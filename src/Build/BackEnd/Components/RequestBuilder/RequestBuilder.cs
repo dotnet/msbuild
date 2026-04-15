@@ -1297,11 +1297,9 @@ namespace Microsoft.Build.BackEnd
 
         private void UpdateStatisticsPostBuild()
         {
-            ITelemetryForwarder telemetryForwarder =
-                ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
-                ?.Instance;
+            ITelemetryCollector telemetryCollector = _nodeLoggingContext?.TelemetryCollector;
 
-            if (telemetryForwarder == null || !telemetryForwarder.IsTelemetryCollected)
+            if (telemetryCollector is null || !telemetryCollector.IsTelemetryCollected)
             {
                 return;
             }
@@ -1315,9 +1313,6 @@ namespace Microsoft.Build.BackEnd
             {
                 return;
             }
-
-            // Accumulate all telemetry into a local instance, then merge into the shared singleton once.
-            WorkerNodeTelemetryData telemetryData = new();
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
@@ -1351,13 +1346,11 @@ namespace Microsoft.Build.BackEnd
 
                 var key = new TaskOrTargetTelemetryKey(
                     projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
-                telemetryData.AddTarget(key, wasExecuted, skipReason);
+                telemetryCollector.AddTarget(key, wasExecuted, skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
             CollectTasksStats(taskReg);
-
-            telemetryForwarder.MergeWorkerData(telemetryData);
 
             void CollectTasksStats(TaskRegistry taskRegistry)
             {
@@ -1373,7 +1366,7 @@ namespace Microsoft.Build.BackEnd
                         registeredTaskRecord.ComputeIfCustom(),
                         registeredTaskRecord.IsFromNugetCache,
                         isFromMetaProject: false);
-                    telemetryData.AddTask(
+                    telemetryCollector.AddTask(
                         key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
