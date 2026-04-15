@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
         private byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
-        /// True if <see cref="SerializeCache"/> should create the state file and serialize ourselves, false otherwise.
+        /// True if <see cref="SerializeCache(string, TaskLoggingHelper, bool)"/> should create the state file and serialize ourselves, false otherwise.
         /// </summary>
         internal virtual bool HasStateToSave => true;
 
