@@ -29,7 +29,7 @@ safe-outputs:
 
 # Expert Code Review
 
-Review pull request #${{ github.event.pull_request.number || github.event.issue.number }} using the `expert-reviewer` agent defined at `.github/agents/expert-reviewer.md`.
+Review pull request #${{ github.event.pull_request.number || github.event.issue.number }} using the `expert-reviewer` agent defined at `.github/agents/expert-reviewer.agent.md`.
 
 ## Instructions
 
