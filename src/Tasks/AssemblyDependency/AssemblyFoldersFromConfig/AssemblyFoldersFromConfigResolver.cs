@@ -180,7 +180,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     {
                         foreach (AssemblyFoldersFromConfigInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersFromConfig)
                         {
-                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder.DirectoryPath, assembliesConsideredAndRejected);
+                            // Absolutize defensively — config paths may not be absolute.
+                            // Not canonicalized here; canonicalization is done in ReferenceTable.
+                            string absoluteDirectoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
+                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, absoluteDirectoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned
                             if (candidatePath != null)

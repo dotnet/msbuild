@@ -46,11 +46,13 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             }
             else
             {
+                // Absolutize directory paths defensively — config paths theoretically should but may not be absolute.
                 _filesInDirectories = new(assemblyFoldersFromConfig.AsParallel()
-                    .Where(assemblyFolder => FileUtilities.DirectoryExistsNoThrow(assemblyFolder.DirectoryPath))
+                    .Select(assemblyFolder => taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value)
+                    .Where(absolutePath => FileUtilities.DirectoryExistsNoThrow(absolutePath))
                     .SelectMany(
-                        assemblyFolder =>
-                            Directory.GetFiles(assemblyFolder.DirectoryPath, "*.*", SearchOption.TopDirectoryOnly)),
+                        absolutePath =>
+                            Directory.GetFiles(absolutePath, "*.*", SearchOption.TopDirectoryOnly)),
                     StringComparer.OrdinalIgnoreCase);
             }
         }
