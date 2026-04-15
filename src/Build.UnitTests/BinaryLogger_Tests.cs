@@ -18,7 +18,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -102,6 +101,17 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
+            // NOTE:
+            // We want both loggers to see the same value of EnableTargetOutputLogging, otherwise, the last assertion will fail.
+            // See logic around showTargetOutputs.
+            // In short, this controls whether or not the "Target output items:" part is shown.
+            // Traits.Instance is weird, it's not always a singleton, depending on whether or not BuildEnvironmentState.s_runningTests is true.
+            // In this case s_runningTests is true.
+            // When s_runningTests is true, we don't use a singleton, and in this case, what matters is the env variable value.
+            // So we set the env variable to 1 and clear at the end of test.
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
+
             var binaryLogger = new BinaryLogger();
 
             binaryLogger.Parameters = _logFile;
@@ -540,6 +550,39 @@ namespace Microsoft.Build.UnitTests
 </Project>";
 
             ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
+        }
+
+        /// <summary>
+        /// Regression test for dotnet/dotnet#5433 — ClearCacheDirectory must not destroy the
+        /// ProjectImports archive before it is embedded in the binlog.
+        /// </summary>
+        [Fact]
+        public void BinlogEmbeddedImportsSurviveClearCacheDirectory()
+        {
+            string logFilePath = Path.Combine(_env.DefaultTestDirectory.Path, "test.binlog");
+
+            var collector = new ProjectImportsCollector(logFilePath, createFile: false, runOnBackground: false);
+            collector.AddFileFromMemory("testfile.proj", "<Project />");
+
+            // This is what XMake.cs does after EndBuild — wipes the cache directory.
+            FileUtilities.ClearCacheDirectory();
+
+            // ProcessResult must still read the archive after the cache dir is gone.
+            bool archiveRead = false;
+            collector.ProcessResult(
+                stream =>
+                {
+                    stream.Length.ShouldBeGreaterThan(0);
+                    archiveRead = true;
+                },
+                error => throw new InvalidOperationException(error));
+            archiveRead.ShouldBeTrue("Archive must be readable after ClearCacheDirectory");
+
+            // DeleteArchive must not throw (directory must still exist).
+            collector.DeleteArchive();
+
+            // Satisfy the fixture's expectation that _logFile exists.
+            File.WriteAllText(_logFile, string.Empty);
         }
 
         /// <summary>

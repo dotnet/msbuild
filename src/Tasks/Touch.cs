@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] TouchedFiles { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Importance: high, normal, low (default normal)

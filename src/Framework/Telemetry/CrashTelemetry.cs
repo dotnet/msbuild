@@ -217,6 +217,30 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? InnermostExceptionType { get; set; }
 
     /// <summary>
+    /// The sanitized stack trace of the inner exception, if any.
+    /// For wrapper exceptions like <c>InternalLoggerException</c>, the outer stack trace
+    /// only shows MSBuild's logging infrastructure. The inner stack trace reveals the
+    /// actual faulting component (e.g., a VS logger that threw <c>ObjectDisposedException</c>).
+    /// Truncated to <see cref="MaxStackTraceLength"/> characters.
+    /// </summary>
+    public string? InnerExceptionStackTrace { get; set; }
+
+    /// <summary>
+    /// A prefix of the inner exception's message, truncated and sanitized to avoid PII.
+    /// For <c>ObjectDisposedException</c>, this includes the disposed object name
+    /// which identifies the specific component that was prematurely disposed.
+    /// </summary>
+    public string? InnerExceptionMessage { get; set; }
+
+    /// <summary>
+    /// The type name of the build event that was being logged when a logger exception occurred.
+    /// Only populated when the exception is an <c>InternalLoggerException</c> with an associated
+    /// <c>BuildEventArgs</c>. Example values: "BuildFinishedEventArgs", "BuildMessageEventArgs".
+    /// Helps narrow down the code path in the faulting logger.
+    /// </summary>
+    public string? LoggerEventType { get; set; }
+
+    /// <summary>
     /// Working set of the MSBuild process at crash time, in MB.
     /// Helps diagnose OOM and memory-pressure crashes.
     /// </summary>
@@ -269,6 +293,72 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// </summary>
     public int? UnmatchedProjectStartedCount { get; set; }
 
+    /// <summary>
+    /// State of the logging service (Instantiated, Initialized, ShuttingDown, Shutdown).
+    /// Helps determine if the logging pipeline is still alive and processing events.
+    /// </summary>
+    public string? LoggingServiceState { get; set; }
+
+    /// <summary>
+    /// Number of events queued in the logging service's async event queue.
+    /// A large number indicates the logging pipeline is backed up.
+    /// </summary>
+    public int? LoggingEventQueueDepth { get; set; }
+
+    /// <summary>
+    /// Whether the BuildManager has started shutting down.
+    /// </summary>
+    public bool? IsShuttingDown { get; set; }
+
+    /// <summary>
+    /// Whether the execution cancellation token has been triggered.
+    /// </summary>
+    public bool? IsCancellationRequested { get; set; }
+
+    /// <summary>
+    /// Number of pending work items in the BuildManager's work queue.
+    /// The OnProjectFinished handler posts to this queue, so a blocked queue
+    /// prevents logging completion.
+    /// </summary>
+    public int? WorkQueueDepth { get; set; }
+
+    /// <summary>
+    /// Per-submission diagnostic summary for pending submissions.
+    /// Format: "id:Started:HasResult:HasException:LoggingCompleted" separated by semicolons.
+    /// </summary>
+    public string? SubmissionDetails { get; set; }
+
+    /// <summary>
+    /// Semicolon-separated list of registered logger type names.
+    /// Identifies which loggers could be blocking the logging pipeline.
+    /// </summary>
+    public string? RegisteredLoggerTypeNames { get; set; }
+
+    /// <summary>
+    /// Comma-separated list of active node IDs that have not yet shut down.
+    /// Populated during WaitingForNodes phase to identify which nodes are stuck.
+    /// </summary>
+    public string? ActiveNodeIds { get; set; }
+
+    /// <summary>
+    /// Whether node reuse is enabled. When true, nodes are told to go idle
+    /// rather than exit, which changes the shutdown pathway.
+    /// </summary>
+    public bool? EnableNodeReuse { get; set; }
+
+    /// <summary>
+    /// Per-node diagnostic summary for active nodes.
+    /// Format: "nodeId:configurationId:projectFile" separated by semicolons.
+    /// Shows what each stuck node was last working on.
+    /// </summary>
+    public string? ActiveNodeDetails { get; set; }
+
+    /// <summary>
+    /// Diagnostic state of the project cache configuration when Project is unexpectedly null.
+    /// Format: "configId:projectFileName:IsLoaded:IsCached:WasGeneratedByNode:IsVsScenario:HasGlobalPlugins".
+    /// </summary>
+    public string? ProjectCacheState { get; set; }
+
     // --- Build state diagnostic properties (help diagnose the context of the crash) ---
 
     /// <summary>
@@ -316,7 +406,39 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         CrashOriginNamespace = ExtractOriginNamespace(exception);
         CrashOrigin = ClassifyOrigin(CrashOriginNamespace);
         CrashThreadName = System.Threading.Thread.CurrentThread.Name;
+        PopulateInnerExceptionDetails(exception);
         PopulateMemoryStats();
+    }
+
+    /// <summary>
+    /// Captures inner exception details that help diagnose wrapper exceptions.
+    /// For <c>InternalLoggerException</c>, the inner exception identifies the actual
+    /// faulting logger, and the <c>BuildEventArgs</c> property identifies what event
+    /// was being delivered.
+    /// </summary>
+    private void PopulateInnerExceptionDetails(Exception exception)
+    {
+        Exception? inner = exception.InnerException;
+        if (inner is not null)
+        {
+            InnerExceptionStackTrace = ExtractFullStackTrace(inner);
+            InnerExceptionMessage = TruncateMessage(inner.Message);
+        }
+
+        // Extract BuildEventArgs type from InternalLoggerException without taking
+        // a direct dependency on Microsoft.Build.dll. The property is public.
+        try
+        {
+            var buildEventArgsProp = exception.GetType().GetProperty("BuildEventArgs");
+            if (buildEventArgsProp?.GetValue(exception) is object eventArgs)
+            {
+                LoggerEventType = eventArgs.GetType().Name;
+            }
+        }
+        catch
+        {
+            // Best effort: reflection failures must not cause a secondary failure.
+        }
     }
 
     /// <summary>
@@ -394,6 +516,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(CrashOriginNamespace);
         AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
+        AddIfNotNull(InnerExceptionStackTrace);
+        AddIfNotNull(InnerExceptionMessage);
+        AddIfNotNull(LoggerEventType);
         AddIfNotNull(ProcessWorkingSetMB);
         AddIfNotNull(MemoryLoadPercent);
 
@@ -404,6 +529,17 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(SubmissionsWithResultNoLogging);
         AddIfNotNull(ThreadExceptionRecorded);
         AddIfNotNull(UnmatchedProjectStartedCount);
+        AddIfNotNull(LoggingServiceState);
+        AddIfNotNull(LoggingEventQueueDepth);
+        AddIfNotNull(IsShuttingDown);
+        AddIfNotNull(IsCancellationRequested);
+        AddIfNotNull(WorkQueueDepth);
+        AddIfNotNull(SubmissionDetails);
+        AddIfNotNull(RegisteredLoggerTypeNames);
+        AddIfNotNull(ActiveNodeIds);
+        AddIfNotNull(EnableNodeReuse);
+        AddIfNotNull(ActiveNodeDetails);
+        AddIfNotNull(ProjectCacheState);
 
         // Build state diagnostic properties
         AddIfNotNull(IsStandaloneExecution);
@@ -450,6 +586,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(CrashOriginNamespace);
         AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
+        AddIfNotNull(InnerExceptionStackTrace);
+        AddIfNotNull(InnerExceptionMessage);
+        AddIfNotNull(LoggerEventType);
         AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
         AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));
 
@@ -460,6 +599,17 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(EndBuildWaitDurationMs?.ToString(), nameof(EndBuildWaitDurationMs));
         AddIfNotNull(ThreadExceptionRecorded?.ToString(), nameof(ThreadExceptionRecorded));
         AddIfNotNull(UnmatchedProjectStartedCount?.ToString(), nameof(UnmatchedProjectStartedCount));
+        AddIfNotNull(LoggingServiceState);
+        AddIfNotNull(LoggingEventQueueDepth?.ToString(), nameof(LoggingEventQueueDepth));
+        AddIfNotNull(IsShuttingDown?.ToString(), nameof(IsShuttingDown));
+        AddIfNotNull(IsCancellationRequested?.ToString(), nameof(IsCancellationRequested));
+        AddIfNotNull(WorkQueueDepth?.ToString(), nameof(WorkQueueDepth));
+        AddIfNotNull(SubmissionDetails);
+        AddIfNotNull(RegisteredLoggerTypeNames);
+        AddIfNotNull(ActiveNodeIds);
+        AddIfNotNull(EnableNodeReuse?.ToString(), nameof(EnableNodeReuse));
+        AddIfNotNull(ActiveNodeDetails);
+        AddIfNotNull(ProjectCacheState);
 
         // Build state diagnostic properties
         AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
@@ -647,6 +797,15 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         if (stackTrace is null)
         {
             return null;
+        }
+
+        // Include the inner exception's stack trace in the hash so that wrapper exceptions
+        // (e.g., InternalLoggerException) get different buckets for different root causes.
+        // Without this, all InternalLoggerExceptions from EventSourceSink.Consume hash
+        // identically regardless of which logger actually faulted.
+        if (exception.InnerException?.StackTrace is string innerStack)
+        {
+            stackTrace = stackTrace + "\n--- InnerException ---\n" + innerStack;
         }
 
 #if NET

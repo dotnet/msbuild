@@ -4,11 +4,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 #if FEATURE_GAC
-using Microsoft.Build.Shared;
+using System.Threading;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 #endif
 
@@ -22,10 +23,9 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class GetReferenceAssemblyPaths : TaskExtension, IMultiThreadableTask
     {
-        /// <summary>
-        /// Task environment for thread-safe operations.
-        /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         #region Data
 #if FEATURE_GAC
         /// <summary>
@@ -37,7 +37,24 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache in a static whether or not we have found the 35sp1sentinel assembly.
         /// </summary>
-        private static bool? s_net35SP1SentinelAssemblyFound;
+        private static readonly Lazy<bool> s_net35SP1SentinelAssemblyFound = new Lazy<bool>(() =>
+        {
+            // get an assemblyname from the string representation of the sentinel assembly name
+            var sentinelAssemblyName = new AssemblyNameExtension(NET35SP1SentinelAssemblyName);
+            string path = GlobalAssemblyCache.GetLocation(
+                sentinelAssemblyName,
+                SystemProcessorArchitecture.MSIL,
+                runtimeVersion => "v2.0.50727",
+                new Version("2.0.57027"),
+                false,
+                new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
+                GlobalAssemblyCache.pathFromFusionName,
+                GlobalAssemblyCache.gacEnumerator,
+                false,
+                TaskEnvironment.Fallback);
+
+            return !string.IsNullOrEmpty(path);
+        }, LazyThreadSafetyMode.PublicationOnly);
 #endif
 
         /// <summary>
@@ -149,6 +166,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            AbsolutePath? absoluteRootPath = !string.IsNullOrEmpty(RootPath)
+                ? TaskEnvironment.GetAbsolutePath(RootPath)
+                : new AbsolutePath(RootPath, ignoreRootedCheck: true);
+            IList<AbsolutePath> absoluteFallbackSearchPaths = ResolveAbsoluteFallbackSearchPaths(TargetFrameworkFallbackSearchPaths);
+
             FrameworkNameVersioning moniker;
             FrameworkNameVersioning monikerWithNoProfile = null;
 
@@ -174,16 +196,6 @@ namespace Microsoft.Build.Tasks
                 if (!BypassFrameworkInstallChecks && moniker.Identifier.Equals(".NETFramework", StringComparison.OrdinalIgnoreCase) &&
                     moniker.Version.Major < 4)
                 {
-                    // We have not got a value for whether or not the 35 sentinel assembly has been found
-                    if (!s_net35SP1SentinelAssemblyFound.HasValue)
-                    {
-                        // get an assemblyname from the string representation of the sentinel assembly name
-                        var sentinelAssemblyName = new AssemblyNameExtension(NET35SP1SentinelAssemblyName);
-
-                        string path = GlobalAssemblyCache.GetLocation(sentinelAssemblyName, SystemProcessorArchitecture.MSIL, runtimeVersion => "v2.0.50727", new Version("2.0.57027"), false, new FileExists(p => FileUtilities.FileExistsNoThrow(p)), GlobalAssemblyCache.pathFromFusionName, GlobalAssemblyCache.gacEnumerator, false, TaskEnvironment);
-                        s_net35SP1SentinelAssemblyFound = !String.IsNullOrEmpty(path);
-                    }
-
                     // We did not find the SP1 sentinel assembly in the GAC. Therefore we must assume that SP1 isn't installed
                     if (!s_net35SP1SentinelAssemblyFound.Value)
                     {
@@ -200,7 +212,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                _tfmPaths = GetPaths(RootPath, TargetFrameworkFallbackSearchPaths, moniker);
+                _tfmPaths = GetPaths(absoluteRootPath, absoluteFallbackSearchPaths, moniker);
 
                 if (_tfmPaths?.Count > 0)
                 {
@@ -211,7 +223,7 @@ namespace Microsoft.Build.Tasks
                 // There is no point in generating the full framework paths if profile path could not be found.
                 if (targetingProfile && _tfmPaths != null)
                 {
-                    _tfmPathsNoProfile = GetPaths(RootPath, TargetFrameworkFallbackSearchPaths, monikerWithNoProfile);
+                    _tfmPathsNoProfile = GetPaths(absoluteRootPath, absoluteFallbackSearchPaths, monikerWithNoProfile);
                 }
 
                 // The path with out the profile is just the reference assembly paths.
@@ -241,14 +253,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Generate the set of chained reference assembly paths
         /// </summary>
-        private IList<String> GetPaths(string rootPath, string targetFrameworkFallbackSearchPaths, FrameworkNameVersioning frameworkmoniker)
+        private IList<String> GetPaths(AbsolutePath? rootPath, IList<AbsolutePath> fallbackSearchPaths, FrameworkNameVersioning frameworkmoniker)
         {
+            string fallbackSearchPathsJoined = string.Join(";", fallbackSearchPaths);
+
             IList<String> pathsToReturn = ToolLocationHelper.GetPathToReferenceAssemblies(
                                                 frameworkmoniker.Identifier,
                                                 frameworkmoniker.Version.ToString(),
                                                 frameworkmoniker.Profile,
-                                                rootPath,
-                                                targetFrameworkFallbackSearchPaths);
+                                                rootPath?.Value,
+                                                fallbackSearchPathsJoined);
 
             if (!SuppressNotFoundError)
             {
@@ -270,6 +284,26 @@ namespace Microsoft.Build.Tasks
             }
 
             return pathsToReturn;
+        }
+
+        /// <summary>
+        /// Resolves each semicolon-separated fallback search path to absolute via TaskEnvironment.
+        /// </summary>
+        private IList<AbsolutePath> ResolveAbsoluteFallbackSearchPaths(string fallbackSearchPaths)
+        {
+            if (string.IsNullOrEmpty(fallbackSearchPaths))
+            {
+                return [];
+            }
+
+            string[] parts = fallbackSearchPaths.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            var result = new AbsolutePath[parts.Length];
+            for (int i = 0; i < parts.Length; i++)
+            {
+                result[i] = TaskEnvironment.GetAbsolutePath(parts[i]);
+            }
+
+            return result;
         }
 
         #endregion

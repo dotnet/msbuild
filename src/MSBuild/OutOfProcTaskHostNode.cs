@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -335,6 +335,13 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                // An empty set means all warnings are errors.
+                return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
+            }
+
+            // Pre-18.6 behavior preserved for backward compatibility: incorrectly checks WarningsAsMessages instead of WarningsAsErrors.
             return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
         }
 
@@ -696,7 +703,7 @@ namespace Microsoft.Build.CommandLine
             shutdownException = null;
 
             // Snapshot the current environment
-            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse, parentPacketVersion);
@@ -978,7 +985,7 @@ namespace Microsoft.Build.CommandLine
             // Restore the original environment, best effort.
             try
             {
-                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
             }
             catch (Exception ex)
             {
@@ -1114,7 +1121,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     _isTaskExecuting = false;
 
-                    IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+                    IDictionary<string, string> currentEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
@@ -1138,7 +1145,7 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                     // Restore the original clean environment
-                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
                 catch (Exception e)
                 {
@@ -1227,7 +1234,7 @@ namespace Microsoft.Build.CommandLine
                 updatedEnvironment = environment;
             }
 
-            CommunicationsUtilities.SetEnvironment(updatedEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(updatedEnvironment);
         }
 
         /// <summary>

@@ -9,7 +9,6 @@ using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

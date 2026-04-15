@@ -20,7 +20,6 @@ using System.IO;
 #endif
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests

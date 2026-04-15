@@ -51,8 +51,8 @@ namespace Microsoft.Build.Utilities
         // Values are stored in escaped form.
         private ImmutableDictionary<string, string> _metadata;
 
-        // cache of the fullpath value
-        private string _fullPath;
+        // cache of derivable modifier values
+        private ItemSpecModifiers.Cache _cachedModifiers;
 
         /// <summary>
         /// May be defined if we're copying this item from a pre-existing one.  Otherwise,
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ItemSpec));
 
                 _itemSpec = FileUtilities.FixFilePath(value);
-                _fullPath = null;
+                _cachedModifiers.Clear();
             }
         }
 
@@ -205,7 +205,7 @@ namespace Microsoft.Build.Utilities
             set
             {
                 _itemSpec = FileUtilities.FixFilePath(value);
-                _fullPath = null;
+                _cachedModifiers.Clear();
             }
         }
 
@@ -226,7 +226,10 @@ namespace Microsoft.Build.Utilities
                     metadataNames.AddRange(_metadata.Keys);
                 }
 
-                metadataNames.AddRange(ItemSpecModifiers.All);
+                foreach (string name in ItemSpecModifiers.All)
+                {
+                    metadataNames.Add(name);
+                }
 
                 return metadataNames;
             }
@@ -500,20 +503,17 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         string ITaskItem2.GetMetadataValueEscaped(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
+            ArgumentNullException.ThrowIfNull(metadataName);
 
-            string metadataValue = null;
-
-            if (ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+            if (ItemSpecModifiers.TryGetDerivableModifierKind(metadataName, out ItemSpecModifierKind modifierKind))
             {
                 // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                 // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                metadataValue = ItemSpecModifiers.GetItemSpecModifier(null, _itemSpec, _definingProject, metadataName, ref _fullPath);
+                return ItemSpecModifiers.GetItemSpecModifier(_itemSpec, modifierKind, null, _definingProject, ref _cachedModifiers);
             }
-            else
-            {
-                _metadata?.TryGetValue(metadataName, out metadataValue);
-            }
+
+            string metadataValue = null;
+            _metadata?.TryGetValue(metadataName, out metadataValue);
 
             return metadataValue ?? string.Empty;
         }

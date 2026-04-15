@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
