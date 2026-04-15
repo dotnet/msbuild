@@ -138,7 +138,6 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
         FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
         FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
-        FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"
     )
 } else {
     $runtimeSpecificFiles = @(

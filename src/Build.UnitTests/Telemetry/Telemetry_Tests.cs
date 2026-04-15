@@ -16,7 +16,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 using static Microsoft.Build.Framework.Telemetry.TelemetryDataUtils;
 
@@ -486,39 +485,35 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void FinalizeProcessing_AfterMerge_ResetsState()
+        public void TelemetryCollector_AccumulatesAndSendsOnFinalize()
         {
-            var forwarder = new TelemetryForwarderProvider.TelemetryForwarder();
+            var collector = new TelemetryCollectorProvider.TelemetryCollector();
             var loggingService = new EventRecordingLoggingService();
 
             var loggingContext = new MockLoggingContext(
                 loggingService,
                 new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            // Merge some data.
-            var localData = new WorkerNodeTelemetryData();
+            // Add data via the collector API.
             var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
-            localData.AddTarget(key, wasExecuted: true);
-            forwarder.MergeWorkerData(localData);
+            collector.AddTarget(key, wasExecuted: true);
 
             // First FinalizeProcessing should emit a telemetry event.
-            forwarder.FinalizeProcessing(loggingContext);
+            collector.FinalizeProcessing(loggingContext);
             var telemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
             telemetryEvents.Count.ShouldBe(1);
             telemetryEvents[0].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key);
 
-            // Second FinalizeProcessing on an empty forwarder should be a no-op (state was reset).
-            forwarder.FinalizeProcessing(loggingContext);
+            // Second FinalizeProcessing on an empty collector should be a no-op (state was reset).
+            collector.FinalizeProcessing(loggingContext);
             loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().Count().ShouldBe(1, "No new event should be emitted after reset");
 
-            // Merge new data after reset — forwarder should still work.
-            var localData2 = new WorkerNodeTelemetryData();
+            // Add new data after reset — collector should still work.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
-            localData2.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
-            forwarder.MergeWorkerData(localData2);
+            collector.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
 
             // Third FinalizeProcessing should emit only the new data.
-            forwarder.FinalizeProcessing(loggingContext);
+            collector.FinalizeProcessing(loggingContext);
             var allTelemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
             allTelemetryEvents.Count.ShouldBe(2);
             allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key2);
