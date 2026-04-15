@@ -13,7 +13,7 @@ namespace Microsoft.Build.Utilities;
 /// <summary>
 ///  Type information for a type <typeparamref name="T"/>.
 /// </summary>
-public static partial class TypeInfo<T>
+internal static partial class TypeInfo<T>
 {
     private static bool? s_hasReferences;
 
@@ -22,15 +22,10 @@ public static partial class TypeInfo<T>
     /// </summary>
     public static bool IsReferenceOrContainsReferences()
     {
-        if (s_hasReferences.HasValue)
-        {
-            return s_hasReferences.Value;
-        }
-
 #if NET
-        s_hasReferences = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+        return s_hasReferences ??= RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 #else
-        s_hasReferences = HasReferences();
+        return s_hasReferences ??= HasReferences();
 
         static bool HasReferences()
         {
@@ -48,7 +43,6 @@ public static partial class TypeInfo<T>
 
             try
             {
-                Type type = typeof(T);
                 GCHandle handle = GCHandle.Alloc(default(T), GCHandleType.Pinned);
                 handle.Free();
                 return false;
@@ -60,7 +54,5 @@ public static partial class TypeInfo<T>
             }
         }
 #endif
-
-        return s_hasReferences.Value;
     }
 }
