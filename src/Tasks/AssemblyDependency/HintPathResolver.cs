@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks
             // However, we should consider Trim() the hintpath https://github.com/dotnet/msbuild/issues/4603
             if (!string.IsNullOrEmpty(hintPath) && !FileUtilities.PathIsInvalid(hintPath))
             {
-                string fullHintPath = taskEnvironment.GetAbsolutePath(hintPath).GetCanonicalForm().Value;
+                string fullHintPath = taskEnvironment.GetAbsolutePath(hintPath).Value;
                 if (ResolveAsFile(fullHintPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, true, assembliesConsideredAndRejected))
                 {
                     userRequestedSpecificFile = true;

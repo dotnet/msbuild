@@ -51,10 +51,11 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_WIN32_REGISTRY
             if (assemblyName != null)
             {
-                // {AssemblyFolders} was passed in. They come from registry and are assumed to be absolute paths.
+                // {AssemblyFolders} was passed in.
                 foreach (string assemblyFolder in AssemblyFolder.GetAssemblyFolders(assemblyFolderKey))
                 {
-                    string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder, assembliesConsideredAndRejected);
+                    string fullAssemblyFolder = taskEnvironment.GetAbsolutePath(assemblyFolder).Value;
+                    string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, fullAssemblyFolder, assembliesConsideredAndRejected);
                     if (resolvedPath != null)
                     {
                         foundPath = resolvedPath;

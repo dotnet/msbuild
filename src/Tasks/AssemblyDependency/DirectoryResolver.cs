@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         public readonly string parentAssembly;
 
         /// <summary>
-        /// Cached absolute path for the search path element
+        /// Cached absolute path for the search path element. Not necessarily in canonical form.
         /// </summary>
         private readonly string _fullSearchPath;
 
@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, taskEnvironment)
         {
             this.parentAssembly = parentAssembly;
-            _fullSearchPath = string.IsNullOrEmpty(searchPathElement) ? searchPathElement : taskEnvironment.GetAbsolutePath(searchPathElement).GetCanonicalForm().Value;
+            _fullSearchPath = string.IsNullOrEmpty(searchPathElement) ? searchPathElement : taskEnvironment.GetAbsolutePath(searchPathElement).Value;
         }
 
         /// <inheritdoc/>

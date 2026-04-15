@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks
             if (rawFileNameCandidate != null)
             {
                 // {RawFileName} was passed in.
-                string fullRawFileName = taskEnvironment.GetAbsolutePath(rawFileNameCandidate).GetCanonicalForm().Value;
+                string fullRawFileName = taskEnvironment.GetAbsolutePath(rawFileNameCandidate).Value;
                 if (isImmutableFrameworkReference || fileExists(fullRawFileName))
                 {
                     userRequestedSpecificFile = true;
