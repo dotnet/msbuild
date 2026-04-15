@@ -771,7 +771,7 @@ internal static class CommunicationsUtilities
 
             try
             {
-                string fileName = nodeId != -1
+                string fileName = nodeId == -1
                     ? $"MSBuild_CommTrace_PID_{EnvironmentUtilities.CurrentProcessId}.txt"
                     : $"MSBuild_CommTrace_PID_{EnvironmentUtilities.CurrentProcessId}_node_{nodeId}.txt";
 
