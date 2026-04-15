@@ -205,7 +205,7 @@ internal static class EscapingUtilities
             return result;
         }
 
-        using RefArrayBuilder<int> specialCharIndices = new(initialCapacity: 64);
+        using RefArrayBuilder<int> specialCharIndices = new(initialCapacity: 16);
         int specialCharIndex = firstSpecialCharIndex;
 
         do
