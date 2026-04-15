@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, taskEnvironment)
         {
             _resolvedSDKs = resolvedSDKs;
-            _resolvedSDKPaths = new Dictionary<string, string>(resolvedSDKs.Count);
+            _resolvedSDKPaths = new Dictionary<string, string>(resolvedSDKs.Count, resolvedSDKs.Comparer);
             
             // Cache absolute paths to avoid repeated TaskEnvironment.GetAbsolutePath calls
             foreach (var kvp in resolvedSDKs)
