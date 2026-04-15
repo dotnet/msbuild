@@ -97,7 +97,7 @@ internal static partial class EnvironmentUtilities
     {
         string? value = Environment.GetEnvironmentVariable(name);
 
-        return !string.IsNullOrEmpty(value) && int.TryParse(value, out int result)
+        return !string.IsNullOrEmpty(value) && int.TryParseInvariant(value, out int result)
             ? result
             : defaultValue;
     }
@@ -114,6 +114,6 @@ internal static partial class EnvironmentUtilities
         string? value = Environment.GetEnvironmentVariable(name);
 
         return value != null &&
-               (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase));
+              (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase));
     }
 }
