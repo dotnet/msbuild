@@ -867,6 +867,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrow(result == null, "Result already set when exception was thrown.");
                     result = new BuildResult(_requestEntry.Request, thrownException);
+                    // Populate the evaluation ID from the configuration for sending to the central node.
+                    result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
                 }
 
                 ReportResultAndCleanUp(result);
@@ -1021,7 +1023,10 @@ namespace Microsoft.Build.BackEnd
                 results = new Dictionary<int, BuildResult>();
                 for (int i = 0; i < requests.Length; i++)
                 {
-                    results[i] = new BuildResult(new BuildRequest(), new BuildAbortedException());
+                    var abortResult = new BuildResult(new BuildRequest(), new BuildAbortedException());
+                    // Populate the evaluation ID from the configuration for sending to the central node.
+                    abortResult.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
+                    results[i] = abortResult;
                 }
             }
 
@@ -1244,6 +1249,9 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                // Populate the evaluation ID from the configuration for sending to the central node.
+                result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
+
                 UpdateStatisticsPostBuild();
 
                 result = _requestEntry.Request.ProxyTargets == null
@@ -1329,7 +1337,7 @@ namespace Microsoft.Build.BackEnd
 
                 bool isFromNuget, isMetaprojTarget, isCustom;
 
-                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                if (FileUtilities.IsMetaprojectFilename(projectTargetInstance.Value.FullPath))
                 {
                     isMetaprojTarget = true;
                     isFromNuget = false;
@@ -1380,8 +1388,6 @@ namespace Microsoft.Build.BackEnd
                 taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
             }
         }
-
-        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment (working directory and environment variables)
