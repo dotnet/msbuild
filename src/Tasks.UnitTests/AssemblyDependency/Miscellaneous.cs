@@ -1176,6 +1176,54 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
+        /// When Wave18_6 is enabled (default), empty AppConfigFile is silently ignored.
+        /// The task should succeed as if no app.config was specified.
+        /// </summary>
+        [Fact]
+        public void EmptyAppConfigFile_Wave18_6_Enabled_Succeeds()
+        {
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+            t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
+            t.AppConfigFile = string.Empty;
+
+            bool retval = Execute(t);
+
+            retval.ShouldBeTrue();
+        }
+
+        /// <summary>
+        /// When Wave18_6 is disabled, empty AppConfigFile should cause the task to fail
+        /// with an error, preserving backward-compatible behavior.
+        /// </summary>
+        [Fact]
+        public void EmptyAppConfigFile_Wave18_6_Disabled_Fails()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+            MockEngine engine = new MockEngine(_output);
+            t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+            t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
+            t.AppConfigFile = string.Empty;
+
+            bool retval = Execute(t);
+
+            retval.ShouldBeFalse();
+            engine.Errors.ShouldBe(1);
+
+            ChangeWaves.ResetStateForTests();
+        }
+
+        /// <summary>
         /// Make sure that nonexistent references are just eliminated.
         /// </summary>
         [Fact]
