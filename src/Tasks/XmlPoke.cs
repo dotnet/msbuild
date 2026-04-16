@@ -18,7 +18,6 @@ namespace Microsoft.Build.Tasks
     /// A task that sets values as specified by XPath Query
     /// into a XML file.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class XmlPoke : TaskExtension, IMultiThreadableTask
     {
         #region Properties

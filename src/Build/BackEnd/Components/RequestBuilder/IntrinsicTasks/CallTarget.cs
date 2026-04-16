@@ -19,7 +19,6 @@ namespace Microsoft.Build.BackEnd
     /// id validation checks to fail.
     /// </remarks>
     [RunInMTA]
-    [MSBuildMultiThreadableTask]
     internal class CallTarget : ITask
     {
         /// <summary>

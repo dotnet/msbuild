@@ -19,7 +19,6 @@ namespace Microsoft.Build.Engine.UnitTests
     /// This task checks that TaskEnvironment is properly provided and tests different
     /// environment variable behavior between multithreaded and single-threaded modes.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class EnvironmentIsolationTestTask : Task, IMultiThreadableTask
     {
         public TaskEnvironment TaskEnvironment { get; set; } = null!;

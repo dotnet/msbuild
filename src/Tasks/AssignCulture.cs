@@ -32,7 +32,6 @@ namespace Microsoft.Build.Tasks
     /// There are plenty of corner cases with this task. See the unit test for
     /// more details.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class AssignCulture : TaskExtension
     {
         #region Properties

@@ -10,7 +10,6 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    [MSBuildMultiThreadableTask]
     public sealed class ZipDirectory : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         public const string CompressionLevelOptimal = "Optimal";

@@ -14,7 +14,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Task to call Path.GetFullPath
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class ConvertToAbsolutePath : TaskExtension
     {
         private ITaskItem[] _paths;

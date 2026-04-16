@@ -15,7 +15,6 @@ namespace Microsoft.Build.Tasks
     /// Create a new list of items that have &lt;TargetPath&gt; attributes if none was present in
     /// the input.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class AssignTargetPath : TaskExtension, IMultiThreadableTask
     {
         #region Properties

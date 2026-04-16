@@ -11,7 +11,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Task that simply emits a message. Importance defaults to high if not specified.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public sealed class Message : TaskExtension
     {
         /// <summary>

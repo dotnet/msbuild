@@ -15,7 +15,6 @@ namespace Microsoft.Build.Tasks
     /// A task that finds an item with the specified itemspec, if present,
     /// in the provided list.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class FindInList : TaskExtension
     {
         private ITaskItem[] _list;

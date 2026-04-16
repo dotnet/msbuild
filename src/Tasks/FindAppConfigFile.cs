@@ -15,7 +15,6 @@ namespace Microsoft.Build.Tasks
     /// For compat reasons, it has to follow a particular arbitrary algorithm.
     /// It also adds the TargetPath metadata.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class FindAppConfigFile : TaskExtension
     {
         // The list to search through

@@ -13,7 +13,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Task that logs telemetry.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public sealed class Telemetry : TaskExtension
     {
         /// <summary>

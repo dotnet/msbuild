@@ -17,7 +17,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// This class defines the touch task.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class Touch : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         private MessageImportance messageImportance;

@@ -16,7 +16,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Remove the specified directories.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class RemoveDir : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         //-----------------------------------------------------------------------------------

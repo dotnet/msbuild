@@ -18,7 +18,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can download a file.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public sealed class DownloadFile : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();

@@ -19,7 +19,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can extract a .zip archive.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).

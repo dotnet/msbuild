@@ -11,7 +11,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Combines multiple XML elements
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class CombineXmlElements : TaskExtension
     {
         /// <summary>

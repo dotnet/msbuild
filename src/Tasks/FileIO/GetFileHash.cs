@@ -18,7 +18,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Computes the checksum for a single file.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public sealed class GetFileHash : TaskExtension, ICancelableTask, IMultiThreadableTask
     {
         internal const string _defaultFileHashAlgorithm = "SHA256";

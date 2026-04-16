@@ -14,7 +14,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that creates a directory
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public class MakeDir : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         [Required]
