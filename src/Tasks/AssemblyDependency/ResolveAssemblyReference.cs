@@ -301,7 +301,7 @@ namespace Microsoft.Build.Tasks
             set
             {
                 _latestTargetFrameworkDirectories = value?.Select(
-                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
+                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray() ?? [];
             }
         }
 
@@ -410,7 +410,7 @@ namespace Microsoft.Build.Tasks
             set
             {
                 _candidateAssemblyFiles = value?.Select(
-                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
+                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray() ?? [];
             }
         }
 
@@ -439,7 +439,7 @@ namespace Microsoft.Build.Tasks
             set
             {
                 _targetFrameworkDirectories = value?.Select(
-                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
+                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray() ?? [];
             }
         }
 
@@ -959,7 +959,7 @@ namespace Microsoft.Build.Tasks
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkFolders");
-                _fullFrameworkFolders = value?.Select(
+                _fullFrameworkFolders = value.Select(
                     path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
             }
         }
@@ -2466,7 +2466,7 @@ namespace Microsoft.Build.Tasks
                                 // Prior to Wave18_6, empty strings would cause TaskEnvironment.GetAbsolutePath() to throw an exception,
                                 // which would be caught and logged as an error, stopping RAR execution.
                                 // With the new behavior, empty strings are silently ignored (treated like null).
-                                // When Wave 18.5 is disabled, we preserve the old failure behavior.
+                                // When Wave 18.6 is disabled, we preserve the old failure behavior.
                                 // When cleaning up this change wave, also clean up the _appConfigValueIsEmptyString field.
                                 
                                 // Note, second part of the sentence is not localized: this is a temporary fallback behind a change wave that is off by default
