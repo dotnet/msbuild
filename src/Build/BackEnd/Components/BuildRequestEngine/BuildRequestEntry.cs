@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
@@ -314,11 +314,9 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentNull(result);
 
-                // PERF: Check the condition and then throw rather than using VerifyThrow to avoid the allocations that happen when boxing the message arguments.
-                if (!(State == BuildRequestEntryState.Waiting || _outstandingRequests == null))
-                {
-                    ErrorUtilities.ThrowInternalError($"Entry must be in the Waiting state to report results, or we must have flushed our requests due to an error. Config: {RequestConfiguration.ConfigurationId} State: {State} Requests: {_outstandingRequests != null}");
-                }
+                ErrorUtilities.VerifyThrow(
+                    State == BuildRequestEntryState.Waiting || _outstandingRequests == null,
+                    $"Entry must be in the Waiting state to report results, or we must have flushed our requests due to an error. Config: {RequestConfiguration.ConfigurationId} State: {State} Requests: {_outstandingRequests != null}");
 
                 // If the matching request is in the issue list, remove it so we don't try to ask for it to be built.
                 if (_requestsToIssue != null)

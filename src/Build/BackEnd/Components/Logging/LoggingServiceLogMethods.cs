@@ -537,11 +537,9 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 projectContextId = NextProjectId;
 
-                // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (_projectFileMap.ContainsKey(projectContextId))
-                {
-                    ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} for project {projectFile} should not already be in the ID-to-file mapping!");
-                }
+                ErrorUtilities.VerifyThrow(
+                    !_projectFileMap.ContainsKey(projectContextId),
+                    $"ContextID {projectContextId} for project {projectFile} should not already be in the ID-to-file mapping!");
 
                 _projectFileMap[projectContextId] = projectFile;
             }
@@ -619,11 +617,9 @@ namespace Microsoft.Build.BackEnd.Logging
             // Due to GetAndVerifyProjectFileFromContext validation, these checks break the build.
             if (!_buildCheckEnabled)
             {
-                // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (!_projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
-                {
-                    ErrorUtilities.ThrowInternalError($"ContextID {projectBuildEventContext.ProjectContextId} for project {projectFile} should be in the ID-to-file mapping!");
-                }
+                ErrorUtilities.VerifyThrow(
+                    _projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _),
+                    $"ContextID {projectBuildEventContext.ProjectContextId} for project {projectFile} should be in the ID-to-file mapping!");
             }
         }
 

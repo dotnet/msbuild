@@ -1003,11 +1003,9 @@ namespace Microsoft.Build.BackEnd.Logging
             ErrorUtilities.VerifyThrow(packet != null, "packet was null");
 
             // Expected the packet type to be a logging message packet
-            // PERF: Not using VerifyThrow to avoid allocations for enum.ToString (boxing of NodePacketType) in the non-error case.
-            if (packet.Type != NodePacketType.LogMessage)
-            {
-                ErrorUtilities.ThrowInternalError($"""Expected packet type "{nameof(NodePacketType.LogMessage)}" but instead got packet type "{packet.Type}".""");
-            }
+            ErrorUtilities.VerifyThrow(
+                packet.Type == NodePacketType.LogMessage,
+                $"""Expected packet type "{nameof(NodePacketType.LogMessage)}" but instead got packet type "{packet.Type}".""");
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
@@ -1984,11 +1982,9 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext context = eventArgs.BuildEventContext!;
             _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
 
-            // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
-            if (projectFile == null && !allowCacheMiss)
-            {
-                ErrorUtilities.ThrowInternalError($"ContextID {context.ProjectContextId} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{eventArgs.Message}'");
-            }
+            ErrorUtilities.VerifyThrow(
+                projectFile != null || allowCacheMiss,
+                $"ContextID {context.ProjectContextId} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{eventArgs.Message}'");
 
             return projectFile;
         }
