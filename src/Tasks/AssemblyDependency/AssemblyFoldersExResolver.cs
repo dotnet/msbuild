@@ -92,11 +92,6 @@ namespace Microsoft.Build.Tasks
         private readonly IBuildEngine4 _buildEngine;
 
         /// <summary>
-        /// TaskEnvironment for thread-safe access to environment variables.
-        /// </summary>
-        private readonly TaskEnvironment _taskEnvironment;
-
-        /// <summary>
         /// If it is not initialized then just return the null object, that would mean the resolver was not called.
         /// </summary>
         internal AssemblyFoldersEx AssemblyFoldersExLocations => _assemblyFoldersCache?.AssemblyFoldersEx;
@@ -111,7 +106,6 @@ namespace Microsoft.Build.Tasks
             _getRegistrySubKeyNames = getRegistrySubKeyNames;
             _getRegistrySubKeyDefaultValue = getRegistrySubKeyDefaultValue;
             _openBaseKey = openBaseKey;
-            _taskEnvironment = taskEnvironment;
         }
 
         /// <summary>
@@ -167,7 +161,7 @@ namespace Microsoft.Build.Tasks
                     }
                     _wasMatch = true;
 
-                    bool useCache = _taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
+                    bool useCache = taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
                     string key = "ca22615d-aa83-444b-80b9-b32f3d5db097" + this.searchPathElement;
                     if (useCache && _buildEngine != null)
                     {
@@ -177,7 +171,7 @@ namespace Microsoft.Build.Tasks
                     if (_assemblyFoldersCache == null)
                     {
                         AssemblyFoldersEx assemblyFolders = new AssemblyFoldersEx(_registryKeyRoot, _targetRuntimeVersion, _registryKeySuffix, _osVersion, _platform, _getRegistrySubKeyNames, _getRegistrySubKeyDefaultValue, this.targetProcessorArchitecture, _openBaseKey);
-                        _assemblyFoldersCache = new AssemblyFoldersExCache(assemblyFolders, fileExists, _taskEnvironment);
+                        _assemblyFoldersCache = new AssemblyFoldersExCache(assemblyFolders, fileExists, taskEnvironment);
                         if (useCache)
                         {
                             _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);
