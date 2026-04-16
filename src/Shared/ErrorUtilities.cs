@@ -78,6 +78,14 @@ internal static class ErrorUtilities
     /// This is only for situations that would mean that there is a bug in MSBuild itself.
     /// </summary>
     [DoesNotReturn]
+    internal static void ThrowInternalError(string message)
+        => throw new InternalErrorException(message);
+
+    /// <summary>
+    /// Throws InternalErrorException.
+    /// This is only for situations that would mean that there is a bug in MSBuild itself.
+    /// </summary>
+    [DoesNotReturn]
     internal static void ThrowInternalError(string message, params object?[]? args)
     {
         throw new InternalErrorException(ResourceUtilities.FormatString(message, args));
@@ -210,78 +218,47 @@ internal static class ErrorUtilities
     /// code somewhere. This should not be used to throw errors based on bad
     /// user input or anything that the user did wrong.
     /// </summary>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage)
+    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string message)
     {
         if (!condition)
         {
-            ThrowInternalError(unformattedMessage, null, null);
+            ThrowInternalError(message);
         }
     }
 
-    /// <summary>
-    /// Overload for one string format argument.
-    /// </summary>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, int arg0)
+    public static void VerifyThrow(
+        [DoesNotReturnIf(false)] bool condition,
+        [InterpolatedStringHandlerArgument(nameof(condition))] ref IsTrueInterpolatedStringHandler handler)
     {
         if (!condition)
         {
-            ThrowInternalError(unformattedMessage, arg0);
+            ThrowInternalError(handler.GetFormattedText());
         }
     }
 
-    /// <summary>
-    /// Overload for one string format argument.
-    /// </summary>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, object arg0)
+    [InterpolatedStringHandler]
+    public ref struct IsTrueInterpolatedStringHandler
     {
-        if (!condition)
-        {
-            ThrowInternalError(unformattedMessage, arg0);
-        }
-    }
+        private StringBuilderHelper _builder;
 
-    /// <summary>
-    /// Overload for two string format arguments.
-    /// </summary>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, int arg0, int arg1)
-    {
-        if (!condition)
+        public IsTrueInterpolatedStringHandler(int literalLength, int formattedCount, bool condition, out bool isEnabled)
         {
-            ThrowInternalError(unformattedMessage, arg0, arg1);
+            isEnabled = !condition;
+            _builder = isEnabled ? new(literalLength) : default;
         }
-    }
 
-    /// <summary>
-    /// Overload for two string format arguments.
-    /// </summary>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, object arg0, object arg1)
-    {
-        if (!condition)
-        {
-            ThrowInternalError(unformattedMessage, arg0, arg1);
-        }
-    }
+        public readonly void AppendLiteral(string value)
+            => _builder.AppendLiteral(value);
 
-    /// <summary>
-    /// Overload for three string format arguments.
-    /// </summary>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, object arg0, object arg1, object arg2)
-    {
-        if (!condition)
-        {
-            ThrowInternalError(unformattedMessage, arg0, arg1, arg2);
-        }
-    }
+        public readonly void AppendFormatted<TValue>(TValue value)
+            => _builder.AppendFormatted(value);
 
-    /// <summary>
-    /// Overload for four string format arguments.
-    /// </summary>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, object arg0, object arg1, object arg2, object arg3)
-    {
-        if (!condition)
-        {
-            ThrowInternalError(unformattedMessage, arg0, arg1, arg2, arg3);
-        }
+        public readonly void AppendFormatted<TValue>(TValue value, string format)
+            where TValue : IFormattable
+            => _builder.AppendFormatted(value, format);
+
+        public string GetFormattedText()
+            => _builder.GetFormattedText();
     }
 
     /// <summary>
