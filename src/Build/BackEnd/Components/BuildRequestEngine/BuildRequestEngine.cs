@@ -446,7 +446,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, $"Engine loop not yet started, status is {_status.Box()}.");
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, $"Engine loop not yet started, status is {_status}.");
                     ErrorUtilities.VerifyThrow(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), $"Request {unblocker.BlockedRequestId} is not known to the engine.");
                     BuildRequestEntry entry = _requestsByGlobalRequestId[unblocker.BlockedRequestId];
 
