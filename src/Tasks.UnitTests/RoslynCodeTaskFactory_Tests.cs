@@ -164,11 +164,17 @@ Log.LogError(Class1.ToPrint());
         public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 2;
+
+            // Use a unique task name per invocation to isolate the static CompiledAssemblyCache.
+            // Without this, a test retry in the same process would find the cache pre-populated
+            // from the previous run, see 0 "Compiling" messages instead of 1, and fail.
+            string taskName = $"Custom{num}_{Guid.NewGuid():N}";
+
             string text1 = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom{num}""
+    TaskName=""{taskName}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -184,8 +190,8 @@ Log.LogError(Class1.ToPrint());
 
     <Target Name=""Build"">
         <MSBuild Projects=""p2.proj"" Targets=""Build"" />
-        <Custom{num} SayHi=""hello1"" />
-        <Custom{num} SayHi=""hello2"" />
+        <{taskName} SayHi=""hello1"" />
+        <{taskName} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -194,7 +200,7 @@ Log.LogError(Class1.ToPrint());
 <Project>
 
   <UsingTask
-    TaskName=""Custom{num}""
+    TaskName=""{taskName}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -209,8 +215,8 @@ Log.LogError(Class1.ToPrint());
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom{num} SayHi=""hello1"" />
-        <Custom{num} SayHi=""hello2"" />
+        <{taskName} SayHi=""hello1"" />
+        <{taskName} SayHi=""hello2"" />
     </Target>
 
 </Project>";
