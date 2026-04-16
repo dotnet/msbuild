@@ -1834,7 +1834,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (affinityMismatch)
                         {
-                            ErrorUtilities.VerifyThrowInternalError(
+                            ErrorUtilities.VerifyThrow(
                                 _configCache.HasConfiguration(request.ConfigurationId),
                                 "A request should have a configuration if it makes it this far in the build process.");
 
