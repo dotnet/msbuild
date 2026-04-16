@@ -854,10 +854,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return false;
             }
 
-            if (!Path.IsPathRooted(path))
-            {
-                path = Path.GetFullPath(path);
-            }
+            // Canonicalize the path (resolve ".." segments etc.) so it matches s_existentFiles entries.
+            path = Path.GetFullPath(path);
 
             foreach (string file in s_existentFiles)
             {
@@ -1048,10 +1046,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 throw new FileNotFoundException(path);
             }
 
-            if (!Path.IsPathRooted(path))
-            {
-                path = Path.GetFullPath(path);
-            }
+            // Canonicalize the path (resolve ".." segments etc.) so it matches expected entries.
+            path = Path.GetFullPath(path);
 
             if
             (

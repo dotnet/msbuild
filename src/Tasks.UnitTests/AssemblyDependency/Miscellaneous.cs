@@ -1155,43 +1155,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Invalid app.config path should not crash.
+        /// Invalid or empty app.config paths should not crash.
+        /// Invalid path "|" causes a logged error and task failure.
+        /// Empty string is silently ignored (Wave18_6 behavior) and task succeeds.
         /// </summary>
-        [Fact]
-        public void Regress286699_InvalidAppConfig()
-        {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
-
-            t.BuildEngine = new MockEngine(_output);
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
-
-            t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
-            t.AppConfigFile = "|";
-
-            bool retval = Execute(t);
-
-            Assert.False(retval);
-
-            // Should not crash.
-        }
-
-        /// <summary>
-        /// When Wave18_6 is enabled (default), empty AppConfigFile is silently ignored.
-        /// The task should succeed as if no app.config was specified.
-        /// </summary>
-        [Fact]
-        public void EmptyAppConfigFile_Wave18_6_Enabled_Succeeds()
+        [Theory]
+        [InlineData("|", false)]
+        [InlineData("", true)]
+        public void InvalidOrEmptyAppConfig_DoesNotCrash(string appConfigFile, bool expectedSuccess)
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
-            t.AppConfigFile = string.Empty;
+            t.AppConfigFile = appConfigFile;
 
             bool retval = Execute(t);
 
-            retval.ShouldBeTrue();
+            retval.ShouldBe(expectedSuccess);
         }
 
         /// <summary>
