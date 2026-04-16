@@ -5,34 +5,64 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Shared;
 
 /// <summary>
-/// This class contains methods that are useful for error checking and validation.
+///  This class contains methods that are useful for error checking and validation.
 /// </summary>
 internal static class ErrorUtilities
 {
-    private static readonly bool s_enableMSBuildDebugTracing = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLEDEBUGTRACING"));
+    private static readonly bool s_enableMSBuildDebugTracing = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLEDEBUGTRACING"));
 
-    public static void DebugTraceMessage(string category, string formatstring, params object[]? parameters)
+    public static void DebugTraceMessage(string category, string message)
     {
         if (s_enableMSBuildDebugTracing)
         {
-            if (parameters != null)
-            {
-                Trace.WriteLine(String.Format(CultureInfo.CurrentCulture, formatstring, parameters), category);
-            }
-            else
-            {
-                Trace.WriteLine(formatstring, category);
-            }
+            Trace.WriteLine(message, category);
         }
+    }
+
+    public static void DebugTraceMessage(string category, ref DebugTraceInterpolatedStringHandler handler)
+    {
+        if (s_enableMSBuildDebugTracing)
+        {
+            Trace.WriteLine(handler.GetFormattedText(), category);
+        }
+    }
+
+    /// <summary>
+    ///  Interpolated string handler used by <see cref="DebugTraceMessage(string, ref DebugTraceInterpolatedStringHandler)"/>
+    ///  to defer string formatting unless tracing is enabled.
+    /// </summary>
+    [InterpolatedStringHandler]
+    public ref struct DebugTraceInterpolatedStringHandler
+    {
+        private StringBuilderHelper _builder;
+
+        public DebugTraceInterpolatedStringHandler(int literalLength, int formattedCount, out bool isEnabled)
+        {
+            isEnabled = s_enableMSBuildDebugTracing;
+            _builder = isEnabled ? new(literalLength) : default;
+        }
+
+        public readonly void AppendLiteral(string value)
+            => _builder.AppendLiteral(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value)
+            => _builder.AppendFormatted(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value, string format)
+            where TValue : IFormattable
+            => _builder.AppendFormatted(value, format);
+
+        public string GetFormattedText()
+            => _builder.GetFormattedText();
     }
 
     internal static void VerifyThrowInternalError([DoesNotReturnIf(false)] bool condition, string message, params object?[]? args)
