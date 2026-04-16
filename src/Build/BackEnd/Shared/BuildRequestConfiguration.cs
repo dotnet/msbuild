@@ -141,7 +141,7 @@ namespace Microsoft.Build.BackEnd
         private string _savedCurrentDirectory;
 
         /// <summary>
-        /// Saves the evaluation ID for the project so that it's accessible even when the underlying Project becomes cached
+        /// Saves the evaluation ID for the project so that it's accessible even when the underlying Project becomes cached.
         /// </summary>
         private int _projectEvaluationId = BuildEventContext.InvalidEvaluationId;
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd
         public bool IsCached { get; private set; }
 
         /// <summary>
-        /// A short
+        /// The evaluation ID for this project, persisted so it remains available even when the project is cached.
         /// </summary>
         public int ProjectEvaluationId
         {
@@ -440,7 +440,7 @@ namespace Microsoft.Build.BackEnd
             _projectDefaultTargets = null;
             _projectInitialTargets = null;
             _projectTargets = null;
-            
+
             _projectEvaluationId = _project.EvaluationId;
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
@@ -950,8 +950,8 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _transferredProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
-            translator.Translate(ref _projectEvaluationId);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
+            translator.Translate(ref _projectEvaluationId);
 
             // if the  entire state is translated, then the transferred state represents the full evaluation data
             if (translator.Mode == TranslationDirection.ReadFromStream && _transferredState?.TranslateEntireState == true)
@@ -969,8 +969,8 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectDefaultTargets);
             translator.Translate(ref _projectInitialTargets);
             translator.Translate(ref _projectTargets);
-            translator.Translate(ref _projectEvaluationId);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _projectEvaluationId);
         }
 
         /// <summary>

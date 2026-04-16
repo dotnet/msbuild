@@ -25,15 +25,17 @@ using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    [UsesVerify]
     public class RoslynCodeTaskFactory_Tests
     {
         private const string TaskName = "MyInlineTask";
 
         private readonly VerifySettings _verifySettings;
 
-        public RoslynCodeTaskFactory_Tests()
+        private readonly ITestOutputHelper _testOutput;
+
+        public RoslynCodeTaskFactory_Tests(ITestOutputHelper testOutput)
         {
+            _testOutput = testOutput;
             UseProjectRelativeDirectory("TaskFactorySource");
 
             _verifySettings = new();
@@ -782,6 +784,49 @@ namespace InlineTask
                 var logger = proj.BuildProjectExpectFailure();
                 logger.AssertLogContains(errorMessage);
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ClassDoesNotInheritFromITask(bool forceOutOfProc)
+        {
+            const string taskName = "ClassDoesNotInheritFromITask";
+            string unformattedMessage = ResourceUtilities.GetResourceString("CodeTaskFactory.NeedsITaskInterface");
+
+            string projectContent = $$"""
+                <Project>
+                  <UsingTask TaskName="{{taskName}}" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class">
+                namespace InlineTask
+                {
+                    public class {{taskName}}
+                    {
+                        public bool Execute()
+                        {
+                            return true;
+                        }
+                    }
+                }
+                      </Code>
+                    </Task>
+                  </UsingTask>
+                  <Target Name="Build">
+                    <{{taskName}} />
+                  </Target>
+                </Project>
+                """;
+
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
+            MockLogger logger = proj.BuildProjectExpectFailure();
+            logger.AssertLogContains(unformattedMessage);
         }
 
         [Fact]

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -867,7 +867,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrow(result == null, "Result already set when exception was thrown.");
                     result = new BuildResult(_requestEntry.Request, thrownException);
-                    // Populate the evaluation ID from the configuration for sending to the central node
+                    // Populate the evaluation ID from the configuration for sending to the central node.
                     result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
                 }
 
@@ -1023,10 +1023,10 @@ namespace Microsoft.Build.BackEnd
                 results = new Dictionary<int, BuildResult>();
                 for (int i = 0; i < requests.Length; i++)
                 {
-                    var result = new BuildResult(new BuildRequest(), new BuildAbortedException());
-                    // Populate the evaluation ID from the configuration for sending to the central node
-                    result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
-                    results[i] = result;
+                    var abortResult = new BuildResult(new BuildRequest(), new BuildAbortedException());
+                    // Populate the evaluation ID from the configuration for sending to the central node.
+                    abortResult.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
+                    results[i] = abortResult;
                 }
             }
 
@@ -1243,7 +1243,7 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
-                // Populate the evaluation ID from the configuration for sending to the central node
+                    // Populate the evaluation ID from the configuration for sending to the central node.
                 result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 
                 UpdateStatisticsPostBuild();
@@ -1299,11 +1299,9 @@ namespace Microsoft.Build.BackEnd
 
         private void UpdateStatisticsPostBuild()
         {
-            ITelemetryForwarder telemetryForwarder =
-                ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
-                ?.Instance;
+            ITelemetryCollector telemetryCollector = _nodeLoggingContext?.TelemetryCollector;
 
-            if (telemetryForwarder == null || !telemetryForwarder.IsTelemetryCollected)
+            if (telemetryCollector is null || !telemetryCollector.IsTelemetryCollected)
             {
                 return;
             }
@@ -1317,9 +1315,6 @@ namespace Microsoft.Build.BackEnd
             {
                 return;
             }
-
-            // Accumulate all telemetry into a local instance, then merge into the shared singleton once.
-            WorkerNodeTelemetryData telemetryData = new();
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
@@ -1336,7 +1331,7 @@ namespace Microsoft.Build.BackEnd
 
                 bool isFromNuget, isMetaprojTarget, isCustom;
 
-                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                if (FileUtilities.IsMetaprojectFilename(projectTargetInstance.Value.FullPath))
                 {
                     isMetaprojTarget = true;
                     isFromNuget = false;
@@ -1353,13 +1348,11 @@ namespace Microsoft.Build.BackEnd
 
                 var key = new TaskOrTargetTelemetryKey(
                     projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
-                telemetryData.AddTarget(key, wasExecuted, skipReason);
+                telemetryCollector.AddTarget(key, wasExecuted, skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
             CollectTasksStats(taskReg);
-
-            telemetryForwarder.MergeWorkerData(telemetryData);
 
             void CollectTasksStats(TaskRegistry taskRegistry)
             {
@@ -1375,7 +1368,7 @@ namespace Microsoft.Build.BackEnd
                         registeredTaskRecord.ComputeIfCustom(),
                         registeredTaskRecord.IsFromNugetCache,
                         isFromMetaProject: false);
-                    telemetryData.AddTask(
+                    telemetryCollector.AddTask(
                         key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
@@ -1389,8 +1382,6 @@ namespace Microsoft.Build.BackEnd
                 taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
             }
         }
-
-        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment (working directory and environment variables)

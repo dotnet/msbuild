@@ -49,6 +49,9 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.0.6" />
+    <PackageVersion Update="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(MicrosoftTestingExtensionsCodeCoverageVersion)' != ''" Version="$(MicrosoftTestingExtensionsCodeCoverageVersion)" />
+
     <PackageVersion Include="FakeItEasy" Version="8.1.0" />
     <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
 
@@ -56,8 +59,8 @@
     <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
     <PackageVersion Update="Microsoft.VisualStudio.SolutionPersistence" Condition="'$(MicrosoftVisualStudioSolutionPersistenceVersion)' != ''" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
 
-    <PackageVersion Include="Verify.Xunit" Version="19.14.1" />
-    <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
+    <PackageVersion Include="Verify.XunitV3" Version="28.12.0" />
+    <PackageVersion Update="Verify.XunitV3" Condition="'$(VerifyXunitV3Version)' != ''" Version="$(VerifyXunitV3Version)" />
   </ItemGroup>
 
   <!-- Roslyn analyzer authoring packages (used by ThreadSafeTaskAnalyzer) -->

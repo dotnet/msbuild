@@ -17,7 +17,6 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -1220,15 +1219,23 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DisplayEnvironmentInDetailed()
         {
-            SimulatedConsole sc = new SimulatedConsole();
+            var logAllOriginal = Traits.LogAllEnvironmentVariables;
+            try
+            {
+                SimulatedConsole sc = new SimulatedConsole();
 
-            ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
-            EventSourceSink es = new EventSourceSink();
-            cl2.Initialize(es);
-            cl2.Parameters = "ShowEnvironment";
-            cl2.ParseParameters();
+                ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
+                EventSourceSink es = new EventSourceSink();
+                cl2.Initialize(es);
+                cl2.Parameters = "ShowEnvironment";
+                cl2.ParseParameters();
 
-            WriteEnvironment(cl2, sc, true);
+                WriteEnvironment(cl2, sc, true);
+            }
+            finally
+            {
+                Traits.LogAllEnvironmentVariables = logAllOriginal;
+            }
         }
 
         /// <summary>
@@ -1264,15 +1271,23 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DisplayEnvironmentInMinimal()
         {
-            SimulatedConsole sc = new SimulatedConsole();
-           
-            ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
-            EventSourceSink es = new EventSourceSink();
-            cl2.Initialize(es);
-            cl2.Parameters = "ShowEnvironment";
-            cl2.ParseParameters();
+            var logAllOriginal = Traits.LogAllEnvironmentVariables;
+            try
+            {
+                SimulatedConsole sc = new SimulatedConsole();
 
-            WriteEnvironment(cl2, sc, true);
+                ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
+                EventSourceSink es = new EventSourceSink();
+                cl2.Initialize(es);
+                cl2.Parameters = "ShowEnvironment";
+                cl2.ParseParameters();
+
+                WriteEnvironment(cl2, sc, true);
+            }
+            finally
+            {
+                Traits.LogAllEnvironmentVariables = logAllOriginal;
+            }
         }
 
         /// <summary>

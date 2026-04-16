@@ -4,6 +4,7 @@
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.TelemetryInfra;
 
 #nullable disable
 
@@ -34,6 +35,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
             this.IsValid = true;
         }
+
+        /// <summary>
+        /// Per-<see cref="BuildRequestEngine"/> telemetry collector.
+        /// Null when telemetry collection is disabled.
+        /// </summary>
+        internal ITelemetryCollector TelemetryCollector { get; set; }
 
         /// <summary>
         /// Log the completion of a build

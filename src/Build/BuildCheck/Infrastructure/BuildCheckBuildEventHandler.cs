@@ -70,7 +70,7 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleProjectEvaluationFinishedEvent(ProjectEvaluationFinishedEventArgs eventArgs)
     {
-        if (!IsMetaProjFile(eventArgs.ProjectFile))
+        if (!FileUtilities.IsMetaprojectFilename(eventArgs.ProjectFile))
         {
             _buildCheckManager.ProcessEvaluationFinishedEventArgs(
                 _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
@@ -82,7 +82,7 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleProjectEvaluationStartedEvent(ProjectEvaluationStartedEventArgs eventArgs)
     {
-        if (!IsMetaProjFile(eventArgs.ProjectFile))
+        if (!FileUtilities.IsMetaprojectFilename(eventArgs.ProjectFile))
         {
             var checkContext = _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!);
             _buildCheckManager.ProjectFirstEncountered(
@@ -144,8 +144,6 @@ internal class BuildCheckBuildEventHandler
         => _buildCheckManager.ProcessProjectImportedEventArgs(
                 _checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs)),
                 eventArgs);
-
-    private bool IsMetaProjFile(string? projectFile) => projectFile?.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase) == true;
 
     private readonly BuildCheckTracingData _tracingData = new BuildCheckTracingData();
 

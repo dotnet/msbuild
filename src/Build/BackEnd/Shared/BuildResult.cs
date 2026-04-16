@@ -86,8 +86,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Allows to serialize and deserialize different versions of the build result.
         /// </remarks>
-        private int _version = 
-            Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 2;
+        private int _version = Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 2;
 
         /// <summary>
         /// The request caused a circular dependency in scheduling.
@@ -712,7 +711,8 @@ namespace Microsoft.Build.Execution
             {
                 translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
             }
-                
+
+            // Starting version 2 the _evaluationId field is present.
             if (_version >= 2)
             {
                 translator.Translate(ref _evaluationId);
