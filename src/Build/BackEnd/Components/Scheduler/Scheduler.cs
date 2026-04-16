@@ -157,9 +157,19 @@ namespace Microsoft.Build.BackEnd
             => Traits.Instance.InProcNodeDisabled || _componentHost.BuildParameters.DisableInProcNode;
 
         /// <summary>
-        /// The path into which debug files will be written.
+        ///  The directory into which debug files will be written.
         /// </summary>
-        private string _debugDumpPath;
+        private readonly string _debugDumpDirectory;
+
+        /// <summary>
+        ///  The file where we will store the trace file.
+        /// </summary>
+        private readonly string _debugDumpTraceFilePath;
+
+        /// <summary>
+        ///  The file where we will store the state file.
+        /// </summary>
+        private readonly string _debugDumpStateFilePath;
 
         /// <summary>
         /// If MSBUILDCUSTOMSCHEDULER = CustomSchedulerForSQL, the user may also choose to set
@@ -213,7 +223,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
             _nodeLimitOffset = 0;
 
@@ -254,10 +264,13 @@ namespace Microsoft.Build.BackEnd
                 _nodeCoreAllocationWeight = 0;
             }
 
-            if (String.IsNullOrEmpty(_debugDumpPath))
+            if (string.IsNullOrEmpty(_debugDumpDirectory))
             {
-                _debugDumpPath = FileUtilities.TempFileDirectory;
+                _debugDumpDirectory = FileUtilities.TempFileDirectory;
             }
+
+            _debugDumpTraceFilePath = Path.Combine(_debugDumpDirectory, $"SchedulerTrace_{EnvironmentUtilities.CurrentProcessId}.txt");
+            _debugDumpStateFilePath = Path.Combine(_debugDumpDirectory, $"SchedulerState_{EnvironmentUtilities.CurrentProcessId}.txt");
 
             Reset();
         }
@@ -2671,9 +2684,9 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                    FileUtilities.EnsureDirectoryExists(_debugDumpDirectory);
 
-                    using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                    using StreamWriter file = FileUtilities.OpenWrite(_debugDumpTraceFilePath, append: true);
                     file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, _schedulingData.EventTime.Ticks);
                     file.WriteLine(message);
                     file.Flush();
@@ -2733,15 +2746,16 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                        FileUtilities.EnsureDirectoryExists(_debugDumpDirectory);
 
                         bool shouldWriteHeader = _debugDumpIsFirstWrite;
                         if (shouldWriteHeader)
                         {
-                            shouldWriteHeader = !FileSystems.Default.FileExists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
+                            shouldWriteHeader = !FileSystems.Default.FileExists(_debugDumpStateFilePath);
                             _debugDumpIsFirstWrite = false;
                         }
-                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+
+                        using StreamWriter file = FileUtilities.OpenWrite(_debugDumpStateFilePath, append: true);
 
 
                         if (shouldWriteHeader)
@@ -2865,7 +2879,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(_debugDumpStateFilePath, append: true);
 
                         file.WriteLine("Configurations used during this build");
                         file.WriteLine("-------------------------------------");
@@ -2905,7 +2919,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(_debugDumpStateFilePath, append: true);
 
                         file.WriteLine("Requests used during the build:");
                         file.WriteLine("-------------------------------");
