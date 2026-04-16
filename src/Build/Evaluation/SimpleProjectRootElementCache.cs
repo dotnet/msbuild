@@ -65,9 +65,7 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrowInternalNull(rootElement, "projectRootElement");
                 ErrorUtilities.VerifyThrow(
                     rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
-                    "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
-                    key,
-                    rootElement.FullPath);
+                    $"Got project back with incorrect path. Expected path: {key}, received path: {rootElement.FullPath}.");
 
                 AddEntry(rootElement);
 

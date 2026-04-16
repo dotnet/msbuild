@@ -401,11 +401,11 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_assignedNodeId == Scheduler.InvalidNodeId || _assignedNodeId == nodeId, "Request must always resume on the same node on which it was started.");
 
             VerifyOneOfStates([SchedulableRequestState.Ready, SchedulableRequestState.Unscheduled]);
-            ErrorUtilities.VerifyThrow((_state == SchedulableRequestState.Ready) || !_schedulingData.IsRequestScheduled(this), "Another instance of request {0} is already scheduled.", _request.GlobalRequestId);
-            ErrorUtilities.VerifyThrow(!_schedulingData.IsNodeWorking(nodeId), "Cannot resume execution of request {0} because node {1} is already working.", _request.GlobalRequestId, nodeId);
+            ErrorUtilities.VerifyThrow((_state == SchedulableRequestState.Ready) || !_schedulingData.IsRequestScheduled(this), $"Another instance of request {_request.GlobalRequestId} is already scheduled.");
+            ErrorUtilities.VerifyThrow(!_schedulingData.IsNodeWorking(nodeId), $"Cannot resume execution of request {_request.GlobalRequestId} because node {nodeId} is already working.");
 
             int requiredNodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(_request.ConfigurationId);
-            ErrorUtilities.VerifyThrow(requiredNodeId == Scheduler.InvalidNodeId || requiredNodeId == nodeId, "Request {0} cannot be assigned to node {1} because its configuration is already assigned to node {2}", _request.GlobalRequestId, nodeId, requiredNodeId);
+            ErrorUtilities.VerifyThrow(requiredNodeId == Scheduler.InvalidNodeId || requiredNodeId == nodeId, $"Request {_request.GlobalRequestId} cannot be assigned to node {nodeId} because its configuration is already assigned to node {requiredNodeId}");
 
             _assignedNodeId = nodeId;
             ChangeToState(SchedulableRequestState.Executing);
@@ -446,7 +446,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void VerifyState(SchedulableRequestState requiredState)
         {
-            ErrorUtilities.VerifyThrow(_state == requiredState, "Request {0} expected to be in state {1} but state is actually {2}", _request.GlobalRequestId, requiredState, _state);
+            ErrorUtilities.VerifyThrow(_state == requiredState, $"Request {_request.GlobalRequestId} expected to be in state {requiredState} but state is actually {_state}");
         }
 
         /// <summary>

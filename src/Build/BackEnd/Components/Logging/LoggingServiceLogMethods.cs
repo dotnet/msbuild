@@ -135,7 +135,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
                 _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
-                ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                ErrorUtilities.VerifyThrow(projectFile != null, $"ContextID {buildEventContext.ProjectContextId} should have been in the ID-to-project file mapping but wasn't!");
                 buildEvent.ProjectFile = projectFile;
             }
 
@@ -175,7 +175,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
                     _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
-                    ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                    ErrorUtilities.VerifyThrow(projectFile != null, $"ContextID {buildEventContext.ProjectContextId} should have been in the ID-to-project file mapping but wasn't!");
                     buildEvent.ProjectFile = projectFile;
                 }
 
@@ -327,7 +327,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
                 _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
-                ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                ErrorUtilities.VerifyThrow(projectFile != null, $"ContextID {buildEventContext.ProjectContextId} should have been in the ID-to-project file mapping but wasn't!");
                 buildEvent.ProjectFile = projectFile;
             }
 

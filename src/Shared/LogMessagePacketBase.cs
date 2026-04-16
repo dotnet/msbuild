@@ -440,7 +440,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 _buildEvent = ReadEventFromStream(_eventType, translator);
-                ErrorUtilities.VerifyThrow(_buildEvent is not null, "Not Supported LoggingEventType {0}", _eventType.ToString());
+                ErrorUtilities.VerifyThrow(_buildEvent is not null, $"Not Supported LoggingEventType {_eventType}");
             }
 
             _eventType = GetLoggingEventId(_buildEvent);

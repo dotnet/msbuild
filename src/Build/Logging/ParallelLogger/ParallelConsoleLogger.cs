@@ -655,7 +655,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Get the project started event so we can use its information to properly display a project finished event
             ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e.BuildEventContext);
-            ErrorUtilities.VerifyThrow(startedEvent != null, "Project finished event for {0} received without matching start event", e.ProjectFile);
+            ErrorUtilities.VerifyThrow(startedEvent != null, $"Project finished event for {e.ProjectFile} received without matching start event");
 
             if (this.showPerfSummary)
             {

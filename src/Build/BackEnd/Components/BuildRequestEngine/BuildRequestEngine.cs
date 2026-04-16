@@ -212,7 +212,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeForBuild(NodeLoggingContext loggingContext)
         {
             ErrorUtilities.VerifyThrow(_componentHost != null, "BuildRequestEngine not initialized by component host.");
-            ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, "Engine must be in the Uninitiailzed state, but is {0}", _status);
+            ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, $"Engine must be in the Uninitiailzed state, but is {_status}");
 
             _nodeLoggingContext = loggingContext;
 
@@ -361,11 +361,11 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, $"Engine loop not yet started, status is {_status}.");
                     TraceEngine($"Request {request.GlobalRequestId}({request.ConfigurationId}) (nr {request.NodeRequestId}) received and activated.");
 
-                    ErrorUtilities.VerifyThrow(!_requestsByGlobalRequestId.ContainsKey(request.GlobalRequestId), "Request {0} is already known to the engine.", request.GlobalRequestId);
-                    ErrorUtilities.VerifyThrow(_configCache.HasConfiguration(request.ConfigurationId), "Request {0} refers to configuration {1} which is not known to the engine.", request.GlobalRequestId, request.ConfigurationId);
+                    ErrorUtilities.VerifyThrow(!_requestsByGlobalRequestId.ContainsKey(request.GlobalRequestId), $"Request {request.GlobalRequestId} is already known to the engine.");
+                    ErrorUtilities.VerifyThrow(_configCache.HasConfiguration(request.ConfigurationId), $"Request {request.GlobalRequestId} refers to configuration {request.ConfigurationId} which is not known to the engine.");
 
                     if (request.NodeRequestId == BuildRequest.ResultsTransferNodeRequestId)
                     {
@@ -446,8 +446,8 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
-                    ErrorUtilities.VerifyThrow(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), "Request {0} is not known to the engine.", unblocker.BlockedRequestId);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, $"Engine loop not yet started, status is {_status.Box()}.");
+                    ErrorUtilities.VerifyThrow(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), $"Request {unblocker.BlockedRequestId} is not known to the engine.");
                     BuildRequestEntry entry = _requestsByGlobalRequestId[unblocker.BlockedRequestId];
 
                     // Are we resuming execution or reporting results?
@@ -551,7 +551,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, $"Engine loop not yet started, status is {_status}.");
 
                     TraceEngine($"Received configuration response for node config {response.NodeConfigurationId}, now global config {response.GlobalConfigurationId}.");
                     ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
@@ -658,7 +658,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, "Cleanup wasn't called, status is {0}", _status);
+            ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, $"Cleanup wasn't called, status is {_status}");
             _componentHost = null;
 
             ChangeStatus(BuildRequestEngineStatus.Shutdown);
@@ -671,7 +671,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.RequestEngine, "Cannot create component of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.RequestEngine, $"Cannot create component of type {type}");
             return new BuildRequestEngine();
         }
 

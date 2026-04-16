@@ -299,7 +299,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ResultsCache, "Cannot create components of type {0}", componentType);
+            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
             return new ResultsCache();
         }
 

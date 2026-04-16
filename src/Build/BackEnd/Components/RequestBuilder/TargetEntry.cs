@@ -419,7 +419,7 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 VerifyState(_state, TargetEntryState.Execution);
-                ErrorUtilities.VerifyThrow(!_isExecuting, "Target {0} is already executing", _target.Name);
+                ErrorUtilities.VerifyThrow(!_isExecuting, $"Target {_target.Name} is already executing");
                 _cancellationToken = cancellationToken;
                 _isExecuting = true;
 
@@ -769,7 +769,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void MarkForError()
         {
-            ErrorUtilities.VerifyThrow(_state != TargetEntryState.Completed, "State must not be Completed. State is {0}.", _state);
+            ErrorUtilities.VerifyThrow(_state != TargetEntryState.Completed, $"State must not be Completed. State is {_state}.");
             _state = TargetEntryState.ErrorExecution;
         }
 
@@ -780,9 +780,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void MarkForStop()
         {
-            ErrorUtilities.VerifyThrow(_state == TargetEntryState.Completed, "State must be Completed. State is {0}.", _state);
-            ErrorUtilities.VerifyThrow(_targetResult.ResultCode == TargetResultCode.Skipped, "ResultCode must be Skipped. ResultCode is {0}.", _state);
-            ErrorUtilities.VerifyThrow(_targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Continue, "ActionCode must be Continue. ActionCode is {0}.", _state);
+            ErrorUtilities.VerifyThrow(_state == TargetEntryState.Completed, $"State must be Completed. State is {_state}.");
+            ErrorUtilities.VerifyThrow(_targetResult.ResultCode == TargetResultCode.Skipped, $"ResultCode must be Skipped. ResultCode is {_targetResult.ResultCode}.");
+            ErrorUtilities.VerifyThrow(_targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Continue, $"ActionCode must be Continue. ActionCode is {_targetResult.WorkUnitResult.ActionCode}.");
 
             _targetResult.WorkUnitResult = new WorkUnitResult(_targetResult.WorkUnitResult.ResultCode, WorkUnitActionCode.Stop, _targetResult.WorkUnitResult.Exception);
         }
@@ -886,7 +886,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="expected">The expected value</param>
         private void VerifyState(TargetEntryState actual, TargetEntryState expected)
         {
-            ErrorUtilities.VerifyThrow(actual == expected, "Expected state {1}.  Got {0}", actual, expected);
+            ErrorUtilities.VerifyThrow(actual == expected, $"Expected state {expected}.  Got {actual}");
         }
 
         /// <summary>

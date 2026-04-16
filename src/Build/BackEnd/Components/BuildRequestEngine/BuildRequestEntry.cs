@@ -223,7 +223,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Active, "Must be in Active state to wait for blocking request.  Config: {0} State: {1}", RequestConfiguration.ConfigurationId, State);
+                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Active, $"Must be in Active state to wait for blocking request.  Config: {RequestConfiguration.ConfigurationId} State: {State}");
 
                 _blockingGlobalRequestId = blockingGlobalRequestId;
 
@@ -396,8 +396,8 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Waiting, "Entry must be in the waiting state to be unblocked. Config: {0} State: {1} Request: {2}", RequestConfiguration.ConfigurationId, State, Request.GlobalRequestId);
-                ErrorUtilities.VerifyThrow(_blockingGlobalRequestId != BuildRequest.InvalidGlobalRequestId, "Entry must be waiting on another request to be unblocked.  Config: {0} Request: {1}", RequestConfiguration.ConfigurationId, Request.GlobalRequestId);
+                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Waiting, $"Entry must be in the waiting state to be unblocked. Config: {RequestConfiguration.ConfigurationId} State: {State} Request: {Request.GlobalRequestId}");
+                ErrorUtilities.VerifyThrow(_blockingGlobalRequestId != BuildRequest.InvalidGlobalRequestId, $"Entry must be waiting on another request to be unblocked.  Config: {RequestConfiguration.ConfigurationId} Request: {Request.GlobalRequestId}");
 
                 _blockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
 
@@ -416,7 +416,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(_unresolvedConfigurations == null, "All configurations must be resolved before Continue may be called.");
                 ErrorUtilities.VerifyThrow(_outstandingRequests == null, "All outstanding requests must have been satisfied.");
-                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Ready, "Entry must be in the Ready state.  Config: {0} State: {1}", RequestConfiguration.ConfigurationId, State);
+                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Ready, $"Entry must be in the Ready state.  Config: {RequestConfiguration.ConfigurationId} State: {State}");
 
                 IDictionary<int, BuildResult> ret = _outstandingResults;
                 _outstandingResults = null;
@@ -493,7 +493,7 @@ namespace Microsoft.Build.BackEnd
                 // of states.
                 if (result.OverallResult == BuildResultCode.Success)
                 {
-                    ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Active, "Entry must be active before it can be Completed successfully.  Config: {0} State: {1}", RequestConfiguration.ConfigurationId, State);
+                    ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Active, $"Entry must be active before it can be Completed successfully.  Config: {RequestConfiguration.ConfigurationId} State: {State}");
                     ErrorUtilities.VerifyThrow(_unresolvedConfigurations == null, "Entry must not have any unresolved configurations.");
                     ErrorUtilities.VerifyThrow(_outstandingRequests == null, "Entry must have no outstanding requests.");
                     ErrorUtilities.VerifyThrow(_outstandingResults == null, "Results must be consumed before request may be completed.");
@@ -514,13 +514,13 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Active || State == BuildRequestEntryState.Waiting, "Must be in Active or Waiting state to wait for results.  Config: {0} State: {1}", RequestConfiguration.ConfigurationId, State);
+                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Active || State == BuildRequestEntryState.Waiting, $"Must be in Active or Waiting state to wait for results.  Config: {RequestConfiguration.ConfigurationId} State: {State}");
 
                 if (newRequest.IsConfigurationResolved)
                 {
                     _outstandingRequests ??= new Dictionary<int, BuildRequest>();
 
-                    ErrorUtilities.VerifyThrow(!_outstandingRequests.ContainsKey(newRequest.NodeRequestId), "Already waiting for local request {0}", newRequest.NodeRequestId);
+                    ErrorUtilities.VerifyThrow(!_outstandingRequests.ContainsKey(newRequest.NodeRequestId), $"Already waiting for local request {newRequest.NodeRequestId}");
                     _outstandingRequests.Add(newRequest.NodeRequestId, newRequest);
                 }
                 else

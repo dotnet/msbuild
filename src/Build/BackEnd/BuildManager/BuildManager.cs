@@ -1727,7 +1727,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
+            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), $"{config.ProjectFullPath} is not a solution");
 
             var buildEventContext = request.BuildEventContext;
             if (buildEventContext == BuildEventContext.Invalid)
@@ -2742,7 +2742,7 @@ namespace Microsoft.Build.Execution
 
             _shuttingDown = true;
             _executionCancellationTokenSource?.Cancel();
-            ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
+            ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), $"Unexpected shutdown from node {node} which shouldn't exist.");
             _activeNodes.Remove(node);
 
             if (shutdownPacket.Reason != NodeShutdownReason.Requested)

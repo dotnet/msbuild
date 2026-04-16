@@ -369,7 +369,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow((_configId == InvalidConfigurationId) || (WasGeneratedByNode && (value > InvalidConfigurationId)), "Configuration ID must be invalid, or it must be less than invalid and the new config must be greater than invalid.  It was {0}, the new value was {1}.", _configId, value);
+                ErrorUtilities.VerifyThrow((_configId == InvalidConfigurationId) || (WasGeneratedByNode && (value > InvalidConfigurationId)), $"Configuration ID must be invalid, or it must be less than invalid and the new config must be greater than invalid.  It was {_configId}, the new value was {value}.");
                 _configId = value;
             }
         }
@@ -462,7 +462,7 @@ namespace Microsoft.Build.BackEnd
             int submissionId,
             int nodeId)
         {
-            ErrorUtilities.VerifyThrow(!IsLoaded, "Already loaded the project for this configuration id {0}.", ConfigurationId);
+            ErrorUtilities.VerifyThrow(!IsLoaded, $"Already loaded the project for this configuration id {ConfigurationId}.");
 
             InitializeProject(componentHost.BuildParameters, () =>
             {

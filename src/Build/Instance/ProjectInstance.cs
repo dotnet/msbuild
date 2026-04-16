@@ -2635,7 +2635,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(buildParameters);
-            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(projectFile), "Project file {0} is not a solution.", projectFile);
+            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(projectFile), $"Project file {projectFile} is not a solution.");
 
             ProjectInstance[] projectInstances = null;
 
@@ -2913,7 +2913,7 @@ namespace Microsoft.Build.Execution
             VerifyThrowNotImmutable();
 
             ErrorUtilities.VerifyThrowInternalLength(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), "Target {0} already exists.", targetName);
+            ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), $"Target {targetName} already exists.");
 
             ProjectTargetInstance target = new ProjectTargetInstance(
                 targetName,

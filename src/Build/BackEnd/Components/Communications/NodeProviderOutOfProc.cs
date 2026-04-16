@@ -135,7 +135,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.ContainsKey(nodeId), "Invalid node id specified: {0}.", nodeId);
+            ErrorUtilities.VerifyThrow(_nodeContexts.ContainsKey(nodeId), $"Invalid node id specified: {nodeId}.");
 
             SendData(_nodeContexts[nodeId], packet);
         }
@@ -198,7 +198,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcNodeProvider, "Factory cannot create components of type {0}", componentType);
+            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProc();
         }
 

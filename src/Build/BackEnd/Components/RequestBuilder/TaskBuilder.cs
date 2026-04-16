@@ -240,7 +240,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskBuilder, "Cannot create components of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskBuilder, $"Cannot create components of type {type}");
             return new TaskBuilder();
         }
 

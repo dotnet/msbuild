@@ -45,28 +45,28 @@ namespace Microsoft.Build.UnitTests
         public void VerifyThrow1True()
         {
             // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, "{0}", "a");
+            ErrorUtilities.VerifyThrow(true, $"{1}");
         }
 
         [Fact]
         public void VerifyThrow2True()
         {
             // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, "{0}{1}", "a", "b");
+            ErrorUtilities.VerifyThrow(true, $"{1}{2}");
         }
 
         [Fact]
         public void VerifyThrow3True()
         {
             // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, "{0}{1}{2}", "a", "b", "c");
+            ErrorUtilities.VerifyThrow(true, $"{1}{2}{3}");
         }
 
         [Fact]
         public void VerifyThrow4True()
         {
             // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, "{0}{1}{2}{3}", "a", "b", "c", "d");
+            ErrorUtilities.VerifyThrow(true, $"{1}{2}{3}{4}");
         }
     }
 }

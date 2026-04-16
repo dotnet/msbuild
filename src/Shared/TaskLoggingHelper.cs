@@ -498,9 +498,9 @@ namespace Microsoft.Build.Utilities
 #if DEBUG
             // Assert that the message does not contain an error code.  Only errors and warnings
             // should have error codes.
-            string errorCode;
-            ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out errorCode);
-            ErrorUtilities.VerifyThrow(errorCode == null, errorCode, FormatResourceString(messageResourceName, messageArgs));
+            string message = FormatResourceString(messageResourceName, messageArgs);
+            ResourceUtilities.ExtractMessageCode(msbuildCodeOnly: true, message, out string errorCode);
+            ErrorUtilities.VerifyThrow(errorCode == null, $"Message has error code: {message}");
 #endif
         }
 
