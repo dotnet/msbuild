@@ -42,34 +42,12 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         internal virtual void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
-            try
+            if (string.IsNullOrEmpty(stateFile))
             {
-                if (!string.IsNullOrEmpty(stateFile))
-                {
-                    if (FileSystems.Default.FileExists(stateFile))
-                    {
-                        File.Delete(stateFile);
-                    }
+                return;
+            }
 
-                    if (serializeEmptyState || HasStateToSave)
-                    {
-                        using (var s = new FileStream(stateFile, FileMode.CreateNew))
-                        {
-                            var translator = BinaryTranslator.GetWriteTranslator(s);
-                            translator.Translate(ref _serializedVersion);
-                            Translate(translator);
-                        }
-                    }
-                }
-            }
-            // If there was a problem writing the file (like it's read-only or locked on disk, for
-            // example), then eat the exception and log a warning.  Otherwise, rethrow.
-            catch (Exception e) when (!ExceptionHandling.NotExpectedSerializationException(e))
-            {
-                // Not being able to serialize the cache is not an error, but we let the user know anyway.
-                // Don't want to hold up processing just because we couldn't read the file.
-                log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile, e.Message);
-            }
+            SerializeCache(new AbsolutePath(stateFile, ignoreRootedCheck: true), log, serializeEmptyState);
         }
 
         /// <summary>
@@ -118,57 +96,13 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log) where T : StateFileBase
         {
-            T retVal = null;
-
-            // First, we read the cache from disk if one exists, or if one does not exist, we create one.
-            try
+            if (string.IsNullOrEmpty(stateFile))
             {
-                if (!string.IsNullOrEmpty(stateFile) && FileSystems.Default.FileExists(stateFile))
-                {
-                    using (FileStream s = File.OpenRead(stateFile))
-                    {
-                        using var translator = BinaryTranslator.GetReadTranslator(s, InterningBinaryReader.PoolingBuffer);
-
-                        byte version = 0;
-                        translator.Translate(ref version);
-                        // If the version is wrong, log a message not a warning. This could be a valid cache with the wrong version preventing correct deserialization.
-                        // For the latter case, internals may be unexpectedly null.
-                        if (version != CurrentSerializationVersion)
-                        {
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
-                            return null;
-                        }
-
-                        var constructors = typeof(T).GetConstructors();
-                        foreach (var constructor in constructors)
-                        {
-                            var parameters = constructor.GetParameters();
-                            if (parameters.Length == 1 && parameters[0].ParameterType == typeof(ITranslator))
-                            {
-                                retVal = constructor.Invoke([translator]) as T;
-                            }
-                        }
-
-                        if (retVal == null)
-                        {
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,
-                                log.FormatResourceString("General.IncompatibleStateFileType"));
-                        }
-                    }
-                }
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // The deserialization process seems like it can throw just about
-                // any exception imaginable.  Catch them all here.
-                // Not being able to deserialize the cache is not an error, but we let the user know anyway.
-                // Don't want to hold up processing just because we couldn't read the file.
-                log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, e.Message);
+                return null;
             }
 
-            return retVal;
+            return DeserializeCache<T>(new AbsolutePath(stateFile, ignoreRootedCheck: true), log);
         }
-
 
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
