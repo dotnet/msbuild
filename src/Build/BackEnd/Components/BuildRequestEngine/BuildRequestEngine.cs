@@ -1,10 +1,9 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -124,9 +123,14 @@ namespace Microsoft.Build.BackEnd
         private readonly bool _debugDumpState;
 
         /// <summary>
-        /// The path where we will store debug files
+        ///  The directory where we will store debug files.
         /// </summary>
-        private readonly string _debugDumpPath;
+        private readonly string _debugDumpDirectory;
+
+        /// <summary>
+        ///  The file where we will store debug files.
+        /// </summary>
+        private readonly string _debugDumpFilePath;
 
         /// <summary>
         /// Forces caching of all configurations and results.
@@ -139,13 +143,15 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
 
-            if (String.IsNullOrEmpty(_debugDumpPath))
+            if (string.IsNullOrEmpty(_debugDumpDirectory))
             {
-                _debugDumpPath = FileUtilities.TempFileDirectory;
+                _debugDumpDirectory = FileUtilities.TempFileDirectory;
             }
+
+            _debugDumpFilePath = Path.Combine(_debugDumpDirectory, $"EngineTrace_{EnvironmentUtilities.CurrentProcessId}.txt");
 
             _status = BuildRequestEngineStatus.Uninitialized;
             _nextUnresolvedConfigurationId = -1;
@@ -1474,9 +1480,9 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                    FileUtilities.EnsureDirectoryExists(_debugDumpDirectory);
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
+                    using (StreamWriter file = FileUtilities.OpenWrite(_debugDumpFilePath, append: true))
                     {
                         file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
                         file.Flush();
