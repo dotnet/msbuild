@@ -462,7 +462,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            ErrorUtilities.ThrowInternalError("State {0} is not one of the expected states.", _state);
+            ErrorUtilities.ThrowInternalError($"State {_state} is not one of the expected states.");
         }
 
         public bool IsProxyBuildRequest() => BuildRequest.IsProxyBuildRequest();

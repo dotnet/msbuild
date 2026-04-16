@@ -724,7 +724,7 @@ namespace Microsoft.Build.BackEnd
             SchedulableRequest request = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
             if (request == null)
             {
-                ErrorUtilities.ThrowInternalError("Request {0} was expected to be in state {1} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)", globalRequestId, state);
+                ErrorUtilities.ThrowInternalError($"Request {globalRequestId} was expected to be in state {state} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)");
             }
             else
             {

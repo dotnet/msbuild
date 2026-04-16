@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!configurations.ById.TryAdd(config.ConfigurationId, config))
             {
-                ErrorUtilities.ThrowInternalError("Configuration {0} already cached", config.ConfigurationId);
+                ErrorUtilities.ThrowInternalError($"Configuration {config.ConfigurationId} already cached");
             }
 
             _ = configurations.ByMetadata[new ConfigurationMetadata(config)] = config;

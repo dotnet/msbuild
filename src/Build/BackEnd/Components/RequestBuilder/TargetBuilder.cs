@@ -545,7 +545,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected target state {0}", currentTargetEntry.State);
+                        ErrorUtilities.ThrowInternalError($"Unexpected target state {currentTargetEntry.State}");
                         break;
                 }
             }

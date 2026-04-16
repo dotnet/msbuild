@@ -540,7 +540,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
                 if (_projectFileMap.ContainsKey(projectContextId))
                 {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should not already be in the ID-to-file mapping!", projectContextId, projectFile);
+                    ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} for project {projectFile} should not already be in the ID-to-file mapping!");
                 }
 
                 _projectFileMap[projectContextId] = projectFile;
@@ -552,7 +552,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
                     {
-                        ErrorUtilities.ThrowInternalError("ContextID {0} was already in the ID-to-project file mapping but the project file {1} did not match the provided one {2}!", projectContextId, existingProjectFile, projectFile);
+                        ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} was already in the ID-to-project file mapping but the project file {existingProjectFile} did not match the provided one {projectFile}!");
                     }
                 }
                 else
@@ -562,7 +562,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // So we only need this sanity check for the in-proc node.
                     if (nodeBuildEventContext.NodeId == Scheduler.InProcNodeId)
                     {
-                        ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", projectContextId);
+                        ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} should have been in the ID-to-project file mapping but wasn't!");
                     }
 
                     _projectFileMap[projectContextId] = projectFile;
@@ -622,7 +622,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
                 if (!_projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
                 {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should be in the ID-to-file mapping!", projectBuildEventContext.ProjectContextId, projectFile);
+                    ErrorUtilities.ThrowInternalError($"ContextID {projectBuildEventContext.ProjectContextId} for project {projectFile} should be in the ID-to-file mapping!");
                 }
             }
         }

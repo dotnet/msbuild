@@ -768,7 +768,7 @@ namespace Microsoft.Build.Shared
                     WriteBuildWarningEventToStream((BuildWarningEventArgs)buildEvent, translator);
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
+                    ErrorUtilities.ThrowInternalError($"Not Supported LoggingEventType {eventType}");
                     break;
             }
         }

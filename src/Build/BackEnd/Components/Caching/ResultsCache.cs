@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd
                     // building them again.
                     if (!_resultsByConfiguration.TryAdd(result.ConfigurationId, result))
                     {
-                        ErrorUtilities.ThrowInternalError("Failed to add result for configuration {0}", result.ConfigurationId);
+                        ErrorUtilities.ThrowInternalError($"Failed to add result for configuration {result.ConfigurationId}");
                     }
                 }
             }

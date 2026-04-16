@@ -123,7 +123,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider))
             {
-                ErrorUtilities.ThrowInternalError("Node {0} does not have a provider.", node);
+                ErrorUtilities.ThrowInternalError($"Node {node} does not have a provider.");
             }
             else
             {

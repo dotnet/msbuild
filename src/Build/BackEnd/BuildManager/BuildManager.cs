@@ -1899,7 +1899,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected packet received by BuildManager: {0}", packet.Type);
+                        ErrorUtilities.ThrowInternalError($"Unexpected packet received by BuildManager: {packet.Type}");
                         break;
                 }
             }
@@ -2393,7 +2393,7 @@ namespace Microsoft.Build.Execution
         {
             if (_buildManagerState != requiredState)
             {
-                ErrorUtilities.ThrowInternalError("Expected state {0}, actual state {1}", requiredState, _buildManagerState);
+                ErrorUtilities.ThrowInternalError($"Expected state {requiredState}, actual state { _buildManagerState}");
             }
         }
 
@@ -2945,7 +2945,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Scheduling action {0} not handled.", response.Action);
+                        ErrorUtilities.ThrowInternalError($"Scheduling action {response.Action} not handled.");
                         break;
                 }
             }
@@ -3388,7 +3388,7 @@ namespace Microsoft.Build.Execution
             // PERF: Not using VerifyThrow here to avoid boxing of expectedType.
             if (castPacket == null)
             {
-                ErrorUtilities.ThrowInternalError("Incorrect packet type: {0} should have been {1}", packet.Type, expectedType);
+                ErrorUtilities.ThrowInternalError($"Incorrect packet type: {packet.Type} should have been {expectedType}");
             }
 
             return castPacket!;

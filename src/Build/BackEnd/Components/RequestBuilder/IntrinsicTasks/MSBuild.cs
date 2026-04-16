@@ -182,7 +182,7 @@ namespace Microsoft.Build.BackEnd
                         return "True";
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonExistentProjects);
+                        ErrorUtilities.ThrowInternalError($"Unexpected case {_skipNonExistentProjects}");
                         break;
                 }
 

@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 // If we caught an exception during cleanup, we need to log that
-                ErrorUtilities.ThrowInternalError("Failure during engine shutdown.  Exception: {0}", e.ToString());
+                ErrorUtilities.ThrowInternalError($"Failure during engine shutdown.  Exception: {e}");
             }
             finally
             {
