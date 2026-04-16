@@ -78,19 +78,47 @@ internal static class ErrorUtilities
     /// This is only for situations that would mean that there is a bug in MSBuild itself.
     /// </summary>
     [DoesNotReturn]
-    internal static void ThrowInternalError(string message, params object?[]? args)
-    {
-        throw new InternalErrorException(ResourceUtilities.FormatString(message, args));
-    }
+    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler)
+        => ThrowInternalError(handler.GetFormattedText());
 
     /// <summary>
     /// Throws InternalErrorException.
     /// This is only for situations that would mean that there is a bug in MSBuild itself.
     /// </summary>
     [DoesNotReturn]
-    internal static void ThrowInternalError(string message, Exception? innerException, params object?[]? args)
+    internal static void ThrowInternalError(string message, Exception? innerException)
+        => throw new InternalErrorException(message, innerException);
+
+    /// <summary>
+    /// Throws InternalErrorException.
+    /// This is only for situations that would mean that there is a bug in MSBuild itself.
+    /// </summary>
+    [DoesNotReturn]
+    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception? innerException)
+        => ThrowInternalError(handler.GetFormattedText(), innerException);
+
+    [InterpolatedStringHandler]
+    public ref struct UnconditionalInterpolatedStringHandler
     {
-        throw new InternalErrorException(ResourceUtilities.FormatString(message, args), innerException);
+        private StringBuilderHelper _builder;
+
+        public UnconditionalInterpolatedStringHandler(int literalLength, int formattedCount)
+        {
+            _builder = new(literalLength);
+        }
+
+        public readonly void AppendLiteral(string value)
+            => _builder.AppendLiteral(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value)
+            => _builder.AppendFormatted(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value, string format)
+            where TValue : IFormattable
+            => _builder.AppendFormatted(value, format);
+
+        public string GetFormattedText()
+            => _builder.GetFormattedText();
     }
 
     /// <summary>
@@ -128,7 +156,7 @@ internal static class ErrorUtilities
         // Check it has a real implementation of ToString()
         if (String.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal))
         {
-            ThrowInternalError("This type does not implement ToString() properly {0}", param.GetType().FullName!);
+            ThrowInternalError($"This type does not implement ToString() properly {param.GetType().FullName!}");
         }
 #endif
     }
@@ -144,7 +172,7 @@ internal static class ErrorUtilities
     {
         if (parameter is null)
         {
-            ThrowInternalError("{0} unexpectedly null", parameterName);
+            ThrowInternalError($"{parameterName} unexpectedly null");
         }
     }
 
@@ -175,7 +203,7 @@ internal static class ErrorUtilities
 
         if (parameterValue.Length == 0)
         {
-            ThrowInternalError("{0} unexpectedly empty", parameterName);
+            ThrowInternalError($"{parameterName} unexpectedly empty");
         }
     }
 
@@ -185,7 +213,7 @@ internal static class ErrorUtilities
 
         if (parameterValue.Length == 0)
         {
-            ThrowInternalError("{0} unexpectedly empty", parameterName);
+            ThrowInternalError($"{parameterName} unexpectedly empty");
         }
     }
 
@@ -199,7 +227,7 @@ internal static class ErrorUtilities
     {
         if (!Path.IsPathRooted(value))
         {
-            ThrowInternalError("{0} unexpectedly not a rooted path", value);
+            ThrowInternalError($"{value} unexpectedly not a rooted path");
         }
     }
 
