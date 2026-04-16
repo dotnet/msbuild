@@ -9,7 +9,7 @@ Loggers are the primary user-facing way to understand what MSBuild is doing. It'
 * `TerminalLogger` for interactive console use in .NET SDK,
 * `BinaryLogger` for detailed capture and analysis,
 * `ConsoleLogger`, the default MSBuild output when redirected and in `MSBuild.exe`, and
-* `FileLogger`, the longstanding "more detailed than console" text output.
+* `FileLogger`, the longstanding “more detailed than console” text output.
 
 Mechanically, loggers receive logging events and note their details, serializing them in their entirety in the case of the binlog and ignoring or textualizing them for the other primary loggers.
 
@@ -17,7 +17,7 @@ New `*EventArgs` classes should carry most of their information via their _struc
 
 Logs can be and often are analyzed post-build. Interesting use cases are
 
-* The Visual Studio Code or GitHub Actions "problem recognizer" regexes that take text output of the build and present it as "build errors".
+* The Visual Studio Code or GitHub Actions “problem matcher” regexes that take text output of the build and present it as “build errors”.
 * The [Structured Log Viewer](https://msbuildlog.com) application (for interactive analysis).
 * Tools built on top of the binlog APIs.
 
