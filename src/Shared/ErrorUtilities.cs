@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.Framework;
@@ -18,132 +16,42 @@ namespace Microsoft.Build.Shared;
 /// </summary>
 internal static class ErrorUtilities
 {
-    private static readonly bool s_enableMSBuildDebugTracing = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLEDEBUGTRACING"));
-
+    /// <inheritdoc cref="FrameworkErrorUtilities.DebugTraceMessage(string, string)"/>
     public static void DebugTraceMessage(string category, string message)
-    {
-        if (s_enableMSBuildDebugTracing)
-        {
-            Trace.WriteLine(message, category);
-        }
-    }
+        => FrameworkErrorUtilities.DebugTraceMessage(category, message);
 
-    public static void DebugTraceMessage(string category, ref DebugTraceInterpolatedStringHandler handler)
-    {
-        if (s_enableMSBuildDebugTracing)
-        {
-            Trace.WriteLine(handler.GetFormattedText(), category);
-        }
-    }
+    /// <inheritdoc cref="FrameworkErrorUtilities.DebugTraceMessage(string, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler)"/>
+    public static void DebugTraceMessage(string category, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler handler)
+        => FrameworkErrorUtilities.DebugTraceMessage(category, ref handler);
 
-    /// <summary>
-    ///  Interpolated string handler used by <see cref="DebugTraceMessage(string, ref DebugTraceInterpolatedStringHandler)"/>
-    ///  to defer string formatting unless tracing is enabled.
-    /// </summary>
-    [InterpolatedStringHandler]
-    public ref struct DebugTraceInterpolatedStringHandler
-    {
-        private StringBuilderHelper _builder;
-
-        public DebugTraceInterpolatedStringHandler(int literalLength, int formattedCount, out bool isEnabled)
-        {
-            isEnabled = s_enableMSBuildDebugTracing;
-            _builder = isEnabled ? new(literalLength) : default;
-        }
-
-        public readonly void AppendLiteral(string value)
-            => _builder.AppendLiteral(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value)
-            => _builder.AppendFormatted(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value, string format)
-            where TValue : IFormattable
-            => _builder.AppendFormatted(value, format);
-
-        public string GetFormattedText()
-            => _builder.GetFormattedText();
-    }
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(string)"/>
     [DoesNotReturn]
     internal static void ThrowInternalError(string message)
-        => throw new InternalErrorException(message);
+        => FrameworkErrorUtilities.ThrowInternalError(message);
 
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(ref UnconditionalInterpolatedStringHandler)"/>
     [DoesNotReturn]
     internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler)
-        => ThrowInternalError(handler.GetFormattedText());
+        => FrameworkErrorUtilities.ThrowInternalError(ref handler);
 
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(string, Exception)"/>
     [DoesNotReturn]
-    internal static void ThrowInternalError(string message, Exception? innerException)
-        => throw new InternalErrorException(message, innerException);
+    internal static void ThrowInternalError(string message, Exception innerException)
+        => FrameworkErrorUtilities.ThrowInternalError(message, innerException);
 
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(ref UnconditionalInterpolatedStringHandler, Exception)"/>
     [DoesNotReturn]
-    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception? innerException)
-        => ThrowInternalError(handler.GetFormattedText(), innerException);
+    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception innerException)
+        => FrameworkErrorUtilities.ThrowInternalError(ref handler, innerException);
 
-    [InterpolatedStringHandler]
-    public ref struct UnconditionalInterpolatedStringHandler
-    {
-        private StringBuilderHelper _builder;
-
-        public UnconditionalInterpolatedStringHandler(int literalLength, int formattedCount)
-        {
-            _builder = new(literalLength);
-        }
-
-        public readonly void AppendLiteral(string value)
-            => _builder.AppendLiteral(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value)
-            => _builder.AppendFormatted(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value, string format)
-            where TValue : IFormattable
-            => _builder.AppendFormatted(value, format);
-
-        public string GetFormattedText()
-            => _builder.GetFormattedText();
-    }
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// Indicates the code path followed should not have been possible.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalErrorUnreachable()"/>
     [DoesNotReturn]
     internal static void ThrowInternalErrorUnreachable()
-    {
-        throw new InternalErrorException("Unreachable?");
-    }
+        => FrameworkErrorUtilities.ThrowInternalErrorUnreachable();
 
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// Indicates the code path followed should not have been possible.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalErrorUnreachable(bool)"/>
     internal static void VerifyThrowInternalErrorUnreachable([DoesNotReturnIf(false)] bool condition)
-    {
-        if (!condition)
-        {
-            ThrowInternalErrorUnreachable();
-        }
-    }
+        => FrameworkErrorUtilities.VerifyThrowInternalErrorUnreachable(condition);
 
     /// <summary>
     /// Throws InternalErrorException.
@@ -161,20 +69,11 @@ internal static class ErrorUtilities
 #endif
     }
 
-    /// <summary>
-    /// Helper to throw an InternalErrorException when the specified parameter is null.
-    /// This should be used ONLY if this would indicate a bug in MSBuild rather than
-    /// anything caused by user action.
-    /// </summary>
-    /// <param name="parameter">The value of the argument.</param>
-    /// <param name="parameterName">Parameter that should not be null</param>
-    internal static void VerifyThrowInternalNull([NotNull] object? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter is null)
-        {
-            ThrowInternalError($"{parameterName} unexpectedly null");
-        }
-    }
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalNull(object?, string?)"/>
+    internal static void VerifyThrowInternalNull(
+        [NotNull] object? parameter,
+        [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowInternalNull(parameter, parameterName);
 
     /// <summary>
     /// Helper to throw an InternalErrorException when a lock on the specified object is not already held.
@@ -190,96 +89,30 @@ internal static class ErrorUtilities
         }
     }
 
-    /// <summary>
-    /// Helper to throw an InternalErrorException when the specified parameter is null or zero length.
-    /// This should be used ONLY if this would indicate a bug in MSBuild rather than
-    /// anything caused by user action.
-    /// </summary>
-    /// <param name="parameterValue">The value of the argument.</param>
-    /// <param name="parameterName">Parameter that should not be null or zero length</param>
-    internal static void VerifyThrowInternalLength([NotNull] string? parameterValue, [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-    {
-        VerifyThrowInternalNull(parameterValue, parameterName);
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalLength(string?, string?)"/>
+    internal static void VerifyThrowInternalLength(
+        [NotNull] string? parameterValue,
+        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowInternalLength(parameterValue, parameterName);
 
-        if (parameterValue.Length == 0)
-        {
-            ThrowInternalError($"{parameterName} unexpectedly empty");
-        }
-    }
+    internal static void VerifyThrowInternalLength<T>(
+        [NotNull] T[]? parameterValue,
+        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowInternalLength(parameterValue, parameterName);
 
-    public static void VerifyThrowInternalLength<T>([NotNull] T[]? parameterValue, [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-    {
-        VerifyThrowInternalNull(parameterValue, parameterName);
-
-        if (parameterValue.Length == 0)
-        {
-            ThrowInternalError($"{parameterName} unexpectedly empty");
-        }
-    }
-
-    /// <summary>
-    /// Helper to throw an InternalErrorException when the specified parameter is not a rooted path.
-    /// This should be used ONLY if this would indicate a bug in MSBuild rather than
-    /// anything caused by user action.
-    /// </summary>
-    /// <param name="value">Parameter that should be a rooted path.</param>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalRooted(string)"/>
     internal static void VerifyThrowInternalRooted(string value)
-    {
-        if (!Path.IsPathRooted(value))
-        {
-            ThrowInternalError($"{value} unexpectedly not a rooted path");
-        }
-    }
+        => FrameworkErrorUtilities.VerifyThrowInternalRooted(value);
 
-    /// <summary>
-    /// This method should be used in places where one would normally put
-    /// an "assert". It should be used to validate that our assumptions are
-    /// true, where false would indicate that there must be a bug in our
-    /// code somewhere. This should not be used to throw errors based on bad
-    /// user input or anything that the user did wrong.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrow(bool, string)"/>
     internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string message)
-    {
-        if (!condition)
-        {
-            ThrowInternalError(message);
-        }
-    }
+        => FrameworkErrorUtilities.VerifyThrow(condition, message);
 
-    public static void VerifyThrow(
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrow(bool, ref FrameworkErrorUtilities.IsTrueInterpolatedStringHandler)"/>
+    internal static void VerifyThrow(
         [DoesNotReturnIf(false)] bool condition,
-        [InterpolatedStringHandlerArgument(nameof(condition))] ref IsTrueInterpolatedStringHandler handler)
-    {
-        if (!condition)
-        {
-            ThrowInternalError(handler.GetFormattedText());
-        }
-    }
-
-    [InterpolatedStringHandler]
-    public ref struct IsTrueInterpolatedStringHandler
-    {
-        private StringBuilderHelper _builder;
-
-        public IsTrueInterpolatedStringHandler(int literalLength, int formattedCount, bool condition, out bool isEnabled)
-        {
-            isEnabled = !condition;
-            _builder = isEnabled ? new(literalLength) : default;
-        }
-
-        public readonly void AppendLiteral(string value)
-            => _builder.AppendLiteral(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value)
-            => _builder.AppendFormatted(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value, string format)
-            where TValue : IFormattable
-            => _builder.AppendFormatted(value, format);
-
-        public string GetFormattedText()
-            => _builder.GetFormattedText();
-    }
+        [InterpolatedStringHandlerArgument(nameof(condition))] ref FrameworkErrorUtilities.IsTrueInterpolatedStringHandler handler)
+        => FrameworkErrorUtilities.VerifyThrow(condition, ref handler);
 
     /// <summary>
     /// Throws an InvalidOperationException with the specified resource string
