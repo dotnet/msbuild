@@ -1168,7 +1168,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.BuildEngine = new MockEngine(_output);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
-            t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
+            t.Assemblies = [new TaskItem("mscorlib")];
             t.AppConfigFile = appConfigFile;
 
             bool retval = Execute(t);
@@ -1182,27 +1182,31 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         [Fact]
         public void EmptyAppConfigFile_Wave18_6_Disabled_Fails()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
+        {            
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
 
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine(_output);
-            t.BuildEngine = engine;
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
-            t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
-            t.AppConfigFile = string.Empty;
+                MockEngine engine = new MockEngine(_output);
+                t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
+                t.AppConfigFile = string.Empty;
 
-            bool retval = Execute(t);
-
-            retval.ShouldBeFalse();
-            engine.Errors.ShouldBe(1);
-
-            ChangeWaves.ResetStateForTests();
+                bool retval = Execute(t);
+                retval.ShouldBeFalse();
+                engine.Errors.ShouldBe(1);
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
         }
 
         /// <summary>
