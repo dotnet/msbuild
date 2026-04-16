@@ -49,7 +49,7 @@
 name: "Close Stale Pull Requests"
 "on":
   schedule:
-  - cron: "18 11 * * 1"
+  - cron: "19 21 * * 1"
     # Friendly format: weekly on monday (scattered)
   # steps: # Steps injected into pre-activation job
   # - name: Checkout the select-copilot-pat action folder
