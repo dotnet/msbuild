@@ -48,6 +48,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             {
                 // Absolutize directory paths defensively — config paths theoretically should but may not be absolute.
                 _filesInDirectories = new(assemblyFoldersFromConfig.AsParallel()
+                    .Where(assemblyFolder => !string.IsNullOrEmpty(assemblyFolder.DirectoryPath))
                     .Select(assemblyFolder => taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value)
                     .Where(absolutePath => FileUtilities.DirectoryExistsNoThrow(absolutePath))
                     .SelectMany(

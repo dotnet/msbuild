@@ -180,10 +180,24 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     {
                         foreach (AssemblyFoldersFromConfigInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersFromConfig)
                         {
-                            // Absolutize defensively — config paths may not be absolute.
-                            // Not canonicalized here; canonicalization is done in ReferenceTable.
-                            string absoluteDirectoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
-                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, absoluteDirectoryPath, assembliesConsideredAndRejected);
+                            string directoryPath;
+                            if (string.IsNullOrEmpty(assemblyFolder.DirectoryPath))
+                            {
+                                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                                {
+                                    continue;
+                                }
+
+                                // Pre-Wave18_6: empty DirectoryPath was passed through and resolved from CWD (project directory).
+                                directoryPath = taskEnvironment.ProjectDirectory.Value;
+                            }
+                            else
+                            {
+                                // Absolutize defensively — config paths may not be absolute.
+                                directoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
+                            }
+
+                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned
                             if (candidatePath != null)
