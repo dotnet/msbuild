@@ -5,68 +5,63 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
-#nullable disable
+namespace Microsoft.Build.UnitTests;
 
-namespace Microsoft.Build.UnitTests
+public sealed class ErrorUtilities_Tests
 {
-    public sealed class ErrorUtilities_Tests
+    [Fact]
+    public void VerifyThrowFalse()
     {
-        [Fact]
-        public void VerifyThrowFalse()
+        var ex = Assert.Throws<InternalErrorException>(() =>
         {
-            try
-            {
-                ErrorUtilities.VerifyThrow(false, "msbuild rules");
-            }
-            catch (InternalErrorException e)
-            {
-                Assert.Contains("msbuild rules", e.Message); // "exception message"
-                return;
-            }
+            ErrorUtilities.VerifyThrow(false, "msbuild rules");
+        });
 
-            Assert.Fail("Should have thrown an exception");
-        }
+        Assert.Contains("msbuild rules", ex.Message);
+    }
 
-        [Fact]
-        public void VerifyThrowTrue()
+    [Fact]
+    public void VerifyThrowTrue()
+    {
+        // This shouldn't throw.
+        ErrorUtilities.VerifyThrow(true, "msbuild rules");
+    }
+
+    [Fact]
+    public void VerifyThrow_InterpolatedString_DoesNotFormat_WhenConditionIsTrue()
+    {
+        bool formatted = false;
+        ErrorUtilities.VerifyThrow(true, $"message {FormatSideEffect(ref formatted)}");
+        Assert.False(formatted, "Interpolated string should not have been formatted when condition is true");
+    }
+
+    [Fact]
+    public void VerifyThrow_InterpolatedString_Formats_WhenConditionIsFalse()
+    {
+        bool formatted = false;
+        var ex = Assert.Throws<InternalErrorException>(() =>
         {
-            // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, "msbuild rules");
-        }
+            ErrorUtilities.VerifyThrow(false, $"error: {FormatSideEffect(ref formatted)}");
+        });
 
-        [Fact]
-        public void VerifyThrow0True()
-        {
-            // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, "blah");
-        }
+        Assert.True(formatted, "Interpolated string should have been formatted when condition is false");
+        Assert.Contains("error: formatted", ex.Message);
+    }
 
-        [Fact]
-        public void VerifyThrow1True()
+    [Fact]
+    public void VerifyThrow_InterpolatedString_FormatsMultipleArgs_WhenConditionIsFalse()
+    {
+        var ex = Assert.Throws<InternalErrorException>(() =>
         {
-            // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, $"{1}");
-        }
+            ErrorUtilities.VerifyThrow(false, $"a={1} b={2} c={"three"}");
+        });
 
-        [Fact]
-        public void VerifyThrow2True()
-        {
-            // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, $"{1}{2}");
-        }
+        Assert.Contains("a=1 b=2 c=three", ex.Message);
+    }
 
-        [Fact]
-        public void VerifyThrow3True()
-        {
-            // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, $"{1}{2}{3}");
-        }
-
-        [Fact]
-        public void VerifyThrow4True()
-        {
-            // This shouldn't throw.
-            ErrorUtilities.VerifyThrow(true, $"{1}{2}{3}{4}");
-        }
+    private static string FormatSideEffect(ref bool formatted)
+    {
+        formatted = true;
+        return "formatted";
     }
 }
