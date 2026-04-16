@@ -9,6 +9,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -301,6 +302,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool Execute()
         {
+            MSBuildEventSource.Log.TaskHostDispatchStart(_taskType.Type.FullName);
+
             _taskLoggingContext.LogComment(
                 MessageImportance.Low,
                 "ExecutingTaskInTaskHost",
@@ -409,6 +412,7 @@ namespace Microsoft.Build.BackEnd
                 LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
             }
 
+            MSBuildEventSource.Log.TaskHostDispatchStop(_taskType.Type.FullName, _taskExecutionSucceeded);
             return _taskExecutionSucceeded;
         }
 

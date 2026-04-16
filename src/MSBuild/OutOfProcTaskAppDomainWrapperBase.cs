@@ -9,6 +9,7 @@ using System.Threading;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -388,10 +389,13 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // If it didn't crash and return before now, we're clear to go ahead and execute here.
+                MSBuildEventSource.Log.TaskExecuteInHostStart(taskName);
                 success = wrappedTask.Execute();
+                MSBuildEventSource.Log.TaskExecuteInHostStop(taskName, success);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
+                MSBuildEventSource.Log.TaskExecuteInHostStop(taskName, false);
                 return new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
 
