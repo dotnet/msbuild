@@ -255,8 +255,24 @@ namespace Microsoft.Build.Experimental
                 return false;
             }
 
-            // Connect to server.
-            if (!TryConnectToServer(1_000))
+            // Connect to server with retry. The server may be recycling its pipe after a previous build:
+            // the ServerBusy mutex is released before the new pipe is ready, causing TryConnectToServer
+            // to silently return false (HandshakeStatus.Timeout). Retry for up to 5 seconds to ride out
+            // the transitional window.
+            bool connected = false;
+            Stopwatch connectSw = Stopwatch.StartNew();
+            while (!connected && connectSw.ElapsedMilliseconds < 5_000)
+            {
+                connected = TryConnectToServer(1_000);
+                if (!connected && connectSw.ElapsedMilliseconds < 5_000)
+                {
+                    CommunicationsUtilities.Trace("Failed to connect to idle server, will retry...");
+                    Thread.Sleep(100);
+                    CreateNodePipeStream();
+                }
+            }
+
+            if (!connected)
             {
                 CommunicationsUtilities.Trace("Client cannot connect to idle server to shut it down.");
                 return false;
