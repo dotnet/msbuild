@@ -24,30 +24,30 @@ internal static class ErrorUtilities
     public static void DebugTraceMessage(string category, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler handler)
         => FrameworkErrorUtilities.DebugTraceMessage(category, ref handler);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(string)"/>
+    /// <inheritdoc cref="InternalError.Throw(string)"/>
     [DoesNotReturn]
     internal static void ThrowInternalError(string message)
-        => FrameworkErrorUtilities.ThrowInternalError(message);
+        => InternalError.Throw(message);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(ref UnconditionalInterpolatedStringHandler)"/>
+    /// <inheritdoc cref="InternalError.Throw(ref UnconditionalInterpolatedStringHandler)"/>
     [DoesNotReturn]
     internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler)
-        => FrameworkErrorUtilities.ThrowInternalError(ref handler);
+        => InternalError.Throw(ref handler);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(string, Exception)"/>
+    /// <inheritdoc cref="InternalError.Throw(string, Exception)"/>
     [DoesNotReturn]
     internal static void ThrowInternalError(string message, Exception innerException)
-        => FrameworkErrorUtilities.ThrowInternalError(message, innerException);
+        => InternalError.Throw(message, innerException);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(ref UnconditionalInterpolatedStringHandler, Exception)"/>
+    /// <inheritdoc cref="InternalError.Throw(ref UnconditionalInterpolatedStringHandler, Exception)"/>
     [DoesNotReturn]
     internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception innerException)
-        => FrameworkErrorUtilities.ThrowInternalError(ref handler, innerException);
+        => InternalError.Throw(ref handler, innerException);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalErrorUnreachable()"/>
+    /// <inheritdoc cref="Assumed.Unreachable(string?)"/>
     [DoesNotReturn]
     internal static void ThrowInternalErrorUnreachable()
-        => FrameworkErrorUtilities.ThrowInternalErrorUnreachable();
+        => Assumed.Unreachable();
 
     /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalErrorUnreachable(bool)"/>
     internal static void VerifyThrowInternalErrorUnreachable([DoesNotReturnIf(false)] bool condition)
@@ -69,11 +69,10 @@ internal static class ErrorUtilities
 #endif
     }
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalNull(object?, string?)"/>
     internal static void VerifyThrowInternalNull(
         [NotNull] object? parameter,
         [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-        => FrameworkErrorUtilities.VerifyThrowInternalNull(parameter, parameterName);
+        => Assumed.NotNull(parameter, valueExpression: parameterName);
 
     /// <summary>
     /// Helper to throw an InternalErrorException when a lock on the specified object is not already held.
@@ -89,11 +88,11 @@ internal static class ErrorUtilities
         }
     }
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalLength(string?, string?)"/>
+    /// <inheritdoc cref="Assumed.NotNullOrEmpty(string?, string?, string?)"/>
     internal static void VerifyThrowInternalLength(
         [NotNull] string? parameterValue,
         [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-        => FrameworkErrorUtilities.VerifyThrowInternalLength(parameterValue, parameterName);
+        => Assumed.NotNullOrEmpty(parameterValue, valueExpression: parameterName);
 
     internal static void VerifyThrowInternalLength<T>(
         [NotNull] T[]? parameterValue,
@@ -104,15 +103,15 @@ internal static class ErrorUtilities
     internal static void VerifyThrowInternalRooted(string value)
         => FrameworkErrorUtilities.VerifyThrowInternalRooted(value);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrow(bool, string)"/>
+    /// <inheritdoc cref="Assumed.True(bool, string?, string?)"/>
     internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string message)
-        => FrameworkErrorUtilities.VerifyThrow(condition, message);
+        => Assumed.True(condition, message);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrow(bool, ref FrameworkErrorUtilities.IsTrueInterpolatedStringHandler)"/>
+    /// <inheritdoc cref="Assumed.True(bool, ref Assumed.TrueInterpolatedStringHandler)"/>
     internal static void VerifyThrow(
         [DoesNotReturnIf(false)] bool condition,
-        [InterpolatedStringHandlerArgument(nameof(condition))] ref FrameworkErrorUtilities.IsTrueInterpolatedStringHandler handler)
-        => FrameworkErrorUtilities.VerifyThrow(condition, ref handler);
+        [InterpolatedStringHandlerArgument(nameof(condition))] ref Assumed.TrueInterpolatedStringHandler handler)
+        => Assumed.True(condition, ref handler);
 
     /// <summary>
     /// Throws an InvalidOperationException with the specified resource string
