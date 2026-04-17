@@ -128,6 +128,8 @@ namespace Microsoft.Build.Experimental
 
         private void CreateNodePipeStream()
         {
+            _nodeStream?.Dispose();
+            _packetPump?.Dispose();
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             _nodeStream = new NamedPipeClientStream(
                 serverName: ".",
