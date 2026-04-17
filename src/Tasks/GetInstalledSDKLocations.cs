@@ -18,7 +18,8 @@ namespace Microsoft.Build.Tasks
     ///  so they can be used during SDK reference resolution and RAR for single files.
     /// </summary>
 #pragma warning disable RS0022 // Constructor make noninheritable base class inheritable: Longstanding API design that we shouldn't change now
-    public class GetInstalledSDKLocations : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class GetInstalledSDKLocations : TaskExtension, IMultiThreadableTask
 #pragma warning restore RS0022 // Constructor make noninheritable base class inheritable
     {
         /// <summary>
@@ -45,6 +46,9 @@ namespace Microsoft.Build.Tasks
         /// Key into our build cache
         /// </summary>
         private const string StaticSDKCacheKey = "StaticToolLocationHelperSDKCacheDisposer";
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         #region Properties
 
@@ -140,12 +144,15 @@ namespace Microsoft.Build.Tasks
             // Dictionary of ESDKs. Each entry is a (location, platform version) tuple
             IDictionary<string, Tuple<string, string>> installedSDKs = null;
 
+            string[] absoluteDirectoryRoots = AbsolutizePaths(SDKDirectoryRoots);
+            string[] absoluteExtensionRoots = AbsolutizePaths(SDKExtensionDirectoryRoots);
+
             try
             {
                 Log.LogMessageFromResources("GetInstalledSDKs.SearchingForSDKs", _targetPlatformIdentifier, _targetPlatformVersion);
 
                 Version platformVersion = Version.Parse(TargetPlatformVersion);
-                installedSDKs = ToolLocationHelper.GetPlatformExtensionSDKLocationsAndVersions(SDKDirectoryRoots, SDKExtensionDirectoryRoots, SDKRegistryRoot, TargetPlatformIdentifier, platformVersion);
+                installedSDKs = ToolLocationHelper.GetPlatformExtensionSDKLocationsAndVersions(absoluteDirectoryRoots, absoluteExtensionRoots, SDKRegistryRoot, TargetPlatformIdentifier, platformVersion);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -205,5 +212,26 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+
+        /// <summary>
+        /// Absolutizes an array of path strings using TaskEnvironment, returning null if the input is null.
+        /// </summary>
+        private string[] AbsolutizePaths(string[] paths)
+        {
+            if (paths == null)
+            {
+                return null;
+            }
+
+            var result = new string[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+            {
+                result[i] = String.IsNullOrEmpty(paths[i])
+                    ? paths[i]
+                    : TaskEnvironment.GetAbsolutePath(paths[i]).Value;
+            }
+
+            return result;
+        }
     }
 }
