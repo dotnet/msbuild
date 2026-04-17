@@ -10,7 +10,7 @@
     "runner": "Microsoft.Testing.Platform"
   },
   "tools": {
-    "dotnet": "10.0.104",
+    "dotnet": "10.0.106",
     "vs": {
       "version": "18.0"
     },
