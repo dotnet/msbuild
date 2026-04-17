@@ -473,14 +473,12 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
         private readonly string _fakeSDKStructureRoot;
-        private readonly string _fakeSDKStructureRoot2;
 
         public GetInstalledSDKLocationsMultiThreadTests(FakeSDKStructure fakeSDKStructure, ITestOutputHelper output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
             _fakeSDKStructureRoot = fakeSDKStructure.FakeSdkStructureRoot;
-            _fakeSDKStructureRoot2 = fakeSDKStructure.FakeSdkStructureRoot2;
         }
 
         public void Dispose() => _env.Dispose();
