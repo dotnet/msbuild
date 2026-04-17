@@ -4,57 +4,57 @@
     <body>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
         <source>{0} ('{1}') must be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be equal to '{2}'.</target>
+        <target state="translated">{0} ('{1}'), '{2}' değerine eşit olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
         <source>{0} ('{1}') must be greater than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than '{2}'.</target>
+        <target state="translated">{0} ('{1}'), '{2}' değerinden büyük olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
         <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than or equal to '{2}'.</target>
+        <target state="translated">{0} ('{1}'), '{2}' değerinden büyük veya buna eşit olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
         <source>{0} ('{1}') must be less than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than '{2}'.</target>
+        <target state="translated">{0} ('{1}'), '{2}' değerinden küçük olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
         <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than or equal to '{2}'.</target>
+        <target state="translated">{0} ('{1}'), '{2}' değerinden küçük veya buna eşit olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
         <source>{0} ('{1}') must be a non-negative value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative value.</target>
+        <target state="translated">{0} ('{1}'), negatif olmayan bir değer olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
         <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative and non-zero value.</target>
+        <target state="translated">{0} ('{1}'), negatif ve sıfır olmayan bir değer olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
         <source>{0} ('{1}') must be a non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-zero value.</target>
+        <target state="translated">{0} ('{1}'), sıfır olmayan bir değer olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
         <source>{0} ('{1}') must not be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must not be equal to '{2}'.</target>
+        <target state="translated">{0} ('{1}'), '{2}' değerine eşit olmamalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
-        <target state="new">The value cannot be an empty string or composed entirely of whitespace.</target>
+        <target state="translated">Değer boş bir dize olamaz veya tamamen boşluklardan oluşamaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyString">
         <source>The value cannot be an empty string.</source>
-        <target state="new">The value cannot be an empty string.</target>
+        <target state="translated">Değer boş bir dize olamaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
