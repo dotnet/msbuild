@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
