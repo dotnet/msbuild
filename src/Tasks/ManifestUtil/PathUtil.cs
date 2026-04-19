@@ -8,6 +8,7 @@ using System.Linq;
 #else
 using System.Text;
 #endif
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -41,14 +42,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         // Resolves the path, and if path is a url also canonicalizes it.
-        public static string Format(string path)
+        public static string Format(string path, AbsolutePath baseDirectory)
         {
             if (String.IsNullOrEmpty(path))
             {
                 return path;
             }
 
-            string resolvedPath = Resolve(path);
+            string resolvedPath = Resolve(path, baseDirectory);
             Uri u = new Uri(resolvedPath);
             //
             // GB18030: Uri class does not correctly encode chars in the PUA range for implicit 
@@ -202,8 +203,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         // If path is a url and starts with "localhost", resolves to machine name.
-        // If path is a relative path, resolves to a full path.
-        public static string Resolve(string path)
+        // If path is a relative path, resolves to a full path against <paramref name="baseDirectory"/>.
+        public static string Resolve(string path, AbsolutePath baseDirectory)
         {
             if (String.IsNullOrEmpty(path))
             {
@@ -236,7 +237,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             // if not unc or url then it must be a local disk path...
-            return Path.GetFullPath(path); // make sure it's a full path
+            // Use AbsolutePath to root the path against the project's base directory instead of the
+            // process current directory. GetCanonicalForm() preserves the canonicalization that
+            // Path.GetFullPath performed previously, including throwing on invalid path characters.
+            //
+            // Before MSBuild's migration from multi-process to multi-threaded, Path.GetFullPath(" ") threw
+            // ArgumentException on Windows because whitespace-only is not a legal path. After combining with
+            // a rooted base directory, Path.GetFullPath silently trims the trailing whitespace, masking the
+            // error. Preserve the historical Windows contract by explicitly rejecting whitespace-only input.
+            // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
+            if (NativeMethodsShared.IsWindows && String.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Path cannot be null or whitespace on Windows.", nameof(path));
+            }
+
+            return new AbsolutePath(path, baseDirectory).GetCanonicalForm();
         }
 
         private static bool IsAsciiString(string str) =>

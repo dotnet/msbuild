@@ -12,8 +12,14 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Formats a url by canonicalizing it (i.e. " " -> "%20") and transforming "localhost" to "machinename".
     /// </summary>
-    public sealed class FormatUrl : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public sealed class FormatUrl : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Gets or sets the task execution environment for thread-safe path resolution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         public string InputUrl { get; set; }
 
         [Output]
@@ -21,7 +27,7 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            OutputUrl = InputUrl != null ? PathUtil.Format(InputUrl) : String.Empty;
+            OutputUrl = InputUrl != null ? PathUtil.Format(InputUrl, TaskEnvironment.ProjectDirectory) : String.Empty;
             return true;
         }
     }
