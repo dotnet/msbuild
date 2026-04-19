@@ -1,6 +1,7 @@
 ---
 name: running-unit-tests
 description: Guide for running MSBuild unit tests efficiently. Use when running, scoping, filtering, or speeding up unit tests in this repository, or when finalizing a change with a heavier validation pass. Covers xUnit v3 + Microsoft.Testing.Platform (MTP) specifics and which `dotnet test` flags do and don't apply.
+argument-hint: Run, filter, scope, or speed up MSBuild unit tests.
 ---
 
 # Running MSBuild Unit Tests
@@ -11,18 +12,18 @@ Use a **fast, scoped** loop while iterating, and a **heavier, complete** pass be
 
 ## Repo-specific knobs to know about
 
-These are baked into `src/Directory.Build.props`, `src/Directory.Build.targets`, and `src/Shared/UnitTests/xunit.runner.json` — they affect every test run:
+These are baked into `Directory.Build.props` (repo root), `src/Directory.Build.targets`, and `src/Shared/UnitTests/xunit.runner.json` — they affect every test run:
 
 - **Multi-targeting**: test projects target `net472` *and* `net10.0` on Windows (`net10.0` only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
 - **Single-threaded by default**: `xunit.runner.json` sets `maxParallelThreads: 1` and `parallelizeTestCollections: false`. Many tests mutate process-global state (env vars, cwd, SDK resolvers), so this is intentional.
 - **Auto trait filters**: platform/TFM-inappropriate tests are filtered out via `--filter-not-trait Category=...` (e.g., `nonwindowstests`, `failing`, `nonnetcoreapptests`). Don't try to "fix" tests that appear skipped because of these.
-- **Coverage on non-Windows**: `--coverage --coverage-settings Coverage.config` is added automatically when `IsUnitTestProject=true`.
-- **Test runner**: `TestRunnerName=XUnitV3`, MTP `1.9.1`, xUnit v3 `3.2.2`.
-- **Assembly fixtures**: `MSBuildTestAssemblyFixture` sets `DOTNET_HOST_PATH` to the bootstrap dotnet so tasks like `RoslynCodeTaskFactory` work in tests. Don't override `DOTNET_HOST_PATH`.
+- **Coverage on non-Windows**: `--coverage --coverage-settings Coverage.config` is appended unconditionally to `XunitOptions` in `src/Directory.Build.targets`. There is no MSBuild property switch to disable it from `dotnet test` — to skip coverage, run the test exe directly without `--coverage`.
+- **Test runner**: `TestRunnerName=XUnitV3`, MTP `1.9.1`, xUnit v3 `3.2.2` (set in repo-root `Directory.Build.props`).
+- **DOTNET_HOST_PATH**: `RunnerUtilities.GetMSBuildEnvironmentVariables` (in `src/UnitTests.Shared/RunnerUtilities.cs`) sets `DOTNET_HOST_PATH` to the bootstrap dotnet when tests launch MSBuild as a child process, so tasks like `RoslynCodeTaskFactory` resolve the right host. Don't override `DOTNET_HOST_PATH` from a test.
 
 ## Flags and arguments — what to use, what to skip
 
-`dotnet test` forwards unknown args to the MTP runner. With MTP + xUnit v3, prefer the MTP-native flags below.
+`dotnet test` does **not** generally forward arbitrary unknown args to the MTP runner. With MTP + xUnit v3, prefer the MTP-native flags below, and pass runner-specific arguments after `--` (or run the test exe directly).
 
 ### Use these (MTP / xUnit v3 native)
 
@@ -31,14 +32,14 @@ These are baked into `src/Directory.Build.props`, `src/Directory.Build.targets`,
 | Filter by fully qualified name substring | `--filter "FullyQualifiedName~SomeMethod"` (translated by the SDK) — or run the test exe directly with `--filter-method "*.SomeMethod"` |
 | Filter by trait | `--filter-trait Category=foo` / `--filter-not-trait Category=failing` |
 | Filter by class / namespace | `--filter-class "Microsoft.Build.UnitTests.SomeClass"` / `--filter-namespace "Microsoft.Build.UnitTests"` |
-
-`--filter-class`, `--filter-method`, `--filter-namespace`, and `--filter-trait` are **MTP-native** and work directly on the test exe with no translation — you don't need to go through `dotnet test` to use them.
 | Quiet, CI-friendly output | `--no-progress --no-ansi` |
 | TRX report | `--report-trx --report-trx-filename my.trx` |
 | Results directory | `--results-directory artifacts/TestResults` |
 | Hard timeout | `--timeout 5m` |
 | Repeat to surface flakes | `--retry-failed-tests 3` |
 | Tree-style output | `--output detailed` |
+
+`--filter-class`, `--filter-method`, `--filter-namespace`, and `--filter-trait` are **MTP-native** and work directly on the test exe with no translation — you don't need to go through `dotnet test` to use them.
 
 ### Do NOT use these (silently no-op or wrong runner)
 
@@ -57,6 +58,8 @@ These are baked into `src/Directory.Build.props`, `src/Directory.Build.targets`,
 ## Dev loop: fast and scoped
 
 Aim for sub-30s iterations. Build once, then run the test exe directly to skip restore/build/discovery overhead.
+
+> Examples below use Windows-style backslashes and PowerShell line continuations. Forward slashes work everywhere with `dotnet` (`src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.csproj`); on Linux/macOS use `/` and shell line continuations (`\`), and the exe path becomes `artifacts/bin/<Proj>/Debug/net10.0/<Proj>` (no `.exe`).
 
 1. **Build the test project once** (or `./build.cmd` if you've changed engine code):
    ```powershell
@@ -96,7 +99,7 @@ These trade safety for speed — use during iteration, **revert before final val
 - **Skip bootstrap packaging** for non-bootstrap test projects:
   `dotnet build ... -p:CreateBootstrap=false` (useful when the local bootstrap SDK payload is missing).
 - **Narrow with traits**: `--filter-trait Category=mytraitduringdev` if you've tagged a focused subset.
-- **Skip code coverage on Linux/macOS**: run the test exe directly without `--coverage`, or pass `-p:CollectCoverage=false`.
+- **Skip code coverage on Linux/macOS**: run the test exe directly without `--coverage`. This repo does not expose a supported `dotnet test` property switch to disable the auto-added coverage arguments.
 
 ## Final validation pass
 
