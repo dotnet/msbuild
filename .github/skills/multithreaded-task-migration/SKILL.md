@@ -23,7 +23,7 @@ public class MyTask : Task, IMultiThreadableTask
 }
 ```
 
-**Note**: `[MSBuildMultiThreadableTask]` has `Inherited = false` — it must be on each concrete class, not just the base.
+**Note**: `[MSBuildMultiThreadableTask]` has `Inherited = false` — it must be on each concrete class, not just the base. On platforms where the task has only a stub implementation that logs an error and returns false (e.g., the non-NETFRAMEWORK side of `GetFrameworkSdkPath`), it is safe to mark the stub with `[MSBuildMultiThreadableTask]` as well — there is no shared mutable state to worry about (resolved in PR #13282 review).
 
 ### Step 2: Absolutize Paths Before File Operations
 
@@ -42,6 +42,7 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 - `OriginalValue` — preserves the input path (use for error messages and `[Output]` properties)
 - Implicitly convertible to `string` for File/Directory API compatibility
 - `GetCanonicalForm()` — resolves `..` segments and normalizes separators (see [Sin 5](#sin-5-canonicalization-mismatch))
+- `TaskEnvironment.ProjectDirectory` is canonicalized by the multithreaded driver setter (PR #13267). Tasks may rely on it being already canonical and skip a redundant `.GetCanonicalForm()` call when using it as a base directory.
 
 **CAUTION**: `GetAbsolutePath()` throws `ArgumentException` for null/empty inputs. See [Sin 3](#sin-3-null-coalescing-that-changes-control-flow) and [Sin 6](#sin-6-exception-type-change) for compatibility implications.
 
@@ -61,7 +62,7 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 
 ## Updating Unit Tests
 
-Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`.
+When a task implements `IMultiThreadableTask`, direct unit-test instantiation of the task class still requires the test to assign `TaskEnvironment` explicitly — the engine-supplied default kicks in via `TaskRouter` at runtime, not via the constructor. Use `t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();` (which currently returns `TaskEnvironment.Fallback`, backed by process cwd) for tests where project-relative resolution doesn't matter, or `TaskEnvironment.CreateWithProjectDirectoryAndEnvironment("<dir>")` when the test specifically needs a project directory distinct from cwd.
 
 ## APIs to Avoid
 
@@ -109,6 +110,23 @@ return success;
 
 Stay in the `AbsolutePath` world — it's implicitly convertible to `string` where needed. Avoid round-tripping through `string` and back.
 
+### Patterns for Migrating Tasks With Cwd-Dependent Helpers
+
+Ranked by blast radius (smallest first). Pick the smallest pattern that fits.
+
+1. **Absolutize-at-boundary, hand pure strings to helpers** — small task with one or two cwd-using helper calls. Call `TaskEnvironment.GetAbsolutePath(...).GetCanonicalForm()` at the top of `Execute`, then pass the absolute string to the helper. Example: PR #13267 (MSBuild/CallTarget) absolutizes once and passes the result to `FrameworkFileUtilities.FixFilePath`.
+2. **Modify a helper's signature to accept `AbsolutePath` / `TaskEnvironment`** — when the helper has only one or two callers, just thread the base directory through. No overload needed (YAGNI).
+3. **Add an overload accepting `AbsolutePath` / `TaskEnvironment` and delegate from old → new** — when the helper has *multiple* callers and only some are migrated. The old signature stays for un-migrated callers; the new one is for migrated tasks.
+4. **Thread `TaskEnvironment` through the entire helper graph** — for tasks where many helpers each have their own cwd dependency. Example: PR #13319 (RAR) touched ~25 files.
+5. **Lock + rely on env-var immutability** — for cwd-dependence backed by a process-wide static cache populated from env vars. Example: PR #13282 (`GetFrameworkPath`/`GetFrameworkSdkPath`) added locks around the static cache and relied on PR #13273's guarantee that env vars don't change mid-build.
+
+### Helpful Pure-String Path Utilities
+
+Safe to use on path strings *after* absolutization — neither touches cwd:
+
+- `FrameworkFileUtilities.FixFilePath(string)` — normalizes directory separators (e.g., backslash↔forward slash) without consulting the working directory.
+- `FileUtilities.PathComparison` — OS-aware string comparison for paths (case-insensitive on Windows, case-sensitive on Linux). Prefer this over hardcoded `StringComparison.OrdinalIgnoreCase` for path comparisons; PR #13069 review specifically called out the latter as a bug on Linux.
+
 ### TaskEnvironment is Not Thread-Safe
 
 If your task spawns multiple threads internally, synchronize access to `TaskEnvironment`. Each task *instance* gets its own environment, so no synchronization between tasks is needed.
@@ -128,7 +146,9 @@ After migration, review for behavioral compatibility. **Every observable differe
 
 Observable behavior = `Execute()` return value, `[Output]` property values, error/warning message content, exception types, files written, and which code path runs.
 
-## The 6 Deadly Compatibility Sins
+When a behavioral diff IS desired (typically because the new behavior is more correct than the old one), gate it behind a ChangeWave per the prevailing pattern. PR #13069 gated two such diffs (no-throw on invalid path characters; OS-aware path case sensitivity in `FindUnderPath`/`AssignTargetPath`) behind `Wave18_5`. Tests for the "old" behavior must set `MSBUILDDISABLEFEATURESFROMVERSION` via `TestEnvironment.SetEnvironmentVariable` and call `ChangeWaves.ResetStateForTests()`. See the `changewaves` skill for the full pattern.
+
+## The 7 Deadly Compatibility Sins
 
 Real bugs found during MSBuild task migrations. Every one shipped in initial "passing" code with green tests.
 
@@ -222,6 +242,28 @@ Old code threw `FileNotFoundException` for missing files; new code throws `Argum
 
 **Detect**: For every `GetAbsolutePath`, check what the old code threw for null/empty and whether the calling code has type-specific catch blocks.
 
+### Sin 7: Cwd-Dependence Buried in Helpers
+
+Path-string tracing (Sin 1, Sin 2) covers strings flowing *out* of the task. Sin 7 covers cwd-consuming APIs reached *through helper methods* called by the task. A helper that looks pure can quietly call `Path.GetFullPath` two frames down.
+
+Audit every helper reachable from `Execute()` for:
+
+- `Path.GetFullPath`
+- `Directory.GetCurrentDirectory`
+- `Environment.CurrentDirectory`
+- `new FileInfo(relativePath)` / `new DirectoryInfo(relativePath)`
+- raw `File.*` / `Directory.*` calls on potentially-relative paths
+
+**Detect** (PowerShell, Windows):
+
+```powershell
+Select-String -Pattern 'Path\.GetFullPath|Directory\.GetCurrentDirectory|Environment\.CurrentDirectory' -Path src/Tasks/**/*.cs
+```
+
+Cross-platform alternative: `git grep -nE 'Path\.GetFullPath|Directory\.GetCurrentDirectory|Environment\.CurrentDirectory'`. Then audit each hit in helpers reachable from the task.
+
+**Real example**: `FormatUrl` looks 3 lines long, but its only cwd-dependence sits two calls deep in `PathUtil.Resolve`. Surface inspection misses it.
+
 ## Red-Team Audit Protocol
 
 ### Phase 1: Trace Every Changed Line
@@ -285,6 +327,7 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] Every `??` or `?.` added: verified it doesn't swallow a previously-thrown exception
 - [ ] No `AbsolutePath` leaks into user-visible strings unintentionally
 - [ ] Helper methods traced for internal File API usage with non-absolutized paths
+- [ ] Inline `PERF NOTE` and `WARNING` comments referencing the OLD path-handling code (e.g., `Path.GetFullPath`) updated to describe the new code path accurately
 - [ ] Tests for custom tasks set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()` (built-in tasks have a default)
 - [ ] Cross-framework: tested on both net472 and net10.0
 - [ ] Concurrent execution: two tasks with different project directories produce correct results
