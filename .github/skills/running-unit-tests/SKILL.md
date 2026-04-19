@@ -31,6 +31,8 @@ These are baked into `src/Directory.Build.props`, `src/Directory.Build.targets`,
 | Filter by fully qualified name substring | `--filter "FullyQualifiedName~SomeMethod"` (translated by the SDK) — or run the test exe directly with `--filter-method "*.SomeMethod"` |
 | Filter by trait | `--filter-trait Category=foo` / `--filter-not-trait Category=failing` |
 | Filter by class / namespace | `--filter-class "Microsoft.Build.UnitTests.SomeClass"` / `--filter-namespace "Microsoft.Build.UnitTests"` |
+
+`--filter-class`, `--filter-method`, `--filter-namespace`, and `--filter-trait` are **MTP-native** and work directly on the test exe with no translation — you don't need to go through `dotnet test` to use them.
 | Quiet, CI-friendly output | `--no-progress --no-ansi` |
 | TRX report | `--report-trx --report-trx-filename my.trx` |
 | Results directory | `--results-directory artifacts/TestResults` |
@@ -71,6 +73,9 @@ Aim for sub-30s iterations. Build once, then run the test exe directly to skip r
    artifacts\bin\Microsoft.Build.Tasks.UnitTests\Debug\net10.0\Microsoft.Build.Tasks.UnitTests.exe `
      --filter-method "*MyFeature*" --no-progress
    ```
+   The exe path is TFM-specific: `Debug\net10.0\...exe` for net10.0, `Debug\net472\...exe` for net472. You must build the TFM you want to run first (`dotnet build ... -f net472` before invoking the net472 exe). Switching TFM without rebuilding silently runs stale binaries.
+
+   In PowerShell, the runner emits a "passed" line per test; pipe through `Select-Object -Last 8` (or `Select-String -Pattern 'failed|Total|error|skipped'`) to surface just the summary when capturing output.
 
 ### Speeding up the dev loop further
 
@@ -115,6 +120,10 @@ Before saying "done," run the heavy configuration. Don't skip TFMs and don't kee
      --report-trx --report-trx-filename validation.trx `
      --results-directory artifacts\TestResults
    ```
+
+## Reading the summary line
+
+MTP's final summary reports `passed`, `failed`, and `skipped` separately. **Always check the `skipped` count** — platform-conditional attributes (`WindowsOnlyFact`, `UnixOnlyFact`, etc.) and the auto trait filters cause expected skips, but a sudden jump in skipped count can hide a regression where a test became inapplicable on the current platform without you intending it.
 
 ## Picking the right project to run
 
