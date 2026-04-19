@@ -8,8 +8,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
-#nullable disable
-
 namespace Microsoft.Build.UnitTests
 {
     public sealed class RequiresFramework35SP1Assembly_Tests
@@ -21,21 +19,28 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
-        private RequiresFramework35SP1Assembly CreateTask()
-        {
-            return new RequiresFramework35SP1Assembly
+        private RequiresFramework35SP1Assembly CreateTask() =>
+            new()
             {
                 BuildEngine = new MockEngine(_output),
-                // SigningManifests defaults to false, which UncheckedSigning() treats as a "requires SP1" signal.
-                // Default to true so per-predicate tests are not contaminated by it.
-                SigningManifests = true,
             };
+
+        [Fact]
+        public void Defaults_UncheckedSigningTriggers()
+        {
+            // The task's default SigningManifests=false is itself an "unchecked signing" trigger,
+            // so the all-defaults case reports RequiresMinimumFramework35SP1=true.
+            RequiresFramework35SP1Assembly task = CreateTask();
+
+            task.Execute().ShouldBeTrue();
+            task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
         [Fact]
-        public void Defaults_NoSignalsTriggered()
+        public void SigningEnabled_NoOtherSignals_DoesNotTrigger()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
 
             task.Execute().ShouldBeTrue();
             task.RequiresMinimumFramework35SP1.ShouldBeFalse();
@@ -45,6 +50,7 @@ namespace Microsoft.Build.UnitTests
         public void ErrorReportUrl_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
             task.ErrorReportUrl = "https://example.com/errors";
 
             task.Execute().ShouldBeTrue();
@@ -55,18 +61,9 @@ namespace Microsoft.Build.UnitTests
         public void CreateDesktopShortcut_OnNet35_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
             task.TargetFrameworkVersion = "v3.5";
             task.CreateDesktopShortcut = true;
-
-            task.Execute().ShouldBeTrue();
-            task.RequiresMinimumFramework35SP1.ShouldBeTrue();
-        }
-
-        [Fact]
-        public void UncheckedSigning_Triggers()
-        {
-            RequiresFramework35SP1Assembly task = CreateTask();
-            task.SigningManifests = false;
 
             task.Execute().ShouldBeTrue();
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
@@ -76,6 +73,7 @@ namespace Microsoft.Build.UnitTests
         public void SuiteName_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
             task.SuiteName = "MyAppSuite";
 
             task.Execute().ShouldBeTrue();
@@ -91,7 +89,8 @@ namespace Microsoft.Build.UnitTests
         public void IncludeHashFalse_OnAnyItemInput_Triggers(string inputName)
         {
             RequiresFramework35SP1Assembly task = CreateTask();
-            ITaskItem item = new TaskItem("some.dll", new Dictionary<string, string> { { "IncludeHash", "false" } });
+            task.SigningManifests = true;
+            ITaskItem item = new TaskItem("some.dll", new Dictionary<string, string?> { { "IncludeHash", "false" } });
             AssignItemInput(task, inputName, item);
 
             task.Execute().ShouldBeTrue();
@@ -102,6 +101,7 @@ namespace Microsoft.Build.UnitTests
         public void CreateDesktopShortcut_OnNet20_DoesNotTrigger()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
             task.TargetFrameworkVersion = "v2.0";
             task.CreateDesktopShortcut = true;
 
@@ -113,6 +113,7 @@ namespace Microsoft.Build.UnitTests
         public void CreateDesktopShortcut_BareVersionString_Works()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
             task.TargetFrameworkVersion = "3.5";
             task.CreateDesktopShortcut = true;
 
@@ -124,6 +125,7 @@ namespace Microsoft.Build.UnitTests
         public void Sp1AssemblyIdentity_TriggersWithoutIncludeHash()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
             task.Files = [new TaskItem("System.Data.Entity")];
 
             task.Execute().ShouldBeTrue();
@@ -134,6 +136,7 @@ namespace Microsoft.Build.UnitTests
         public void Net35ClientSentinelIdentity_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
+            task.SigningManifests = true;
             task.Assemblies = [new TaskItem("Sentinel.v3.5Client")];
 
             task.Execute().ShouldBeTrue();
