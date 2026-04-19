@@ -1702,6 +1702,11 @@
         <target state="translated">O arquivo de manifesto do aplicativo não pode ser encontrado. Verifique se ele existe.</target>
         <note />
       </trans-unit>
+      <trans-unit id="PathUtil.WhitespacePathNotAllowedOnWindows">
+        <source>Path cannot be null or whitespace on Windows.</source>
+        <target state="new">Path cannot be null or whitespace on Windows.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: Não foi possível ler linhas do arquivo "{0}". {1}</target>

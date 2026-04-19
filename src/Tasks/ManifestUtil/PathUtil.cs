@@ -248,7 +248,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
             if (NativeMethodsShared.IsWindows && String.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException("Path cannot be null or whitespace on Windows.", nameof(path));
+                throw new ArgumentException(ResourceUtilities.GetResourceString("PathUtil.WhitespacePathNotAllowedOnWindows"), nameof(path));
             }
 
             return new AbsolutePath(path, baseDirectory).GetCanonicalForm();

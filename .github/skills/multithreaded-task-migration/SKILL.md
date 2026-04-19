@@ -62,7 +62,7 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 
 ## Updating Unit Tests
 
-When a task implements `IMultiThreadableTask`, direct unit-test instantiation of the task class still requires the test to assign `TaskEnvironment` explicitly — the engine-supplied default kicks in via `TaskRouter` at runtime, not via the constructor. Use `t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();` (which currently returns `TaskEnvironment.Fallback`, backed by process cwd) for tests where project-relative resolution doesn't matter, or `TaskEnvironment.CreateWithProjectDirectoryAndEnvironment("<dir>")` when the test specifically needs a project directory distinct from cwd.
+Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`.
 
 ## APIs to Avoid
 
@@ -110,16 +110,6 @@ return success;
 
 Stay in the `AbsolutePath` world — it's implicitly convertible to `string` where needed. Avoid round-tripping through `string` and back.
 
-### Patterns for Migrating Tasks With Cwd-Dependent Helpers
-
-Ranked by blast radius (smallest first). Pick the smallest pattern that fits.
-
-1. **Absolutize-at-boundary, hand pure strings to helpers** — small task with one or two cwd-using helper calls. Call `TaskEnvironment.GetAbsolutePath(...).GetCanonicalForm()` at the top of `Execute`, then pass the absolute string to the helper. Example: PR #13267 (MSBuild/CallTarget) absolutizes once and passes the result to `FrameworkFileUtilities.FixFilePath`.
-2. **Modify a helper's signature to accept `AbsolutePath` / `TaskEnvironment`** — when the helper has only one or two callers, just thread the base directory through. No overload needed (YAGNI).
-3. **Add an overload accepting `AbsolutePath` / `TaskEnvironment` and delegate from old → new** — when the helper has *multiple* callers and only some are migrated. The old signature stays for un-migrated callers; the new one is for migrated tasks.
-4. **Thread `TaskEnvironment` through the entire helper graph** — for tasks where many helpers each have their own cwd dependency. Example: PR #13319 (RAR) touched ~25 files.
-5. **Lock + rely on env-var immutability** — for cwd-dependence backed by a process-wide static cache populated from env vars. Example: PR #13282 (`GetFrameworkPath`/`GetFrameworkSdkPath`) added locks around the static cache and relied on PR #13273's guarantee that env vars don't change mid-build.
-
 ### Helpful Pure-String Path Utilities
 
 Safe to use on path strings *after* absolutization — neither touches cwd:
@@ -148,7 +138,7 @@ Observable behavior = `Execute()` return value, `[Output]` property values, erro
 
 When a behavioral diff IS desired (typically because the new behavior is more correct than the old one), gate it behind a ChangeWave per the prevailing pattern. PR #13069 gated two such diffs (no-throw on invalid path characters; OS-aware path case sensitivity in `FindUnderPath`/`AssignTargetPath`) behind `Wave18_5`. Tests for the "old" behavior must set `MSBUILDDISABLEFEATURESFROMVERSION` via `TestEnvironment.SetEnvironmentVariable` and call `ChangeWaves.ResetStateForTests()`. See the `changewaves` skill for the full pattern.
 
-## The 7 Deadly Compatibility Sins
+## The 6 Deadly Compatibility Sins
 
 Real bugs found during MSBuild task migrations. Every one shipped in initial "passing" code with green tests.
 
@@ -241,28 +231,6 @@ var map = items.ToDictionary(
 Old code threw `FileNotFoundException` for missing files; new code throws `ArgumentException` from `GetAbsolutePath("")` before reaching the file check. Custom catch blocks filtering by exception type may be bypassed. (`ExceptionHandling.IsIoRelatedException` catches `ArgumentException`, but task-specific handlers might not.)
 
 **Detect**: For every `GetAbsolutePath`, check what the old code threw for null/empty and whether the calling code has type-specific catch blocks.
-
-### Sin 7: Cwd-Dependence Buried in Helpers
-
-Path-string tracing (Sin 1, Sin 2) covers strings flowing *out* of the task. Sin 7 covers cwd-consuming APIs reached *through helper methods* called by the task. A helper that looks pure can quietly call `Path.GetFullPath` two frames down.
-
-Audit every helper reachable from `Execute()` for:
-
-- `Path.GetFullPath`
-- `Directory.GetCurrentDirectory`
-- `Environment.CurrentDirectory`
-- `new FileInfo(relativePath)` / `new DirectoryInfo(relativePath)`
-- raw `File.*` / `Directory.*` calls on potentially-relative paths
-
-**Detect** (PowerShell, Windows):
-
-```powershell
-Select-String -Pattern 'Path\.GetFullPath|Directory\.GetCurrentDirectory|Environment\.CurrentDirectory' -Path src/Tasks/**/*.cs
-```
-
-Cross-platform alternative: `git grep -nE 'Path\.GetFullPath|Directory\.GetCurrentDirectory|Environment\.CurrentDirectory'`. Then audit each hit in helpers reachable from the task.
-
-**Real example**: `FormatUrl` looks 3 lines long, but its only cwd-dependence sits two calls deep in `PathUtil.Resolve`. Surface inspection misses it.
 
 ## Red-Team Audit Protocol
 

@@ -1702,6 +1702,11 @@
         <target state="translated">アプリケーション マニフェスト ファイルが見つかりません。これが存在することを確認してください。</target>
         <note />
       </trans-unit>
+      <trans-unit id="PathUtil.WhitespacePathNotAllowedOnWindows">
+        <source>Path cannot be null or whitespace on Windows.</source>
+        <target state="new">Path cannot be null or whitespace on Windows.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: ファイル "{0}" からの行を読み取れませんでした。{1}</target>
