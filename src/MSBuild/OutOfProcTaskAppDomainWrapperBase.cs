@@ -394,7 +394,6 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                success = false;
                 return new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
             finally
