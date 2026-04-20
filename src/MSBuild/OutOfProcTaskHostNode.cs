@@ -1003,7 +1003,8 @@ namespace Microsoft.Build.CommandLine
             var context = GetCurrentTaskContext();
             var pendingRequests = context?.PendingCallbackRequests ?? _pendingCallbackRequests;
 
-            // IMPORTANT: Request IDs must be globally unique across all task contexts
+            // Request IDs are unique across all task contexts for the process lifetime
+            // (monotonic counter, never resets) to prevent cross-task or stale response misdelivery.
             int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
             request.RequestId = requestId;
 
