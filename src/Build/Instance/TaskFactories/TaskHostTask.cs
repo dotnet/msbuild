@@ -724,7 +724,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleBuildRequest(TaskHostBuildRequest request)
         {
-            TaskHostBuildResponse response;
+            TaskHostBuildResponse response = null;
             try
             {
                 if (_buildEngine is not IBuildEngine3 engine3)
@@ -766,18 +766,15 @@ namespace Microsoft.Build.BackEnd
 
                 response = TaskHostBuildResponse.FromBuildEngineResult(request.RequestId, result);
             }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            finally
             {
-                // Engine error state: the BuildProjectFilesInParallel call on the worker side threw.
-                // The task will see Success=false in the response and can react accordingly.
-                // Trace instead of warning to avoid surfacing engine internals to users.
-                CommunicationsUtilities.Trace("TaskHost BuildProjectFile callback failed: {0}", ex);
-
                 // Always send a response to prevent the OOP task from hanging.
-                response = new TaskHostBuildResponse(request.RequestId, false, null);
+                // On success, sends the real result; on exception, sends failure.
+                // Exceptions propagate to TaskBuilder which handles them identically
+                // to the in-proc TaskHost path (CircularDependencyException, etc.).
+                response ??= new TaskHostBuildResponse(request.RequestId, false, null);
+                _taskHostProvider.SendData(_taskHostNodeKey, response);
             }
-
-            _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 
         /// <summary>
