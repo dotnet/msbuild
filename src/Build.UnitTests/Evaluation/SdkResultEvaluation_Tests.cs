@@ -551,60 +551,50 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void SdkResolverEnvironmentVariablesOverrideAmbientEnvironmentVariables()
         {
-            string originalValue = Environment.GetEnvironmentVariable("SDK_TEST_VAR");
-            try
-            {
-                // Set an ambient environment variable
-                Environment.SetEnvironmentVariable("SDK_TEST_VAR", "AmbientValue");
+            _env.SetEnvironmentVariable("SDK_TEST_VAR", "AmbientValue");
+            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver((_, _, factory) =>
+                factory.IndicateSuccess(Path.Combine(_testFolder, "Sdk"), "1.0.0", null, null, null, environmentVariablesToAdd: new Dictionary<string, string>
+                        {
+                            { "SDK_TEST_VAR", "SdkValue" }
+                        })));
 
-                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver((_, _, factory) =>
-                    factory.IndicateSuccess(Path.Combine(_testFolder, "Sdk"), "1.0.0", null, null, null, environmentVariablesToAdd: new Dictionary<string, string>
-                            {
-                                { "SDK_TEST_VAR", "SdkValue" }
-                            })));
-
-                string projectContent = """
-                    <Project Sdk="sdkenvvar">
+            string projectContent = """
+                <Project Sdk="sdkenvvar">
+                    <PropertyGroup>
+                        <CapturedValue>$(SDK_TEST_VAR)</CapturedValue>
+                    </PropertyGroup>
+                    <Target Name="TestTarget">
                         <PropertyGroup>
-                            <CapturedValue>$(SDK_TEST_VAR)</CapturedValue>
+                            <ExecValue>$(SDK_TEST_VAR)</ExecValue>
                         </PropertyGroup>
-                        <Target Name="TestTarget">
-                            <PropertyGroup>
-                                <ExecValue>$(SDK_TEST_VAR)</ExecValue>
-                            </PropertyGroup>
-                        </Target>
-                    </Project>
-                    """;
+                    </Target>
+                </Project>
+                """;
 
-                string projectPath = Path.Combine(_testFolder, "project.proj");
-                File.WriteAllText(projectPath, projectContent);
+            string projectPath = Path.Combine(_testFolder, "project.proj");
+            File.WriteAllText(projectPath, projectContent);
 
-                string sdkPropsContents = "<Project />";
-                string sdkPropsPath = Path.Combine(_testFolder, "Sdk", "Sdk.props");
-                Directory.CreateDirectory(Path.Combine(_testFolder, "Sdk"));
-                File.WriteAllText(sdkPropsPath, sdkPropsContents);
+            string sdkPropsContents = "<Project />";
+            string sdkPropsPath = Path.Combine(_testFolder, "Sdk", "Sdk.props");
+            Directory.CreateDirectory(Path.Combine(_testFolder, "Sdk"));
+            File.WriteAllText(sdkPropsPath, sdkPropsContents);
 
-                string sdkTargetsContents = @"<Project />";
-                string sdkTargetsPath = Path.Combine(_testFolder, "Sdk", "Sdk.targets");
-                File.WriteAllText(sdkTargetsPath, sdkTargetsContents);
+            string sdkTargetsContents = @"<Project />";
+            string sdkTargetsPath = Path.Combine(_testFolder, "Sdk", "Sdk.targets");
+            File.WriteAllText(sdkTargetsPath, sdkTargetsContents);
 
-                var project = CreateProject(projectPath, projectOptions);
-                var instance = project.CreateProjectInstance();
+            var project = CreateProject(projectPath, projectOptions);
+            var instance = project.CreateProjectInstance();
 
-                _logger.AssertNoErrors();
-                _logger.AssertNoWarnings();
+            _logger.AssertNoErrors();
+            _logger.AssertNoWarnings();
 
-                // The SDK value should override the ambient environment variable
-                instance.GetPropertyValue("CapturedValue").ShouldBe("SdkValue");
+            // The SDK value should override the ambient environment variable
+            instance.GetPropertyValue("CapturedValue").ShouldBe("SdkValue");
 
-                instance.Build(["TestTarget"], [_logger], out var targetOutputs);
+            instance.Build(["TestTarget"], [_logger], out var targetOutputs);
 
-                instance.GetPropertyValue("ExecValue").ShouldBe("SdkValue");
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("SDK_TEST_VAR", originalValue);
-            }
+            instance.GetPropertyValue("ExecValue").ShouldBe("SdkValue");
         }
 
         [Fact]
