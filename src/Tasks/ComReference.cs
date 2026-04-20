@@ -414,8 +414,8 @@ namespace Microsoft.Build.Tasks
 
                 int pathLength = (int)PInvoke.GetModuleFileName(handle, buffer.AsSpan());
 
-                bool isBufferTooSmall = (WIN32_ERROR)Marshal.GetLastWin32Error() == WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER;
-                if (pathLength != 0 && !isBufferTooSmall)
+                // GetModuleFileName returns bufferSize when truncated; treat that as "buffer too small".
+                if (pathLength != 0 && pathLength < bufferSize)
                 {
                     return buffer.Slice(0, pathLength).ToString();
                 }

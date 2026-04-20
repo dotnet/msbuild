@@ -246,6 +246,10 @@ namespace Microsoft.Build.UnitTests
                 debugResult.ShouldNotBeNull();
                 wmiResult.ShouldContain("ping", Case.Insensitive);
                 debugResult.ShouldContain("ping", Case.Insensitive);
+
+                // Both should contain the same target address or timeout argument
+                wmiResult.ShouldMatch(@"(127\.0\.0\.1|31)");
+                debugResult.ShouldMatch(@"(127\.0\.0\.1|31)");
             }
             finally
             {
@@ -257,18 +261,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [WindowsOnlyFact]
-        public void GetCommandLine_ViaWmi_InvalidPid_ReturnsNull()
+        public void GetCommandLine_ViaWmi_RunningProcess_ReturnsCommandLine()
         {
-            // Use a PID that is extremely unlikely to be a real process
             using Process dummy = StartLongRunningProcess();
             try
             {
-                // Create a process just so we have a non-exited Process object,
-                // then test with an invalid PID through the direct internal overload.
-                // The TryGetCommandLine overload checks HasExited, so we test the
-                // underlying Windows.GetCommandLine indirectly via a valid process object.
-                // For an invalid PID, WMI should return null (no matching process found).
-                dummy.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out _).ShouldBeTrue();
+                dummy.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out string commandLine).ShouldBeTrue();
+                commandLine.ShouldNotBeNull();
+                commandLine.ShouldContain("ping", Case.Insensitive);
             }
             finally
             {
@@ -280,12 +280,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [WindowsOnlyFact]
-        public void GetCommandLine_ViaDebugEngine_InvalidPid_ReturnsNull()
+        public void GetCommandLine_ViaDebugEngine_RunningProcess_ReturnsCommandLine()
         {
             using Process dummy = StartLongRunningProcess();
             try
             {
-                dummy.TryGetCommandLine(ProcessExtensions.CommandLineSource.DebugEngine, out _).ShouldBeTrue();
+                dummy.TryGetCommandLine(ProcessExtensions.CommandLineSource.DebugEngine, out string commandLine).ShouldBeTrue();
+                commandLine.ShouldNotBeNull();
+                commandLine.ShouldContain("ping", Case.Insensitive);
             }
             finally
             {

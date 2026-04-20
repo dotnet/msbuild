@@ -95,7 +95,6 @@
 
   <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true'">
     <Compile Remove="Windows\**\*.cs" />
-    <Compile Remove="Shared\TrimmingAttributes.cs" />
     <Compile Remove="Shared\Win32\**\*.cs" />
     <Compile Remove="FileSystem\MSBuildOnWindowsFileSystem.cs" />
     <Compile Remove="FileSystem\WindowsFileSystem.cs" />

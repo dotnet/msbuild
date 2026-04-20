@@ -878,7 +878,7 @@ internal static class NativeMethods
                     fileModifiedTime = DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
 
                     // If file is a symlink _and_ we're not instructed to do the wrong thing, get a more accurate timestamp.
-                    if (((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes).HasFlag(FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_REPARSE_POINT)
+                    if (((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_REPARSE_POINT) != 0
                         && !Traits.Instance.EscapeHatches.UseSymlinkTimeInsteadOfTargetTime)
                     {
                         fileModifiedTime = GetContentLastWriteFileUtcTime(path);

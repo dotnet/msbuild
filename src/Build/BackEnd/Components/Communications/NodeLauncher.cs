@@ -67,13 +67,14 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Launching node from {0}", nodeLaunchData.MSBuildLocation);
 
 #if FEATURE_WINDOWSINTEROP
-            return NativeMethodsShared.IsWindows
-                ? StartProcessWindows(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
-                :
+            if (NativeMethodsShared.IsWindows)
+            {
+                return StartProcessWindows(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost);
+            }
 #endif
-                NativeMethodsShared.IsUnixLike
-                    ? StartProcessUnix(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
-                    : throw new PlatformNotSupportedException();
+            return NativeMethodsShared.IsUnixLike
+                ? StartProcessUnix(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
+                : throw new PlatformNotSupportedException();
 
             static void ValidateMSBuildLocation(string msbuildLocation)
             {
