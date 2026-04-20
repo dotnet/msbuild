@@ -9,6 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -360,6 +361,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+
+            // Print out all enabled logs.
+            LogLoggersUsed(fileNames: false);
         }
 
         /// <summary>
@@ -382,6 +386,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     message = ResourceUtilities.GetResourceString(success ? "BuildFinishedSuccess" : "BuildFinishedFailure");
                 }
             }
+            // Before ending the build, print out all logs that outputted a file and the location of the file.
+            LogLoggersUsed(fileNames: true);
 
             BuildFinishedEventArgs buildEvent = new BuildFinishedEventArgs(message, null /* no help keyword */, success);
 
@@ -391,6 +397,56 @@ namespace Microsoft.Build.BackEnd.Logging
             WaitForLoggingToProcessEvents();
         }
 
+        /// <summary>
+        /// Prints either the names of enabled logs (except for Forwarding logs)
+        /// or the file paths of the logs, depending on the value of the fileNames parameter.
+        /// </summary>
+        /// <param name="fileNames">If true, logs the file paths of the logs; otherwise, logs the names of the enabled logs.</param>
+        private void LogLoggersUsed(bool fileNames)
+        {
+            var list_of_log_names = new List<string>();
+            foreach (ILogger logger in Loggers)
+            {
+                ILogger actual = logger is ReusableLogger reusable
+                    ? reusable.OriginalLogger
+                    : logger;
+                // We don't want to log the name of the forwarding logger, since it may be confusing.
+                if (actual is CentralForwardingLogger == true)
+                {
+                    continue;
+                }
+
+                if (fileNames)
+                {
+                    (string logType, string path) = actual switch
+                    {
+                        BinaryLogger bl => ("Binary log", bl.FilePath),
+                        FileLogger fl => ("File log", fl.FilePath),
+                        _ => (null, null)
+                    };
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        var msgEvent = new BuildMessageEventArgs(
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logType, path),
+                            null, null, MessageImportance.High);
+                        msgEvent.BuildEventContext = BuildEventContext.Invalid;
+                        ProcessLoggingEvent(msgEvent);
+                    }
+                }
+                else
+                {
+                    list_of_log_names.Add(actual.GetType().Name);
+                }
+            }
+            if (list_of_log_names.Count != 0)
+            {
+                var msgEvent = new BuildMessageEventArgs(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", list_of_log_names)),
+                    null, null, MessageImportance.High);
+                msgEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(msgEvent);
+            }
+        }
         /// <inheritdoc />
         public void LogBuildCanceled()
         {

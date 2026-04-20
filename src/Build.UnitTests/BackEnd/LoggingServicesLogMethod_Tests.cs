@@ -14,6 +14,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Logging;
 using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1046,6 +1047,62 @@ namespace Microsoft.Build.UnitTests.Logging
             buildEvent = new BuildFinishedEventArgs(string.Empty, null /* no help keyword */, true, service.ProcessedBuildEvent.Timestamp);
             Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
+        [Fact]
+        public void LogBuildStartedLoggerNames()
+        {
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            ConsoleLogger consoleLogger = new ConsoleLogger();
+            service.RegisterLogger(consoleLogger);
+
+            service.LogBuildStarted();
+            Assert.IsType<BuildMessageEventArgs>(service.ProcessedBuildEvent);
+            Assert.Contains("ConsoleLogger", service.ProcessedBuildEvent.Message);
+        }
+
+        [Fact]
+        public void LogBuildFinishedLoggerPaths()
+        {
+            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            BinaryLogger binaryLogger = new BinaryLogger { Parameters = "test.binlog" }; ;
+            service.RegisterLogger(binaryLogger);
+            service.LogBuildFinished(true);
+            var pathMessage = service.AllProcessedBuildEvents
+                .OfType<BuildMessageEventArgs>()
+                .FirstOrDefault(e => e.Message.Contains("test.binlog"));
+            Assert.NotNull(pathMessage);
+            Assert.Contains("Binary log", pathMessage.Message);
+        }
+
+        [Fact]
+        public void LogFilePathsPresentInBinaryLog()
+        {
+            using var env = TestEnvironment.Create();
+            var binlogPath = env.ExpectFile(".binlog").Path;
+
+            var binaryLogger = new BinaryLogger { Parameters = binlogPath };
+            var mockLogger = new MockLogger();
+
+            using (var collection = new ProjectCollection())
+            {
+                var project = ObjectModelHelpers.CreateInMemoryProject(collection, @"
+            <Project>
+              <Target Name=""Build"" />
+            </Project>");
+                project.Build(new ILogger[] { binaryLogger, mockLogger }).ShouldBeTrue();
+            }
+
+            // Check the text log (MockLogger captures all messages)
+            mockLogger.FullLog.ShouldContain(".binlog");
+
+            // Check the binary log by replaying it
+            var replayLogger = new MockLogger();
+            var reader = new BinaryLogReplayEventSource();
+            replayLogger.Initialize(reader);
+            reader.Replay(binlogPath);
+            replayLogger.Shutdown();
+
+            replayLogger.FullLog.ShouldContain(".binlog");
+        }
 
         [Fact]
         public void LogBuildCanceled()
@@ -1795,6 +1852,11 @@ namespace Microsoft.Build.UnitTests.Logging
             /// to verify that a buildEvent was sent to ProcessLoggingEvent.
             /// </summary>
             private BuildEventArgs _processedBuildEvent;
+
+            /// <summary>
+            /// All events processed by ProcessLoggingEvent.
+            /// </summary>
+            internal List<BuildEventArgs> AllProcessedBuildEvents { get; } = new();
             #endregion
             #region Constructor
             /// <summary>
@@ -1857,6 +1919,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 if (buildEvent is BuildEventArgs buildEventArgs)
                 {
                     _processedBuildEvent = buildEventArgs;
+                    AllProcessedBuildEvents.Add(buildEventArgs);
                 }
                 else if (buildEvent is KeyValuePair<int, BuildEventArgs> kvp)
                 {
