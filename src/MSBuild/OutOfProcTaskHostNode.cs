@@ -1747,7 +1747,7 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(EffectiveConfiguration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
             }
         }
