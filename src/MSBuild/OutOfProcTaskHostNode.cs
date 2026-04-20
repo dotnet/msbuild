@@ -556,11 +556,12 @@ namespace Microsoft.Build.CommandLine
                 return new BuildEngineResult(false, null);
             }
 
-            string projectFilesJoined = string.Join(";", projectFileNames ?? []);
-            string targetNamesJoined = string.Join(";", targetNames ?? []);
+            string projectFilesJoined = null;
 
             if (MSBuildEventSource.Log.IsEnabled())
             {
+                projectFilesJoined = string.Join(";", projectFileNames ?? []);
+                string targetNamesJoined = string.Join(";", targetNames ?? []);
                 MSBuildEventSource.Log.TaskHostBuildProjectFileStart(projectFilesJoined, targetNamesJoined);
             }
 
@@ -586,7 +587,7 @@ namespace Microsoft.Build.CommandLine
             {
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
-                    MSBuildEventSource.Log.TaskHostBuildProjectFileStop(projectFilesJoined, success);
+                    MSBuildEventSource.Log.TaskHostBuildProjectFileStop(projectFilesJoined!, success);
                 }
 
                 ResumeAfterCallback();
