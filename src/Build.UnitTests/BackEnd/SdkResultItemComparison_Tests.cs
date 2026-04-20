@@ -13,6 +13,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResultItemComparison_Tests
     {
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13490
+        /// </summary>
         [Fact]
         public void SdkResult_NotEqual_DifferentItemsCount()
         {
