@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd
 {
     internal sealed class NodeLauncher : INodeLauncher, IBuildComponent
     {
-        private static const string DotnetEnableDiagnosticsEnvVarName = "DOTNET_EnableDiagnostics";
+        private const string DotnetEnableDiagnosticsEnvVarName = "DOTNET_EnableDiagnostics";
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
@@ -137,7 +137,8 @@ namespace Microsoft.Build.BackEnd
                 RedirectStandardError = redirectStreams,
                 CreateNoWindow = redirectStreams && (creationFlags & BackendNativeMethods.CREATENOWINDOW) != 0,
             };
-            if (!processStartInfo.Environment.TryAdd(DotnetEnableDiagnosticsEnvVarName, "0"))
+
+            if (!processStartInfo.Environment.ContainsKey(DotnetEnableDiagnosticsEnvVarName))
             {
                 processStartInfo.Environment[DotnetEnableDiagnosticsEnvVarName] = "0";
             }
@@ -281,7 +282,8 @@ namespace Microsoft.Build.BackEnd
             {
                 environment[(string)entry.Key] = (string)entry.Value;
             }
-            if (!environment.TryAdd(DotnetEnableDiagnosticsEnvVarName, "0"))
+
+            if (environment.ContainsKey(DotnetEnableDiagnosticsEnvVarName))
             {
                 environment[DotnetEnableDiagnosticsEnvVarName] = "0";
             }

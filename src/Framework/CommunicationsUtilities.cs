@@ -19,7 +19,7 @@ namespace Microsoft.Build.Framework
     internal static class FrameworkCommunicationsUtilities
     {
 
-        internal static const string DotnetDiagnosticsEnvironmentVariableName = "DOTNET_EnableDiagnostics";
+        internal const string DotnetDiagnosticsEnvironmentVariableName = "DOTNET_EnableDiagnostics";
 
         /// <summary>
         /// Case-insensitive string comparer for environment variable names.

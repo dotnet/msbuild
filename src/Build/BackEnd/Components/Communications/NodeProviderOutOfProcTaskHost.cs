@@ -766,7 +766,7 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE
             Handshake handshake = new Handshake(hostContext);
 #else
-            Handshake handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath);
+            Handshake handshake = new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath);
 #endif
 
             if (FileSystems.Default.FileExists(appHostPath))
