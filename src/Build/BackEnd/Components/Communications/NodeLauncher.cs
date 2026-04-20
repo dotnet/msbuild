@@ -19,6 +19,10 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 #nullable disable
 
@@ -62,9 +66,14 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Launching node from {0}", nodeLaunchData.MSBuildLocation);
 
+#if FEATURE_WINDOWSINTEROP
             return NativeMethodsShared.IsWindows
                 ? StartProcessWindows(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
-                : StartProcessUnix(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost);
+                :
+#endif
+                NativeMethodsShared.IsUnixLike
+                    ? StartProcessUnix(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
+                    : throw new PlatformNotSupportedException();
 
             static void ValidateMSBuildLocation(string msbuildLocation)
             {
@@ -156,7 +165,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        [SupportedOSPlatform("windows")]
+#if FEATURE_WINDOWSINTEROP
+        [SupportedOSPlatform("windows6.1")]
         private static Process StartProcessWindows(NodeLaunchData nodeLaunchData, string exeName, uint creationFlags, bool redirectStreams, bool isNativeAppHost)
         {
             // Repeat the executable name as the first token of the command line because the command line
@@ -227,19 +237,22 @@ namespace Microsoft.Build.BackEnd
 
             static void CloseProcessHandles(BackendNativeMethods.PROCESS_INFORMATION processInfo)
             {
-                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+#pragma warning disable CA1416 // static local functions don't inherit [SupportedOSPlatform] (analyzer limitation)
+                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != new IntPtr(-1))
                 {
-                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
+                    PInvoke.CloseHandle((HANDLE)processInfo.hProcess);
                 }
 
-                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != new IntPtr(-1))
                 {
-                    NativeMethodsShared.CloseHandle(processInfo.hThread);
+                    PInvoke.CloseHandle((HANDLE)processInfo.hThread);
                 }
+#pragma warning restore CA1416
             }
         }
+#endif
 
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         private static BackendNativeMethods.STARTUP_INFO CreateStartupInfo(bool redirectStreams)
         {
             var startInfo = new BackendNativeMethods.STARTUP_INFO

@@ -3,7 +3,13 @@
 
 #nullable disable
 using System;
+#if FEATURE_WINDOWSINTEROP
 using System.Diagnostics;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
+using Windows.Win32.System.Console;
+#endif
 
 namespace Microsoft.Build.BackEnd.Logging;
 
@@ -24,14 +30,15 @@ internal class InProcessConsoleConfiguration : IConsoleConfiguration
         get
         {
             bool acceptAnsiColorCodes = false;
+#if FEATURE_WINDOWSINTEROP
             if (NativeMethodsShared.IsWindows && !Console.IsOutputRedirected)
             {
                 try
                 {
-                    IntPtr stdOut = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-                    if (NativeMethodsShared.GetConsoleMode(stdOut, out uint consoleMode))
+                    HANDLE stdOut = PInvoke.GetStdHandle(STD_HANDLE.STD_OUTPUT_HANDLE);
+                    if (PInvoke.GetConsoleMode(stdOut, out CONSOLE_MODE consoleMode))
                     {
-                        acceptAnsiColorCodes = (consoleMode & NativeMethodsShared.ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0;
+                        acceptAnsiColorCodes = consoleMode.HasFlag(CONSOLE_MODE.ENABLE_VIRTUAL_TERMINAL_PROCESSING);
                     }
                 }
                 catch (Exception ex)
@@ -40,6 +47,7 @@ internal class InProcessConsoleConfiguration : IConsoleConfiguration
                 }
             }
             else
+#endif
             {
                 // On posix OSes we expect console always supports VT100 coloring unless it is redirected
                 acceptAnsiColorCodes = !Console.IsOutputRedirected;
@@ -75,20 +83,19 @@ internal class InProcessConsoleConfiguration : IConsoleConfiguration
         {
             bool isScreen = false;
 
+#if FEATURE_WINDOWSINTEROP
             if (NativeMethodsShared.IsWindows)
             {
                 // Get the std out handle
-                IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+                HANDLE stdHandle = PInvoke.GetStdHandle(STD_HANDLE.STD_OUTPUT_HANDLE);
 
-                if (stdHandle != NativeMethods.InvalidHandle)
+                if (stdHandle != HANDLE.INVALID_HANDLE_VALUE)
                 {
-                    uint fileType = NativeMethodsShared.GetFileType(stdHandle);
-
-                    // The std out is a char type(LPT or Console)
-                    isScreen = fileType == NativeMethodsShared.FILE_TYPE_CHAR;
+                    isScreen = PInvoke.GetFileType(stdHandle) == FILE_TYPE.FILE_TYPE_CHAR;
                 }
             }
             else
+#endif
             {
                 isScreen = !Console.IsOutputRedirected;
             }

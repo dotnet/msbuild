@@ -457,3 +457,12 @@ dotnet_diagnostic.xUnit1031.severity = none
 # The latter brings incosistency in the codebase and some times in one test case.
 # So we are disabling this rule with respect to the above mentioned reasons.
 dotnet_diagnostic.xUnit2013.severity = none
+
+# Attributes needed for interop are not CLS-compliant, which produces CS3016 warnings. Disabling here doesn't
+# actually work, but when we apply the [CLSCompliant(false)] attribute to the partial declarations of the generated
+# types it then fires CS3019 warnings about it not making sense on internal types. We disable these warnings for
+# anything in the CsWin32 subfolders. Other options are to disable CS3016 entirely in the project, but that would
+# suppress the warning for all code, not just the interop code. Hopefully https://github.com/dotnet/roslyn/issues/68526
+# is addressed so we can remove all of this complication.
+[{**/Windows/**/*.cs}]
+dotnet_diagnostic.CS3019.severity = none

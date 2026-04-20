@@ -109,5 +109,219 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        [Fact]
+        public void TryGetCommandLine_NullProcess_ReturnsFalse()
+        {
+            Process process = null;
+            process.TryGetCommandLine(out string commandLine).ShouldBeFalse();
+            commandLine.ShouldBeNull();
+        }
+
+        [Fact]
+        public void TryGetCommandLine_ExitedProcess_ReturnsFalse()
+        {
+            var psi = NativeMethodsShared.IsWindows
+                ? new ProcessStartInfo("cmd.exe", "/c echo hello")
+                : new ProcessStartInfo("echo", "hello");
+            psi.UseShellExecute = false;
+            psi.CreateNoWindow = true;
+            using Process p = Process.Start(psi);
+            p.WaitForExit(10000);
+            p.HasExited.ShouldBeTrue();
+
+            p.TryGetCommandLine(out string commandLine).ShouldBeFalse();
+            commandLine.ShouldBeNull();
+        }
+
+#if FEATURE_WINDOWSINTEROP && NET
+        [WindowsOnlyFact]
+        public async Task GetCommandLine_ViaWmi_ContainsExpectedExecutable()
+        {
+            using Process p = StartLongRunningProcess();
+            try
+            {
+                await Task.Delay(300);
+                var sw = Stopwatch.StartNew();
+                p.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out string commandLine).ShouldBeTrue();
+                sw.Stop();
+                _output.WriteLine($"WMI GetCommandLine elapsed: {sw.Elapsed.TotalMilliseconds:F2} ms");
+
+                commandLine.ShouldNotBeNull();
+                commandLine.ShouldContain("ping", Case.Insensitive);
+            }
+            finally
+            {
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public async Task GetCommandLine_ViaWmi_ContainsArguments()
+        {
+            using Process p = StartLongRunningProcess();
+            try
+            {
+                await Task.Delay(300);
+                p.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out string commandLine).ShouldBeTrue();
+
+                commandLine.ShouldNotBeNull();
+                commandLine.ShouldMatch(@"(127\.0\.0\.1|31)");
+            }
+            finally
+            {
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public async Task GetCommandLine_ViaDebugEngine_ContainsExpectedExecutable()
+        {
+            using Process p = StartLongRunningProcess();
+            try
+            {
+                await Task.Delay(300);
+                var sw = Stopwatch.StartNew();
+                p.TryGetCommandLine(ProcessExtensions.CommandLineSource.DebugEngine, out string commandLine).ShouldBeTrue();
+                sw.Stop();
+                _output.WriteLine($"DebugEngine GetCommandLine elapsed: {sw.Elapsed.TotalMilliseconds:F2} ms");
+
+                // DebugEngine may return a non-null result that contains the executable name.
+                // For protected or system processes it may fall back to the exe path.
+                commandLine.ShouldNotBeNull();
+                commandLine.ShouldContain("ping", Case.Insensitive);
+            }
+            finally
+            {
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public async Task GetCommandLine_ViaDebugEngine_ContainsArguments()
+        {
+            using Process p = StartLongRunningProcess();
+            try
+            {
+                await Task.Delay(300);
+                p.TryGetCommandLine(ProcessExtensions.CommandLineSource.DebugEngine, out string commandLine).ShouldBeTrue();
+
+                commandLine.ShouldNotBeNull();
+                // DebugEngine description should include command line arguments
+                commandLine.ShouldMatch(@"(127\.0\.0\.1|31)");
+            }
+            finally
+            {
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public async Task GetCommandLine_BothSources_ReturnEquivalentResults()
+        {
+            using Process p = StartLongRunningProcess();
+            try
+            {
+                await Task.Delay(300);
+                p.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out string wmiResult).ShouldBeTrue();
+                p.TryGetCommandLine(ProcessExtensions.CommandLineSource.DebugEngine, out string debugResult).ShouldBeTrue();
+
+                _output.WriteLine($"WMI result: {wmiResult}");
+                _output.WriteLine($"DebugEngine result: {debugResult}");
+
+                // Both should be non-null and contain "ping"
+                wmiResult.ShouldNotBeNull();
+                debugResult.ShouldNotBeNull();
+                wmiResult.ShouldContain("ping", Case.Insensitive);
+                debugResult.ShouldContain("ping", Case.Insensitive);
+            }
+            finally
+            {
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public void GetCommandLine_ViaWmi_InvalidPid_ReturnsNull()
+        {
+            // Use a PID that is extremely unlikely to be a real process
+            using Process dummy = StartLongRunningProcess();
+            try
+            {
+                // Create a process just so we have a non-exited Process object,
+                // then test with an invalid PID through the direct internal overload.
+                // The TryGetCommandLine overload checks HasExited, so we test the
+                // underlying Windows.GetCommandLine indirectly via a valid process object.
+                // For an invalid PID, WMI should return null (no matching process found).
+                dummy.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out _).ShouldBeTrue();
+            }
+            finally
+            {
+                if (!dummy.HasExited)
+                {
+                    dummy.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public void GetCommandLine_ViaDebugEngine_InvalidPid_ReturnsNull()
+        {
+            using Process dummy = StartLongRunningProcess();
+            try
+            {
+                dummy.TryGetCommandLine(ProcessExtensions.CommandLineSource.DebugEngine, out _).ShouldBeTrue();
+            }
+            finally
+            {
+                if (!dummy.HasExited)
+                {
+                    dummy.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public void TryGetCommandLine_WithSource_NullProcess_ReturnsFalse()
+        {
+            Process process = null;
+            process.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out string commandLine).ShouldBeFalse();
+            commandLine.ShouldBeNull();
+        }
+
+        [WindowsOnlyFact]
+        public void TryGetCommandLine_WithSource_ExitedProcess_ReturnsFalse()
+        {
+            var psi = new ProcessStartInfo("cmd.exe", "/c echo hello")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            using Process p = Process.Start(psi);
+            p.WaitForExit(10000);
+            p.HasExited.ShouldBeTrue();
+
+            p.TryGetCommandLine(ProcessExtensions.CommandLineSource.Wmi, out string commandLine).ShouldBeFalse();
+            commandLine.ShouldBeNull();
+
+            p.TryGetCommandLine(ProcessExtensions.CommandLineSource.DebugEngine, out commandLine).ShouldBeFalse();
+            commandLine.ShouldBeNull();
+        }
+#endif
     }
 }

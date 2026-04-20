@@ -15,14 +15,14 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 ### Technology Stack
 - .NET 10.0 and .NET Framework 4.7.2
-- C# 13 features (especially collection expressions)
+- C# 14 features (especially collection expressions)
 - xUnit with Shouldly for testing
 - Multi-platform support (Windows, Linux, macOS)
 
 ## General
 
 * Performance is the top priority - minimize allocations, avoid LINQ in hot paths, use efficient algorithms.
-* Always use the latest C# features, currently C# 13, especially collection expressions (`[]` over `new Type[]`).
+* Always use the latest C# features, currently C# 14, especially collection expressions (`[]` over `new Type[]`).
 * Match the style of surrounding code when making edits, but modernize aggressively for substantial changes.
 
 ## Code Review Instructions

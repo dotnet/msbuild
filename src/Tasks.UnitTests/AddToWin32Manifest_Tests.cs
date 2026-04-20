@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -11,6 +11,10 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -69,7 +73,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         [WindowsOnlyTheory]
         [InlineData(null, true)]
         [InlineData("buildIn.manifest", true)]
@@ -138,7 +142,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             static string NormalizeLineEndings(string input) => input.Replace("\r\n", "\n").Replace("\r", "\n");
         }
 
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         internal sealed class AssemblyNativeResourceManager
         {
             public enum LoadLibraryFlags : uint { LOAD_LIBRARY_AS_DATAFILE = 2 };
@@ -183,7 +187,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
                 finally
                 {
-                    NativeMethodsShared.FreeLibrary(hModule);
+                    PInvoke.FreeLibrary((HMODULE)hModule);
                 }
 
                 return null;
