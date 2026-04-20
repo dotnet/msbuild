@@ -28,6 +28,7 @@ using Microsoft.Build.Instance.ImmutableProjectCollections;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Constants = Microsoft.Build.Framework.Constants;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -3397,7 +3398,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            var multiDictionary = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
+            var multiDictionary = new MultiDictionary<string, ProjectItemInstance>(items.Count, StringComparer.OrdinalIgnoreCase);
             foreach (var item in items)
             {
                 multiDictionary.Add(item.EvaluatedInclude, projectItemToInstanceMap[item]);

@@ -1,19 +1,19 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-#if !CLR2COMPATIBILITY
 using Microsoft.Build.Experimental.FileAccess;
-#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
@@ -31,12 +31,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        INodePacketFactory, INodePacketHandler,
-#if CLR2COMPATIBILITY
-        IBuildEngine3
-#else
-        IBuildEngine10
-#endif
+        INodePacketFactory, INodePacketHandler, IBuildEngine10
     {
         /// <summary>
         /// Keeps a record of all environment variables that, on startup of the task host, have a different
@@ -46,10 +41,10 @@ namespace Microsoft.Build.CommandLine
         /// process.  Those are the variables that this dictionary should store.
         ///
         /// - The key into the dictionary is the name of the environment variable.
-        /// - The Key of the KeyValuePair is the value of the variable in the parent process -- the value that we
+        /// - The Key of the KeyValuePair is the value of the variable in the owning worker node process -- the value that we
         ///   wish to ensure is replaced by whatever the correct value in our current process is.
         /// - The Value of the KeyValuePair is the value of the variable in the current process -- the value that
-        ///   we wish to replay the Key value with in the environment that we receive from the parent before
+        ///   we wish to replay the Key value with in the environment that we receive from the owning worker node before
         ///   applying it to the current process.
         ///
         /// Note that either value in the KeyValuePair can be null, as it is completely possible to have an
@@ -164,12 +159,10 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _nodeReuse;
 
-#if !CLR2COMPATIBILITY
         /// <summary>
         /// The task object cache.
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
-#endif
 
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
@@ -177,6 +170,35 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
 #endif
+
+        /// <summary>
+        /// Counter for generating unique request IDs for callback correlation.
+        /// </summary>
+        private int _nextCallbackRequestId;
+
+        /// <summary>
+        /// Pending callback requests awaiting responses from the owning worker node.
+        /// Key is the request ID, value is the TaskCompletionSource to signal when response arrives.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> _pendingCallbackRequests = new();
+
+        /// <summary>
+        /// The packet version negotiated with the owning worker node.
+        /// Used to determine if the worker node supports callback packets.
+        /// </summary>
+        private byte _parentPacketVersion;
+
+        /// <summary>
+        /// Minimum packet version required for IBuildEngine callback support.
+        /// When all callback stages are complete, PacketVersion will be bumped to this value.
+        /// </summary>
+        private const byte CallbacksMinPacketVersion = 4;
+
+        /// <summary>
+        /// Whether the owning worker node supports IBuildEngine callbacks.
+        /// True if the worker node's packet version is high enough, or if the feature is force-enabled via env var.
+        /// </summary>
+        private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion || Traits.Instance.EnableTaskHostCallbacks;
 
         /// <summary>
         /// Constructor.
@@ -203,10 +225,10 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
 
-#if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
-#endif
         }
 
         #region IBuildEngine Implementation (Properties)
@@ -264,15 +286,23 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine2 Implementation (Properties)
 
         /// <summary>
-        /// Stub implementation of IBuildEngine2.IsRunningMultipleNodes.  The task host does not support this sort of
-        /// IBuildEngine callback, so error.
+        /// Implementation of IBuildEngine2.IsRunningMultipleNodes.
+        /// Queries the owning worker node and returns the actual value.
+        /// Returns false if the worker node doesn't support callbacks (cross-version scenario).
         /// </summary>
         public bool IsRunningMultipleNodes
         {
             get
             {
-                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-                return false;
+                if (!CallbacksSupported)
+                {
+                    LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+                    return false;
+                }
+
+                var request = new TaskHostIsRunningMultipleNodesRequest();
+                var response = SendCallbackRequestAndWaitForResponse<TaskHostIsRunningMultipleNodesResponse>(request);
+                return response.IsRunningMultipleNodes;
             }
         }
 
@@ -305,6 +335,13 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                // An empty set means all warnings are errors.
+                return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
+            }
+
+            // Pre-18.6 behavior preserved for backward compatibility: incorrectly checks WarningsAsMessages instead of WarningsAsErrors.
             return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
         }
 
@@ -317,9 +354,9 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine Implementation (Methods)
 
         /// <summary>
-        /// Sends the provided error back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided error back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
@@ -327,9 +364,9 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends the provided warning back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided warning back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
@@ -337,9 +374,9 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends the provided message back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided message back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
@@ -347,9 +384,9 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends the provided custom event back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided custom event back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
@@ -424,7 +461,6 @@ namespace Microsoft.Build.CommandLine
 
         #endregion // IBuildEngine3 Implementation
 
-#if !CLR2COMPATIBILITY
         #region IBuildEngine4 Implementation
 
         /// <summary>
@@ -506,14 +542,31 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+
+            if (!CallbacksSupported)
+            {
+                // Callbacks not available (cross-version scenario). Throw so callers' existing
+                // catch (NotImplementedException) blocks fire and fall back gracefully.
+                throw new NotImplementedException();
+            }
+
+            var request = new TaskHostCoresRequest(requestedCores, isRelease: false);
+            var response = SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
+            return response.GrantedCores;
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+
+            if (!CallbacksSupported)
+            {
+                throw new NotImplementedException();
+            }
+
+            var request = new TaskHostCoresRequest(coresToRelease, isRelease: true);
+            SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
         }
 
         #endregion
@@ -560,8 +613,6 @@ namespace Microsoft.Build.CommandLine
         public EngineServices EngineServices { get; }
 
         #endregion
-
-#endif
 
         #region INodePacketFactory Members
 
@@ -646,13 +697,13 @@ namespace Microsoft.Build.CommandLine
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception shutdownException, bool nodeReuse = false, byte parentPacketVersion = 1)
         {
-#if !CLR2COMPATIBILITY
             _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
-#endif
+            _parentPacketVersion = parentPacketVersion;
+
             shutdownException = null;
 
             // Snapshot the current environment
-            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse, parentPacketVersion);
@@ -725,6 +776,91 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
+
+                // Callback response packets - route to pending request
+                case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
+                case NodePacketType.TaskHostCoresResponse:
+                    HandleCallbackResponse(packet);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Handles a callback response packet by completing the pending request's TaskCompletionSource.
+        /// This is called on the main thread and unblocks the task thread waiting for the response.
+        /// </summary>
+        private void HandleCallbackResponse(INodePacket packet)
+        {
+            if (packet is not ITaskHostCallbackPacket callbackPacket)
+            {
+                ErrorUtilities.ThrowInternalError("HandleCallbackResponse called with non-callback packet type: {0}", packet.GetType().Name);
+                return;
+            }
+
+            // Request ID not found is expected if the connection was lost and the task thread
+            // already cleaned up via the finally block in SendCallbackRequestAndWaitForResponse.
+            if (_pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
+            {
+                tcs.TrySetResult(packet);
+            }
+        }
+
+        /// <summary>
+        /// Sends a callback request packet to the owning worker node and waits for the corresponding response.
+        /// This is called from task threads and blocks until the response arrives on the main thread.
+        /// </summary>
+        /// <typeparam name="TResponse">The expected response packet type.</typeparam>
+        /// <param name="request">The request packet to send (must implement ITaskHostCallbackPacket).</param>
+        /// <returns>The response packet.</returns>
+        /// <exception cref="InvalidOperationException">If the connection is lost.</exception>
+        /// <remarks>
+        /// This method is infrastructure for callback support. Used by IsRunningMultipleNodes,
+        /// RequestCores/ReleaseCores, BuildProjectFile, etc.
+        ///
+        /// We intentionally do NOT check _taskCancelledEvent here. This aligns with in-process
+        /// mode where IBuildEngine callbacks are direct method calls that complete regardless of
+        /// cancellation state. The owning worker node continues processing callback requests even after
+        /// sending TaskHostTaskCancelled, so the response will arrive. Cancellation is handled
+        /// cooperatively via ICancelableTask.Cancel() on the task itself.
+        ///
+        /// NOTE: Unlike in-process mode, the IPC mechanism here *could* support cancellation-aware
+        /// callbacks by failing the TCS when _taskCancelledEvent is signaled. This is a future
+        /// opportunity if we need to abort long-running callbacks (e.g. BuildProjectFile) immediately
+        /// on cancellation rather than waiting for the worker node to respond.
+        ///
+        /// Connection loss is handled by OnLinkStatusChanged, which fails all pending TCS
+        /// with InvalidOperationException, causing this method to throw immediately.
+        /// </remarks>
+        private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
+            where TResponse : class, INodePacket
+        {
+            int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
+            request.RequestId = requestId;
+
+            var tcs = new TaskCompletionSource<INodePacket>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _pendingCallbackRequests[requestId] = tcs;
+
+            try
+            {
+                // Send the request packet to the owning worker node
+                _nodeEndpoint.SendData(request);
+
+                // Block until the response arrives (via HandleCallbackResponse → TCS.SetResult)
+                // or the connection is lost (via OnLinkStatusChanged → TCS.TrySetException).
+                // No timeout - callbacks like BuildProjectFile can legitimately take hours.
+                INodePacket response = tcs.Task.GetAwaiter().GetResult();
+
+                if (response is TResponse typedResponse)
+                {
+                    return typedResponse;
+                }
+
+                throw new InvalidOperationException(
+                    $"Unexpected callback response type: expected {typeof(TResponse).Name}, got {response?.GetType().Name ?? "null"}");
+            }
+            finally
+            {
+                _pendingCallbackRequests.TryRemove(requestId, out _);
             }
         }
 
@@ -839,10 +975,8 @@ namespace Microsoft.Build.CommandLine
 
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
-#if !CLR2COMPATIBILITY
             _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
             _registeredTaskObjectCache = null;
-#endif
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
@@ -851,7 +985,7 @@ namespace Microsoft.Build.CommandLine
             // Restore the original environment, best effort.
             try
             {
-                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
             }
             catch (Exception ex)
             {
@@ -870,17 +1004,10 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.Disconnect();
 
             // Dispose these WaitHandles
-#if CLR2COMPATIBILITY
-            _packetReceivedEvent.Close();
-            _shutdownEvent.Close();
-            _taskCompleteEvent.Close();
-            _taskCancelledEvent.Close();
-#else
             _packetReceivedEvent.Dispose();
             _shutdownEvent.Dispose();
             _taskCompleteEvent.Dispose();
             _taskCancelledEvent.Dispose();
-#endif
 
             return _shutdownReason;
         }
@@ -895,6 +1022,18 @@ namespace Microsoft.Build.CommandLine
                 case LinkStatus.ConnectionFailed:
                 case LinkStatus.Failed:
                     _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
+
+                    // Fail all pending callback requests so task threads unblock immediately
+                    // instead of waiting indefinitely for responses that will never arrive.
+                    foreach (var kvp in _pendingCallbackRequests)
+                    {
+                        if (_pendingCallbackRequests.TryRemove(kvp.Key, out TaskCompletionSource<INodePacket> tcs))
+                        {
+                            tcs.TrySetException(new InvalidOperationException(
+                                "TaskHost lost connection to owning worker node during callback."));
+                        }
+                    }
+
                     _shutdownEvent.Set();
                     break;
 
@@ -916,7 +1055,7 @@ namespace Microsoft.Build.CommandLine
             TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
             IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
 
-            // We only really know the values of these variables for sure once we see what we received from our parent
+            // We only really know the values of these variables for sure once we see what we received from the owning worker node
             // environment -- otherwise if this was a completely new build, we could lose out on expected environment
             // variables.
             _debugCommunications = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
@@ -937,6 +1076,7 @@ namespace Microsoft.Build.CommandLine
 
                 // Now set the new environment
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
+                DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
 
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
@@ -944,9 +1084,9 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-#if !CLR2COMPATIBILITY
+
                 TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
-#endif
+
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
@@ -963,9 +1103,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
 #endif
-#if !NET35
                     taskConfiguration.HostServices,
-#endif
                     taskParams);
             }
             catch (ThreadAbortException)
@@ -983,7 +1121,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     _isTaskExecuting = false;
 
-                    IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+                    IDictionary<string, string> currentEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
@@ -1007,7 +1145,7 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                     // Restore the original clean environment
-                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
                 catch (Exception e)
                 {
@@ -1040,7 +1178,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Set the environment for the task host -- includes possibly munging the given
         /// environment somewhat to account for expected environment differences between,
-        /// e.g. parent processes and task hosts of different bitnesses.
+        /// e.g. worker node processes and task hosts of different bitnesses.
         /// </summary>
         private void SetTaskHostEnvironment(IDictionary<string, string> environment)
         {
@@ -1096,7 +1234,7 @@ namespace Microsoft.Build.CommandLine
                 updatedEnvironment = environment;
             }
 
-            CommunicationsUtilities.SetEnvironment(updatedEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(updatedEnvironment);
         }
 
         /// <summary>
@@ -1114,9 +1252,9 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (KeyValuePair<string, KeyValuePair<string, string>> variable in s_mismatchedEnvironmentValues)
                 {
-                    // Since this is munging the property list for returning to the parent process,
+                    // Since this is munging the property list for returning to the owning worker node process,
                     // then the value we wish to replace is the one that is in this process, and the
-                    // replacement value is the one that originally came from the parent process,
+                    // replacement value is the one that originally came from the worker node process,
                     // instead of the other way around.
                     string oldValue = variable.Value.Value;
                     string newValue = variable.Value.Key;

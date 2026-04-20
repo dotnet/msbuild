@@ -231,9 +231,7 @@ namespace Microsoft.Build.BackEnd
             set => _taskFactoryWrapper = value;
         }
 
-#if !NET35
         private HostServices _hostServices;
-#endif
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -273,9 +271,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-#if !NET35
             HostServices hostServices,
-#endif
             bool isOutOfProc,
             CancellationToken cancellationToken,
             TaskEnvironment taskEnvironment)
@@ -292,9 +288,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup = appDomainSetup;
 #endif
-#if !NET35
             _hostServices = hostServices;
-#endif
             IsOutOfProc = isOutOfProc;
             TaskEnvironment = taskEnvironment;
         }
@@ -1002,9 +996,7 @@ namespace Microsoft.Build.BackEnd
                         _buildComponentHost,
                         taskIdentityParameters,
                         _projectFile,
-#if !NET35
                         _hostServices,
-#endif
 #if FEATURE_APPDOMAIN
                         AppDomainSetup,
 #endif
@@ -1502,8 +1494,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // The common case -- all items involved are Microsoft.Build.Execution.ProjectItemInstance.TaskItems.
                                 // Furthermore, because that is true, we know by definition that they also implement ITaskItem2.
-                                // Use the constructor that preserves includeBeforeWildcardExpansionEscaped for RecursiveDir support.
-                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, outputAsProjectItem.IncludeBeforeWildcardExpansionEscaped, parameterLocationEscaped);
+                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
 
                                 newItem.SetMetadata(outputAsProjectItem.MetadataCollection); // copy-on-write!
                             }
@@ -1853,9 +1844,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif
-#if !NET35
                 _hostServices,
-#endif
                 scheduledNodeId,
                 TaskEnvironment);
         }

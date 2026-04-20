@@ -131,11 +131,14 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc />
         public override int GetHashCode()
         {
+            var comparer = StringComparer.OrdinalIgnoreCase;
+
             unchecked
             {
-                var hashCode = (Name != null ? Name.ToLowerInvariant().GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Version != null ? Version.ToLowerInvariant().GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (MinimumVersion != null ? MinimumVersion.ToLowerInvariant().GetHashCode() : 0);
+                int hashCode = 0;
+                hashCode = (hashCode * 397) ^ (Name != null ? comparer.GetHashCode(Name) : 0);
+                hashCode = (hashCode * 397) ^ (Version != null ? comparer.GetHashCode(Version) : 0);
+                hashCode = (hashCode * 397) ^ (MinimumVersion != null ? comparer.GetHashCode(MinimumVersion) : 0);
                 return hashCode;
             }
         }

@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] TouchedFiles { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Importance: high, normal, low (default normal)
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Tasks
                 AbsolutePath path;
                 try
                 {
-                    path = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(file.ItemSpec));
+                    path = TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(file.ItemSpec));
                 }
                 catch (ArgumentException ex)
                 {

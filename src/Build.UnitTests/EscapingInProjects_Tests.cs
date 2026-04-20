@@ -18,12 +18,10 @@ using Microsoft.Build.Utilities;
 #if FEATURE_COMPILE_IN_TESTS
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
 #endif
-using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 #if FEATURE_COMPILE_IN_TESTS
 using Microsoft.Build.Shared;
 #endif
@@ -110,16 +108,16 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
-                    <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
-                    <PropertyGroup>
-                        <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
-                    </PropertyGroup>
-                    <Target Name=`Build`>
-                        <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
-                    </Target>
-                </Project>
-                ", logger: new MockLogger(_output));
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                        <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
+                        <PropertyGroup>
+                            <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
+                        </PropertyGroup>
+                        <Target Name=`Build`>
+                            <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
+                        </Target>
+                    </Project>
+                    ", logger: new MockLogger(_output));
 
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }

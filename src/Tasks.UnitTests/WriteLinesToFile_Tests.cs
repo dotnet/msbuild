@@ -14,7 +14,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -488,9 +487,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
 
                 // Build using ProjectCollection as recommended by Change Waves documentation
+                var logger = new MockLogger(_output);
                 using (var collection = new ProjectCollection(
                     globalProperties: null,
-                    loggers: null,
+                    loggers: [logger],
                     remoteLoggers: null,
                     toolsetDefinitionLocations: ToolsetDefinitionLocations.Default,
                     maxNodeCount: Environment.ProcessorCount,

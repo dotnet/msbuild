@@ -227,7 +227,6 @@ namespace Microsoft.Build.UnitTests
             unquoteParameters.ShouldBeTrue();
         }
 
-#if FEATURE_NODE_REUSE
         [Theory]
         [InlineData("nr")]
         [InlineData("NR")]
@@ -249,7 +248,6 @@ namespace Microsoft.Build.UnitTests
             missingParametersErrorMessage.ShouldNotBeNull();
             unquoteParameters.ShouldBeTrue();
         }
-#endif
 
         [Fact]
         public void ProjectSwitchIdentificationTests()
@@ -1135,6 +1133,7 @@ namespace Microsoft.Build.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.10");
+                ChangeWaves.ResetStateForTests();
 
                 CommandLineSwitches switches = new CommandLineSwitches();
                 switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:Clean;Build", "\"Clean;Build\"", true, true, false);
@@ -1254,7 +1253,6 @@ namespace Microsoft.Build.UnitTests
             Assert.True(switches.HaveAnySwitchesBeenSet());
         }
 
-#if FEATURE_NODE_REUSE
         /// <summary>
         /// /nodereuse:false /nodereuse:true should result in "true"
         /// </summary>
@@ -1276,7 +1274,6 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(nodeReuse);
         }
-#endif
 
         /// <summary>
         /// Regress DDB #143341:

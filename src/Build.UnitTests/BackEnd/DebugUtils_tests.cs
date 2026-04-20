@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Shouldly;
@@ -18,15 +19,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DumpExceptionToFileShouldWriteInDebugDumpPath()
         {
-            ExceptionHandling.ResetDebugDumpPathInRunningTests = true;
-            var exceptionFilesBefore = Directory.GetFiles(ExceptionHandling.DebugDumpPath, "MSBuild_*failure.txt");
+            DebugUtils.ResetDebugDumpPathInRunningTests = true;
+            var exceptionFilesBefore =
+                Directory.Exists(DebugUtils.DebugDumpPath) ? Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt") : Array.Empty<string>();
 
             string[] exceptionFiles = null;
 
             try
             {
-                ExceptionHandling.DumpExceptionToFile(new Exception("hello world"));
-                exceptionFiles = Directory.GetFiles(ExceptionHandling.DebugDumpPath, "MSBuild_*failure.txt");
+                DebugUtils.DumpExceptionToFile(new Exception("hello world"));
+                exceptionFiles = Directory.GetFiles(DebugUtils.DebugDumpPath, "MSBuild_*failure.txt");
             }
             finally
             {
@@ -58,8 +60,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    DebugUtils.SetDebugPath();
-                    string resultPath = DebugUtils.DebugPath;
+                    FrameworkDebugUtils.SetDebugPath();
+                    string resultPath = FrameworkDebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(relativePath, ".MSBuild_Logs"));
                     Directory.Exists(resultPath).ShouldBeTrue();
@@ -69,7 +71,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    DebugUtils.SetDebugPath();
+                    FrameworkDebugUtils.SetDebugPath();
                 }
             }
         }
@@ -93,8 +95,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    DebugUtils.SetDebugPath();
-                    string resultPath = DebugUtils.DebugPath;
+                    FrameworkDebugUtils.SetDebugPath();
+                    string resultPath = FrameworkDebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(fullInSolutionPath, ".MSBuild_Logs"));
                 }
@@ -103,7 +105,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    DebugUtils.SetDebugPath();
+                    FrameworkDebugUtils.SetDebugPath();
                 }
             }
         }
@@ -124,8 +126,8 @@ namespace Microsoft.Build.UnitTests
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
-                    DebugUtils.SetDebugPath();
-                    string resultPath = DebugUtils.DebugPath;
+                    FrameworkDebugUtils.SetDebugPath();
+                    string resultPath = FrameworkDebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
                     resultPath.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), ".MSBuild_Logs"));
                 }
@@ -134,7 +136,7 @@ namespace Microsoft.Build.UnitTests
                     // Reset DebugPath to not affect other tests
                     transientEnvVar.Revert();
                     transientDebugEngine.Revert();
-                    DebugUtils.SetDebugPath();
+                    FrameworkDebugUtils.SetDebugPath();
                 }
             }
         }
@@ -144,7 +146,7 @@ namespace Microsoft.Build.UnitTests
         {
             // When running in the main test process (no /nodemode argument),
             // we should not be in a TaskHost node
-            DebugUtils.IsInTaskHostNode().ShouldBeFalse();
+            FrameworkDebugUtils.IsInTaskHostNode().ShouldBeFalse();
         }
     }
 }

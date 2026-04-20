@@ -19,12 +19,11 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -73,12 +72,6 @@ namespace Microsoft.Build.UnitTests
                 + $"  </Target>\n"
                 + "</Project>");
         }
-
-#if USE_MSBUILD_DLL_EXTN
-        private const string MSBuildExeName = "MSBuild.dll";
-#else
-        private const string MSBuildExeName = "MSBuild.exe";
-#endif
 
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
@@ -567,10 +560,6 @@ namespace Microsoft.Build.UnitTests
 
             List<string> cmdLine = new()
             {
-#if !FEATURE_RUN_EXE_IN_TESTS
-                EnvironmentProvider.GetDotnetExePath(),
-#endif
-                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
                 "-nologo",
                 "-version"
             };
@@ -579,8 +568,8 @@ namespace Microsoft.Build.UnitTests
             {
                 StartInfo =
                 {
-                    FileName = cmdLine[0],
-                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    FileName = RunnerUtilities.PathToCurrentlyRunningMsBuildExe,
+                    Arguments = string.Join(" ", cmdLine),
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                 },
@@ -611,10 +600,6 @@ namespace Microsoft.Build.UnitTests
 
             List<string> cmdLine = new()
             {
-#if !FEATURE_RUN_EXE_IN_TESTS
-                EnvironmentProvider.GetDotnetExePath(),
-#endif
-                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
                 "-nologo",
                 "-version"
             };
@@ -623,8 +608,8 @@ namespace Microsoft.Build.UnitTests
             {
                 StartInfo =
                 {
-                    FileName = cmdLine[0],
-                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    FileName = RunnerUtilities.PathToCurrentlyRunningMsBuildExe,
+                    Arguments = string.Join(" ", cmdLine),
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                 },
@@ -1472,7 +1457,7 @@ namespace Microsoft.Build.UnitTests
                 string rspPath = Path.Combine(directory, AutoResponseFileName);
 
                 exeDirectory = CopyMSBuild();
-                string exePath = Path.Combine(exeDirectory, MSBuildExeName);
+                string exePath = Path.Combine(exeDirectory, Constants.MSBuildExecutableName);
                 string mainRspPath = Path.Combine(exeDirectory, AutoResponseFileName);
 
                 Directory.CreateDirectory(exeDirectory);
@@ -1512,7 +1497,7 @@ namespace Microsoft.Build.UnitTests
                 directory = CopyMSBuild();
                 string projectPath = Path.Combine(directory, "my.proj");
                 string rspPath = Path.Combine(directory, AutoResponseFileName);
-                string exePath = Path.Combine(directory, MSBuildExeName);
+                string exePath = Path.Combine(directory, Constants.MSBuildExecutableName);
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);

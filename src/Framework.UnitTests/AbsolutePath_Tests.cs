@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -30,7 +29,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 // Should throw ArgumentException for any non-absolute path
-                Should.Throw<System.ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: false),
+                Should.Throw<ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: false),
                     $"Path '{path}' should be rejected as it's not a true absolute path");
             }
         }
@@ -45,25 +44,42 @@ namespace Microsoft.Build.UnitTests
             Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [UseInvariantCulture]
-        public void AbsolutePath_NullOrEmpty_ShouldThrow(string? path)
+        [Fact]
+        public void AbsolutePath_NullOrEmpty_ShouldThrowOnNull()
         {
-            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
-            exception.Message.ShouldContain("Path must not be null or empty");
+            string? path = null;
+
+            Should.Throw<ArgumentNullException>(() => new AbsolutePath(path!));
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
+        [Fact]
         [UseInvariantCulture]
-        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrow(string? path)
+        public void AbsolutePath_NullOrEmpty_ShouldThrowOnEmpty()
         {
+            string path = "";
+
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path));
+            exception.Message.ShouldStartWith("The value cannot be an empty string.");
+        }
+
+        [Fact]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnNull()
+        {
+            string? path = null;
             var basePath = GetTestBasePath();
-            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
-            exception.Message.ShouldContain("Path must not be null or empty");
+
+            Should.Throw<ArgumentNullException>(() => new AbsolutePath(path!, basePath));
+        }
+
+        [Fact]
+        [UseInvariantCulture]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnEmpty()
+        {
+            string path = "";
+            var basePath = GetTestBasePath();
+
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path, basePath));
+            exception.Message.ShouldStartWith("The value cannot be an empty string.");
         }
 
         [Theory]
@@ -78,7 +94,7 @@ namespace Microsoft.Build.UnitTests
             var absolutePath = new AbsolutePath(relativePath, basePath);
 
             Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
-            
+
             string expectedPath = Path.Combine(baseDirectory, relativePath);
             absolutePath.Value.ShouldBe(expectedPath);
         }
@@ -165,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (shouldThrow)
             {
-                Should.Throw<System.ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: ignoreRootedCheck));
+                Should.Throw<ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: ignoreRootedCheck));
             }
             else
             {
@@ -220,13 +236,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetCanonicalForm_NullPath_ShouldReturnSameInstance()
+        public void GetCanonicalForm_NullPath_ShouldThrow()
         {
             var absolutePath = new AbsolutePath(null!, null!, ignoreRootedCheck: true);
-            var result = absolutePath.GetCanonicalForm();
-            
-            // Should return the same struct values when no normalization is needed
-            result.ShouldBe(absolutePath);
+
+            Should.Throw<ArgumentNullException>(() => absolutePath.GetCanonicalForm());
         }
 
 
@@ -235,6 +249,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData("C:\\foo\\..\\bar")]                   // Parent directory reference
         [InlineData("C:\\foo/bar")]                        // Forward slash to backslash
         [InlineData("C:\\foo\\bar")]                       // Simple Windows path (no normalization needed)
+        [InlineData("C:\\foo\\\\bar")]                     // Consecutive backslashes
+        [InlineData("C:\\foo\\bar\\\\")]                   // Trailing consecutive backslashes
         public void GetCanonicalForm_WindowsPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
             ValidateGetCanonicalFormMatchesSystem(inputPath);
@@ -245,24 +261,46 @@ namespace Microsoft.Build.UnitTests
         [InlineData("/foo/../bar")]                        // Parent directory reference     
         [InlineData("/foo/bar")]                           // Simple Unix path (no normalization needed)
         [InlineData("/foo/bar\\baz")]                      // Simple Unix path with backslash that is not a path separator (no normalization needed)
+        [InlineData("/foo//bar")]                          // Consecutive forward slashes
+        [InlineData("/foo/bar//")]                         // Trailing consecutive forward slashes
         public void GetCanonicalForm_UnixPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
             ValidateGetCanonicalFormMatchesSystem(inputPath);
         }
-        
+
         private static void ValidateGetCanonicalFormMatchesSystem(string inputPath)
         {
             var absolutePath = new AbsolutePath(inputPath, ignoreRootedCheck: true);
             var result = absolutePath.GetCanonicalForm();
             var systemResult = Path.GetFullPath(inputPath);
-            
+
             // Should match Path.GetFullPath behavior exactly
             result.Value.ShouldBe(systemResult);
-            
+
             // Should preserve original value
             result.OriginalValue.ShouldBe(absolutePath.OriginalValue);
         }
-      
+
+        [Fact]
+        public void GetCanonicalForm_InvalidPathCharacters_ShouldThrowSameAsPathGetFullPath()
+        {
+            // A path containing a null character is invalid on all platforms.
+            // Path.GetFullPath throws for this input; GetCanonicalForm should too.
+            // Construct the path string directly to avoid Path.Combine throwing on .NET Framework.
+            string invalidPath = Path.GetTempPath() + "foo\0bar";
+            var absolutePath = new AbsolutePath(invalidPath, ignoreRootedCheck: true);
+
+            // Capture the exception that Path.GetFullPath would throw
+            Exception? getFullPathException = Record.Exception(() => Path.GetFullPath(invalidPath));
+
+            getFullPathException.ShouldNotBeNull("Path.GetFullPath should throw for a path with null character");
+
+            // GetCanonicalForm should throw the same exception type
+            Should.Throw(
+                () => absolutePath.GetCanonicalForm(),
+                getFullPathException.GetType());
+        }
+
         [WindowsOnlyFact]
         [UseInvariantCulture]
         public void AbsolutePath_NotRooted_ShouldThrowWithLocalizedMessage()

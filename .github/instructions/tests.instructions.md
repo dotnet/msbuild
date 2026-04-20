@@ -31,7 +31,7 @@ Do not specify `xmlns` in test XML snippets unless it is important to the functi
 
 ## Build and Task Testing Helpers
 
-Use `MockLogger` (`Microsoft.Build.UnitTests.MockLogger`) to capture and assert build output. It provides `AssertLogContains`, `AssertLogDoesntContain`, `AssertNoErrors`, `AssertNoWarnings`, and typed event collections (`Errors`, `Warnings`, `TargetStartedEvents`, etc.). Do not assume the test locale will be English--assert on invariant substrings or explicit localized resources, not full English strings.
+Use `MockLogger` (`Microsoft.Build.UnitTests.MockLogger`) to capture and assert build output. It provides `AssertLogContains`, `AssertLogDoesntContain`, `AssertNoErrors`, `AssertNoWarnings`, and typed event collections (`Errors`, `Warnings`, `TargetStartedEvents`, etc.). Do not assume the test locale will be English--assert on invariant substrings or explicit localized resources, not full English strings. Tests that invoke builds via `ProjectCollection` or `BuildManager` must always attach a `MockLogger(_output)` so that build errors and warnings appear in the .trx test output for CI diagnostics.
 
 Use `MockEngine` (`Microsoft.Build.UnitTests.MockEngine`) as an `IBuildEngine` implementation for testing individual tasks in isolation without a full build.
 

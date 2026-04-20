@@ -316,7 +316,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="InvalidNoLogoValue">
         <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1071: Wartość NoLogo jest nieprawidłowa. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1071: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -671,8 +671,8 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
-                       Specify -nologo:false to explicitly show the logo.
+        <target state="translated">  -noLogo[:true|false] Nie wyświetlaj baneru startowego ani komunikatu o prawach autorskich.
+                       Użyj -nologo:false, aby wyraźnie pokazać logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:

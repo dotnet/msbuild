@@ -968,5 +968,51 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var buildResult = new BuildResult(_defaultParentRequest);
             _scheduler.ReportResult(_defaultParentRequest.NodeRequestId, buildResult);
         }
+
+        [Fact]
+        public void ScheduleTimeRecord_AccumulatedTime_DoesNotThrowWhenTimerIsRunning()
+        {
+            var record = new ScheduleTimeRecord();
+            DateTime startTime = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // Before starting: accumulated time should be zero.
+            record.AccumulatedTime.ShouldBe(TimeSpan.Zero);
+
+            // Start the timer.
+            record.StartState(startTime);
+
+            // While running: should NOT throw — should return a positive elapsed time.
+            record.AccumulatedTime.ShouldBeGreaterThan(TimeSpan.Zero);
+
+            // Stop the timer.
+            DateTime endTime = startTime.AddMilliseconds(500);
+            record.EndState(endTime);
+
+            // After stopping: should return the accumulated time.
+            record.AccumulatedTime.ShouldBe(TimeSpan.FromMilliseconds(500));
+        }
+
+        [Fact]
+        public void ScheduleTimeRecord_AccumulatedTime_IncludesPreviousAccumulation()
+        {
+            var record = new ScheduleTimeRecord();
+            DateTime t0 = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // First interval: 200ms.
+            record.StartState(t0);
+            record.EndState(t0.AddMilliseconds(200));
+            record.AccumulatedTime.ShouldBe(TimeSpan.FromMilliseconds(200));
+
+            // Start a second interval.
+            record.StartState(t0.AddMilliseconds(300));
+
+            // While second interval is running: should include the 200ms from
+            // the first interval plus the elapsed time of the current interval.
+            record.AccumulatedTime.ShouldBeGreaterThan(TimeSpan.FromMilliseconds(200));
+
+            // Stop second interval after 100ms.
+            record.EndState(t0.AddMilliseconds(400));
+            record.AccumulatedTime.ShouldBe(TimeSpan.FromMilliseconds(300));
+        }
     }
 }
