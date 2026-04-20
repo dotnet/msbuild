@@ -23,6 +23,7 @@ safe-outputs:
     max: 30
   submit-pull-request-review:
     max: 1
+    allowed-events: [COMMENT, REQUEST_CHANGES]
   add-comment:
     max: 5
 ---
