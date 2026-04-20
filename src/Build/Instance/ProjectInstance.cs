@@ -1421,9 +1421,9 @@ namespace Microsoft.Build.Execution
                 _environmentVariableProperties.Remove(name);
             }
 
-            // Set the property, overriding ambient environment variables but not regular properties defined in XML.
-            // If we're overriding an ambient variable, or if the property doesn't exist, set it.
-            // Otherwise, prioritize regular properties defined in XML.
+            // Set the property, overriding ambient environment variables but not regular properties defined in XML (aka if the Property explicitly exists already).
+            // We have to logically 'set' a property here to do the ambient override (marking this set as coming from an env var) but we're not actually 'overridding'
+            // a pre-existing Property.
             if (overridingAmbient || GetProperty(name) is null)
             {
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
