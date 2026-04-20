@@ -26,7 +26,8 @@ internal static class StringBuilderCache
     /// </summary>
     /// <param name="capacity">The suggested starting size of this instance.</param>
     /// <returns>
-    ///  A <see cref="StringBuilder"/> that may or may not be reused.</returns>
+    ///  A <see cref="StringBuilder"/> that may or may not be reused.
+    /// </returns>
     /// <remarks>
     ///  <para>
     ///   Can be called any number of times. If a <see cref="StringBuilder"/> is in the cache then
