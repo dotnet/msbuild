@@ -2,19 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 #if FEATURE_WINDOWSINTEROP
+using System.Collections.Generic;
+using System.Diagnostics;
+using Microsoft.Build.Utilities;
+using Microsoft.Win32.SafeHandles;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Storage.FileSystem;
@@ -121,12 +121,12 @@ internal static class NativeMethods
         /// </summary>
         public readonly ProcessorArchitectures ProcessorArchitectureTypeNative;
 
+#if FEATURE_WINDOWSINTEROP
         /// <summary>
         /// Convert SYSTEM_INFO architecture values to the internal enum
         /// </summary>
         /// <param name="arch"></param>
         /// <returns></returns>
-#if FEATURE_WINDOWSINTEROP
         private static ProcessorArchitectures ConvertSystemArchitecture(PROCESSOR_ARCHITECTURE arch)
         {
             return arch switch
@@ -895,12 +895,12 @@ internal static class NativeMethods
         }
     }
 
+#if FEATURE_WINDOWSINTEROP
     /// <summary>
     /// Get the SafeFileHandle for a file, while skipping reparse points (going directly to target file).
     /// </summary>
     /// <param name="fullPath">Full path to the file in the filesystem</param>
     /// <returns>the SafeFileHandle for a file (target file in case of symlinks)</returns>
-#if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
     private static unsafe SafeFileHandle OpenFileThroughSymlinks(string fullPath)
     {
