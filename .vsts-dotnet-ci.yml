@@ -6,8 +6,8 @@ trigger:
     - vs*
   paths:
     exclude:
-    - documentation/*
-    - .github/*
+    - documentation/**
+    - .github/**
 
 variables:
 - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
