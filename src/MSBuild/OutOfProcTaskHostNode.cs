@@ -1104,8 +1104,7 @@ namespace Microsoft.Build.CommandLine
             if (!_taskContexts.TryAdd(taskId, context))
             {
                 context.Dispose();
-                throw new InvalidOperationException(
-                    $"Task ID {taskId} already exists in TaskHost.");
+                ErrorUtilities.ThrowInternalError("Task ID {0} already exists in TaskHost.", taskId);
             }
 
             return context;
