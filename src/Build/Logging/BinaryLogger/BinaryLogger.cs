@@ -48,7 +48,7 @@ namespace Microsoft.Build.Logging
     /// text logs that erase a lot of useful information.
     /// </summary>
     /// <remarks>The logger is public so that it can be instantiated from MSBuild.exe via command-line switch.</remarks>
-    public sealed class BinaryLogger : ILogger
+    public sealed class BinaryLogger : ILogger, IFileOutputLogger
     {
         // version 2:
         //   - new BuildEventContext.EvaluationId
@@ -296,6 +296,9 @@ namespace Microsoft.Build.Logging
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
         internal string FilePath { get; private set; }
+
+        /// <inheritdoc/>
+        string IFileOutputLogger.OutputFilePath => FilePath;
 
         /// <summary>
         /// Gets or sets additional output file paths. When set, the binlog will be copied to all these paths

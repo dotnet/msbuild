@@ -171,8 +171,8 @@
     <value>Build succeeded.</value>
   </data>
   <data name="LogFileOutputPath" xml:space="preserve">
-    <value>{0} output file: {1}</value>
-    <comment>{0} is the log type (e.g. "Binary log", "File log"). {1} is the full file path.</comment>
+    <value>Log output file: {0}</value>
+    <comment>{0} is the full file path.</comment>
   </data>
   <data name="LogEnabledLogs" xml:space="preserve">
     <value>Enabled logs: {0}</value>
