@@ -240,6 +240,11 @@ namespace Microsoft.Build.Logging
         private string _logFileName = "msbuild.log";
 
         /// <summary>
+        /// The path to the log file.
+        /// </summary>
+        internal string FilePath => Path.GetFullPath(_logFileName);
+
+        /// <summary>
         /// fileWriter is the stream that has been opened on our log file.
         /// </summary>
         private StreamWriter _fileWriter;

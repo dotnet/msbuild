@@ -585,6 +585,16 @@
         <target state="translated">Идет загрузка следующего подключаемого модуля кэша проектов: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled logs: {0}</source>
+        <target state="new">Enabled logs: {0}</target>
+        <note>{0} is a comma-separated list of log types (e.g. "Binary log", "File log").</note>
+      </trans-unit>
+      <trans-unit id="LogFileOutputPath">
+        <source>{0} output file: {1}</source>
+        <target state="new">{0} output file: {1}</target>
+        <note>{0} is the log type (e.g. "Binary log", "File log"). {1} is the full file path.</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Уровень детализации журнала: {0}.</target>
