@@ -964,9 +964,9 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            // No pending request matched -- trace for diagnostic visibility.
-            // This is an engine error state (protocol bug or race), not a user scenario.
-            CommunicationsUtilities.Trace("TaskHost received callback response with no pending request. RequestId={0}, Type={1}",
+            // No pending request matched -- this is a protocol bug (duplicate response,
+            // corrupted request ID, or race with shutdown). Crash to surface the issue.
+            ErrorUtilities.ThrowInternalError("TaskHost received callback response with no pending request. RequestId={0}, Type={1}",
                 callbackPacket.RequestId, packet.Type);
         }
 
