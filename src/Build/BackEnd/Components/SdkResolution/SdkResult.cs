@@ -153,7 +153,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     foreach (var envVarToAdd in _environmentVariablesToAdd)
                     {
-                        if (result._environmentVariablesToAdd[envVarToAdd.Key] != envVarToAdd.Value)
+                        // different if key not found _or_ key found and not equal
+                        if (!result._environmentVariablesToAdd.TryGetValue(envVarToAdd.Key, out string otherEnvVarValue) || otherEnvVarValue != envVarToAdd.Value)
                         {
                             return false;
                         }
