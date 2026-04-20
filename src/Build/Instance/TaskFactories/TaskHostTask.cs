@@ -303,116 +303,121 @@ namespace Microsoft.Build.BackEnd
         public bool Execute()
         {
             MSBuildEventSource.Log.TaskHostDispatchStart(_taskType.Type.FullName);
-
-            _taskLoggingContext.LogComment(
-                MessageImportance.Low,
-                "ExecutingTaskInTaskHost",
-                _taskType.Type.Name,
-                _taskType.Assembly.AssemblyLocation,
-                _taskHostParameters.Runtime,
-                _taskHostParameters.Architecture);
-
-            // set up the node
-            lock (_taskHostLock)
-            {
-                _taskHostProvider = (NodeProviderOutOfProcTaskHost)_buildComponentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-                ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
-            }
-
-            string taskLocation = AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly);
-            if (string.IsNullOrEmpty(taskLocation))
-            {
-                // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
-                taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
-            }
-
-            TaskHostConfiguration hostConfiguration =
-                new TaskHostConfiguration(
-                        _buildComponentHost.BuildParameters.NodeId,
-                        _taskEnvironment.ProjectDirectory,
-                        (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
-                        _buildComponentHost.BuildParameters.Culture,
-                        _buildComponentHost.BuildParameters.UICulture,
-                        _hostServices,
-#if FEATURE_APPDOMAIN
-                        _appDomainSetup,
-#endif
-                        BuildEngine.LineNumberOfTaskNode,
-                        BuildEngine.ColumnNumberOfTaskNode,
-                        BuildEngine.ProjectFileOfTaskNode,
-                        BuildEngine.ContinueOnError,
-                        _taskType.Type.FullName,
-                        taskLocation,
-                        _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
-                        _projectFile,
-                        _buildComponentHost.BuildParameters.LogTaskInputs,
-                        _setParameters,
-                        GetGlobalPropertiesForTaskHost(),
-                        _taskLoggingContext.GetWarningsAsErrors(),
-                        _taskLoggingContext.GetWarningsNotAsErrors(),
-                        _taskLoggingContext.GetWarningsAsMessages());
-
             try
             {
+                _taskLoggingContext.LogComment(
+                    MessageImportance.Low,
+                    "ExecutingTaskInTaskHost",
+                    _taskType.Type.Name,
+                    _taskType.Assembly.AssemblyLocation,
+                    _taskHostParameters.Runtime,
+                    _taskHostParameters.Architecture);
+
+                // set up the node
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
-                        taskHost: true,
-
-                        // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
-                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost,
-                        taskHostParameters: _taskHostParameters);
-
-                    _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_taskHostNodeKey, this, this, hostConfiguration, _taskHostParameters);
+                    _taskHostProvider = (NodeProviderOutOfProcTaskHost)_buildComponentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+                    ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
                 }
 
-                if (_connectedToTaskHost)
+                string taskLocation = AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly);
+                if (string.IsNullOrEmpty(taskLocation))
                 {
-                    try
+                    // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
+                    taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
+                }
+
+                TaskHostConfiguration hostConfiguration =
+                    new TaskHostConfiguration(
+                            _buildComponentHost.BuildParameters.NodeId,
+                            _taskEnvironment.ProjectDirectory,
+                            (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
+                            _buildComponentHost.BuildParameters.Culture,
+                            _buildComponentHost.BuildParameters.UICulture,
+                            _hostServices,
+#if FEATURE_APPDOMAIN
+                            _appDomainSetup,
+#endif
+                            BuildEngine.LineNumberOfTaskNode,
+                            BuildEngine.ColumnNumberOfTaskNode,
+                            BuildEngine.ProjectFileOfTaskNode,
+                            BuildEngine.ContinueOnError,
+                            _taskType.Type.FullName,
+                            taskLocation,
+                            _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
+                            _projectFile,
+                            _buildComponentHost.BuildParameters.LogTaskInputs,
+                            _setParameters,
+                            GetGlobalPropertiesForTaskHost(),
+                            _taskLoggingContext.GetWarningsAsErrors(),
+                            _taskLoggingContext.GetWarningsNotAsErrors(),
+                            _taskLoggingContext.GetWarningsAsMessages());
+
+                try
+                {
+                    lock (_taskHostLock)
                     {
-                        bool taskFinished = false;
+                        _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
+                            taskHost: true,
 
-                        while (!taskFinished)
+                            // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
+                            nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost,
+                            taskHostParameters: _taskHostParameters);
+
+                        _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
+                        _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_taskHostNodeKey, this, this, hostConfiguration, _taskHostParameters);
+                    }
+
+                    if (_connectedToTaskHost)
+                    {
+                        try
                         {
-                            _packetReceivedEvent.WaitOne();
+                            bool taskFinished = false;
 
-                            INodePacket packet = null;
-
-                            // Handle the packet that's coming in
-                            while (_receivedPackets.TryDequeue(out packet))
+                            while (!taskFinished)
                             {
-                                if (packet != null)
+                                _packetReceivedEvent.WaitOne();
+
+                                INodePacket packet = null;
+
+                                // Handle the packet that's coming in
+                                while (_receivedPackets.TryDequeue(out packet))
                                 {
-                                    HandlePacket(packet, out taskFinished);
+                                    if (packet != null)
+                                    {
+                                        HandlePacket(packet, out taskFinished);
+                                    }
                                 }
                             }
                         }
-                    }
-                    finally
-                    {
-                        lock (_taskHostLock)
+                        finally
                         {
-                            _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
-                            _connectedToTaskHost = false;
+                            lock (_taskHostLock)
+                            {
+                                _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
+                                _connectedToTaskHost = false;
+                            }
                         }
                     }
+                    else
+                    {
+                        LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
+                    }
                 }
-                else
+                catch (BuildAbortedException ex)
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex);
+                }
+                catch (NodeFailedToLaunchException e)
+                {
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
                 }
             }
-            catch (BuildAbortedException ex)
+            finally
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex);
-            }
-            catch (NodeFailedToLaunchException e)
-            {
-                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
+                MSBuildEventSource.Log.TaskHostDispatchStop(_taskType.Type.FullName, _taskExecutionSucceeded);
             }
 
-            MSBuildEventSource.Log.TaskHostDispatchStop(_taskType.Type.FullName, _taskExecutionSucceeded);
             return _taskExecutionSucceeded;
         }
 
