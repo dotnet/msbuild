@@ -30,6 +30,7 @@ namespace Microsoft.Build.Tasks
     /// <comment>
     /// Currently only supports writing .NET attributes.
     /// </comment>
+    [MSBuildMultiThreadableTask]
     public class WriteCodeFragment : TaskExtension, IMultiThreadableTask
     {
         /// <inheritdoc />

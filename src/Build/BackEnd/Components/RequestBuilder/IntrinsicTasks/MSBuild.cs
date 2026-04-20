@@ -19,6 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// <remarks>
     /// This class implements the "MSBuild" task, which hands off child project files to the MSBuild engine to be built.
     /// </remarks>
+    [MSBuildMultiThreadableTask]
     internal class MSBuild : ITask, IMultiThreadableTask
     {
         /// <summary>

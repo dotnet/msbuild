@@ -16,6 +16,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Appends a list of items to a file. One item per line with carriage returns in-between.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class WriteLinesToFile : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         // Default encoding taken from System.IO.WriteAllText()

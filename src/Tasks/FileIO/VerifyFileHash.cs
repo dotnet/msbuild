@@ -13,6 +13,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Verifies that a file matches the expected file hash.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public sealed class VerifyFileHash : TaskExtension, ICancelableTask, IMultiThreadableTask
     {
         /// <inheritdoc />

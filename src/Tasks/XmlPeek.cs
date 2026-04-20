@@ -19,6 +19,7 @@ namespace Microsoft.Build.Tasks
     /// A task that returns values as specified by XPath Query
     /// from an XML file.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class XmlPeek : TaskExtension, IMultiThreadableTask
     {
         #region Properties

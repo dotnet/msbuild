@@ -21,6 +21,7 @@ namespace Microsoft.Build.Tasks
     /// but this could restriction could be lifted as MoveFileEx,
     /// which is used here, supports it.
     /// </remarks>
+    [MSBuildMultiThreadableTask]
     public class Move : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>

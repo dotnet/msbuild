@@ -15,6 +15,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Given a list of items, determine which are in the cone of the folder passed in and which aren't.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class FindUnderPath : TaskExtension, IMultiThreadableTask
     {
         /// <summary>

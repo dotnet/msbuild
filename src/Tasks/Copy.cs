@@ -21,6 +21,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that copies files.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class Copy : TaskExtension, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
 

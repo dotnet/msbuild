@@ -18,6 +18,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Returns paths to the frameworks SDK.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class GetFrameworkSdkPath : TaskExtension, IGetFrameworkSdkPathTaskContract
     {
         #region Properties
@@ -398,6 +399,8 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 #else
+
+    [MSBuildMultiThreadableTask]
     public sealed class GetFrameworkSdkPath : TaskRequiresFramework, IGetFrameworkSdkPathTaskContract
     {
         public GetFrameworkSdkPath()

@@ -17,6 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Delete files from disk.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class Delete : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         #region Properties

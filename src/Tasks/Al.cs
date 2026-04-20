@@ -19,6 +19,7 @@ namespace Microsoft.Build.Tasks
     /// This class defines the "AL" XMake task, which enables using al.exe to link
     /// modules and resource files into assemblies.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class AL : ToolTaskExtension, IALTaskContract
     {
         #region Properties
@@ -407,6 +408,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Stub AL task for .NET Core.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public sealed class AL : TaskRequiresFramework, IALTaskContract
     {
         public AL()
