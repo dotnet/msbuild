@@ -46,7 +46,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     { "item1", new SdkResultItem("spec1", new Dictionary<string, string>()) },
                 });
 
+            // Assert both directions because the bug was asymmetric:
+            // result1.Equals(result2) could differ from result2.Equals(result1).
             result1.ShouldNotBe(result2);
+            result2.ShouldNotBe(result1);
         }
 
         [Fact]
