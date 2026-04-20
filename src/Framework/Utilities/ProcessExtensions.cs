@@ -247,15 +247,13 @@ namespace Microsoft.Build.Shared
             internal static unsafe string? GetCommandLineViaWmi(int processId)
             {
                 HRESULT hr = PInvoke.CoInitializeSecurity(
-                    default,
-                    -1,
-                    null,
-                    null,
-                    RPC_C_AUTHN_LEVEL.RPC_C_AUTHN_LEVEL_DEFAULT,
-                    RPC_C_IMP_LEVEL.RPC_C_IMP_LEVEL_IMPERSONATE,
-                    null,
-                    EOLE_AUTHENTICATION_CAPABILITIES.EOAC_NONE,
-                    null);
+                    pSecDesc: default,
+                    cAuthSvc: -1,
+                    asAuthSvc: null,
+                    dwAuthnLevel: RPC_C_AUTHN_LEVEL.RPC_C_AUTHN_LEVEL_DEFAULT,
+                    dwImpLevel: RPC_C_IMP_LEVEL.RPC_C_IMP_LEVEL_IMPERSONATE,
+                    pAuthList: null,
+                    dwCapabilities: EOLE_AUTHENTICATION_CAPABILITIES.EOAC_NONE);
 
                 // RPC_E_TOO_LATE (0x80010119) means another call already set security — not fatal.
                 if (hr.Failed && hr != HRESULT.RPC_E_TOO_LATE)
@@ -292,14 +290,14 @@ namespace Microsoft.Build.Shared
                 }
 
                 hr = PInvoke.CoSetProxyBlanket(
-                    (IUnknown*)services.Pointer,
-                    PInvoke.RPC_C_AUTHN_WINNT,
-                    PInvoke.RPC_C_AUTHZ_NONE,
-                    default,
-                    RPC_C_AUTHN_LEVEL.RPC_C_AUTHN_LEVEL_CALL,
-                    RPC_C_IMP_LEVEL.RPC_C_IMP_LEVEL_IMPERSONATE,
-                    null,
-                    EOLE_AUTHENTICATION_CAPABILITIES.EOAC_NONE);
+                    pProxy: (IUnknown*)services.Pointer,
+                    dwAuthnSvc: PInvoke.RPC_C_AUTHN_WINNT,
+                    dwAuthzSvc: PInvoke.RPC_C_AUTHZ_NONE,
+                    pServerPrincName: default,
+                    dwAuthnLevel: RPC_C_AUTHN_LEVEL.RPC_C_AUTHN_LEVEL_CALL,
+                    dwImpLevel: RPC_C_IMP_LEVEL.RPC_C_IMP_LEVEL_IMPERSONATE,
+                    pAuthInfo: null,
+                    dwCapabilities: EOLE_AUTHENTICATION_CAPABILITIES.EOAC_NONE);
 
                 if (hr.Failed)
                 {

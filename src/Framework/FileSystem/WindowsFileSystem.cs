@@ -64,7 +64,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
             uint attrs = PInvoke.GetFileAttributes(path);
             return attrs != PInvoke.INVALID_FILE_ATTRIBUTES
-                && ((FILE_FLAGS_AND_ATTRIBUTES)attrs).HasFlag(FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY);
+                && (attrs & (uint)FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0;
         }
 
         public override bool FileExists(string path)
