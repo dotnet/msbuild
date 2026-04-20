@@ -363,7 +363,7 @@ namespace Microsoft.Build.BackEnd.Logging
             WaitForLoggingToProcessEvents();
 
             // Print out all enabled logs.
-            LogLoggersUsed(fileNames: false);
+            LogEnabledLoggers();
         }
 
         /// <summary>
@@ -387,7 +387,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
             // Before ending the build, print out all logs that outputted a file and the location of the file.
-            LogLoggersUsed(fileNames: true);
+            LogFileNamesOfLoggersUsed();
 
             BuildFinishedEventArgs buildEvent = new BuildFinishedEventArgs(message, null /* no help keyword */, success);
 
@@ -398,55 +398,59 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Prints either the names of enabled logs (except for Forwarding logs)
-        /// or the file paths of the logs, depending on the value of the fileNames parameter.
+        /// Logs the names of enabled logs (except for Forwarding logs).
         /// </summary>
-        /// <param name="fileNames">If true, logs the file paths of the logs; otherwise, logs the names of the enabled logs.</param>
-        private void LogLoggersUsed(bool fileNames)
+        private void LogEnabledLoggers()
         {
-            var list_of_log_names = new List<string>();
+            List<string> listOfLoggers = new();
             foreach (ILogger logger in Loggers)
             {
-                ILogger actual = logger is ReusableLogger reusable
-                    ? reusable.OriginalLogger
-                    : logger;
-                // We don't want to log the name of the forwarding logger, since it may be confusing.
-                if (actual is CentralForwardingLogger == true)
+                ILogger actualLogger = UnwrapLogger(logger);
+                if (actualLogger is CentralForwardingLogger == true)
                 {
                     continue;
                 }
-
-                if (fileNames)
-                {
-                    (string logType, string path) = actual switch
-                    {
-                        BinaryLogger bl => ("Binary log", bl.FilePath),
-                        FileLogger fl => ("File log", fl.FilePath),
-                        _ => (null, null)
-                    };
-                    if (!string.IsNullOrEmpty(path))
-                    {
-                        var msgEvent = new BuildMessageEventArgs(
-                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logType, path),
-                            null, null, MessageImportance.High);
-                        msgEvent.BuildEventContext = BuildEventContext.Invalid;
-                        ProcessLoggingEvent(msgEvent);
-                    }
-                }
-                else
-                {
-                    list_of_log_names.Add(actual.GetType().Name);
-                }
+                listOfLoggers.Add(actualLogger.GetType().Name);
             }
-            if (list_of_log_names.Count != 0)
+            if (listOfLoggers.Count != 0)
             {
                 var msgEvent = new BuildMessageEventArgs(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", list_of_log_names)),
-                    null, null, MessageImportance.High);
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", listOfLoggers)),
+                    null, null, MessageImportance.Low);
                 msgEvent.BuildEventContext = BuildEventContext.Invalid;
                 ProcessLoggingEvent(msgEvent);
             }
         }
+
+        /// <summary>
+        /// Logs the file paths of enabled logs. 
+        /// </summary>
+        private void LogFileNamesOfLoggersUsed()
+        {
+            foreach (ILogger logger in Loggers)
+            {
+                ILogger actualLogger = UnwrapLogger(logger);
+                if (actualLogger is IFileOutputLogger fileLogger && !string.IsNullOrEmpty(fileLogger.OutputFilePath))
+                {
+                    var msgEvent = new BuildMessageEventArgs(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", fileLogger.OutputFilePath),
+                        null, null, MessageImportance.Low);
+                    msgEvent.BuildEventContext = BuildEventContext.Invalid;
+                    ProcessLoggingEvent(msgEvent);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unwraps the name of the logger to get the actual logger.
+        /// </summary>
+        /// <param name="logger">A logger to unwrap.</param>
+        /// <returns>The actual logger.</returns>
+        private ILogger UnwrapLogger(ILogger logger)
+        {
+            return logger is ReusableLogger reusable ? reusable.OriginalLogger : logger;
+        }
+
         /// <inheritdoc />
         public void LogBuildCanceled()
         {

@@ -1070,7 +1070,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 .OfType<BuildMessageEventArgs>()
                 .FirstOrDefault(e => e.Message.Contains("test.binlog"));
             Assert.NotNull(pathMessage);
-            Assert.Contains("Binary log", pathMessage.Message);
+            Assert.Contains("Log output file", pathMessage.Message);
         }
 
         [Fact]
