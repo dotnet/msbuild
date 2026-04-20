@@ -23,44 +23,14 @@ using System.Text.RegularExpressions;
 using System.Runtime.Versioning;
 using Microsoft.Build.Utilities;
 
+#if FEATURE_MSCOREE
+using Windows.Win32.Foundation;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
-    /// <summary>
-    /// The original ITypeInfo interface in the CLR has incorrect definitions for GetRefTypeOfImplType and GetRefTypeInfo.
-    /// It uses ints for marshalling handles which will result in a crash on 64 bit systems. This is a temporary interface
-    /// for use until the one in the CLR is fixed. When it is we can go back to using ITypeInfo.
-    /// </summary>
-    [Guid("00020401-0000-0000-C000-000000000046")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [ComImport]
-    public interface IFixedTypeInfo
-    {
-        void GetTypeAttr(out IntPtr ppTypeAttr);
-        void GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp);
-        void GetFuncDesc(int index, out IntPtr ppFuncDesc);
-        void GetVarDesc(int index, out IntPtr ppVarDesc);
-        void GetNames(int memid, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2), Out] String[] rgBstrNames, int cMaxNames, out int pcNames);
-        void GetRefTypeOfImplType(int index, out IntPtr href);
-        void GetImplTypeFlags(int index, out System.Runtime.InteropServices.ComTypes.IMPLTYPEFLAGS pImplTypeFlags);
-        void GetIDsOfNames([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 1), In] String[] rgszNames, int cNames, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1), Out] int[] pMemId);
-        void Invoke([MarshalAs(UnmanagedType.IUnknown)] Object pvInstance, int memid, Int16 wFlags, ref System.Runtime.InteropServices.ComTypes.DISPPARAMS pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, out int puArgErr);
-        void GetDocumentation(int index, out String strName, out String strDocString, out int dwHelpContext, out String strHelpFile);
-        void GetDllEntry(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, IntPtr pBstrDllName, IntPtr pBstrName, IntPtr pwOrdinal);
-        void GetRefTypeInfo(IntPtr hRef, out IFixedTypeInfo ppTI);
-        void AddressOfMember(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, out IntPtr ppv);
-        void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] Object pUnkOuter, [In] ref Guid riid, [MarshalAs(UnmanagedType.IUnknown), Out] out Object ppvObj);
-        void GetMops(int memid, out String pBstrMops);
-        void GetContainingTypeLib(out System.Runtime.InteropServices.ComTypes.ITypeLib ppTLB, out int pIndex);
-        [PreserveSig]
-        void ReleaseTypeAttr(IntPtr pTypeAttr);
-        [PreserveSig]
-        void ReleaseFuncDesc(IntPtr pFuncDesc);
-        [PreserveSig]
-        void ReleaseVarDesc(IntPtr pVarDesc);
-    }
-
     [GuidAttribute("00020406-0000-0000-C000-000000000046")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
@@ -1107,7 +1077,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
         /// <returns>HResult.</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern unsafe uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
+        internal static extern unsafe HRESULT GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
 #endif
         #endregion
 

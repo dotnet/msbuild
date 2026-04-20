@@ -14,11 +14,13 @@ namespace Microsoft.Build.Shared.FileSystem
 
         private static IFileSystem GetFileSystem()
         {
+#if FEATURE_WINDOWSINTEROP
             if (NativeMethods.IsWindows)
             {
                 return MSBuildOnWindowsFileSystem.Singleton();
             }
             else
+#endif
             {
                 return ManagedFileSystem.Singleton();
             }
