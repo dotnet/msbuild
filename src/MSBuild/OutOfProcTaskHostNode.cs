@@ -1082,7 +1082,9 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Gets the configuration for the currently executing task on this thread.
-        /// Uses the thread-local task context if available, falling back to the global configuration.
+        /// On task threads, returns the per-task context configuration.
+        /// On the main communication thread (e.g., infrastructure logging), the context
+        /// is null so this falls back to the global <see cref="_currentConfiguration"/>.
         /// </summary>
         private TaskHostConfiguration GetCurrentConfiguration()
         {
