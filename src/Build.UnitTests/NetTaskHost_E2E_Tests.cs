@@ -316,10 +316,6 @@ namespace Microsoft.Build.Engine.UnitTests
             successTestTask.ShouldBeTrue();
 
             // Both the parent task and child task should report TASKHOST_PID
-            testTaskOutput.ShouldContain("TASKHOST_PID=");
-            testTaskOutput.ShouldContain("PARENT_TASKHOST_PID=");
-            testTaskOutput.ShouldContain("CHILD_TASKHOST_PID=");
-
             // Extract PIDs from output and verify they match (same process reused)
             var parentPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"PARENT_TASKHOST_PID=(\d+)");
             var childPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"CHILD_TASKHOST_PID=(\d+)");
