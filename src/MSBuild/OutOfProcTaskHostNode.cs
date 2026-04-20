@@ -1170,9 +1170,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleTaskHostConfiguration(TaskHostConfiguration taskHostConfiguration)
         {
-            // Allow new configuration when no task is actively executing.
-            // A task blocked on a BuildProjectFile callback does NOT prevent
-            // a new task from starting - this enables nested build scenarios.
+            // Only _activeTaskCount must be zero — blocked tasks (waiting on BuildProjectFile
+            // callbacks) don't prevent accepting a new nested task configuration.
             ErrorUtilities.VerifyThrow(_activeTaskCount == 0,
                 "Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={0}",
                 _activeTaskCount);
@@ -1200,8 +1199,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void CompleteTask()
         {
-            // Only the active (topmost) task can complete. Blocked tasks are waiting
-            // on a callback response and can't finish until they resume.
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active && _taskCompletePacket is not null)
             {
                 _nodeEndpoint.SendData(_taskCompletePacket);
@@ -1490,18 +1487,13 @@ namespace Microsoft.Build.CommandLine
             {
                 try
                 {
-                    // Reconcile counters: if the task is still blocked on a callback
-                    // (shouldn't happen -- BlockForCallback/ResumeAfterCallback are paired),
-                    // fix up the counters defensively.
-                    if (taskContext is not null && taskContext.State == TaskExecutionState.BlockedOnCallback)
-                    {
-                        Interlocked.Decrement(ref _blockedTaskCount);
-                        // Don't decrement _activeTaskCount -- it was already decremented by BlockForCallback
-                    }
-                    else
-                    {
-                        Interlocked.Decrement(ref _activeTaskCount);
-                    }
+                    // BlockForCallback/ResumeAfterCallback are always paired, so a task
+                    // should never be in BlockedOnCallback state when it completes.
+                    ErrorUtilities.VerifyThrow(
+                        taskContext is null || taskContext.State != TaskExecutionState.BlockedOnCallback,
+                        "Task completed while still in BlockedOnCallback state.");
+
+                    Interlocked.Decrement(ref _activeTaskCount);
 
                     IDictionary<string, string> currentEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
