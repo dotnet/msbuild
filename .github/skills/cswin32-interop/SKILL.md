@@ -387,20 +387,32 @@ DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
 - **Nullable structs**: `PInvoke.CreateFile(..., (SECURITY_ATTRIBUTES?)null, ...)`
 - **`BOOL` vs `bool`**: CsWin32 returns `BOOL` struct; implicit conversion usually works
 - **`HANDLE` ↔ `IntPtr`**: `(HANDLE)intPtr` / `(IntPtr)handle.Value`. Sentinels: `HANDLE.Null`, `HANDLE.INVALID_HANDLE_VALUE`
-- **Enum casting**: `(STD_HANDLE)nStdHandle`. Prefer `.HasFlag()` over bitwise-AND
+- **Enum casting**: `(STD_HANDLE)nStdHandle`. Use bitwise `&` for flag checks — `HasFlag()` boxes on .NET Framework
 - **Anonymous unions**: Access via `systemInfo.Anonymous.Anonymous.wProcessorArchitecture` — check generated source in `obj/`
 - **`SafeFileHandle`**: Create with `new SafeFileHandle((IntPtr)h.Value, true)`. Pass with `(HANDLE)handle.DangerousGetHandle()`
 
 ### Build Warnings
 
-- **IDE0005**: Guard `using` directives with `#if FEATURE_WINDOWSINTEROP` (or matching compound guard)
-- **CS1587**: Move XML doc comments **inside** `#if` blocks, not before them
+- **IDE0005**: Guard `using` directives with `#if FEATURE_WINDOWSINTEROP` (or matching compound guard). Any `using` only referenced inside a feature-guarded block must itself be guarded.
+- **IDE0051/IDE0052**: Private members (methods, fields) only used inside `#if FEATURE_WINDOWSINTEROP` blocks must also be guarded. This includes helper methods called only from Windows code paths and fields read only inside the guard.
+- **CS1587**: Move XML doc comments **inside** `#if` blocks, not before them. A `/// <summary>` before `#if FEATURE_WINDOWSINTEROP` is orphaned in source builds.
 - **DefaultItemExcludes**: For net472-only polyfill folders, exclude from other TFMs:
   ```xml
   <PropertyGroup Condition="'$(TargetFramework)' != '$(FullFrameworkTFM)'">
     <DefaultItemExcludes>$(DefaultItemExcludes);**/Framework/**/*</DefaultItemExcludes>
   </PropertyGroup>
   ```
+
+### Verifying Source Builds Locally
+
+Source builds (`DotNetBuildSourceOnly=true`) disable `FEATURE_WINDOWSINTEROP` and CsWin32. CI treats all warnings as errors, so unused members/usings cause build failures. **Always verify locally before pushing:**
+
+```shell
+# Simulate source-build on Windows (uses MSBuild.SourceBuild.slnf, ~20 seconds)
+dotnet msbuild MSBuild.SourceBuild.slnf /p:DotNetBuildSourceOnly=true -v:q
+```
+
+Check for `IDE0005` (unused usings), `IDE0051` (unused private members), `IDE0052` (unread private fields), and `CS1587` (orphaned XML comments) in the output. Any warning from files you changed will become a CI error.
 
 ## `LibraryImport`
 
