@@ -646,7 +646,7 @@ Use this to prioritize dimensions based on changed files.
 
    **Important**: Use `create_pull_request_review_comment` (inline on diff), NOT `add_comment` (general PR comment). Only findings tied to a specific changed line should use this tool.
 
-   **Every inline comment must be actionable.** Do NOT post comments that only praise existing code, acknowledge good patterns, or say "looks good". If a dimension is clean, record it as LGTM in the summary table — do not leave an inline comment for it. Comments like "This is well-written 👍" or "Good use of X pattern" add noise without giving the author anything to act on.
+   **Every inline comment must be actionable.** Do NOT post comments that only praise existing code, acknowledge good patterns, or say "looks good". If a dimension is clean, do not leave an inline comment for it and do not add it as an LGTM row in the summary table; instead, count it only in the aggregate clean-dimensions summary line described in step 7. Comments like "This is well-written 👍" or "Good use of X pattern" add noise without giving the author anything to act on.
 
 6. Post design-level concerns (not tied to a specific diff line) as a single PR comment via the `add_comment` safe-output tool — one bullet each.
 
