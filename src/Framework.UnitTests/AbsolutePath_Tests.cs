@@ -310,23 +310,21 @@ namespace Microsoft.Build.UnitTests
         }
 
         [WindowsOnlyFact]
-        public void GetCanonicalForm_WhitespacePath_ShouldThrowOnWindows()
+        public void AbsolutePath_WhitespacePath_ShouldThrowOnWindows()
         {
             var basePath = GetTestBasePath();
-            var absolutePath = new AbsolutePath(" ", basePath);
 
-            Should.Throw<ArgumentException>(() => absolutePath.GetCanonicalForm());
+            Should.Throw<ArgumentException>(() => new AbsolutePath(" ", basePath));
         }
 
         [UnixOnlyFact]
-        public void GetCanonicalForm_WhitespacePath_ShouldNotThrowOnUnix()
+        public void AbsolutePath_WhitespacePath_ShouldNotThrowOnUnix()
         {
             var basePath = GetTestBasePath();
-            var absolutePath = new AbsolutePath(" ", basePath);
 
             // Whitespace is a valid filename character on Unix — should not throw.
-            var result = absolutePath.GetCanonicalForm();
-            result.Value.ShouldNotBeNullOrEmpty();
+            var absolutePath = new AbsolutePath(" ", basePath);
+            absolutePath.Value.ShouldNotBeNullOrEmpty();
         }
     }
 }
