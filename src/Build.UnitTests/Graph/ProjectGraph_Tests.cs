@@ -2924,6 +2924,7 @@ $@"
         }
 
         [Fact]
+        [UseInvariantCulture]
         public void InvalidProjectReferenceErrorIncludesReferringProject()
         {
             using (var env = TestEnvironment.Create())
@@ -2945,11 +2946,12 @@ $@"
                 
                 // The error message should mention the referring project
                 innerException.Message.ShouldContain("project1.proj");
-                innerException.Message.ShouldContain("referenced by");
+                innerException.Message.ShouldContain("Referenced by:");
             }
         }
 
         [Fact]
+        [UseInvariantCulture]
         public void InvalidProjectReferenceErrorIncludesMultipleReferringProjects()
         {
             using (var env = TestEnvironment.Create())
@@ -2985,7 +2987,7 @@ $@"
                 var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
                 
                 // The error message should mention at least one referring project
-                innerException.Message.ShouldContain("referenced by");
+                innerException.Message.ShouldContain("Referenced by:");
                 bool hasProject1 = innerException.Message.Contains("project1.proj");
                 bool hasProject2 = innerException.Message.Contains("project2.proj");
                 (hasProject1 || hasProject2).ShouldBeTrue();
