@@ -94,17 +94,19 @@ No blanket `NoWarn` — handle semantically:
 - Enum flags: use bitwise `&` — `HasFlag()` boxes on .NET Framework
 - Anonymous unions: `systemInfo.Anonymous.Anonymous.wProcessorArchitecture` — check generated source in `obj/`
 
-### Source-Build Warnings (CI treats as errors)
+### Source-Build Verification (REQUIRED before pushing)
 
-**Everything** only referenced inside `#if FEATURE_WINDOWSINTEROP` must be guarded:
-- **IDE0005**: `using` directives
-- **IDE0051/IDE0052**: Private members (methods, fields)
-- **CS1587**: XML doc comments (move inside `#if`, not before)
-
-### Verifying Source Builds
+Source builds (`DotNetBuildSourceOnly=true`) disable `FEATURE_WINDOWSINTEROP`. CI treats **all warnings as errors**. Run both builds before every push:
 
 ```shell
+# Normal build
+dotnet msbuild MSBuild.Dev.slnf -v:q
+
+# Source-build — catches unused usings/members/docs from #if guards
 dotnet msbuild MSBuild.SourceBuild.slnf /p:DotNetBuildSourceOnly=true -v:q
 ```
 
-Any warning from changed files becomes a CI error. Always run before pushing.
+**Everything** only referenced inside `#if FEATURE_WINDOWSINTEROP` must also be guarded:
+- **IDE0005**: `using` directives — most common failure
+- **IDE0051/IDE0052**: Private members (methods, fields)
+- **CS1587**: XML doc comments (move inside `#if`, not before)

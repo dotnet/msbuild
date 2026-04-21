@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
 #endif
 
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -19,7 +16,10 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 #if FEATURE_WINDOWSINTEROP
+using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Text;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 #endif
