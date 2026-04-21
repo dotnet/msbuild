@@ -173,7 +173,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
         if (TryGetEvalDataForProject(e) is TEvalData evalData)
         {
             // Create project data using the eval data
-            TProjectData? projectData = CreateProjectData(evalData, e);
+            TProjectData? projectData = CreateProjectData(evalData, _buildData, e);
             if (projectData != null)
             {
                 _projectDataByProjectContextId[projectContext] = projectData;
@@ -341,14 +341,26 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     #endregion
 
     #region Protected helpers
-
-    protected int? GetNodeIdForEvent(BuildEventArgs args) => args?.BuildEventContext is null ? null : NodeIndexForContext(args.BuildEventContext);
+    
+    /// <inheritdoc cref="NodeIdForContext(BuildEventContext)"/>
+    protected int? GetNodeArrayIndexForEvent(BuildEventArgs args) => 
+        args?.BuildEventContext switch
+        {
+            null => null,
+            BuildEventContext context => NodeIdForContext(context),
+        };
 
     #endregion
 
     #region Private helpers
 
-    private int NodeIndexForContext(BuildEventContext context)
+    /// <summary>
+    /// Computes the zero-based node array index for the given build event context.
+    /// </summary>
+    /// <remarks>
+    /// Engine Node IDs are 1-based, so we subtract 1 to get a zero-based array index.
+    /// </remarks>
+    private int NodeIdForContext(BuildEventContext context)
     {
         // Node IDs reported by the build are 1-based.
         return context.NodeId - 1;
@@ -394,9 +406,10 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     /// Creates project data from the project started event and evaluation data.
     /// </summary>
     /// <param name="evalData">The evaluation data for this project.</param>
+    /// <param name="buildData">The build data for this build session - can be used to decide if the project should be tracked.</param>
     /// <param name="e">The project started event args.</param>
     /// <returns>The project data to store, or null to not track this project.</returns>
-    protected abstract TProjectData? CreateProjectData(TEvalData? evalData, ProjectStartedEventArgs e);
+    protected abstract TProjectData? CreateProjectData(TEvalData? evalData, TBuildData buildData, ProjectStartedEventArgs e);
     
 
     /// <summary>

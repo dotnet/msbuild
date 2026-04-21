@@ -43,8 +43,6 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
-    // ProjectContext and EvalContext are now inherited from BuildTrackerLogger
-
     private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
 
     /// <summary>
@@ -474,7 +472,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
 
     #endregion
 
-    #region BuildTrackerLogger implementation
+    #region ProjectTrackingLoggerBase implementation
 
     /// <inheritdoc/>
     protected override TerminalBuildData CreateBuildData(BuildStartedEventArgs e)
@@ -524,8 +522,14 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     }
 
     /// <inheritdoc/>
-    protected override TerminalProjectInfo? CreateProjectData(EvalProjectInfo evalData, ProjectStartedEventArgs e)
+    protected override TerminalProjectInfo? CreateProjectData(EvalProjectInfo evalData, TerminalBuildData buildData, ProjectStartedEventArgs e)
     {
+        // TL doesn't want to track projects that are part of a restore
+        if (buildData.IsRestoring)
+        {
+            return null;
+        }
+
         return new TerminalProjectInfo(evalData, _createStopwatch?.Invoke());
     }
 
@@ -687,7 +691,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     protected override void OnProjectStarted(ProjectStartedEventArgs e, EvalProjectInfo evalData, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
         // Handle restore case
-        if (buildData.RestoreContext is null && e.TargetNames == "Restore" && !buildData.RestoreFinished && e.BuildEventContext is not null)
+        if (!buildData.IsRestoring && e.TargetNames == "Restore" && !buildData.RestoreFinished && e.BuildEventContext is not null)
         {
             buildData.RestoreContext = e.BuildEventContext.ProjectContextId;
             StartNode(e, new TerminalNodeStatus(e.ProjectFile!, evalData.TargetFramework, evalData.RuntimeIdentifier, "Restore", projectData.Stopwatch));
@@ -704,16 +708,11 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
         }
 
         // Mark node idle until something uses it again
-        if (buildData.RestoreContext is null)
+        if (!buildData.IsRestoring)
         {
             YieldNode(e);
         }
 
-        // Continue execution and add project summary to the static part of the Console only if verbosity is higher than Quiet.
-        if (Verbosity <= LoggerVerbosity.Quiet)
-        {
-            return;
-        }
 
         if (projectData != null)
         {
@@ -943,10 +942,13 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     /// <inheritdoc/>
     protected override void OnTargetStarted(TargetStartedEventArgs e, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
-        TerminalNodeStatus? nodeData = CreateNodeData(e, projectData);
-        if (nodeData != null)
+        if (!buildData.IsRestoring)
         {
-            StartNode(e, nodeData);
+            TerminalNodeStatus? nodeData = CreateNodeData(e, projectData);
+            if (nodeData != null)
+            {
+                StartNode(e, nodeData);
+            }
         }
     }
 
@@ -1002,7 +1004,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     /// <inheritdoc/>
     protected override void OnTaskStarted(TaskStartedEventArgs e, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
-        if (buildData.RestoreContext is null && e.BuildEventContext is not null && e.TaskName == MSBuildTaskName)
+        if (!buildData.IsRestoring && e.BuildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
             // This will yield the node, so preemptively mark it idle
             YieldNode(e);
@@ -1015,7 +1017,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     protected override void OnTaskFinished(TaskFinishedEventArgs e, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildData.RestoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName)
+        if (buildData.IsRestoring && buildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
             projectData.Stopwatch.Start();
 
@@ -1192,8 +1194,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
         }
 
         if (e.BuildEventContext is not null
-            && projectData != null
-            && Verbosity > LoggerVerbosity.Quiet)
+            && projectData != null)
         {
             // If the warning is not a 'global' auth provider message, but is immediate, we render it immediately
             // but we don't early return so that the project also tracks it.
@@ -1273,7 +1274,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     /// <inheritdoc/>
     protected override void OnErrorRaised(BuildErrorEventArgs e, TerminalProjectInfo? projectData, TerminalBuildData buildData)
     {
-        if (projectData != null && Verbosity > LoggerVerbosity.Quiet)
+        if (projectData != null)
         {
             // Always accumulate errors in the project, even in quiet mode, so they can be shown
             // in project-grouped form later.
@@ -1384,7 +1385,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
 
     private TerminalNodeStatus? GetNodeForEvent(BuildEventArgs e)
     {
-        int? node = GetNodeIdForEvent(e);
+        int? node = GetNodeArrayIndexForEvent(e);
         if (node is int nodeId)
         {
             EnsureNodeCapacity(nodeId);
@@ -1399,18 +1400,16 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
 
     private void StartNode(BuildEventArgs e, TerminalNodeStatus status)
     {
-        int? node = GetNodeIdForEvent(e);
-        if (node is int nodeId)
+        if (GetNodeArrayIndexForEvent(e) is int nodeId)
         {
             EnsureNodeCapacity(nodeId);
             _nodes[nodeId] = status;
         }
     }
 
-    public void YieldNode(BuildEventArgs e)
+    private void YieldNode(BuildEventArgs e)
     {
-        var node = GetNodeIdForEvent(e);
-        if (node is int nodeId)
+        if (GetNodeArrayIndexForEvent(e) is int nodeId)
         {
             EnsureNodeCapacity(nodeId);
             _nodes[nodeId] = null;

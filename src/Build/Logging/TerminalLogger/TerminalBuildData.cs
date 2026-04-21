@@ -31,6 +31,11 @@ public sealed class TerminalBuildData
     public int? RestoreContext { get; set; }
 
     /// <summary>
+    /// True if the build is currently performing a restore operation.
+    /// </summary>
+    public bool IsRestoring => RestoreContext is not null;
+
+    /// <summary>
     /// True if restore failed and this failure has already been reported.
     /// </summary>
     public bool RestoreFailed { get; set; }
