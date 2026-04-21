@@ -144,8 +144,8 @@ namespace Microsoft.Build.Tasks
             // Dictionary of ESDKs. Each entry is a (location, platform version) tuple
             IDictionary<string, Tuple<string, string>> installedSDKs = null;
 
-            string[] absoluteDirectoryRoots = AbsolutizePaths(SDKDirectoryRoots);
-            string[] absoluteExtensionRoots = AbsolutizePaths(SDKExtensionDirectoryRoots);
+            string[] absoluteDirectoryRoots = TaskEnvironment.GetAbsolutePathsOrNull(SDKDirectoryRoots);
+            string[] absoluteExtensionRoots = TaskEnvironment.GetAbsolutePathsOrNull(SDKExtensionDirectoryRoots);
 
             try
             {
@@ -212,26 +212,5 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
-
-        /// <summary>
-        /// Absolutizes an array of path strings using TaskEnvironment, returning null if the input is null.
-        /// </summary>
-        private string[] AbsolutizePaths(string[] paths)
-        {
-            if (paths == null)
-            {
-                return null;
-            }
-
-            var result = new string[paths.Length];
-            for (int i = 0; i < paths.Length; i++)
-            {
-                result[i] = String.IsNullOrEmpty(paths[i])
-                    ? paths[i]
-                    : TaskEnvironment.GetAbsolutePath(paths[i]).Value;
-            }
-
-            return result;
-        }
     }
 }
