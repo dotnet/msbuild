@@ -84,20 +84,6 @@ namespace Microsoft.Build.Framework
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
         private static void ValidatePath(string path)
         {
-            // Before MSBuild's migration from multi-process to multi-threaded, Path.GetFullPath(" ") threw
-            // ArgumentException on Windows because whitespace-only is not a legal path. After combining with
-            // a rooted base directory, Path.GetFullPath silently trims the trailing whitespace, masking the
-            // error. Preserve the historical Windows contract by explicitly rejecting whitespace-only input.
-            // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
-            if (NativeMethods.IsWindows && string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException(SR.WhitespacePathNotAllowedOnWindows, nameof(path));
-            }
-            else
-            {
-                ArgumentException.ThrowIfNullOrEmpty(path);
-            }
-
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
             // in .NET Framework it's provided by package and in .NET it's built-in
 #if NETFRAMEWORK || NET
@@ -116,13 +102,16 @@ namespace Microsoft.Build.Framework
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
-            if (NativeMethods.IsWindows && string.IsNullOrWhiteSpace(path))
+            ArgumentException.ThrowIfNullOrEmpty(path);
+
+            // Before MSBuild's migration from multi-process to multi-threaded, Path.GetFullPath(" ") threw
+            // ArgumentException on Windows because whitespace-only is not a legal path. After combining with
+            // a rooted base directory, Path.GetFullPath silently trims the trailing whitespace, masking the
+            // error. Preserve the historical Windows contract by explicitly rejecting whitespace-only input.
+            // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
+            if (NativeMethods.IsWindows && path.Length > 0 && path.Trim().Length == 0)
             {
                 throw new ArgumentException(SR.WhitespacePathNotAllowedOnWindows, nameof(path));
-            }
-            else
-            {
-                ArgumentException.ThrowIfNullOrEmpty(path);
             }
 
             // This function should not throw when path has illegal characters.
