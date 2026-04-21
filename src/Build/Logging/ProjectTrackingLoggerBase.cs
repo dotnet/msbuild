@@ -173,7 +173,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
         if (TryGetEvalDataForProject(e) is TEvalData evalData)
         {
             // Create project data using the eval data
-            TProjectData? projectData = CreateProjectData(evalData, _buildData, e);
+            TProjectData? projectData = CreateProjectData(evalData, _buildData!, e);
             if (projectData != null)
             {
                 _projectDataByProjectContextId[projectContext] = projectData;
