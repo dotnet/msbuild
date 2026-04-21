@@ -23,7 +23,7 @@ public class MyTask : Task, IMultiThreadableTask
 }
 ```
 
-**Note**: `[MSBuildMultiThreadableTask]` has `Inherited = false` — it must be on each concrete class, not just the base. On platforms where the task has only a stub implementation that logs an error and returns false (e.g., the non-NETFRAMEWORK side of `GetFrameworkSdkPath`), it is safe to mark the stub with `[MSBuildMultiThreadableTask]` as well — there is no shared mutable state to worry about (resolved in PR #13282 review).
+**Note**: `[MSBuildMultiThreadableTask]` has `Inherited = false` — it must be on each concrete class, not just the base.
 
 ### Step 2: Absolutize Paths Before File Operations
 
@@ -42,7 +42,6 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 - `OriginalValue` — preserves the input path (use for error messages and `[Output]` properties)
 - Implicitly convertible to `string` for File/Directory API compatibility
 - `GetCanonicalForm()` — resolves `..` segments and normalizes separators (see [Sin 5](#sin-5-canonicalization-mismatch))
-- `TaskEnvironment.ProjectDirectory` is canonicalized by the multithreaded driver setter (PR #13267). Tasks may rely on it being already canonical and skip a redundant `.GetCanonicalForm()` call when using it as a base directory.
 
 **CAUTION**: `GetAbsolutePath()` throws `ArgumentException` for null/empty inputs. See [Sin 3](#sin-3-null-coalescing-that-changes-control-flow) and [Sin 6](#sin-6-exception-type-change) for compatibility implications.
 
@@ -110,13 +109,6 @@ return success;
 
 Stay in the `AbsolutePath` world — it's implicitly convertible to `string` where needed. Avoid round-tripping through `string` and back.
 
-### Helpful Pure-String Path Utilities
-
-Safe to use on path strings *after* absolutization — neither touches cwd:
-
-- `FrameworkFileUtilities.FixFilePath(string)` — normalizes directory separators (e.g., backslash↔forward slash) without consulting the working directory.
-- `FileUtilities.PathComparison` — OS-aware string comparison for paths (case-insensitive on Windows, case-sensitive on Linux). Prefer this over hardcoded `StringComparison.OrdinalIgnoreCase` for path comparisons; PR #13069 review specifically called out the latter as a bug on Linux.
-
 ### TaskEnvironment is Not Thread-Safe
 
 If your task spawns multiple threads internally, synchronize access to `TaskEnvironment`. Each task *instance* gets its own environment, so no synchronization between tasks is needed.
@@ -135,8 +127,6 @@ If your task spawns multiple threads internally, synchronize access to `TaskEnvi
 After migration, review for behavioral compatibility. **Every observable difference is a bug until proven otherwise.**
 
 Observable behavior = `Execute()` return value, `[Output]` property values, error/warning message content, exception types, files written, and which code path runs.
-
-When a behavioral diff IS desired (typically because the new behavior is more correct than the old one), gate it behind a ChangeWave per the prevailing pattern. PR #13069 gated two such diffs (no-throw on invalid path characters; OS-aware path case sensitivity in `FindUnderPath`/`AssignTargetPath`) behind `Wave18_5`. Tests for the "old" behavior must set `MSBUILDDISABLEFEATURESFROMVERSION` via `TestEnvironment.SetEnvironmentVariable` and call `ChangeWaves.ResetStateForTests()`. See the `changewaves` skill for the full pattern.
 
 ## The 6 Deadly Compatibility Sins
 
@@ -295,7 +285,6 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] Every `??` or `?.` added: verified it doesn't swallow a previously-thrown exception
 - [ ] No `AbsolutePath` leaks into user-visible strings unintentionally
 - [ ] Helper methods traced for internal File API usage with non-absolutized paths
-- [ ] Inline `PERF NOTE` and `WARNING` comments referencing the OLD path-handling code (e.g., `Path.GetFullPath`) updated to describe the new code path accurately
 - [ ] Tests for custom tasks set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()` (built-in tasks have a default)
 - [ ] Cross-framework: tested on both net472 and net10.0
 - [ ] Concurrent execution: two tasks with different project directories produce correct results
