@@ -84,6 +84,8 @@ namespace Microsoft.Build.Framework
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
         private static void ValidatePath(string path)
         {
+            ArgumentException.ThrowIfNullOrEmpty(path);
+
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
             // in .NET Framework it's provided by package and in .NET it's built-in
 #if NETFRAMEWORK || NET
