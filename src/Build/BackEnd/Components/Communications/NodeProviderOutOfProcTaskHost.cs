@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -215,14 +214,7 @@ namespace Microsoft.Build.BackEnd
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
-            // Wait until all nodes have sent NodeShutdown, indicating they are in their final cleanup.
             _noNodesActiveEvent.WaitOne();
-
-            // Task host nodes always terminate after a build (MSBUILDREUSETASKHOSTNODES is off by default).
-            // NodeShutdown only means the process has begun its exit sequence — it hasn't fully exited yet.
-            // Wait for actual OS-level process termination so callers can rely on the processes being dead.
-            // Use parallel wait so multiple nodes don't add latency serially.
-            Task.WaitAll(contextsToShutDown.Select(c => Task.Run(() => c.Process.WaitForExit(30_000))).ToArray());
         }
 
         /// <summary>
@@ -354,19 +346,9 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
 
-                // May also be removed by unnatural termination, so don't assume it's there
-                lock (_activeNodes)
-                {
-                    if (_activeNodes.Contains(node))
-                    {
-                        _activeNodes.Remove(node);
-                    }
-
-                    if (_activeNodes.Count == 0)
-                    {
-                        _noNodesActiveEvent.Set();
-                    }
-                }
+                // NodeShutdown indicates the process is beginning its exit sequence but has not yet closed
+                // the pipe or exited. Removal from _activeNodes and signaling _noNodesActiveEvent is deferred
+                // to NodeContextTerminated, which fires on pipe disconnect — closer to actual process exit.
             }
         }
 
