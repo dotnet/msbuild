@@ -129,10 +129,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly string _debugDumpPath;
 
+#if FEATURE_WINDOWSINTEROP
         /// <summary>
         /// Forces caching of all configurations and results.
         /// </summary>
         private readonly bool _debugForceCaching;
+#endif
 
         /// <summary>
         /// Constructor
@@ -141,7 +143,9 @@ namespace Microsoft.Build.BackEnd
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
             _debugDumpPath = FrameworkDebugUtils.DebugPath;
+#if FEATURE_WINDOWSINTEROP
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
+#endif
 
             if (String.IsNullOrEmpty(_debugDumpPath))
             {
@@ -1486,6 +1490,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+#if FEATURE_WINDOWSINTEROP
         private void TraceEngine(string format, ulong arg)
         {
             if (_debugDumpState)
@@ -1493,6 +1498,15 @@ namespace Microsoft.Build.BackEnd
                 TraceEngine(format, [arg]);
             }
         }
+
+        private void TraceEngine(string format, ulong arg1, ulong arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2]);
+            }
+        }
+#endif
 
         private void TraceEngine(string format, int arg)
         {
@@ -1511,14 +1525,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         private void TraceEngine(string format, int arg1, int arg2)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2]);
-            }
-        }
-
-        private void TraceEngine(string format, ulong arg1, ulong arg2)
         {
             if (_debugDumpState)
             {

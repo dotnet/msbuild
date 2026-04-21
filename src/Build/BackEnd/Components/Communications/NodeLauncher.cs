@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
@@ -20,6 +19,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 #if FEATURE_WINDOWSINTEROP
+using System.Globalization;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 #endif
@@ -253,6 +253,7 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
+#if FEATURE_WINDOWSINTEROP
         [SupportedOSPlatform("windows6.1")]
         private static BackendNativeMethods.STARTUP_INFO CreateStartupInfo(bool redirectStreams)
         {
@@ -311,6 +312,7 @@ namespace Microsoft.Build.BackEnd
 
             return Marshal.StringToHGlobalUni(sb.ToString());
         }
+#endif
 
         private static Process DisableMSBuildServer(Func<Process> func)
         {
