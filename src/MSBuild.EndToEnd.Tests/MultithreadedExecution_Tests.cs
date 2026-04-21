@@ -77,6 +77,8 @@ namespace Microsoft.Build.EndToEndTests
             {
                 nameof(TestSolutionAssetsFixture.SingleProject) => TestSolutionAssetsFixture.SingleProject,
                 nameof(TestSolutionAssetsFixture.ProjectWithDependencies) => TestSolutionAssetsFixture.ProjectWithDependencies,
+                nameof(TestSolutionAssetsFixture.NonSdkSingleProject) => TestSolutionAssetsFixture.NonSdkSingleProject,
+                nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies) => TestSolutionAssetsFixture.NonSdkProjectWithDependencies,
                 _ => throw new ArgumentException($"Unknown test asset name: {testAssetName}", nameof(testAssetName))
             };
         }
@@ -142,6 +144,67 @@ namespace Microsoft.Build.EndToEndTests
             
             replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
             
+            _output.WriteLine($"Built and replayed {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
+        }
+
+        /// <summary>
+        /// Tests building non-SDK-style projects with multithreading flags.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:2 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:8 /mt")]
+        public void MultithreadedBuild_NonSdkStyle_Success(string testAssetName, string multithreadingArgs)
+        {
+            TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
+            TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} {CommonMSBuildArgs}",
+                out bool success,
+                timeoutMilliseconds: _timeoutInMilliseconds);
+
+            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}");
+
+            _output.WriteLine($"Built {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
+        }
+
+        /// <summary>
+        /// Tests binary logging with non-sdk style multithreaded builds and verifies replay functionality.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
+        public void MultithreadedBuild_NonSdkStyle_BinaryLogging(string testAssetName, string multithreadingArgs)
+        {
+            // Resolve TestSolutionAsset from name
+            TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
+
+            // Prepare isolated copy of test assets to ensure fresh builds
+            TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
+
+            string binlogPath = Path.Combine(isolatedAsset.SolutionFolder, "build.binlog");
+
+            // Build with binary logging
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" {CommonMSBuildArgs}",
+                out bool success,
+                timeoutMilliseconds: _timeoutInMilliseconds);
+
+            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}.");
+
+            // Verify binary log was created and has content
+            File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
+
+            // Test binlog replay
+            string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{binlogPath}\" {CommonMSBuildArgs}",
+                out bool replaySuccess,
+                timeoutMilliseconds: _timeoutInMilliseconds);
+
+            replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
+
             _output.WriteLine($"Built and replayed {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
         }
     }
