@@ -339,11 +339,12 @@ namespace Microsoft.Build.BackEnd
         /// 1: .NET task host support.
         /// 2: Added support for translating/reading HostServices, ProjectFile, TargetName in TaskHostConfiguration.
         /// 3: Added App Host support.
+        /// 4: Added IsRunningMultipleNodes, Request/ReleaseCores, BuildProjectFile callbacks support for OOP TaskHost.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
         /// </summary>
-        public const byte PacketVersion = 3;
+        public const byte PacketVersion = 4;
 
         // Flag bits in upper 2 bits
         private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000

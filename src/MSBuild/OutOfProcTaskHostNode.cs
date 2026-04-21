@@ -210,15 +210,14 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Minimum packet version required for IBuildEngine callback support.
-        /// When all callback stages are complete, PacketVersion will be bumped to this value.
         /// </summary>
         private const byte CallbacksMinPacketVersion = 4;
 
         /// <summary>
         /// Whether the owning worker node supports IBuildEngine callbacks.
-        /// True if the worker node's packet version is high enough, or if the feature is force-enabled via env var.
+        /// True if the worker node's packet version is high enough.
         /// </summary>
-        private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion || Traits.Instance.EnableTaskHostCallbacks;
+        private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion;
 
         /// <summary>
         /// Gets the effective configuration for the current task thread.
