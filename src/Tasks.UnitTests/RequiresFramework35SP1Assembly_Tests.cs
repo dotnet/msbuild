@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
         {
             RequiresFramework35SP1Assembly task = CreateTask();
             task.SigningManifests = true;
-            task.Files = [new TaskItem("System.Data.Entity")];
+            AssignItemInput(task, "Files", new TaskItem("System.Data.Entity"));
 
             task.Execute().ShouldBeTrue();
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
