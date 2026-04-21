@@ -2439,9 +2439,6 @@
   <data name="XmlPeek.XmlInput.TooFew" xml:space="preserve">
     <value>One of XmlContent or XmlInputPath arguments must be set.</value>
   </data>
-  <data name="PathUtil.WhitespacePathNotAllowedOnWindows" xml:space="preserve">
-    <value>Path cannot be null or whitespace on Windows.</value>
-  </data>
   <data name="XmlPeek.NamespacesParameterNoAttribute" xml:space="preserve">
     <value>The specified Namespaces attribute does not have attribute "{0}".</value>
   </data>

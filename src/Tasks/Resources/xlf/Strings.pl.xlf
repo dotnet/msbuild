@@ -1702,11 +1702,6 @@
         <target state="translated">Nie można odnaleźć pliku manifestu aplikacji. Upewnij się, że istnieje.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathUtil.WhitespacePathNotAllowedOnWindows">
-        <source>Path cannot be null or whitespace on Windows.</source>
-        <target state="new">Path cannot be null or whitespace on Windows.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: Nie można odczytać wierszy z pliku „{0}”. {1}</target>

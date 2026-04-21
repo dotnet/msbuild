@@ -1702,11 +1702,6 @@
         <target state="translated">애플리케이션 매니페스트 파일을 찾을 수 없습니다. 존재하는지 확인하세요.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathUtil.WhitespacePathNotAllowedOnWindows">
-        <source>Path cannot be null or whitespace on Windows.</source>
-        <target state="new">Path cannot be null or whitespace on Windows.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: "{0}" 파일에서 줄을 읽을 수 없습니다. {1}</target>

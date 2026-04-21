@@ -240,17 +240,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // Use AbsolutePath to root the path against the project's base directory instead of the
             // process current directory. GetCanonicalForm() preserves the canonicalization that
             // Path.GetFullPath performed previously, including throwing on invalid path characters.
-            //
-            // Before MSBuild's migration from multi-process to multi-threaded, Path.GetFullPath(" ") threw
-            // ArgumentException on Windows because whitespace-only is not a legal path. After combining with
-            // a rooted base directory, Path.GetFullPath silently trims the trailing whitespace, masking the
-            // error. Preserve the historical Windows contract by explicitly rejecting whitespace-only input.
-            // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
-            if (NativeMethodsShared.IsWindows && String.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException(ResourceUtilities.GetResourceString("PathUtil.WhitespacePathNotAllowedOnWindows"), nameof(path));
-            }
-
             return new AbsolutePath(path, baseDirectory).GetCanonicalForm();
         }
 

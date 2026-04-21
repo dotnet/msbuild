@@ -1702,11 +1702,6 @@
         <target state="translated">找不到应用程序清单文件。请确保它存在。</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathUtil.WhitespacePathNotAllowedOnWindows">
-        <source>Path cannot be null or whitespace on Windows.</source>
-        <target state="new">Path cannot be null or whitespace on Windows.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: 未能从文件“{0}”读取命令行。{1}</target>

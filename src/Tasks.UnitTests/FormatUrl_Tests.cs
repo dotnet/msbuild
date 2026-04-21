@@ -19,9 +19,8 @@ namespace Microsoft.Build.UnitTests
             _out = testOutputHelper;
         }
 
-        private FormatUrl GetTarget() => new FormatUrl
+        private FormatUrl GetFormatUrlUnderTest() => new FormatUrl
         {
-            TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             BuildEngine = new MockEngine(_out),
         };
 
@@ -31,7 +30,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NullTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = null;
             t.Execute().ShouldBeTrue();
@@ -44,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EmptyTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = string.Empty;
             t.Execute().ShouldBeTrue();
@@ -57,7 +56,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoInputTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.Execute().ShouldBeTrue();
             t.OutputUrl.ShouldBe(string.Empty);
@@ -72,7 +71,7 @@ namespace Microsoft.Build.UnitTests
         [UnixOnlyFact]
         public void WhitespaceTestOnUnix()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = " ";
             t.Execute().ShouldBeTrue();
@@ -88,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact]
         public void WhitespaceTestOnWindows()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = " ";
             Should.Throw<ArgumentException>(() => t.Execute());
@@ -100,7 +99,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UncPathTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"\\server\filename.ext";
             t.Execute().ShouldBeTrue();
@@ -114,7 +113,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LocalAbsolutePathTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = Environment.CurrentDirectory;
             t.Execute().ShouldBeTrue();
@@ -128,7 +127,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LocalRelativePathTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @".";
             t.Execute().ShouldBeTrue();
@@ -141,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         [UnixOnlyFact]
         public void LocalUnixAbsolutePathTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"/usr/local/share";
             t.Execute().ShouldBeTrue();
@@ -154,7 +153,7 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact]
         public void LocalWindowsAbsolutePathTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"c:\folder\filename.ext";
             t.Execute().ShouldBeTrue();
@@ -167,7 +166,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UrlLocalHostTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"https://localhost/Example/Path";
             t.Execute().ShouldBeTrue();
@@ -180,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UrlTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"https://example.com/Example/Path";
             t.Execute().ShouldBeTrue();
@@ -193,7 +192,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UrlParentPathTest()
         {
-            var t = GetTarget();
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"https://example.com/Example/../Path";
             t.Execute().ShouldBeTrue();

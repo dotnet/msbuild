@@ -141,6 +141,16 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         internal AbsolutePath GetCanonicalForm()
         {
+            // Before MSBuild's migration from multi-process to multi-threaded, Path.GetFullPath(" ") threw
+            // ArgumentException on Windows because whitespace-only is not a legal path.
+            // Preserve the historical Windows contract by explicitly rejecting whitespace-only input.
+            // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
+            if (NativeMethods.IsWindows && string.IsNullOrWhiteSpace(OriginalValue))
+            {
+                throw new ArgumentException(SR.WhitespacePathNotAllowedOnWindows);
+            }
+
+            // GetFullPath will reject null / empty.
             return new AbsolutePath(System.IO.Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
         }
 
