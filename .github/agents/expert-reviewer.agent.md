@@ -656,6 +656,8 @@ Use this to prioritize dimensions based on changed files.
 
    **Omit all LGTM dimensions from the table** — only list dimensions that have findings. This keeps the review concise and actionable. Show the count of clean dimensions as a single summary line instead.
 
+   When there **are** findings:
+
    ```markdown
    | # | Dimension | Verdict |
    |---|-----------|---------|
@@ -666,6 +668,12 @@ Use this to prioritize dimensions based on changed files.
 
    - [ ] Concurrency — shared state race
    - [ ] Correctness — null input edge case
+   ```
+
+   When **all dimensions are clean**, omit the table entirely:
+
+   ```markdown
+   ✅ 24/24 dimensions clean — no findings.
    ```
 
    `[ ]` = dimensions with findings. Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
