@@ -926,6 +926,11 @@ Errors: {3}</source>
         <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но для нее уже было настроено значение "{2}" другим пакетом SDK.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">Не удалось разрешить SDK "{0}" с помощью сопоставителя SDK "{1}". {2}</target>
