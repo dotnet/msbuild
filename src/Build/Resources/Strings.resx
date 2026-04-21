@@ -1389,7 +1389,9 @@ Errors: {3}</value>
   <data name="SdkEnvironmentVariableAlreadySetBySdk" xml:space="preserve">
     <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</value>
   </data>
-
+  <data name="SdkEnvironmentVariableOverridingAmbient" xml:space="preserve">
+    <value>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</value>
+  </data>
   <data name="UnrecognizedParentElement" xml:space="preserve">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>

@@ -261,15 +261,7 @@ internal enum NodePacketType : byte
     /// </summary>
     TaskHostIsRunningMultipleNodesResponse = 0x25,
 
-    /// <summary>
-    /// Request from TaskHost to parent for Yield/Reacquire operations.
-    /// </summary>
-    TaskHostYieldRequest = 0x26,
-
-    /// <summary>
-    /// Response from parent to TaskHost acknowledging yield/reacquire.
-    /// </summary>
-    TaskHostYieldResponse = 0x27,
+    // 0x26-0x27 reserved for future TaskHost callback packet types
 
     #endregion
 
