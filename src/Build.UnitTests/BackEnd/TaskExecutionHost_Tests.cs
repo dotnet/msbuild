@@ -978,9 +978,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                var loggingService = new MockLoggingService();
                 using var host = new TaskExecutionHost();
-                TargetLoggingContext tlc = new TargetLoggingContext(loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+                TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
 
                 ProjectInstance project = CreateTestProject();
                 host.InitializeForTask(
@@ -1000,7 +999,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CancellationToken.None,
                     TaskEnvironmentHelper.CreateForTest());
                 host.FindTask(TaskHostParameters.Empty);
-                host.InitializeForBatch(new TaskLoggingContext(loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
+                host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             });
         }
         /// <summary>
