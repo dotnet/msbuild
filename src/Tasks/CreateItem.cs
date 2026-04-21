@@ -14,9 +14,13 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Forward a list of items from input to output. This allows dynamic item lists.
     /// </summary>
-    public class CreateItem : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class CreateItem : TaskExtension, IMultiThreadableTask
     {
         #region Properties
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         [Output]
         public ITaskItem[] Include { get; set; }
@@ -178,7 +182,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else if (isLegalFileSpec)
                         {
-                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(TaskEnvironment.ProjectDirectory, i.ItemSpec);
                             if (globFailure != null)
                             {
                                 Log.LogMessage(MessageImportance.Low, globFailure);

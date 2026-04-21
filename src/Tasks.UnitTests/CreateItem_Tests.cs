@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
@@ -443,6 +444,146 @@ namespace Microsoft.Build.UnitTests
                     "TestTarget",
                     Helpers.ExpectedBuildResult.SucceedWithWarning,
                     _testOutput);
+        }
+
+        /// <summary>
+        /// Relative wildcard Include resolves against TaskEnvironment.ProjectDirectory, not cwd.
+        /// </summary>
+        [Fact]
+        public void WildcardInclude_ResolvesAgainstProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            // Create a project directory with a file.
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(projectDir, "alpha.txt", "alpha");
+
+            // Create a separate directory that is NOT the project directory and put a different file there.
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(otherDir, "beta.txt", "beta");
+
+            // Set cwd to otherDir so that if the task used cwd, it would find beta.txt instead.
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem("*.txt") },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe("alpha.txt");
+        }
+
+        /// <summary>
+        /// Relative wildcard Exclude resolves against TaskEnvironment.ProjectDirectory, not cwd.
+        /// The *.log exclude should match SampleFile.log in the project directory and filter it out.
+        /// </summary>
+        [Fact]
+        public void WildcardExclude_ResolvesAgainstProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(projectDir, "SampleFile.log", "SampleFile");
+
+            // cwd points elsewhere — Exclude must still resolve *.log against projectDir.
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem("*.log") },
+                Exclude = new ITaskItem[] { new TaskItem("*.log") },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.ShouldBeEmpty();
+        }
+
+        /// <summary>
+        /// RecursiveDir metadata is correctly set when wildcard expansion uses a custom ProjectDirectory.
+        /// </summary>
+        [Fact]
+        public void RecursiveDir_WithCustomProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            string sampleSubdirectory = Path.Combine(projectDir.Path, "SampleSubdirectory");
+            Directory.CreateDirectory(sampleSubdirectory);
+            File.WriteAllText(Path.Combine(sampleSubdirectory, "SampleFile.txt"), "content");
+
+            // Set cwd somewhere else to prove ProjectDirectory is used.
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem($"**{Path.DirectorySeparatorChar}*.txt") },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+
+            string recursiveDir = t.Include[0].GetMetadata("RecursiveDir");
+            recursiveDir.ShouldBe("SampleSubdirectory" + Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Absolute wildcard patterns are unaffected by ProjectDirectory — the same files are returned
+        /// regardless of what ProjectDirectory is set to.
+        /// </summary>
+        [Fact]
+        public void AbsoluteWildcard_IgnoresProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder targetDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(targetDir, "SampleFile.txt", "content");
+
+            // Use an unrelated ProjectDirectory.
+            TransientTestFolder unrelatedDir = env.CreateFolder(createFolder: true);
+
+            string absolutePattern = Path.Combine(targetDir.Path, "*.txt");
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem(absolutePattern) },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(unrelatedDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            // Absolute pattern returns absolute path.
+            Path.GetFileName(t.Include[0].ItemSpec).ShouldBe("SampleFile.txt");
+        }
+
+        /// <summary>
+        /// Pre-expanded literal items (no wildcards) produce identical output regardless of
+        /// ProjectDirectory, Exclude, and AdditionalMetadata settings.
+        /// </summary>
+        [Fact]
+        public void LiteralItems_UnaffectedByProjectDirectory()
+        {
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem("A.txt"), new TaskItem("B.txt") },
+                Exclude = new ITaskItem[] { new TaskItem("B.txt") },
+                AdditionalMetadata = new string[] { "Tag=Value" },
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe("A.txt");
+            t.Include[0].GetMetadata("Tag").ShouldBe("Value");
         }
     }
 }
