@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         {
             RequiresFramework35SP1Assembly task = CreateTask();
             task.SigningManifests = true;
-            task.Assemblies = [new TaskItem("Sentinel.v3.5Client")];
+            AssignItemInput(task, "Assemblies", new TaskItem("Sentinel.v3.5Client"));
 
             task.Execute().ShouldBeTrue();
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
