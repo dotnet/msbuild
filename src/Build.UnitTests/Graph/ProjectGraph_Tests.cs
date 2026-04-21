@@ -2927,71 +2927,80 @@ $@"
         [UseInvariantCulture]
         public void InvalidProjectReferenceErrorIncludesReferringProject()
         {
-            using (var env = TestEnvironment.Create())
-            {
-                // Create a project that references a non-existent project
-                TransientTestFile project1 = env.CreateFile("project1.proj", @"
-<Project>
-  <ItemGroup>
-    <ProjectReference Include=""missing.proj"" />
-  </ItemGroup>
-</Project>");
+            using var env = TestEnvironment.Create();
 
-                // Attempt to create a graph should throw an exception
-                var exception = Should.Throw<AggregateException>(() => new ProjectGraph(project1.Path));
-                
-                // The exception should be an InvalidProjectFileException
-                exception.InnerExceptions.ShouldHaveSingleItem();
-                var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
-                
-                // The error message should mention the referring project
-                innerException.Message.ShouldContain("project1.proj");
-                innerException.Message.ShouldContain("Referenced by:");
-            }
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var exception = Should.Throw<AggregateException>(() => new ProjectGraph(project1.Path));
+
+            exception.InnerExceptions.ShouldHaveSingleItem();
+            var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+
+            // ProjectFile on the exception should be the missing project
+            innerException.ProjectFile.ShouldContain("missing.proj");
+
+            // The message should name both the missing file and its referrer in the expected format
+            innerException.Message.ShouldContain("missing.proj");
+            innerException.Message.ShouldContain(project1.Path);
+            innerException.Message.ShouldContain("could not be loaded");
+            innerException.Message.ShouldContain("referenced by");
         }
 
         [Fact]
         [UseInvariantCulture]
         public void InvalidProjectReferenceErrorIncludesMultipleReferringProjects()
         {
-            using (var env = TestEnvironment.Create())
-            {
-                // Create two projects that both reference a non-existent project
-                TransientTestFile project1 = env.CreateFile("project1.proj", @"
-<Project>
-  <ItemGroup>
-    <ProjectReference Include=""missing.proj"" />
-  </ItemGroup>
-</Project>");
+            using var env = TestEnvironment.Create();
 
-                TransientTestFile project2 = env.CreateFile("project2.proj", @"
-<Project>
-  <ItemGroup>
-    <ProjectReference Include=""missing.proj"" />
-  </ItemGroup>
-</Project>");
+            // Two independent projects both referencing the same missing project
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
 
-                TransientTestFile main = env.CreateFile("main.proj", @"
-<Project>
-  <ItemGroup>
-    <ProjectReference Include=""project1.proj"" />
-    <ProjectReference Include=""project2.proj"" />
-  </ItemGroup>
-</Project>");
+            TransientTestFile project2 = env.CreateFile("project2.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
 
-                // Attempt to create a graph should throw an exception
-                var exception = Should.Throw<AggregateException>(() => new ProjectGraph(main.Path));
-                
-                // The exception should be an InvalidProjectFileException
-                exception.InnerExceptions.ShouldHaveSingleItem();
-                var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
-                
-                // The error message should mention at least one referring project
-                innerException.Message.ShouldContain("Referenced by:");
-                bool hasProject1 = innerException.Message.Contains("project1.proj");
-                bool hasProject2 = innerException.Message.Contains("project2.proj");
-                (hasProject1 || hasProject2).ShouldBeTrue();
-            }
+            TransientTestFile main = env.CreateFile("main.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="project1.proj" />
+                    <ProjectReference Include="project2.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var exception = Should.Throw<AggregateException>(() => new ProjectGraph(main.Path));
+
+            exception.InnerExceptions.ShouldHaveSingleItem();
+            var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+
+            // ProjectFile on the exception should be the missing project
+            innerException.ProjectFile.ShouldContain("missing.proj");
+
+            // The message should name the missing file and at least one of its referrers
+            innerException.Message.ShouldContain("missing.proj");
+            innerException.Message.ShouldContain("could not be loaded");
+            innerException.Message.ShouldContain("referenced by");
+
+            // At least one of the two referring projects must be named in the message
+            bool mentionsProject1 = innerException.Message.Contains(project1.Path);
+            bool mentionsProject2 = innerException.Message.Contains(project2.Path);
+            (mentionsProject1 || mentionsProject2).ShouldBeTrue();
         }
 
         public void Dispose()

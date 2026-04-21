@@ -548,11 +548,19 @@ namespace Microsoft.Build.Graph
             {
                 // Enrich the exception with information about which project(s) referenced this project
                 string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
-                
+
                 string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                     "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
-                    referrerList,
-                    ex.Message);
+                    configurationMetadata.ProjectFullPath,
+                    referrerList);
+
+                // Append the specific reason from the inner exception (e.g. "Could not find file '...'")
+                // without doing any locale-specific string manipulation on the outer exception's message.
+                string innerDetail = ex.InnerException?.Message;
+                if (!string.IsNullOrEmpty(innerDetail))
+                {
+                    enrichedMessage = $"{enrichedMessage} {innerDetail}";
+                }
 
                 throw new InvalidProjectFileException(
                     ex.ProjectFile ?? configurationMetadata.ProjectFullPath,
