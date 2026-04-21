@@ -5,14 +5,10 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-
-#nullable disable
 
 namespace Microsoft.Build.EndToEndTests
 {
@@ -61,7 +57,7 @@ namespace Microsoft.Build.EndToEndTests
             // Create isolated copy of entire test asset directory structure
             TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
             
-            FileSystemUtilities.CopyFilesRecursively(sourceAssetDir, workFolder.Path);
+            FileUtilities.CopyDirectory(sourceAssetDir, workFolder.Path);
             
             // Return TestSolutionAsset with temp folder and project file
             return new TestSolutionAsset(workFolder.Path, testAsset.ProjectRelativePath);
@@ -84,81 +80,13 @@ namespace Microsoft.Build.EndToEndTests
         }
 
         /// <summary>
-        /// Tests building projects with various multithreading flags.
+        /// Builds a test asset with the given MSBuild args and verifies success and output assemblies.
         /// </summary>
-        [Theory]
-        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:2 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:8 /mt")]
-        public void MultithreadedBuild_Success(string testAssetName, string multithreadingArgs)
+        private void BuildAndVerify(string testAssetName, string multithreadingArgs)
         {
             // Resolve TestSolutionAsset from name
             TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
-            
             // Prepare isolated copy of test assets to ensure fresh builds
-            TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
-
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} {CommonMSBuildArgs}", 
-                out bool success, 
-                timeoutMilliseconds: _timeoutInMilliseconds);
-
-            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}");
-            
-            _output.WriteLine($"Built {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
-        }
-
-        /// <summary>
-        /// Tests binary logging with multithreaded builds and verifies replay functionality.
-        /// </summary>
-        [Theory]
-        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
-        public void MultithreadedBuild_BinaryLogging(string testAssetName, string multithreadingArgs)
-        {
-            // Resolve TestSolutionAsset from name
-            TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
-            
-            // Prepare isolated copy of test assets to ensure fresh builds
-            TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
-            
-            string binlogPath = Path.Combine(isolatedAsset.SolutionFolder, "build.binlog");
-
-            // Build with binary logging
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" {CommonMSBuildArgs}", 
-                out bool success, 
-                timeoutMilliseconds: _timeoutInMilliseconds);
-
-            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}.");
-            
-            // Verify binary log was created and has content
-            File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
-            
-            // Test binlog replay
-            string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{binlogPath}\" {CommonMSBuildArgs}", 
-                out bool replaySuccess, 
-                timeoutMilliseconds: _timeoutInMilliseconds);
-            
-            replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
-            
-            _output.WriteLine($"Built and replayed {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
-        }
-
-        /// <summary>
-        /// Tests building non-SDK-style projects with multithreading flags.
-        /// </summary>
-        [WindowsOnlyTheory]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:2 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:8 /mt")]
-        public void MultithreadedBuild_NonSdkStyle_Success(string testAssetName, string multithreadingArgs)
-        {
-            TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
             TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
 
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
@@ -166,21 +94,34 @@ namespace Microsoft.Build.EndToEndTests
                 out bool success,
                 timeoutMilliseconds: _timeoutInMilliseconds);
 
-            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}");
+            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\n{output}");
 
             _output.WriteLine($"Built {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
         }
 
         /// <summary>
-        /// Tests binary logging with non-sdk style multithreaded builds and verifies replay functionality.
+        /// Tests building projects with various multithreading flags.
         /// </summary>
-        [WindowsOnlyTheory]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
-        public void MultithreadedBuild_NonSdkStyle_BinaryLogging(string testAssetName, string multithreadingArgs)
+        [Theory]
+        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:2 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:8 /mt")]
+        public void MultithreadedBuild_Success(string testAssetName, string multithreadingArgs)
+        {
+            BuildAndVerify(testAssetName, multithreadingArgs);
+        }
+
+        /// <summary>
+        /// Builds a test asset with binary logging, then replays the binlog and verifies both succeed.
+        /// </summary>
+        private void BuildWithBinlogAndVerifyReplay(string testAssetName, string multithreadingArgs)
         {
             // Resolve TestSolutionAsset from name
             TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
-
+            
             // Prepare isolated copy of test assets to ensure fresh builds
             TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
 
@@ -192,7 +133,7 @@ namespace Microsoft.Build.EndToEndTests
                 out bool success,
                 timeoutMilliseconds: _timeoutInMilliseconds);
 
-            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}.");
+            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\n{output}.");
 
             // Verify binary log was created and has content
             File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
@@ -203,9 +144,44 @@ namespace Microsoft.Build.EndToEndTests
                 out bool replaySuccess,
                 timeoutMilliseconds: _timeoutInMilliseconds);
 
-            replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
+            replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\n{replayOutput}");
 
             _output.WriteLine($"Built and replayed {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
+        }
+
+        /// <summary>
+        /// Tests binary logging with multithreaded builds and verifies replay functionality.
+        /// </summary>
+        [Theory]
+        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
+        public void MultithreadedBuild_BinaryLogging(string testAssetName, string multithreadingArgs)
+        {
+            BuildWithBinlogAndVerifyReplay(testAssetName, multithreadingArgs);
+        }
+
+        /// <summary>
+        /// Tests building non-SDK-style projects with multithreading flags.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:2 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:8 /mt")]
+        public void MultithreadedBuild_NonSdkStyle_Success(string testAssetName, string multithreadingArgs)
+        {
+            BuildAndVerify(testAssetName, multithreadingArgs);
+        }
+
+        /// <summary>
+        /// Tests binary logging with non-SDK-style multithreaded builds and verifies replay functionality.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
+        public void MultithreadedBuild_NonSdkStyle_BinaryLogging(string testAssetName, string multithreadingArgs)
+        {
+            BuildWithBinlogAndVerifyReplay(testAssetName, multithreadingArgs);
         }
     }
 }

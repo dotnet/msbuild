@@ -6,8 +6,6 @@ using System.IO;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 
-#nullable disable
-
 namespace Microsoft.Build.EndToEndTests
 {
     /// <summary>

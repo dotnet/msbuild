@@ -1,6 +1,6 @@
-namespace Library3
+namespace Library4
 {
-    public class Class3
+    public class Class4
     {
         
     }

@@ -3,8 +3,6 @@
 
 using System.IO;
 
-#nullable disable
-
 namespace Microsoft.Build.EndToEndTests
 {
     /// <summary>
