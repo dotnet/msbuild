@@ -221,6 +221,12 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showNodesDisplay = true;
 
+    /// <summary>
+    /// Stores the registered loggers.
+    /// </summary>
+    private readonly List<LoggerRegisteredEventArgs> _registeredLoggers = new();
+
+
     private uint? _originalConsoleMode;
 
     /// <summary>
@@ -641,6 +647,13 @@ public sealed partial class TerminalLogger : INodeLogger
                 }
                 else
                 {
+                    foreach (var logger in _registeredLoggers)
+                    {
+                        if (!string.IsNullOrEmpty(logger.OutputFilePath))
+                        {
+                            Terminal.WriteLine($"  {logger.LoggerName}: {AnsiCodes.LinkPrefix}file:///{logger.OutputFilePath}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}");
+                        }
+                    }
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
                         buildResult,
                         duration));
@@ -1180,7 +1193,11 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return;
         }
-
+        if (e is LoggerRegisteredEventArgs loggerEvent)
+        {
+            _registeredLoggers.Add(loggerEvent);
+            return;
+        }
         string? message = e.Message;
 
         if (message is not null && e.Importance == MessageImportance.High)

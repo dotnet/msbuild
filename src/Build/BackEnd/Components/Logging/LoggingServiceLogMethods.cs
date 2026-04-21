@@ -362,7 +362,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
 
-            // Print out all enabled logs.
+            // Register Loggers and print out all the enabled loggers.
+            RegisterLoggers();
             LogEnabledLoggers();
         }
 
@@ -386,8 +387,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     message = ResourceUtilities.GetResourceString(success ? "BuildFinishedSuccess" : "BuildFinishedFailure");
                 }
             }
-            // Before ending the build, print out all logs that outputted a file and the location of the file.
-            LogFileNamesOfLoggersUsed();
 
             BuildFinishedEventArgs buildEvent = new BuildFinishedEventArgs(message, null /* no help keyword */, success);
 
@@ -425,27 +424,29 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Logs the file paths of enabled logs. 
         /// </summary>
-        private void LogFileNamesOfLoggersUsed()
+        private void RegisterLoggers()
         {
             foreach (ILogger logger in Loggers)
             {
                 ILogger actualLogger = UnwrapLogger(logger);
-                if (actualLogger is IFileOutputLogger fileLogger && !string.IsNullOrEmpty(fileLogger.OutputFilePath))
-                {
-                    var msgEvent = new BuildMessageEventArgs(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", fileLogger.OutputFilePath),
-                        null, null, MessageImportance.Low);
-                    msgEvent.BuildEventContext = BuildEventContext.Invalid;
-                    ProcessLoggingEvent(msgEvent);
-                }
+
+                string outputFilePath = actualLogger is IFileOutputLogger fileLogger && !string.IsNullOrEmpty(fileLogger.OutputFilePath)
+                    ? fileLogger.OutputFilePath
+                    : null;
+
+                IReadOnlyList<string> additionalPaths = actualLogger is BinaryLogger bl
+                    ? bl.AdditionalFilePaths
+                    : null;
+
+                var registerEvent = new LoggerRegisteredEventArgs(
+                    loggerName: actualLogger.GetType().Name,
+                    outputFilePath: outputFilePath,
+                    verbosity: actualLogger.Verbosity,
+                    additionalOutputFilePaths: additionalPaths);
+                registerEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(registerEvent);
             }
         }
-
-        /// <summary>
-        /// Unwraps the name of the logger to get the actual logger.
-        /// </summary>
-        /// <param name="logger">A logger to unwrap.</param>
-        /// <returns>The actual logger.</returns>
         private ILogger UnwrapLogger(ILogger logger)
         {
             return logger is ReusableLogger reusable ? reusable.OriginalLogger : logger;
