@@ -28,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
-
+        private readonly List<LoggerRegisteredEventArgs> _registeredLoggers = new List<LoggerRegisteredEventArgs>();
         #region Constructors
         /// <summary>
         /// Default constructor.
@@ -271,6 +271,15 @@ namespace Microsoft.Build.BackEnd.Logging
             if (this.showPerfSummary)
             {
                 ShowPerfSummary();
+            }
+
+            foreach (var logger in _registeredLoggers)
+            {
+                if (!string.IsNullOrEmpty(logger.OutputFilePath))
+                {
+                    WriteNewLine();
+                    WriteLinePretty($"  {logger.LoggerName}: {logger.OutputFilePath}");
+                }
             }
 
             // Write the "Build Finished" event if verbosity is normal, detailed or diagnostic or the user
@@ -1124,7 +1133,11 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
-
+            if (e is LoggerRegisteredEventArgs loggerEvent)
+            {
+                _registeredLoggers.Add(loggerEvent);
+                return;
+            }
             if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)
             {
                 return;
