@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework
     //       because some of the errors there will use localized resources from different assemblies,
     //       which won't be referenceable in Framework.
 
-    internal class FrameworkErrorUtilities
+    internal static class FrameworkErrorUtilities
     {
         /// <summary>
         /// This method should be used in places where one would normally put
@@ -43,6 +43,33 @@ namespace Microsoft.Build.Framework
             {
                 ThrowInternalError("{0} unexpectedly null", innerException: null, args: parameterName);
             }
+        }
+
+        /// <summary>
+        /// Helper to throw an InternalErrorException when the specified parameter is null or zero length.
+        /// This should be used ONLY if this would indicate a bug in MSBuild rather than
+        /// anything caused by user action.
+        /// </summary>
+        /// <param name="parameterValue">The value of the argument.</param>
+        /// <param name="parameterName">Parameter that should not be null or zero length</param>
+        internal static void VerifyThrowInternalLength([NotNull] string? parameterValue, [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
+        {
+            VerifyThrowInternalNull(parameterValue, parameterName);
+
+            if (parameterValue.Length == 0)
+            {
+                ThrowInternalError("{0} unexpectedly empty", innerException: null, args: parameterName);
+            }
+        }
+
+        /// <summary>
+        /// Throws InternalErrorException.
+        /// This is only for situations that would mean that there is a bug in MSBuild itself.
+        /// </summary>
+        [DoesNotReturn]
+        internal static void ThrowInternalError(string message)
+        {
+            throw new InternalErrorException(message);
         }
 
         /// <summary>

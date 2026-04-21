@@ -1151,8 +1151,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [MemberData(nameof(ItemElementsThatRequireSplitting))]
-        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
         public void RenameThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
             AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.Rename("foo"); });
@@ -1284,8 +1284,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [MemberData(nameof(ItemElementsThatRequireSplitting))]
-        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
         public void ChangeItemTypeThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
             AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.ItemType = "foo"; });
@@ -1446,16 +1446,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [MemberData(nameof(ItemElementsThatRequireSplitting))]
-        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
         public void RemoveItemThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
             AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItem(i); });
         }
 
         [Theory]
-        [MemberData(nameof(ItemElementsThatRequireSplitting))]
-        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
         public void RemoveItemsThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
             AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new[] { i }); });
@@ -1654,7 +1654,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [MemberData(nameof(ItemElementsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
         public void RemoveMetadataThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
             AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.RemoveMetadata("bar"); }, "bar");
@@ -1743,8 +1743,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [MemberData(nameof(ItemElementsThatRequireSplitting))]
-        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
+        [MemberData(nameof(ItemElementsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
+        [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting), DisableDiscoveryEnumeration = true)]
         public void SetMetadataThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
             AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.SetMetadataValue("foo", "bar"); });

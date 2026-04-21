@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 

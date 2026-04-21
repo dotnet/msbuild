@@ -21,10 +21,9 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that copies files.
     /// </summary>
-    public class Copy : TaskExtension, IIncrementalTask, ICancelableTask
+    [MSBuildMultiThreadableTask]
+    public class Copy : TaskExtension, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
-        internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
-        internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
 
         // Default parallelism determined empirically - times below are in seconds spent in the Copy task building this repo
         // with "build -skiptests -rebuild -configuration Release /ds" (with hack to build.ps1 to disable creating selfhost
@@ -109,17 +108,16 @@ namespace Microsoft.Build.Tasks
         // Bool is just a placeholder, we're mainly interested in a threadsafe key set.
         private readonly ConcurrentDictionary<string, bool> _directoriesKnownToExist = new ConcurrentDictionary<string, bool>(DefaultCopyParallelism, DefaultCopyParallelism, FileUtilities.PathComparer);
 
+        internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
+        internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
+
         /// <summary>
         /// Force the copy to retry even when it hits ERROR_ACCESS_DENIED -- normally we wouldn't retry in this case since
         /// normally there's no point, but occasionally things get into a bad state temporarily, and retrying does actually
         /// succeed.  So keeping around a secret environment variable to allow forcing that behavior if necessary.
+        /// Initialized from TaskEnvironment in Execute() for MT-safety.
         /// </summary>
-        private static bool s_alwaysRetryCopy = Environment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
-
-        /// <summary>
-        /// Global flag to force on UseSymboliclinksIfPossible since Microsoft.Common.targets doesn't expose the functionality.
-        /// </summary>
-        private static readonly bool s_forceSymlinks = Environment.GetEnvironmentVariable("MSBuildUseSymboliclinksIfPossible") != null;
+        private bool _alwaysRetryCopy;
 
         private static readonly bool s_copyInParallel = GetParallelismFromEnvironment();
 
@@ -155,8 +153,20 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets a value that indicates whether to create symbolic links for the copied files
         /// rather than copy the files, if it's possible to do so.
+        /// The MSBuildUseSymboliclinksIfPossible env var sets the default; explicit task parameter overrides it.
         /// </summary>
-        public bool UseSymboliclinksIfPossible { get; set; } = s_forceSymlinks;
+        public bool UseSymboliclinksIfPossible
+        {
+            get => _useSymboliclinksIfPossible ?? false;
+            set
+            {
+                _useSymboliclinksIfPossible = value;
+                _useSymboliclinksIfPossibleExplicitlySet = true;
+            }
+        }
+
+        private bool? _useSymboliclinksIfPossible;
+        private bool _useSymboliclinksIfPossibleExplicitlySet;
 
         /// <summary>
         /// Fail if unable to create a symbolic or hard link instead of falling back to copy
@@ -184,6 +194,9 @@ namespace Microsoft.Build.Tasks
         public bool OverwriteReadOnlyFiles { get; set; }
 
         public bool FailIfNotIncremental { get; set; }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         #endregion
 
@@ -226,24 +239,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// INTERNAL FOR UNIT-TESTING ONLY
-        ///
-        /// We've got several environment variables that we read into statics since we don't expect them to ever
-        /// reasonably change, but we need some way of refreshing their values so that we can modify them for
-        /// unit testing purposes.
-        /// </summary>
-        internal static void RefreshInternalEnvironmentValues()
-        {
-            s_alwaysRetryCopy = Environment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
-        }
-
-        /// <summary>
         /// If MSBUILDALWAYSRETRY is set, also log useful diagnostic information -- as
         /// a warning, so it's easily visible.
         /// </summary>
         private void LogAlwaysRetryDiagnosticFromResources(string messageResourceName, params object[] messageArgs)
         {
-            if (s_alwaysRetryCopy)
+            if (_alwaysRetryCopy)
             {
                 Log.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
             }
@@ -260,7 +261,7 @@ namespace Microsoft.Build.Tasks
         {
             if (destinationFileState.DirectoryExists)
             {
-                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Name, destinationFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue);
                 return false;
             }
 
@@ -270,17 +271,18 @@ namespace Microsoft.Build.Tasks
                 // error telling the user so.  Otherwise, .NET Framework's File.Copy method will throw
                 // an UnauthorizedAccessException saying "access is denied", which is not very useful
                 // to the user.
-                Log.LogErrorWithCodeFromResources("Copy.SourceIsDirectory", sourceFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.SourceIsDirectory", sourceFileState.Path.OriginalValue);
                 return false;
             }
 
             if (!sourceFileState.FileExists)
             {
-                Log.LogErrorWithCodeFromResources("Copy.SourceFileNotFound", sourceFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.SourceFileNotFound", sourceFileState.Path.OriginalValue);
                 return false;
             }
 
-            string destinationFolder = Path.GetDirectoryName(destinationFileState.Name);
+            string destinationFolder = Path.GetDirectoryName(destinationFileState.Path);
+            string originalDestinationFolder = Path.GetDirectoryName(destinationFileState.Path.OriginalValue);
 
             if (!string.IsNullOrEmpty(destinationFolder) && !_directoriesKnownToExist.ContainsKey(destinationFolder))
             {
@@ -288,12 +290,12 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FailIfNotIncremental)
                     {
-                        Log.LogError(CreatesDirectory, destinationFolder);
+                        Log.LogError(CreatesDirectory, originalDestinationFolder);
                         return false;
                     }
                     else
                     {
-                        Log.LogMessage(MessageImportance.Normal, CreatesDirectory, destinationFolder);
+                        Log.LogMessage(MessageImportance.Normal, CreatesDirectory, originalDestinationFolder);
                         Directory.CreateDirectory(destinationFolder);
                     }
                 }
@@ -306,7 +308,8 @@ namespace Microsoft.Build.Tasks
 
             if (FailIfNotIncremental)
             {
-                Log.LogError(FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+                // Before the introduction of AbsolutePath, this logged full paths, so preserve that behavior
+                Log.LogError(FileComment, sourceFileState.Path, destinationFileState.Path);
                 return false;
             }
 
@@ -319,7 +322,7 @@ namespace Microsoft.Build.Tasks
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {
-                FileUtilities.DeleteNoThrow(destinationFileState.Name);
+                FileUtilities.DeleteNoThrow(destinationFileState.Path);
             }
 
             bool symbolicLinkCreated = false;
@@ -335,11 +338,12 @@ namespace Microsoft.Build.Tasks
                     if (UseSymboliclinksIfPossible)
                     {
                         // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
-                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath, errorMessage);
+                        // Before the introduction of AbsolutePath, this logged full paths, so preserve that behavior
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Path, destinationFileState.Path, errorMessage);
                     }
                     else
                     {
-                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath, errorMessage);
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Path, destinationFileState.Path, errorMessage);
                     }
                 }
             }
@@ -355,13 +359,13 @@ namespace Microsoft.Build.Tasks
                         errorMessage = Log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "symlink()", errorMessage);
                     }
 
-                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath, errorMessage);
+                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Path, destinationFileState.Path, errorMessage);
                 }
             }
 
             if (ErrorIfLinkFails && !hardLinkCreated && !symbolicLinkCreated)
             {
-                Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+                Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.Path, destinationFileState.Path);
                 return false;
             }
 
@@ -370,9 +374,9 @@ namespace Microsoft.Build.Tasks
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.Path, destinationFileState.Path);
 
-                File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+                File.Copy(sourceFileState.Path, destinationFileState.Path, true);
             }
 
             // If the destinationFile file exists, then make sure it's read-write.
@@ -393,9 +397,9 @@ namespace Microsoft.Build.Tasks
         private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-            Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+            Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.Path, destinationFileState.Path);
 
-            linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
+            linkCreated = createLink(sourceFileState.Path, destinationFileState.Path, errorMessage);
         }
 
         /// <summary>
@@ -410,10 +414,10 @@ namespace Microsoft.Build.Tasks
                 {
                     if (logActivity)
                     {
-                        Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Name);
+                        Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Path.OriginalValue);
                     }
 
-                    File.SetAttributes(file.Name, FileAttributes.Normal);
+                    File.SetAttributes(file.Path, FileAttributes.Normal);
                     file.Reset();
                 }
             }
@@ -444,9 +448,18 @@ namespace Microsoft.Build.Tasks
             }
 
             // Environment variable stomps on user-requested value if it's set.
-            if (Environment.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
+            if (TaskEnvironment.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
             {
                 OverwriteReadOnlyFiles = true;
+            }
+
+            _alwaysRetryCopy = TaskEnvironment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
+
+            // Env var sets the default for UseSymboliclinksIfPossible, but explicit task parameter wins.
+            if (!_useSymboliclinksIfPossibleExplicitlySet
+                && TaskEnvironment.GetEnvironmentVariable("MSBuildUseSymboliclinksIfPossible") != null)
+            {
+                _useSymboliclinksIfPossible = true;
             }
 
             // Track successfully copied subset.
@@ -497,11 +510,28 @@ namespace Microsoft.Build.Tasks
             for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
                 bool copyComplete = false;
-                string destPath = DestinationFiles[i].ItemSpec;
-                MSBuildEventSource.Log.CopyUpToDateStart(destPath);
-                if (filesActuallyCopied.TryGetValue(destPath, out string originalSource))
+                string sourceSpec = SourceFiles[i].ItemSpec;
+                string destSpec = DestinationFiles[i].ItemSpec;
+
+                // Compute absolute paths once - reused for ETW, deduplication dictionary, and FileState
+                AbsolutePath sourceAbsolutePath;
+                AbsolutePath destAbsolutePath;
+                try
                 {
-                    if (String.Equals(originalSource, SourceFiles[i].ItemSpec, FileUtilities.PathComparison))
+                    sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                    destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
+                }
+                catch (ArgumentException ex)
+                {
+                    Log.LogErrorWithCodeFromResources("Copy.Error", sourceSpec, destSpec, ex.Message);
+                    success = false;
+                    continue;
+                }
+
+                MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
+                if (filesActuallyCopied.TryGetValue(destAbsolutePath, out string originalSource))
+                {
+                    if (originalSource == sourceAbsolutePath)
                     {
                         // Already copied from this location, don't copy again.
                         copyComplete = true;
@@ -510,9 +540,9 @@ namespace Microsoft.Build.Tasks
 
                 if (!copyComplete)
                 {
-                    if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec), new FileState(DestinationFiles[i].ItemSpec), copyFile))
+                    if (DoCopyIfNecessary(new FileState(sourceAbsolutePath), new FileState(destAbsolutePath), copyFile))
                     {
-                        filesActuallyCopied[destPath] = SourceFiles[i].ItemSpec;
+                        filesActuallyCopied[destAbsolutePath] = sourceAbsolutePath;
                         copyComplete = true;
                     }
                     else
@@ -522,7 +552,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destPath, true);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath.OriginalValue, true);
                 }
 
                 if (copyComplete)
@@ -638,26 +668,46 @@ namespace Microsoft.Build.Tasks
                 {
                     while (partitionQueue.TryDequeue(out List<int> partition))
                     {
+                        // Cache the previous source absolute path to avoid recomputing it
+                        AbsolutePath prevSourceAbsolutePath = default;
+
                         for (int partitionIndex = 0; partitionIndex < partition.Count && !_cancellationTokenSource.IsCancellationRequested; partitionIndex++)
                         {
                             int fileIndex = partition[partitionIndex];
                             ITaskItem sourceItem = SourceFiles[fileIndex];
                             ITaskItem destItem = DestinationFiles[fileIndex];
-                            string sourcePath = sourceItem.ItemSpec;
+                            string sourceSpec = sourceItem.ItemSpec;
+                            string destSpec = destItem.ItemSpec;
+
+                            // Compute absolute paths once - reused for ETW, deduplication check, and FileState
+                            AbsolutePath sourceAbsolutePath;
+                            AbsolutePath destAbsolutePath;
+                            try
+                            {
+                                sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                                destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
+                            }
+                            catch (ArgumentException ex)
+                            {
+                                Log.LogErrorWithCodeFromResources("Copy.Error", sourceSpec, destSpec, ex.Message);
+                                success = false;
+                                continue;
+                            }
 
                             // Check if we just copied from this location to the destination, don't copy again.
-                            MSBuildEventSource.Log.CopyUpToDateStart(destItem.ItemSpec);
-                            bool copyComplete = partitionIndex > 0 &&
-                                                String.Equals(
-                                                    sourcePath,
-                                                    SourceFiles[partition[partitionIndex - 1]].ItemSpec,
-                                                    FileUtilities.PathComparison);
+                            MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
+                            bool copyComplete = false;
+                            if (partitionIndex > 0)
+                            {
+                                // Use cached absolute path from previous iteration instead of recomputing
+                                copyComplete = sourceAbsolutePath == prevSourceAbsolutePath;
+                            }
 
                             if (!copyComplete)
                             {
                                 if (DoCopyIfNecessary(
-                                    new FileState(sourceItem.ItemSpec),
-                                    new FileState(destItem.ItemSpec),
+                                    new FileState(sourceAbsolutePath),
+                                    new FileState(destAbsolutePath),
                                     copyFile))
                                 {
                                     copyComplete = true;
@@ -670,7 +720,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec, true);
+                                MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath.OriginalValue, true);
                             }
 
                             if (copyComplete)
@@ -678,6 +728,9 @@ namespace Microsoft.Build.Tasks
                                 sourceItem.CopyMetadataTo(destItem);
                                 successFlags[fileIndex] = (IntPtr)1;
                             }
+
+                            // Cache for next iteration's duplicate check
+                            prevSourceAbsolutePath = sourceAbsolutePath;
                         }
                     }
                 }
@@ -799,7 +852,8 @@ namespace Microsoft.Build.Tasks
 
                     foreach (ITaskItem sourceFolder in SourceFolders)
                     {
-                        string src = FileUtilities.NormalizePath(sourceFolder.ItemSpec);
+                        ErrorUtilities.VerifyThrowArgumentLength(sourceFolder.ItemSpec);
+                        AbsolutePath src = FileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(sourceFolder.ItemSpec));
                         string srcName = Path.GetFileName(src);
 
                         (string[] filesInFolder, _, _, string globFailure) = FileMatcher.Default.GetFiles(src, "**");
@@ -900,19 +954,18 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessage(
                         MessageImportance.Low,
                         DidNotCopyBecauseOfFileMatch,
-                        sourceFileState.Name,
-                        destinationFileState.Name,
+                        sourceFileState.Path.OriginalValue,
+                        destinationFileState.Path.OriginalValue,
                         "SkipUnchangedFiles",
                         "true");
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path.OriginalValue, true);
                 }
                 else if (!PathsAreIdentical(sourceFileState, destinationFileState))
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, false);
-
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path.OriginalValue, false);
                     if (FailIfNotIncremental)
                     {
-                        Log.LogError(FileComment, sourceFileState.Name, destinationFileState.Name);
+                        Log.LogError(FileComment, sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue);
                         success = false;
                     }
                     else
@@ -922,7 +975,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Name, true);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path.OriginalValue, true);
                 }
             }
             catch (OperationCanceledException)
@@ -931,12 +984,12 @@ namespace Microsoft.Build.Tasks
             }
             catch (PathTooLongException e)
             {
-                Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Name, destinationFileState.Name, e.Message);
+                Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue, e.Message);
                 success = false;
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Name, destinationFileState.Name, e.Message);
+                Log.LogErrorWithCodeFromResources("Copy.Error", sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue, e.Message);
                 success = false;
             }
 
@@ -976,7 +1029,7 @@ namespace Microsoft.Build.Tasks
                         case IOException: // Not clear why we can get one and not the other
                             int code = Marshal.GetHRForException(e);
 
-                            LogAlwaysRetryDiagnosticFromResources("Copy.IOException", e.ToString(), sourceFileState.Name, destinationFileState.Name, code);
+                            LogAlwaysRetryDiagnosticFromResources("Copy.IOException", e.ToString(), sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue, code);
                             if (code == NativeMethods.ERROR_ACCESS_DENIED)
                             {
                                 // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
@@ -986,7 +1039,7 @@ namespace Microsoft.Build.Tasks
                                 // to a failure to reset the readonly bit properly, in which case retrying will succeed.  This seems to be
                                 // a pretty edge scenario, but since some of our internal builds appear to be hitting it, provide a secret
                                 // environment variable to allow overriding the default behavior and forcing retries in this circumstance as well.
-                                if (!s_alwaysRetryCopy)
+                                if (!_alwaysRetryCopy)
                                 {
                                     throw;
                                 }
@@ -1006,7 +1059,7 @@ namespace Microsoft.Build.Tasks
                                 break;
                             }
 
-                            if (DestinationFolder != null && FileSystems.Default.FileExists(DestinationFolder.ItemSpec))
+                            if (DestinationFolder != null && FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec)))
                             {
                                 // We failed to create the DestinationFolder because it's an existing file. No sense retrying.
                                 // We don't check for this case upstream because it'd be another hit to the filesystem.
@@ -1019,9 +1072,9 @@ namespace Microsoft.Build.Tasks
                     if (retries < Retries)
                     {
                         retries++;
-                        Log.LogWarningWithCodeFromResources("Copy.Retrying", sourceFileState.Name,
-                            destinationFileState.Name, retries, RetryDelayMilliseconds, e.Message,
-                            LockCheck.GetLockedFileMessage(destinationFileState.Name));
+                        Log.LogWarningWithCodeFromResources("Copy.Retrying", sourceFileState.Path.OriginalValue,
+                            destinationFileState.Path.OriginalValue, retries, RetryDelayMilliseconds, e.Message,
+                            LockCheck.GetLockedFileMessage(destinationFileState.Path));
 
                         // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
                         destinationFileState.Reset();
@@ -1032,8 +1085,8 @@ namespace Microsoft.Build.Tasks
                     else if (Retries > 0)
                     {
                         // Exception message is logged in caller
-                        Log.LogErrorWithCodeFromResources("Copy.ExceededRetries", sourceFileState.Name,
-                            destinationFileState.Name, Retries, LockCheck.GetLockedFileMessage(destinationFileState.Name));
+                        Log.LogErrorWithCodeFromResources("Copy.ExceededRetries", sourceFileState.Path.OriginalValue,
+                            destinationFileState.Path.OriginalValue, Retries, LockCheck.GetLockedFileMessage(destinationFileState.Path));
                         throw;
                     }
                     else
@@ -1045,9 +1098,9 @@ namespace Microsoft.Build.Tasks
                 if (retries < Retries)
                 {
                     retries++;
-                    Log.LogWarningWithCodeFromResources("Copy.Retrying", sourceFileState.Name,
-                        destinationFileState.Name, retries, RetryDelayMilliseconds, String.Empty /* no details */,
-                        LockCheck.GetLockedFileMessage(destinationFileState.Name));
+                    Log.LogWarningWithCodeFromResources("Copy.Retrying", sourceFileState.Path.OriginalValue,
+                        destinationFileState.Path.OriginalValue, retries, RetryDelayMilliseconds, String.Empty /* no details */,
+                        LockCheck.GetLockedFileMessage(destinationFileState.Path));
 
                     // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
                     destinationFileState.Reset();
@@ -1056,8 +1109,8 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (Retries > 0)
                 {
-                    Log.LogErrorWithCodeFromResources("Copy.ExceededRetries", sourceFileState.Name,
-                        destinationFileState.Name, Retries, LockCheck.GetLockedFileMessage(destinationFileState.Name));
+                    Log.LogErrorWithCodeFromResources("Copy.ExceededRetries", sourceFileState.Path.OriginalValue,
+                        destinationFileState.Path.OriginalValue, Retries, LockCheck.GetLockedFileMessage(destinationFileState.Path));
                     return false;
                 }
                 else
@@ -1085,16 +1138,16 @@ namespace Microsoft.Build.Tasks
         /// Compares two paths to see if they refer to the same file. We can't solve the general
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
+        /// <remarks>
+        /// This method has a side effect of canonicalizing the paths before comparison to avoid
+        /// false negatives due to different path representations. This operation may throw in certain cases (e.g. invalid paths on Windows).
+        /// TODO: refactor this task not to rely on this side effect for correct exception handling and caching
+        /// </remarks>
         private static bool PathsAreIdentical(FileState source, FileState destination)
         {
-            if (string.Equals(source.Name, destination.Name, FileUtilities.PathComparison))
-            {
-                return true;
-            }
-
-            source.FileNameFullPath = Path.GetFullPath(source.Name);
-            destination.FileNameFullPath = Path.GetFullPath(destination.Name);
-            return string.Equals(source.FileNameFullPath, destination.FileNameFullPath, FileUtilities.PathComparison);
+            source.Path = source.Path.GetCanonicalForm();
+            destination.Path = destination.Path.GetCanonicalForm();
+            return source.Path == destination.Path;
         }
 
         private static bool GetParallelismFromEnvironment()

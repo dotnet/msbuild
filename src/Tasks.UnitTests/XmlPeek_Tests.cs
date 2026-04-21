@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
@@ -65,7 +66,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -88,7 +89,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -117,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNsWithText, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -146,7 +147,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNsNoDtd, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -166,7 +167,7 @@ namespace Microsoft.Build.UnitTests
         {
             MockEngine engine = new MockEngine(true);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlContent = _xmlFileNoNsNoDtd;
@@ -189,7 +190,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNsNoDtd, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -212,7 +213,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNsNoDtd, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.Query = "//variable/@Name";
@@ -228,7 +229,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNsNoDtd, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -245,7 +246,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.ProhibitDtd = true;
@@ -263,7 +264,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
@@ -292,7 +293,7 @@ namespace Microsoft.Build.UnitTests
                         res += attrs[k] + " ";
                     }
                 }
-                XmlPeek p = new XmlPeek();
+                XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 p.BuildEngine = engine;
                 p.XmlInputPath = new TaskItem(xmlInputPath);
                 p.Query = "//s:variable/@Name";
@@ -347,7 +348,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileRequiresEscaping, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek();
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);

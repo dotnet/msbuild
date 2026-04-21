@@ -11,7 +11,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
 using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string>;
 
@@ -484,7 +483,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         }
 
         [Theory]
-        [MemberData(nameof(UndeclaredReferenceEnforcementShouldNormalizeFilePathsTestData))]
+        [MemberData(nameof(UndeclaredReferenceEnforcementShouldNormalizeFilePathsTestData), DisableDiscoveryEnumeration = true)]
         public void UndeclaredReferenceEnforcementShouldNormalizeFilePaths(Func<string, string> projectReferenceModifier, Func<string, string> msbuildProjectModifier, string targetName)
         {
             AssertBuild(new[] { targetName },

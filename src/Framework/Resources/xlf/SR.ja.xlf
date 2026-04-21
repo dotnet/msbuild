@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../SR.resx">
+    <body>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
+        <source>{0} ('{1}') must be equal to '{2}'.</source>
+        <target state="translated">{0} ('{1}') は '{2}' と等しい必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
+        <source>{0} ('{1}') must be greater than '{2}'.</source>
+        <target state="translated">{0} ('{1}') は '{2}' より大きくなければなりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
+        <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
+        <target state="translated">{0} ('{1}') は '{2}' 以上である必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
+        <source>{0} ('{1}') must be less than '{2}'.</source>
+        <target state="translated">{0} ('{1}') は '{2}' より小さくなければなりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
+        <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
+        <target state="translated">{0} ('{1}') は '{2}' 以下である必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
+        <source>{0} ('{1}') must be a non-negative value.</source>
+        <target state="translated">{0} ('{1}') は負ではない値でなければなりません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
+        <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
+        <target state="translated">{0} ('{1}') は、負でなく、0 以外の値である必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
+        <source>{0} ('{1}') must be a non-zero value.</source>
+        <target state="translated">{0} ('{1}') は 0 以外の値である必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
+        <source>{0} ('{1}') must not be equal to '{2}'.</source>
+        <target state="translated">{0} ('{1}') は '{2}' 以外にする必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyOrWhiteSpaceString">
+        <source>The value cannot be an empty string or composed entirely of whitespace.</source>
+        <target state="translated">値を空の文字列や、すべて空白で構成することはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyString">
+        <source>The value cannot be an empty string.</source>
+        <target state="translated">値を空の文字列にすることはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">文字列 "{0}" をブール値 (true/false) に変換することはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">このコレクションは読み取り専用です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">参照アセンブリ パスをパス "{0}" とフレームワーク モニカー "{1}" から生成しようとしたときに、エラーが発生しました。{2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">デバッグ ログに使用されるパス "{0}" が長すぎます。MSBUILDDEBUGPATH 環境変数を使用して短い値に設定するか、長いパスを許可するようにシステム構成を変更してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">一時ファイルを作成できませんでした。一時ファイル フォルダーがいっぱいであるか、またはそのパスが正しくありません。{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">glob を使用して fileSpec を展開中に例外が発生しました: fileSpec: "{0}"、これはファイル名であると仮定します。例外: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">項目 "{0}" は、"{3}" に変換できなかった値 "{2}" を伴う属性 "{1}" を含んでいます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">項目メタデータ "%({0})" をパス "{1}" に適用できません。{2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">パラメーター '{0}' に使用できるのはファイル名のみで、ディレクトリを含めることはできません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathMustBeRooted">
+        <source>Path must be rooted.</source>
+        <target state="translated">パスはルート指定パスである必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">パス: {0} は OS のパスの上限を越えています。完全修飾のファイル名は {1} 文字以下にする必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">.NET Framework のバージョン "{0}" はサポートされていません。列挙 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion から値を指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">Windows SDK を明示的にターゲットとする場合、.NET Framework のバージョン "{0}" はサポートされません。Windows SDK は、.NET 4.5 以降でのみサポートされています。列挙 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion から Version45 以上の値を指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Visual Studio のバージョン "{0}" はサポートされていません。列挙 Microsoft.Build.Utilities.VisualStudioVersion から値を指定してください。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

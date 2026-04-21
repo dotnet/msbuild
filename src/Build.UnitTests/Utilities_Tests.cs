@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
@@ -80,17 +79,9 @@ namespace Microsoft.Build.UnitTests
 
             env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
 
-#if FEATURE_GET_COMMANDLINE
-            MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + inputFile.Path +
-                (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + outputFile.Path + @"""")
-                .ShouldBe(MSBuildApp.ExitType.Success);
-#else
             Assert.Equal(
                 MSBuildApp.ExitType.Success,
-                MSBuildApp.Execute(
-                    new[] { @"c:\bin\msbuild.exe", '"' + inputFile.Path + '"',
-                '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + outputFile.Path + '"'}));
-#endif
+                MSBuildApp.Execute([ @"c:\bin\msbuild.exe", '"' + inputFile.Path + '"', '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + outputFile.Path + '"']));
 
             bool foundDoNotModify = false;
             foreach (string line in File.ReadLines(outputFile.Path))

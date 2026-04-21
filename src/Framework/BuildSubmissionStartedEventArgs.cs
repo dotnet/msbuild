@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {

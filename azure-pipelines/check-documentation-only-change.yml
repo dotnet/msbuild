@@ -1,0 +1,21 @@
+# Template to check if only documentation files have changed
+# Sets a pipeline variable 'onlyDocChanged' to 1 if only doc files changed, 0 otherwise
+# This template should be included at the start of test jobs to determine if tests should run
+
+steps:
+- powershell: |
+    $changedFiles = git diff --name-only HEAD HEAD~1
+    $changedFiles
+    $onlyDocChanged = 1
+    foreach ($file in $changedFiles) {
+      $isUnderDocumentation = $file -match "^documentation/"
+      if(!$isUnderDocumentation)
+      {
+        $onlyDocChanged = 0
+        break;
+      }
+    }
+    Write-Host "##vso[task.setvariable variable=onlyDocChanged]$onlyDocChanged"
+    Write-Host "##vso[task.setvariable variable=onlyDocChanged;isoutput=true]$onlyDocChanged"
+  name: CheckDocumentationOnlyChange
+  displayName: Check whether only documentation has been updated

@@ -25,12 +25,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
-        public delegate (int exitCode, string exitType) BuildCallback(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine);
-#else
-            string[] commandLine);
-#endif
+        public delegate (int exitCode, string exitType) BuildCallback(string[] commandLine);
 
         private readonly BuildCallback _buildFunction;
 
@@ -324,13 +319,28 @@ namespace Microsoft.Build.Experimental
         /// <param name="buildComplete"></param>
         private void HandleServerShutdownCommand(NodeBuildComplete buildComplete)
         {
-            _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            bool shouldReuse = buildComplete.PrepareForReuse;
+
+            if (shouldReuse)
+            {
+                // Self-terminate if another server node is already running system-wide.
+                // Threshold is 1: only one server node should be active per handshake.
+                // If another is running (count > 1, since we count ourselves), exit to avoid over-provisioning.
+                int serverNodeCount = NodeProviderOutOfProcBase.CountActiveNodesWithMode(NodeMode.OutOfProcServerNode);
+                if (serverNodeCount > 1)
+                {
+                    CommunicationsUtilities.Trace("Terminating server node due to over-provisioning: {0} server nodes found system-wide.", serverNodeCount);
+                    shouldReuse = false;
+                }
+            }
+
+            _shutdownReason = shouldReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
         }
 
         private void HandleBuildCancel()
         {
-            CommunicationsUtilities.Trace("Received request to cancel build running on MSBuild Server. MSBuild server will shutdown.}");
+            CommunicationsUtilities.Trace("Received request to cancel build running on MSBuild Server. MSBuild server will shutdown.");
             _cancelRequested = true;
             BuildManager.DefaultBuildManager.CancelAllSubmissions();
         }
@@ -370,7 +380,7 @@ namespace Microsoft.Build.Experimental
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
-            CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;

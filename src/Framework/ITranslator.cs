@@ -75,11 +75,21 @@ namespace Microsoft.Build.BackEnd
     internal interface ITranslator : IDisposable
     {
         /// <summary>
-        /// Gets or sets the packet version associated with the stream.
-        /// This can be used to exclude various fields from translation for backwards compatibility,
-        /// e.g. when Writer introduces information that should be skipped in the Reader stream.
+        /// Gets or sets the negotiated packet version between the communicating nodes.
+        /// This represents the minimum packet version supported by both the sender and receiver,
+        /// ensuring backward compatibility during cross-version communication.
         /// </summary>
-        byte PacketVersion { get; set; }
+        /// <remarks>
+        /// This version is determined during the initial handshake between nodes and may differ
+        /// from NodePacketTypeExtensions.PacketVersion when nodes are running different MSBuild versions.
+        /// The negotiated version is used to conditionally serialize/deserialize fields that may
+        /// not be supported by older packet versions.
+        /// Special values:
+        /// null: CLR2 (NET35) task host communication. Version-dependent fields are skipped because NET35 doesn't have them.
+        /// 0: The constant value for Framework-to-Framework (CLR4) task host communication. Supports HostServices, TargetName, ProjectFile, and AppDomain.
+        /// 2+: .NET task host communication with full support for version-dependent fields.
+        /// </remarks>
+        byte? NegotiatedPacketVersion { get; set; }
 
         /// <summary>
         /// Returns the current serialization mode.
@@ -257,14 +267,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="value">The value to be translated.</param>
         void Translate(ref TimeSpan value);
 
-        // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext,
-        // which is what current implementations of this method use.  However, it also does not ever need to translate
-        // BuildEventContexts, so it should be perfectly safe to compile this method out of that assembly. I am compiling
-        // the method out of the interface as well, instead of just making the method empty, so that if we ever do need
-        // to translate BuildEventContexts from the CLR 3.5 task host, it will become immediately obvious, rather than
-        // failing or misbehaving silently.
-#if !CLR2COMPATIBILITY
-
         /// <summary>
         /// Translates a BuildEventContext
         /// </summary>
@@ -274,7 +276,6 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         /// <param name="value">The context to be translated.</param>
         void Translate(ref BuildEventContext value);
-#endif
 
         /// <summary>
         /// Translates an enumeration.

@@ -22,7 +22,6 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -32,12 +31,6 @@ namespace Microsoft.Build.UnitTests
     {
 #if FEATURE_CODETASKFACTORY
         private readonly ITestOutputHelper _output;
-#endif
-
-#if USE_MSBUILD_DLL_EXTN
-        private const string MSBuildExeName = "MSBuild.dll";
-#else
-        private const string MSBuildExeName = "MSBuild.exe";
 #endif
 
         public ToolLocationHelper_Tests(ITestOutputHelper output)
@@ -682,20 +675,20 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestGetPathToBuildToolsFile()
         {
-            string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version20);
+            string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version20);
 
-            net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "2.0"));
+            net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "2.0"));
 
-            string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version35);
+            string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version35);
 
-            net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "3.5"));
+            net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "3.5"));
 
-            ToolLocationHelper.GetPathToDotNetFrameworkFile("MSBuild.exe", TargetDotNetFrameworkVersion.Version40).ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("MSBuild.exe", "4.0"));
+            ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version40).ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "4.0"));
 
-            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).ToolsPath, MSBuildExeName);
+            string tv12path = Path.Combine(ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).ToolsPath, Constants.MSBuildExecutableName);
 
-            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(MSBuildExeName, ObjectModelHelpers.MSBuildDefaultToolsVersion));
-            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(MSBuildExeName, ToolLocationHelper.CurrentToolsVersion));
+            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ObjectModelHelpers.MSBuildDefaultToolsVersion));
+            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ToolLocationHelper.CurrentToolsVersion));
         }
 
 #if RUNTIME_TYPE_NETCORE
@@ -705,20 +698,20 @@ namespace Microsoft.Build.UnitTests
 #endif
         public void TestGetPathToBuildToolsFile_32Bit()
         {
-            string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness32);
-            net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "2.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
+            string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness32);
+            net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "2.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
 
-            string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version35, UtilitiesDotNetFrameworkArchitecture.Bitness32);
-            net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "3.5", UtilitiesDotNetFrameworkArchitecture.Bitness32));
+            string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version35, UtilitiesDotNetFrameworkArchitecture.Bitness32);
+            net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "3.5", UtilitiesDotNetFrameworkArchitecture.Bitness32));
 
-            ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
-                    ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "4.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
+            ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
+                    ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, "4.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
 
             var toolsPath32 = ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion).Properties["MSBuildToolsPath32"];
-            string tv12path = Path.Combine(Path.GetFullPath(toolsPath32.EvaluatedValue), "msbuild.exe");
+            string tv12path = Path.Combine(Path.GetFullPath(toolsPath32.EvaluatedValue), Constants.MSBuildExecutableName);
 
-            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ObjectModelHelpers.MSBuildDefaultToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
-            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
+            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ObjectModelHelpers.MSBuildDefaultToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
+            tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
         }
 
         [Fact]

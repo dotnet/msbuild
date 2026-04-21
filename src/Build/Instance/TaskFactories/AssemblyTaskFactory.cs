@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
 
@@ -21,8 +22,8 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Logging;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -54,7 +55,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A cache of tasks and the AppDomains they are loaded in.
         /// </summary>
-        private Dictionary<ITask, AppDomain> _tasksAndAppDomains = new Dictionary<ITask, AppDomain>();
+        private readonly ConcurrentDictionary<ITask, AppDomain> _tasksAndAppDomains = new ConcurrentDictionary<ITask, AppDomain>();
 #endif
 
         /// <summary>
@@ -62,11 +63,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters _factoryIdentityParameters;
 
-        /// <summary>
-        /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
-        /// TaskLoader will be able to call back with errors.
-        /// </summary>
-        private TaskLoggingContext _taskLoggingContext;
 
         #endregion
 
@@ -204,14 +200,11 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(task);
 #if FEATURE_APPDOMAIN
-            AppDomain appDomain;
-            if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
+            if (_tasksAndAppDomains.TryRemove(task, out AppDomain appDomain))
             {
-                _tasksAndAppDomains.Remove(task);
 
                 if (appDomain != null)
                 {
-                    AssemblyLoadsTracker.StopTracking(appDomain);
                     // Unload the AppDomain asynchronously to avoid a deadlock that can happen because
                     // AppDomain.Unload blocks for the process's one Finalizer thread to finalize all
                     // objects. Some objects are RCWs for STA COM objects and as such would need the
@@ -317,6 +310,8 @@ namespace Microsoft.Build.BackEnd
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             in TaskHostParameters taskIdentityParameters,
+            string projectFile,
+            HostServices hostServices,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -329,7 +324,6 @@ namespace Microsoft.Build.BackEnd
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
 
             TaskHostParameters mergedParameters = TaskHostParameters.Empty;
-            _taskLoggingContext = taskLoggingContext;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
@@ -354,17 +348,21 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+            taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
-                (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
+                mergedParameters = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
-                    || isNetRuntime;
+                // Sidecar here means that the task host is launched with /nodeReuse:true and doesn't terminate
+                // after the task execution. This improves performance for tasks that run multiple times in a build.
+                // If the task host factory is explicitly requested, do not act as a sidecar task host.
+                // This is important as customers use task host factories for short lived tasks to release
+                // potential locks.
+                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -373,9 +371,11 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters,
                     _loadedType,
                     useSidecarTaskHost: useSidecarTaskHost,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
+                    hostServices,
                     scheduledNodeId,
                     taskEnvironment: taskEnvironment);
                 return task;
@@ -393,7 +393,8 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.File,
                     taskLocation.Line,
                     taskLocation.Column,
-                    new TaskLoader.LogError(ErrorLoggingDelegate),
+                    new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
+                        taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
@@ -410,17 +411,13 @@ namespace Microsoft.Build.BackEnd
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
                 }
-                else if (taskAppDomain != null)
-                {
-                    AssemblyLoadsTracker.StopTracking(taskAppDomain);
-                }
 #endif
 
                 // Track non-sealed subclasses of Microsoft-owned MSBuild tasks
                 if (taskInstance != null)
                 {
                     bool isMicrosoftOwned = IsMicrosoftAuthoredTask();
-                    _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
+                    taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
                 }
 
                 return taskInstance;
@@ -631,7 +628,7 @@ namespace Microsoft.Build.BackEnd
         /// Adds the properties necessary for .NET task host instantiation if the runtime is .NET.
         /// Returns a new TaskHostParameters with .NET host parameters added, or the original if not needed.
         /// </summary>
-        private static (TaskHostParameters TaskHostParams, bool isNetRuntime) AddNetHostParamsIfNeeded(
+        private static TaskHostParameters AddNetHostParamsIfNeeded(
             in TaskHostParameters currentParams,
             Func<string, ProjectPropertyInstance> getProperty)
         {
@@ -639,25 +636,34 @@ namespace Microsoft.Build.BackEnd
             if (currentParams.Runtime == null ||
                 !currentParams.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
             {
-                return (currentParams, isNetRuntime: false);
+                return currentParams;
             }
 
             string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
-            string ridGraphPath = getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue;
+            string netCoreSdkRoot = getProperty(Constants.NetCoreSdkRoot)?.EvaluatedValue?.TrimEnd('/', '\\');
 
-            if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(ridGraphPath))
+            // The NetCoreSdkRoot property got added with .NET 11, so for earlier SDKs we fall back to the RID graph path
+            if (string.IsNullOrEmpty(netCoreSdkRoot))
             {
-                return (currentParams, isNetRuntime: false);
+                string ridGraphPath = getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue;
+                if (!string.IsNullOrEmpty(ridGraphPath))
+                {
+                    netCoreSdkRoot = Path.GetDirectoryName(ridGraphPath);
+                }
             }
 
-            string msBuildAssemblyPath = Path.GetDirectoryName(ridGraphPath) ?? string.Empty;
+            // Both DOTNET_HOST_PATH and NetCoreSdkRoot are required to launch .NET task host.
+            // If both are not present, return the original parameters.
+            if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(netCoreSdkRoot))
+            {
+                return currentParams;
+            }
 
-            return (new TaskHostParameters(
+            return new TaskHostParameters(
                 runtime: currentParams.Runtime,
                 architecture: currentParams.Architecture,
                 dotnetHostPath: dotnetHostPath,
-                msBuildAssemblyPath: msBuildAssemblyPath),
-                isNetRuntime: true);
+                msBuildAssemblyPath: netCoreSdkRoot);
         }
 
         /// <summary>
@@ -733,14 +739,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Log errors from TaskLoader.
-        /// </summary>
-        private void ErrorLoggingDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
-        {
-            _taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation, taskLine, taskColumn), message, messageArgs);
         }
 
         /// <summary>

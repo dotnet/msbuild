@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Utilities
 {
     internal static class CanonicalTrackedFilesHelper

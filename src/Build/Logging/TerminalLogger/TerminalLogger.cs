@@ -152,6 +152,11 @@ public sealed partial class TerminalLogger : INodeLogger
     private ProjectContext? _restoreContext;
 
     /// <summary>
+    /// True if we're replaying a binary log. In this mode, we may encounter NodeIds higher than the initial node count.
+    /// </summary>
+    private bool _isReplayMode = false;
+
+    /// <summary>
     /// The thread that performs periodic refresh of the console output.
     /// </summary>
     private Thread? _refresher;
@@ -431,6 +436,9 @@ public sealed partial class TerminalLogger : INodeLogger
     public void Initialize(IEventSource eventSource)
     {
         ParseParameters();
+
+        // Detect if we're in replay mode
+        _isReplayMode = eventSource is IBinaryLogReplaySource;
 
         eventSource.BuildStarted += BuildStarted;
         eventSource.BuildFinished += BuildFinished;
@@ -717,12 +725,18 @@ public sealed partial class TerminalLogger : INodeLogger
             EvalContext evalContext = new(e.BuildEventContext);
             string? targetFramework = null;
             string? runtimeIdentifier = null;
+            
             if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
             {
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
+
+            // Per-project metaproj files (e.g. MyProject.csproj.metaproj) are constructed
+            // directly without evaluation, so they won't have a matching ProjectEvaluationFinished event.
+            System.Diagnostics.Debug.Assert(
+                evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
+                "EvalProjectInfo should have been captured before ProjectStarted");
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
             _projects[c] = projectInfo;
@@ -732,6 +746,7 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(e.BuildEventContext);
+                EnsureNodeCapacity(nodeIndex);
                 _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
@@ -754,18 +769,23 @@ public sealed partial class TerminalLogger : INodeLogger
             UpdateNodeStatus(buildEventContext, null);
         }
 
-        // Continue execution and add project summary to the static part of the Console only if verbosity is higher than Quiet.
-        if (Verbosity <= LoggerVerbosity.Quiet)
-        {
-            return;
-        }
-
         ProjectContext c = new(buildEventContext);
 
         if (_projects.TryGetValue(c, out TerminalProjectInfo? project))
         {
             project.Succeeded = e.Succeeded;
             project.Stopwatch.Stop();
+
+            // In quiet mode, only show projects with errors or warnings.
+            // In higher verbosity modes, show projects based on other criteria.
+            if (Verbosity == LoggerVerbosity.Quiet && !project.HasErrorsOrWarnings)
+            {
+                // Still need to update counts even if not displaying
+                _buildErrorsCount += project.ErrorCount;
+                _buildWarningsCount += project.WarningCount;
+                return;
+            }
+
             lock (_lock)
             {
                 Terminal.BeginUpdate();
@@ -809,6 +829,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
                     // and it is hard to see if project finished, or did not run at all.
+                    // In quiet mode, we show the project header if there are errors/warnings (already checked above).
                     else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
@@ -839,7 +860,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     _buildErrorsCount += project.ErrorCount;
                     _buildWarningsCount += project.WarningCount;
 
-                    if (_showNodesDisplay)
+                    if (_showNodesDisplay && Verbosity > LoggerVerbosity.Quiet)
                     {
                         DisplayNodes();
                     }
@@ -1047,7 +1068,29 @@ public sealed partial class TerminalLogger : INodeLogger
     private void UpdateNodeStatus(BuildEventContext buildEventContext, TerminalNodeStatus? nodeStatus)
     {
         int nodeIndex = NodeIndexForContext(buildEventContext);
+        EnsureNodeCapacity(nodeIndex);
         _nodes[nodeIndex] = nodeStatus;
+    }
+
+    /// <summary>
+    /// Ensures that the <see cref="_nodes"/> array has enough capacity to accommodate the given index.
+    /// This is necessary for binary log replay scenarios where the replay may use fewer nodes than the original build.
+    /// </summary>
+    private void EnsureNodeCapacity(int nodeIndex)
+    {
+        // Only resize in replay mode - during normal builds, the node count is fixed
+        if (_isReplayMode && nodeIndex >= _nodes.Length)
+        {
+            // Resize to accommodate the new index plus some extra capacity
+            lock (_lock)
+            {
+                if (nodeIndex >= _nodes.Length)
+                {
+                    int newSize = Math.Max(nodeIndex + 1, _nodes.Length * 2);
+                    Array.Resize(ref _nodes, newSize);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -1185,7 +1228,9 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (hasProject && project!.IsTestProject)
             {
-                TerminalNodeStatus? node = _nodes[NodeIndexForContext(buildEventContext)];
+                int nodeIndex = NodeIndexForContext(buildEventContext);
+                EnsureNodeCapacity(nodeIndex);
+                TerminalNodeStatus? node = _nodes[nodeIndex];
 
                 // Consumes test update messages produced by VSTest and MSTest runner.
                 if (e is IExtendedBuildEventArgs extendedMessage)
@@ -1300,27 +1345,24 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
-            && Verbosity > LoggerVerbosity.Quiet)
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
             // If the warning is not a 'global' auth provider message, but is immediate, we render it immediately
             // but we don't early return so that the project also tracks it.
-            if (IsImmediateWarning(e.Code))
+            if (IsImmediateWarning(e.Code) && Verbosity > LoggerVerbosity.Quiet)
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
 
             // This is the general case - _most_ warnings are not immediate, so we add them to the project summary
             // and display them in the per-project and final summary.
+            // In quiet mode, we still accumulate so they can be shown in project-grouped form later.
             project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
             // It is necessary to display warning messages reported by MSBuild,
-            // even if it's not tracked in _projects collection or the verbosity is Quiet.
-            // The idea here (similar to the implementation in ErrorRaised) is that
-            // even in Quiet scenarios we need to show warnings/errors, even if not in
-            // full project-tree view
+            // even if it's not tracked in _projects collection.
             RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             _buildWarningsCount++;
         }
@@ -1385,14 +1427,15 @@ public sealed partial class TerminalLogger : INodeLogger
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
         if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
-            && Verbosity > LoggerVerbosity.Quiet)
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
+            // Always accumulate errors in the project, even in quiet mode, so they can be shown
+            // in project-grouped form later.
             project.AddBuildMessage(TerminalMessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
         }
         else
         {
-            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
+            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
             // For nicer formatting, any messages from the engine we strip the file portion from.
             bool hasMSBuildPlaceholderLocation = e.File.Equals("MSBUILD", StringComparison.Ordinal);
             RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: !hasMSBuildPlaceholderLocation));

@@ -14,7 +14,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.Helpers;
 
 using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
@@ -282,7 +281,7 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Theory]
-        [MemberData(nameof(BuildGraphData))]
+        [MemberData(nameof(BuildGraphData), DisableDiscoveryEnumeration = true)]
         public void BuildProjectGraphUsingCaches(Dictionary<int, int[]> edges)
         {
             var topoSortedNodes =

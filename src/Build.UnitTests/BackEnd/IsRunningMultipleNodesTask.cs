@@ -1,0 +1,32 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+namespace Microsoft.Build.UnitTests.BackEnd
+{
+    /// <summary>
+    /// A simple task that queries IsRunningMultipleNodes from the build engine.
+    /// Used by TaskHostCallback_Tests (in-process) and NetTaskHost_E2E_Tests (cross-runtime).
+    /// The E2E project includes this file via linked compile to avoid duplication.
+    /// </summary>
+    public class IsRunningMultipleNodesTask : Task
+    {
+        [Output]
+        public bool IsRunningMultipleNodes { get; set; }
+
+        public override bool Execute()
+        {
+            if (BuildEngine is IBuildEngine2 engine2)
+            {
+                IsRunningMultipleNodes = engine2.IsRunningMultipleNodes;
+                Log.LogMessage(MessageImportance.High, $"IsRunningMultipleNodes = {IsRunningMultipleNodes}");
+                return true;
+            }
+
+            Log.LogError("BuildEngine does not implement IBuildEngine2");
+            return false;
+        }
+    }
+}

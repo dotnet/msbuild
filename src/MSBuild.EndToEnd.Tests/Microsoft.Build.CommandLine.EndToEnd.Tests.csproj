@@ -10,7 +10,6 @@
     <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
   </ItemGroup>
 
@@ -21,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
 
   <ItemGroup>

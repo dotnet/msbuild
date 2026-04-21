@@ -30,9 +30,11 @@ internal class BuildCheckTelemetry
         {
             properties["ExceptionType"] = exceptionType;
         }
-        if (exception.Message != null)
+
+        string? sanitizedMessage = CrashTelemetry.TruncateMessage(exception.Message);
+        if (sanitizedMessage != null)
         {
-            properties["ExceptionMessage"] = exception.Message;
+            properties["ExceptionMessage"] = sanitizedMessage;
         }
 
         return (FailedAcquisitionEventName, properties);
@@ -87,10 +89,7 @@ internal class BuildCheckTelemetry
             yield return (RuleStatsEventName, properties);
         }
 
-
         // set for the new submission in case of build server
         _submissionId = Guid.NewGuid();
     }
 }
-
-

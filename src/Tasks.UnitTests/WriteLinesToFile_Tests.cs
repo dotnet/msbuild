@@ -14,7 +14,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -38,6 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             var a = new WriteLinesToFile
             {
                 BuildEngine = new MockEngine(_output),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Encoding = "||invalid||",
                 File = new TaskItem("c:\\" + Guid.NewGuid().ToString()),
                 Lines = new TaskItem[] { new TaskItem("x") }
@@ -61,6 +61,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var a = new WriteLinesToFile
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("\uBDEA") }
                 };
@@ -68,7 +69,8 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 var r = new ReadLinesFromFile
                 {
-                    File = new TaskItem(file)
+                    File = new TaskItem(file),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
                 Assert.True(r.Execute());
 
@@ -80,6 +82,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 a = new WriteLinesToFile
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("\uBDEA") },
                     Encoding = "ASCII"
@@ -89,7 +92,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // Read the line from the file.
                 r = new ReadLinesFromFile
                 {
-                    File = new TaskItem(file)
+                    File = new TaskItem(file),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
                 Assert.True(r.Execute());
 
@@ -112,6 +116,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents1") }
@@ -120,7 +125,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 a.Execute().ShouldBeTrue();
 
                 // Verify contents
-                var r = new ReadLinesFromFile { File = new TaskItem(file) };
+                var r = new ReadLinesFromFile { File = new TaskItem(file), TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 r.Execute().ShouldBeTrue();
                 r.Lines[0].ItemSpec.ShouldBe("File contents1");
 
@@ -133,6 +138,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents1") }
@@ -145,6 +151,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents2") }
@@ -171,6 +178,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             WriteLinesToFile task = new()
             {
                 BuildEngine = engine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = new TaskItem(file),
                 Lines = new ITaskItem[] { new TaskItem($"{nameof(RedundantParametersAreLogged)} Test") },
                 WriteOnlyWhenDifferent = true,
@@ -195,6 +203,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents1") }
@@ -203,7 +212,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 a.Execute().ShouldBeTrue();
 
                 // Verify contents
-                var r = new ReadLinesFromFile { File = new TaskItem(file) };
+                var r = new ReadLinesFromFile { File = new TaskItem(file), TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 r.Execute().ShouldBeTrue();
                 r.Lines[0].ItemSpec.ShouldBe("File contents1");
 
@@ -216,6 +225,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents1") },
@@ -229,6 +239,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     WriteOnlyWhenDifferent = true,
                     Lines = new ITaskItem[] { new TaskItem("File contents2") },
@@ -274,6 +285,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = Overwrite,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(fileExists),
                     WriteOnlyWhenDifferent = WriteOnlyWhenDifferent,
                     FailIfNotIncremental = true,
@@ -285,6 +297,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = Overwrite,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(fileNotExists),
                     WriteOnlyWhenDifferent = WriteOnlyWhenDifferent,
                     FailIfNotIncremental = true,
@@ -308,6 +321,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var WriteLinesToFile = new WriteLinesToFile
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("WriteLinesToFileDoesCreateDirectory Test") }
                 };
@@ -339,6 +353,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file.Path),
                     Lines = lines
                 }.Execute().ShouldBeTrue();
@@ -365,6 +380,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file.Path),
                     Lines = lines
                 }.Execute().ShouldBeTrue();
@@ -471,9 +487,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
 
                 // Build using ProjectCollection as recommended by Change Waves documentation
+                var logger = new MockLogger(_output);
                 using (var collection = new ProjectCollection(
                     globalProperties: null,
-                    loggers: null,
+                    loggers: [logger],
                     remoteLoggers: null,
                     toolsetDefinitionLocations: ToolsetDefinitionLocations.Default,
                     maxNodeCount: Environment.ProcessorCount,

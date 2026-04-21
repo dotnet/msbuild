@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
