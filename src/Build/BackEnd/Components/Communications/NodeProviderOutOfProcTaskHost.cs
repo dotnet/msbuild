@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -93,20 +93,15 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, TaskHostNodeKey> _nodeIdToNodeKey;
 
         /// <summary>
-        /// A mapping of all of the INodePacketFactories wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
-        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
-        /// can simultaneously create their own taskhosts.
+        /// Per-node handler stacks for routing packets from OOP TaskHost processes.
+        /// Keyed by communication node ID (one per OOP process). Each node can have
+        /// multiple OOP processes for different architectures (x86, x64, ARM64).
+        /// The stack supports nested BuildProjectFile callbacks: when Task A calls
+        /// BuildProjectFile and blocks, Task B is dispatched to the same process --
+        /// handler B is pushed on top. Packets always route to Peek() (the active task).
+        /// When Task B finishes, handler B is popped and Task A's handler is restored.
         /// </summary>
-        private ConcurrentDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
-
-        /// <summary>
-        /// A mapping of all of the INodePacketHandlers wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
-        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
-        /// can simultaneously create their own taskhosts.
-        /// </summary>
-        private ConcurrentDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
+        private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
         /// <summary>
         /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
@@ -237,8 +232,7 @@ namespace Microsoft.Build.BackEnd
             ComponentHost = host;
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
-            _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
-            _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
+            _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
             _activeNodes = [];
             _nextNodeId = 0;
 
@@ -248,6 +242,13 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+
+            // Register callback request packet types so we can deserialize them when
+            // they arrive from TaskHost processes. These are forwarded to the current
+            // TaskHostTask handler via the handler stack.
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
         }
 
         /// <summary>
@@ -283,20 +284,17 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Takes a serializer, deserializes the packet and routes it to the appropriate handler.
+        /// Always uses the local packet factory for deserialization, which routes through
+        /// our PacketReceived method (using the handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
-            else
-            {
-                _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
+            // Always route through our local factory which handles deserialization
+            // and routes to our PacketReceived, which uses the handler stack.
+            _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
         /// <summary>
@@ -310,20 +308,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Routes the specified packet
+        /// Routes the specified packet through our PacketReceived method (handler stack).
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.RoutePacket(nodeId, packet);
-            }
-            else
-            {
-                _localPacketFactory.RoutePacket(nodeId, packet);
-            }
+            _localPacketFactory.RoutePacket(nodeId, packet);
         }
 
         #endregion
@@ -338,27 +329,40 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            if (_nodeIdToPacketHandler.TryGetValue(node, out INodePacketHandler packetHandler))
+            if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
             {
-                packetHandler.PacketReceived(node, packet);
-            }
-            else
-            {
-                ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
-
-                // May also be removed by unnatural termination, so don't assume it's there
-                lock (_activeNodes)
+                lock (handlerStack)
                 {
-                    if (_activeNodes.Contains(node))
+                    if (handlerStack.Count > 0)
                     {
-                        _activeNodes.Remove(node);
-                    }
-
-                    if (_activeNodes.Count == 0)
-                    {
-                        _noNodesActiveEvent.Set();
+                        INodePacketHandler packetHandler = handlerStack.Peek();
+                        packetHandler.PacketReceived(node, packet);
+                        return;
                     }
                 }
+            }
+
+            // No handler. Handle node-level events directly.
+            switch (packet.Type)
+            {
+                case NodePacketType.NodeShutdown:
+                    lock (_activeNodes)
+                    {
+                        if (_activeNodes.Contains(node))
+                        {
+                            _activeNodes.Remove(node);
+                        }
+
+                        if (_activeNodes.Count == 0)
+                        {
+                            _noNodesActiveEvent.Set();
+                        }
+                    }
+
+                    break;
+                default:
+                    ErrorUtilities.ThrowInternalError("PacketReceived: no handler for node {0}, unexpected packet type {1}", node, packet.Type);
+                    break;
             }
         }
 
@@ -630,9 +634,12 @@ namespace Microsoft.Build.BackEnd
             if (nodeCreationSucceeded)
             {
                 NodeContext context = _nodeContexts[nodeKey];
-                // Map the transport ID directly to the handlers for O(1) packet routing
-                _nodeIdToPacketFactory[context.NodeId] = factory;
-                _nodeIdToPacketHandler[context.NodeId] = handler;
+
+                Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+                lock (handlerStack)
+                {
+                    handlerStack.Push(handler);
+                }
 
                 // Configure the node.
                 context.SendData(configuration);
@@ -647,21 +654,29 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectFromHost(TaskHostNodeKey nodeKey)
         {
-            // The node context might already have been removed by NodeContextTerminated if the task host
-            // process terminated before we got here. This is a valid race condition - just return early.
-            // Note: NodeContextTerminated does NOT remove handlers, so they'll be orphaned in this case,
-            // but that's acceptable since the task host is dead and the handlers will be cleaned up
-            // when the provider is shut down.
             if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
             {
                 CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
                 return;
             }
 
-            bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
-            bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
+            int nodeId = context.NodeId;
 
-            ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
+            if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
+            {
+                lock (handlerStack)
+                {
+                    if (handlerStack.Count > 0)
+                    {
+                        handlerStack.Pop();
+                    }
+
+                    if (handlerStack.Count == 0)
+                    {
+                        _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -760,7 +775,7 @@ namespace Microsoft.Build.BackEnd
             //
             // On .NET Core, parent and child are always from the same SDK directory. Passing
             // msbuildAssemblyPath from $(NetCoreSdkRoot) can cause a handshake mismatch on
-            // macOS where /tmp → /private/tmp symlink means the property value differs from
+            // macOS where /tmp -> /private/tmp symlink means the property value differs from
             // AppContext.BaseDirectory. By omitting toolsDirectory, both sides default to
             // BuildEnvironmentHelper which resolves symlinks consistently.
 #if RUNTIME_TYPE_NETCORE

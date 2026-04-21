@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\DebuggingSources.proj" />
 
@@ -81,6 +81,9 @@
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
     <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
     <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
+    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
+    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
+
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
@@ -102,6 +105,7 @@
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
+    <Compile Include="TaskExecutionContext.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
