@@ -361,7 +361,7 @@ namespace Microsoft.Build.BackEnd
 
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError("PacketReceived: no handler for node {0}, unexpected packet type {1}", node, packet.Type);
+                    ErrorUtilities.ThrowInternalError($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
                     break;
             }
         }
