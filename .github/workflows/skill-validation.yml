@@ -22,6 +22,7 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   validate:
@@ -85,7 +86,7 @@ jobs:
           if [ "${{ steps.changed.outputs.has_skills }}" = "true" ] && [ -f changed-skill-dirs.txt ]; then
             for dir in .github/skills/*/; do
               dirname=$(basename "$dir")
-              if ! grep -qx "$dirname" changed-skill-dirs.txt; then
+              if ! grep -Fxq "$dirname" changed-skill-dirs.txt; then
                 rm -rf "$dir"
               fi
             done
@@ -96,7 +97,7 @@ jobs:
           # Remove unchanged agent files
           if [ "${{ steps.changed.outputs.has_agents }}" = "true" ] && [ -f changed-agent-files.txt ]; then
             for f in .github/agents/*; do
-              if ! grep -qx "$f" changed-agent-files.txt; then
+              if ! grep -Fxq "$f" changed-agent-files.txt; then
                 rm -f "$f"
               fi
             done
@@ -210,13 +211,16 @@ jobs:
 
           # If check step was skipped (PR with no skill/agent changes), emit zeros
           exit_code="${{ steps.check.outputs.exit_code }}"
+          skill_count=0
+          agent_count=0
+          total=0
           if [ -z "$exit_code" ]; then
             exit_code=0
+          else
+            skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+            agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l)
+            total=$((skill_count + agent_count))
           fi
-
-          skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
-          agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l)
-          total=$((skill_count + agent_count))
           echo "${{ github.event.pull_request.number }}" > sv-results/pr-number.txt
           echo "$skill_count" > sv-results/skill-count.txt
           echo "$agent_count" > sv-results/agent-count.txt
