@@ -8,6 +8,14 @@ argument-hint: 'Describe the COM interface or activation pattern you are working
 
 Struct-based COM interop using CsWin32 patterns — AOT-compatible, no `[ComImport]` or built-in marshalling.
 
+## Workflow
+
+1. **Determine if the interface is in Win32 metadata.** If yes, add the name to `src/Framework/NativeMethods.txt` — CsWin32 generates it. If no (e.g. WMI), define a manual struct (see below).
+2. **Create a `ComScope<T>`** for lifetime management: `using ComScope<T> scope = new();`
+3. **Activate the COM object** via `ComClassFactory.TryCreate(CLSID, ...)` or `PInvoke.CoCreateInstance` with `IID.Get<T>()`.
+4. **Call methods** via `scope.Pointer->Method(...)`. Pass `ComScope<T>` directly as `T**` output parameters.
+5. **Guard with `#if FEATURE_WINDOWSINTEROP`** (or `&& NET` for manual structs needing `delegate* unmanaged`).
+
 ## COM Interfaces in Win32 Metadata
 
 Add the interface name to `src/Framework/NativeMethods.txt` → CsWin32 generates it → use `ComScope<T>`:
