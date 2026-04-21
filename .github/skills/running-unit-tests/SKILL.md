@@ -6,13 +6,20 @@ argument-hint: Run, filter, scope, or speed up MSBuild unit tests.
 
 # Running MSBuild Unit Tests
 
-This repo uses **xUnit v3** with the **Microsoft.Testing.Platform (MTP)** runner. Test projects are built as `OutputType=Exe`, so each test assembly is a self-contained host process — *not* a classic VSTest assembly. That changes which CLI flags are useful and which silently do nothing.
+This repo uses **xUnit v3** with the **Microsoft.Testing.Platform (MTP)** runner. Test projects are built as `OutputType=Exe`, so each test assembly is a self-contained host process — *not* a classic VSTest assembly.
 
-Use a **fast, scoped** loop while iterating, and a **heavier, complete** pass before declaring the change done.
+There are **two ways to run tests**:
+
+| Method | When to use |
+|--------|-------------|
+| `dotnet test <project>` | Dev loop — run a single test project, optionally filtered |
+| `build.cmd -test` / `build.sh --test` | Final validation — builds everything and runs all test projects via the repo's Arcade harness |
+
+Use a **fast, scoped** `dotnet test` loop while iterating, and the **full `build.cmd -test`** pass before declaring the change done.
 
 ## Repo-specific knobs to know about
 
-These are baked into `Directory.Build.props` (repo root), `src/Directory.Build.targets`, and `src/Shared/UnitTests/xunit.runner.json` — they affect every test run:
+These are configured in `Directory.Build.props` (repo root), `src/Directory.Build.targets`, and `src/Shared/UnitTests/xunit.runner.json`. They apply to both `dotnet test` and `build.cmd -test` unless noted otherwise:
 
 - **Multi-targeting**: test projects target `net472` *and* `net10.0` on Windows (`net10.0` only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
 - **Single-threaded by default**: `xunit.runner.json` sets `maxParallelThreads: 1` and `parallelizeTestCollections: false`. Many tests mutate process-global state (env vars, cwd, SDK resolvers), so this is intentional.
@@ -21,71 +28,40 @@ These are baked into `Directory.Build.props` (repo root), `src/Directory.Build.t
 - **Test runner**: `TestRunnerName=XUnitV3`, MTP `1.9.1`, xUnit v3 `3.2.2` (set in repo-root `Directory.Build.props`).
 - **DOTNET_HOST_PATH**: `RunnerUtilities.GetMSBuildEnvironmentVariables` (in `src/UnitTests.Shared/RunnerUtilities.cs`) sets `DOTNET_HOST_PATH` to the bootstrap dotnet when tests launch MSBuild as a child process, so tasks like `RoslynCodeTaskFactory` resolve the right host. Don't override `DOTNET_HOST_PATH` from a test.
 
-## Flags and arguments — what to use, what to skip
+## Flags — MTP vs VSTest pitfalls
 
-`dotnet test` does **not** generally forward arbitrary unknown args to the MTP runner. With MTP + xUnit v3, prefer the MTP-native flags below, and pass runner-specific arguments after `--` (or run the test exe directly).
+This repo uses MTP, **not** VSTest. Many familiar `dotnet test` flags silently do nothing. Key differences:
 
-### Use these (MTP / xUnit v3 native)
+- **Use** `--report-trx` (not `--logger trx`), `--coverage` (not `--collect "XPlat Code Coverage"`), `--filter-method`/`--filter-class`/`--filter-trait` for xUnit v3 native filtering.
+- **Don't use** `--nologo`, `--blame`, `--settings *.runsettings`, `--diag`, `--collect`, or `-- RunConfiguration.MaxCpuCount=...` — these are VSTest-only and ignored.
+- **Still works**: `-c`, `-f`, `--no-restore`, `--no-build`, `-v`, `-bl:`, `-p:Property=Value` — these are interpreted by `dotnet test` itself before MTP sees them.
 
-| Need | Flag |
-|------|------|
-| Filter by fully qualified name substring | `--filter "FullyQualifiedName~SomeMethod"` (translated by the SDK) — or run the test exe directly with `--filter-method "*.SomeMethod"` |
-| Filter by trait | `--filter-trait Category=foo` / `--filter-not-trait Category=failing` |
-| Filter by class / namespace | `--filter-class "Microsoft.Build.UnitTests.SomeClass"` / `--filter-namespace "Microsoft.Build.UnitTests"` |
-| Quiet, CI-friendly output | `--no-progress --no-ansi` |
-| TRX report | `--report-trx --report-trx-filename my.trx` |
-| Results directory | `--results-directory artifacts/TestResults` |
-| Hard timeout | `--timeout 5m` |
-| Repeat to surface flakes | `--retry-failed-tests 3` |
-| Tree-style output | `--output detailed` |
-
-`--filter-class`, `--filter-method`, `--filter-namespace`, and `--filter-trait` are **MTP-native** and work directly on the test exe with no translation — you don't need to go through `dotnet test` to use them.
-
-### Do NOT use these (silently no-op or wrong runner)
-
-- `--nologo` / `--no-logo` — not an MTP flag. MTP's banner is controlled by `--no-progress`/`--no-ansi`.
-- `--logger "trx;LogFileName=..."` / `--logger console;verbosity=...` — VSTest loggers; ignored by MTP. Use `--report-trx` instead.
-- `--collect "XPlat Code Coverage"` — VSTest collector; coverage with MTP uses `--coverage`.
-- `--blame`, `--blame-hang`, `--blame-crash` — VSTest-only.
-- `--settings *.runsettings` — `.runsettings` is VSTest-only and ignored by MTP runs in this repo.
-- `dotnet test -- RunConfiguration.MaxCpuCount=...` — VSTest MSBuild-style args; doesn't apply.
-- `--diag` — VSTest-only.
-
-### `dotnet test` flags that *do* still work
-
-`-c Release`, `-f net10.0`, `--no-restore`, `--no-build`, `-v q|m|n|d|diag`, `-bl:path.binlog`, `-p:Property=Value`. These are interpreted by `dotnet test` itself before MTP sees them.
+For comprehensive MTP vs VSTest flag reference, see the `run-tests` skill from the `dotnet-test` plugin.
 
 ## Dev loop: fast and scoped
 
-Aim for sub-30s iterations. Build once, then run the test exe directly to skip restore/build/discovery overhead.
+Aim for sub-30s iterations.
 
 > Examples below use Windows-style backslashes and PowerShell line continuations. Forward slashes work everywhere with `dotnet` (`src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.csproj`); on Linux/macOS use `/` and shell line continuations (`\`), and the exe path becomes `artifacts/bin/<Proj>/Debug/net10.0/<Proj>` (no `.exe`).
 
-1. **Build the test project once** (or `./build.cmd` if you've changed engine code):
-   ```powershell
-   dotnet build src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj -c Debug -f net10.0
-   ```
-2. **Run via `dotnet test` with `--no-restore --no-build` and a single TFM**:
+1. **Run via `dotnet test` with a single TFM and filter** (incremental build handles rebuilding automatically):
    ```powershell
    dotnet test src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj `
-     -f net10.0 --no-restore --no-build `
-     --filter "FullyQualifiedName~MyFeature"
+     -f net10.0 --filter "FullyQualifiedName~MyFeature"
    ```
-3. **Or run the MTP exe directly** (fastest — no SDK overhead):
+2. **Or run the MTP exe directly** (fastest — no SDK overhead; build first if source changed):
    ```powershell
+   dotnet build src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj -c Debug -f net10.0
    artifacts\bin\Microsoft.Build.Tasks.UnitTests\Debug\net10.0\Microsoft.Build.Tasks.UnitTests.exe `
      --filter-method "*MyFeature*" --no-progress
    ```
-   The exe path is TFM-specific: `Debug\net10.0\...exe` for net10.0, `Debug\net472\...exe` for net472. You must build the TFM you want to run first (`dotnet build ... -f net472` before invoking the net472 exe). Switching TFM without rebuilding silently runs stale binaries.
-
-   In PowerShell, the runner emits a "passed" line per test; pipe through `Select-Object -Last 8` (or `Select-String -Pattern 'failed|Total|error|skipped'`) to surface just the summary when capturing output.
+   The exe path is TFM-specific: `Debug\net10.0\...exe` for net10.0, `Debug\net472\...exe` for net472. Switching TFM without rebuilding silently runs stale binaries.
 
 ### Speeding up the dev loop further
 
 These trade safety for speed — use during iteration, **revert before final validation**:
 
 - **Single TFM**: pass `-f net10.0`. Halves runtime on Windows by skipping `net472`.
-- **Use `--no-restore --no-build`**: only after a successful build. If you change source, you must rebuild.
 - **Temporarily relax single-threaded execution**: drop a `xunit.runner.json` next to the test project (or override the existing one) with:
   ```json
   {
@@ -142,15 +118,11 @@ Match the source area you changed to its `*.UnitTests` project:
 | `src/Build/BuildCheck/**` | `src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.csproj` |
 | `src/Shared/**` | Run the consumers above (Build, Tasks, Utilities) — shared code is linked into all of them. |
 
-## Authoring tip: keep tests scoped-friendly
-
-When adding tests, make them filterable and parallel-safe where possible. Prefer `TestEnvironment.Create(_output)` for state cleanup so a future relaxation of `maxParallelThreads` doesn't break them. See [`tests.instructions.md`](../../instructions/tests.instructions.md).
-
 ## Quick reference
 
 | Scenario | Command |
 |----------|---------|
-| Fast scoped dev loop | `dotnet test <proj> -f net10.0 --no-restore --no-build --filter "FullyQualifiedName~X"` |
+| Fast scoped dev loop | `dotnet test <proj> -f net10.0 --filter "FullyQualifiedName~X"` |
 | Direct MTP exe | `artifacts\bin\<Proj>\Debug\net10.0\<Proj>.exe --filter-method "*X*" --no-progress` |
 | Single test by name | `dotnet test <proj> --filter "FullyQualifiedName~MyTestMethod"` |
 | Final per-project validation | `dotnet test <proj> -c Release` (all TFMs) |
