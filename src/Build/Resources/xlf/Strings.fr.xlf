@@ -926,6 +926,11 @@ Erreurs : {3}</target>
         <target state="translated">Un Kit de développement logiciel (SDK) a tenté de définir la variable d’environnement « {0} » à « {1} », mais elle était déjà définie sur « {2} » par un autre SDK.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">Le Kit de développement logiciel (SDK) « {0} » n’a pas pu être résolu par le résolveur de SDK « {1} ». {2}</target>

@@ -201,7 +201,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
-
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _taskHostLock = new();
@@ -535,6 +535,9 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostCoresRequest:
                     HandleCoresRequest(packet as TaskHostCoresRequest);
                     break;
+                case NodePacketType.TaskHostBuildRequest:
+                    HandleBuildRequest(packet as TaskHostBuildRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -691,7 +694,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleCoresRequest(TaskHostCoresRequest request)
         {
-            // Default to 1 for RequestCores (not 0) to satisfy the API contract (return ∈ [1, requested]).
+            // Default to 1 for RequestCores (not 0) to satisfy the API contract (return in [1, requested]).
             // For ReleaseCores, 0 is correct as it's just an acknowledgment.
             int grantedCores = request.IsRelease ? 0 : 1;
 
@@ -712,6 +715,66 @@ namespace Microsoft.Build.BackEnd
 
             var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
             _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
+        /// Handle BuildProjectFile* request from the TaskHost.
+        /// Forwards the call to the in-process IBuildEngine3.BuildProjectFilesInParallel,
+        /// which handles project resolution, scheduler interaction, and target execution.
+        /// </summary>
+        private void HandleBuildRequest(TaskHostBuildRequest request)
+        {
+            TaskHostBuildResponse response = null;
+            try
+            {
+                if (_buildEngine is not IBuildEngine3 engine3)
+                {
+                    ErrorUtilities.ThrowInternalError("HandleBuildRequest requires IBuildEngine3 but _buildEngine is {0}",
+                        _buildEngine?.GetType().Name ?? "null");
+                    return; // unreachable, but satisfies flow analysis
+                }
+
+                // Reconstruct IDictionary[] from the serialized Dictionary<string, string>[]
+                System.Collections.IDictionary[] globalProperties = null;
+                if (request.GlobalProperties is not null)
+                {
+                    globalProperties = new System.Collections.IDictionary[request.GlobalProperties.Length];
+                    for (int i = 0; i < request.GlobalProperties.Length; i++)
+                    {
+                        globalProperties[i] = request.GlobalProperties[i];
+                    }
+                }
+
+                // Reconstruct IList<string>[] from List<string>[]
+                IList<string>[] removeGlobalProperties = null;
+                if (request.RemoveGlobalProperties is not null)
+                {
+                    removeGlobalProperties = new IList<string>[request.RemoveGlobalProperties.Length];
+                    for (int i = 0; i < request.RemoveGlobalProperties.Length; i++)
+                    {
+                        removeGlobalProperties[i] = request.RemoveGlobalProperties[i];
+                    }
+                }
+
+                BuildEngineResult result = engine3.BuildProjectFilesInParallel(
+                    request.ProjectFileNames,
+                    request.TargetNames,
+                    globalProperties,
+                    removeGlobalProperties,
+                    request.ToolsVersions,
+                    request.ReturnTargetOutputs);
+
+                response = TaskHostBuildResponse.FromBuildEngineResult(request.RequestId, result);
+            }
+            finally
+            {
+                // Always send a response to prevent the OOP task from hanging.
+                // On success, sends the real result; on exception, sends failure.
+                // Exceptions propagate to TaskBuilder which handles them identically
+                // to the in-proc TaskHost path (CircularDependencyException, etc.).
+                response ??= new TaskHostBuildResponse(request.RequestId, false, null);
+                _taskHostProvider.SendData(_taskHostNodeKey, response);
+            }
         }
 
         /// <summary>

@@ -926,6 +926,11 @@ Fehler: {3}</target>
         <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits von einem anderen SDK auf „{2}“ festgelegt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">SDK „{0}“ konnte vom SDK-Resolver „{1}“ nicht aufgelöst werden. {2}</target>
