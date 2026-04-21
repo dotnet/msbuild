@@ -760,7 +760,6 @@ namespace Microsoft.Build.Eventing
 
         /// <summary>
         /// Signals that a task is being dispatched to the task host.
-        /// Measures the full round-trip: serialization, IPC, remote execution, and result retrieval.
         /// Pair with <see cref="TaskHostDispatchStop"/> to compute total task host wall-clock time.
         /// </summary>
         [Event(107, Keywords = Keywords.All)]
@@ -771,6 +770,7 @@ namespace Microsoft.Build.Eventing
 
         /// <summary>
         /// Signals that a task dispatched to the task host has completed and the result has been received.
+        /// Measures the full round-trip: serialization, IPC, remote execution, and result retrieval.
         /// </summary>
         [Event(108, Keywords = Keywords.All)]
         public void TaskHostDispatchStop(string taskName, bool succeeded)
