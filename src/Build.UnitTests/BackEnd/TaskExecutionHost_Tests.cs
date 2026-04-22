@@ -643,7 +643,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var parameters = new Dictionary<string, (string, ElementLocation)>(StringComparer.OrdinalIgnoreCase);
                 parameters["ExecuteReturnParam"] = ("false", ElementLocation.Create("foo.proj"));
 
-                ((TaskBuilderTestTask)(_host as TaskExecutionHost).TaskInstance).ThrowOnExecute = true;
+                ((TaskBuilderTestTask)_host.TaskInstance).ThrowOnExecute = true;
 
                 Assert.True(_host.SetTaskParameters(parameters));
 
