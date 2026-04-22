@@ -1832,6 +1832,16 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       request a target to build itself (perhaps via a chain of other targets)
     </comment>
   </data>
+  <data name="ProjectGraphProjectFileCannotBeLoadedWithReferrers" xml:space="preserve">
+    <value>The project file '{0}' could not be loaded when referenced by {1}.</value>
+    <comment>
+      This message is shown during static graph construction when a referenced project file cannot be loaded,
+      along with information about which project(s) are referencing the failed project.
+      {0} is the full path to the project that failed to load
+      {1} is a comma-separated list of full paths to the projects that reference the failed project
+      The specific reason for the load failure (e.g., "Could not find file '...'") is appended separately in code.
+    </comment>
+  </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" xml:space="preserve">
     <value>MSB4252: Project "{0}" with global properties
     ({1})
