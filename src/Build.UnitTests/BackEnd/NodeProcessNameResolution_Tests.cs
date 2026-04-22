@@ -13,20 +13,9 @@ using Constants = Microsoft.Build.Framework.Constants;
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
-    /// Unit tests for the process-name resolution used by
-    /// <c>NodeProviderOutOfProcBase.GetPossibleRunningNodes</c>. This is the surface area changed
-    /// by the fix for <see href="https://github.com/dotnet/msbuild/issues/13508"/>:
-    /// <c>ShutdownAllNodes</c> must look for both the host kind that *would* be launched right
-    /// now (e.g. <c>dotnet</c>) and the alternate AppHost name (<c>MSBuild</c>), so idle worker
-    /// nodes started by either host kind are discovered.
+    /// Tests for <see cref="NodeProviderOutOfProcBase.ResolveProcessNamesToSearch"/>, the resolver
+    /// changed by the fix for https://github.com/dotnet/msbuild/issues/13508.
     /// </summary>
-    /// <remarks>
-    /// A full end-to-end test of <c>ShutdownAllNodes</c> across host kinds is structurally
-    /// infeasible from a unit test: worker connect handshakes include the launcher's
-    /// <c>MSBuildToolsDirectory32</c>, so workers spawned by the bootstrapped MSBuild won't
-    /// answer to a shutdown call originating from the test assembly's MSBuild.dll. We therefore
-    /// validate the fix at the resolver layer where the bug actually lived.
-    /// </remarks>
     public class NodeProcessNameResolution_Tests
     {
         private const string AppHostName = "MSBuild";  // Constants.MSBuildAppName
@@ -58,12 +47,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             names[0].ShouldNotBeNullOrEmpty();
         }
 
-        /// <summary>
-        /// Regression for <see href="https://github.com/dotnet/msbuild/issues/13508"/>:
-        /// when shutdown is invoked with no active build (<c>configuredNodeExeLocation == null</c>),
-        /// the resolver must include the <c>MSBuild</c> AppHost name so that idle worker nodes
-        /// launched as <c>MSBuild.exe</c> are discovered, regardless of the current host kind.
-        /// </summary>
+        // Regression for https://github.com/dotnet/msbuild/issues/13508.
         [Fact]
         public void ShutdownBranch_NoConfiguredLocation_AlwaysIncludesAppHostName()
         {
@@ -74,11 +58,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             ShouldContainIgnoreCase(names, AppHostName);
         }
 
-        /// <summary>
-        /// When the active build's <see cref="Microsoft.Build.Execution.BuildParameters.NodeExeLocation"/>
-        /// is the AppHost, the resolver must still include both the AppHost name and the alternate
-        /// host name so a defensive shutdown still finds nodes launched by the other host kind.
-        /// </summary>
         [Fact]
         public void ShutdownBranch_ConfiguredAppHostLocation_IncludesBothNames()
         {
@@ -94,10 +73,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
 #if NET
-        /// <summary>
-        /// On .NET Core, when the configured location is a managed assembly (DLL), the resolver
-        /// returns the current host (e.g. "dotnet") plus the AppHost name as defensive fallback.
-        /// </summary>
         [Fact]
         public void ShutdownBranch_NetCore_ConfiguredDllLocation_IncludesAppHostFallback()
         {
