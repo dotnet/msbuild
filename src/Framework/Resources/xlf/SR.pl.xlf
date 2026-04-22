@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw SDK systemu Windows, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw Windows SDK, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">

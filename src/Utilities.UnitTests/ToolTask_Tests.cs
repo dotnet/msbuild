@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text.RegularExpressions;
@@ -13,7 +14,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolTask_Tests
     {
-        private ITestOutputHelper _output;
+        private readonly ITestOutputHelper _output;
 
         public ToolTask_Tests(ITestOutputHelper testOutput)
         {
@@ -995,21 +995,23 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
         /// </summary>
         /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
-        /// <param name="initialDelay">Delay to generate on the first execution in milliseconds.</param>
-        /// <param name="followupDelay">Delay to generate on follow-up execution in milliseconds.</param>
-        /// <param name="timeout">Task timeout in milliseconds.</param>
+        /// <param name="timeoutOnFirstExecution">Whether the first execution should be forced to time out before later retries succeed.</param>
         /// <remarks>
-        /// These tests execute the same task instance multiple times, which will in turn run a shell command to sleep
+        /// These tests execute the same task instance multiple times, which will in turn run a command to sleep for a
         /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
         /// that all following executions return success.
         /// </remarks>
         [Theory]
-        [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
-        [InlineData(3, 1, 1, -1)] // Repeat without timeout.
-        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
-        public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
+        [InlineData(1, false)]
+        [InlineData(3, false)]
+        [InlineData(3, true)]
+        public void ToolTaskThatTimeoutAndRetry(int repeats, bool timeoutOnFirstExecution)
         {
             using var env = TestEnvironment.Create(_output);
+
+            int fastDelayMilliseconds = 100;
+            int slowDelayMilliseconds = 5_000;
+            int timeoutMilliseconds = 2_000;
 
             MockEngine3 engine = new();
 
@@ -1017,27 +1019,36 @@ namespace Microsoft.Build.UnitTests
             var task = new ToolTaskThatSleeps
             {
                 BuildEngine = engine,
-                InitialDelay = initialDelay,
-                FollowupDelay = followupDelay,
-                Timeout = timeout
+                InitialDelay = timeoutOnFirstExecution ? slowDelayMilliseconds : fastDelayMilliseconds,
+                FollowupDelay = fastDelayMilliseconds,
+                Timeout = timeoutOnFirstExecution ? timeoutMilliseconds : System.Threading.Timeout.Infinite
             };
 
             // Execute the same task instance multiple times. The index is one-based.
-            bool result;
-            for (int i = 1; i <= repeats; i++)
+            for (int attempt = 1; attempt <= repeats; attempt++)
             {
-                // Execute the task:
-                result = task.Execute();
+                bool shouldSucceed = attempt > 1 || !timeoutOnFirstExecution;
+                bool result = task.Execute();
 
-                _output.WriteLine(engine.Log);
+                _output.WriteLine(
+                    $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, exitCode={task.ExitCode}.");
 
-                task.RepeatCount.ShouldBe(i);
-
-                // The first execution may fail (timeout), but all following ones should succeed:
-                if (i > 1)
+                if (!string.IsNullOrEmpty(engine.Log))
                 {
-                    result.ShouldBeTrue();
+                    _output.WriteLine(engine.Log);
+                    engine.Log = string.Empty;
+                }
+
+                task.RepeatCount.ShouldBe(attempt);
+                result.ShouldBe(shouldSucceed);
+
+                if (shouldSucceed)
+                {
                     task.ExitCode.ShouldBe(0);
+                }
+                else
+                {
+                    task.ExitCode.ShouldNotBe(0);
                 }
             }
         }
@@ -1108,25 +1119,21 @@ namespace Microsoft.Build.UnitTests
         /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
         /// </summary>
         /// <remarks>
-        /// This task runs shell command to sleep for predefined, variable amount of time based on how many times the
-        /// instance has been executed.
+        /// This task invokes a direct sleep tool with a variable delay based on how many times the instance has been
+        /// executed, which avoids the flakiness of nesting the wait inside a shell.
         /// </remarks>
         private sealed class ToolTaskThatSleeps : ToolTask
         {
-            // Windows prompt command to sleep:
-            private readonly string _windowsSleep = "/c start /wait timeout {0}";
-
-            // UNIX command to sleep:
-            private readonly string _unixSleep = "-c \"sleep {0}\"";
-
-            // Full path to shell:
-            private readonly string _pathToShell;
+            private readonly string _pathToTool;
 
             public ToolTaskThatSleeps()
                 : base()
             {
-                // Determines shell to use: cmd for Windows, sh for UNIX-like systems:
-                _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : "cmd.exe";
+                // timeout.exe exits immediately when ToolTask redirects stdin on Windows, so use ping.exe
+                // as the built-in blocking process for the timeout/retry scenario.
+                _pathToTool = NativeMethodsShared.IsUnixLike
+                    ? "sleep"
+                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "ping.exe");
             }
 
             /// <summary>
@@ -1141,9 +1148,9 @@ namespace Microsoft.Build.UnitTests
             /// Gets or sets the delay for the follow-up executions.
             /// </summary>
             /// <remarks>
-            /// Defaults to 1 milliseconds.
+            /// Defaults to 100 milliseconds.
             /// </remarks>
-            public Int32 FollowupDelay { get; set; } = 1;
+            public Int32 FollowupDelay { get; set; } = 100;
 
             /// <summary>
             /// Int32 output parameter for the repeat counter for test purpose.
@@ -1152,22 +1159,26 @@ namespace Microsoft.Build.UnitTests
             public Int32 RepeatCount { get; private set; } = 0;
 
             /// <summary>
-            /// Gets the tool name (shell).
+            /// Gets the tool name.
             /// </summary>
-            protected override string ToolName => Path.GetFileName(_pathToShell);
+            protected override string ToolName => Path.GetFileName(_pathToTool);
 
             /// <summary>
-            /// Gets the full path to shell.
+            /// Gets the full path to the sleep tool.
             /// </summary>
-            protected override string GenerateFullPathToTool() => _pathToShell;
+            protected override string GenerateFullPathToTool() => _pathToTool;
 
             /// <summary>
-            /// Generates a shell command to sleep different amount of time based on repeat counter.
+            /// Generates the arguments to sleep for a different amount of time based on repeat counter.
             /// </summary>
-            protected override string GenerateCommandLineCommands() =>
-                NativeMethodsShared.IsUnixLike ?
-                string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
-                string.Format(_windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
+            protected override string GenerateCommandLineCommands()
+            {
+                int delay = RepeatCount < 2 ? InitialDelay : FollowupDelay;
+
+                return NativeMethodsShared.IsUnixLike
+                    ? (delay / 1000.0).ToString("0.###", CultureInfo.InvariantCulture)
+                    : $"-n {Math.Max(2, (int)Math.Ceiling(delay / 1000.0) + 1).ToString(CultureInfo.InvariantCulture)} 127.0.0.1";
+            }
 
             /// <summary>
             /// Ensures that test parameters make sense.
