@@ -1340,7 +1340,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns true if the specified filename is a metaproject file (.metaproj), otherwise false.
         /// </summary>
-        internal static bool IsMetaprojectFilename(string filename)
+        internal static bool IsMetaprojectFilename(string? filename)
         {
             return HasExtension(filename, ".metaproj");
         }
@@ -1350,14 +1350,14 @@ namespace Microsoft.Build.Framework
             return HasExtension(filename, ".binlog");
         }
 
-        private static bool HasExtension(string filename, string extension)
+        private static bool HasExtension(string? filename, string extension)
         {
             if (String.IsNullOrEmpty(filename))
             {
                 return false;
             }
 
-            return filename.EndsWith(extension, PathComparison);
+            return filename!.EndsWith(extension, PathComparison);
         }
 
         /// <summary>
