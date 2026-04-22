@@ -462,7 +462,9 @@ namespace Microsoft.Build.BackEnd
             string msbuildLocation = null,
             NodeMode? expectedNodeMode = null)
         {
-            string[] processNamesToSearch = ResolveProcessNamesToSearch(msbuildLocation);
+            string[] processNamesToSearch = ResolveProcessNamesToSearch(
+                msbuildLocation,
+                _componentHost?.BuildParameters?.NodeExeLocation);
 
             ErrorUtilities.VerifyThrow(processNamesToSearch.Length > 0, "Expected at least one process name to search for.");
             string expectedProcessName = processNamesToSearch.Length == 1
@@ -495,65 +497,50 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Determines which process names could host MSBuild worker nodes for the current operation.
+        /// Returns the candidate process names to search for when looking up worker nodes.
         /// </summary>
+        /// <param name="msbuildLocation">
+        /// The MSBuild executable that *will* be used to launch a worker on the node-reuse path,
+        /// or <c>null</c> when called from <see cref="ShutdownAllNodes"/> (no active build).
+        /// </param>
+        /// <param name="configuredNodeExeLocation">
+        /// <see cref="Microsoft.Build.Execution.BuildParameters.NodeExeLocation"/> from the active
+        /// build, or <c>null</c> when no build is active. Parameter (rather than instance state)
+        /// so the resolver can be unit-tested in isolation.
+        /// </param>
         /// <remarks>
-        /// During node-reuse the caller supplies the exact <paramref name="msbuildLocation"/> that
-        /// would be used to launch a new node, so we return a single name derived from it. Behavior
-        /// of this branch is intentionally identical to the pre-fix code.
+        /// On the reuse path the caller already knows the launch location, so we return the single
+        /// process name that location would produce — preserving pre-fix behavior.
         /// <para>
-        /// During <see cref="ShutdownAllNodes"/> the caller passes <c>null</c> because there is no
-        /// active build context. The previous implementation fell back to <see cref="CurrentHost.GetCurrentHost"/>,
-        /// which always resolves to the *current* process host (e.g. <c>dotnet</c>) and therefore missed
-        /// idle worker nodes started via the MSBuild AppHost. We instead derive the path that *would*
-        /// be launched right now, mirroring the resolution logic in <see cref="GetNodes"/>:
-        /// </para>
-        /// <list type="number">
-        ///   <item><c>BuildParameters.NodeExeLocation</c> if available, else <c>BuildEnvironmentHelper.Instance.CurrentMSBuildExePath</c>.</item>
-        ///   <item>On .NET Core, when the path points at the AppHost and the current process is <c>dotnet</c>,
-        ///   remap to <c>MSBuild.dll</c> (workers will be launched as <c>dotnet MSBuild.dll</c>).</item>
-        /// </list>
-        /// <para>
-        /// We then add the *other* host name as a defensive fallback because previously launched
-        /// idle nodes may have been started by a different host kind (e.g. a prior <c>MSBuild.exe</c>
-        /// invocation followed by <c>dotnet build-server shutdown</c>). Extra candidates are safe:
-        /// they are validated downstream by handshake and process-owner checks.
+        /// On the shutdown path we mirror the resolution <see cref="GetNodes"/> performs:
+        /// <c>configuredNodeExeLocation ?? CurrentMSBuildExePath</c>, with the .NET Core AppHost→.dll
+        /// remap applied. We additionally include the *other* host name as a defensive fallback to
+        /// catch idle nodes started by an earlier build that used a different host kind (e.g.
+        /// <c>MSBuild.exe</c> followed by <c>dotnet build-server shutdown</c>). Extra candidates
+        /// are harmless: they are validated downstream by handshake and process-owner checks.
         /// </para>
         /// </remarks>
-        private string[] ResolveProcessNamesToSearch(string msbuildLocation)
-            => ResolveProcessNamesToSearchCore(msbuildLocation, _componentHost?.BuildParameters?.NodeExeLocation);
-
-        /// <summary>
-        /// Pure implementation extracted for unit testing. See <see cref="ResolveProcessNamesToSearch(string)"/>.
-        /// </summary>
-        /// <param name="msbuildLocation">Caller-supplied MSBuild executable path (non-null on the
-        /// node-reuse path; null on the shutdown path).</param>
-        /// <param name="configuredNodeExeLocation"><c>BuildParameters.NodeExeLocation</c> from the
-        /// active build, or <c>null</c> when no build is active (e.g. <see cref="ShutdownAllNodes"/>).</param>
-        internal static string[] ResolveProcessNamesToSearchCore(string msbuildLocation, string configuredNodeExeLocation)
+        internal static string[] ResolveProcessNamesToSearch(string msbuildLocation, string configuredNodeExeLocation)
         {
+            // Reuse path: the launch location is known, so only one process name is possible.
             if (msbuildLocation != null)
             {
-                return [GetProcessNameFromExecutablePath(msbuildLocation)];
+                return [GetProcessNameForLocation(msbuildLocation)];
             }
 
-            string wouldLaunchPath = configuredNodeExeLocation;
-            if (string.IsNullOrEmpty(wouldLaunchPath))
-            {
-                wouldLaunchPath = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            }
+            // Shutdown path: derive the path that *would* be launched right now.
+            string wouldLaunchPath = !string.IsNullOrEmpty(configuredNodeExeLocation)
+                ? configuredNodeExeLocation
+                : BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
 #if RUNTIME_TYPE_NETCORE
-            // Mirror the AppHost -> .dll remap GetNodes performs when launching from a dotnet host.
             wouldLaunchPath = RemapAppHostToManagedDllIfHostedByDotnet(wouldLaunchPath);
 #endif
 
             string primary = !string.IsNullOrEmpty(wouldLaunchPath)
-                ? GetProcessNameFromExecutablePath(wouldLaunchPath)
+                ? GetProcessNameForLocation(wouldLaunchPath)
                 : (Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost()) ?? Constants.MSBuildAppName);
 
-            // Defensive fallback: include the alternate host so previously launched idle nodes
-            // started by the other host kind (AppHost vs dotnet) are also discovered.
             string alternate = string.Equals(primary, Constants.MSBuildAppName, StringComparison.OrdinalIgnoreCase)
                 ? Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost())
                 : Constants.MSBuildAppName;
@@ -561,30 +548,25 @@ namespace Microsoft.Build.BackEnd
             return string.IsNullOrEmpty(alternate) || string.Equals(primary, alternate, StringComparison.OrdinalIgnoreCase)
                 ? [primary]
                 : [primary, alternate];
-        }
 
-        /// <summary>
-        /// Returns the process name that would be observed for a worker node launched from
-        /// <paramref name="msbuildLocation"/>: the AppHost executable name when the path points
-        /// at the AppHost, otherwise the host name (e.g. <c>dotnet</c>) that runs <c>MSBuild.dll</c>.
-        /// </summary>
-        private static string GetProcessNameFromExecutablePath(string msbuildLocation)
-        {
-            bool isAppHost = Path.GetFileName(msbuildLocation)
-                .Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+            // AppHost path -> "MSBuild"; managed DLL path -> current host name (e.g. "dotnet").
+            static string GetProcessNameForLocation(string location)
+            {
+                bool isAppHost = Path.GetFileName(location)
+                    .Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
 
-            return Path.GetFileNameWithoutExtension(
-                isAppHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
+                return Path.GetFileNameWithoutExtension(
+                    isAppHost ? location : (CurrentHost.GetCurrentHost() ?? location));
+            }
         }
 
 #if RUNTIME_TYPE_NETCORE
         /// <summary>
-        /// When the current process is the <c>dotnet</c> CLI host and <paramref name="msbuildLocation"/>
-        /// points at the MSBuild AppHost (<c>MSBuild.exe</c>/<c>MSBuild</c>), returns the sibling
-        /// <c>MSBuild.dll</c> path so worker nodes are launched as <c>dotnet MSBuild.dll</c> rather
-        /// than via the slower AppHost. Otherwise returns <paramref name="msbuildLocation"/> unchanged.
-        /// Used by both <see cref="GetNodes"/> (launch path) and <see cref="ResolveProcessNamesToSearchCore"/>
-        /// (shutdown path) so the two stay in sync by construction.
+        /// When the current process is <c>dotnet</c> and <paramref name="msbuildLocation"/> points at
+        /// the MSBuild AppHost, returns the sibling <c>MSBuild.dll</c> so workers are launched as
+        /// <c>dotnet MSBuild.dll</c> (faster than the AppHost). Otherwise returns the input unchanged.
+        /// Shared by <see cref="GetNodes"/> (launch) and <see cref="ResolveProcessNamesToSearch"/>
+        /// (shutdown) so the two cannot drift.
         /// </summary>
         private static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
         {

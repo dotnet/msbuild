@@ -39,7 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void ReuseBranch_AppHostPath_ReturnsAppHostName()
         {
-            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearchCore(
+            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
                 msbuildLocation: Path.Combine("c:", "tools", AppHostExeName),
                 configuredNodeExeLocation: null);
 
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void ReuseBranch_DllPath_ReturnsHostName()
         {
             // For a managed-assembly path the launcher uses the current host (e.g. "dotnet" on .NET Core).
-            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearchCore(
+            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
                 msbuildLocation: Path.Combine("c:", "tools", Constants.MSBuildAssemblyName),
                 configuredNodeExeLocation: null);
 
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void ShutdownBranch_NoConfiguredLocation_AlwaysIncludesAppHostName()
         {
-            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearchCore(
+            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
                 msbuildLocation: null,
                 configuredNodeExeLocation: null);
 
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void ShutdownBranch_ConfiguredAppHostLocation_IncludesBothNames()
         {
-            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearchCore(
+            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
                 msbuildLocation: null,
                 configuredNodeExeLocation: Path.Combine("c:", "tools", AppHostExeName));
 
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void ShutdownBranch_NetCore_ConfiguredDllLocation_IncludesAppHostFallback()
         {
-            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearchCore(
+            string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
                 msbuildLocation: null,
                 configuredNodeExeLocation: Path.Combine("c:", "tools", Constants.MSBuildAssemblyName));
 
