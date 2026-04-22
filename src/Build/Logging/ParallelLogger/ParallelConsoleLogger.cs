@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
@@ -277,13 +278,19 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (!string.IsNullOrEmpty(logger.OutputFilePath))
                 {
-                    WriteNewLine();
-                    WriteLinePretty($"  {logger.LoggerName}: {logger.OutputFilePath}");
+                    if (setColor != DontSetColor)
+                    {
+                        WriteLinePretty($"  {logger.LoggerName}: {AnsiCodes.LinkPrefix}file:///{logger.OutputFilePath}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}");
+                    }
+                    else
+                    {
+                        WriteLinePretty($"  {logger.LoggerName}: {logger.OutputFilePath}");
+                    }
                 }
             }
 
             // Write the "Build Finished" event if verbosity is normal, detailed or diagnostic or the user
-            // specified to show the summary.
+            // specified to show the summary.but if it was ne
             if (ShowSummary == true)
             {
                 if (e.Succeeded)
