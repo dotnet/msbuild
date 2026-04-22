@@ -3,7 +3,6 @@
 
 using System;
 using System.Text;
-using System.Threading;
 
 namespace Microsoft.Build.Framework.Utilities;
 
@@ -34,7 +33,12 @@ internal ref struct StringBuilderHelper(int capacity)
     ///  back to the <see cref="StringBuilderCache"/>. Subsequent calls return <see cref="string.Empty"/>.
     /// </summary>
     public string GetFormattedText()
-        => Interlocked.Exchange(ref _builder, null) is { } builder
-            ? StringBuilderCache.GetStringAndRelease(builder)
-            : string.Empty;
+    {
+        StringBuilder? builder = _builder;
+        _builder = null;
+
+        return builder is not null
+                ? StringBuilderCache.GetStringAndRelease(builder)
+                : string.Empty;
+    }
 }
