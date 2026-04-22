@@ -43,6 +43,11 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
+    /// <summary>
+    /// Protects access to the stdout - ensures that only one thread writes to the console at a time.
+    /// </summary>
+    private readonly LockType _renderLock = new();
+
     private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
 
     /// <summary>
@@ -60,40 +65,19 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     internal Func<StopwatchAbstraction>? _createStopwatch = null;
 
     /// <summary>
-    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
-    /// </summary>
-    /// <remarks>
-    /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
-    /// However, reads and writes to locations in an array is atomic, so locking is not required.
-    /// </remarks>
-    private TerminalNodeStatus?[] _nodes = [];
-
-    /// <summary>
     /// Name of target that identifies the project cache plugin run has just started.
     /// </summary>
     private const string CachePluginStartTarget = "_CachePluginRunStart";
-
-    /// <summary>
-    /// Protects access to state shared between the logger callbacks and the rendering thread.
-    /// </summary>
-    private readonly LockType _lock = new();
 
     /// <summary>
     /// A cancellation token to signal the rendering thread that it should exit.
     /// </summary>
     private readonly CancellationTokenSource _cts = new();
 
-
     /// <summary>
     /// The working directory when the build starts, to trim relative output paths.
     /// </summary>
     private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
-
-
-    /// <summary>
-    /// True if we're replaying a binary log. In this mode, we may encounter NodeIds higher than the initial node count.
-    /// </summary>
-    private bool _isReplayMode = false;
 
     /// <summary>
     /// The thread that performs periodic refresh of the console output.
@@ -366,10 +350,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     public override void Initialize(IEventSource eventSource)
     {
         ParseParameters();
-        // Detect if we're in replay mode
-        _isReplayMode = eventSource is IBinaryLogReplaySource;
         base.Initialize(eventSource);
-        _nodes = new TerminalNodeStatus[NodeCount];
     }
 
 
@@ -473,6 +454,12 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     #endregion
 
     #region ProjectTrackingLoggerBase implementation
+    
+    public override bool NeedsTaskInputs => true;
+
+    public override bool NeedsEvaluationPropertiesAndItems => true;
+
+    public override bool UsesPerNodeData => true;
 
     /// <inheritdoc/>
     protected override TerminalBuildData CreateBuildData(BuildStartedEventArgs e)
@@ -581,7 +568,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     }
 
     /// <inheritdoc/>
-    protected override void OnBuildFinished(BuildFinishedEventArgs e, TerminalProjectInfo[] projectInfos, TerminalBuildData buildData)
+    protected override void OnBuildFinished(BuildFinishedEventArgs e, IEnumerable<TerminalProjectInfo> projectInfos, TerminalBuildData buildData)
     {
         _cts.Cancel();
         _refresher?.Join();
@@ -654,7 +641,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
         _testEndTime = null;
     }
 
-    private void RenderBuildSummary(TerminalBuildData buildData, TerminalProjectInfo[] projectInfos)
+    private void RenderBuildSummary(TerminalBuildData buildData, IEnumerable<TerminalProjectInfo> projectInfos)
     {
         if (buildData.BuildErrorsCount == 0 && buildData.BuildWarningsCount == 0)
         {
@@ -694,7 +681,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
         if (!buildData.IsRestoring && e.TargetNames == "Restore" && !buildData.RestoreFinished && e.BuildEventContext is not null)
         {
             buildData.RestoreContext = e.BuildEventContext.ProjectContextId;
-            StartNode(e, new TerminalNodeStatus(e.ProjectFile!, evalData.TargetFramework, evalData.RuntimeIdentifier, "Restore", projectData.Stopwatch));
+            SetActiveNodeStatus(e, new TerminalNodeStatus(e.ProjectFile!, evalData.TargetFramework, evalData.RuntimeIdentifier, "Restore", projectData.Stopwatch));
         }
     }
 
@@ -734,12 +721,12 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
                 return;
             }
 
-            lock (_lock)
+            lock (_renderLock)
             {
                 Terminal.BeginUpdate();
                 try
                 {
-                    EraseNodes();
+                    EraseNodesDisplay();
 
                     string duration = projectData.Stopwatch.ElapsedSeconds.ToString("F1");
                     ReadOnlyMemory<char>? outputPath = projectData.OutputPath;
@@ -953,28 +940,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
             TerminalNodeStatus? nodeData = CreateNodeData(e, projectData);
             if (nodeData != null)
             {
-                StartNode(e, nodeData);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Ensures that the <see cref="_nodes"/> array has enough capacity to accommodate the given index.
-    /// This is necessary for binary log replay scenarios where the replay may use fewer nodes than the original build.
-    /// </summary>
-    private void EnsureNodeCapacity(int nodeIndex)
-    {
-        // Only resize in replay mode - during normal builds, the node count is fixed
-        if (_isReplayMode && nodeIndex >= _nodes.Length)
-        {
-            // Resize to accommodate the new index plus some extra capacity
-            lock (_lock)
-            {
-                if (nodeIndex >= _nodes.Length)
-                {
-                    int newSize = Math.Max(nodeIndex + 1, _nodes.Length * 2);
-                    Array.Resize(ref _nodes, newSize);
-                }
+                SetActiveNodeStatus(e, nodeData);
             }
         }
     }
@@ -1030,7 +996,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
             string targetName = projectData.CurrentTarget ?? "";
             TerminalNodeStatus nodeStatus = new(projectFile, projectData.TargetFramework, projectData.RuntimeIdentifier, GetDisplayTargetName(targetName), projectData.Stopwatch);
-            StartNode(e, nodeStatus);
+            SetActiveNodeStatus(e, nodeStatus);
         }
     }
 
@@ -1084,7 +1050,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
 
             if (hasProject && projectData != null && projectData.IsTestProject)
             {
-                var node = GetNodeForEvent(e);
+                var node = GetNodeDataForEvent(e);
                 // Consumes test update messages produced by VSTest and MSTest runner.
                 if (e is IExtendedBuildEventArgs extendedMessage)
                 {
@@ -1092,7 +1058,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
                     {
                         case "TLTESTPASSED":
                             {
-                                if (node != null)
+                                if (node != default)
                                 {
                                     string indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                     string displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
@@ -1100,7 +1066,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
                                     TerminalNodeStatus? status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, projectData.Stopwatch);
                                     if (e.BuildEventContext != null)
                                     {
-                                        StartNode(e, status);
+                                        SetActiveNodeStatus(e, status);
                                     }
                                 }
 
@@ -1109,14 +1075,14 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
 
                         case "TLTESTSKIPPED":
                             {
-                                if (node != null)
+                                if (node != default)
                                 {
                                     string indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                     string displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
                                     TerminalNodeStatus? status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, projectData.Stopwatch);
                                     if (e.BuildEventContext != null)
                                     {
-                                        StartNode(e, status);
+                                        SetActiveNodeStatus(e, status);
                                     }
                                 }
                                 break;
@@ -1310,7 +1276,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
         while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
             count++;
-            lock (_lock)
+            lock (_renderLock)
             {
                 // Querying the terminal for it's dimensions is expensive, so we only do it every 30 frames e.g. once a second.
                 if (count >= 30)
@@ -1325,7 +1291,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
             }
         }
 
-        EraseNodes();
+        EraseNodesDisplay();
     }
 
     /// <summary>
@@ -1336,12 +1302,12 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     {
         int width = updateSize ? Terminal.Width : _currentFrame.Width;
         int height = updateSize ? Terminal.Height : _currentFrame.Height;
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(GetAllNodeData(), width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
         {
-            EraseNodes();
+            EraseNodesDisplay();
         }
 
         string rendered = newFrame.Render(_currentFrame);
@@ -1363,7 +1329,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     /// <summary>
     /// Erases the previously printed live node output.
     /// </summary>
-    private void EraseNodes()
+    private void EraseNodesDisplay()
     {
         if (_currentFrame.NodesCount == 0)
         {
@@ -1387,39 +1353,6 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     private static string GetDisplayTargetName(string targetName)
     {
         return targetName == _testStartTarget ? "Testing" : targetName;
-    }
-
-    private TerminalNodeStatus? GetNodeForEvent(BuildEventArgs e)
-    {
-        int? node = GetNodeArrayIndexForEvent(e);
-        if (node is int nodeId)
-        {
-            EnsureNodeCapacity(nodeId);
-            if (_nodes[nodeId] is TerminalNodeStatus status)
-            {
-                return status;
-            }
-        }
-
-        return null;
-    }
-
-    private void StartNode(BuildEventArgs e, TerminalNodeStatus status)
-    {
-        if (GetNodeArrayIndexForEvent(e) is int nodeId)
-        {
-            EnsureNodeCapacity(nodeId);
-            _nodes[nodeId] = status;
-        }
-    }
-
-    private void YieldNode(BuildEventArgs e)
-    {
-        if (GetNodeArrayIndexForEvent(e) is int nodeId)
-        {
-            EnsureNodeCapacity(nodeId);
-            _nodes[nodeId] = null;
-        }
     }
 
     /// <summary>
@@ -1459,11 +1392,11 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     /// <param name="message">Build message needed to be shown immediately.</param>
     private void RenderImmediateMessage(string message)
     {
-        lock (_lock)
+        lock (_renderLock)
         {
             // Calling erase helps to clear the screen before printing the message
             // The immediate output will not overlap with node status reporting
-            EraseNodes();
+            EraseNodesDisplay();
             Terminal.WriteLine(message);
         }
     }
