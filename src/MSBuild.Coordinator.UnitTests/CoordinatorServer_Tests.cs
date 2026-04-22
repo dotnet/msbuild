@@ -204,6 +204,8 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task ConcurrentClients_AllReceiveGrants()
     {
+#pragma warning disable CA2000 // Dispose objects before losing scope
+
         // Budget of 16 with 4 clients each requesting 4.
         // All should connect and receive grants without waiting.
         using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
@@ -254,6 +256,7 @@ public class CoordinatorServer_Tests : IDisposable
             _cts.Cancel();
             await serverTask;
         }
+#pragma warning restore CA2000 // Dispose objects before losing scope
     }
 
     [Fact]

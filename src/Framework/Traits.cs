@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Build.Framework.Coordinator;
 
 namespace Microsoft.Build.Framework
 {
@@ -129,6 +130,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// TODO: Replace with command line flag when feature is completed. The environment variable is intented to avoid exposing the flag early.
         public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
+
+        /// <summary>
+        /// Enables the build coordinator for cross-process node budget management.
+        /// </summary>
+        public readonly bool EnableCoordinator = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(Protocol.UseCoordinatorEnvironmentVariable));
 
         /// <summary>
         /// Name of environment variables used to enable MSBuild server.
