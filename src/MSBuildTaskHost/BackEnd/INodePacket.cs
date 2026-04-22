@@ -113,17 +113,16 @@ internal static class NodePacketTypeExtensions
     /// <summary>
     /// Defines the communication protocol version for node communication.
     /// 
-    /// null: CLR2 (NET35) task host. Version-dependent fields skipped (not compiled in NET35).
-    /// 0: The constant value for Framework-to-Framework (CLR4) task host. Supports HostServices, TargetName, ProjectFile.
-    /// 1: .NET task host support.
-    /// 2: Added support for translating/reading HostServices, ProjectFile, TargetName in TaskHostConfiguration.
-    /// 3: Added App Host support.
-    /// 4: Added IsRunningMultipleNodes, Request/ReleaseCores, BuildProjectFile callbacks support for OOP TaskHost.
+    /// Version 1: Introduced for the .NET Task Host protocol. This version
+    /// excludes the translation of appDomainConfig within TaskHostConfiguration
+    /// to maintain backward compatibility and reduce serialization overhead.
+    ///
+    /// Version 2: Adds support of HostServices and target name translation in TaskHostConfiguration.
     /// 
     /// When incrementing this version, ensure compatibility with existing
     /// task hosts and update the corresponding deserialization logic.
     /// </summary>
-    public const byte PacketVersion = 4;
+    public const byte PacketVersion = 2;
 
     // Flag bits in upper 2 bits
     private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000
