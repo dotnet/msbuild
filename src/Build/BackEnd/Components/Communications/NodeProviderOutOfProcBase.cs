@@ -472,12 +472,12 @@ namespace Microsoft.Build.BackEnd
             string msbuildLocation = null,
             NodeMode? expectedNodeMode = null)
         {
-            string[] processNamesToSearch = msbuildLocation != null
-                ? [GetProcessNameForNodeReuse(msbuildLocation)]
-                : GetProcessNamesForShutdown();
+            string[] processNamesToSearch = ResolveProcessNamesToSearch(msbuildLocation);
 
             ErrorUtilities.VerifyThrow(processNamesToSearch.Length > 0, "Expected at least one process name to search for.");
-            string expectedProcessName = string.Join(", ", processNamesToSearch);
+            string expectedProcessName = processNamesToSearch.Length == 1
+                ? processNamesToSearch[0]
+                : string.Join(", ", processNamesToSearch);
 
             // Enumerate all candidate processes matching any of the target names.
             List<Process> processes = new();
@@ -505,52 +505,95 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns the single process name to search when reusing nodes.
-        /// We know exactly how nodes were launched from <paramref name="msbuildLocation"/>.
+        /// Determines which process names could host MSBuild worker nodes for the current operation.
         /// </summary>
-        private static string GetProcessNameForNodeReuse(string msbuildLocation)
+        /// <remarks>
+        /// During node-reuse the caller supplies the exact <paramref name="msbuildLocation"/> that
+        /// would be used to launch a new node, so we return a single name derived from it. Behavior
+        /// of this branch is intentionally identical to the pre-fix code.
+        /// <para>
+        /// During <see cref="ShutdownAllNodes"/> the caller passes <c>null</c> because there is no
+        /// active build context. The previous implementation fell back to <see cref="CurrentHost.GetCurrentHost"/>,
+        /// which always resolves to the *current* process host (e.g. <c>dotnet</c>) and therefore missed
+        /// idle worker nodes started via the MSBuild AppHost. We instead derive the path that *would*
+        /// be launched right now, mirroring the resolution logic in <see cref="GetNodes"/>:
+        /// </para>
+        /// <list type="number">
+        ///   <item><c>BuildParameters.NodeExeLocation</c> if available, else <c>BuildEnvironmentHelper.Instance.CurrentMSBuildExePath</c>.</item>
+        ///   <item>On .NET Core, when the path points at the AppHost and the current process is <c>dotnet</c>,
+        ///   remap to <c>MSBuild.dll</c> (workers will be launched as <c>dotnet MSBuild.dll</c>).</item>
+        /// </list>
+        /// <para>
+        /// We then add the *other* host name as a defensive fallback because previously launched
+        /// idle nodes may have been started by a different host kind (e.g. a prior <c>MSBuild.exe</c>
+        /// invocation followed by <c>dotnet build-server shutdown</c>). Extra candidates are safe:
+        /// they are validated downstream by handshake and process-owner checks.
+        /// </para>
+        /// </remarks>
+        private string[] ResolveProcessNamesToSearch(string msbuildLocation)
+            => ResolveProcessNamesToSearchCore(msbuildLocation, _componentHost?.BuildParameters?.NodeExeLocation);
+
+        /// <summary>
+        /// Pure implementation extracted for unit testing. See <see cref="ResolveProcessNamesToSearch(string)"/>.
+        /// </summary>
+        /// <param name="msbuildLocation">Caller-supplied MSBuild executable path (non-null on the
+        /// node-reuse path; null on the shutdown path).</param>
+        /// <param name="configuredNodeExeLocation"><c>BuildParameters.NodeExeLocation</c> from the
+        /// active build, or <c>null</c> when no build is active (e.g. <see cref="ShutdownAllNodes"/>).</param>
+        internal static string[] ResolveProcessNamesToSearchCore(string msbuildLocation, string configuredNodeExeLocation)
+        {
+            if (msbuildLocation != null)
+            {
+                return [GetProcessNameFromExecutablePath(msbuildLocation)];
+            }
+
+            string wouldLaunchPath = configuredNodeExeLocation;
+            if (string.IsNullOrEmpty(wouldLaunchPath))
+            {
+                wouldLaunchPath = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+            }
+
+#if RUNTIME_TYPE_NETCORE
+            // Mirror the AppHost -> .dll remap GetNodes performs when launching from a dotnet host.
+            if (!string.IsNullOrEmpty(wouldLaunchPath)
+                && Path.GetFileName(wouldLaunchPath).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(Path.GetFileName(EnvironmentUtilities.ProcessPath), Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase))
+            {
+                string dllPath = Path.Combine(Path.GetDirectoryName(wouldLaunchPath), Constants.MSBuildAssemblyName);
+                if (File.Exists(dllPath))
+                {
+                    wouldLaunchPath = dllPath;
+                }
+            }
+#endif
+
+            string primary = !string.IsNullOrEmpty(wouldLaunchPath)
+                ? GetProcessNameFromExecutablePath(wouldLaunchPath)
+                : (Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost()) ?? Constants.MSBuildAppName);
+
+            // Defensive fallback: include the alternate host so previously launched idle nodes
+            // started by the other host kind (AppHost vs dotnet) are also discovered.
+            string alternate = string.Equals(primary, Constants.MSBuildAppName, StringComparison.OrdinalIgnoreCase)
+                ? Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost())
+                : Constants.MSBuildAppName;
+
+            return string.IsNullOrEmpty(alternate) || string.Equals(primary, alternate, StringComparison.OrdinalIgnoreCase)
+                ? [primary]
+                : [primary, alternate];
+        }
+
+        /// <summary>
+        /// Returns the process name that would be observed for a worker node launched from
+        /// <paramref name="msbuildLocation"/>: the AppHost executable name when the path points
+        /// at the AppHost, otherwise the host name (e.g. <c>dotnet</c>) that runs <c>MSBuild.dll</c>.
+        /// </summary>
+        private static string GetProcessNameFromExecutablePath(string msbuildLocation)
         {
             bool isAppHost = Path.GetFileName(msbuildLocation)
                 .Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
 
             return Path.GetFileNameWithoutExtension(
                 isAppHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
-        }
-
-        /// <summary>
-        /// Returns all process names that could host idle MSBuild nodes.
-        /// During shutdown we don't know how nodes were launched - they could be running as
-        /// "dotnet" (via <c>dotnet MSBuild.dll</c>) or as "MSBuild" (via the AppHost).
-        /// We search for both so that <see cref="ShutdownAllNodes"/> finds all idle nodes.
-        /// </summary>
-        /// <remarks>
-        /// On .NET Core, <see cref="CurrentHost.GetCurrentHost"/> always resolves a host (it throws
-        /// via <c>ErrorUtilities.ThrowInternalErrorUnreachable</c> if it cannot). The null check on
-        /// <c>currentHostPath</c> only applies on .NET Framework, where <c>GetCurrentHost()</c>
-        /// returns null.
-        /// </remarks>
-        private static string[] GetProcessNamesForShutdown()
-        {
-            string currentHostPath = CurrentHost.GetCurrentHost();
-            string currentHostName = currentHostPath != null
-                ? Path.GetFileNameWithoutExtension(currentHostPath)
-                : null;
-
-            var names = new List<string>(capacity: 2);
-
-            // The current host process (e.g. "dotnet").
-            if (currentHostName != null)
-            {
-                names.Add(currentHostName);
-            }
-
-            // The MSBuild AppHost (e.g. "MSBuild"), if it differs from the current host.
-            if (!string.Equals(currentHostName, Constants.MSBuildAppName, StringComparison.OrdinalIgnoreCase))
-            {
-                names.Add(Constants.MSBuildAppName);
-            }
-
-            return names.ToArray();
         }
 
         /// <summary>
