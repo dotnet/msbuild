@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if DEBUG
-using System;
-#endif
 using Microsoft.Build.Framework.Logging;
 
 namespace Microsoft.Build.Logging;
@@ -34,7 +31,7 @@ public class TerminalNodeStatus
 #if DEBUG
         if (target.Contains("\x1B"))
         {
-            throw new ArgumentException("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
+            throw new System.ArgumentException("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
         }
 #endif
         Project = project;
@@ -85,7 +82,7 @@ public class TerminalNodeStatus
     public override int GetHashCode()
     {
 #if NETCOREAPP
-        return HashCode.Combine(Project, TargetFramework, RuntimeIdentifier, Target, TargetPrefixColor, TargetPrefix);
+        return System.HashCode.Combine(Project, TargetFramework, RuntimeIdentifier, Target, TargetPrefixColor, TargetPrefix);
 #else
         int hash = 17;
         hash = hash * 31 + (Project?.GetHashCode() ?? 0);
