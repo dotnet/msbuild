@@ -84,6 +84,17 @@ public class TerminalNodeStatus
 
     public override int GetHashCode()
     {
-        throw new System.NotImplementedException();
+#if NETCOREAPP
+        return HashCode.Combine(Project, TargetFramework, RuntimeIdentifier, Target, TargetPrefixColor, TargetPrefix);
+#else
+        int hash = 17;
+        hash = hash * 31 + (Project?.GetHashCode() ?? 0);
+        hash = hash * 31 + (TargetFramework?.GetHashCode() ?? 0);
+        hash = hash * 31 + (RuntimeIdentifier?.GetHashCode() ?? 0);
+        hash = hash * 31 + (Target?.GetHashCode() ?? 0);
+        hash = hash * 31 + TargetPrefixColor.GetHashCode();
+        hash = hash * 31 + (TargetPrefix?.GetHashCode() ?? 0);
+        return hash;
+#endif
     }
 }

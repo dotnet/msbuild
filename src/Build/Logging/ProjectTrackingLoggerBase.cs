@@ -378,14 +378,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     #endregion
 
     #region Protected helpers
-    
-    /// <inheritdoc cref="NodeIdForContext(BuildEventContext)"/>
-    protected int? GetNodeArrayIndexForEvent(BuildEventArgs args) => 
-        args?.BuildEventContext switch
-        {
-            null => null,
-            BuildEventContext context => NodeIdForContext(context),
-        };
+
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void EnsurePerNodeDataEnabled()
@@ -399,7 +392,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     protected TNodeData? GetNodeDataForEvent(BuildEventArgs e)
     {
         EnsurePerNodeDataEnabled();
-        int? node = GetNodeArrayIndexForEvent(e);
+        int? node = NodeIdForContext(e.BuildEventContext);
         if (node is int nodeId)
         {
             EnsureNodeCapacity(nodeId);
@@ -418,7 +411,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     protected void SetActiveNodeStatus(BuildEventArgs e, TNodeData status)
     {
         EnsurePerNodeDataEnabled();
-        if (GetNodeArrayIndexForEvent(e) is int nodeId)
+        if (NodeIdForContext(e.BuildEventContext) is int nodeId)
         {
             EnsureNodeCapacity(nodeId);
             _nodeDataByNodeId[nodeId] = status;
@@ -431,7 +424,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     protected void YieldNode(BuildEventArgs e)
     {
         EnsurePerNodeDataEnabled();
-        if (GetNodeArrayIndexForEvent(e) is int nodeId)
+        if (NodeIdForContext(e.BuildEventContext) is int nodeId)
         {
             EnsureNodeCapacity(nodeId);
             _nodeDataByNodeId[nodeId] = default;
@@ -457,10 +450,13 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     /// <remarks>
     /// Engine Node IDs are 1-based, so we subtract 1 to get a zero-based array index.
     /// </remarks>
-    private int NodeIdForContext(BuildEventContext context)
+    private int? NodeIdForContext(BuildEventContext? context)
     {
-        // Node IDs reported by the build are 1-based.
-        return context.NodeId - 1;
+        return context switch
+        {
+            null => null,
+            _ => context.NodeId - 1,// Node IDs reported by the build are 1-based.
+        };
     }
 
     /// <summary>
