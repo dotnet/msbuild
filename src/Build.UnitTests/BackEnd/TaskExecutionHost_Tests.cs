@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public TaskExecutionHost_Tests()
         {
-            InitializeHost(false);
+            InitializeHost();
         }
 
         /// <summary>
@@ -1234,8 +1234,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Initialize the host object
         /// </summary>
-        /// <param name="throwOnExecute">Should the task throw when executed</param>
-        private void InitializeHost(bool throwOnExecute)
+        private void InitializeHost()
         {
             _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             _logger = new MockLogger();
@@ -1255,7 +1254,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly, typeof(ITaskItem));
 
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
-            taskFactory.ThrowOnExecute = throwOnExecute;
             string taskName = "TaskBuilderTestTask";
             (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, taskName, TaskHostParameters.Empty);
             _host.InitializeForTask(
