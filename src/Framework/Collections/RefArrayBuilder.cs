@@ -54,6 +54,11 @@ internal ref struct RefArrayBuilder<T>
     }
 
     /// <summary>
+    ///  Gets the current capacity of the builder.
+    /// </summary>
+    public readonly int Capacity => _scope.Length;
+
+    /// <summary>
     ///  Gets a value indicating whether the builder contains no elements.
     /// </summary>
     /// <value>
@@ -169,7 +174,7 @@ internal ref struct RefArrayBuilder<T>
 
         if ((uint)(count + source.Length) > (uint)span.Length)
         {
-            Grow(span.Length - count + source.Length);
+            Grow(size: source.Length);
 
             // Reset span since we grew.
             span = _scope;
@@ -221,7 +226,8 @@ internal ref struct RefArrayBuilder<T>
     }
 
     /// <summary>
-    ///  Inserts a range of elements at the specified index, shifting subsequent elements. The builder will automatically grow if needed.
+    ///  Inserts a range of elements at the specified index, shifting subsequent elements.
+    ///  The builder will automatically grow if needed.
     /// </summary>
     /// <param name="index">The zero-based index at which to insert the elements.</param>
     /// <param name="source">The span of elements to insert.</param>
@@ -234,7 +240,7 @@ internal ref struct RefArrayBuilder<T>
         int count = _count;
         Span<T> span = _scope;
 
-        if ((uint)(index + source.Length) < (uint)span.Length)
+        if ((uint)(count + source.Length) <= (uint)span.Length)
         {
             // Shift existing items
             int toCopy = count - index;
@@ -256,9 +262,9 @@ internal ref struct RefArrayBuilder<T>
         int count = _count;
         Span<T> span = _scope;
 
-        if ((uint)(index + source.Length) > (uint)span.Length)
+        if ((uint)(count + source.Length) > (uint)span.Length)
         {
-            Grow(size: span.Length - count + source.Length, startIndex: index);
+            Grow(size: source.Length, startIndex: index);
 
             // Reset span since we grew.
             span = _scope;
@@ -310,10 +316,10 @@ internal ref struct RefArrayBuilder<T>
 
             if (startIndex > 0)
             {
-                span.Slice(0, startIndex).CopyTo(destination);
+                span[..startIndex].CopyTo(destination);
             }
 
-            span.Slice(startIndex).CopyTo(destination.Slice(startIndex + size));
+            span[startIndex.._count].CopyTo(destination.Slice(startIndex + size));
 
             _scope.Dispose();
             _scope = newScope;

@@ -335,6 +335,56 @@ public class RefArrayBuilder_Tests
     }
 
     [Fact]
+    public void InsertRange_AtBeginning_NearCapacity_ShiftsCorrectly()
+    {
+        // Use a capacity that we know ArrayPool will give us, then fill most of it.
+        // The bug is that InsertRange checks (index + source.Length) < capacity
+        // instead of (count + source.Length) <= capacity.
+        using RefArrayBuilder<int> builder = new(16);
+        int capacity = builder.Capacity;
+
+        // Fill all but 2 slots
+        int fillCount = capacity - 2;
+        for (int i = 1; i <= fillCount; i++)
+        {
+            builder.Add(i);
+        }
+
+        // Insert 5 at index 0: index + 5 could be < capacity, but count + 5 exceeds it.
+        builder.InsertRange(0, [91, 92, 93, 94, 95]);
+
+        builder.Count.ShouldBe(fillCount + 5);
+        builder[0].ShouldBe(91);
+        builder[1].ShouldBe(92);
+        builder[2].ShouldBe(93);
+        builder[3].ShouldBe(94);
+        builder[4].ShouldBe(95);
+        builder[5].ShouldBe(1);
+        builder[fillCount + 4].ShouldBe(fillCount);
+    }
+
+    [Fact]
+    public void InsertRange_ScratchBuffer_AtBeginning_NearCapacity_ShiftsCorrectly()
+    {
+        using RefArrayBuilder<int> builder = new(stackalloc int[12]);
+        for (int i = 3; i <= 12; i++)
+        {
+            builder.Add(i);
+        }
+
+        builder.InsertRange(0, [22, 33, 44, 55, 66]);
+
+        builder.Count.ShouldBe(15);
+        builder[0].ShouldBe(22);
+        builder[1].ShouldBe(33);
+        builder[2].ShouldBe(44);
+        builder[3].ShouldBe(55);
+        builder[4].ShouldBe(66);
+        builder[5].ShouldBe(3);
+        builder[14].ShouldBe(12);
+    }
+
+    [Fact]
     public void InsertRange_EmptySpan_DoesNothing()
     {
         using RefArrayBuilder<int> builder = new(4);
