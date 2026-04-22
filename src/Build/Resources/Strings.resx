@@ -1389,7 +1389,9 @@ Errors: {3}</value>
   <data name="SdkEnvironmentVariableAlreadySetBySdk" xml:space="preserve">
     <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</value>
   </data>
-
+  <data name="SdkEnvironmentVariableOverridingAmbient" xml:space="preserve">
+    <value>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</value>
+  </data>
   <data name="UnrecognizedParentElement" xml:space="preserve">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -1828,6 +1830,16 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>
       {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
+    </comment>
+  </data>
+  <data name="ProjectGraphProjectFileCannotBeLoadedWithReferrers" xml:space="preserve">
+    <value>The project file '{0}' could not be loaded when referenced by {1}.</value>
+    <comment>
+      This message is shown during static graph construction when a referenced project file cannot be loaded,
+      along with information about which project(s) are referencing the failed project.
+      {0} is the full path to the project that failed to load
+      {1} is a comma-separated list of full paths to the projects that reference the failed project
+      The specific reason for the load failure (e.g., "Could not find file '...'") is appended separately in code.
     </comment>
   </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" xml:space="preserve">

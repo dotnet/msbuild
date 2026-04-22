@@ -797,5 +797,27 @@ namespace Microsoft.Build.Eventing
             WriteEvent(110, taskName, succeeded);
         }
         #endregion
+
+        #region TaskHost Callback Events
+
+        /// <summary>
+        /// Raised when a TaskHost begins a BuildProjectFile callback.
+        /// </summary>
+        [Event(107, Keywords = Keywords.All)]
+        public void TaskHostBuildProjectFileStart(string projectFiles, string targetNames)
+        {
+            WriteEvent(107, projectFiles, targetNames);
+        }
+
+        /// <summary>
+        /// Raised when a TaskHost BuildProjectFile callback completes.
+        /// </summary>
+        [Event(108, Keywords = Keywords.All)]
+        public void TaskHostBuildProjectFileStop(string projectFiles, bool success)
+        {
+            WriteEvent(108, projectFiles, success);
+        }
+
+        #endregion
     }
 }
