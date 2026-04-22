@@ -728,6 +728,12 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
                 OnRestoreFinished(e, projectData, buildData);
             }
 
+            // In quiet mode, only show projects with errors or warnings.
+            if (Verbosity == LoggerVerbosity.Quiet && !projectData.HasErrorsOrWarnings)
+            {
+                return;
+            }
+
             lock (_lock)
             {
                 Terminal.BeginUpdate();
@@ -1017,7 +1023,7 @@ public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProje
     protected override void OnTaskFinished(TaskFinishedEventArgs e, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
         var buildEventContext = e.BuildEventContext;
-        if (buildData.IsRestoring && buildEventContext is not null && e.TaskName == MSBuildTaskName)
+        if (!buildData.IsRestoring && buildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
             projectData.Stopwatch.Start();
 
