@@ -186,8 +186,8 @@ jobs:
             if [ "$rc" -eq 0 ]; then
               echo "All checks passed."
               echo ""
-              skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
-              agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l)
+              skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l || true)
+              agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l || true)
               echo "Validated **${skill_count}** skill(s) and **${agent_count}** agent(s)."
             else
               for f in skill-check-skills.txt skill-check-agents.txt; do
@@ -217,8 +217,8 @@ jobs:
           if [ -z "$exit_code" ]; then
             exit_code=0
           else
-            skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
-            agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l)
+            skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l || true)
+            agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l || true)
             total=$((skill_count + agent_count))
           fi
           echo "${{ github.event.pull_request.number }}" > sv-results/pr-number.txt

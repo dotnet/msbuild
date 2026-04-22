@@ -825,6 +825,17 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
+        <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
+        <target state="new">The project file '{0}' could not be loaded when referenced by {1}.</target>
+        <note>
+      This message is shown during static graph construction when a referenced project file cannot be loaded,
+      along with information about which project(s) are referencing the failed project.
+      {0} is the full path to the project that failed to load
+      {1} is a comma-separated list of full paths to the projects that reference the failed project
+      The specific reason for the load failure (e.g., "Could not find file '...'") is appended separately in code.
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
         <target state="translated">"{0}" adlı proje, ifadenin boş dize olarak değerlendirilmesi nedeniyle ({2},{3}) konumundaki "{1}" tarafından içeri aktarılmadı.</target>
