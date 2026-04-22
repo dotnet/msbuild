@@ -1060,26 +1060,12 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         [Fact]
-        public void LogBuildFinishedLoggerPaths()
-        {
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            BinaryLogger binaryLogger = new BinaryLogger { Parameters = "test.binlog" }; ;
-            service.RegisterLogger(binaryLogger);
-            service.LogBuildFinished(true);
-            var pathMessage = service.AllProcessedBuildEvents
-                .OfType<BuildMessageEventArgs>()
-                .FirstOrDefault(e => e.Message.Contains("test.binlog"));
-            Assert.NotNull(pathMessage);
-            Assert.Contains("Log output file", pathMessage.Message);
-        }
-
-        [Fact]
-        public void LogFilePathsPresentInBinaryLog()
+        public void LogFilePathsPresentInFileLog()
         {
             using var env = TestEnvironment.Create();
-            var binlogPath = env.ExpectFile(".binlog").Path;
+            var logFilePath = env.ExpectFile(".log").Path;
 
-            var binaryLogger = new BinaryLogger { Parameters = binlogPath };
+            var fileLogger = new FileLogger { Parameters = "logfile=" + logFilePath };
             var mockLogger = new MockLogger();
 
             using (var collection = new ProjectCollection())
@@ -1088,20 +1074,19 @@ namespace Microsoft.Build.UnitTests.Logging
             <Project>
               <Target Name=""Build"" />
             </Project>");
-                project.Build(new ILogger[] { binaryLogger, mockLogger }).ShouldBeTrue();
+                project.Build(new ILogger[] { fileLogger, mockLogger }).ShouldBeTrue();
             }
 
-            // Check the text log (MockLogger captures all messages)
-            mockLogger.FullLog.ShouldContain(".binlog");
+            // Check that MockLogger captured a LoggerRegisteredEventArgs with the file logger path
+            var registeredEvent = mockLogger.AllBuildEvents
+                .OfType<LoggerRegisteredEventArgs>()
+                .FirstOrDefault(e => e.LoggerName == nameof(FileLogger));
+            registeredEvent.ShouldNotBeNull();
+            registeredEvent.OutputFilePath.ShouldContain(".log");
 
-            // Check the binary log by replaying it
-            var replayLogger = new MockLogger();
-            var reader = new BinaryLogReplayEventSource();
-            replayLogger.Initialize(reader);
-            reader.Replay(binlogPath);
-            replayLogger.Shutdown();
-
-            replayLogger.FullLog.ShouldContain(".binlog");
+            // Check the file log itself contains the path
+            var fileLogContents = File.ReadAllText(logFilePath);
+            fileLogContents.ShouldContain(".log");
         }
 
         [Fact]
