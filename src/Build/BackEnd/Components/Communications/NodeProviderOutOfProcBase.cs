@@ -239,19 +239,9 @@ namespace Microsoft.Build.BackEnd
             // worker nodes are launched via dotnet.exe, matching the parent process.
             // This only applies to regular out-of-proc worker nodes (nodemode:1), not task host nodes
             // (nodemode:2) which may need the AppHost for COM host object support.
-            if (expectedNodeMode == NodeMode.OutOfProcNode
-                && !String.IsNullOrEmpty(msbuildLocation)
-                && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase))
+            if (expectedNodeMode == NodeMode.OutOfProcNode)
             {
-                string currentProcessName = Path.GetFileName(EnvironmentUtilities.ProcessPath);
-                if (currentProcessName?.Equals(Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    string dllPath = Path.Combine(Path.GetDirectoryName(msbuildLocation), Constants.MSBuildAssemblyName);
-                    if (File.Exists(dllPath))
-                    {
-                        msbuildLocation = dllPath;
-                    }
-                }
+                msbuildLocation = RemapAppHostToManagedDllIfHostedByDotnet(msbuildLocation);
             }
 #endif
 
@@ -555,16 +545,7 @@ namespace Microsoft.Build.BackEnd
 
 #if RUNTIME_TYPE_NETCORE
             // Mirror the AppHost -> .dll remap GetNodes performs when launching from a dotnet host.
-            if (!string.IsNullOrEmpty(wouldLaunchPath)
-                && Path.GetFileName(wouldLaunchPath).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(Path.GetFileName(EnvironmentUtilities.ProcessPath), Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase))
-            {
-                string dllPath = Path.Combine(Path.GetDirectoryName(wouldLaunchPath), Constants.MSBuildAssemblyName);
-                if (File.Exists(dllPath))
-                {
-                    wouldLaunchPath = dllPath;
-                }
-            }
+            wouldLaunchPath = RemapAppHostToManagedDllIfHostedByDotnet(wouldLaunchPath);
 #endif
 
             string primary = !string.IsNullOrEmpty(wouldLaunchPath)
@@ -595,6 +576,29 @@ namespace Microsoft.Build.BackEnd
             return Path.GetFileNameWithoutExtension(
                 isAppHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
         }
+
+#if RUNTIME_TYPE_NETCORE
+        /// <summary>
+        /// When the current process is the <c>dotnet</c> CLI host and <paramref name="msbuildLocation"/>
+        /// points at the MSBuild AppHost (<c>MSBuild.exe</c>/<c>MSBuild</c>), returns the sibling
+        /// <c>MSBuild.dll</c> path so worker nodes are launched as <c>dotnet MSBuild.dll</c> rather
+        /// than via the slower AppHost. Otherwise returns <paramref name="msbuildLocation"/> unchanged.
+        /// Used by both <see cref="GetNodes"/> (launch path) and <see cref="ResolveProcessNamesToSearchCore"/>
+        /// (shutdown path) so the two stay in sync by construction.
+        /// </summary>
+        private static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
+        {
+            if (string.IsNullOrEmpty(msbuildLocation)
+                || !Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(Path.GetFileName(EnvironmentUtilities.ProcessPath), Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase))
+            {
+                return msbuildLocation;
+            }
+
+            string dllPath = Path.Combine(Path.GetDirectoryName(msbuildLocation), Constants.MSBuildAssemblyName);
+            return File.Exists(dllPath) ? dllPath : msbuildLocation;
+        }
+#endif
 
         /// <summary>
         /// Filters candidate processes whose command-line NodeMode argument matches the expected value.
