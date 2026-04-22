@@ -127,6 +127,11 @@
         <target state="translated">不支持 Visual Studio 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.VisualStudioVersion 中的某个值。</target>
         <note />
       </trans-unit>
+      <trans-unit id="WhitespacePathNotAllowedOnWindows">
+        <source>Path cannot be null or whitespace on Windows.</source>
+        <target state="new">Path cannot be null or whitespace on Windows.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

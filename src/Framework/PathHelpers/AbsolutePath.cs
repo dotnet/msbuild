@@ -106,6 +106,16 @@ namespace Microsoft.Build.Framework
         {
             ArgumentException.ThrowIfNullOrEmpty(path);
 
+            // Before MSBuild's migration from multi-process to multi-threaded, Path.GetFullPath(" ") threw
+            // ArgumentException on Windows because whitespace-only is not a legal path. After combining with
+            // a rooted base directory, Path.GetFullPath silently trims the trailing whitespace, masking the
+            // error. Preserve the historical Windows contract by explicitly rejecting whitespace-only input.
+            // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
+            if (NativeMethods.IsWindows && path.Length > 0 && path.Trim().Length == 0)
+            {
+                throw new ArgumentException(SR.WhitespacePathNotAllowedOnWindows, nameof(path));
+            }
+
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
             // For .NET Core, System.IO.Path.Combine already does not throw in this case.

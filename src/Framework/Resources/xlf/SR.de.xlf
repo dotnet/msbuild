@@ -127,6 +127,11 @@
         <target state="translated">Visual Studio-Version "{0}" wird nicht unterstützt.  Geben Sie einen Wert aus der Enumeration "Microsoft.Build.Utilities.VisualStudioVersion" an.</target>
         <note />
       </trans-unit>
+      <trans-unit id="WhitespacePathNotAllowedOnWindows">
+        <source>Path cannot be null or whitespace on Windows.</source>
+        <target state="new">Path cannot be null or whitespace on Windows.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
