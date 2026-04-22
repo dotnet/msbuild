@@ -274,17 +274,21 @@ namespace Microsoft.Build.BackEnd.Logging
                 ShowPerfSummary();
             }
 
-            foreach (var logger in _registeredLoggers)
+            // Show paths to the files created by enabled loggers.
+            if (ShowSummary == true)
             {
-                if (!string.IsNullOrEmpty(logger.OutputFilePath))
+                foreach (var logger in _registeredLoggers)
                 {
-                    if (setColor != DontSetColor)
+                    if (!string.IsNullOrEmpty(logger.OutputFilePath))
                     {
-                        WriteLinePretty($"  {logger.LoggerName}: {AnsiCodes.LinkPrefix}file:///{logger.OutputFilePath}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}");
-                    }
-                    else
-                    {
-                        WriteLinePretty($"  {logger.LoggerName}: {logger.OutputFilePath}");
+                        if (setColor != DontSetColor)
+                        {
+                            WriteLinePretty($"  {logger.LoggerName}: {AnsiCodes.LinkPrefix}file:///{logger.OutputFilePath}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}");
+                        }
+                        else
+                        {
+                            WriteLinePretty($"  {logger.LoggerName}: {logger.OutputFilePath}");
+                        }
                     }
                 }
             }

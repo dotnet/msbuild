@@ -639,13 +639,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     RenderBuildSummary();
                 }
 
-                if (_restoreFailed)
-                {
-                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                        buildResult,
-                        duration));
-                }
-                else
+                if (_showSummary == true)
                 {
                     foreach (var logger in _registeredLoggers)
                     {
@@ -654,6 +648,16 @@ public sealed partial class TerminalLogger : INodeLogger
                             Terminal.WriteLine($"  {logger.LoggerName}: {AnsiCodes.LinkPrefix}file:///{logger.OutputFilePath}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}");
                         }
                     }
+                }
+
+                if (_restoreFailed)
+                {
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                        buildResult,
+                        duration));
+                }
+                else
+                {
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
                         buildResult,
                         duration));
