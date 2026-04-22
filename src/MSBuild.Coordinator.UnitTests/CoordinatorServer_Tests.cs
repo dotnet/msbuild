@@ -10,10 +10,12 @@ using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorServer_Tests : IDisposable
+public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 {
     private readonly string _pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
     private readonly CancellationTokenSource _cts = new();
+
+    private readonly TestLogger _logger = new(testOutput);
 
     public void Dispose()
     {
@@ -24,7 +26,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task SingleClient_ReceivesNodeGrant()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         using NamedPipeClientStream client = await ConnectClientAsync();
@@ -46,7 +48,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task SingleClient_RequestLessThanBudget_GrantsOnlyRequested()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         using NamedPipeClientStream client = await ConnectClientAsync();
@@ -68,7 +70,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task MultipleClients_FairShareAllocation()
     {
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client takes all 8 nodes.
@@ -105,7 +107,7 @@ public class CoordinatorServer_Tests : IDisposable
     {
         // Budget of 8. One active client holds all 8. Two clients wait.
         // When the active client releases, both waiters should get fair-share grants.
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client takes all 8 nodes.
@@ -156,7 +158,7 @@ public class CoordinatorServer_Tests : IDisposable
         // Budget of 4. One active client holds all 4. Two clients wait.
         // The first waiter disconnects. When the active client releases,
         // the remaining waiter should get a grant.
-        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // Active client takes all 4 nodes.
@@ -208,7 +210,7 @@ public class CoordinatorServer_Tests : IDisposable
 
         // Budget of 16 with 4 clients each requesting 4.
         // All should connect and receive grants without waiting.
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // Connect all clients concurrently.
@@ -262,7 +264,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task Heartbeat_DoesNotCauseError()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         using NamedPipeClientStream client = await ConnectClientAsync();
@@ -287,7 +289,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task ClientDisconnect_ReleasesGrant()
     {
-        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client connects, gets grant, then disconnects abruptly.
@@ -324,7 +326,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task InvalidFirstMessage_ReceivesError()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         using NamedPipeClientStream client = await ConnectClientAsync();
@@ -344,7 +346,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task AutoShutdown_ExitsWhenNoBuildsActive()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: 500);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: 500, logger: _logger);
 
         // Server should shut itself down after 500ms with no clients.
         Task serverTask = server.RunAsync(_cts.Token);
@@ -358,7 +360,7 @@ public class CoordinatorServer_Tests : IDisposable
     [Fact]
     public async Task SamePidReconnects_CleanlyHandled()
     {
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         int pid = 30001;

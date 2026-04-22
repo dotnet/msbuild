@@ -17,12 +17,13 @@ namespace Microsoft.Build.BackEnd;
 ///  Handles connecting to (or launching) the coordinator, requesting a node grant,
 ///  sending heartbeats, and releasing the grant.
 /// </summary>
-internal sealed class CoordinatorClient : IDisposable
+internal sealed partial class CoordinatorClient : IDisposable
 {
     private readonly NamedPipeClientStream _pipeStream;
     private readonly BinaryReader _reader;
     private readonly BinaryWriter _writer;
     private readonly Timer _heartbeatTimer;
+    private readonly ICoordinatorLogger _logger;
     private bool _disposed;
 
     /// <summary>
@@ -30,11 +31,18 @@ internal sealed class CoordinatorClient : IDisposable
     /// </summary>
     public int GrantedNodes { get; }
 
-    private CoordinatorClient(NamedPipeClientStream pipeStream, BinaryReader reader, BinaryWriter writer, int grantedNodes, int heartbeatIntervalMs)
+    private CoordinatorClient(
+        NamedPipeClientStream pipeStream,
+        BinaryReader reader,
+        BinaryWriter writer,
+        int grantedNodes,
+        int heartbeatIntervalMs,
+        ICoordinatorLogger logger)
     {
         _pipeStream = pipeStream;
         _reader = reader;
         _writer = writer;
+        _logger = logger;
         GrantedNodes = grantedNodes;
 
         _heartbeatTimer = new Timer(
@@ -48,8 +56,11 @@ internal sealed class CoordinatorClient : IDisposable
     ///  Attempts to connect to the coordinator and request a node grant.
     ///  Returns null if the coordinator is not available or an error occurs.
     /// </summary>
-    public static CoordinatorClient? TryConnect(int requestedNodes, int connectionTimeoutMs = 5000)
+    public static CoordinatorClient? TryConnect(
+        int requestedNodes,
+        int connectionTimeoutMs = 5000)
     {
+        ICoordinatorLogger logger = DefaultLogger.Instance;
         string pipeName = Protocol.GetPipeName();
 
         NamedPipeClientStream? pipeStream = null;
@@ -58,12 +69,17 @@ internal sealed class CoordinatorClient : IDisposable
         {
             pipeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
+            logger.WriteLine($"CoordinatorClient: Connecting to pipe '{pipeName}'");
+
             // Try to connect to an existing coordinator.
             if (!TryConnectToPipe(pipeStream, connectionTimeoutMs))
             {
+                logger.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
+
                 // No coordinator running. Try to launch one and retry.
-                if (!TryLaunchCoordinator())
+                if (!TryLaunchCoordinator(logger))
                 {
+                    logger.WriteLine("CoordinatorClient: Failed to launch coordinator");
                     pipeStream.Dispose();
                     return null;
                 }
@@ -72,17 +88,22 @@ internal sealed class CoordinatorClient : IDisposable
                 pipeStream.Dispose();
                 pipeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
+                logger.WriteLine("CoordinatorClient: Retrying connection after launch");
+
                 if (!TryConnectToPipe(pipeStream, connectionTimeoutMs))
                 {
+                    logger.WriteLine("CoordinatorClient: Retry connection failed");
                     pipeStream.Dispose();
                     return null;
                 }
             }
 
-            return TryNegotiate(pipeStream, requestedNodes, EnvironmentUtilities.CurrentProcessId);
+            logger.WriteLine("CoordinatorClient: Connected to coordinator");
+            return TryNegotiate(pipeStream, requestedNodes, EnvironmentUtilities.CurrentProcessId, logger);
         }
-        catch (Exception) when (!Debugger.IsAttached)
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
+            logger.WriteLine($"CoordinatorClient: Exception during connect: {ex.Message}");
             // Any failure in coordinator communication should not break the build.
             pipeStream?.Dispose();
             return null;
@@ -93,24 +114,35 @@ internal sealed class CoordinatorClient : IDisposable
     ///  Attempts to connect to a coordinator at the given pipe name and request a node grant.
     ///  This overload does not attempt to launch the coordinator and is intended for testing.
     /// </summary>
-    internal static CoordinatorClient? TryConnectToServer(string pipeName, int requestedNodes, int processId, int connectionTimeoutMs = 5000)
+    internal static CoordinatorClient? TryConnectToServer(
+        string pipeName,
+        int requestedNodes,
+        int processId,
+        int connectionTimeoutMs = 5000,
+        ICoordinatorLogger? logger = null)
     {
+        logger ??= DefaultLogger.Instance;
         NamedPipeClientStream? pipeStream = null;
 
         try
         {
             pipeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
+            logger.WriteLine($"CoordinatorClient: Connecting to test pipe '{pipeName}'");
+
             if (!TryConnectToPipe(pipeStream, connectionTimeoutMs))
             {
+                logger.WriteLine("CoordinatorClient: Test connection timed out");
                 pipeStream.Dispose();
                 return null;
             }
 
-            return TryNegotiate(pipeStream, requestedNodes, processId);
+            logger.WriteLine("CoordinatorClient: Connected to test server");
+            return TryNegotiate(pipeStream, requestedNodes, processId, logger);
         }
-        catch (Exception) when (!Debugger.IsAttached)
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
+            logger.WriteLine($"CoordinatorClient: Exception during test connect: {ex.Message}");
             pipeStream?.Dispose();
             return null;
         }
@@ -120,7 +152,11 @@ internal sealed class CoordinatorClient : IDisposable
     ///  Performs the request/response negotiation over an already-connected pipe.
     ///  On failure, disposes the pipe and returns null.
     /// </summary>
-    private static CoordinatorClient? TryNegotiate(NamedPipeClientStream pipeStream, int requestedNodes, int processId)
+    private static CoordinatorClient? TryNegotiate(
+        NamedPipeClientStream pipeStream,
+        int requestedNodes,
+        int processId,
+        ICoordinatorLogger logger)
     {
         int heartbeatIntervalMs = GetEnvironmentInt(
             Protocol.HeartbeatIntervalEnvironmentVariable,
@@ -130,6 +166,7 @@ internal sealed class CoordinatorClient : IDisposable
         BinaryWriter writer = new(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
 
         // Send the node request.
+        logger.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {processId})");
         new RequestNodesMessage(requestedNodes, processId).Write(writer);
 
         // Read the response.
@@ -138,16 +175,22 @@ internal sealed class CoordinatorClient : IDisposable
         switch (response)
         {
             case NodeGrantMessage grant:
-                return new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, heartbeatIntervalMs);
+                logger.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
+                return new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, heartbeatIntervalMs, logger);
 
             case WaitMessage:
+                logger.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
+
                 // Wait for a grant to arrive.
                 ServerMessage grantAfterWait = ServerMessage.Read(reader);
 
                 if (grantAfterWait is NodeGrantMessage deferredGrant)
                 {
-                    return new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, heartbeatIntervalMs);
+                    logger.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes");
+                    return new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, heartbeatIntervalMs, logger);
                 }
+
+                logger.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name}");
 
                 // Unexpected response after wait.
                 reader.Dispose();
@@ -156,6 +199,8 @@ internal sealed class CoordinatorClient : IDisposable
                 return null;
 
             default:
+                logger.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
+
                 // Error or unexpected response.
                 reader.Dispose();
                 writer.Dispose();
@@ -176,6 +221,8 @@ internal sealed class CoordinatorClient : IDisposable
 
         _disposed = true;
         _heartbeatTimer.Dispose();
+
+        _logger.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
 
         try
         {
@@ -212,6 +259,8 @@ internal sealed class CoordinatorClient : IDisposable
         }
         catch (IOException)
         {
+            _logger.WriteLine("CoordinatorClient: Heartbeat failed (pipe broken)");
+
             // Pipe broken — nothing we can do. The build continues
             // with whatever nodes were already granted.
         }
@@ -230,7 +279,7 @@ internal sealed class CoordinatorClient : IDisposable
         }
     }
 
-    private static bool TryLaunchCoordinator()
+    private static bool TryLaunchCoordinator(ICoordinatorLogger logger)
     {
         try
         {
@@ -240,6 +289,8 @@ internal sealed class CoordinatorClient : IDisposable
             {
                 return false;
             }
+
+            logger.WriteLine($"CoordinatorClient: Launching coordinator: {startInfo.FileName} {startInfo.Arguments}");
 
             Process? process = Process.Start(startInfo);
             return process is not null;

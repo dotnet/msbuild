@@ -8,10 +8,12 @@ using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorClient_Tests : IDisposable
+public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
 {
     private readonly string _pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
     private readonly CancellationTokenSource _cts = new();
+
+    private readonly TestLogger _logger = new(testOutput);
 
     // Use fake PIDs that won't collide with each other or the real process.
     // The coordinator server only uses PIDs for keying connections and liveness checks.
@@ -27,10 +29,10 @@ public class CoordinatorClient_Tests : IDisposable
     [Fact]
     public async Task TryConnect_ReceivesNodeGrant()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid1);
+        using CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid1, logger: _logger);
 
         client.ShouldNotBeNull();
         client.GrantedNodes.ShouldBe(8);
@@ -43,10 +45,10 @@ public class CoordinatorClient_Tests : IDisposable
     [Fact]
     public async Task TryConnect_GrantCapsToRequestedNodes()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 4, processId: Pid1);
+        using CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 4, processId: Pid1, logger: _logger);
 
         client.ShouldNotBeNull();
         client.GrantedNodes.ShouldBe(4);
@@ -59,10 +61,10 @@ public class CoordinatorClient_Tests : IDisposable
     [Fact]
     public async Task TryConnect_GrantCapsToTotalBudget()
     {
-        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 16, processId: Pid1);
+        using CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 16, processId: Pid1, logger: _logger);
 
         client.ShouldNotBeNull();
         client.GrantedNodes.ShouldBe(4);
@@ -80,7 +82,8 @@ public class CoordinatorClient_Tests : IDisposable
             $"msbuild-coordinator-nonexistent-{Guid.NewGuid():N}",
             requestedNodes: 8,
             processId: Pid1,
-            connectionTimeoutMs: 500);
+            connectionTimeoutMs: 500,
+            logger: _logger);
 
         client.ShouldBeNull();
 
@@ -90,17 +93,17 @@ public class CoordinatorClient_Tests : IDisposable
     [Fact]
     public async Task Dispose_ReleasesGrant_SecondClientGetsNodes()
     {
-        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client takes the full budget.
-        CoordinatorClient? client1 = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 4, processId: Pid1);
+        CoordinatorClient? client1 = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 4, processId: Pid1, logger: _logger);
         client1.ShouldNotBeNull();
         client1.GrantedNodes.ShouldBe(4);
 
         // Second client will be queued (different PID so the server tracks it separately).
         Task<CoordinatorClient?> client2Task = Task.Run(() =>
-            CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 4, processId: Pid2));
+            CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 4, processId: Pid2, logger: _logger));
 
         // Give the second client time to connect and be queued.
         await Task.Delay(200);
@@ -120,10 +123,10 @@ public class CoordinatorClient_Tests : IDisposable
     [Fact]
     public async Task Dispose_SendsReleaseMessage()
     {
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid1);
+        CoordinatorClient? client = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid1, logger: _logger);
         client.ShouldNotBeNull();
         client.GrantedNodes.ShouldBe(8);
 
@@ -140,11 +143,11 @@ public class CoordinatorClient_Tests : IDisposable
     [Fact]
     public async Task MultipleClients_FairShare()
     {
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite);
+        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client connects and gets all 8.
-        CoordinatorClient? client1 = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid1);
+        CoordinatorClient? client1 = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid1, logger: _logger);
         client1.ShouldNotBeNull();
         client1.GrantedNodes.ShouldBe(8);
 
@@ -152,7 +155,7 @@ public class CoordinatorClient_Tests : IDisposable
         client1.Dispose();
 
         // Second client connects and should also get up to 8.
-        using CoordinatorClient? client2 = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid2);
+        using CoordinatorClient? client2 = CoordinatorClient.TryConnectToServer(_pipeName, requestedNodes: 8, processId: Pid2, logger: _logger);
         client2.ShouldNotBeNull();
         client2.GrantedNodes.ShouldBe(8);
 
