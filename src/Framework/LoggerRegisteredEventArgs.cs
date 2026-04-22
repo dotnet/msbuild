@@ -22,12 +22,25 @@ namespace Microsoft.Build.Framework
         /// <param name="outputFilePath">The full path to the log output file.</param>
         /// <param name="verbosity">The verbosity level of the logger.</param>
         /// <param name="additionalOutputFilePaths">Additional output file paths for the logger.</param>
-        public LoggerRegisteredEventArgs(string loggerName, string? outputFilePath, LoggerVerbosity? verbosity, IReadOnlyList<string>? additionalOutputFilePaths) : base()
+        public LoggerRegisteredEventArgs(string loggerName, string? outputFilePath, LoggerVerbosity? verbosity, IReadOnlyList<string>? additionalOutputFilePaths)
+            : base(FormatMessage(loggerName, outputFilePath), null, null, MessageImportance.Low)
         {
             OutputFilePath = outputFilePath;
             LoggerName = loggerName;
             Verbosity = verbosity;
             AdditionalOutputFilePaths = additionalOutputFilePaths;
+        }
+        /// <summary>
+        /// Formats the message for the logger registered event, including the logger name and output file path if available. This only serves as a message for loggers that do not handle this event.
+        /// </summary>
+        /// <param name="loggerName">The name of the logger.</param>
+        /// <param name="outputFilePath">The full path to the log output file.</param>
+        /// <returns>A formatted message string.</returns>
+        private static string? FormatMessage(string loggerName, string? outputFilePath)
+        {
+            return !string.IsNullOrEmpty(outputFilePath)
+                ? $"{loggerName}: {outputFilePath}"
+                : null;
         }
 
         /// <summary>
