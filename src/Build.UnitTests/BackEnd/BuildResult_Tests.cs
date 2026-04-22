@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestTranslation()
         {
-            BuildRequest request = new BuildRequest(1, 1, 2, new string[] { "alpha", "omega" }, null, new BuildEventContext(1, 1, 2, 3, 4, 5), null);
+            BuildRequest request = new BuildRequest(1, 1, 2, new string[] { "alpha", "omega" }, null, BuildEventContext.CreateInitial(1, 1).WithEvaluationId(2).WithProjectInstanceId(3).WithProjectContextId(4).WithTaskId(5), null);
             BuildResult result = new BuildResult(request, new BuildAbortedException());
 
             TaskItem fooTaskItem = new TaskItem("foo", "asdf.proj");
@@ -347,7 +347,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestTranslationPreservesEvaluationId()
         {
-            BuildRequest request = new(1, 1, 2, ["Build"], null, new BuildEventContext(1, 1, 2, 3, 4, 5), null);
+            BuildRequest request = new(1, 1, 2, ["Build"], null, BuildEventContext.CreateInitial(1, 1).WithProjectInstanceId(2).WithProjectContextId(3).WithTargetId(4).WithTaskId(5), null);
             BuildResult result = new(request, new BuildAbortedException())
             {
                 EvaluationId = 42,

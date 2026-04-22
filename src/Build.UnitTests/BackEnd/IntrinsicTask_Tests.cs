@@ -3958,7 +3958,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance projectInstance = project.CreateProjectInstance();
             ProjectTargetInstanceChild targetChild = projectInstance.Targets["t"].Children.First();
 
-            NodeLoggingContext nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
+            NodeLoggingContext nodeContext = new NodeLoggingContext(new MockLoggingService(), BuildEventContext.Invalid.WithNodeId(1), 1, false);
             BuildRequestEntry entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "t" }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0"), CreateStubTaskEnvironment());
             entry.RequestConfiguration.Project = projectInstance;
             IntrinsicTask task = IntrinsicTask.InstantiateTask(
@@ -3993,7 +3993,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var projectInstance = project.CreateProjectInstance();
                     var targetChild = projectInstance.Targets["t"].Children.First();
 
-                    var nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
+                    var nodeContext = new NodeLoggingContext(new MockLoggingService(), BuildEventContext.Invalid.WithNodeId(1), 1, false);
                     var entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { targetName }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0"), CreateStubTaskEnvironment());
                     entry.RequestConfiguration.Project = projectInstance;
                     var task = IntrinsicTask.InstantiateTask(

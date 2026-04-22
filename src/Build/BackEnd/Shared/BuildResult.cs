@@ -101,6 +101,11 @@ namespace Microsoft.Build.Execution
         private Exception? _requestException;
 
         /// <summary>
+        /// The evaluation ID of the project used for this build.
+        /// </summary>
+        private int _evaluationId = BuildEventContext.InvalidEvaluationId;
+
+        /// <summary>
         /// The overall result calculated in the constructor.
         /// </summary>
         private bool _baseOverallResult = true;
@@ -144,11 +149,6 @@ namespace Microsoft.Build.Execution
         /// Is optional, the field is expected to be present starting <see cref="_version"/> 1.
         /// </remarks>
         private BuildRequestDataFlags _buildRequestDataFlags;
-
-        /// <summary>
-        /// The evaluation ID of the project used for this build.
-        /// </summary>
-        private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
         private string? _schedulerInducedError;
 
@@ -432,17 +432,6 @@ namespace Microsoft.Build.Execution
         public BuildRequestDataFlags? BuildRequestDataFlags => (_version > 0) ? _buildRequestDataFlags : null;
 
         /// <summary>
-        /// The evaluation ID of the project used for this build.
-        /// </summary>
-        internal int EvaluationId
-        {
-            [DebuggerStepThrough]
-            get => _evaluationId;
-            [DebuggerStepThrough]
-            set => _evaluationId = value;
-        }
-
-        /// <summary>
         /// Returns the node packet type.
         /// </summary>
         NodePacketType INodePacket.Type
@@ -509,6 +498,17 @@ namespace Microsoft.Build.Execution
             get => _projectTargets;
             [DebuggerStepThrough]
             set => _projectTargets = value;
+        }
+
+        /// <summary>
+        /// The evaluation ID of the project used for this build.
+        /// </summary>
+        internal int EvaluationId
+        {
+            [DebuggerStepThrough]
+            get => _evaluationId;
+            [DebuggerStepThrough]
+            set => _evaluationId = value;
         }
 
         /// <summary>

@@ -492,7 +492,10 @@ namespace Microsoft.Build.Engine.UnitTests
 
             var loggingContext = new MockLoggingContext(
                 loggingService,
-                new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+                BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1)
+                    .WithProjectInstanceId(2)
+                    .WithProjectContextId(BuildEventContext.InvalidProjectContextId)
+                    .WithTargetId(4));
 
             // Add data via the collector API.
             var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);

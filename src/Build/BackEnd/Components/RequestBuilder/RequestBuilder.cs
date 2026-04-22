@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1158,8 +1158,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
                         _componentHost,
                         RequestEntry.Request.BuildRequestDataFlags,
-                        RequestEntry.Request.SubmissionId,
-                        _nodeLoggingContext.BuildEventContext.NodeId);
+                        _nodeLoggingContext.BuildEventContext.WithSubmissionId(RequestEntry.Request.SubmissionId));
                 }
 
                 // Set SDK-resolved environment variables if they haven't been set yet for this configuration
@@ -1179,13 +1178,8 @@ namespace Microsoft.Build.BackEnd
             }
             catch
             {
-                // make sure that any errors thrown by a child project are logged in the context of their parent project: create a temporary projectLoggingContext
-                _projectLoggingContext = new ProjectLoggingContext(
-                    _nodeLoggingContext,
-                    _requestEntry.Request,
-                    _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion);
-
+                // make sure that any errors thrown by a child project are logged in the context of their parent project
+                _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
                 throw;
             }
             finally
@@ -1249,7 +1243,7 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
-                // Populate the evaluation ID from the configuration for sending to the central node.
+                    // Populate the evaluation ID from the configuration for sending to the central node.
                 result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 
                 UpdateStatisticsPostBuild();

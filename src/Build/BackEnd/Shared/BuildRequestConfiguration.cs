@@ -459,8 +459,7 @@ namespace Microsoft.Build.BackEnd
         internal void LoadProjectIntoConfiguration(
             IBuildComponentHost componentHost,
             BuildRequestDataFlags buildRequestDataFlags,
-            int submissionId,
-            int nodeId)
+            BuildEventContext parentBuildEventContext)
         {
             ErrorUtilities.VerifyThrow(!IsLoaded, "Already loaded the project for this configuration id {0}.", ConfigurationId);
 
@@ -511,16 +510,9 @@ namespace Microsoft.Build.BackEnd
                     toolsVersionOverride,
                     componentHost.BuildParameters,
                     componentHost.LoggingService,
-                    new BuildEventContext(
-                        submissionId,
-                        nodeId,
-                        BuildEventContext.InvalidEvaluationId,
-                        BuildEventContext.InvalidProjectInstanceId,
-                        BuildEventContext.InvalidProjectContextId,
-                        BuildEventContext.InvalidTargetId,
-                        BuildEventContext.InvalidTaskId),
+                    parentBuildEventContext,
                     sdkResolverService,
-                    submissionId,
+                    parentBuildEventContext.SubmissionId,
                     projectLoadSettings);
             });
         }

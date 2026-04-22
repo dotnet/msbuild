@@ -90,7 +90,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
             item.SetMetadata("a", "b");
-            var buildEventContext = new Framework.BuildEventContext(1, 2, 3, 4, 5, 6, 7);
+            var buildEventContext = Framework.BuildEventContext.CreateInitial(1, 2)
+                .WithEvaluationId(3)
+                .WithProjectInstanceId(4)
+                .WithProjectContextId(5)
+                .WithTargetId(6)
+                .WithTaskId(7);
 
             TargetResult result = new TargetResult(
                 new TaskItem[] { item },

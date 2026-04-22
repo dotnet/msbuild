@@ -457,19 +457,19 @@ namespace Microsoft.Build.UnitTests
             // Not all parameters are null here, but that's fine, we assume the engine will never
             // fire a ProjectStarted without a project name, etc.
             es.Consume(new BuildStartedEventArgs(null, null));
-            es.Consume(new ProjectStartedEventArgs(1, null, null, "p", null, null, null, parentBuildEventContext: new BuildEventContext(1, 1, 1, 1)) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new TargetStartedEventArgs(null, null, "t", null, null) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new TaskStartedEventArgs(null, null, null, null, "task") { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new BuildMessageEventArgs(null, null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new BuildWarningEventArgs(null, null, null, 0, 0, 0, 0, null, null, null) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new BuildErrorEventArgs(null, null, null, 0, 0, 0, 0, null, null, null) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new TaskFinishedEventArgs(null, null, null, null, "task", true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new TargetFinishedEventArgs(null, null, "t", null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new ProjectFinishedEventArgs(null, null, "p", true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
-            es.Consume(new MyCustomBuildEventArgs2() { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new ProjectStartedEventArgs(1, null, null, "p", null, null, null, parentBuildEventContext: BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1)) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new TargetStartedEventArgs(null, null, "t", null, null) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new TaskStartedEventArgs(null, null, null, null, "task") { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new BuildMessageEventArgs(null, null, null, MessageImportance.High) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new BuildWarningEventArgs(null, null, null, 0, 0, 0, 0, null, null, null) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new BuildErrorEventArgs(null, null, null, 0, 0, 0, 0, null, null, null) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new TaskFinishedEventArgs(null, null, null, null, "task", true) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new TargetFinishedEventArgs(null, null, "t", null, null, true) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new ProjectFinishedEventArgs(null, null, "p", true) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
+            es.Consume(new MyCustomBuildEventArgs2() { BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1) });
             // No exception raised
         }
 
@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests
                                                 sc.Write, sc.SetColor,
                                                 sc.ResetColor);
             L.Initialize(es, 2);
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs(null, null);
             bse.BuildEventContext = buildEventContext;
@@ -599,7 +599,7 @@ namespace Microsoft.Build.UnitTests
 
             BuildMessageEventArgs be = new BuildMessageEventArgs(message, "help", "sender", messageImportance)
             {
-                BuildEventContext = new BuildEventContext(1, 2, 3, 4)
+                BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4)
             };
 
             eventSourceSink.Consume(be);
@@ -655,7 +655,7 @@ namespace Microsoft.Build.UnitTests
                 throw new InvalidOperationException($"Invalid expectedMessageType '{expectedMessageType}'");
             }
 
-            buildEventArgs.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            buildEventArgs.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4);
 
             EventSourceSink eventSourceSink = new EventSourceSink();
             SimulatedConsole console = new SimulatedConsole();
@@ -684,13 +684,13 @@ namespace Microsoft.Build.UnitTests
                                                 sc.ResetColor);
             L.Initialize(es);
 
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
             bse.BuildEventContext = buildEventContext;
             es.Consume(bse);
 
-            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 1, 1, 1));
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1));
             pse.BuildEventContext = buildEventContext;
             es.Consume(pse);
 
@@ -734,13 +734,13 @@ namespace Microsoft.Build.UnitTests
                                                 sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es);
 
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
             bse.BuildEventContext = buildEventContext;
             es.Consume(bse);
 
-            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4));
             pse.BuildEventContext = buildEventContext;
             es.Consume(pse);
 
@@ -795,13 +795,13 @@ namespace Microsoft.Build.UnitTests
                                                 sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es);
 
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
             bse.BuildEventContext = buildEventContext;
             es.Consume(bse);
 
-            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4));
             pse.BuildEventContext = buildEventContext;
             es.Consume(pse);
 
@@ -857,13 +857,13 @@ namespace Microsoft.Build.UnitTests
                                                 sc.ResetColor);
             L.Initialize(es);
 
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
             bse.BuildEventContext = buildEventContext;
             es.Consume(bse);
 
-            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 1, 1, 1));
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1));
             pse.BuildEventContext = buildEventContext;
             es.Consume(pse);
 
@@ -910,13 +910,13 @@ namespace Microsoft.Build.UnitTests
                                                 sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es);
 
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
             bse.BuildEventContext = buildEventContext;
             es.Consume(bse);
 
-            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4));
             pse.BuildEventContext = buildEventContext;
             es.Consume(pse);
 
@@ -970,13 +970,13 @@ namespace Microsoft.Build.UnitTests
                                                 sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es);
 
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
             bse.BuildEventContext = buildEventContext;
             es.Consume(bse);
 
-            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4));
             pse.BuildEventContext = buildEventContext;
             es.Consume(pse);
 
@@ -1031,13 +1031,13 @@ namespace Microsoft.Build.UnitTests
                                                 sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es);
 
-            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
 
             BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
             bse.BuildEventContext = buildEventContext;
             L.BuildStartedHandler(null, bse);
 
-            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4));
             pse.BuildEventContext = buildEventContext;
             L.ProjectStartedHandler(null, pse);
 
@@ -1090,7 +1090,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es);
 
             MyCustomBuildEventArgs c = new MyCustomBuildEventArgs("msg");
-            c.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            c.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
 
             es.Consume(c);
 
@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.UnitTests
 
             MyCustomBuildEventArgs c =
                     new MyCustomBuildEventArgs("msg");
-            c.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            c.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
             es.Consume(c);
 
             sc.ToString().ShouldContain("msg");
@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es);
 
             MyCustomBuildEventArgs c = new MyCustomBuildEventArgs("msg");
-            c.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            c.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
 
             es.Consume(c);
 
@@ -1146,7 +1146,7 @@ namespace Microsoft.Build.UnitTests
             string prop3;
 
             BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            buildEvent.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
             ((ParallelConsoleLogger)cl).WriteProperties(buildEvent, properties);
             prop1 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop1", "val1");
             prop2 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop2", "val2");
@@ -1367,7 +1367,7 @@ namespace Microsoft.Build.UnitTests
             string item3metadatum = string.Empty;
 
             BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            buildEvent.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
             ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
             item1spec = Environment.NewLine + "    spec" + Environment.NewLine;
             item2spec = Environment.NewLine + "    spec2" + Environment.NewLine;
@@ -1424,7 +1424,7 @@ namespace Microsoft.Build.UnitTests
             SimulatedConsole sc = new SimulatedConsole();
             BaseConsoleLogger cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            buildEvent.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
             ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
             string log = sc.ToString();
 
@@ -1444,7 +1444,7 @@ namespace Microsoft.Build.UnitTests
             SimulatedConsole sc = new SimulatedConsole();
             var cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            buildEvent.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
             cl.WriteProperties(buildEvent, properties);
 
             string log = sc.ToString();
@@ -1550,13 +1550,13 @@ namespace Microsoft.Build.UnitTests
 
             // Introduce a warning
             BuildWarningEventArgs bwea = new BuildWarningEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
-            bwea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            bwea.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
 
             es.Consume(bwea);
 
             // Introduce an error
             BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
-            beea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            beea.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
 
             es.Consume(beea);
 
@@ -1637,13 +1637,13 @@ namespace Microsoft.Build.UnitTests
 
             // Introduce a warning
             BuildWarningEventArgs bwea = new BuildWarningEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
-            bwea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            bwea.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
 
             es.Consume(bwea);
 
             // Introduce an error
             BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
-            beea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            beea.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
 
             es.Consume(beea);
 
@@ -1719,8 +1719,8 @@ namespace Microsoft.Build.UnitTests
             // BuildStarted Event
             es.Consume(new BuildStartedEventArgs("bs", null));
             // Project Started Event
-            ProjectStartedEventArgs project1Started = new ProjectStartedEventArgs(1, null, null, "p", "t", null, null, new BuildEventContext(BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId));
-            project1Started.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            ProjectStartedEventArgs project1Started = new ProjectStartedEventArgs(1, null, null, "p", "t", null, null, BuildEventContext.CreateInitial(0, BuildEventContext.InvalidNodeId));
+            project1Started.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
             es.Consume(project1Started);
             TargetStartedEventArgs targetStarted1 = new TargetStartedEventArgs(null, null, "t", null, null);
             targetStarted1.BuildEventContext = project1Started.BuildEventContext;
@@ -1748,7 +1748,7 @@ namespace Microsoft.Build.UnitTests
 
             ProjectStartedEventArgs project2Started = new ProjectStartedEventArgs(2, null, null, "p2", "t2", null, null, project1Started.BuildEventContext);
             // Project Started Event
-            project2Started.BuildEventContext = new BuildEventContext(2, 2, 2, 2);
+            project2Started.BuildEventContext = BuildEventContext.CreateInitial(2, 2).WithEvaluationId(2).WithProjectInstanceId(2);
             es.Consume(project2Started);
             TargetStartedEventArgs targetStarted2 = new TargetStartedEventArgs(null, null, "t2", null, null);
             targetStarted2.BuildEventContext = project2Started.BuildEventContext;
@@ -1833,7 +1833,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es, 2);
             es.Consume(new BuildStartedEventArgs("bs", null));
             TaskCommandLineEventArgs messsage1 = new TaskCommandLineEventArgs("Message", null, MessageImportance.High);
-            messsage1.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            messsage1.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(1).WithProjectContextId(1).WithTaskId(1);
             // Message Event
             es.Consume(messsage1);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
@@ -1847,7 +1847,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es, 2);
             es.Consume(new BuildStartedEventArgs("bs", null));
             BuildMessageEventArgs messsage2 = new BuildMessageEventArgs("Message", null, null, MessageImportance.High);
-            messsage2.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            messsage2.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4);
             // Message Event
             es.Consume(messsage2);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
@@ -1861,7 +1861,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es, 2);
             es.Consume(new BuildStartedEventArgs("bs", null));
             messsage2 = new BuildMessageEventArgs("Message", null, null, MessageImportance.High);
-            messsage2.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            messsage2.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4);
             // Message Event
             es.Consume(messsage2);
             ProjectStartedEventArgs project = new ProjectStartedEventArgs(1, "Hello,", "HI", "None", "Build", null, null, messsage1.BuildEventContext);
@@ -1893,8 +1893,7 @@ namespace Microsoft.Build.UnitTests
                     L.Initialize(es);
                 }
                 es.Consume(new BuildStartedEventArgs("bs", null));
-                BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
-                BuildEventContext context2 = new BuildEventContext(2, 2, 2, 2);
+                BuildEventContext context = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
 
                 ProjectStartedEventArgs project = new ProjectStartedEventArgs(1, "Hello,", "HI", "None", "Build", null, null, context);
                 project.BuildEventContext = context;
@@ -1923,8 +1922,8 @@ namespace Microsoft.Build.UnitTests
             ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es, 2);
             es.Consume(new BuildStartedEventArgs("bs", null));
-            BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
-            BuildEventContext context2 = new BuildEventContext(2, 2, 2, 2);
+            BuildEventContext context = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
+            BuildEventContext context2 = BuildEventContext.CreateInitial(2, 2).WithEvaluationId(2).WithProjectInstanceId(2);
 
             ProjectStartedEventArgs project = new ProjectStartedEventArgs(1, "Hello,", "HI", "None", "Build", null, null, context);
             project.BuildEventContext = context;

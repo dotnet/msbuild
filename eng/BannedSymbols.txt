@@ -1,0 +1,7 @@
+// Banned BuildEventContext constructors - use CreateInitial/CreateForSubmission/CreateForNode + WithXxx() builder methods instead.
+// These constructors make it easy to accidentally drop evaluation IDs and other critical context data.
+// See BuildEventContext.cs for the recommended builder pattern.
+M:Microsoft.Build.Framework.BuildEventContext.#ctor(System.Int32,System.Int32,System.Int32,System.Int32);Use BuildEventContext.CreateInitial/CreateForNode + WithXxx() builder methods instead
+M:Microsoft.Build.Framework.BuildEventContext.#ctor(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32);Use BuildEventContext.CreateInitial/CreateForNode + WithXxx() builder methods instead
+M:Microsoft.Build.Framework.BuildEventContext.#ctor(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32);Use BuildEventContext.CreateInitial + WithXxx() builder methods instead
+M:Microsoft.Build.Framework.BuildEventContext.#ctor(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32);Use BuildEventContext.CreateInitial + WithXxx() builder methods instead
