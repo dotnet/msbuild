@@ -1,8 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging;
@@ -57,9 +59,28 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     private readonly Dictionary<ProjectContext, TProjectData> _projectDataByProjectContextId = new();
 
     /// <summary>
+    /// Protects access to state shared between the logger callbacks and the rendering thread.
+    /// </summary>
+    private readonly LockType _stateUpdateLock = new();
+
+    /// <summary>
     /// Tracks build-level data for the entire build session.
     /// </summary>
     private TBuildData? _buildData;
+
+    /// <summary>
+    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
+    /// </summary>
+    /// <remarks>
+    /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
+    /// However, reads and writes to locations in an array is atomic, so locking is not required.
+    /// </remarks>
+    private TNodeData?[] _nodeDataByNodeId = [];
+
+    /// <summary>
+    /// True if we're replaying a binary log. In this mode, we may encounter NodeIds higher than the initial node count.
+    /// </summary>
+    private bool _isReplayMode = false;
 
     #region INodeLogger implementation
 
@@ -74,6 +95,15 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     /// </summary>
     protected int NodeCount { get; private set; }
 
+    public virtual bool NeedsTaskInputs => false;
+
+    public virtual bool NeedsEvaluationPropertiesAndItems => false;
+
+    /// <summary>
+    /// Opts this base into tracking per-node data structures.
+    /// </summary>
+    public virtual bool UsesPerNodeData => false;
+
     /// <inheritdoc/>
     public virtual void Initialize(IEventSource eventSource, int nodeCount)
     {
@@ -81,11 +111,18 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
         NodeCount = nodeCount + 1;
 
         Initialize(eventSource);
+
+        _nodeDataByNodeId = UsesPerNodeData ? new TNodeData?[NodeCount] : [];
     }
 
     /// <inheritdoc/>
     public virtual void Initialize(IEventSource eventSource)
     {
+        if (eventSource is BinaryLogReplayEventSource)
+        {
+            _isReplayMode = true;
+        }
+
         eventSource.BuildStarted += BuildStartedHandler;
         eventSource.BuildFinished += BuildFinishedHandler;
         eventSource.ProjectStarted += ProjectStartedHandler;
@@ -99,12 +136,12 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
         eventSource.WarningRaised += WarningRaisedHandler;
         eventSource.ErrorRaised += ErrorRaisedHandler;
 
-        if (eventSource is IEventSource3 eventSource3)
+        if (eventSource is IEventSource3 eventSource3 && NeedsTaskInputs)
         {
             eventSource3.IncludeTaskInputs();
         }
 
-        if (eventSource is IEventSource4 eventSource4)
+        if (eventSource is IEventSource4 eventSource4 && NeedsEvaluationPropertiesAndItems)
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();
         }
@@ -131,7 +168,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     /// </summary>
     private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
     {
-        OnBuildFinished(e, _projectDataByProjectContextId.Values.ToArray(), _buildData!);
+        OnBuildFinished(e, _projectDataByProjectContextId.Values, _buildData!);
 
         // Clear tracking data
         _projectDataByProjectContextId.Clear();
@@ -192,9 +229,9 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
         else if (FileUtilities.IsMetaprojectFilename(e.ProjectFile))
         {
             // create synthetic evaluation data for metaprojects
-                TEvalData syntheticEvalData = CreateSyntheticEvalDataForMetaproject(e);
-                _evaluationDataByEvalId[evalContext] = syntheticEvalData;
-                return syntheticEvalData;
+            TEvalData syntheticEvalData = CreateSyntheticEvalDataForMetaproject(e);
+            _evaluationDataByEvalId[evalContext] = syntheticEvalData;
+            return syntheticEvalData;
         }
         return default;
     }
@@ -350,6 +387,66 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
             BuildEventContext context => NodeIdForContext(context),
         };
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void EnsurePerNodeDataEnabled()
+    {
+        Debug.Assert(UsesPerNodeData, "Node data is not being tracked because UsesPerNodeData is false. Opt this logger into tracking per-node data by overriding UsesPerNodeData to return true.");
+    }
+
+    /// <summary>
+    /// Retrieves the node data associated with the given build event, based on the node ID in the event's <see cref="BuildEventContext"/>, or <see langword="null"/> if no data is found.
+    /// </summary>
+    protected TNodeData? GetNodeDataForEvent(BuildEventArgs e)
+    {
+        EnsurePerNodeDataEnabled();
+        int? node = GetNodeArrayIndexForEvent(e);
+        if (node is int nodeId)
+        {
+            EnsureNodeCapacity(nodeId);
+            if (_nodeDataByNodeId[nodeId] is TNodeData status)
+            {
+                return status;
+            }
+        }
+
+        return default;
+    }
+
+    /// <summary>
+    /// Updates the node data associated with the given build event in the internal tracking.
+    /// </summary>
+    protected void SetActiveNodeStatus(BuildEventArgs e, TNodeData status)
+    {
+        EnsurePerNodeDataEnabled();
+        if (GetNodeArrayIndexForEvent(e) is int nodeId)
+        {
+            EnsureNodeCapacity(nodeId);
+            _nodeDataByNodeId[nodeId] = status;
+        }
+    }
+
+    /// <summary>
+    /// Marks the node associated with the given build event as no longer active.
+    /// </summary>
+    protected void YieldNode(BuildEventArgs e)
+    {
+        EnsurePerNodeDataEnabled();
+        if (GetNodeArrayIndexForEvent(e) is int nodeId)
+        {
+            EnsureNodeCapacity(nodeId);
+            _nodeDataByNodeId[nodeId] = default;
+        }
+    }
+
+    /// <summary>
+    /// Gets a read-only view of the per-node data.
+    /// </summary>
+    protected ReadOnlySpan<TNodeData?> GetAllNodeData()
+    {
+        EnsurePerNodeDataEnabled();
+        return _nodeDataByNodeId;
+    }
+
     #endregion
 
     #region Private helpers
@@ -386,6 +483,27 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
         }
     }
 
+    /// <summary>
+    /// Ensures that the <see cref="_nodeDataByNodeId"/> array has enough capacity to accommodate the given index.
+    /// This is necessary for binary log replay scenarios where the replay may use fewer nodes than the original build.
+    /// </summary>
+    private void EnsureNodeCapacity(int nodeIndex)
+    {
+        // Only resize in replay mode - during normal builds, the node count is fixed
+        if (_isReplayMode && nodeIndex >= _nodeDataByNodeId.Length)
+        {
+            // Resize to accommodate the new index plus some extra capacity
+            lock (_stateUpdateLock)
+            {
+                if (nodeIndex >= _nodeDataByNodeId.Length)
+                {
+                    int newSize = Math.Max(nodeIndex + 1, _nodeDataByNodeId.Length * 2);
+                    Array.Resize(ref _nodeDataByNodeId, newSize);
+                }
+            }
+        }
+    }
+
     #endregion
 
     #region Abstract methods - must be implemented by subclasses
@@ -410,7 +528,6 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     /// <param name="e">The project started event args.</param>
     /// <returns>The project data to store, or null to not track this project.</returns>
     protected abstract TProjectData? CreateProjectData(TEvalData? evalData, TBuildData buildData, ProjectStartedEventArgs e);
-    
 
     /// <summary>
     /// Creates build data when the build starts.
@@ -431,7 +548,7 @@ public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectDa
     /// <summary>
     /// Called when the build finishes.
     /// </summary>
-    protected virtual void OnBuildFinished(BuildFinishedEventArgs e, TProjectData[] projectData, TBuildData buildData) { }
+    protected virtual void OnBuildFinished(BuildFinishedEventArgs e, IEnumerable<TProjectData> projectData, TBuildData buildData) { }
 
     /// <summary>
     /// Called when the build is canceled.
