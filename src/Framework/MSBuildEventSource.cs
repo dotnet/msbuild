@@ -757,15 +757,6 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(106, nodeId, processId, succeeded);
         }
-
-        /// <summary>
-        /// Signals that the actual task.Execute() call has completed inside the task host process.
-        /// </summary>
-        [Event(110, Keywords = Keywords.All)]
-        public void TaskExecuteInHostStop(string taskName, bool succeeded)
-        {
-            WriteEvent(110, taskName, succeeded);
-        }
         #endregion
 
         #region TaskHost Callback Events
@@ -819,6 +810,16 @@ namespace Microsoft.Build.Eventing
         public void TaskExecuteInHostStart(string taskName)
         {
             WriteEvent(111, taskName);
+        }
+
+
+        /// <summary>
+        /// Signals that the actual task.Execute() call has completed inside the task host process.
+        /// </summary>
+        [Event(110, Keywords = Keywords.All)]
+        public void TaskExecuteInHostStop(string taskName, bool succeeded)
+        {
+            WriteEvent(110, taskName, succeeded);
         }
         #endregion
     }
