@@ -243,6 +243,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="WorkerNodeTelemetryEventArgs"/>
         /// </summary>
         WorkerNodeTelemetryEvent = 42,
+
+        /// <summary>
+        /// Event is <see cref="LoggerRegisteredEventArgs"/>
+        /// </summary>
+        LoggerRegisteredEvent = 43,
     }
     #endregion
 
@@ -543,6 +548,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
+                LoggingEventType.LoggerRegisteredEvent => new LoggerRegisteredEventArgs(),
 
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -689,6 +695,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(WorkerNodeTelemetryEventArgs))
             {
                 return LoggingEventType.WorkerNodeTelemetryEvent;
+            }
+            else if (eventType == typeof(LoggerRegisteredEventArgs))
+            {
+                return LoggingEventType.LoggerRegisteredEvent;
             }
             else if (eventType == typeof(TargetStartedEventArgs))
             {

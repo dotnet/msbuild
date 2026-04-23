@@ -224,7 +224,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Stores the registered loggers.
     /// </summary>
-    private readonly List<LoggerRegisteredEventArgs> _registeredLoggers = new();
+    private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
 
 
     private uint? _originalConsoleMode;
@@ -638,9 +638,9 @@ public sealed partial class TerminalLogger : INodeLogger
                 {
                     foreach (var logger in _registeredLoggers)
                     {
-                        if (!string.IsNullOrEmpty(logger.OutputFilePath))
+                        foreach (var outputPath in logger.OutputFilePaths)
                         {
-                            string displayPath = $"{AnsiCodes.LinkPrefix}{new Uri(logger.OutputFilePath).AbsoluteUri}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}";
+                            string displayPath = $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}";
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
                         }
                     }
@@ -1196,7 +1196,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
         if (e is LoggerRegisteredEventArgs loggerEvent)
         {
-            _registeredLoggers.Add(loggerEvent);
+            _registeredLoggers.AddRange(loggerEvent.Loggers);
             return;
         }
         string? message = e.Message;
