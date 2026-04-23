@@ -816,10 +816,10 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Signals that the actual task.Execute() call has completed inside the task host process.
         /// </summary>
-        [Event(110, Keywords = Keywords.All)]
+        [Event(112, Keywords = Keywords.All)]
         public void TaskExecuteInHostStop(string taskName, bool succeeded)
         {
-            WriteEvent(110, taskName, succeeded);
+            WriteEvent(112, taskName, succeeded);
         }
         #endregion
     }
