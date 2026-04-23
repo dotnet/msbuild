@@ -852,7 +852,7 @@ namespace Microsoft.Build.CommandLine
             shutdownException = null;
 
             // Snapshot the current environment
-            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse, parentPacketVersion);
@@ -1130,7 +1130,7 @@ namespace Microsoft.Build.CommandLine
 
             context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
             context.SavedEnvironment = new Dictionary<string, string>(
-                FrameworkCommunicationsUtilities.GetEnvironmentVariables(),
+                CommunicationsUtilities.GetEnvironmentVariables(),
                 StringComparer.OrdinalIgnoreCase);
 
             // Save debug/environment flags that are overwritten per-task in RunTask
@@ -1151,7 +1151,7 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            FrameworkCommunicationsUtilities.SetEnvironment(context.SavedEnvironment);
+            CommunicationsUtilities.SetEnvironment(context.SavedEnvironment);
             NativeMethodsShared.SetCurrentDirectory(context.SavedCurrentDirectory);
 
             // Restore debug/environment flags
@@ -1177,7 +1177,7 @@ namespace Microsoft.Build.CommandLine
 
             if (_blockedTaskCount > 0)
             {
-                CommunicationsUtilities.Trace("Nested task {0} dispatched while {1} tasks are blocked on callbacks.", taskHostConfiguration.TaskName, _blockedTaskCount);
+                CommunicationsUtilities.Trace($"Nested task {taskHostConfiguration.TaskName} dispatched while {_blockedTaskCount} tasks are blocked on callbacks.");
             }
 
             _currentConfiguration = taskHostConfiguration;
@@ -1308,7 +1308,7 @@ namespace Microsoft.Build.CommandLine
             // Restore the original environment, best effort.
             try
             {
-                FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
             }
             catch (Exception ex)
             {
@@ -1494,7 +1494,7 @@ namespace Microsoft.Build.CommandLine
 
                     Interlocked.Decrement(ref _activeTaskCount);
 
-                    IDictionary<string, string> currentEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+                    IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
@@ -1514,7 +1514,7 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                     // Restore the original clean environment
-                    FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
                 catch (Exception e)
                 {
@@ -1617,7 +1617,7 @@ namespace Microsoft.Build.CommandLine
                 updatedEnvironment = environment;
             }
 
-            FrameworkCommunicationsUtilities.SetEnvironment(updatedEnvironment);
+            CommunicationsUtilities.SetEnvironment(updatedEnvironment);
         }
 
         /// <summary>

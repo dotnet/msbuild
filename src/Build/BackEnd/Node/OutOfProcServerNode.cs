@@ -100,7 +100,7 @@ namespace Microsoft.Build.Experimental
 
             // Handled race condition. If two processes spawn to start build Server one will die while
             // one Server client connects to the other one and run build on it.
-            CommunicationsUtilities.Trace("Starting new server node with handshake {0}", handshake);
+            CommunicationsUtilities.Trace($"Starting new server node with handshake {handshake}");
             using var serverRunningMutex = ServerNamedMutex.OpenOrCreateMutex(GetRunningServerMutexName(handshake), out bool mutexCreatedNew);
             if (!mutexCreatedNew)
             {
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Experimental
         // TODO: it is too complicated, for simple role of server node it needs to be simplified
         private NodeEngineShutdownReason HandleShutdown(out Exception? exception)
         {
-            CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
+            CommunicationsUtilities.Trace($"Shutting down with reason: {_shutdownReason}, and exception: {_shutdownException}.");
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
@@ -329,7 +329,7 @@ namespace Microsoft.Build.Experimental
                 int serverNodeCount = NodeProviderOutOfProcBase.CountActiveNodesWithMode(NodeMode.OutOfProcServerNode);
                 if (serverNodeCount > 1)
                 {
-                    CommunicationsUtilities.Trace("Terminating server node due to over-provisioning: {0} server nodes found system-wide.", serverNodeCount);
+                    CommunicationsUtilities.Trace($"Terminating server node due to over-provisioning: {serverNodeCount} server nodes found system-wide.");
                     shouldReuse = false;
                 }
             }
@@ -364,7 +364,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleServerNodeBuildCommand(ServerNodeBuildCommand command)
         {
-            CommunicationsUtilities.Trace("Building with MSBuild server with command line {0}", command.CommandLine);
+            CommunicationsUtilities.Trace($"Building with MSBuild server with command line {command.CommandLine}");
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
             if (!holdsMutex)
             {
@@ -380,7 +380,7 @@ namespace Microsoft.Build.Experimental
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
-            FrameworkCommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+            CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;

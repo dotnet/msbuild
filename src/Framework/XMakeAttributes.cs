@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -159,7 +160,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool RuntimeValuesMatch(string runtimeA, string runtimeB)
         {
-            ErrorUtilities.VerifyThrow(runtimeA != String.Empty && runtimeB != String.Empty, "We should never get an empty string passed to this method");
+            FrameworkErrorUtilities.VerifyThrow(runtimeA != String.Empty && runtimeB != String.Empty, "We should never get an empty string passed to this method");
 
             if (runtimeA == null || runtimeB == null)
             {
@@ -203,7 +204,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool TryMergeRuntimeValues(string runtimeA, string runtimeB, out string mergedRuntime)
         {
-            ErrorUtilities.VerifyThrow(runtimeA != String.Empty && runtimeB != String.Empty, "We should never get an empty string passed to this method");
+            FrameworkErrorUtilities.VerifyThrow(runtimeA != String.Empty && runtimeB != String.Empty, "We should never get an empty string passed to this method");
 
             // set up the defaults
             if (runtimeA == null)
@@ -276,7 +277,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool ArchitectureValuesMatch(string architectureA, string architectureB)
         {
-            ErrorUtilities.VerifyThrow(architectureA != String.Empty && architectureB != String.Empty, "We should never get an empty string passed to this method");
+            FrameworkErrorUtilities.VerifyThrow(architectureA != String.Empty && architectureB != String.Empty, "We should never get an empty string passed to this method");
 
             if (architectureA == null || architectureB == null)
             {
@@ -343,7 +344,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool TryMergeArchitectureValues(string architectureA, string architectureB, out string mergedArchitecture)
         {
-            ErrorUtilities.VerifyThrow(architectureA != String.Empty && architectureB != String.Empty, "We should never get an empty string passed to this method");
+            FrameworkErrorUtilities.VerifyThrow(architectureA != String.Empty && architectureB != String.Empty, "We should never get an empty string passed to this method");
 
             // set up the defaults
             if (architectureA == null)

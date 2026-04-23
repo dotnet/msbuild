@@ -9,18 +9,24 @@ namespace Microsoft.Build.Framework;
 
 internal static partial class EnvironmentUtilities
 {
-#if !NETCOREAPP
+#if !NET
     private static volatile int s_processId;
     private static volatile string? s_processPath;
 #endif
+
     private static volatile string? s_processName;
 
-    /// <summary>Gets the unique identifier for the current process.</summary>
+    /// <summary>
+    ///  Gets the unique identifier for the current process.
+    /// </summary>
+    /// <value>
+    ///  A number that represents the unique identifier for the current process.
+    /// </value>
     public static int CurrentProcessId
     {
         get
         {
-#if NETCOREAPP
+#if NET
             return Environment.ProcessId;
 #else
             // copied from Environment.ProcessPath
@@ -40,17 +46,21 @@ internal static partial class EnvironmentUtilities
     }
 
     /// <summary>
-    /// Returns the path of the executable that started the currently executing process. Returns null when the path is not available.
+    ///  Returns the path of the executable that started the currently executing process.
+    ///  Returns <see langword="null"/> when the path is not available.
     /// </summary>
-    /// <returns>Path of the executable that started the currently executing process</returns>
+    /// <value>
+    ///  The path of the executable that started the currently executing process.
+    /// </value>
     /// <remarks>
-    /// If the executable is renamed or deleted before this property is first accessed, the return value is undefined and depends on the operating system.
+    ///  If the executable is renamed or deleted before this property is first accessed,
+    ///  the return value is undefined and depends on the operating system.
     /// </remarks>
     public static string? ProcessPath
     {
         get
         {
-#if NETCOREAPP
+#if NET
             return Environment.ProcessPath;
 #else
             // copied from Environment.ProcessPath
@@ -87,9 +97,60 @@ internal static partial class EnvironmentUtilities
     }
 
     public static bool IsWellKnownEnvironmentDerivedProperty(string propertyName)
+        => propertyName.StartsWith("MSBUILD", StringComparison.OrdinalIgnoreCase) ||
+           propertyName.StartsWith("COMPLUS_", StringComparison.OrdinalIgnoreCase) ||
+           propertyName.StartsWith("DOTNET_", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    ///  Gets the value of the specified environment variable as an <see cref="int"/>, 
+    ///  or returns <paramref name="defaultValue"/> if the variable is not set or cannot be parsed.
+    /// </summary>
+    /// <param name="name">The name of the environment variable.</param>
+    /// <param name="defaultValue">The value to return if the variable is not set or is not a valid integer.</param>
+    /// <returns>
+    ///  The parsed integer value of the environment variable, or <paramref name="defaultValue"/>
+    ///  if the variable is not set, is empty, or cannot be parsed as an integer.
+    /// </returns>
+    public static int GetValueAsInt32OrDefault(string name, int defaultValue)
     {
-        return propertyName.StartsWith("MSBUILD", StringComparison.OrdinalIgnoreCase) ||
-            propertyName.StartsWith("COMPLUS_", StringComparison.OrdinalIgnoreCase) ||
-            propertyName.StartsWith("DOTNET_", StringComparison.OrdinalIgnoreCase);
+        string? value = Environment.GetEnvironmentVariable(name);
+
+        return !string.IsNullOrEmpty(value) && int.TryParseInvariant(value, out int result)
+            ? result
+            : defaultValue;
+    }
+
+    /// <summary>
+    ///  Returns <see langword="true"/> if the specified environment variable exists and has a non-empty value;
+    ///  otherwise, <paramref name="defaultValue"/>.
+    /// </summary>
+    /// <param name="name">The name of the environment variable.</param>
+    /// <param name="defaultValue">The value to return if the variable is not set or is empty.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the environment variable has a non-empty value;
+    ///  otherwise, <paramref name="defaultValue"/>.
+    /// </returns>
+    public static bool ValueExistsOrDefault(string name, bool defaultValue)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+
+        return !string.IsNullOrEmpty(value) || defaultValue;
+    }
+
+    /// <summary>
+    ///  Returns <see langword="true"/> if the specified environment variable is set to <c>"1"</c>
+    ///  or <c>"true"</c> (case-insensitive).
+    /// </summary>
+    /// <param name="name">The name of the environment variable.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the environment variable value is <c>"1"</c> or <c>"true"</c>
+    ///  (case-insensitive); otherwise, <see langword="false"/>.
+    /// </returns>
+    internal static bool IsValueOneOrTrue(string name)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+
+        return value != null &&
+              (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase));
     }
 }

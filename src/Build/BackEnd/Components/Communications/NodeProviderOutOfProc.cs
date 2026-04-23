@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableLowPriority">Is the build running at low priority?</param>
         internal static Handshake GetHandshake(bool enableNodeReuse, bool enableLowPriority)
         {
-            CommunicationsUtilities.Trace("MSBUILDNODEHANDSHAKESALT=\"{0}\", msbuildDirectory=\"{1}\", enableNodeReuse={2}, enableLowPriority={3}", Traits.MSBuildNodeHandshakeSalt, BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, enableNodeReuse, enableLowPriority);
+            CommunicationsUtilities.Trace($"""MSBUILDNODEHANDSHAKESALT="{Traits.MSBuildNodeHandshakeSalt}", msbuildDirectory="{BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32}", enableNodeReuse={enableNodeReuse}, enableLowPriority={enableLowPriority}""");
             return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: enableNodeReuse, lowPriority: enableLowPriority));
         }
 
@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd
                 Handshake: hostHandshake,
                 EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
 
-            CommunicationsUtilities.Trace("Starting to acquire {1} new or existing node(s) to establish nodes from ID {0} to {2}...", nextNodeId, numberOfNodesToCreate, nextNodeId + numberOfNodesToCreate - 1);
+            CommunicationsUtilities.Trace($"Starting to acquire {numberOfNodesToCreate} new or existing node(s) to establish nodes from ID {nextNodeId} to {nextNodeId + numberOfNodesToCreate - 1}...");
      
             IList<NodeContext> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
 
