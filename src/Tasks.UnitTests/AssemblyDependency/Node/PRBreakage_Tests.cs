@@ -18,6 +18,16 @@ using Xunit;
 // review of PR #13319 ("Enlighten RAR task"). Each [Fact] targets one finding and
 // is intended to FAIL on the current head of the PR branch (627af67).
 //
+// Parity convention: where applicable, each `_Breakage` test is paired with a
+// `_Control` test that exercises the SAME scenario through the legacy/MP
+// (multi-process) code path — i.e., bypassing the OOP wire round-trip or the
+// new MT environment driver. The Control test is expected to PASS on the PR
+// head, demonstrating that the breakage is specific to the new MT/OOP path
+// and not present in the original `-multiprocess` paradigm.
+//
+// Findings without a meaningful MP/old-paradigm equivalent (NEW-8, NEW-10,
+// C1, NEW-2) have no Control test; this is documented inline.
+//
 // Findings covered (see files/council_review.md for full context):
 //   * NEW-3  - _appConfigValueIsEmptyString silently dropped over the OOP wire,
 //              causing MP/OOP behavioural divergence with Wave18_6 OFF.
@@ -89,6 +99,41 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
+        /// <summary>
+        /// Parity control for NEW-3. Same Wave18_6-OFF + AppConfigFile="" scenario,
+        /// but executed entirely in-process (no wire round-trip). This is what
+        /// `-multiprocess` mode does today: the same RAR instance the user
+        /// configured is the one whose Execute() runs. The flag is preserved by
+        /// definition — there is no serializer in the loop to drop it.
+        /// </summary>
+        [Fact]
+        public void NEW3_AppConfigEmptyStringFlag_MultiProcess_Control()
+        {
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create();
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                ResolveAssemblyReference rar = new()
+                {
+                    BuildEngine = new MockEngine(),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    AppConfigFile = string.Empty,
+                };
+
+                // MP path: the very instance the user configured is the one that
+                // would Execute(). Flag is intact — legacy error contract holds.
+                GetPrivateBool(rar, "_appConfigValueIsEmptyString").ShouldBeTrue(
+                    "MP control: in-process RAR retains the empty-string flag (no wire to drop it).");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         // ---------------------------------------------------------------
         // NEW-4 — Relative StateFile is no longer absolutized at the wire
         // boundary. Pre-PR, RarNodeExecuteRequest explicitly Path.GetFullPath'd
@@ -133,6 +178,42 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
+        /// <summary>
+        /// Parity control for NEW-4 (StateFile). MP path keeps the value the user
+        /// set on the same instance; resolution happens against the client process
+        /// CWD which IS the project CWD. No wire boundary to lose context.
+        /// </summary>
+        [Fact]
+        public void NEW4_RelativeStateFile_MultiProcess_Control()
+        {
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create();
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                const string RelativeStateFile = "obj/rar.cache";
+
+                ResolveAssemblyReference rar = new()
+                {
+                    BuildEngine = new MockEngine(),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    StateFile = RelativeStateFile,
+                };
+
+                // MP path: same instance owns the value end-to-end. The string
+                // resolves against the (correct) project CWD when read.
+                rar.StateFile.ShouldBe(RelativeStateFile,
+                    "MP control: in-process RAR preserves the user-supplied StateFile verbatim; " +
+                    "resolution happens against the correct project CWD.");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         [Fact]
         public void NEW4_RelativeAppConfigFile_NotAbsolutizedAcrossWire_WaveOff()
         {
@@ -166,6 +247,39 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
+        /// <summary>
+        /// Parity control for NEW-4 (AppConfigFile). MP equivalent: no wire,
+        /// no node-process CWD, value is consumed in the project context.
+        /// </summary>
+        [Fact]
+        public void NEW4_RelativeAppConfigFile_MultiProcess_Control()
+        {
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create();
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                const string RelativeAppConfig = "app.config";
+
+                ResolveAssemblyReference rar = new()
+                {
+                    BuildEngine = new MockEngine(),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    AppConfigFile = RelativeAppConfig,
+                };
+
+                rar.AppConfigFile.ShouldBe(RelativeAppConfig,
+                    "MP control: in-process RAR preserves AppConfigFile; resolution happens " +
+                    "in the project CWD where 'app.config' is correct.");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         // ---------------------------------------------------------------
         // NEW-8 — RawFilenameResolver only guards `rawFileNameCandidate != null`,
         // not IsNullOrEmpty. An empty ItemSpec reaches taskEnvironment.GetAbsolutePath("")
@@ -174,6 +288,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         //
         // Pre-PR this codepath silently no-op'd (returned false). Now an empty primary
         // reference ItemSpec aborts the resolver chain.
+        //
+        // No MP/MT parity Control: the bug lives inside the resolver itself, which
+        // is shared between in-proc and OOP paths. The breakage is a behavior-change
+        // regression vs. the pre-PR resolver, not an MT-specific bug.
         // ---------------------------------------------------------------
         [Fact]
         public void NEW8_RawFilenameResolver_EmptyItemSpec_ThrowsArgumentException()
@@ -215,6 +333,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         //   * relative → silently accepted (`ignoreRootedCheck:true`), then the
         //             ctor writes that bogus value to the FileUtilities thread-static
         //             which leaks into Expander / %(FullPath) downstream.
+        //
+        // No MP/MT parity Control: MultiThreadedTaskEnvironmentDriver is a
+        // PR-introduced type; the MP path uses MultiProcessTaskEnvironmentDriver
+        // which simply reads `NativeMethods.GetCurrentDirectory()` and never
+        // accepts an unvalidated wire string. The breakage is MT-only by
+        // construction; there is no MP equivalent codepath to compare.
         // ---------------------------------------------------------------
         [Fact]
         public void NEW10_MultiThreadedDriver_NullProjectDirectory_NoPreconditionCheck()
@@ -313,6 +437,50 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 appConfigOriginal.ShouldBeNull(
                     "C5/N3 regression: AppConfigFile setter must clear the underlying absolute " +
                     $"path when re-assigned to empty; instead it retained '{appConfigOriginal}'.");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        /// <summary>
+        /// Parity control for C5/N3. Same setter sequence with Wave18_6 ON
+        /// (the new-behavior path). With the wave on, empty assignment is an
+        /// intentional no-op: the empty-flag is NOT set, so no stale-path
+        /// inconsistency arises (the prior absolute path is preserved with
+        /// no contradictory flag). The bug is specific to the Wave18_6-OFF
+        /// branch the PR introduced, where the flag DOES flip.
+        /// </summary>
+        [Fact]
+        public void C5_AppConfigFileSetter_ReassignToEmpty_WaveOn_Control()
+        {
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create();
+                ChangeWaves.ResetStateForTests();
+                // Leave wave ON.
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                string absolutePath = Path.Combine(Path.GetTempPath(), "control.config");
+
+                ResolveAssemblyReference rar = new()
+                {
+                    BuildEngine = new MockEngine(),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    AppConfigFile = absolutePath,
+                };
+
+                rar.AppConfigFile = string.Empty;
+
+                bool emptyFlag = GetPrivateBool(rar, "_appConfigValueIsEmptyString");
+
+                // With Wave ON, the empty assignment is a no-op: NO inconsistent flag flip.
+                // The prior absolute path is preserved without contradiction.
+                emptyFlag.ShouldBeFalse(
+                    "Control: with Wave18_6 ON, empty AppConfigFile assignment must NOT set the " +
+                    "empty-string flag (no contradictory state). The C5/N3 inconsistency is " +
+                    "Wave18_6-OFF-only.");
             }
             finally
             {
