@@ -1,0 +1,600 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Microsoft.Build.Framework;
+
+namespace Microsoft.Build.Logging;
+
+/// <summary>
+/// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
+/// </summary>
+internal record struct ProjectContext(int Id)
+{
+    public ProjectContext(BuildEventContext context)
+        : this(context.ProjectContextId)
+    {
+    }
+}
+
+/// <summary>
+/// A wrapper over the evaluation context ID passed to us in <see cref="IEventSource"/> logger events.
+/// </summary>
+internal record struct EvalContext(int Id)
+{
+    public EvalContext(BuildEventContext context)
+        : this(context.EvaluationId)
+    {
+    }
+}
+
+/// <summary>
+/// Base class that tracks build state (evaluation data, node status, completed project data, and whole-build data) during builds.
+/// Subclasses can specialize the type of data tracked for each area and implement rendering logic.
+/// </summary>
+/// <typeparam name="TEvalData">Data gathered/projected for each evaluation context</typeparam>
+/// <typeparam name="TNodeData">Data stored for each live, actively running build worker node</typeparam>
+/// <typeparam name="TProjectData">Data stored for each completed project context instance</typeparam>
+/// <typeparam name="TBuildData">Data that is aggregated across the entire build session</typeparam>
+public abstract class ProjectTrackingLoggerBase<TEvalData, TNodeData, TProjectData, TBuildData> : INodeLogger
+{
+
+    /// <summary>
+    /// Tracks the evaluation data for all evaluations seen so far.
+    /// </summary>
+    /// <remarks>
+    /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding evaluation.
+    /// </remarks>
+    private readonly Dictionary<EvalContext, TEvalData> _evaluationDataByEvalId = new();
+
+    /// <summary>
+    /// Tracks the status of all relevant projects seen so far.
+    /// </summary>
+    /// <remarks>
+    /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
+    /// </remarks>
+    private readonly Dictionary<ProjectContext, TProjectData> _projectDataByProjectContextId = new();
+
+    /// <summary>
+    /// Protects access to state shared between the logger callbacks and the rendering thread.
+    /// </summary>
+    private readonly LockType _stateUpdateLock = new();
+
+    /// <summary>
+    /// Tracks build-level data for the entire build session.
+    /// </summary>
+    private TBuildData? _buildData;
+
+    /// <summary>
+    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
+    /// </summary>
+    /// <remarks>
+    /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
+    /// However, reads and writes to locations in an array is atomic, so locking is not required.
+    /// </remarks>
+    private TNodeData?[] _nodeDataByNodeId = [];
+
+    /// <summary>
+    /// True if we're replaying a binary log. In this mode, we may encounter NodeIds higher than the initial node count.
+    /// </summary>
+    private bool _isReplayMode = false;
+
+    #region INodeLogger implementation
+
+    /// <inheritdoc/>
+    public abstract LoggerVerbosity Verbosity { get; set; }
+
+    /// <inheritdoc/>
+    public abstract string? Parameters { get; set; }
+
+    /// <summary>
+    /// The number of nodes in the build. Handles the case where MSBUILDNOINPROCNODE is set by reserving an extra slot.
+    /// </summary>
+    protected int NodeCount { get; private set; }
+
+    public virtual bool NeedsTaskInputs => false;
+
+    public virtual bool NeedsEvaluationPropertiesAndItems => false;
+
+    /// <summary>
+    /// Opts this base into tracking per-node data structures.
+    /// </summary>
+    public virtual bool UsesPerNodeData => false;
+
+    /// <inheritdoc/>
+    public virtual void Initialize(IEventSource eventSource, int nodeCount)
+    {
+        // When MSBUILDNOINPROCNODE enabled, NodeId's reported by build start with 2. We need to reserve an extra spot for this case.
+        NodeCount = nodeCount + 1;
+
+        Initialize(eventSource);
+
+        _nodeDataByNodeId = UsesPerNodeData ? new TNodeData?[NodeCount] : [];
+    }
+
+    /// <inheritdoc/>
+    public virtual void Initialize(IEventSource eventSource)
+    {
+        if (eventSource is BinaryLogReplayEventSource)
+        {
+            _isReplayMode = true;
+        }
+
+        eventSource.BuildStarted += BuildStartedHandler;
+        eventSource.BuildFinished += BuildFinishedHandler;
+        eventSource.ProjectStarted += ProjectStartedHandler;
+        eventSource.ProjectFinished += ProjectFinishedHandler;
+        eventSource.TargetStarted += TargetStartedHandler;
+        eventSource.TargetFinished += TargetFinishedHandler;
+        eventSource.TaskStarted += TaskStartedHandler;
+        eventSource.TaskFinished += TaskFinishedHandler;
+        eventSource.StatusEventRaised += StatusEventRaisedHandler;
+        eventSource.MessageRaised += MessageRaisedHandler;
+        eventSource.WarningRaised += WarningRaisedHandler;
+        eventSource.ErrorRaised += ErrorRaisedHandler;
+
+        if (eventSource is IEventSource3 eventSource3 && NeedsTaskInputs)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
+
+        if (eventSource is IEventSource4 eventSource4 && NeedsEvaluationPropertiesAndItems)
+        {
+            eventSource4.IncludeEvaluationPropertiesAndItems();
+        }
+    }
+
+    /// <inheritdoc/>
+    public abstract void Shutdown();
+
+    #endregion
+
+    #region Logger callbacks
+
+    /// <summary>
+    /// The <see cref="IEventSource.BuildStarted"/> callback.
+    /// </summary>
+    private void BuildStartedHandler(object sender, BuildStartedEventArgs e)
+    {
+        _buildData = CreateBuildData(e);
+        OnBuildStarted(e, _buildData);
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.BuildFinished"/> callback.
+    /// </summary>
+    private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
+    {
+        OnBuildFinished(e, _projectDataByProjectContextId.Values, _buildData!);
+
+        // Clear tracking data
+        _projectDataByProjectContextId.Clear();
+        _evaluationDataByEvalId.Clear();
+        _buildData = default;
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.StatusEventRaised"/> callback.
+    /// </summary>
+    private void StatusEventRaisedHandler(object sender, BuildStatusEventArgs e)
+    {
+        switch (e)
+        {
+            case BuildCanceledEventArgs cancelEvent:
+                OnBuildCanceled(cancelEvent);
+                break;
+            case ProjectEvaluationStartedEventArgs:
+                break;
+            case ProjectEvaluationFinishedEventArgs evalFinish:
+                CaptureEvalContext(evalFinish);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.ProjectStarted"/> callback.
+    /// </summary>
+    private void ProjectStartedHandler(object sender, ProjectStartedEventArgs e)
+    {
+        if (e.BuildEventContext is null)
+        {
+            return;
+        }
+
+        ProjectContext projectContext = new(e.BuildEventContext);
+
+        // Get eval data for this project. 
+        if (TryGetEvalDataForProject(e) is TEvalData evalData)
+        {
+            // Create project data using the eval data
+            TProjectData? projectData = CreateProjectData(evalData, _buildData!, e);
+            if (projectData != null)
+            {
+                _projectDataByProjectContextId[projectContext] = projectData;
+                OnProjectStarted(e, evalData, projectData!, _buildData!);
+            }
+        }
+    }
+
+    private TEvalData? TryGetEvalDataForProject(ProjectStartedEventArgs e)
+    {
+        EvalContext evalContext = new(e.BuildEventContext!);
+        if (_evaluationDataByEvalId.TryGetValue(evalContext, out TEvalData? evalData))
+        {
+            return evalData;
+        }
+        else if (FileUtilities.IsMetaprojectFilename(e.ProjectFile))
+        {
+            // create synthetic evaluation data for metaprojects
+            TEvalData syntheticEvalData = CreateSyntheticEvalDataForMetaproject(e);
+            _evaluationDataByEvalId[evalContext] = syntheticEvalData;
+            return syntheticEvalData;
+        }
+        return default;
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.ProjectFinished"/> callback.
+    /// </summary>
+    private void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        ProjectContext projectContext = new(buildEventContext);
+
+        // Get project data
+        if (_projectDataByProjectContextId.TryGetValue(projectContext, out var projectData))
+        {
+            OnProjectFinished(e, projectData, _buildData!);
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.TargetStarted"/> callback.
+    /// </summary>
+    private void TargetStartedHandler(object sender, TargetStartedEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null)
+        {
+            ProjectContext projectContext = new(buildEventContext);
+            if (_projectDataByProjectContextId.TryGetValue(projectContext, out TProjectData? projectData))
+            {
+                OnTargetStarted(e, projectData, _buildData!);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.TargetFinished"/> callback.
+    /// </summary>
+    private void TargetFinishedHandler(object sender, TargetFinishedEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        ProjectContext projectContext = new(buildEventContext);
+        if (_projectDataByProjectContextId.TryGetValue(projectContext, out var projectData))
+        {
+            OnTargetFinished(e, projectData, _buildData!);
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.TaskStarted"/> callback.
+    /// </summary>
+    private void TaskStartedHandler(object sender, TaskStartedEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null)
+        {
+            ProjectContext projectContext = new(buildEventContext);
+            if (_projectDataByProjectContextId.TryGetValue(projectContext, out var projectData))
+            {
+                OnTaskStarted(e, projectData, _buildData!);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.TaskFinished"/> callback.
+    /// </summary>
+    private void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is not null)
+        {
+            ProjectContext projectContext = new(buildEventContext);
+            if (_projectDataByProjectContextId.TryGetValue(projectContext, out var projectData))
+            {
+                OnTaskFinished(e, projectData, _buildData!);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.MessageRaised"/> callback.
+    /// </summary>
+    private void MessageRaisedHandler(object sender, BuildMessageEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        ProjectContext projectContext = new(buildEventContext);
+        TProjectData? projectData = default;
+        _projectDataByProjectContextId.TryGetValue(projectContext, out projectData);
+        OnMessageRaised(e, projectData, _buildData!);
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.WarningRaised"/> callback.
+    /// </summary>
+    private void WarningRaisedHandler(object sender, BuildWarningEventArgs e)
+    {
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            OnWarningRaised(e, default, _buildData!);
+            return;
+        }
+
+        ProjectContext projectContext = new(buildEventContext);
+        TProjectData? projectData = default;
+        _projectDataByProjectContextId.TryGetValue(projectContext, out projectData);
+        OnWarningRaised(e, projectData, _buildData!);
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.ErrorRaised"/> callback.
+    /// </summary>
+    private void ErrorRaisedHandler(object sender, BuildErrorEventArgs e)
+    {
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            OnErrorRaised(e, default, _buildData!);
+            return;
+        }
+
+        ProjectContext projectContext = new(buildEventContext);
+        TProjectData? projectData = default;
+        _projectDataByProjectContextId.TryGetValue(projectContext, out projectData);
+        OnErrorRaised(e, projectData, _buildData!);
+    }
+
+    #endregion
+
+    #region Protected helpers
+
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void EnsurePerNodeDataEnabled()
+    {
+        Debug.Assert(UsesPerNodeData, "Node data is not being tracked because UsesPerNodeData is false. Opt this logger into tracking per-node data by overriding UsesPerNodeData to return true.");
+    }
+
+    /// <summary>
+    /// Retrieves the node data associated with the given build event, based on the node ID in the event's <see cref="BuildEventContext"/>, or <see langword="null"/> if no data is found.
+    /// </summary>
+    protected TNodeData? GetNodeDataForEvent(BuildEventArgs e)
+    {
+        EnsurePerNodeDataEnabled();
+        int? node = NodeIdForContext(e.BuildEventContext);
+        if (node is int nodeId)
+        {
+            EnsureNodeCapacity(nodeId);
+            if (_nodeDataByNodeId[nodeId] is TNodeData status)
+            {
+                return status;
+            }
+        }
+
+        return default;
+    }
+
+    /// <summary>
+    /// Updates the node data associated with the given build event in the internal tracking.
+    /// </summary>
+    protected void SetActiveNodeStatus(BuildEventArgs e, TNodeData status)
+    {
+        EnsurePerNodeDataEnabled();
+        if (NodeIdForContext(e.BuildEventContext) is int nodeId)
+        {
+            EnsureNodeCapacity(nodeId);
+            _nodeDataByNodeId[nodeId] = status;
+        }
+    }
+
+    /// <summary>
+    /// Marks the node associated with the given build event as no longer active.
+    /// </summary>
+    protected void YieldNode(BuildEventArgs e)
+    {
+        EnsurePerNodeDataEnabled();
+        if (NodeIdForContext(e.BuildEventContext) is int nodeId)
+        {
+            EnsureNodeCapacity(nodeId);
+            _nodeDataByNodeId[nodeId] = default;
+        }
+    }
+
+    /// <summary>
+    /// Gets a read-only view of the per-node data.
+    /// </summary>
+    protected ReadOnlySpan<TNodeData?> GetAllNodeData()
+    {
+        EnsurePerNodeDataEnabled();
+        return _nodeDataByNodeId;
+    }
+
+    #endregion
+
+    #region Private helpers
+
+    /// <summary>
+    /// Computes the zero-based node array index for the given build event context.
+    /// </summary>
+    /// <remarks>
+    /// Engine Node IDs are 1-based, so we subtract 1 to get a zero-based array index.
+    /// </remarks>
+    private int? NodeIdForContext(BuildEventContext? context)
+    {
+        return context switch
+        {
+            null => null,
+            _ => context.NodeId - 1,// Node IDs reported by the build are 1-based.
+        };
+    }
+
+    /// <summary>
+    /// Captures evaluation context data from the evaluation finished event.
+    /// </summary>
+    private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
+    {
+        var buildEventContext = evalFinish.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        EvalContext evalContext = new(buildEventContext);
+
+        if (!_evaluationDataByEvalId.ContainsKey(evalContext))
+        {
+            TEvalData evalData = CreateEvalData(evalFinish);
+            _evaluationDataByEvalId[evalContext] = evalData;
+        }
+    }
+
+    /// <summary>
+    /// Ensures that the <see cref="_nodeDataByNodeId"/> array has enough capacity to accommodate the given index.
+    /// This is necessary for binary log replay scenarios where the replay may use fewer nodes than the original build.
+    /// </summary>
+    private void EnsureNodeCapacity(int nodeIndex)
+    {
+        // Only resize in replay mode - during normal builds, the node count is fixed
+        if (_isReplayMode && nodeIndex >= _nodeDataByNodeId.Length)
+        {
+            // Resize to accommodate the new index plus some extra capacity
+            lock (_stateUpdateLock)
+            {
+                if (nodeIndex >= _nodeDataByNodeId.Length)
+                {
+                    int newSize = Math.Max(nodeIndex + 1, _nodeDataByNodeId.Length * 2);
+                    Array.Resize(ref _nodeDataByNodeId, newSize);
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region Abstract methods - must be implemented by subclasses
+
+    /// <summary>
+    /// Creates evaluation data from the evaluation finished event.
+    /// </summary>
+    /// <param name="e">The evaluation finished event args.</param>
+    /// <returns>The evaluation data to store, or null to not track this evaluation.</returns>
+    protected abstract TEvalData CreateEvalData(ProjectEvaluationFinishedEventArgs e);
+
+    /// <summary>
+    /// Creates synthetic evaluation data for a metaproject from the project started event.
+    /// </summary>
+    protected abstract TEvalData CreateSyntheticEvalDataForMetaproject(ProjectStartedEventArgs e);
+
+    /// <summary>
+    /// Creates project data from the project started event and evaluation data.
+    /// </summary>
+    /// <param name="evalData">The evaluation data for this project.</param>
+    /// <param name="buildData">The build data for this build session - can be used to decide if the project should be tracked.</param>
+    /// <param name="e">The project started event args.</param>
+    /// <returns>The project data to store, or null to not track this project.</returns>
+    protected abstract TProjectData? CreateProjectData(TEvalData? evalData, TBuildData buildData, ProjectStartedEventArgs e);
+
+    /// <summary>
+    /// Creates build data when the build starts.
+    /// </summary>
+    /// <param name="e">The build started event args.</param>
+    /// <returns>The build data to track for this build session.</returns>
+    protected abstract TBuildData CreateBuildData(BuildStartedEventArgs e);
+
+    #endregion
+
+    #region Virtual methods - can be overridden by subclasses
+
+    /// <summary>
+    /// Called when the build starts.
+    /// </summary>
+    protected virtual void OnBuildStarted(BuildStartedEventArgs e, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when the build finishes.
+    /// </summary>
+    protected virtual void OnBuildFinished(BuildFinishedEventArgs e, IEnumerable<TProjectData> projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when the build is canceled.
+    /// </summary>
+    protected virtual void OnBuildCanceled(BuildCanceledEventArgs e) { }
+
+    /// <summary>
+    /// Called when a project starts.
+    /// </summary>
+    protected virtual void OnProjectStarted(ProjectStartedEventArgs e, TEvalData evalData, TProjectData projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when a project finishes.
+    /// </summary>
+    protected virtual void OnProjectFinished(ProjectFinishedEventArgs e, TProjectData projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when a target starts.
+    /// </summary>
+    protected virtual void OnTargetStarted(TargetStartedEventArgs e, TProjectData projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when a target finishes.
+    /// </summary>
+    protected virtual void OnTargetFinished(TargetFinishedEventArgs e, TProjectData projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when a task starts.
+    /// </summary>
+    protected virtual void OnTaskStarted(TaskStartedEventArgs e, TProjectData projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when a task finishes.
+    /// </summary>
+    protected virtual void OnTaskFinished(TaskFinishedEventArgs e, TProjectData projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when a message is raised.
+    /// </summary>
+    protected virtual void OnMessageRaised(BuildMessageEventArgs e, TProjectData? projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when a warning is raised.
+    /// </summary>
+    protected virtual void OnWarningRaised(BuildWarningEventArgs e, TProjectData? projectData, TBuildData buildData) { }
+
+    /// <summary>
+    /// Called when an error is raised.
+    /// </summary>
+    protected virtual void OnErrorRaised(BuildErrorEventArgs e, TProjectData? projectData, TBuildData buildData) { }
+
+    #endregion
+}

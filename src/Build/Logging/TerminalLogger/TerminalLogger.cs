@@ -30,7 +30,7 @@ namespace Microsoft.Build.Logging;
 /// <remarks>
 /// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
 /// </remarks>
-public sealed partial class TerminalLogger : INodeLogger
+public sealed partial class TerminalLogger : ProjectTrackingLoggerBase<EvalProjectInfo, TerminalNodeStatus, TerminalProjectInfo, TerminalBuildData>
 {
     private const string FilePathPattern = " -> ";
     private const string MSBuildTaskName = "MSBuild";
@@ -44,26 +44,9 @@ public sealed partial class TerminalLogger : INodeLogger
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
     /// <summary>
-    /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
+    /// Protects access to the stdout - ensures that only one thread writes to the console at a time.
     /// </summary>
-    internal record struct ProjectContext(int Id)
-    {
-        public ProjectContext(BuildEventContext context)
-            : this(context.ProjectContextId)
-        {
-        }
-    }
-
-    /// <summary>
-    /// A wrapper over the evaluation context ID passed to us in <see cref="IEventSource"/> logger events.
-    /// </summary>
-    internal record struct EvalContext(int Id)
-    {
-        public EvalContext(BuildEventContext context)
-            : this(context.EvaluationId)
-        {
-        }
-    }
+    private readonly LockType _renderLock = new();
 
     private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
 
@@ -87,74 +70,14 @@ public sealed partial class TerminalLogger : INodeLogger
     private const string CachePluginStartTarget = "_CachePluginRunStart";
 
     /// <summary>
-    /// Protects access to state shared between the logger callbacks and the rendering thread.
-    /// </summary>
-    private readonly LockType _lock = new();
-
-    /// <summary>
     /// A cancellation token to signal the rendering thread that it should exit.
     /// </summary>
     private readonly CancellationTokenSource _cts = new();
 
     /// <summary>
-    /// Tracks the status of all relevant projects seen so far.
-    /// </summary>
-    /// <remarks>
-    /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
-    /// </remarks>
-    private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = [];
-
-    private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
-
-    /// <summary>
-    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
-    /// </summary>
-    /// <remarks>
-    /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
-    /// However, reads and writes to locations in an array is atomic, so locking is not required.
-    /// </remarks>
-    private TerminalNodeStatus?[] _nodes = Array.Empty<TerminalNodeStatus>();
-
-    /// <summary>
-    /// The timestamp of the <see cref="IEventSource.BuildStarted"/> event.
-    /// </summary>
-    private DateTime _buildStartTime;
-
-    /// <summary>
     /// The working directory when the build starts, to trim relative output paths.
     /// </summary>
     private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
-
-    /// <summary>
-    /// Number of build errors.
-    /// </summary>
-    private int _buildErrorsCount;
-
-    /// <summary>
-    /// Number of build warnings.
-    /// </summary>
-    private int _buildWarningsCount;
-
-    /// <summary>
-    /// True if restore failed and this failure has already been reported.
-    /// </summary>
-    private bool _restoreFailed;
-
-    /// <summary>
-    /// True if restore happened and finished.
-    /// </summary>
-    private bool _restoreFinished = false;
-
-    /// <summary>
-    /// The project build context corresponding to the <c>Restore</c> initial target, or null if the build is currently
-    /// not restoring.
-    /// </summary>
-    private ProjectContext? _restoreContext;
-
-    /// <summary>
-    /// True if we're replaying a binary log. In this mode, we may encounter NodeIds higher than the initial node count.
-    /// </summary>
-    private bool _isReplayMode = false;
 
     /// <summary>
     /// The thread that performs periodic refresh of the console output.
@@ -418,50 +341,16 @@ public sealed partial class TerminalLogger : INodeLogger
     #region INodeLogger implementation
 
     /// <inheritdoc/>
-    public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Minimal;
+    public override LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Minimal;
 
     /// <inheritdoc/>
-    public string? Parameters { get; set; } = null;
+    public override string? Parameters { get; set; } = null;
 
     /// <inheritdoc/>
-    public void Initialize(IEventSource eventSource, int nodeCount)
-    {
-        // When MSBUILDNOINPROCNODE enabled, NodeId's reported by build start with 2. We need to reserve an extra spot for this case.
-        _nodes = new TerminalNodeStatus[nodeCount + 1];
-
-        Initialize(eventSource);
-    }
-
-    /// <inheritdoc/>
-    public void Initialize(IEventSource eventSource)
+    public override void Initialize(IEventSource eventSource)
     {
         ParseParameters();
-
-        // Detect if we're in replay mode
-        _isReplayMode = eventSource is IBinaryLogReplaySource;
-
-        eventSource.BuildStarted += BuildStarted;
-        eventSource.BuildFinished += BuildFinished;
-        eventSource.ProjectStarted += ProjectStarted;
-        eventSource.ProjectFinished += ProjectFinished;
-        eventSource.TargetStarted += TargetStarted;
-        eventSource.TargetFinished += TargetFinished;
-        eventSource.TaskStarted += TaskStarted;
-        eventSource.TaskFinished += TaskFinished;
-        eventSource.StatusEventRaised += StatusEventRaised;
-        eventSource.MessageRaised += MessageRaised;
-        eventSource.WarningRaised += WarningRaised;
-        eventSource.ErrorRaised += ErrorRaised;
-
-        if (eventSource is IEventSource3 eventSource3)
-        {
-            eventSource3.IncludeTaskInputs();
-        }
-
-        if (eventSource is IEventSource4 eventSource4)
-        {
-            eventSource4.IncludeEvaluationPropertiesAndItems();
-        }
+        base.Initialize(eventSource);
     }
 
 
@@ -542,7 +431,7 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <inheritdoc/>
-    public void Shutdown()
+    public override void Shutdown()
     {
         NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
@@ -564,12 +453,106 @@ public sealed partial class TerminalLogger : INodeLogger
 
     #endregion
 
-    #region Logger callbacks
+    #region ProjectTrackingLoggerBase implementation
+    
+    public override bool NeedsTaskInputs => true;
 
-    /// <summary>
-    /// The <see cref="IEventSource.BuildStarted"/> callback.
-    /// </summary>
-    private void BuildStarted(object sender, BuildStartedEventArgs e)
+    public override bool NeedsEvaluationPropertiesAndItems => true;
+
+    public override bool UsesPerNodeData => true;
+
+    /// <inheritdoc/>
+    protected override TerminalBuildData CreateBuildData(BuildStartedEventArgs e)
+    {
+        return new TerminalBuildData(e.Timestamp);
+    }
+
+    /// <inheritdoc/>
+    protected override EvalProjectInfo CreateEvalData(ProjectEvaluationFinishedEventArgs e)
+    {
+        (string? tfm, string? rid) = EnumerateEvalProperties(e.EnumerateProperties());
+        return new EvalProjectInfo(e.ProjectFile!, tfm, rid);
+    }
+
+    /// <inheritdoc/>
+    protected override EvalProjectInfo CreateSyntheticEvalDataForMetaproject(ProjectStartedEventArgs e)
+    {
+        (string? tfm, string? rid) = EnumerateEvalProperties(e.EnumerateProperties());
+        return new EvalProjectInfo(e.ProjectFile!, tfm, rid);
+    }
+
+    private (string? tfm, string? rid) EnumerateEvalProperties(IEnumerable<PropertyData> properties)
+    {
+        string? tfm = null;
+        string? rid = null;
+
+        foreach (PropertyData property in properties)
+        {
+            if (tfm is not null && rid is not null)
+            {
+                // We already have both properties, no need to continue.
+                break;
+            }
+
+            switch (property.Name)
+            {
+                case "TargetFramework":
+                    tfm = property.Value;
+                    break;
+                case "RuntimeIdentifier":
+                    rid = property.Value;
+                    break;
+            }
+        }
+
+        return (tfm, rid);
+    }
+
+    /// <inheritdoc/>
+    protected override TerminalProjectInfo? CreateProjectData(EvalProjectInfo evalData, TerminalBuildData buildData, ProjectStartedEventArgs e)
+    {
+        // TL doesn't want to track projects that are part of a restore
+        if (buildData.IsRestoring)
+        {
+            return null;
+        }
+
+        return new TerminalProjectInfo(evalData, _createStopwatch?.Invoke());
+    }
+
+    private TerminalNodeStatus? CreateNodeData(TargetStartedEventArgs e, TerminalProjectInfo projectData)
+    {
+        projectData.Stopwatch.Start();
+        string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
+        string targetName = e.TargetName;
+        projectData.CurrentTarget = targetName;
+
+        if (targetName == CachePluginStartTarget)
+        {
+            projectData.IsCachePluginProject = true;
+            _hasUsedCache = true;
+        }
+
+        if (targetName == _testStartTarget)
+        {
+            targetName = "Testing";
+            _testStartTime = _testStartTime == null
+                ? e.Timestamp
+                : e.Timestamp < _testStartTime
+                    ? e.Timestamp : _testStartTime;
+            projectData.IsTestProject = true;
+        }
+
+        return new TerminalNodeStatus(projectFile, projectData.TargetFramework, projectData.RuntimeIdentifier, targetName, projectData.Stopwatch);
+    }
+
+
+    #endregion
+
+    #region Logger event overrides
+
+    /// <inheritdoc/>
+    protected override void OnBuildStarted(BuildStartedEventArgs e, TerminalBuildData buildData)
     {
         if (!_manualRefresh && _showNodesDisplay)
         {
@@ -578,18 +561,14 @@ public sealed partial class TerminalLogger : INodeLogger
             _refresher.Start();
         }
 
-        _buildStartTime = e.Timestamp;
-
         if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
         {
             Terminal.Write(AnsiCodes.SetProgressIndeterminate);
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.BuildFinished"/> callback.
-    /// </summary>
-    private void BuildFinished(object sender, BuildFinishedEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnBuildFinished(BuildFinishedEventArgs e, IEnumerable<TerminalProjectInfo> projectInfos, TerminalBuildData buildData)
     {
         _cts.Cancel();
         _refresher?.Join();
@@ -599,8 +578,8 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             if (Verbosity > LoggerVerbosity.Quiet)
             {
-                string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-                string buildResult = GetBuildResultString(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
+                string duration = (e.Timestamp - buildData.BuildStartTime).TotalSeconds.ToString("F1");
+                string buildResult = GetBuildResultString(e.Succeeded, buildData.BuildErrorsCount, buildData.BuildWarningsCount);
 
                 Terminal.WriteLine("");
                 if (_testRunSummaries.Any())
@@ -612,8 +591,8 @@ public sealed partial class TerminalLogger : INodeLogger
                     string testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
                     bool colorizeFailed = failed > 0;
-                    bool colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
-                    bool colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
+                    bool colorizePassed = passed > 0 && buildData.BuildErrorsCount == 0 && failed == 0;
+                    bool colorizeSkipped = skipped > 0 && skipped == total && buildData.BuildErrorsCount == 0 && failed == 0;
 
                     string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
                     string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
@@ -630,10 +609,10 @@ public sealed partial class TerminalLogger : INodeLogger
 
                 if (_showSummary == true)
                 {
-                    RenderBuildSummary();
+                    RenderBuildSummary(buildData, projectInfos);
                 }
 
-                if (_restoreFailed)
+                if (buildData?.RestoreFailed == true)
                 {
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
                         buildResult,
@@ -657,18 +636,14 @@ public sealed partial class TerminalLogger : INodeLogger
             Terminal.EndUpdate();
         }
 
-        _projects.Clear();
         _testRunSummaries.Clear();
-        _buildErrorsCount = 0;
-        _buildWarningsCount = 0;
-        _restoreFailed = false;
         _testStartTime = null;
         _testEndTime = null;
     }
 
-    private void RenderBuildSummary()
+    private void RenderBuildSummary(TerminalBuildData buildData, IEnumerable<TerminalProjectInfo> projectInfos)
     {
-        if (_buildErrorsCount == 0 && _buildWarningsCount == 0)
+        if (buildData.BuildErrorsCount == 0 && buildData.BuildWarningsCount == 0)
         {
             // No errors/warnings to display.
             return;
@@ -676,7 +651,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         Terminal.WriteLine(ResourceUtilities.GetResourceString("BuildSummary"));
 
-        foreach (TerminalProjectInfo project in _projects.Values.Where(p => p.HasErrorsOrWarnings))
+        foreach (TerminalProjectInfo project in projectInfos.Where(p => p.HasErrorsOrWarnings))
         {
             string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
             string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
@@ -693,69 +668,25 @@ public sealed partial class TerminalLogger : INodeLogger
         Terminal.WriteLine(string.Empty);
     }
 
-    private void StatusEventRaised(object sender, BuildStatusEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnBuildCanceled(BuildCanceledEventArgs e)
     {
-        switch (e)
+        RenderImmediateMessage(e.Message!);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnProjectStarted(ProjectStartedEventArgs e, EvalProjectInfo evalData, TerminalProjectInfo projectData, TerminalBuildData buildData)
+    {
+        // Handle restore case
+        if (!buildData.IsRestoring && e.TargetNames == "Restore" && !buildData.RestoreFinished && e.BuildEventContext is not null)
         {
-            case BuildCanceledEventArgs cancelEvent:
-                RenderImmediateMessage(cancelEvent.Message!);
-                break;
-            case ProjectEvaluationStartedEventArgs _evalStart:
-                break;
-            case ProjectEvaluationFinishedEventArgs evalFinish:
-                CaptureEvalContext(evalFinish);
-                break;
+            buildData.RestoreContext = e.BuildEventContext.ProjectContextId;
+            SetActiveNodeStatus(e, new TerminalNodeStatus(e.ProjectFile!, evalData.TargetFramework, evalData.RuntimeIdentifier, "Restore", projectData.Stopwatch));
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.ProjectStarted"/> callback.
-    /// </summary>
-    private void ProjectStarted(object sender, ProjectStartedEventArgs e)
-    {
-        if (e.BuildEventContext is null)
-        {
-            return;
-        }
-
-        ProjectContext c = new(e.BuildEventContext);
-
-        if (_restoreContext is null)
-        {
-            EvalContext evalContext = new(e.BuildEventContext);
-            string? targetFramework = null;
-            string? runtimeIdentifier = null;
-            
-            if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
-            {
-                targetFramework = evalInfo.TargetFramework;
-                runtimeIdentifier = evalInfo.RuntimeIdentifier;
-            }
-
-            // Per-project metaproj files (e.g. MyProject.csproj.metaproj) are constructed
-            // directly without evaluation, so they won't have a matching ProjectEvaluationFinished event.
-            System.Diagnostics.Debug.Assert(
-                evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
-                "EvalProjectInfo should have been captured before ProjectStarted");
-
-            TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
-            _projects[c] = projectInfo;
-
-            // First ever restore in the build is starting.
-            if (e.TargetNames == "Restore" && !_restoreFinished)
-            {
-                _restoreContext = c;
-                int nodeIndex = NodeIndexForContext(e.BuildEventContext);
-                EnsureNodeCapacity(nodeIndex);
-                _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
-            }
-        }
-    }
-
-    /// <summary>
-    /// The <see cref="IEventSource.ProjectFinished"/> callback.
-    /// </summary>
-    private void ProjectFinished(object sender, ProjectFinishedEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnProjectFinished(ProjectFinishedEventArgs e, TerminalProjectInfo? projectData, TerminalBuildData buildData)
     {
         var buildEventContext = e.BuildEventContext;
         if (buildEventContext is null)
@@ -764,82 +695,60 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         // Mark node idle until something uses it again
-        if (_restoreContext is null)
+        if (!buildData.IsRestoring)
         {
-            UpdateNodeStatus(buildEventContext, null);
+            YieldNode(e);
         }
 
-        ProjectContext c = new(buildEventContext);
 
-        if (_projects.TryGetValue(c, out TerminalProjectInfo? project))
+        if (projectData != null)
         {
-            project.Succeeded = e.Succeeded;
-            project.Stopwatch.Stop();
+            projectData.Succeeded = e.Succeeded;
+            projectData.Stopwatch.Stop();
+
+            // Handle restore completion
+            if (buildEventContext.ProjectContextId == buildData.RestoreContext)
+            {
+                buildData.RestoreContext = null;
+                buildData.RestoreFinished = true;
+                buildData.RestoreFailed = !e.Succeeded;
+                OnRestoreFinished(e, projectData, buildData);
+            }
 
             // In quiet mode, only show projects with errors or warnings.
-            // In higher verbosity modes, show projects based on other criteria.
-            if (Verbosity == LoggerVerbosity.Quiet && !project.HasErrorsOrWarnings)
+            if (Verbosity == LoggerVerbosity.Quiet && !projectData.HasErrorsOrWarnings)
             {
-                // Still need to update counts even if not displaying
-                _buildErrorsCount += project.ErrorCount;
-                _buildWarningsCount += project.WarningCount;
                 return;
             }
 
-            lock (_lock)
+            lock (_renderLock)
             {
                 Terminal.BeginUpdate();
                 try
                 {
-                    EraseNodes();
+                    EraseNodesDisplay();
 
-                    string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
+                    string duration = projectData.Stopwatch.ElapsedSeconds.ToString("F1");
+                    ReadOnlyMemory<char>? outputPath = projectData.OutputPath;
 
                     // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
                     // reported during build.
-                    string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
+                    string buildResult = GetBuildResultString(projectData.Succeeded, projectData.ErrorCount, projectData.WarningCount);
 
-                    // Check if we're done restoring.
-                    if (c == _restoreContext)
-                    {
-                        if (e.Succeeded)
-                        {
-                            if (project.HasErrorsOrWarnings)
-                            {
-                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                                    buildResult,
-                                    duration));
-                            }
-                            else
-                            {
-                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
-                                    duration));
-                            }
-                        }
-                        else
-                        {
-                            // It will be reported after build finishes.
-                            _restoreFailed = true;
-                        }
-
-                        _restoreContext = null;
-                        _restoreFinished = true;
-                    }
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
                     // and it is hard to see if project finished, or did not run at all.
                     // In quiet mode, we show the project header if there are errors/warnings (already checked above).
-                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
+                    if (projectData.OutputPath is not null || projectData.BuildMessages is not null || projectData.IsTestProject)
                     {
                         // Show project build complete and its output
-                        string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
+                        string projectFinishedHeader = GetProjectFinishedHeader(projectData, buildResult, duration);
                         Terminal.Write(projectFinishedHeader);
 
                         // Print the output path as a link if we have it.
                         if (outputPath is { } outputPathSpan)
                         {
-                            (string? projectDisplayPath, var urlLink) = DetermineOutputPathToRender(outputPathSpan, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
+                            (string projectDisplayPath, Uri? urlLink) = DetermineOutputPathToRender(outputPathSpan, _initialWorkingDirectory.AsMemory(), projectData.SourceRoot);
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(urlLink, projectDisplayPath.ToString())));
                         }
                         else
@@ -849,16 +758,20 @@ public sealed partial class TerminalLogger : INodeLogger
                     }
 
                     // Print diagnostic output under the Project -> Output line.
-                    if (project.BuildMessages is not null)
+                    if (projectData.BuildMessages is not null)
                     {
-                        foreach (TerminalBuildMessage buildMessage in project.BuildMessages)
+                        foreach (TerminalBuildMessage buildMessage in projectData.BuildMessages)
                         {
                             Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
                         }
                     }
 
-                    _buildErrorsCount += project.ErrorCount;
-                    _buildWarningsCount += project.WarningCount;
+                    // Track errors and warnings in build data
+                    if (buildData != null)
+                    {
+                        buildData.BuildErrorsCount += projectData.ErrorCount;
+                        buildData.BuildWarningsCount += projectData.WarningCount;
+                    }
 
                     if (_showNodesDisplay && Verbosity > LoggerVerbosity.Quiet)
                     {
@@ -873,39 +786,27 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
+    private void OnRestoreFinished(ProjectFinishedEventArgs e, TerminalProjectInfo? projectData, TerminalBuildData buildData)
     {
-        var buildEventContext = evalFinish.BuildEventContext;
-        if (buildEventContext is null)
+        if (Verbosity > LoggerVerbosity.Quiet && projectData != null)
         {
-            return;
-        }
+            string duration = projectData.Stopwatch.ElapsedSeconds.ToString("F1");
+            string buildResult = GetBuildResultString(projectData.Succeeded, projectData.ErrorCount, projectData.WarningCount);
 
-        EvalContext c = new(buildEventContext);
-
-        if (!_projectEvaluations.TryGetValue(c, out EvalProjectInfo _))
-        {
-            string? tfm = null;
-            string? rid = null;
-            foreach (var property in evalFinish.EnumerateProperties())
+            if (e.Succeeded)
             {
-                if (tfm is not null && rid is not null)
+                if (projectData.HasErrorsOrWarnings)
                 {
-                    // We already have both properties, no need to continue.
-                    break;
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                        buildResult,
+                        duration));
                 }
-                switch (property.Name)
+                else
                 {
-                    case "TargetFramework":
-                        tfm = property.Value;
-                        break;
-                    case "RuntimeIdentifier":
-                        rid = property.Value;
-                        break;
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
+                        duration));
                 }
             }
-            var evalInfo = new EvalProjectInfo(c, evalFinish.ProjectFile, tfm, rid);
-            _projectEvaluations[c] = evalInfo;
         }
     }
 
@@ -927,8 +828,9 @@ public sealed partial class TerminalLogger : INodeLogger
         // * the output path relative to the source root, if it is under it
 
         // full path fallback
-        var projectDisplayPathSpan = outputPathSpan;
-        var workingDirectorySpan = workingDir.Span;
+        ReadOnlySpan<char> projectDisplayPathSpan = outputPathSpan;
+        ReadOnlySpan<char> workingDirectorySpan = workingDir.Span;
+        
         // under working dir case
         if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
         {
@@ -939,10 +841,11 @@ public sealed partial class TerminalLogger : INodeLogger
                 projectDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
             }
         }
+
         // under source root case
         else if (sourceRoot is { Span: var sourceRootSpan })
         {
-            var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
+            ReadOnlySpan<char> relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
             if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
             {
                 if (outputPathSpan.Length > sourceRootSpan.Length
@@ -1029,163 +932,82 @@ public sealed partial class TerminalLogger : INodeLogger
         };
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.TargetStarted"/> callback.
-    /// </summary>
-    private void TargetStarted(object sender, TargetStartedEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnTargetStarted(TargetStartedEventArgs e, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        if (!buildData.IsRestoring)
         {
-            project.Stopwatch.Start();
-
-            string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
-
-            string targetName = e.TargetName;
-            project.CurrentTarget = targetName;
-            if (targetName == CachePluginStartTarget)
+            TerminalNodeStatus? nodeData = CreateNodeData(e, projectData);
+            if (nodeData != null)
             {
-                project.IsCachePluginProject = true;
-                _hasUsedCache = true;
-            }
-
-            if (targetName == _testStartTarget)
-            {
-                // Use the minimal start time, so if we run tests in parallel, we can calculate duration
-                // as this start time, minus time when tests finished.
-                _testStartTime = _testStartTime == null
-                    ? e.Timestamp
-                    : e.Timestamp < _testStartTime
-                        ? e.Timestamp : _testStartTime;
-                project.IsTestProject = true;
-            }
-
-            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
-            UpdateNodeStatus(buildEventContext, nodeStatus);
-        }
-    }
-
-    private void UpdateNodeStatus(BuildEventContext buildEventContext, TerminalNodeStatus? nodeStatus)
-    {
-        int nodeIndex = NodeIndexForContext(buildEventContext);
-        EnsureNodeCapacity(nodeIndex);
-        _nodes[nodeIndex] = nodeStatus;
-    }
-
-    /// <summary>
-    /// Ensures that the <see cref="_nodes"/> array has enough capacity to accommodate the given index.
-    /// This is necessary for binary log replay scenarios where the replay may use fewer nodes than the original build.
-    /// </summary>
-    private void EnsureNodeCapacity(int nodeIndex)
-    {
-        // Only resize in replay mode - during normal builds, the node count is fixed
-        if (_isReplayMode && nodeIndex >= _nodes.Length)
-        {
-            // Resize to accommodate the new index plus some extra capacity
-            lock (_lock)
-            {
-                if (nodeIndex >= _nodes.Length)
-                {
-                    int newSize = Math.Max(nodeIndex + 1, _nodes.Length * 2);
-                    Array.Resize(ref _nodes, newSize);
-                }
+                SetActiveNodeStatus(e, nodeData);
             }
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.TargetFinished"/> callback. Unused.
-    /// </summary>
-    private void TargetFinished(object sender, TargetFinishedEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnTargetFinished(TargetFinishedEventArgs e, TerminalProjectInfo? projectData, TerminalBuildData buildData)
     {
         // For cache plugin projects which result in a cache hit, ensure the output path is set
         // to the item spec corresponding to the GetTargetPath target upon completion.
-        var buildEventContext = e.BuildEventContext;
         var targetOutputs = e.TargetOutputs;
-        if (_restoreContext is not null || buildEventContext is null)
+        if (projectData is null || targetOutputs is null)
         {
             return;
         }
 
-        if (targetOutputs is not null
-                && _hasUsedCache
-                && e.TargetName == "GetTargetPath"
-                && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        if (_hasUsedCache && e.TargetName == "GetTargetPath" && projectData.IsCachePluginProject)
         {
-            if (project is not null && project.IsCachePluginProject)
+            foreach (ITaskItem output in targetOutputs)
             {
-                foreach (ITaskItem output in targetOutputs)
-                {
-                    project.OutputPath = output.ItemSpec.AsMemory();
-                    break;
-                }
+                projectData.OutputPath = output.ItemSpec.AsMemory();
+                break;
             }
         }
-        else if (targetOutputs is not null
-            && e.TargetName == "InitializeSourceRootMappedPaths"
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out project)
-            && project.SourceRoot is null)
+        else if (e.TargetName == "InitializeSourceRootMappedPaths" && projectData.SourceRoot is null)
         {
-            project.SourceRoot =
+            projectData.SourceRoot =
                 (targetOutputs as IEnumerable<ITaskItem>)?
                 .FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")))
                 ?.ItemSpec.AsMemory();
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.TaskStarted"/> callback.
-    /// </summary>
-    private void TaskStarted(object sender, TaskStartedEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnTaskStarted(TaskStartedEventArgs e, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName)
+        if (!buildData.IsRestoring && e.BuildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
             // This will yield the node, so preemptively mark it idle
-            UpdateNodeStatus(buildEventContext, null);
+            YieldNode(e);
 
-            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
-            {
-                project.Stopwatch.Stop();
-            }
+            projectData.Stopwatch.Stop();
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.TaskFinished"/> callback.
-    /// </summary>
-    private void TaskFinished(object sender, TaskFinishedEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnTaskFinished(TaskFinishedEventArgs e, TerminalProjectInfo projectData, TerminalBuildData buildData)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        if (!buildData.IsRestoring && buildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
-            project.Stopwatch.Start();
+            projectData.Stopwatch.Start();
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
-            string targetName = project.CurrentTarget ?? "";
-
-            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
-            UpdateNodeStatus(buildEventContext, nodeStatus);
+            string targetName = projectData.CurrentTarget ?? "";
+            TerminalNodeStatus nodeStatus = new(projectFile, projectData.TargetFramework, projectData.RuntimeIdentifier, GetDisplayTargetName(targetName), projectData.Stopwatch);
+            SetActiveNodeStatus(e, nodeStatus);
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.MessageRaised"/> callback.
-    /// </summary>
-    private void MessageRaised(object sender, BuildMessageEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnMessageRaised(BuildMessageEventArgs e, TerminalProjectInfo? projectData, TerminalBuildData buildData)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is null)
-        {
-            return;
-        }
-
         string? message = e.Message;
 
         if (message is not null && e.Importance == MessageImportance.High)
         {
-            bool hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
+            var hasProject = projectData != null;
 
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
@@ -1194,10 +1016,10 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject && projectData != null)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-                    project!.OutputPath = outputPath;
+                    projectData.OutputPath = outputPath;
                     return;
                 }
             }
@@ -1226,12 +1048,9 @@ public sealed partial class TerminalLogger : INodeLogger
                 }
             }
 
-            if (hasProject && project!.IsTestProject)
+            if (hasProject && projectData != null && projectData.IsTestProject)
             {
-                int nodeIndex = NodeIndexForContext(buildEventContext);
-                EnsureNodeCapacity(nodeIndex);
-                TerminalNodeStatus? node = _nodes[nodeIndex];
-
+                var node = GetNodeDataForEvent(e);
                 // Consumes test update messages produced by VSTest and MSTest runner.
                 if (e is IExtendedBuildEventArgs extendedMessage)
                 {
@@ -1239,26 +1058,32 @@ public sealed partial class TerminalLogger : INodeLogger
                     {
                         case "TLTESTPASSED":
                             {
-                                if (node != null)
+                                if (node != default)
                                 {
                                     string indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                     string displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
-                                    UpdateNodeStatus(buildEventContext, status);
+                                    TerminalNodeStatus? status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, projectData.Stopwatch);
+                                    if (e.BuildEventContext != null)
+                                    {
+                                        SetActiveNodeStatus(e, status);
+                                    }
                                 }
+
                                 break;
                             }
 
                         case "TLTESTSKIPPED":
                             {
-                                if (node != null)
+                                if (node != default)
                                 {
                                     string indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                     string displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
-
-                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
-                                    UpdateNodeStatus(buildEventContext, status);
+                                    TerminalNodeStatus? status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, projectData.Stopwatch);
+                                    if (e.BuildEventContext != null)
+                                    {
+                                        SetActiveNodeStatus(e, status);
+                                    }
                                 }
                                 break;
                             }
@@ -1304,9 +1129,9 @@ public sealed partial class TerminalLogger : INodeLogger
                     return;
                 }
 
-                if (hasProject)
+                if (hasProject && projectData != null)
                 {
-                    project!.AddBuildMessage(TerminalMessageSeverity.Message, FormatInformationalMessage(e));
+                    projectData.AddBuildMessage(TerminalMessageSeverity.Message, FormatInformationalMessage(e));
                 }
                 else
                 {
@@ -1330,13 +1155,9 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.WarningRaised"/> callback.
-    /// </summary>
-    private void WarningRaised(object sender, BuildWarningEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnWarningRaised(BuildWarningEventArgs e, TerminalProjectInfo? projectData, TerminalBuildData buildData)
     {
-        BuildEventContext? buildEventContext = e.BuildEventContext;
-
         // auth provider messages are 'global' in nature and should be a) immediate reported, and b) not re-reported in the summary.
         if (IsAuthProviderMessage(e.Message))
         {
@@ -1344,8 +1165,8 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        if (e.BuildEventContext is not null
+            && projectData != null)
         {
             // If the warning is not a 'global' auth provider message, but is immediate, we render it immediately
             // but we don't early return so that the project also tracks it.
@@ -1357,14 +1178,17 @@ public sealed partial class TerminalLogger : INodeLogger
             // This is the general case - _most_ warnings are not immediate, so we add them to the project summary
             // and display them in the per-project and final summary.
             // In quiet mode, we still accumulate so they can be shown in project-grouped form later.
-            project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
+            projectData.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
             // It is necessary to display warning messages reported by MSBuild,
-            // even if it's not tracked in _projects collection.
+            // even if it's not tracked in projects collection or the verbosity is Quiet.
+            // The idea here (similar to the implementation in ErrorRaised) is that
+            // even in Quiet scenarios we need to show warnings/errors, even if not in
+            // full project-tree view
             RenderImmediateMessage(FormatWarningMessage(e, Indentation));
-            _buildWarningsCount++;
+            buildData.BuildWarningsCount++;
         }
     }
 
@@ -1419,27 +1243,22 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    /// <summary>
-    /// The <see cref="IEventSource.ErrorRaised"/> callback.
-    /// </summary>
-    private void ErrorRaised(object sender, BuildErrorEventArgs e)
+    /// <inheritdoc/>
+    protected override void OnErrorRaised(BuildErrorEventArgs e, TerminalProjectInfo? projectData, TerminalBuildData buildData)
     {
-        BuildEventContext? buildEventContext = e.BuildEventContext;
-
-        if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        if (projectData != null)
         {
             // Always accumulate errors in the project, even in quiet mode, so they can be shown
             // in project-grouped form later.
-            project.AddBuildMessage(TerminalMessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
+            projectData.AddBuildMessage(TerminalMessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
         }
         else
         {
-            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
+            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in projects collection or the verbosity is Quiet.
             // For nicer formatting, any messages from the engine we strip the file portion from.
             bool hasMSBuildPlaceholderLocation = e.File.Equals("MSBUILD", StringComparison.Ordinal);
             RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: !hasMSBuildPlaceholderLocation));
-            _buildErrorsCount++;
+            buildData.BuildErrorsCount++;
         }
     }
 
@@ -1457,7 +1276,7 @@ public sealed partial class TerminalLogger : INodeLogger
         while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
             count++;
-            lock (_lock)
+            lock (_renderLock)
             {
                 // Querying the terminal for it's dimensions is expensive, so we only do it every 30 frames e.g. once a second.
                 if (count >= 30)
@@ -1472,7 +1291,7 @@ public sealed partial class TerminalLogger : INodeLogger
             }
         }
 
-        EraseNodes();
+        EraseNodesDisplay();
     }
 
     /// <summary>
@@ -1483,12 +1302,12 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         int width = updateSize ? Terminal.Width : _currentFrame.Width;
         int height = updateSize ? Terminal.Height : _currentFrame.Height;
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(GetAllNodeData(), width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
         {
-            EraseNodes();
+            EraseNodesDisplay();
         }
 
         string rendered = newFrame.Render(_currentFrame);
@@ -1510,7 +1329,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Erases the previously printed live node output.
     /// </summary>
-    private void EraseNodes()
+    private void EraseNodesDisplay()
     {
         if (_currentFrame.NodesCount == 0)
         {
@@ -1573,23 +1392,16 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <param name="message">Build message needed to be shown immediately.</param>
     private void RenderImmediateMessage(string message)
     {
-        lock (_lock)
+        lock (_renderLock)
         {
             // Calling erase helps to clear the screen before printing the message
             // The immediate output will not overlap with node status reporting
-            EraseNodes();
+            EraseNodesDisplay();
             Terminal.WriteLine(message);
         }
     }
 
-    /// <summary>
-    /// Returns the <see cref="_nodes"/> index corresponding to the given <see cref="BuildEventContext"/>.
-    /// </summary>
-    private int NodeIndexForContext(BuildEventContext context)
-    {
-        // Node IDs reported by the build are 1-based.
-        return context.NodeId - 1;
-    }
+    // NodeIndexForContext is now inherited from base class
 
     /// <summary>
     /// Colorizes the filename part of the given path.
@@ -1793,7 +1605,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
     #endregion
-    
+
     #region Regex Patterns
     // Regex patterns for command line argument parsing
     private const string s_terminalLoggerArgPattern = @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)";
