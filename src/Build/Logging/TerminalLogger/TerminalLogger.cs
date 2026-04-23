@@ -645,7 +645,8 @@ public sealed partial class TerminalLogger : INodeLogger
                     {
                         if (!string.IsNullOrEmpty(logger.OutputFilePath))
                         {
-                            Terminal.WriteLine($"  {logger.LoggerName}: {AnsiCodes.LinkPrefix}file:///{logger.OutputFilePath}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}");
+                            string displayPath = $"{AnsiCodes.LinkPrefix}{new Uri(logger.OutputFilePath).AbsoluteUri}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}";
+                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
                         }
                     }
                 }
@@ -676,6 +677,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         _projects.Clear();
         _testRunSummaries.Clear();
+        _registeredLoggers.Clear();
         _buildErrorsCount = 0;
         _buildWarningsCount = 0;
         _restoreFailed = false;

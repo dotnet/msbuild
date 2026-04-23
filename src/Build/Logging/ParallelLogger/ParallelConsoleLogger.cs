@@ -205,6 +205,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the data structures created when the logger was created
+            _registeredLoggers.Clear();
             propertyOutputMap = new Dictionary<(int, int), string>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
@@ -281,20 +282,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     if (!string.IsNullOrEmpty(logger.OutputFilePath))
                     {
-                        if (setColor != DontSetColor)
-                        {
-                            WriteLinePretty($"  {logger.LoggerName}: {AnsiCodes.LinkPrefix}file:///{logger.OutputFilePath}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}");
-                        }
-                        else
-                        {
-                            WriteLinePretty($"  {logger.LoggerName}: {logger.OutputFilePath}");
-                        }
+                        string displayPath = setColor != DontSetColor
+                            ? $"{AnsiCodes.LinkPrefix}{new Uri(logger.OutputFilePath).AbsoluteUri}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}"
+                            : logger.OutputFilePath;
+                        WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
                     }
                 }
             }
 
             // Write the "Build Finished" event if verbosity is normal, detailed or diagnostic or the user
-            // specified to show the summary.but if it was ne
+            // specified to show the summary.
             if (ShowSummary == true)
             {
                 if (e.Succeeded)
