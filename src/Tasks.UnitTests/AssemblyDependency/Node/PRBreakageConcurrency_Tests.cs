@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -22,10 +24,12 @@ using Xunit;
 // flagged: pool poisoning, lazy-init race, OOP deadlock, GetInstance TOCTOU.
 //
 // Parity convention: where applicable, each `_Breakage` test is paired with a
-// `_Control` test that exercises the SAME scenario through the legacy/MP
-// (multi-process / single-threaded) path. The Control test is expected to
-// PASS on the PR head, demonstrating the breakage is specific to the new
-// MT/OOP path.
+// `_Control` test that exercises the SAME scenario through the legacy
+// `-multiprocess` isolation model. For NEW-1 and NEW-6 that means spinning
+// fresh child test processes, because the old paradigm's safety came from
+// process isolation rather than from a serialized in-proc execution path.
+// The Control test is expected to PASS on the PR head, demonstrating the
+// breakage is specific to the new MT/OOP co-location model.
 //
 // Findings without a meaningful MP parity (C1, NEW-2) operate on PR-introduced
 // types (OutOfProcRarClient, OutOfProcRarNodeEndpoint) that have no MP
@@ -165,44 +169,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Parity control for NEW-1. Same Strings.Initialize sequence executed
-        /// strictly serially (single thread). This is the `-multiprocess`
-        /// equivalent: each Execute() runs in its own process, so static-init
-        /// is observed by exactly one thread. No race is possible; all
-        /// dependent fields must be non-null after Initialize returns.
+        /// Parity control for NEW-1. The old `-multiprocess` model isolated each
+        /// RAR invocation in its own process, so the `Strings` static state was
+        /// never shared across concurrent callers. Spawn several fresh child test
+        /// processes in parallel; each must fully initialize `Strings` in its own
+        /// address space without torn publication.
         /// </summary>
         [Fact]
-        public void NEW1_StringsInitialize_SingleThreaded_Control()
+        public void NEW1_StringsInitialize_MultiProcess_Control()
         {
-            Type? stringsType = typeof(ResolveAssemblyReference)
-                .GetNestedType("Strings", BindingFlags.NonPublic);
-            stringsType.ShouldNotBeNull("expected nested 'Strings' type on ResolveAssemblyReference");
+            ChildTestRunResult[] results = RunHelperClassInParallel(
+                "*PRBreakageConcurrency_New1MultiprocessControlHelper",
+                processCount: 8);
 
-            FieldInfo? initializedField = stringsType!.GetField(
-                "initialized", BindingFlags.Static | BindingFlags.NonPublic);
-            initializedField.ShouldNotBeNull();
-
-            FieldInfo[] dependentFields = stringsType.GetFields(
-                BindingFlags.Static | BindingFlags.Public)
-                .Where(f => f.FieldType == typeof(string) && !f.IsLiteral && !f.IsInitOnly)
-                .ToArray();
-            dependentFields.Length.ShouldBeGreaterThan(0);
-
-            // Repeated serial init/reset cycles must always end with all fields populated.
-            for (int i = 0; i < 50; i++)
-            {
-                ResetStringsState(initializedField!, dependentFields);
-                _ = new ResolveAssemblyReference();
-
-                ((bool)initializedField!.GetValue(null)!).ShouldBeTrue(
-                    "Control: serial Initialize must set the flag.");
-                foreach (FieldInfo f in dependentFields)
-                {
-                    f.GetValue(null).ShouldNotBeNull(
-                        $"Control: serial Initialize must populate '{f.Name}' before returning. " +
-                        "MP path runs each Execute in its own process; no race possible.");
-                }
-            }
+            results.All(r => r.ExitCode == 0).ShouldBeTrue(
+                "MP control for NEW-1 failed. At least one isolated child process " +
+                "could not fully initialize ResolveAssemblyReference.Strings." +
+                Environment.NewLine + FormatChildFailures(results));
         }
 
         // ============================================================
@@ -459,35 +442,156 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Parity control for NEW-6. Same GetInstance call sequence executed
-        /// strictly serially. This is the `-multiprocess` / single-RAR-call
-        /// equivalent: one caller per build, no race. All N calls must return
-        /// the SAME instance (the one registered on first call).
+        /// Parity control for NEW-6. The old `-multiprocess` model never had
+        /// multiple callers racing through the SAME `MockEngine` task-object cache;
+        /// each process got its own engine and its own singleton. Spawn several
+        /// fresh child test processes in parallel and assert each process observes
+        /// the expected per-engine singleton behavior.
         /// </summary>
         [Fact]
-        public void NEW6_GetInstance_SingleThreaded_Control()
+        public void NEW6_GetInstance_MultiProcess_Control()
         {
-            const int Calls = 32;
+            ChildTestRunResult[] results = RunHelperClassInParallel(
+                "*PRBreakageConcurrency_New6MultiprocessControlHelper",
+                processCount: 8);
 
-            MockEngine engine = new(_output) { SetIsOutOfProcRarNodeEnabled = true };
+            results.All(r => r.ExitCode == 0).ShouldBeTrue(
+                "MP control for NEW-6 failed. At least one isolated child process " +
+                "did not observe stable per-engine GetInstance behavior." +
+                Environment.NewLine + FormatChildFailures(results));
+        }
 
-            OutOfProcRarClient[] returned = new OutOfProcRarClient[Calls];
-            for (int i = 0; i < Calls; i++)
+        private static ChildTestRunResult[] RunHelperClassInParallel(string helperClassPattern, int processCount)
+        {
+            System.Threading.Tasks.Task<ChildTestRunResult>[] children = Enumerable.Range(0, processCount)
+                .Select(index => System.Threading.Tasks.Task.Run(() => RunHelperClass(helperClassPattern, index)))
+                .ToArray();
+
+            System.Threading.Tasks.Task.WaitAll(children);
+            return children.Select(task => task.Result).ToArray();
+        }
+
+        private static ChildTestRunResult RunHelperClass(string helperClassPattern, int childIndex)
+        {
+            (string fileName, string arguments) = GetTestRunnerCommand(helperClassPattern);
+            ProcessStartInfo startInfo = new(fileName, arguments)
             {
-                returned[i] = OutOfProcRarClient.GetInstance(engine);
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+            };
+
+            startInfo.EnvironmentVariables["PRBREAKAGE_CHILD_INDEX"] = childIndex.ToString();
+
+            using Process? child = Process.Start(startInfo);
+            child.ShouldNotBeNull($"failed to start child test runner for '{helperClassPattern}'");
+
+            string stdout = child!.StandardOutput.ReadToEnd();
+            string stderr = child.StandardError.ReadToEnd();
+            child.WaitForExit();
+
+            return new ChildTestRunResult(childIndex, child.ExitCode, stdout, stderr);
+        }
+
+        private static (string FileName, string Arguments) GetTestRunnerCommand(string helperClassPattern)
+        {
+            string assemblyPath = Assembly.GetExecutingAssembly().Location;
+            string executablePath = Path.ChangeExtension(assemblyPath, ".exe");
+            string filterArguments = $"--filter-class \"{helperClassPattern}\"";
+
+            if (File.Exists(executablePath))
+            {
+                return (executablePath, filterArguments);
             }
 
-            int distinct = returned.Where(c => c is not null).Distinct().Count();
-            distinct.ShouldBe(1,
-                "Control: serial GetInstance calls must return the single registered " +
-                $"OutOfProcRarClient instance (got {distinct} distinct). MP / single-caller " +
-                "path is by definition race-free.");
+            return ("dotnet", $"\"{assemblyPath}\" {filterArguments}");
+        }
+
+        private static string FormatChildFailures(ChildTestRunResult[] results)
+        {
+            ChildTestRunResult[] failed = results.Where(result => result.ExitCode != 0).ToArray();
+            if (failed.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Join(
+                Environment.NewLine + "---" + Environment.NewLine,
+                failed.Take(3).Select(result =>
+                    $"child #{result.ChildIndex} exit={result.ExitCode}" + Environment.NewLine +
+                    result.StdOut.Trim() + Environment.NewLine +
+                    result.StdErr.Trim()));
+        }
+
+        private sealed class ChildTestRunResult
+        {
+            public ChildTestRunResult(int childIndex, int exitCode, string stdOut, string stdErr)
+            {
+                ChildIndex = childIndex;
+                ExitCode = exitCode;
+                StdOut = stdOut;
+                StdErr = stdErr;
+            }
+
+            public int ChildIndex { get; }
+            public int ExitCode { get; }
+            public string StdOut { get; }
+            public string StdErr { get; }
+        }
+    }
+
+    public sealed class PRBreakageConcurrency_New1MultiprocessControlHelper
+    {
+        [Fact]
+        public void NEW1_ProcessIsolatedHelper_StringsInitialize_Completes()
+        {
+            Type? stringsType = typeof(ResolveAssemblyReference)
+                .GetNestedType("Strings", BindingFlags.NonPublic);
+            stringsType.ShouldNotBeNull("expected nested 'Strings' type on ResolveAssemblyReference");
+
+            FieldInfo? initializedField = stringsType!.GetField(
+                "initialized", BindingFlags.Static | BindingFlags.NonPublic);
+            initializedField.ShouldNotBeNull();
+
+            FieldInfo[] dependentFields = stringsType.GetFields(
+                BindingFlags.Static | BindingFlags.Public)
+                .Where(f => f.FieldType == typeof(string) && !f.IsLiteral && !f.IsInitOnly)
+                .ToArray();
+            dependentFields.Length.ShouldBeGreaterThan(0);
+
+            _ = new ResolveAssemblyReference();
+
+            ((bool)initializedField!.GetValue(null)!).ShouldBeTrue(
+                "MP helper: process-local Strings.Initialize must set the initialized flag.");
+            foreach (FieldInfo field in dependentFields)
+            {
+                field.GetValue(null).ShouldNotBeNull(
+                    $"MP helper: process-local Strings.Initialize left '{field.Name}' null.");
+            }
+        }
+    }
+
+    public sealed class PRBreakageConcurrency_New6MultiprocessControlHelper
+    {
+        [Fact]
+        public void NEW6_ProcessIsolatedHelper_GetInstance_IsStablePerEngine()
+        {
+            MockEngine engine = new() { SetIsOutOfProcRarNodeEnabled = true };
+
+            OutOfProcRarClient first = OutOfProcRarClient.GetInstance(engine);
+            OutOfProcRarClient second = OutOfProcRarClient.GetInstance(engine);
+
+            first.ShouldBeSameAs(second,
+                "MP helper: repeated GetInstance calls within one isolated process must " +
+                "return the same per-engine singleton.");
 
             OutOfProcRarClient registered = (OutOfProcRarClient)engine.GetRegisteredTaskObject(
                 OutOfProcRarClient.TaskObjectCacheKey,
                 RegisteredTaskObjectLifetime.Build);
-            registered.ShouldBeSameAs(returned[0],
-                "Control: the registered instance must be the one returned to all callers.");
+            registered.ShouldBeSameAs(first,
+                "MP helper: the engine-registered instance must match the returned singleton.");
 
             registered.Dispose();
         }
