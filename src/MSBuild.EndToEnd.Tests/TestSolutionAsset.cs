@@ -23,7 +23,8 @@ namespace Microsoft.Build.EndToEndTests
         }
         
         /// <summary>
-        /// Gets the full relative path from TestAssets root to the project file.
+        /// Gets the path to the project file. This is relative when used as a test asset definition,
+        /// or absolute when used as an isolated test instance (after PrepareIsolatedTestAssets).
         /// </summary>
         public string ProjectPath => Path.Combine(SolutionFolder, ProjectRelativePath);
     }

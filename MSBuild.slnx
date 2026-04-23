@@ -74,7 +74,7 @@
   <Project Path="src/MSBuild.Bootstrap/MSBuild.Bootstrap.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
-  <Project Path="src/MSBuild.EndToEnd.Tests/Microsoft.Build.CommandLine.EndToEnd.Tests.csproj">
+  <Project Path="src/MSBuild.EndToEnd.Tests/Microsoft.Build.EndToEnd.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="src/MSBuild.UnitTests/Microsoft.Build.CommandLine.UnitTests.csproj">

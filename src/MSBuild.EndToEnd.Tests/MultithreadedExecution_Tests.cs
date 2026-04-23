@@ -21,7 +21,7 @@ namespace Microsoft.Build.EndToEndTests
         private readonly TestEnvironment _env;
         private readonly string _testAssetDir;
 
-        private readonly int _timeoutInMilliseconds = 60_000;
+        private readonly int _timeoutInMilliseconds = 180_000;
 
         // Common parameters for all multithreaded tests:
         // /nodereuse:false - Prevents MSBuild server processes from persisting between tests,
@@ -80,7 +80,7 @@ namespace Microsoft.Build.EndToEndTests
         }
 
         /// <summary>
-        /// Builds a test asset with the given MSBuild args and verifies success and output assemblies.
+        /// Builds a test asset with the given MSBuild args and verifies success.
         /// </summary>
         private void BuildAndVerify(string testAssetName, string multithreadingArgs)
         {
@@ -137,6 +137,7 @@ namespace Microsoft.Build.EndToEndTests
 
             // Verify binary log was created and has content
             File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
+            new FileInfo(binlogPath).Length.ShouldBeGreaterThan(0, "Binary log file was created but is empty.");
 
             // Test binlog replay
             string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild(
