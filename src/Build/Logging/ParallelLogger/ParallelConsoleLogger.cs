@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
-        private readonly List<RegisteredLoggerInfo> _registeredLoggers = new List<RegisteredLoggerInfo>();
+        private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
         #region Constructors
         /// <summary>
         /// Default constructor.
@@ -1141,11 +1141,6 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
-            if (e is LoggerRegisteredEventArgs loggerEvent)
-            {
-                _registeredLoggers.AddRange(loggerEvent.Loggers);
-                return;
-            }
             if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)
             {
                 return;
@@ -1233,6 +1228,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     var evaluationKey = GetEvaluationKey(e.BuildEventContext);
                     propertyOutputMap[evaluationKey] = value;
                 }
+            }
+            else if (e is LoggerRegisteredEventArgs loggerEvent)
+            {
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
             }
             else if (e is BuildCanceledEventArgs buildCanceled)
             {

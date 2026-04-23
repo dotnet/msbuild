@@ -45,5 +45,6 @@ namespace Microsoft.Build.Logging
         BuildCheckAcquisition,
         BuildSubmissionStarted,
         BuildCanceled,
+        LoggerRegistered,
     }
 }

@@ -719,6 +719,9 @@ public sealed partial class TerminalLogger : INodeLogger
             case ProjectEvaluationFinishedEventArgs evalFinish:
                 CaptureEvalContext(evalFinish);
                 break;
+            case LoggerRegisteredEventArgs loggerEvent:
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
+                break;
         }
     }
 
@@ -1192,11 +1195,6 @@ public sealed partial class TerminalLogger : INodeLogger
         var buildEventContext = e.BuildEventContext;
         if (buildEventContext is null)
         {
-            return;
-        }
-        if (e is LoggerRegisteredEventArgs loggerEvent)
-        {
-            _registeredLoggers.AddRange(loggerEvent.Loggers);
             return;
         }
         string? message = e.Message;

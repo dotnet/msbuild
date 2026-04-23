@@ -1057,7 +1057,7 @@ namespace Microsoft.Build.UnitTests.Logging
             service.LogBuildStarted();
             var enabledLogsEvent = service.AllProcessedBuildEvents
                 .OfType<BuildMessageEventArgs>()
-                .FirstOrDefault(e => e is not LoggerRegisteredEventArgs && e.Message?.Contains("ConsoleLogger") == true);
+                .FirstOrDefault(e => e.Message?.Contains("ConsoleLogger") == true);
             enabledLogsEvent.ShouldNotBeNull();
         }
 

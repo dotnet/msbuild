@@ -44,7 +44,7 @@ namespace Microsoft.Build.Framework
     /// Arguments for the logger registered event, containing one or more logger registrations.
     /// </summary>
     [Serializable]
-    public sealed class LoggerRegisteredEventArgs : BuildMessageEventArgs
+    public sealed class LoggerRegisteredEventArgs : BuildStatusEventArgs
     {
         internal LoggerRegisteredEventArgs()
         {
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="loggers">The list of registered loggers.</param>
         public LoggerRegisteredEventArgs(IReadOnlyList<RegisteredLoggerInfo> loggers)
-            : base(FormatMessage(loggers), null, null, MessageImportance.Low)
+            : base(FormatMessage(loggers), null, null)
         {
             Loggers = loggers;
         }
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Framework
             var withPaths = loggers.Where(l => l.OutputFilePaths.Count > 0).ToList();
             if (withPaths.Count == 0)
             {
-                return null;
+                return string.Empty;
             }
 
             return string.Join("; ", withPaths.Select(l => $"{l.LoggerName}: {string.Join(", ", l.OutputFilePaths)}"));
