@@ -71,16 +71,9 @@ namespace Microsoft.Build.Tasks
             var list = new List<ITaskItem>();
             foreach (ITaskItem item in AssemblyFiles)
             {
-                AbsolutePath assemblyPath;
-                try
-                {
-                    assemblyPath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
-                }
-                catch (ArgumentException e)
-                {
-                    Log.LogErrorWithCodeFromResources("GetAssemblyIdentity.CouldNotGetAssemblyName", item.ItemSpec, e.Message);
-                    continue;
-                }
+                ArgumentNullException.ThrowIfNullOrEmpty(item.ItemSpec, nameof(item.ItemSpec));
+
+                AbsolutePath assemblyPath = assemblyPath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
 
                 AssemblyName an;
                 try

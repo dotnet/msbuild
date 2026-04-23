@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
@@ -109,11 +110,17 @@ namespace Microsoft.Build.UnitTests
         {
             var engine = new MockEngine(_output);
             GetAssemblyIdentity task = CreateTaskUnderTest(engine);
-            task.AssemblyFiles = [new TaskItem(string.Empty)];
+            task.AssemblyFiles = [new TaskItem("")];
 
-            task.Execute().ShouldBeFalse();
+            Assert.Throws<ArgumentException>(() => task.Execute());
+        }
 
-            AssertCouldNotGetAssemblyName(engine);
+        [Fact]
+        public void NullItemSpec_LogsErrorAndReturnsFalse()
+        {
+            var engine = new MockEngine(_output);
+            GetAssemblyIdentity task = CreateTaskUnderTest(engine);
+            Assert.Throws<ArgumentNullException>(() => task.AssemblyFiles = [new TaskItem((ITaskItem)null)]);
         }
 
         [Fact]
