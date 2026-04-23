@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
-        private readonly List<LoggerRegisteredEventArgs> _registeredLoggers = new List<LoggerRegisteredEventArgs>();
+        private readonly List<RegisteredLoggerInfo> _registeredLoggers = new List<RegisteredLoggerInfo>();
         #region Constructors
         /// <summary>
         /// Default constructor.
@@ -280,11 +280,11 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 foreach (var logger in _registeredLoggers)
                 {
-                    if (!string.IsNullOrEmpty(logger.OutputFilePath))
+                    foreach (var outputPath in logger.OutputFilePaths)
                     {
                         string displayPath = setColor != DontSetColor
-                            ? $"{AnsiCodes.LinkPrefix}{new Uri(logger.OutputFilePath).AbsoluteUri}{AnsiCodes.LinkInfix}{logger.OutputFilePath}{AnsiCodes.LinkSuffix}"
-                            : logger.OutputFilePath;
+                            ? $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"
+                            : outputPath;
                         WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
                     }
                 }
@@ -1143,7 +1143,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
             if (e is LoggerRegisteredEventArgs loggerEvent)
             {
-                _registeredLoggers.Add(loggerEvent);
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
                 return;
             }
             if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)

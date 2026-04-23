@@ -408,10 +408,6 @@ namespace Microsoft.Build.BackEnd.Logging
             foreach (ILogger logger in Loggers)
             {
                 ILogger actualLogger = UnwrapLogger(logger);
-                if (actualLogger is CentralForwardingLogger == true)
-                {
-                    continue;
-                }
                 listOfLoggers.Add(actualLogger.GetType().Name);
             }
             if (listOfLoggers.Count != 0)
@@ -429,23 +425,31 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void RegisterLoggers()
         {
+            var loggerDescriptions = new List<RegisteredLoggerInfo>();
             foreach (ILogger logger in Loggers)
             {
                 ILogger actualLogger = UnwrapLogger(logger);
 
-                string outputFilePath = actualLogger is IFileOutputLogger fileLogger && !string.IsNullOrEmpty(fileLogger.OutputFilePath)
-                    ? fileLogger.OutputFilePath
-                    : null;
+                var outputFilePaths = new List<string>();
+                if (actualLogger is IFileOutputLogger fileLogger && !string.IsNullOrEmpty(fileLogger.OutputFilePath))
+                {
+                    outputFilePaths.Add(fileLogger.OutputFilePath);
+                }
 
-                IReadOnlyList<string> additionalPaths = actualLogger is BinaryLogger bl
-                    ? bl.AdditionalFilePaths
-                    : null;
+                if (actualLogger is BinaryLogger bl && bl.AdditionalFilePaths != null)
+                {
+                    outputFilePaths.AddRange(bl.AdditionalFilePaths);
+                }
 
-                var registerEvent = new LoggerRegisteredEventArgs(
+                loggerDescriptions.Add(new RegisteredLoggerInfo(
                     loggerName: actualLogger.GetType().Name,
-                    outputFilePath: outputFilePath,
-                    verbosity: actualLogger.Verbosity,
-                    additionalOutputFilePaths: additionalPaths);
+                    outputFilePaths: outputFilePaths.Count > 0 ? outputFilePaths : null,
+                    verbosity: actualLogger.Verbosity));
+            }
+
+            if (loggerDescriptions.Count > 0)
+            {
+                var registerEvent = new LoggerRegisteredEventArgs(loggerDescriptions);
                 registerEvent.BuildEventContext = BuildEventContext.Invalid;
                 ProcessLoggingEvent(registerEvent);
             }
