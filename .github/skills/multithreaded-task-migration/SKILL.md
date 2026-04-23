@@ -59,6 +59,104 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 | `var psi = new ProcessStartInfo("tool.exe");`      | `var psi = TaskEnvironment.GetProcessStartInfo();`  |
 |                                                    | `psi.FileName = "tool.exe";`                        |
 
+### Step 5: Ensure Static Fields Are Safe
+
+Review every static field for two independent issues:
+
+#### 5a. Concurrency — make static fields thread-safe
+
+```csharp
+// BEFORE (UNSAFE)
+private static readonly Dictionary<string, string> s_cache = new();
+
+// AFTER (SAFE)
+private static readonly ConcurrentDictionary<string, string> s_cache = new();
+```
+
+For fields that don't fit a concurrent collection, use a `lock` or `Interlocked` APIs.
+
+#### 5b. Lifetime — scope per-build caches with `RegisterTaskObject`
+
+Not all caches need this. Caches valid across builds (e.g., expensive computations with stable inputs) should stay as static fields. Only migrate when data becomes stale between builds.
+
+**Replacing a static field with a registered task object:**
+
+```csharp
+// BEFORE - leaks across builds (UNSAFE)
+private static readonly Dictionary<string, string> s_cache = new();
+
+// AFTER - engine-managed lifetime (SAFE)
+private const string CacheKey = "MyNamespace.MyTask.Cache";
+private static readonly object s_cacheLock = new();
+
+public override bool Execute()
+{
+    var engine4 = (IBuildEngine4)BuildEngine;
+
+    var cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+        CacheKey, RegisteredTaskObjectLifetime.Build);
+    if (cache is null)
+    {
+        lock (s_cacheLock)
+        {
+            cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+                CacheKey, RegisteredTaskObjectLifetime.Build);
+            if (cache is null)
+            {
+                cache = new ConcurrentDictionary<string, string>();
+                engine4.RegisterTaskObject(
+                    CacheKey, cache,
+                    RegisteredTaskObjectLifetime.Build,
+                    allowEarlyCollection: true);
+            }
+        }
+    }
+
+    cache[key] = value;
+    ...
+}
+```
+
+**Cleanup-on-Dispose pattern** — for static caches in utility classes without `IBuildEngine` access, register a disposable wrapper:
+
+```csharp
+internal static class MyHelper
+{
+    private static readonly ConcurrentDictionary<string, string> s_cache = new();
+    internal static void ClearCache() => s_cache.Clear();
+}
+
+public class MyTask : Task
+{
+    private const string CleanerKey = "MyNamespace.MyTask.CacheCleaner";
+
+    public override bool Execute()
+    {
+        var engine4 = (IBuildEngine4)BuildEngine;
+        if (engine4.GetRegisteredTaskObject(CleanerKey, RegisteredTaskObjectLifetime.Build) is null)
+        {
+            engine4.RegisterTaskObject(
+                CleanerKey,
+                new CacheCleanup(MyHelper.ClearCache),
+                RegisteredTaskObjectLifetime.Build,
+                allowEarlyCollection: false);
+        }
+        ...
+    }
+
+    private sealed class CacheCleanup(Action onDispose) : IDisposable
+    {
+        public void Dispose() => onDispose();
+    }
+}
+```
+
+**`RegisterTaskObject` guidelines:**
+- `RegisteredTaskObjectLifetime.Build` for per-build data; `AppDomain` for cross-build data.
+- `allowEarlyCollection: true` when data can be recreated; `false` for cleanup wrappers.
+- Use a unique `const string` key (e.g., `"MyNamespace.MyTask.Cache"`).
+- `GetRegisteredTaskObject` returns null when no object is registered or it was early-collected.
+
 ## Updating Unit Tests
 
 Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`.
@@ -289,3 +387,6 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] Cross-framework: tested on both net472 and net10.0
 - [ ] Concurrent execution: two tasks with different project directories produce correct results
 - [ ] No forbidden APIs (`Environment.Exit`, `Console.*`, etc.)
+- [ ] Static fields are thread-safe for concurrent access (concurrent collections, `Interlocked`, or `lock`)
+- [ ] Per-build caches migrated to `RegisterTaskObject` with `Build` lifetime (or cleanup wrapper registered); cross-build caches can be left as static fields
+
