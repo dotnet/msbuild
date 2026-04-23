@@ -1727,7 +1727,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), "{0} is not a solution", config.ProjectFullPath);
+            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), $"{config.ProjectFullPath} is not a solution");
 
             var buildEventContext = request.BuildEventContext;
             if (buildEventContext == BuildEventContext.Invalid)
@@ -1899,7 +1899,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected packet received by BuildManager: {0}", packet.Type);
+                        ErrorUtilities.ThrowInternalError($"Unexpected packet received by BuildManager: {packet.Type}");
                         break;
                 }
             }
@@ -2393,7 +2393,7 @@ namespace Microsoft.Build.Execution
         {
             if (_buildManagerState != requiredState)
             {
-                ErrorUtilities.ThrowInternalError("Expected state {0}, actual state {1}", requiredState, _buildManagerState);
+                ErrorUtilities.ThrowInternalError($"Expected state {requiredState}, actual state {_buildManagerState}");
             }
         }
 
@@ -2742,7 +2742,7 @@ namespace Microsoft.Build.Execution
 
             _shuttingDown = true;
             _executionCancellationTokenSource?.Cancel();
-            ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
+            ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), $"Unexpected shutdown from node {node} which shouldn't exist.");
             _activeNodes.Remove(node);
 
             if (shutdownPacket.Reason != NodeShutdownReason.Requested)
@@ -2945,7 +2945,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Scheduling action {0} not handled.", response.Action);
+                        ErrorUtilities.ThrowInternalError($"Scheduling action {response.Action} not handled.");
                         break;
                 }
             }
@@ -3381,17 +3381,14 @@ namespace Microsoft.Build.Execution
         /// Ensures that the packet type matches the expected type
         /// </summary>
         /// <typeparam name="I">The instance-type of packet being expected</typeparam>
-        private static I ExpectPacketType<I>(INodePacket packet, NodePacketType expectedType) where I : class, INodePacket
+        private static I ExpectPacketType<I>(INodePacket packet, NodePacketType expectedType)
+            where I : class, INodePacket
         {
             I? castPacket = packet as I;
 
-            // PERF: Not using VerifyThrow here to avoid boxing of expectedType.
-            if (castPacket == null)
-            {
-                ErrorUtilities.ThrowInternalError("Incorrect packet type: {0} should have been {1}", packet.Type, expectedType);
-            }
+            ErrorUtilities.VerifyThrow(castPacket != null, $"Incorrect packet type: {packet.Type} should have been {expectedType}");
 
-            return castPacket!;
+            return castPacket;
         }
 
         /// <summary>

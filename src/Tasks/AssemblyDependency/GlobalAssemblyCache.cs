@@ -186,7 +186,7 @@ namespace Microsoft.Build.Tasks
             {
                 uint hr = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
 
-                ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
+                ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, $"CreateAssemblyCache failed, hr {hr}");
 
                 var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>() };
 

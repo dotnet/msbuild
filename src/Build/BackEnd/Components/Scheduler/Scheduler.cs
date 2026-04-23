@@ -7,11 +7,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -155,9 +157,19 @@ namespace Microsoft.Build.BackEnd
             => Traits.Instance.InProcNodeDisabled || _componentHost.BuildParameters.DisableInProcNode;
 
         /// <summary>
-        /// The path into which debug files will be written.
+        ///  The directory into which debug files will be written.
         /// </summary>
-        private string _debugDumpPath;
+        private readonly string _debugDumpDirectory;
+
+        /// <summary>
+        ///  The file where we will store the trace file.
+        /// </summary>
+        private readonly string _debugDumpTraceFilePath;
+
+        /// <summary>
+        ///  The file where we will store the state file.
+        /// </summary>
+        private readonly string _debugDumpStateFilePath;
 
         /// <summary>
         /// If MSBUILDCUSTOMSCHEDULER = CustomSchedulerForSQL, the user may also choose to set
@@ -211,7 +223,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
             _schedulingUnlimitedVariable = Environment.GetEnvironmentVariable("MSBUILDSCHEDULINGUNLIMITED");
             _nodeLimitOffset = 0;
 
@@ -252,10 +264,13 @@ namespace Microsoft.Build.BackEnd
                 _nodeCoreAllocationWeight = 0;
             }
 
-            if (String.IsNullOrEmpty(_debugDumpPath))
+            if (string.IsNullOrEmpty(_debugDumpDirectory))
             {
-                _debugDumpPath = FileUtilities.TempFileDirectory;
+                _debugDumpDirectory = FileUtilities.TempFileDirectory;
             }
+
+            _debugDumpTraceFilePath = Path.Combine(_debugDumpDirectory, $"SchedulerTrace_{EnvironmentUtilities.CurrentProcessId}.txt");
+            _debugDumpStateFilePath = Path.Combine(_debugDumpDirectory, $"SchedulerState_{EnvironmentUtilities.CurrentProcessId}.txt");
 
             Reset();
         }
@@ -355,7 +370,7 @@ namespace Microsoft.Build.BackEnd
                 // building a target we want to build.
                 if (blocker.YieldAction != YieldAction.None)
                 {
-                    TraceScheduler("Request {0} on node {1} is performing yield action {2}.", blocker.BlockedRequestId, nodeId, blocker.YieldAction);
+                    TraceScheduler($"Request {blocker.BlockedRequestId} on node {nodeId} is performing yield action {blocker.YieldAction}.");
                     ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     HandleYieldAction(parentRequest, blocker);
                 }
@@ -376,7 +391,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (SchedulerCircularDependencyException ex)
                     {
-                        TraceScheduler("Circular dependency caused by request {0}({1}) (nr {2}), parent {3}({4}) (nr {5})", ex.Request.GlobalRequestId, ex.Request.ConfigurationId, ex.Request.NodeRequestId, parentRequest.BuildRequest.GlobalRequestId, parentRequest.BuildRequest.ConfigurationId, parentRequest.BuildRequest.NodeRequestId);
+                        TraceScheduler($"Circular dependency caused by request {ex.Request.GlobalRequestId}({ex.Request.ConfigurationId}) (nr {ex.Request.NodeRequestId}), parent {parentRequest.BuildRequest.GlobalRequestId}({parentRequest.BuildRequest.ConfigurationId}) (nr {parentRequest.BuildRequest.NodeRequestId})");
                         responses.Add(ScheduleResponse.CreateCircularDependencyResponse(nodeId, parentRequest.BuildRequest, ex.Request));
                     }
                 }
@@ -389,7 +404,7 @@ namespace Microsoft.Build.BackEnd
             }
             catch (SchedulerCircularDependencyException ex)
             {
-                TraceScheduler("Circular dependency caused by request {0}({1}) (nr {2}), parent {3}({4}) (nr {5})", ex.Request.GlobalRequestId, ex.Request.ConfigurationId, ex.Request.NodeRequestId, parentRequest.BuildRequest.GlobalRequestId, parentRequest.BuildRequest.ConfigurationId, parentRequest.BuildRequest.NodeRequestId);
+                TraceScheduler($"Circular dependency caused by request {ex.Request.GlobalRequestId}({ex.Request.ConfigurationId}) (nr {ex.Request.NodeRequestId}), parent {parentRequest.BuildRequest.GlobalRequestId}({parentRequest.BuildRequest.ConfigurationId}) (nr {parentRequest.BuildRequest.NodeRequestId})");
                 responses.Add(ScheduleResponse.CreateCircularDependencyResponse(nodeId, parentRequest.BuildRequest, ex.Request));
             }
 
@@ -407,7 +422,7 @@ namespace Microsoft.Build.BackEnd
         {
             _schedulingData.EventTime = DateTime.UtcNow;
             List<ScheduleResponse> responses = new List<ScheduleResponse>();
-            TraceScheduler("Reporting result from node {0} for request {1}, parent {2}.", nodeId, result.GlobalRequestId, result.ParentGlobalRequestId);
+            TraceScheduler($"Reporting result from node {nodeId} for request {result.GlobalRequestId}, parent {result.ParentGlobalRequestId}.");
             RecordResultToCurrentCacheIfConfigNotInOverrideCache(result);
 
             if (result.NodeRequestId == BuildRequest.ResultsTransferNodeRequestId)
@@ -467,7 +482,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (unscheduledRequest.BuildRequest.GlobalRequestId == result.GlobalRequestId)
                     {
-                        TraceScheduler("Request {0} (node request {1}) also satisfied by result.", unscheduledRequest.BuildRequest.GlobalRequestId, unscheduledRequest.BuildRequest.NodeRequestId);
+                        TraceScheduler($"Request {unscheduledRequest.BuildRequest.GlobalRequestId} (node request {unscheduledRequest.BuildRequest.NodeRequestId}) also satisfied by result.");
                         BuildResult newResult = new BuildResult(unscheduledRequest.BuildRequest, result, null);
 
                         // Report results to the parent.
@@ -533,7 +548,7 @@ namespace Microsoft.Build.BackEnd
             foreach (NodeInfo nodeInfo in nodeInfos)
             {
                 _availableNodes[nodeInfo.NodeId] = nodeInfo;
-                TraceScheduler("Node {0} created", nodeInfo.NodeId);
+                TraceScheduler($"Node {nodeInfo.NodeId} created");
 
                 switch (nodeInfo.ProviderType)
                 {
@@ -565,7 +580,7 @@ namespace Microsoft.Build.BackEnd
             _schedulingData.EventTime = DateTime.UtcNow;
 
             // Get the list of build requests currently assigned to the node and report aborted results for them.
-            TraceScheduler("Build aborted by node {0}", nodeId);
+            TraceScheduler($"Build aborted by node {nodeId}");
 
             foreach (SchedulableRequest request in _schedulingData.GetScheduledRequestsByNode(nodeId))
             {
@@ -692,7 +707,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.Scheduler, "Cannot create components of type {0}", componentType);
+            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.Scheduler, $"Cannot create components of type {componentType}");
             return new Scheduler();
         }
 
@@ -735,7 +750,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Nodes still have work, but we have no requests.  Let them proceed and only handle resource requests.
                     HandlePendingResourceRequests();
-                    TraceScheduler("{0}: Waiting for existing work to proceed.", schedulingTime);
+                    TraceScheduler($"{schedulingTime}: Waiting for existing work to proceed.");
                 }
 
                 return;
@@ -799,25 +814,25 @@ namespace Microsoft.Build.BackEnd
                         if (RequestOrAnyItIsBlockedByCanBeServiced(request))
                         {
                             DumpSchedulerState();
-                            ErrorUtilities.ThrowInternalError("Somehow no requests are currently executing, and at least one of the {0} requests blocked by in-progress requests is servicable by a currently existing node, but no circular dependency was detected ...", _schedulingData.BlockedRequestsCount);
+                            ErrorUtilities.ThrowInternalError($"Somehow no requests are currently executing, and at least one of the {_schedulingData.BlockedRequestsCount} requests blocked by in-progress requests is servicable by a currently existing node, but no circular dependency was detected ...");
                         }
                     }
 
                     if (!createNodePending)
                     {
                         DumpSchedulerState();
-                        ErrorUtilities.ThrowInternalError("None of the {0} blocked requests can be serviced by currently existing nodes, but we aren't requesting a new one.", _schedulingData.BlockedRequestsCount);
+                        ErrorUtilities.ThrowInternalError($"None of the {_schedulingData.BlockedRequestsCount} blocked requests can be serviced by currently existing nodes, but we aren't requesting a new one.");
                     }
                 }
                 else if (_schedulingData.ReadyRequestsCount != 0)
                 {
                     DumpSchedulerState();
-                    ErrorUtilities.ThrowInternalError("Somehow we have {0} requests which are ready to go but we didn't tell the nodes to continue.", _schedulingData.ReadyRequestsCount);
+                    ErrorUtilities.ThrowInternalError($"Somehow we have {_schedulingData.ReadyRequestsCount} requests which are ready to go but we didn't tell the nodes to continue.");
                 }
                 else if (_schedulingData.UnscheduledRequestsCount != 0 && !createNodePending)
                 {
                     DumpSchedulerState();
-                    ErrorUtilities.ThrowInternalError("Somehow we have {0} unassigned build requests but {1} of our nodes are free and we aren't requesting a new one...", _schedulingData.UnscheduledRequestsCount, idleNodes.Count);
+                    ErrorUtilities.ThrowInternalError($"Somehow we have {_schedulingData.UnscheduledRequestsCount} unassigned build requests but {idleNodes.Count} of our nodes are free and we aren't requesting a new one...");
                 }
             }
             else
@@ -825,7 +840,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(responses.Count > 0, "We failed to request a node to be created.");
             }
 
-            TraceScheduler("Requests scheduled: {0} Unassigned Requests: {1} Blocked Requests: {2} Unblockable Requests: {3} Free Nodes: {4}/{5} Responses: {6}", nodesFreeToDoWorkPriorToScheduling - idleNodes.Count, _schedulingData.UnscheduledRequestsCount, _schedulingData.BlockedRequestsCount, _schedulingData.ReadyRequestsCount, idleNodes.Count, _availableNodes.Count, responses.Count);
+            TraceScheduler($"Requests scheduled: {nodesFreeToDoWorkPriorToScheduling - idleNodes.Count} Unassigned Requests: {_schedulingData.UnscheduledRequestsCount} Blocked Requests: {_schedulingData.BlockedRequestsCount} Unblockable Requests: {_schedulingData.ReadyRequestsCount} Free Nodes: {idleNodes.Count}/{_availableNodes.Count} Responses: {responses.Count}");
             DumpSchedulerState();
         }
 
@@ -1087,7 +1102,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (AtSchedulingLimit())
                 {
-                    TraceScheduler("System load limit reached, cannot schedule new work.  Executing: {0} Yielding: {1} Max Count: {2}", _schedulingData.ExecutingRequestsCount, _schedulingData.YieldingRequestsCount, _componentHost.BuildParameters.MaxNodeCount);
+                    TraceScheduler($"System load limit reached, cannot schedule new work.  Executing: {_schedulingData.ExecutingRequestsCount} Yielding: {_schedulingData.YieldingRequestsCount} Max Count: {_componentHost.BuildParameters.MaxNodeCount}");
                     break;
                 }
 
@@ -1307,7 +1322,7 @@ namespace Microsoft.Build.BackEnd
                 // Don't overload the system.
                 if (AtSchedulingLimit())
                 {
-                    TraceScheduler("System load limit reached, cannot schedule new work.  Executing: {0} Yielding: {1} Max Count: {2}", _schedulingData.ExecutingRequestsCount, _schedulingData.YieldingRequestsCount, _componentHost.BuildParameters.MaxNodeCount);
+                    TraceScheduler($"System load limit reached, cannot schedule new work.  Executing: {_schedulingData.ExecutingRequestsCount} Yielding: {_schedulingData.YieldingRequestsCount} Max Count: {_componentHost.BuildParameters.MaxNodeCount}");
                     return;
                 }
 
@@ -1371,7 +1386,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (AtSchedulingLimit())
                 {
-                    TraceScheduler("System load limit reached, cannot schedule new work.  Executing: {0} Yielding: {1} Max Count: {2}", _schedulingData.ExecutingRequestsCount, _schedulingData.YieldingRequestsCount, _componentHost.BuildParameters.MaxNodeCount);
+                    TraceScheduler($"System load limit reached, cannot schedule new work.  Executing: {_schedulingData.ExecutingRequestsCount} Yielding: {_schedulingData.YieldingRequestsCount} Max Count: {_componentHost.BuildParameters.MaxNodeCount}");
                     break;
                 }
 
@@ -1391,7 +1406,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else if (configurationCountsByNode[nodeId] > configurationCountLimit)
                         {
-                            TraceScheduler("Chose not to assign request {0} to node {2} because its count of configurations ({3}) exceeds the current limit ({4}).", request.BuildRequest.GlobalRequestId, request.BuildRequest.ConfigurationId, nodeId, configurationCountsByNode[nodeId], configurationCountLimit);
+                            TraceScheduler($"Chose not to assign request {request.BuildRequest.GlobalRequestId} to node {nodeId} because its count of configurations ({configurationCountsByNode[nodeId]}) exceeds the current limit ({configurationCountLimit}).");
                         }
                     }
                 }
@@ -1426,7 +1441,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(config.ResultsNodeId != InvalidNodeId, "Configuration's results node is not set.");
 
             responses.Add(ScheduleResponse.CreateScheduleResponse(nodeId, request.BuildRequest, mustSendConfigurationToNode));
-            TraceScheduler("Executing request {0} on node {1} with parent {2}", request.BuildRequest.GlobalRequestId, nodeId, (request.Parent == null) ? -1 : request.Parent.BuildRequest.GlobalRequestId);
+            TraceScheduler($"Executing request {request.BuildRequest.GlobalRequestId} on node {nodeId} with parent {(request.Parent == null ? -1 : request.Parent.BuildRequest.GlobalRequestId)}");
 
             WarnWhenProxyBuildsGetScheduledOnOutOfProcNode();
 
@@ -1617,7 +1632,7 @@ namespace Microsoft.Build.BackEnd
                         ErrorUtilities.VerifyThrow(inProcNodesToCreate == 1, "We should not be trying to create more than one inproc node");
                     }
 
-                    TraceScheduler("Requesting creation of new node satisfying affinity {0}", NodeAffinity.InProc);
+                    TraceScheduler($"Requesting creation of new node satisfying affinity {NodeAffinity.InProc}");
                     responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, inProcNodesToCreate));
 
                     // We only want to submit one node creation request at a time -- as part of node creation we recursively re-request the scheduler
@@ -1648,7 +1663,7 @@ namespace Microsoft.Build.BackEnd
                 // If we still want to create them, go ahead
                 if (outOfProcNodesToCreate > 0)
                 {
-                    TraceScheduler("Requesting creation of {0} new node(s) satisfying affinity {1}", outOfProcNodesToCreate, NodeAffinity.OutOfProc);
+                    TraceScheduler($"Requesting creation of {outOfProcNodesToCreate} new node(s) satisfying affinity {NodeAffinity.OutOfProc}");
                     responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.OutOfProc, outOfProcNodesToCreate));
                 }
 
@@ -1727,7 +1742,7 @@ namespace Microsoft.Build.BackEnd
             BuildRequestConfiguration configuration = _configCache[parentRequest.BuildRequest.ConfigurationId];
             responses.Add(ScheduleResponse.CreateScheduleResponse(configuration.ResultsNodeId, newRequest, false));
 
-            TraceScheduler("Created request {0} (node request {1}) for transfer of configuration {2}'s results from node {3} to node {4}", newRequest.GlobalRequestId, newRequest.NodeRequestId, configuration.ConfigurationId, configuration.ResultsNodeId, parentRequest.AssignedNode);
+            TraceScheduler($"Created request {newRequest.GlobalRequestId} (node request {newRequest.NodeRequestId}) for transfer of configuration {configuration.ConfigurationId}'s results from node {configuration.ResultsNodeId} to node {parentRequest.AssignedNode}");
 
             // The configuration's results will now be homed at the new location (once they have come back from the
             // original node.)
@@ -1754,7 +1769,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int nodeForResults = (parentRequest == null) ? InvalidNodeId : parentRequest.AssignedNode;
-                TraceScheduler("Received request {0} (node request {1}) with parent {2} from node {3} for project {4} with targets {5}", request.GlobalRequestId, request.NodeRequestId, request.ParentGlobalRequestId, nodeForResults, _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets));
+                TraceScheduler($"Received request {request.GlobalRequestId} (node request {request.NodeRequestId}) with parent {request.ParentGlobalRequestId} from node {nodeForResults} for project {_configCache![request.ConfigurationId].ProjectFullPath} with targets {(request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets))}");
 
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
@@ -1762,7 +1777,7 @@ namespace Microsoft.Build.BackEnd
                 ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
                 if (response != null)
                 {
-                    TraceScheduler("Request {0} (node request {1}) satisfied from the cache.", request.GlobalRequestId, request.NodeRequestId);
+                    TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) satisfied from the cache.");
 
                     // BuildResult result = (response.Action == ScheduleActionType.Unblock) ? response.Unblocker.Results[0] : response.BuildResult;
                     LogRequestHandledFromCache(request, response.BuildResult);
@@ -1819,7 +1834,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (affinityMismatch)
                         {
-                            ErrorUtilities.VerifyThrowInternalError(
+                            ErrorUtilities.VerifyThrow(
                                 _configCache.HasConfiguration(request.ConfigurationId),
                                 "A request should have a configuration if it makes it this far in the build process.");
 
@@ -1883,7 +1898,7 @@ namespace Microsoft.Build.BackEnd
             // We only actually look at the first one, since that is all we need.
             foreach (SchedulableRequest request in _schedulingData.GetReadyRequestsByNode(nodeId))
             {
-                TraceScheduler("Unblocking request {0} on node {1}", request.BuildRequest.GlobalRequestId, nodeId);
+                TraceScheduler($"Unblocking request {request.BuildRequest.GlobalRequestId} on node {nodeId}");
 
                 // ScheduleResponse response = new ScheduleResponse(nodeId, new BuildRequestUnblocker(request.BuildRequest.GlobalRequestId));
                 ScheduleResponse response = ScheduleResponse.CreateResumeExecutionResponse(nodeId, request.BuildRequest.GlobalRequestId);
@@ -1923,7 +1938,7 @@ namespace Microsoft.Build.BackEnd
                     LogRequestHandledFromCache(request.BuildRequest, response.Unblocker.Result);
                     request.Complete(response.Unblocker.Result);
 
-                    TraceScheduler("Reporting results for request {0} with parent {1} to node {2} from cache.", request.BuildRequest.GlobalRequestId, request.BuildRequest.ParentGlobalRequestId, response.NodeId);
+                    TraceScheduler($"Reporting results for request {request.BuildRequest.GlobalRequestId} with parent {request.BuildRequest.ParentGlobalRequestId} to node {response.NodeId} from cache.");
                     if (response.NodeId != InvalidNodeId)
                     {
                         responses.Add(response);
@@ -1977,7 +1992,7 @@ namespace Microsoft.Build.BackEnd
                 // Don't overload the system.
                 if (AtSchedulingLimit())
                 {
-                    TraceScheduler("System load limit reached, cannot resume any more work.  Executing: {0} Yielding: {1} Max Count: {2}", _schedulingData.ExecutingRequestsCount, _schedulingData.YieldingRequestsCount, _componentHost.BuildParameters.MaxNodeCount);
+                    TraceScheduler($"System load limit reached, cannot resume any more work.  Executing: {_schedulingData.ExecutingRequestsCount} Yielding: {_schedulingData.YieldingRequestsCount} Max Count: {_componentHost.BuildParameters.MaxNodeCount}");
                     return;
                 }
 
@@ -2201,11 +2216,7 @@ namespace Microsoft.Build.BackEnd
             NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, nodeId, true);
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
 
-            TraceScheduler(
-                "Request {0} (node request {1}) with targets ({2}) satisfied from cache",
-                request.GlobalRequestId,
-                request.NodeRequestId,
-                string.Join(";", request.Targets));
+            TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) with targets ({string.Join(";", request.Targets)}) satisfied from cache");
         }
 
         /// <summary>
@@ -2667,17 +2678,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method used for debugging purposes.
         /// </summary>
-        private void TraceScheduler(string format, params object[] stuff)
+        private void TraceScheduler(string message)
         {
             if (_debugDumpState)
             {
                 try
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                    FileUtilities.EnsureDirectoryExists(_debugDumpDirectory);
 
-                    using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                    using StreamWriter file = FileUtilities.OpenWrite(_debugDumpTraceFilePath, append: true);
                     file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, _schedulingData.EventTime.Ticks);
-                    file.WriteLine(format, stuff);
+                    file.WriteLine(message);
                     file.Flush();
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -2685,6 +2696,43 @@ namespace Microsoft.Build.BackEnd
                     // Ignore exceptions
                 }
             }
+        }
+
+        private void TraceScheduler([InterpolatedStringHandlerArgument("")] ref TraceInterpolatedStringHandler handler)
+        {
+            if (_debugDumpState)
+            {
+                TraceScheduler(handler.GetFormattedText());
+            }
+        }
+
+        /// <summary>
+        ///  Interpolated string handler used by <see cref="TraceScheduler(ref TraceInterpolatedStringHandler)"/>
+        ///  to defer string formatting unless tracing is enabled.
+        /// </summary>
+        [InterpolatedStringHandler]
+        private ref struct TraceInterpolatedStringHandler
+        {
+            private StringBuilderHelper _builder;
+
+            public TraceInterpolatedStringHandler(int literalLength, int formattedCount, Scheduler scheduler, out bool isEnabled)
+            {
+                isEnabled = scheduler._debugDumpState;
+                _builder = isEnabled ? new(literalLength) : default;
+            }
+
+            public readonly void AppendLiteral(string value)
+                => _builder.AppendLiteral(value);
+
+            public readonly void AppendFormatted<TValue>(TValue value)
+                => _builder.AppendFormatted(value);
+
+            public readonly void AppendFormatted<TValue>(TValue value, string format)
+                where TValue : IFormattable
+                => _builder.AppendFormatted(value, format);
+
+            public string GetFormattedText()
+                => _builder.GetFormattedText();
         }
 
         /// <summary>
@@ -2698,15 +2746,16 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                        FileUtilities.EnsureDirectoryExists(_debugDumpDirectory);
 
                         bool shouldWriteHeader = _debugDumpIsFirstWrite;
                         if (shouldWriteHeader)
                         {
-                            shouldWriteHeader = !FileSystems.Default.FileExists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
+                            shouldWriteHeader = !FileSystems.Default.FileExists(_debugDumpStateFilePath);
                             _debugDumpIsFirstWrite = false;
                         }
-                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+
+                        using StreamWriter file = FileUtilities.OpenWrite(_debugDumpStateFilePath, append: true);
 
 
                         if (shouldWriteHeader)
@@ -2830,7 +2879,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(_debugDumpStateFilePath, append: true);
 
                         file.WriteLine("Configurations used during this build");
                         file.WriteLine("-------------------------------------");
@@ -2870,7 +2919,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(_debugDumpStateFilePath, append: true);
 
                         file.WriteLine("Requests used during the build:");
                         file.WriteLine("-------------------------------");

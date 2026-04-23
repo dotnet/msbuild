@@ -348,7 +348,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.InProcNodeProvider, "Cannot create component of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.InProcNodeProvider, $"Cannot create component of type {type}");
             return new NodeProviderInProc();
         }
 
@@ -394,7 +394,7 @@ namespace Microsoft.Build.BackEnd
 
             int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
             bool connected = nodeContext._endpointConnectedEvent.WaitOne(connectionTimeout);
-            ErrorUtilities.VerifyThrow(connected, "In-proc node failed to start up within {0}ms", connectionTimeout);
+            ErrorUtilities.VerifyThrow(connected, $"In-proc node failed to start up within {connectionTimeout}ms");
             return true;
         }
 
@@ -451,7 +451,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case NodeEngineShutdownReason.ConnectionFailed:
-                    ErrorUtilities.ThrowInternalError("Unexpected shutdown code {0} received.", reason);
+                    ErrorUtilities.ThrowInternalError($"Unexpected shutdown code {reason} received.");
                     break;
             }
         }

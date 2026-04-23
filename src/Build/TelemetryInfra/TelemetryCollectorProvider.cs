@@ -28,7 +28,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
-        ErrorUtilities.VerifyThrow(type == BuildComponentType.TelemetryCollector, "Cannot create components of type {0}", type);
+        ErrorUtilities.VerifyThrow(type == BuildComponentType.TelemetryCollector, $"Cannot create components of type {type}");
         return new TelemetryCollectorProvider();
     }
 

@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!configurations.ById.TryAdd(config.ConfigurationId, config))
             {
-                ErrorUtilities.ThrowInternalError("Configuration {0} already cached", config.ConfigurationId);
+                ErrorUtilities.ThrowInternalError($"Configuration {config.ConfigurationId} already cached");
             }
 
             _ = configurations.ByMetadata[new ConfigurationMetadata(config)] = config;
@@ -338,7 +338,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ConfigCache, "Cannot create components of type {0}", componentType);
+            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ConfigCache, $"Cannot create components of type {componentType}");
             return new ConfigCache();
         }
 

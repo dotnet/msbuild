@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared
             string resource = PrimaryResources.GetString(name, CultureInfo.CurrentUICulture)
                 ?? SharedResources.GetString(name, CultureInfo.CurrentUICulture);
 
-            ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
+            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
 
             return resource;
         }

@@ -552,7 +552,7 @@ namespace Microsoft.Build.Execution
 
             if (_resultsByTarget.TryGetValue(target, out TargetResult? targetResult))
             {
-                ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, "Items already exist for target {0}.", target);
+                ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, $"Items already exist for target {target}.");
             }
 
             _resultsByTarget[target] = result;
