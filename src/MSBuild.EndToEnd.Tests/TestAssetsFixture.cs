@@ -5,8 +5,6 @@ using System;
 using System.IO;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit.Sdk;
-using Xunit.v3;
 
 namespace Microsoft.Build.EndToEndTests
 {
@@ -32,13 +30,13 @@ namespace Microsoft.Build.EndToEndTests
         ];
 
 
-        public TestSolutionAssetsFixture(IMessageSink messageSink)
+        public TestSolutionAssetsFixture()
         {
             TestAssetDir = Path.Combine(Path.GetDirectoryName(typeof(TestSolutionAssetsFixture).Assembly.Location) ?? AppContext.BaseDirectory, "TestAssets");
-            RestoreTestAssets(messageSink);
+            RestoreTestAssets();
         }
 
-        private void RestoreTestAssets(IMessageSink messageSink)
+        private void RestoreTestAssets()
         {
             foreach (var asset in AssetsToRestore)
             {
@@ -46,12 +44,8 @@ namespace Microsoft.Build.EndToEndTests
                 
                 File.Exists(projectPath).ShouldBeTrue($"Test asset project not found: {projectPath}");
 
-                messageSink.OnMessage(new DiagnosticMessage($"Started restoring test asset: {asset.ProjectPath}"));
-
                 string output = RunnerUtilities.ExecBootstrapedMSBuild($"\"{projectPath}\" /t:Restore /v:minimal", out bool success, timeoutMilliseconds: 120_000);
                 success.ShouldBeTrue($"Failed to restore test asset {asset.SolutionFolder}\\{asset.ProjectRelativePath}. Output:\n{output}");
-
-                messageSink.OnMessage(new DiagnosticMessage($"Finished restoring test asset: {asset.ProjectPath}"));
             }
         }
     }
