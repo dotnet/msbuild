@@ -923,13 +923,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string frameworkPath in frameworkPaths)
                 {
-                    if
-                    (
-                        String.Compare(
-                            frameworkPath, 0,
-                            fullPath, 0,
-                            frameworkPath.Length,
-                            StringComparison.OrdinalIgnoreCase) == 0)
+                    if (IsUnderDirectory(fullPath, frameworkPath))
                     {
                         return true;
                     }
@@ -950,20 +944,22 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (var frameworkPath in frameworkPaths)
                 {
-                    if
-                    (
-                        frameworkPath.Value is not null &&
-                        String.Compare(
-                            frameworkPath.Value, 0,
-                            fullPath, 0,
-                            frameworkPath.Value.Length,
-                            StringComparison.OrdinalIgnoreCase) == 0)
+                    if (IsUnderDirectory(fullPath, frameworkPath.Value))
                     {
                         return true;
                     }
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Checks whether <paramref name="fullPath"/> starts with <paramref name="directoryPath"/> (case-insensitive).
+        /// </summary>
+        private static bool IsUnderDirectory(string fullPath, string directoryPath)
+        {
+            return directoryPath is not null &&
+                String.Compare(directoryPath, 0, fullPath, 0, directoryPath.Length, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         /// <summary>
