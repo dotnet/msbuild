@@ -1055,8 +1055,10 @@ namespace Microsoft.Build.UnitTests.Logging
             service.RegisterLogger(consoleLogger);
 
             service.LogBuildStarted();
-            Assert.IsType<BuildMessageEventArgs>(service.ProcessedBuildEvent);
-            Assert.Contains("ConsoleLogger", service.ProcessedBuildEvent.Message);
+            var enabledLogsEvent = service.AllProcessedBuildEvents
+                .OfType<BuildMessageEventArgs>()
+                .FirstOrDefault(e => e is not LoggerRegisteredEventArgs && e.Message?.Contains("ConsoleLogger") == true);
+            enabledLogsEvent.ShouldNotBeNull();
         }
 
         [Fact]
@@ -1082,11 +1084,12 @@ namespace Microsoft.Build.UnitTests.Logging
                 .OfType<LoggerRegisteredEventArgs>()
                 .FirstOrDefault(e => e.LoggerName == nameof(FileLogger));
             registeredEvent.ShouldNotBeNull();
-            registeredEvent.OutputFilePath.ShouldContain(".log");
+            var expectedPath = Path.GetFullPath(logFilePath);
+            registeredEvent.OutputFilePath.ShouldBe(expectedPath);
 
-            // Check the file log itself contains the path
+            // Check the file log itself contains the exact path
             var fileLogContents = File.ReadAllText(logFilePath);
-            fileLogContents.ShouldContain(".log");
+            fileLogContents.ShouldContain(expectedPath);
         }
 
         [Fact]

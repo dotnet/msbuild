@@ -363,8 +363,11 @@ namespace Microsoft.Build.BackEnd.Logging
             WaitForLoggingToProcessEvents();
 
             // Register Loggers and print out all the enabled loggers.
-            LogEnabledLoggers();
-            RegisterLoggers();
+            if (!OnlyLogCriticalEvents)
+            {
+                LogEnabledLoggers();
+                RegisterLoggers();
+            }
         }
 
         /// <summary>

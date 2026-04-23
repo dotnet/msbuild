@@ -12,7 +12,7 @@ namespace Microsoft.Build.Framework
     [Serializable]
     public class LoggerRegisteredEventArgs : BuildMessageEventArgs
     {
-        public LoggerRegisteredEventArgs()
+        protected LoggerRegisteredEventArgs()
         {
         }
         /// <summary>
