@@ -212,8 +212,10 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (AssemblyFoldersExInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersEx)
                         {
-                            // assemblyFolder.DirectoryPath is assumed to be absolute path as it was taken from registry.
-                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder.DirectoryPath, assembliesConsideredAndRejected);
+                            // Defensively absolutize the directory path — it comes from the registry and should be absolute,
+                            // but we enforce it rather than assume it.
+                            string directoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
+                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned
                             if (candidatePath != null)
