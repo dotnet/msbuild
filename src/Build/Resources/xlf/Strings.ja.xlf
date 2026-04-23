@@ -939,7 +939,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
-        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <target state="translated">SDK によって環境変数 "{0}" が "{1}" に設定され、プロセスから継承された値 "{2}" が上書きされました。</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
