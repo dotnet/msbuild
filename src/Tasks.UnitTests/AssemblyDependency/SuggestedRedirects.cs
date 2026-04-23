@@ -45,6 +45,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -90,6 +91,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[] {
                 new TaskItem("A"), new TaskItem("B")
@@ -139,6 +141,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AutoUnify = true;
 
             t.Assemblies = new ITaskItem[] {
@@ -179,6 +182,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -222,6 +226,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -275,6 +280,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -314,6 +320,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -349,6 +356,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             // NB: These are what common targets would set when AutoGenerateBindingRedirects is enabled.
             t.AutoUnify = true;
@@ -393,6 +401,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -436,6 +445,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {

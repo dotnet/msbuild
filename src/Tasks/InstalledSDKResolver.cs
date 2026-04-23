@@ -24,8 +24,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public InstalledSDKResolver(Dictionary<string, ITaskItem> resolvedSDKs, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
+        public InstalledSDKResolver(Dictionary<string, ITaskItem> resolvedSDKs, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, TaskEnvironment taskEnvironment)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, taskEnvironment)
         {
             _resolvedSDKs = resolvedSDKs;
         }
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
                 // We have found a resolved SDK item that matches the one on the reference items.
                 if (_resolvedSDKs.TryGetValue(sdkName, out ITaskItem resolvedSDK))
                 {
-                    string sdkDirectory = resolvedSDK.ItemSpec;
+                    string sdkDirectory = taskEnvironment.GetAbsolutePath(resolvedSDK.ItemSpec).Value;
                     string configuration = resolvedSDK.GetMetadata("TargetedSDKConfiguration");
                     string architecture = resolvedSDK.GetMetadata("TargetedSDKArchitecture");
 

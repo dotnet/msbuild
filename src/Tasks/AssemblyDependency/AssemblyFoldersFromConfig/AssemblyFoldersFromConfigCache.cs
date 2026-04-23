@@ -35,22 +35,25 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// Constructor
         /// </summary>
-        internal AssemblyFoldersFromConfigCache(AssemblyFoldersFromConfig assemblyFoldersFromConfig, FileExists fileExists)
+        internal AssemblyFoldersFromConfigCache(AssemblyFoldersFromConfig assemblyFoldersFromConfig, FileExists fileExists, TaskEnvironment taskEnvironment)
         {
             AssemblyFoldersFromConfig = assemblyFoldersFromConfig;
             _fileExists = fileExists;
 
-            if (Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") != null)
+            if (taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") != null)
             {
                 _useOriginalFileExists = true;
             }
             else
             {
+                // Absolutize directory paths defensively — config paths theoretically should but may not be absolute.
                 _filesInDirectories = new(assemblyFoldersFromConfig.AsParallel()
-                    .Where(assemblyFolder => FileUtilities.DirectoryExistsNoThrow(assemblyFolder.DirectoryPath))
+                    .Where(assemblyFolder => !string.IsNullOrEmpty(assemblyFolder.DirectoryPath))
+                    .Select(assemblyFolder => taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value)
+                    .Where(absolutePath => FileUtilities.DirectoryExistsNoThrow(absolutePath))
                     .SelectMany(
-                        assemblyFolder =>
-                            Directory.GetFiles(assemblyFolder.DirectoryPath, "*.*", SearchOption.TopDirectoryOnly)),
+                        absolutePath =>
+                            Directory.GetFiles(absolutePath, "*.*", SearchOption.TopDirectoryOnly)),
                     StringComparer.OrdinalIgnoreCase);
             }
         }

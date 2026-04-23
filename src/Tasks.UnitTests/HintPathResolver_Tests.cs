@@ -71,7 +71,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 getAssemblyName: (path) => throw new NotImplementedException(), // not called in this code path
                 fileExists: p => FileUtilities.FileExistsNoThrow(p),
                 getRuntimeVersion: (path) => throw new NotImplementedException(), // not called in this code path
-                targetedRuntimeVesion: Version.Parse("4.0.30319"));
+                targetedRuntimeVesion: Version.Parse("4.0.30319"),
+                taskEnvironment: TaskEnvironmentHelper.CreateForTest());
 
             var result = hintPathResolver.Resolve(new AssemblyNameExtension("FakeSystem.Net.Http"),
                 sdkName: "",

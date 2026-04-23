@@ -33,7 +33,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("DependsOnFoo4Framework"),
             };
 
+    
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "BAR, Version=4.0";
@@ -61,6 +63,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=v4.0";
@@ -88,6 +91,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -118,6 +122,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -145,6 +150,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=v4.0";
@@ -174,6 +180,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -206,6 +213,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -237,6 +245,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -267,6 +276,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest(); 
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -299,6 +309,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -331,6 +342,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -363,6 +375,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = e;
             t.Assemblies = items;
             t.FindDependencies = false;

@@ -29,14 +29,31 @@ namespace Microsoft.Build.Tasks
         private byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
-        /// True if <see cref="SerializeCache"/> should create the state file and serialize ourselves, false otherwise.
+        /// True if <see cref="SerializeCache(string, TaskLoggingHelper, bool)"/> should create the state file and serialize ourselves, false otherwise.
         /// </summary>
         internal virtual bool HasStateToSave => true;
 
         /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
+        /// <remarks>
+        /// Prioritize using the AbsolutePath overload of this method. This method is still used by unenlightened tasks, but new code should use the AbsolutePath overload.
+        /// Delete this method once all tasks have been migrated to the AbsolutePath overload.
+        /// </remarks>
         internal virtual void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
+        {
+            if (string.IsNullOrEmpty(stateFile))
+            {
+                return;
+            }
+
+            SerializeCache(new AbsolutePath(stateFile, ignoreRootedCheck: true), log, serializeEmptyState);
+        }
+
+        /// <summary>
+        /// Writes the contents of this object out to the specified file.
+        /// </summary>
+        internal virtual void SerializeCache(AbsolutePath stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
             try
             {
@@ -64,7 +81,7 @@ namespace Microsoft.Build.Tasks
             {
                 // Not being able to serialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
-                log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile, e.Message);
+                log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile.OriginalValue, e.Message);
             }
         }
 
@@ -72,8 +89,25 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
+        /// stateFile should be absolute path to the file on disk.
         /// </summary>
+        /// <remarks>
+        /// Prioritize using the AbsolutePath overload of this method. This method is still used by unenlightened tasks, but new code should use the AbsolutePath overload.
+        /// </remarks>
         internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log) where T : StateFileBase
+        {
+            if (string.IsNullOrEmpty(stateFile))
+            {
+                return null;
+            }
+
+            return DeserializeCache<T>(new AbsolutePath(stateFile, ignoreRootedCheck: true), log);
+        }
+
+        /// <summary>
+        /// Reads the specified file from disk into a StateFileBase derived object.
+        /// </summary>
+        internal static T DeserializeCache<T>(AbsolutePath stateFile, TaskLoggingHelper log) where T : StateFileBase
         {
             T retVal = null;
 
@@ -92,7 +126,7 @@ namespace Microsoft.Build.Tasks
                         // For the latter case, internals may be unexpectedly null.
                         if (version != CurrentSerializationVersion)
                         {
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile.OriginalValue, log.FormatResourceString("General.IncompatibleStateFileType"));
                             return null;
                         }
 
@@ -108,7 +142,7 @@ namespace Microsoft.Build.Tasks
 
                         if (retVal == null)
                         {
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,
+                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile.OriginalValue,
                                 log.FormatResourceString("General.IncompatibleStateFileType"));
                         }
                     }
@@ -120,11 +154,12 @@ namespace Microsoft.Build.Tasks
                 // any exception imaginable.  Catch them all here.
                 // Not being able to deserialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
-                log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, e.Message);
+                log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile.OriginalValue, e.Message);
             }
 
             return retVal;
         }
+
 
         /// <summary>
         /// Deletes the state file from disk

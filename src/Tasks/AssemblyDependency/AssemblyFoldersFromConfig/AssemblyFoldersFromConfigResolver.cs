@@ -75,10 +75,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         public AssemblyFoldersFromConfigResolver(string searchPathElement, GetAssemblyName getAssemblyName,
             FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion,
             ProcessorArchitecture targetProcessorArchitecture, bool compareProcessorArchitecture,
-            IBuildEngine buildEngine, TaskLoggingHelper log)
+            IBuildEngine buildEngine, TaskLoggingHelper log, TaskEnvironment taskEnvironment)
             : base(
                 searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion,
-                targetProcessorArchitecture, compareProcessorArchitecture)
+                targetProcessorArchitecture, compareProcessorArchitecture, taskEnvironment)
         {
             _buildEngine = buildEngine as IBuildEngine4;
             _taskLogger = log;
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 
                     _wasMatch = true;
 
-                    bool useCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
+                    bool useCache = taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
                     string key = "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + searchPathElement;
 
                     if (useCache && _buildEngine != null)
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                         try
                         {
                             AssemblyFoldersFromConfig assemblyFolders = new AssemblyFoldersFromConfig(_assemblyFolderConfigFile, _targetRuntimeVersion, targetProcessorArchitecture);
-                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists);
+                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists, taskEnvironment);
                             if (useCache)
                             {
                                 _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);
@@ -180,7 +180,24 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     {
                         foreach (AssemblyFoldersFromConfigInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersFromConfig)
                         {
-                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder.DirectoryPath, assembliesConsideredAndRejected);
+                            string directoryPath;
+                            if (string.IsNullOrEmpty(assemblyFolder.DirectoryPath))
+                            {
+                                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                                {
+                                    continue;
+                                }
+
+                                // Pre-Wave18_6: empty DirectoryPath was passed through and resolved from CWD (project directory).
+                                directoryPath = taskEnvironment.ProjectDirectory.Value;
+                            }
+                            else
+                            {
+                                // Absolutize defensively — config paths may not be absolute.
+                                directoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
+                            }
+
+                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned
                             if (candidatePath != null)

@@ -621,8 +621,8 @@ namespace Microsoft.Build.Tasks
                         if (allowListErrors.Count == errorsBeforeReadCall)
                         {
                             // The allowList errors passes back problems reading the redist file through the use of an array containing exceptions
-                            allowListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
-                            allowListErrorFileNames.Add(info.Path);
+                            allowListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path.OriginalValue)));
+                            allowListErrorFileNames.Add(info.Path.OriginalValue);
                         }
                     }
                 }
@@ -689,7 +689,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Redist name of the redist list just read in</returns>
         internal static string ReadFile(AssemblyTableInfo assemblyTableInfo, List<AssemblyEntry> assembliesList, List<Exception> errorsList, List<string> errorFilenamesList, List<AssemblyRemapping> remapEntries)
         {
-            string path = assemblyTableInfo.Path;
+            string path = assemblyTableInfo.Path.Value;
             string redistName = null;
             XmlReader reader = null;
 
@@ -978,17 +978,36 @@ namespace Microsoft.Build.Tasks
     {
         private string _descriptor;
 
-        internal AssemblyTableInfo(string path, string frameworkDirectory)
+        /// <summary>
+        /// Creates an <see cref="AssemblyTableInfo"/> from a potentially relative path,
+        /// absolutizing it and canonicalizing it if possible using the provided <paramref name="taskEnvironment"/>.
+        /// </summary>
+        /// <param name="path">Path to the assembly table file (can be relative).</param>
+        /// <param name="frameworkDirectory">Framework directory path.</param>
+        /// <param name="taskEnvironment">TaskEnvironment for path conversion.</param>
+        /// <param name="log">Logger for diagnostic messages when canonicalization fails.</param>
+        internal static AssemblyTableInfo CreateFromRelativePath(string path, string frameworkDirectory, TaskEnvironment taskEnvironment, TaskLoggingHelper log)
         {
-            Path = FileUtilities.NormalizeForPathComparison(path);
+            AbsolutePath canonicalPath = taskEnvironment.GetAbsolutePath(FileUtilities.NormalizeForPathComparison(path)).TryGetCanonicalForm(log);
+            return new AssemblyTableInfo(canonicalPath, FileUtilities.NormalizeForPathComparison(frameworkDirectory));
+        }
+
+        /// <summary>
+        /// Constructor that expects absolute paths. Use this when paths are already fully qualified.
+        /// </summary>
+        /// <param name="absolutePath">Absolute path to the assembly table file</param>
+        /// <param name="frameworkDirectory">Framework directory path</param>
+        internal AssemblyTableInfo(string absolutePath, string frameworkDirectory)
+        {
+            Path = new AbsolutePath(FileUtilities.NormalizeForPathComparison(absolutePath));
             FrameworkDirectory = FileUtilities.NormalizeForPathComparison(frameworkDirectory);
         }
 
-        internal string Path { get; }
+        internal AbsolutePath Path { get; }
 
         internal string FrameworkDirectory { get; }
 
-        internal string Descriptor => _descriptor ?? (_descriptor = Path + FrameworkDirectory);
+        internal string Descriptor => _descriptor ?? (_descriptor = Path.Value + FrameworkDirectory);
 
         public int CompareTo(object obj)
         {

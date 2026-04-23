@@ -34,6 +34,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 AllowOutOfProcNode = true,
                 BuildEngine = engine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Assemblies = [new TaskItem("System")],
                 SearchPaths = [Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName)],
             };
@@ -73,6 +74,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 AllowOutOfProcNode = taskInputFlag,
                 BuildEngine = engine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Assemblies = [new TaskItem("System")],
                 SearchPaths = [Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName)],
             };
@@ -99,6 +101,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 AllowOutOfProcNode = true,
                 BuildEngine = engine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Assemblies = [new TaskItem("System")],
                 SearchPaths = [Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName)],
             };
