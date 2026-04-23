@@ -19,6 +19,7 @@ namespace Microsoft.Build.Tasks
     /// Generates an application manifest for ClickOnce projects.
     /// </summary>
     [SupportedOSPlatform("windows")]
+    [MSBuildMultiThreadableTask]
     public sealed class GenerateApplicationManifest : GenerateManifestBase
     {
         private enum _ManifestType
@@ -41,7 +42,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Dependencies
         {
             get => _dependencies;
-            set => _dependencies = Util.SortItems(value);
+            set => _dependencies = value;
         }
 
         public string ErrorReportUrl { get; set; }
@@ -63,7 +64,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Files
         {
             get => _files;
-            set => _files = Util.SortItems(value);
+            set => _files = value;
         }
 
         public bool HostInBrowser { get; set; }
@@ -73,7 +74,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] IsolatedComReferences
         {
             get => _isolatedComReferences;
-            set => _isolatedComReferences = Util.SortItems(value);
+            set => _isolatedComReferences = value;
         }
 
         public string ManifestType { get; set; }
@@ -142,6 +143,10 @@ namespace Microsoft.Build.Tasks
 
         private bool BuildApplicationManifest(ApplicationManifest manifest)
         {
+            _dependencies = Util.SortItems(_dependencies, TaskEnvironment);
+            _files = Util.SortItems(_files, TaskEnvironment);
+            _isolatedComReferences = Util.SortItems(_isolatedComReferences, TaskEnvironment);
+
             if (Dependencies != null)
             {
                 foreach (ITaskItem item in Dependencies)
@@ -281,8 +286,9 @@ namespace Microsoft.Build.Tasks
 
             if (!String.IsNullOrEmpty(TrustInfoFile?.ItemSpec))
             {
+                AbsolutePath trustInfoPath = TaskEnvironment.GetAbsolutePath(TrustInfoFile.ItemSpec);
                 manifest.TrustInfo = new TrustInfo();
-                manifest.TrustInfo.Read(TrustInfoFile.ItemSpec);
+                manifest.TrustInfo.Read(trustInfoPath);
             }
 
             if (manifest.TrustInfo == null)
@@ -449,7 +455,8 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                using (Stream s = File.Open(InputManifest.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read))
+                AbsolutePath inputManifestPath = TaskEnvironment.GetAbsolutePath(InputManifest.ItemSpec);
+                using (Stream s = File.Open(inputManifestPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     var document = new XmlDocument();
                     var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };

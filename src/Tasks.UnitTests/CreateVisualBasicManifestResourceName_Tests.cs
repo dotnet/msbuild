@@ -344,6 +344,7 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ITaskItem i = new TaskItem("SR1.resx");
 
@@ -390,6 +391,7 @@ End Namespace");
                 CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i },
                 };
@@ -410,7 +412,7 @@ End Namespace");
         /// <param name="mode">File mode</param>
         /// <param name="access">Access type</param>
         /// <returns>The Stream</returns>
-        private Stream CreateFileStream(string path, FileMode mode, FileAccess access)
+        private Stream CreateFileStream(AbsolutePath path, FileMode mode, FileAccess access)
         {
             if (String.Equals(path, "SR1.strings", StringComparison.OrdinalIgnoreCase))
             {
@@ -513,6 +515,7 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("strings.resx");
 
             t.ResourceFiles = new ITaskItem[] { i };
@@ -538,6 +541,7 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("pic.bmp");
             i.SetMetadata("Type", "Non-Resx");
 
@@ -563,6 +567,7 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("pic.bmp");
             i.SetMetadata("LogicalName", "foo");
             i.SetMetadata("Type", "Non-Resx");
@@ -589,6 +594,7 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("strings.resx");
             i.SetMetadata("Type", "Resx");
 
