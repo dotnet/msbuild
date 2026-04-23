@@ -393,7 +393,7 @@ namespace Microsoft.Build.BackEnd
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
-            
+
             if (TaskInstance is IMultiThreadableTask multiThreadableTask)
             {
                 multiThreadableTask.TaskEnvironment = TaskEnvironment;
@@ -1488,7 +1488,7 @@ namespace Microsoft.Build.BackEnd
                             ProjectItemInstance newItem;
 
                             TaskItem outputAsProjectItem = output as TaskItem;
-                            string parameterLocationEscaped = EscapingUtilities.EscapeWithCaching(parameterLocation.File);
+                            string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
 
                             if (outputAsProjectItem != null)
                             {
