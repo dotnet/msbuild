@@ -614,10 +614,7 @@ namespace Microsoft.Build.Tasks
             get => _assemblyInformationCacheOutputPath.OriginalValue;
             set
             {
-                if (!string.IsNullOrEmpty(value))
-                {
-                    _assemblyInformationCacheOutputPath = MakeAbsolutePath(value);
-                }
+                _assemblyInformationCacheOutputPath = MakeAbsolutePath(value);
             }
         }
 
@@ -802,10 +799,7 @@ namespace Microsoft.Build.Tasks
             get => _stateFile.OriginalValue;
             set 
             { 
-                if (!string.IsNullOrEmpty(value))
-                {
-                    _stateFile = MakeAbsolutePath(value);
-                }
+                _stateFile = MakeAbsolutePath(value);
             }
         }
 
@@ -1134,12 +1128,17 @@ namespace Microsoft.Build.Tasks
         }
         
         /// <summary>
-        /// Converts a path to an <see cref="AbsolutePath"/>.
+        /// Converts a path to an <see cref="AbsolutePath"/>. Returns <c>default</c> for null or empty paths.
         /// Under Wave 18.6, absolutizes relative paths via <see cref="TaskEnvironment"/>.
         /// Otherwise, wraps the raw string to preserve pre-wave behavior.
         /// </summary>
         private AbsolutePath MakeAbsolutePath(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return default;
+            }
+
             return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)
                 ? TaskEnvironment.GetAbsolutePath(path)
                 : new AbsolutePath(path, ignoreRootedCheck: true);
@@ -1151,17 +1150,22 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private AbsolutePath[] MakeAbsolutePaths(string[] paths)
         {
-            return paths?.Select(
-                path => string.IsNullOrEmpty(path) ? default : MakeAbsolutePath(path)).ToArray() ?? [];
+            return paths?.Select(path => MakeAbsolutePath(path)).ToArray() ?? [];
         }
 
         /// <summary>
         /// Converts a path to an <see cref="AbsolutePath"/> in canonical form (resolves ".." etc.).
+        /// Returns <c>default</c> for null or empty paths.
         /// Canonical form is needed for paths used in string comparisons.
         /// Under Wave 18.6, absolutizes and canonicalizes. Otherwise, wraps the raw string.
         /// </summary>
         private AbsolutePath MakeCanonicalPath(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return default;
+            }
+
             return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)
                 ? TaskEnvironment.GetAbsolutePath(path).TryGetCanonicalForm(Log)
                 : new AbsolutePath(path, ignoreRootedCheck: true);
@@ -1173,8 +1177,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private AbsolutePath[] MakeCanonicalPaths(string[] paths)
         {
-            return paths?.Select(
-                path => string.IsNullOrEmpty(path) ? default : MakeCanonicalPath(path)).ToArray() ?? [];
+            return paths?.Select(path => MakeCanonicalPath(path)).ToArray() ?? [];
         }
 
         #endregion
@@ -3393,10 +3396,6 @@ namespace Microsoft.Build.Tasks
                     CommunicationsUtilities.Trace("RAR out-of-proc connection failed, failing back to in-proc. Exception: {0}", ex);
                 }
             }
-
-            // In a multithreaded node, relative paths must be resolved relative to the project directory
-            // rather than the process working directory. AbsolutePath objects are created in property setters
-            // when TaskEnvironment is available, so no additional processing needed here.
 
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
