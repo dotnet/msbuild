@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -300,8 +300,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                _latestTargetFrameworkDirectories = value?.Select(
-                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray() ?? [];
+                _latestTargetFrameworkDirectories = MakeCanonicalPaths(value);
             }
         }
 
@@ -409,8 +408,7 @@ namespace Microsoft.Build.Tasks
             }
             set
             {
-                _candidateAssemblyFiles = value?.Select(
-                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray() ?? [];
+                _candidateAssemblyFiles = MakeAbsolutePaths(value);
             }
         }
 
@@ -438,8 +436,7 @@ namespace Microsoft.Build.Tasks
             }
             set
             {
-                _targetFrameworkDirectories = value?.Select(
-                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray() ?? [];
+                _targetFrameworkDirectories = MakeCanonicalPaths(value);
             }
         }
 
@@ -619,7 +616,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.IsNullOrEmpty(value))
                 {
-                    _assemblyInformationCacheOutputPath = TaskEnvironment.GetAbsolutePath(value);
+                    _assemblyInformationCacheOutputPath = MakeAbsolutePath(value);
                 }
             }
         }
@@ -709,7 +706,7 @@ namespace Microsoft.Build.Tasks
             { 
                 if (!string.IsNullOrEmpty(value))
                 {
-                    _appConfigFile = TaskEnvironment.GetAbsolutePath(value);
+                    _appConfigFile = MakeAbsolutePath(value);
                 }
                 else if (value == string.Empty && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
                 {
@@ -807,7 +804,7 @@ namespace Microsoft.Build.Tasks
             { 
                 if (!string.IsNullOrEmpty(value))
                 {
-                    _stateFile = TaskEnvironment.GetAbsolutePath(value).GetCanonicalForm();
+                    _stateFile = MakeAbsolutePath(value);
                 }
             }
         }
@@ -959,8 +956,7 @@ namespace Microsoft.Build.Tasks
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkFolders");
-                _fullFrameworkFolders = value.Select(
-                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
+                _fullFrameworkFolders = MakeCanonicalPaths(value);
             }
         }
 
@@ -1135,6 +1131,50 @@ namespace Microsoft.Build.Tasks
         {
             get => [.. _unresolvedConflicts];
             internal set => _unresolvedConflicts = [.. value];
+        }
+        
+        /// <summary>
+        /// Converts a path to an <see cref="AbsolutePath"/>.
+        /// Under Wave 18.6, absolutizes relative paths via <see cref="TaskEnvironment"/>.
+        /// Otherwise, wraps the raw string to preserve pre-wave behavior.
+        /// </summary>
+        private AbsolutePath MakeAbsolutePath(string path)
+        {
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)
+                ? TaskEnvironment.GetAbsolutePath(path)
+                : new AbsolutePath(path, ignoreRootedCheck: true);
+        }
+
+        /// <summary>
+        /// Converts each non-empty path in the array to an <see cref="AbsolutePath"/>.
+        /// Returns an empty array if <paramref name="paths"/> is null.
+        /// </summary>
+        private AbsolutePath[] MakeAbsolutePaths(string[] paths)
+        {
+            return paths?.Select(
+                path => string.IsNullOrEmpty(path) ? default : MakeAbsolutePath(path)).ToArray() ?? [];
+        }
+
+        /// <summary>
+        /// Converts a path to an <see cref="AbsolutePath"/> in canonical form (resolves ".." etc.).
+        /// Canonical form is needed for paths used in string comparisons.
+        /// Under Wave 18.6, absolutizes and canonicalizes. Otherwise, wraps the raw string.
+        /// </summary>
+        private AbsolutePath MakeCanonicalPath(string path)
+        {
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)
+                ? TaskEnvironment.GetAbsolutePath(path).TryGetCanonicalForm(Log)
+                : new AbsolutePath(path, ignoreRootedCheck: true);
+        }
+
+        /// <summary>
+        /// Converts each non-empty path in the array to a canonical <see cref="AbsolutePath"/>.
+        /// Returns an empty array if <paramref name="paths"/> is null.
+        /// </summary>
+        private AbsolutePath[] MakeCanonicalPaths(string[] paths)
+        {
+            return paths?.Select(
+                path => string.IsNullOrEmpty(path) ? default : MakeCanonicalPath(path)).ToArray() ?? [];
         }
 
         #endregion
@@ -2171,7 +2211,7 @@ namespace Microsoft.Build.Tasks
         {
             if (_assemblyInformationCacheOutputPath.Value is not null)
             {
-                _cache.SerializePrecomputedCache(_assemblyInformationCacheOutputPath.Value, Log);
+                _cache.SerializePrecomputedCache(_assemblyInformationCacheOutputPath, Log);
             }
             else if (_stateFile.Value is not null && (_cache.IsDirty || _cache.instanceLocalOutgoingFileStateCache.Count < _cache.instanceLocalFileStateCache.Count))
             {

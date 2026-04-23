@@ -618,7 +618,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="stateFile">Path to which to write the precomputed cache</param>
         /// <param name="log">How to log</param>
-        internal void SerializePrecomputedCache(string stateFile, TaskLoggingHelper log)
+        internal void SerializePrecomputedCache(AbsolutePath stateFile, TaskLoggingHelper log)
         {
             // Save a copy of instanceLocalOutgoingFileStateCache so we can restore it later. SerializeCacheByTranslator serializes
             // instanceLocalOutgoingFileStateCache by default, so change that to the relativized form, then change it back.
@@ -629,7 +629,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (FileUtilities.FileExistsNoThrow(stateFile))
                 {
-                    log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile);
+                    log.LogWarningWithCodeFromResources("General.StateFileAlreadyPresent", stateFile.OriginalValue);
                 }
                 SerializeCache(stateFile, log);
             }

@@ -619,6 +619,11 @@
         <target state="translated">Die erwartete Datei "{0}" ist nicht vorhanden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not canonicalize path "{0}": {1}. The path will be used as-is.</source>
+        <target state="new">Could not canonicalize path "{0}": {1}. The path will be used as-is.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
         <source>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</source>
         <target state="translated">MSB3082: Fehler bei der Aufgabe. "{0}" wurde nicht gefunden, oder .NET Framework {1} ist nicht installiert.  Installieren Sie .NET Framework {1}.</target>

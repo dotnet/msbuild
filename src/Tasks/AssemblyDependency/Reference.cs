@@ -821,6 +821,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns a collection of strings. Each string is the full path to an assembly that was
         /// considered for resolution but then rejected because it wasn't a complete match.
+        /// Note that these paths are not canonicalized — resolvers only absolutize paths, not canonicalize them.
         /// </summary>
         internal List<ResolutionSearchLocation> AssembliesConsideredAndRejected { get; private set; } = new List<ResolutionSearchLocation>();
 

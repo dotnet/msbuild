@@ -619,6 +619,11 @@
         <target state="translated">필요한 "{0}" 파일이 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not canonicalize path "{0}": {1}. The path will be used as-is.</source>
+        <target state="new">Could not canonicalize path "{0}": {1}. The path will be used as-is.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
         <source>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</source>
         <target state="translated">MSB3082: "{0}"이(가) 없거나 .NET Framework {1}이(가) 설치되어 있지 않아 작업을 수행하지 못했습니다.  .NET Framework {1}을(를) 설치하세요.</target>

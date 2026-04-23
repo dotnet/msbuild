@@ -619,6 +619,11 @@
         <target state="translated">Beklenen "{0}" dosyası yok.</target>
         <note />
       </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not canonicalize path "{0}": {1}. The path will be used as-is.</source>
+        <target state="new">Could not canonicalize path "{0}": {1}. The path will be used as-is.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
         <source>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</source>
         <target state="translated">MSB3082: "{0}" bulunamadığından veya .NET Framework {1} yüklü olmadığından görev başarısız oldu.  Lütfen .NET Framework {1} yükleyin.</target>

@@ -619,6 +619,11 @@
         <target state="translated">Očekávaný soubor {0} neexistuje.</target>
         <note />
       </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not canonicalize path "{0}": {1}. The path will be used as-is.</source>
+        <target state="new">Could not canonicalize path "{0}": {1}. The path will be used as-is.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
         <source>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</source>
         <target state="translated">MSB3082: Úloha se nezdařila, protože nebyla nalezena položka {0} nebo není nainstalováno rozhraní .NET Framework {1}.  Nainstalujte rozhraní .NET Framework {1}.</target>
