@@ -939,7 +939,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
-        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <target state="translated">Bir SDK, "{0}" ortam değişkenini "{1}" olarak ayarlayarak, işlemden devralınan "{2}" değerini geçersiz kıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
