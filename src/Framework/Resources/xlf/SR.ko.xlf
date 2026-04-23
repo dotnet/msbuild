@@ -127,6 +127,16 @@
         <target state="translated">Visual Studio 버전 "{0}"이(가) 지원되지 않습니다.  Microsoft.Build.Utilities.VisualStudioVersion 열거형에서 값을 지정하세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="_0_contains_no_elements">
+        <source>'{0}' contains no elements.</source>
+        <target state="new">'{0}' contains no elements.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_does_not_contain_matching_element">
+        <source>'{0}' does not contain matching element.</source>
+        <target state="new">'{0}' does not contain matching element.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -127,6 +127,16 @@
         <target state="translated">Visual Studio-Version "{0}" wird nicht unterstützt.  Geben Sie einen Wert aus der Enumeration "Microsoft.Build.Utilities.VisualStudioVersion" an.</target>
         <note />
       </trans-unit>
+      <trans-unit id="_0_contains_no_elements">
+        <source>'{0}' contains no elements.</source>
+        <target state="new">'{0}' contains no elements.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_does_not_contain_matching_element">
+        <source>'{0}' does not contain matching element.</source>
+        <target state="new">'{0}' does not contain matching element.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
