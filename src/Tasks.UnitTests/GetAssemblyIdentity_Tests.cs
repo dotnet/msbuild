@@ -112,7 +112,9 @@ namespace Microsoft.Build.UnitTests
             GetAssemblyIdentity task = CreateTaskUnderTest(engine);
             task.AssemblyFiles = [new TaskItem("")];
 
-            Assert.Throws<ArgumentException>(() => task.Execute());
+            task.Execute().ShouldBeFalse();
+
+            AssertCouldNotGetAssemblyName(engine);
         }
 
         [Fact]
