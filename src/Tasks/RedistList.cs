@@ -979,15 +979,17 @@ namespace Microsoft.Build.Tasks
         private string _descriptor;
 
         /// <summary>
-        /// Constructor that converts relative paths to absolute paths using TaskEnvironment.
+        /// Creates an <see cref="AssemblyTableInfo"/> from a potentially relative path,
+        /// absolutizing it and canonicalizing it if possible using the provided <paramref name="taskEnvironment"/>.
         /// </summary>
-        /// <param name="path">Path to the assembly table file (can be relative)</param>
-        /// <param name="frameworkDirectory">Framework directory path</param>
-        /// <param name="taskEnvironment">TaskEnvironment for path conversion</param>
-        internal AssemblyTableInfo(string path, string frameworkDirectory, TaskEnvironment taskEnvironment)
+        /// <param name="path">Path to the assembly table file (can be relative).</param>
+        /// <param name="frameworkDirectory">Framework directory path.</param>
+        /// <param name="taskEnvironment">TaskEnvironment for path conversion.</param>
+        /// <param name="log">Logger for diagnostic messages when canonicalization fails.</param>
+        internal static AssemblyTableInfo CreateFromRelativePath(string path, string frameworkDirectory, TaskEnvironment taskEnvironment, TaskLoggingHelper log)
         {
-            Path = taskEnvironment.GetAbsolutePath(FileUtilities.NormalizeForPathComparison(path)).GetCanonicalForm();
-            FrameworkDirectory = FileUtilities.NormalizeForPathComparison(frameworkDirectory);
+            AbsolutePath canonicalPath = taskEnvironment.GetAbsolutePath(FileUtilities.NormalizeForPathComparison(path)).TryGetCanonicalForm(log);
+            return new AssemblyTableInfo(canonicalPath, FileUtilities.NormalizeForPathComparison(frameworkDirectory));
         }
 
         /// <summary>

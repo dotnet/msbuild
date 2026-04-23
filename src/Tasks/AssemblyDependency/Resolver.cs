@@ -299,7 +299,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
         /// <param name="executableExtensions">The possible filename extensions of the assembly. Must be one of these or its no match.</param>
-        /// <param name="fullPathToDirectory">Fully qualified path to the directory to look in</param>
+        /// <param name="fullPathToDirectory">Absolute path to the directory to look in. May not be in canonical form.</param>
         /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
         /// <returns>'null' if the assembly wasn't found.</returns>
         protected string ResolveFromDirectory(

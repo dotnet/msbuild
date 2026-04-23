@@ -3188,7 +3188,7 @@ namespace Microsoft.Build.Tasks
                     string[] listPaths = GetAssemblyListPaths(targetFrameworkDirectory);
                     foreach (string listPath in listPaths)
                     {
-                        tableMap[listPath] = new AssemblyTableInfo(listPath, targetFrameworkDirectory, TaskEnvironment);
+                        tableMap[listPath] = AssemblyTableInfo.CreateFromRelativePath(listPath, targetFrameworkDirectory, TaskEnvironment, Log);
                     }
                 }
             }
@@ -3212,7 +3212,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory, TaskEnvironment);
+                tableMap[installedAssemblyTable.ItemSpec] = AssemblyTableInfo.CreateFromRelativePath(installedAssemblyTable.ItemSpec, frameworkDirectory, TaskEnvironment, Log);
             }
 
             AssemblyTableInfo[] extensions = new AssemblyTableInfo[tableMap.Count];

@@ -14,10 +14,14 @@ namespace Microsoft.Build.Tasks
     {
         /// <summary>
         /// Tries to return the canonical form of an <see cref="AbsolutePath"/> (resolving ".." segments, etc.).
-        /// On .NET Framework, <see cref="System.IO.Path.GetFullPath(string)"/> validates path characters and throws
-        /// for illegal characters. In that case the original absolute path is returned as-is and a message is logged.
+        /// <see cref="System.IO.Path.GetFullPath(string)"/> on .NET Framework validates path characters and throws
+        /// <see cref="ArgumentException"/> for illegal characters (e.g. <c>|</c>, <c>&lt;</c>, <c>&gt;</c>).
+        /// .NET Core is more permissive and delegates character validation to the OS.
+        /// When canonicalization fails, the original absolute path is returned as-is.
         /// </summary>
-        internal static AbsolutePath TryGetCanonicalForm(this AbsolutePath absolutePath, TaskLoggingHelper log)
+        /// <param name="absolutePath">The absolute path to canonicalize.</param>
+        /// <param name="log">Optional logger. When provided, a low-importance diagnostic message is logged on failure.</param>
+        internal static AbsolutePath TryGetCanonicalForm(this AbsolutePath absolutePath, TaskLoggingHelper? log = null)
         {
             try
             {
@@ -25,7 +29,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e)
             {
-                log.LogMessageFromResources(MessageImportance.Low, "General.FailedToCanonicalizePath", absolutePath.Value, e.Message);
+                log?.LogMessageFromResources(MessageImportance.Low, "General.FailedToCanonicalizePath", absolutePath.Value, e.Message);
                 return absolutePath;
             }
         }
