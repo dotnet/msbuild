@@ -4046,7 +4046,11 @@ namespace Microsoft.Build.CommandLine
             bool isBuildCheckEnabled)
         {
 
-            var replayEventSource = new BinaryLogReplayEventSource();
+            var replayEventSource = new BinaryLogReplayEventSource() { AllowForwardCompatibility = true };
+            replayEventSource.RecoverableReadError += args =>
+            {
+                Console.WriteLine(args.ErrorType + ": " + args.GetFormattedMessage());
+            };
 
             var eventSource = isBuildCheckEnabled ?
                 BuildCheckReplayModeConnector.GetMergedEventSource(BuildManager.DefaultBuildManager, replayEventSource) :
@@ -4080,6 +4084,19 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
+
+                if (replayEventSource.FileFormatVersion > BinaryLogger.FileFormatVersion)
+                {
+                    Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BinlogFormatVersionMismatch",
+                        replayEventSource.FileFormatVersion, BinaryLogger.FileFormatVersion));
+                }
+            }
+            catch (NotSupportedException ex)
+            {
+                // The log file format is not supported (e.g. minimum reader version too high).
+                // This is a fatal error - we cannot read the log at all.
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
+                Console.WriteLine(message);
             }
             catch (Exception ex)
             {

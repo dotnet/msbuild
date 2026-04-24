@@ -1736,10 +1736,15 @@
   </data>
   <!-- **** TaskHost strings end **** -->
 
+  <data name="BinlogFormatVersionMismatch" xml:space="preserve">
+    <value>MSB1072: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</value>
+    <comment>{StrBegin="MSB1072: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</comment>
+  </data>
+
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1072.
+        Next error code should be MSB1073.
 
         Don't forget to update this comment after using the new code.
   -->

@@ -10,6 +10,11 @@
       fire this error.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="BinlogFormatVersionMismatch">
+        <source>MSB1072: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
+        <target state="new">MSB1072: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <note>{StrBegin="MSB1072: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
+      </trans-unit>
       <trans-unit id="BuildFailedWithPropertiesItemsOrTargetResultsRequested">
         <source>Build failed. Properties, Items, and Target results cannot be obtained. See details in stderr above.</source>
         <target state="translated">Kompilacja nie powiodła się. Nie można uzyskać wyników właściwości, elementów i celu. Zobacz szczegóły w sekcji stderr powyżej.</target>

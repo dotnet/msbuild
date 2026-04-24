@@ -967,6 +967,61 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
+        [Fact]
+        public void OpenBuildEventsReader_ForwardCompatibility_DoesNotThrowWhenMinReaderVersionIsSatisfied()
+        {
+            // Simulate a binlog header with a higher format version but a minimum reader version
+            // that the current reader can satisfy.
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true);
+
+            int futureFormatVersion = BinaryLogger.FileFormatVersion + 10;
+            int satisfiableMinReaderVersion = BinaryLogger.FileFormatVersion;
+
+            binaryWriter.Write(futureFormatVersion);
+            binaryWriter.Write(satisfiableMinReaderVersion);
+            binaryWriter.Flush();
+            memoryStream.Position = 0;
+
+            using var binaryReader = new BinaryReader(memoryStream);
+
+            // With forward compatibility enabled and satisfiable min reader version, this should not throw.
+            using var reader = BinaryLogReplayEventSource.OpenBuildEventsReader(
+                binaryReader, closeInput: false, allowForwardCompatibility: true);
+
+            reader.ShouldNotBeNull();
+            reader.FileFormatVersion.ShouldBe(futureFormatVersion);
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void OpenBuildEventsReader_ForwardCompatibility_ThrowsWhenMinReaderVersionIsNotSatisfied()
+        {
+            // Simulate a binlog header where the minimum reader version exceeds our current version.
+            var memoryStream = new MemoryStream();
+            using var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true);
+
+            int futureFormatVersion = BinaryLogger.FileFormatVersion + 10;
+            int unsatisfiableMinReaderVersion = BinaryLogger.FileFormatVersion + 5;
+
+            binaryWriter.Write(futureFormatVersion);
+            binaryWriter.Write(unsatisfiableMinReaderVersion);
+            binaryWriter.Flush();
+            memoryStream.Position = 0;
+
+            using var binaryReader = new BinaryReader(memoryStream);
+
+            // Even with forward compatibility enabled, should throw when min reader version cannot be satisfied.
+            Should.Throw<NotSupportedException>(() =>
+                BinaryLogReplayEventSource.OpenBuildEventsReader(
+                    binaryReader, closeInput: false, allowForwardCompatibility: true));
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
         public void Dispose()
         {
             _env.Dispose();
