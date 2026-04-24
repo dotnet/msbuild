@@ -82,6 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildCheckTracingEventArgs buildCheckTracing = new();
             BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
             WorkerNodeTelemetryEventArgs workerNodeTelemetry = new();
+            LoggerRegisteredEventArgs loggerRegistered = new(new List<RegisteredLoggerInfo> { new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }) });
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -119,6 +120,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(buildCheckTracing, LoggingEventType.BuildCheckTracingEvent);
             VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
             VerifyLoggingPacket(workerNodeTelemetry, LoggingEventType.WorkerNodeTelemetryEvent);
+            VerifyLoggingPacket(loggerRegistered, LoggingEventType.LoggerRegisteredEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -321,6 +323,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new GeneratedFileUsedEventArgs("path", "some content"),
+                    new LoggerRegisteredEventArgs(new List<RegisteredLoggerInfo>
+                    {
+                        new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }),
+                        new RegisteredLoggerInfo("BinaryLogger"),
+                    }),
                 };
                 foreach (BuildEventArgs arg in testArgs)
                 {

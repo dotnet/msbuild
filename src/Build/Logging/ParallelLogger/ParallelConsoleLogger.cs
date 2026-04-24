@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
@@ -28,7 +29,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
-
+        private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
         #region Constructors
         /// <summary>
         /// Default constructor.
@@ -204,6 +205,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the data structures created when the logger was created
+            _registeredLoggers.Clear();
             propertyOutputMap = new Dictionary<(int, int), string>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
@@ -271,6 +273,21 @@ namespace Microsoft.Build.BackEnd.Logging
             if (this.showPerfSummary)
             {
                 ShowPerfSummary();
+            }
+
+            // Show paths to the files created by enabled loggers.
+            if (ShowSummary == true)
+            {
+                foreach (var logger in _registeredLoggers)
+                {
+                    foreach (var outputPath in logger.OutputFilePaths)
+                    {
+                        string displayPath = setColor != DontSetColor
+                            ? $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"
+                            : outputPath;
+                        WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
+                    }
+                }
             }
 
             // Write the "Build Finished" event if verbosity is normal, detailed or diagnostic or the user
@@ -1124,7 +1141,6 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
-
             if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)
             {
                 return;
@@ -1212,6 +1228,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     var evaluationKey = GetEvaluationKey(e.BuildEventContext);
                     propertyOutputMap[evaluationKey] = value;
                 }
+            }
+            else if (e is LoggerRegisteredEventArgs loggerEvent)
+            {
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
             }
             else if (e is BuildCanceledEventArgs buildCanceled)
             {

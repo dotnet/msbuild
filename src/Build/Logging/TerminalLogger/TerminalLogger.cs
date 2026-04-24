@@ -221,6 +221,12 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showNodesDisplay = true;
 
+    /// <summary>
+    /// Stores the registered loggers.
+    /// </summary>
+    private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
+
+
     private uint? _originalConsoleMode;
 
     /// <summary>
@@ -633,6 +639,18 @@ public sealed partial class TerminalLogger : INodeLogger
                     RenderBuildSummary();
                 }
 
+                if (_showSummary == true)
+                {
+                    foreach (var logger in _registeredLoggers)
+                    {
+                        foreach (var outputPath in logger.OutputFilePaths)
+                        {
+                            string displayPath = $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}";
+                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
+                        }
+                    }
+                }
+
                 if (_restoreFailed)
                 {
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
@@ -659,6 +677,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         _projects.Clear();
         _testRunSummaries.Clear();
+        _registeredLoggers.Clear();
         _buildErrorsCount = 0;
         _buildWarningsCount = 0;
         _restoreFailed = false;
@@ -704,6 +723,9 @@ public sealed partial class TerminalLogger : INodeLogger
                 break;
             case ProjectEvaluationFinishedEventArgs evalFinish:
                 CaptureEvalContext(evalFinish);
+                break;
+            case LoggerRegisteredEventArgs loggerEvent:
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
                 break;
         }
     }
@@ -1180,7 +1202,6 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return;
         }
-
         string? message = e.Message;
 
         if (message is not null && e.Importance == MessageImportance.High)

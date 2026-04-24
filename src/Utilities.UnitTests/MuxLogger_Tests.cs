@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -126,7 +127,10 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             // This test was changed to not compare new lines because of https://github.com/dotnet/msbuild/issues/10493
             // It will need to be changed once we fix the root cause of the issue
-            mockLogger.FullLog.Replace(Environment.NewLine, "").ShouldBe(mockLogger2.FullLog.Replace(Environment.NewLine, ""));
+            // Strip "Enabled logs: ..." line because MuxLogger sub-loggers are registered after BuildStarted
+            // and cannot receive messages emitted during BuildStarted processing.
+            string StripEnabledLogs(string log) => Regex.Replace(log.Replace(Environment.NewLine, ""), @"Enabled logs: .+?(?=Project |$)", "");
+            StripEnabledLogs(mockLogger.FullLog).ShouldBe(StripEnabledLogs(mockLogger2.FullLog));
         }
 
         /// <summary>

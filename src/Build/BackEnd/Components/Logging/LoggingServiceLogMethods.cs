@@ -9,6 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -360,6 +361,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+
+            // Register Loggers and print out all the enabled loggers.
+            if (!OnlyLogCriticalEvents)
+            {
+                LogEnabledLoggers();
+                RegisterLoggers();
+            }
         }
 
         /// <summary>
@@ -389,6 +397,66 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+        }
+
+        /// <summary>
+        /// Logs the names of enabled logs (except for Forwarding logs).
+        /// </summary>
+        private void LogEnabledLoggers()
+        {
+            List<string> listOfLoggers = new();
+            foreach (ILogger logger in Loggers)
+            {
+                ILogger actualLogger = UnwrapLogger(logger);
+                listOfLoggers.Add(actualLogger.GetType().Name);
+            }
+            if (listOfLoggers.Count != 0)
+            {
+                var msgEvent = new BuildMessageEventArgs(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", listOfLoggers)),
+                    null, null, MessageImportance.Low);
+                msgEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(msgEvent);
+            }
+        }
+
+        /// <summary>
+        /// Logs the file paths of enabled logs. 
+        /// </summary>
+        private void RegisterLoggers()
+        {
+            var loggerDescriptions = new List<RegisteredLoggerInfo>();
+            foreach (ILogger logger in Loggers)
+            {
+                ILogger actualLogger = UnwrapLogger(logger);
+
+                var outputFilePaths = new List<string>();
+                if (actualLogger is IFileOutputLogger fileLogger && !string.IsNullOrEmpty(fileLogger.OutputFilePath))
+                {
+                    outputFilePaths.Add(fileLogger.OutputFilePath);
+                }
+
+                if (actualLogger is BinaryLogger bl && bl.AdditionalFilePaths != null)
+                {
+                    outputFilePaths.AddRange(bl.AdditionalFilePaths);
+                }
+
+                loggerDescriptions.Add(new RegisteredLoggerInfo(
+                    loggerName: actualLogger.GetType().Name,
+                    outputFilePaths: outputFilePaths.Count > 0 ? outputFilePaths : null,
+                    verbosity: actualLogger.Verbosity));
+            }
+
+            if (loggerDescriptions.Count > 0)
+            {
+                var registerEvent = new LoggerRegisteredEventArgs(loggerDescriptions);
+                registerEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(registerEvent);
+            }
+        }
+        private ILogger UnwrapLogger(ILogger logger)
+        {
+            return logger is ReusableLogger reusable ? reusable.OriginalLogger : logger;
         }
 
         /// <inheritdoc />

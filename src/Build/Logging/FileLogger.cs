@@ -25,10 +25,9 @@ namespace Microsoft.Build.Logging
     /// complex -- for example, there is parameter parsing in this class, plus in BaseConsoleLogger. However we have
     /// to derive FileLogger from ConsoleLogger because it shipped that way in Whidbey.
     /// </remarks>
-    public class FileLogger : ConsoleLogger
+    public class FileLogger : ConsoleLogger, IFileOutputLogger
     {
         #region Constructors
-
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -238,6 +237,14 @@ namespace Microsoft.Build.Logging
         /// the default value is msbuild.log
         /// </summary>
         private string _logFileName = "msbuild.log";
+
+        /// <summary>
+        /// The path to the log file.
+        /// </summary>
+        internal string FilePath => Path.GetFullPath(_logFileName);
+
+        /// <inheritdoc/>
+        string IFileOutputLogger.OutputFilePath => FilePath;
 
         /// <summary>
         /// fileWriter is the stream that has been opened on our log file.
