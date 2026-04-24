@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -83,12 +81,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The schedulable request which issued this request.
         /// </summary>
-        private SchedulableRequest _parent;
+        private SchedulableRequest? _parent;
 
         /// <summary>
         /// The list of targets which were actively building at the time we were blocked.
         /// </summary>
-        private string[] _activeTargetsWhenBlocked;
+        private string[]? _activeTargetsWhenBlocked;
 
         /// <summary>
         /// The requests which must complete before we can continue executing.  Indexed by global request id and node request id.
@@ -124,7 +122,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor.
         /// </summary>
-        public SchedulableRequest(SchedulingData collection, BuildRequest request, SchedulableRequest parent)
+        public SchedulableRequest(SchedulingData collection, BuildRequest request, SchedulableRequest? parent)
         {
             ErrorUtilities.VerifyThrowArgumentNull(collection);
             ErrorUtilities.VerifyThrowArgumentNull(request);
@@ -167,7 +165,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The request which issued this request.
         /// </summary>
-        public SchedulableRequest Parent
+        public SchedulableRequest? Parent
         {
             get { return _parent; }
         }
@@ -188,14 +186,14 @@ namespace Microsoft.Build.BackEnd
             get
             {
                 VerifyOneOfStates([SchedulableRequestState.Yielding, SchedulableRequestState.Blocked, SchedulableRequestState.Executing]);
-                return _activeTargetsWhenBlocked;
+                return _activeTargetsWhenBlocked!;
             }
         }
 
         /// <summary>
         /// The target we are blocked on
         /// </summary>
-        public string BlockingTarget { get; private set; }
+        public string? BlockingTarget { get; private set; }
 
         /// <summary>
         /// Gets a count of the requests we are blocked by.
@@ -332,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="blockingRequest">The request which is blocking this one.</param>
         /// <param name="activeTargets">The list of targets this request was currently building at the time it became blocked.</param>
         /// <param name="blockingTarget">Target that we are blocked on which is being built by <paramref name="blockingRequest"/></param>
-        public void BlockByRequest(SchedulableRequest blockingRequest, string[] activeTargets, string blockingTarget = null)
+        public void BlockByRequest(SchedulableRequest blockingRequest, string[] activeTargets, string? blockingTarget = null)
         {
             VerifyOneOfStates([SchedulableRequestState.Blocked, SchedulableRequestState.Executing]);
             ErrorUtilities.VerifyThrowArgumentNull(blockingRequest);
@@ -516,7 +514,7 @@ namespace Microsoft.Build.BackEnd
         {
             // If there is already a blocked request which has the same configuration id as the blocking request and that blocked request is (recursively)
             // waiting on this request, then that is an indirect circular dependency.
-            SchedulableRequest alternateRequest = _schedulingData.GetBlockedRequestIfAny(blockingRequest.BuildRequest.GlobalRequestId);
+            SchedulableRequest? alternateRequest = _schedulingData.GetBlockedRequestIfAny(blockingRequest.BuildRequest.GlobalRequestId);
             if (alternateRequest == null)
             {
                 return;
@@ -528,10 +526,10 @@ namespace Microsoft.Build.BackEnd
 
             while (requestsToEvaluate.Count > 0)
             {
-                SchedulableRequest requestToEvaluate = requestsToEvaluate.Pop();
+                SchedulableRequest? requestToEvaluate = requestsToEvaluate.Pop();
 
                 // If we make it to a child which is us, then it's a circular dependency.
-                if (requestToEvaluate.BuildRequest.GlobalRequestId == this.BuildRequest.GlobalRequestId)
+                if (requestToEvaluate.BuildRequest.GlobalRequestId == BuildRequest.GlobalRequestId)
                 {
                     ThrowIndirectCircularDependency(blockingRequest, requestToEvaluate);
                 }
@@ -588,7 +586,7 @@ namespace Microsoft.Build.BackEnd
             // A circular dependency occurs when this project (or any of its ancestors) has the same global request id as the
             // blocking request.
             List<SchedulableRequest> ancestors = new List<SchedulableRequest>(16);
-            SchedulableRequest currentRequest = this;
+            SchedulableRequest? currentRequest = this;
             do
             {
                 ancestors.Add(currentRequest);
@@ -638,7 +636,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectRequestWeAreBlockedBy(BlockingRequestKey blockingRequestKey)
         {
-            ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.TryGetValue(blockingRequestKey, out SchedulableRequest unblockingRequest), "We are not blocked by the specified request.");
+            ErrorUtilities.VerifyThrow(_requestsWeAreBlockedBy.TryGetValue(blockingRequestKey, out SchedulableRequest? unblockingRequest), "We are not blocked by the specified request.");
             ErrorUtilities.VerifyThrow(unblockingRequest._requestsWeAreBlocking.Contains(this), "The request unblocking us doesn't think it is blocking us.");
 
             _requestsWeAreBlockedBy.Remove(blockingRequestKey);
@@ -693,11 +691,11 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Equals override.
             /// </summary>
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj != null)
                 {
-                    BlockingRequestKey other = obj as BlockingRequestKey;
+                    BlockingRequestKey? other = obj as BlockingRequestKey;
                     if (other != null)
                     {
                         return (other._globalRequestId == _globalRequestId) && (other._nodeRequestId == _nodeRequestId);

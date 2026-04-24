@@ -26,6 +26,8 @@ namespace Microsoft.Build.BackEnd
 {
     internal sealed class NodeLauncher : INodeLauncher, IBuildComponent
     {
+        private const string DotnetEnableDiagnosticsEnvVarName = "DOTNET_EnableDiagnostics";
+
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
             ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
@@ -136,6 +138,10 @@ namespace Microsoft.Build.BackEnd
                 CreateNoWindow = redirectStreams && (creationFlags & BackendNativeMethods.CREATENOWINDOW) != 0,
             };
 
+            if (!processStartInfo.Environment.ContainsKey(DotnetEnableDiagnosticsEnvVarName))
+            {
+                processStartInfo.Environment[DotnetEnableDiagnosticsEnvVarName] = "0";
+            }
             DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(processStartInfo.Environment, nodeLaunchData.EnvironmentOverrides);
 
             try
@@ -277,6 +283,10 @@ namespace Microsoft.Build.BackEnd
                 environment[(string)entry.Key] = (string)entry.Value;
             }
 
+            if (environment.ContainsKey(DotnetEnableDiagnosticsEnvVarName))
+            {
+                environment[DotnetEnableDiagnosticsEnvVarName] = "0";
+            }
             DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(environment, environmentOverrides);
 
             // Build the environment block: "key=value\0key=value\0\0"
