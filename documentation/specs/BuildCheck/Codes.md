@@ -17,6 +17,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
 | [BC0301](#bc0301---building-from-downloads-folder) | None | Project | 9.0.300 | Building from Downloads folder. |
 | [BC0302](#bc0302---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
+| [BC0303](#bc0303---private-items-not-disposed) | Warning | Project | TBD | Private items in target not cleaned up. |
 
 Notes: 
  * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
@@ -203,9 +204,53 @@ Place your projects into trusted locations - including cases when you intend to 
 
 Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
 
-<BR/>
-<BR/>
-<BR/>
+<a name="BC0303"></a>
+## BC0303 - Private items not disposed.
 
-### Related Resources
+"Private item lists created inside a target should be removed at the end of the target to avoid wasting memory."
+
+MSBuild does not have a built-in concept of "private" or scoped items within targets. When a target creates items using `Include`, those items become part of the global item collection and persist for the remainder of the build. The convention of prefixing item type names with an underscore (`_`) signals that the item is intended to be "private" to the target that creates it.
+
+This check reports a diagnostic when a target:
+1. Creates an item type with a name starting with underscore (`_`) using `Include`
+2. Does NOT clean up that item type using a matching `Remove` operation
+3. Does NOT expose the item type in the target's `Outputs` or `Returns` attributes
+
+**Example that triggers BC0303:**
+
+```xml
+<Target Name="BadExample">
+  <ItemGroup>
+    <_TempArgs Include="arg1;arg2;arg3" />
+  </ItemGroup>
+  <Exec Command="tool.exe @(_TempArgs, ' ')" />
+  <!-- Missing: <_TempArgs Remove="@(_TempArgs)" /> -->
+</Target>
+```
+
+**Corrected example:**
+
+```xml
+<Target Name="GoodExample">
+  <ItemGroup>
+    <_TempArgs Include="arg1;arg2;arg3" />
+  </ItemGroup>
+  <Exec Command="tool.exe @(_TempArgs, ' ')" />
+  <ItemGroup>
+    <_TempArgs Remove="@(_TempArgs)" />
+  </ItemGroup>
+</Target>
+```
+
+**Why this matters:**
+- **Memory efficiency**: Temporary items accumulate in memory unnecessarily throughout the build
+- **Naming collisions**: Future targets might accidentally reference stale items
+- **Build hygiene**: Cleaning up private items makes target intent clearer
+
+**Exceptions (no diagnostic reported):**
+- Items exposed via `Outputs` or `Returns` attributes (part of target's public contract)
+- Items that only use `Update` (no new items created)
+- Item types that don't start with underscore (considered public)
+
+## Related Resources
 * [BuildCheck documentation](./BuildCheck.md)
