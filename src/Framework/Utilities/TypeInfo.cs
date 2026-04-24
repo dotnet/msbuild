@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System;
 using System.Runtime.InteropServices;
 #endif
+using System.Threading;
 
 namespace Microsoft.Build.Utilities;
 
@@ -15,17 +16,24 @@ namespace Microsoft.Build.Utilities;
 /// </summary>
 internal static partial class TypeInfo<T>
 {
-    private static bool? s_hasReferences;
+    // Tri-state: 0 = not computed, 1 = false (no references), 2 = true (has references)
+    private static int s_hasReferences;
 
     /// <summary>
     ///  Returns <see langword="true"/> if the type <typeparamref name="T"/> is a reference type or contains references.
     /// </summary>
     public static bool IsReferenceOrContainsReferences()
     {
+        int value = Volatile.Read(ref s_hasReferences);
+        if (value != 0)
+        {
+            return value == 2;
+        }
+
 #if NET
-        return s_hasReferences ??= RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+        bool result = RuntimeHelpers.IsReferenceOrContainsReferences<T>();
 #else
-        return s_hasReferences ??= HasReferences();
+        bool result = HasReferences();
 
         static bool HasReferences()
         {
@@ -54,5 +62,8 @@ internal static partial class TypeInfo<T>
             }
         }
 #endif
+
+        Interlocked.CompareExchange(ref s_hasReferences, result ? 2 : 1, 0);
+        return result;
     }
 }

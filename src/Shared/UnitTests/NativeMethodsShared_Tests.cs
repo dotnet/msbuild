@@ -9,8 +9,10 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
-
-
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 #nullable disable
 
@@ -32,16 +34,16 @@ namespace Microsoft.Build.UnitTests
         /// when that bug was in play this test would fail.
         /// </summary>
         [WindowsOnlyFact("No Kernel32.dll except on Windows.")]
-        [SupportedOSPlatform("windows")] // bypass CA1416: Validate platform compatibility
+        [SupportedOSPlatform("windows6.1")]
         public void TestGetProcAddress()
         {
-            IntPtr kernel32Dll = NativeMethodsShared.LoadLibrary("kernel32.dll");
+            HMODULE kernel32Dll = PInvoke.LoadLibrary("kernel32.dll");
             try
             {
-                IntPtr processHandle = NativeMethodsShared.NullIntPtr;
-                if (kernel32Dll != NativeMethodsShared.NullIntPtr)
+                IntPtr processHandle = IntPtr.Zero;
+                if (!kernel32Dll.IsNull)
                 {
-                    processHandle = NativeMethodsShared.GetProcAddress(kernel32Dll, "GetCurrentProcessId");
+                    processHandle = (IntPtr)PInvoke.GetProcAddress(kernel32Dll, "GetCurrentProcessId").Value;
                 }
                 else
                 {
@@ -49,7 +51,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // Make sure the pointer passed back for the method is not null
-                Assert.NotEqual(processHandle, NativeMethodsShared.NullIntPtr);
+                Assert.NotEqual(processHandle, IntPtr.Zero);
 
                 // Actually call the method
                 GetProcessIdDelegate processIdDelegate = Marshal.GetDelegateForFunctionPointer<GetProcessIdDelegate>(processHandle);
@@ -60,9 +62,9 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (kernel32Dll != NativeMethodsShared.NullIntPtr)
+                if (!kernel32Dll.IsNull)
                 {
-                    NativeMethodsShared.FreeLibrary(kernel32Dll);
+                    PInvoke.FreeLibrary(kernel32Dll);
                 }
             }
         }

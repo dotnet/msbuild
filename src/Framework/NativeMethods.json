@@ -1,0 +1,11 @@
+{
+  "$schema": "https://aka.ms/CsWin32.schema.json",
+  "allowMarshaling": false,
+  "useSafeHandles": false,
+  "className": "PInvoke",
+  "comInterop": {
+    "preserveSigMethods": [
+      "*"
+    ]
+  }
+}
