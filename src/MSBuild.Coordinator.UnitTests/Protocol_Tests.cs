@@ -12,10 +12,10 @@ namespace Microsoft.Build.Coordinator.UnitTests;
 public class Protocol_Tests
 {
     [Fact]
-    public void GetPipeName_ContainsPrefix()
+    public void GetPipeName_ContainsBase()
     {
         string pipeName = Protocol.GetPipeName();
-        pipeName.ShouldStartWith(Protocol.PipeNamePrefix);
+        pipeName.ShouldContain(Protocol.PipeNameBase);
     }
 
     [Fact]

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Framework.Coordinator;
 
@@ -16,10 +17,9 @@ internal static class Protocol
     public const byte Version = 1;
 
     /// <summary>
-    ///  Default named pipe name prefix. The full pipe name is "{Prefix}-{username}" on Windows
-    ///  or "/tmp/{Prefix}-{uid}" on Unix.
+    ///  Default named pipe name base.
     /// </summary>
-    public const string PipeNamePrefix = "msbuild-coordinator";
+    public const string PipeNameBase = "msbuild-coordinator";
 
     /// <summary>
     ///  Default heartbeat interval in milliseconds.
@@ -57,6 +57,6 @@ internal static class Protocol
     public static string GetPipeName()
     {
         string userIdentifier = Environment.UserName;
-        return $"{PipeNamePrefix}-{userIdentifier}";
+        return NamedPipeUtil.GetPlatformSpecificPipeName($"{PipeNameBase}-{userIdentifier}");
     }
 }

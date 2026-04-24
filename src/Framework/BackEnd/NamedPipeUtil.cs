@@ -1,0 +1,44 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.IO;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
+
+namespace Microsoft.Build.BackEnd;
+
+internal static class NamedPipeUtil
+{
+    internal static string GetPlatformSpecificPipeName(int? processId = null)
+    {
+        processId ??= EnvironmentUtilities.CurrentProcessId;
+
+        string pipeName = $"MSBuild{processId}";
+
+        return GetPlatformSpecificPipeName(pipeName);
+    }
+
+    internal static string GetPlatformSpecificPipeName(string pipeName)
+    {
+        if (NativeMethods.IsUnixLike)
+        {
+            // If we're on a Unix machine then named pipes are implemented using Unix Domain Sockets.
+            // Most Unix systems have a maximum path length limit for Unix Domain Sockets, with
+            // Mac having a particularly short one. Mac also has a generated temp directory that
+            // can be quite long, leaving very little room for the actual pipe name. Fortunately,
+            // '/tmp' is mandated by POSIX to always be a valid temp directory, so we can use that
+            // instead.
+            return Path.Combine("/tmp", pipeName);
+        }
+        else
+        {
+            return pipeName;
+        }
+    }
+
+    internal static string GetRarNodePipeName(ServerNodeHandshake handshake)
+        => GetPlatformSpecificPipeName($"MSBuildRarNode-{handshake.ComputeHash()}");
+
+    internal static string GetRarNodeEndpointPipeName(ServerNodeHandshake handshake)
+        => GetPlatformSpecificPipeName($"MSBuildRarNodeEndpoint-{handshake.ComputeHash()}");
+}
