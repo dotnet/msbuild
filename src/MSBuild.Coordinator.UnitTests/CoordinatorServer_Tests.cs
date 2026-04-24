@@ -3,6 +3,7 @@
 
 using System.IO.Pipes;
 using System.Text;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Shouldly;
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Coordinator.UnitTests;
 
 public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 {
-    private readonly string _pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
+    private readonly string _pipeName = NamedPipeUtil.GetPlatformSpecificPipeName($"msbuild-coordinator-test-{Guid.NewGuid():N}");
     private readonly CancellationTokenSource _cts = new();
 
     private readonly TestLogger _logger = new(testOutput);

@@ -10,7 +10,7 @@ namespace Microsoft.Build.Coordinator.UnitTests;
 
 public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
 {
-    private readonly string _pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
+    private readonly string _pipeName = NamedPipeUtil.GetPlatformSpecificPipeName($"msbuild-coordinator-test-{Guid.NewGuid():N}");
     private readonly CancellationTokenSource _cts = new();
 
     private readonly TestLogger _logger = new(testOutput);
@@ -79,7 +79,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
     {
         // Use a pipe name that no server is listening on.
         CoordinatorClient? client = CoordinatorClient.TryConnectToServer(
-            $"msbuild-coordinator-nonexistent-{Guid.NewGuid():N}",
+            NamedPipeUtil.GetPlatformSpecificPipeName($"msbuild-coordinator-nonexistent-{Guid.NewGuid():N}"),
             requestedNodes: 8,
             processId: Pid1,
             connectionTimeoutMs: 500,
