@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+
+  <PropertyGroup Label="CalculateArch">
+    <BuildArchitecture Condition="'$(BuildArchitecture)' == ''">$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</BuildArchitecture>
+    <TargetArchitecture Condition="'$(TargetArchitecture)' == '' AND ('$(BuildArchitecture)' == 'arm64' OR '$(BuildArchitecture)' == 's390x' OR '$(BuildArchitecture)' == 'ppc64le' OR '$(BuildArchitecture)' == 'loongarch64')">$(BuildArchitecture)</TargetArchitecture>
+    <TargetArchitecture Condition="'$(TargetArchitecture)' == ''">x64</TargetArchitecture>
+  </PropertyGroup>
+
+  <!-- Host and target OS detection.
+       Uses full OS names (windows, linux, osx, freebsd, etc.) matching the VMR convention.
+       See https://github.com/dotnet/dotnet/blob/main/docs/VMR-Controls.md#output-controls -->
+  <PropertyGroup Label="CalculateTargetOS">
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('WINDOWS'))">windows</HostOS>
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('OSX'))">osx</HostOS>
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('FREEBSD'))">freebsd</HostOS>
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('OPENBSD'))">openbsd</HostOS>
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('ILLUMOS'))">illumos</HostOS>
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('SOLARIS'))">solaris</HostOS>
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('HAIKU'))">haiku</HostOS>
+    <HostOS Condition="'$(HostOS)' == '' AND $([MSBuild]::IsOSPlatform('LINUX'))">linux</HostOS>
+
+    <!-- TargetOS defaults to HostOS; overridable via /p:TargetOS from build scripts or VMR. -->
+    <TargetOS Condition="'$(TargetOS)' == ''">$(HostOS)</TargetOS>
+  </PropertyGroup>
+
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
   <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
@@ -76,6 +100,8 @@ ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/sy
          version numbers. This is ok in that context, since VMR-produced MSBuild packages won't
          be published. -->
     <NoWarn Condition="'$(DotNetBuild)' == 'true'">$(NoWarn);NU5104;</NoWarn>
+
+    <DefineConstants Condition="'$(TargetOS)' == 'windows'">$(DefineConstants);TARGET_WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

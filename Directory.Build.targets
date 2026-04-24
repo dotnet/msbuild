@@ -58,4 +58,14 @@
                Condition="Exists('$(_PackageFolderInGlobalPackages)')" />
   </Target>
 
+  <!-- Diagnostic target for verifying platform property resolution -->
+  <Target Name="ShowPlatformProperties"
+          BeforeTargets="Build"
+          Condition="'$(ShowPlatformProperties)' == 'true'">
+    <Message Importance="high" Text="HostOS              = $(HostOS)" />
+    <Message Importance="high" Text="TargetOS            = $(TargetOS)" />
+    <Message Importance="high" Text="BuildArchitecture   = $(BuildArchitecture)" />
+    <Message Importance="high" Text="TargetArchitecture  = $(TargetArchitecture)" />
+  </Target>
+
 </Project>
