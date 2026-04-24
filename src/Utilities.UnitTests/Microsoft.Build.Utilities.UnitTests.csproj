@@ -12,6 +12,7 @@
     <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
 
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
