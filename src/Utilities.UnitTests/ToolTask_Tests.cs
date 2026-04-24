@@ -572,35 +572,49 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
-            string tempFile = FileUtilities.GetTemporaryFileName();
-            File.WriteAllText(tempFile, @"
+            using var env = TestEnvironment.Create(_output);
+            var toolOutput = env.CreateFile(
+                "tool-output.txt",
+                """
                 Main.cs(17,20): warning CS0168: The variable 'foo' is declared but never used.
                 BADTHINGHAPPENED: This is my custom error format that's not in canonical error format.
-                ");
+                """);
 
-            using (MyTool t = new MyTool())
+            var engine = new MockEngine(_output);
+
+            using var task = new MyTool
             {
-                MockEngine3 engine = new MockEngine3();
-                t.BuildEngine = engine;
+                BuildEngine = engine,
                 // The command we're giving is the command to spew the contents of the temp
                 // file we created above.
-                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? $"/C type \"{tempFile}\""
-                                                : $"-c \"cat \'{tempFile}\'\"";
+                MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? $"/C type \"{toolOutput.Path}\""
+                    : $"-c \"cat '{toolOutput.Path}'\"",
+            };
 
-                t.Execute();
+            task.Execute().ShouldBeFalse();
 
-                // The above command logged a canonical warning, as well as a custom error.
-                engine.AssertLogContains("CS0168");
-                engine.AssertLogContains("The variable 'foo' is declared but never used");
-                engine.AssertLogContains("BADTHINGHAPPENED");
-                engine.AssertLogContains("This is my custom error format");
+            engine.ShouldSatisfyAllConditions(
+                () => task.ExitCode.ShouldBe(-1),
+                () => engine.Warnings.ShouldBe(1),
+                () => engine.Errors.ShouldBe(1));
 
-                engine.Warnings.ShouldBe(1); // "Expected one warning in log."
-                engine.Errors.ShouldBe(1); // "Expected one error in log."
-            }
+            engine.WarningEvents
+                .ShouldHaveSingleItem()
+                .ShouldSatisfyAllConditions(
+                    w => w.Code.ShouldBe("CS0168"),
+                    w => w.File.ShouldBe("Main.cs"),
+                    w => w.LineNumber.ShouldBe(17),
+                    w => w.ColumnNumber.ShouldBe(20),
+                    w => w.Message.ShouldContain("foo"));
 
-            File.Delete(tempFile);
+            engine.ErrorEvents
+                .ShouldHaveSingleItem()
+                .ShouldSatisfyAllConditions(
+                    e => e.LineNumber.ShouldBe(0),
+                    e => e.ColumnNumber.ShouldBe(0),
+                    e => e.Message.ShouldContain("BADTHINGHAPPENED"),
+                    e => e.Message.ShouldContain("custom error format"));
         }
 
         /// <summary>
