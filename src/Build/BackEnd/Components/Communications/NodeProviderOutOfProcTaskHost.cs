@@ -346,19 +346,11 @@ namespace Microsoft.Build.BackEnd
             switch (packet.Type)
             {
                 case NodePacketType.NodeShutdown:
-                    lock (_activeNodes)
-                    {
-                        if (_activeNodes.Contains(node))
-                        {
-                            _activeNodes.Remove(node);
-                        }
-
-                        if (_activeNodes.Count == 0)
-                        {
-                            _noNodesActiveEvent.Set();
-                        }
-                    }
-
+                    // NodeShutdown means the process is beginning its exit sequence but has not yet closed
+                    // the pipe or exited. Removal from _activeNodes and signaling _noNodesActiveEvent is
+                    // deferred to NodeContextTerminated, which fires on pipe disconnect — much closer to
+                    // actual process exit. This avoids a race where ShutdownConnectedNodes returns before
+                    // the process is truly dead.
                     break;
                 default:
                     ErrorUtilities.ThrowInternalError("PacketReceived: no handler for node {0}, unexpected packet type {1}", node, packet.Type);
