@@ -52,10 +52,25 @@ internal static class Protocol
     public const string ShutdownTimeoutEnvironmentVariable = "MSBUILDCOORDINATORSHUTDOWNTIMEOUT";
 
     /// <summary>
-    ///  Gets the platform-appropriate named pipe name for the current user.
+    ///  Environment variable that overrides the coordinator pipe name.
+    ///  When set, both the coordinator process and MSBuild clients will use this
+    ///  name instead of the default user-scoped pipe name.
+    /// </summary>
+    public const string PipeNameEnvironmentVariable = "MSBUILDCOORDINATORPIPENAME";
+
+    /// <summary>
+    ///  Gets the named pipe name for the coordinator. On Unix-like systems, the pipe name
+    ///  is placed under /tmp to avoid exceeding Unix Domain Socket path length limits.
+    ///  If <see cref="PipeNameEnvironmentVariable"/> is set, that value is used directly.
     /// </summary>
     public static string GetPipeName()
     {
+        string? overrideName = Environment.GetEnvironmentVariable(PipeNameEnvironmentVariable);
+        if (!string.IsNullOrEmpty(overrideName))
+        {
+            return NamedPipeUtil.GetPlatformSpecificPipeName(overrideName);
+        }
+
         string userIdentifier = Environment.UserName;
         return NamedPipeUtil.GetPlatformSpecificPipeName($"{PipeNameBase}-{userIdentifier}");
     }
