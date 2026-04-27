@@ -593,7 +593,7 @@ namespace Microsoft.Build.UnitTests
             string shortChildName = Path.GetFileName(shortChildPath);
 
             // If 8.3 names are disabled on this volume, the short name won't contain '~' — skip.
-            if (!shortChildName.Contains('~'))
+            if (!shortChildName.Contains("~"))
             {
                 _testOutput.WriteLine($"Skipping: 8.3 names appear disabled (short name was '{shortChildName}').");
                 return;
@@ -611,8 +611,9 @@ namespace Microsoft.Build.UnitTests
             // Verify the decoy also gets the same short name.
             string shortDecoyPath = NativeMethodsShared.GetShortFilePath(cwdChild);
             string shortDecoyName = Path.GetFileName(shortDecoyPath);
-            shortDecoyName.ShouldBe(shortChildName, StringCompareShould.IgnoreCase,
-                "Both directories should have the same 8.3 short name since they share the first 6 characters.");
+            shortDecoyName.ShouldBe(shortChildName, customMessage:
+                "Both directories should have the same 8.3 short name since they share the first 6 characters.",
+                options: StringCompareShould.IgnoreCase);
 
             // Set CWD to cwdDir — GetLongPathName will resolve the short name against this directory.
             env.SetCurrentDirectory(cwdDir.Path);
