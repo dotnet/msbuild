@@ -18,7 +18,7 @@ internal abstract record ServerMessage
 
         if (version != Protocol.Version)
         {
-            throw new InternalErrorException($"Unsupported coordinator protocol version: {version} (expected {Protocol.Version})");
+            FrameworkErrorUtilities.ThrowInternalError($"Unsupported coordinator protocol version: {version} (expected {Protocol.Version})");
         }
 
         var messageType = (ServerMessageType)reader.ReadByte();
@@ -29,7 +29,7 @@ internal abstract record ServerMessage
             ServerMessageType.Wait => WaitMessage.Instance,
             ServerMessageType.Error => new ErrorMessage(message: reader.ReadString()),
 
-            _ => throw new InternalErrorException($"Unknown coordinator message type: {messageType}"),
+            _ => FrameworkErrorUtilities.ThrowInternalError<ServerMessage>($"Unknown coordinator message type: {messageType}"),
         };
     }
 
