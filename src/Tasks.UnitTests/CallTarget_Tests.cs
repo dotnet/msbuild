@@ -220,15 +220,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that separate CallTarget task instances maintain independent output state.
-        /// Two sequential invocations targeting different targets produce correct, independent
-        /// outputs with no shared mutable state interference.
+        /// Regression guard for instance isolation: verifies that two sequential CallTarget
+        /// invocations (in separate projects) each report their own <see cref="CallTarget.TargetOutputs"/>
+        /// without leaking results between instances. This is a sequential test, not a concurrency
+        /// test — BuildManager is process-global and serializes builds, so true parallel execution
+        /// is not exercised here.
         /// </summary>
         [Fact]
         public void CallTargetInstances_MaintainIndependentOutputState()
         {
             // Build two projects sequentially (BuildManager is process-global),
-            // verifying that each CallTarget instance maintains independent _targetOutputs.
+            // verifying that each CallTarget instance reports its own TargetOutputs
+            // without cross-instance leakage.
             MockLogger loggerA = ObjectModelHelpers.BuildProjectExpectSuccess("""
                 <Project>
                     <Target Name="Build">

@@ -13,6 +13,9 @@ namespace Microsoft.Build.Tasks
     /// project file.  Marked RunInMTA because we do not want this task to ever be invoked explicitly
     /// on the STA if the RequestBuilder is running on another thread, as this will cause thread
     /// id validation checks to fail.
+    /// Note: <see cref="MSBuildMultiThreadableTaskAttribute"/> has Inherited = false, so subclasses
+    /// of CallTarget must re-apply [MSBuildMultiThreadableTask] to be eligible for in-process
+    /// scheduling under multithreaded mode.
     /// </remarks>
     [RunInMTA]
     [MSBuildMultiThreadableTask]
