@@ -21,8 +21,11 @@ namespace Microsoft.Build.Tasks
     /// This task generates the application trust from the base manifest
     /// and the TargetZone and ExcludedPermissions properties.
     /// </summary>
-    public sealed class GenerateTrustInfo : TaskExtension, IGenerateTrustInfoTaskContract
+    [MSBuildMultiThreadableTask]
+    public sealed class GenerateTrustInfo : TaskExtension, IGenerateTrustInfoTaskContract, IMultiThreadableTask
     {
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         private const string Custom = "Custom";
 
         public ITaskItem BaseManifest { get; set; }
@@ -50,16 +53,20 @@ namespace Microsoft.Build.Tasks
             }
 
             // Read trust-info from app.manifest
-            if (BaseManifest != null && FileSystems.Default.FileExists(BaseManifest.ItemSpec))
+            if (BaseManifest != null)
             {
-                try
+                AbsolutePath baseManifestPath = TaskEnvironment.GetAbsolutePath(BaseManifest.ItemSpec);
+                if (FileSystems.Default.FileExists(baseManifestPath))
                 {
-                    trustInfo.ReadManifest(BaseManifest.ItemSpec);
-                }
-                catch (Exception ex)
-                {
-                    Log.LogErrorWithCodeFromResources("GenerateManifest.ReadInputManifestFailed", BaseManifest.ItemSpec, ex.Message);
-                    return false;
+                    try
+                    {
+                        trustInfo.ReadManifest(baseManifestPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogErrorWithCodeFromResources("GenerateManifest.ReadInputManifestFailed", BaseManifest.ItemSpec, ex.Message);
+                        return false;
+                    }
                 }
             }
 
@@ -99,7 +106,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Write trust-info back to a stand-alone trust file
-            trustInfo.Write(TrustInfoFile.ItemSpec);
+            AbsolutePath trustInfoFilePath = TaskEnvironment.GetAbsolutePath(TrustInfoFile.ItemSpec);
+            trustInfo.Write(trustInfoFilePath);
 
             return true;
         }
@@ -107,6 +115,7 @@ namespace Microsoft.Build.Tasks
 
 #else
 
+    [MSBuildMultiThreadableTask]
     public sealed class GenerateTrustInfo : TaskRequiresFramework, IGenerateTrustInfoTaskContract
     {
         public GenerateTrustInfo()
