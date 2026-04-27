@@ -6,6 +6,9 @@
     ],
     "errorMessage": "The .NET SDK could not be found, please run a command-line build with ./build.cmd."
   },
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  },
   "tools": {
     "dotnet": "10.0.104",
     "vs": {

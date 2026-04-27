@@ -340,7 +340,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleBuildCancel()
         {
-            CommunicationsUtilities.Trace("Received request to cancel build running on MSBuild Server. MSBuild server will shutdown.}");
+            CommunicationsUtilities.Trace("Received request to cancel build running on MSBuild Server. MSBuild server will shutdown.");
             _cancelRequested = true;
             BuildManager.DefaultBuildManager.CancelAllSubmissions();
         }
