@@ -827,7 +827,7 @@
       </trans-unit>
       <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
         <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
-        <target state="new">The project file '{0}' could not be loaded when referenced by {1}.</target>
+        <target state="translated">Impossibile caricare il file di progetto '{0}' quando è referenziato da {1}.</target>
         <note>
       This message is shown during static graph construction when a referenced project file cannot be loaded,
       along with information about which project(s) are referencing the failed project.
