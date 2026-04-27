@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Read trust-info from app.manifest
-            if (BaseManifest != null)
+            if (BaseManifest != null && !string.IsNullOrEmpty(BaseManifest.ItemSpec))
             {
                 AbsolutePath baseManifestPath = TaskEnvironment.GetAbsolutePath(BaseManifest.ItemSpec);
                 if (FileSystems.Default.FileExists(baseManifestPath))
