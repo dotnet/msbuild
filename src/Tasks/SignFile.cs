@@ -22,8 +22,11 @@ namespace Microsoft.Build.Tasks
     /// It can sign ClickOnce manifests as well as exe's.
     /// </summary>
     [SupportedOSPlatform("windows")]
-    public sealed class SignFile : Task
+    [MSBuildMultiThreadableTask]
+    public sealed class SignFile : Task, IMultiThreadableTask
     {
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         public SignFile()
             : base(AssemblyResources.PrimaryResources, "MSBuild.")
         {
@@ -51,10 +54,11 @@ namespace Microsoft.Build.Tasks
             }
             try
             {
+                AbsolutePath signingTargetPath = TaskEnvironment.GetAbsolutePath(SigningTarget.ItemSpec);
                 SecurityUtilities.SignFile(
                     CertificateThumbprint,
                     TimestampUrl == null ? null : new Uri(TimestampUrl),
-                    SigningTarget.ItemSpec,
+                    signingTargetPath,
                     TargetFrameworkVersion,
                     TargetFrameworkIdentifier,
                     DisallowMansignTimestampFallback);
