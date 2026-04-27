@@ -52,9 +52,10 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(SignFile));
                 return false;
             }
+            AbsolutePath signingTargetPath = TaskEnvironment.GetAbsolutePath(SigningTarget.ItemSpec);
+            string SanitizeMessage(string msg) => msg?.Replace((string)signingTargetPath, signingTargetPath.OriginalValue) ?? msg;
             try
             {
-                AbsolutePath signingTargetPath = TaskEnvironment.GetAbsolutePath(SigningTarget.ItemSpec);
                 SecurityUtilities.SignFile(
                     CertificateThumbprint,
                     TimestampUrl == null ? null : new Uri(TimestampUrl),
@@ -69,29 +70,29 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("SignFile.CertNotInStore");
                 return false;
             }
-            catch (FileNotFoundException ex)
+            catch (FileNotFoundException)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.TargetFileNotFound", ex.FileName);
+                Log.LogErrorWithCodeFromResources("SignFile.TargetFileNotFound", signingTargetPath.OriginalValue);
                 return false;
             }
             catch (ApplicationException ex)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", ex.Message.Trim());
+                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", SanitizeMessage(ex.Message).Trim());
                 return false;
             }
             catch (WarningException ex)
             {
-                Log.LogWarningWithCodeFromResources("SignFile.SignToolWarning", ex.Message.Trim());
+                Log.LogWarningWithCodeFromResources("SignFile.SignToolWarning", SanitizeMessage(ex.Message).Trim());
                 return true;
             }
             catch (CryptographicException ex)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", ex.Message.Trim());
+                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", SanitizeMessage(ex.Message).Trim());
                 return false;
             }
             catch (Win32Exception ex)
             {
-                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", ex.Message.Trim());
+                Log.LogErrorWithCodeFromResources("SignFile.SignToolError", SanitizeMessage(ex.Message).Trim());
                 return false;
             }
             catch (UriFormatException ex)
