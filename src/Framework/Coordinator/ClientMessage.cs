@@ -12,7 +12,7 @@ internal abstract record ClientMessage
 {
     public abstract ClientMessageType MessageType { get; }
 
-    public static ClientMessage Read(BinaryReader reader)
+    public static ClientMessage ReadFrom(BinaryReader reader)
     {
         byte version = reader.ReadByte();
 
@@ -33,7 +33,7 @@ internal abstract record ClientMessage
         };
     }
 
-    public void Write(BinaryWriter writer)
+    public void WriteTo(BinaryWriter writer)
     {
         writer.Write(Protocol.Version);
         writer.Write((byte)MessageType);

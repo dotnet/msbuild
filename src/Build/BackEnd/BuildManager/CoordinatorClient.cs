@@ -167,10 +167,10 @@ internal sealed partial class CoordinatorClient : IDisposable
 
         // Send the node request.
         logger.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {processId})");
-        new RequestNodesMessage(requestedNodes, processId).Write(writer);
+        writer.Write(new RequestNodesMessage(requestedNodes, processId));
 
         // Read the response.
-        ServerMessage response = ServerMessage.Read(reader);
+        ServerMessage response = reader.ReadServerMessage();
 
         switch (response)
         {
@@ -182,7 +182,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                 logger.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
 
                 // Wait for a grant to arrive.
-                ServerMessage grantAfterWait = ServerMessage.Read(reader);
+                ServerMessage grantAfterWait = reader.ReadServerMessage();
 
                 if (grantAfterWait is NodeGrantMessage deferredGrant)
                 {
@@ -226,7 +226,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
         try
         {
-            ReleaseNodesMessage.Instance.Write(_writer);
+            _writer.Write(ReleaseNodesMessage.Instance);
         }
         catch (IOException)
         {
@@ -255,7 +255,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
         try
         {
-            HeartbeatMessage.Instance.Write(_writer);
+            _writer.Write(HeartbeatMessage.Instance);
         }
         catch (IOException)
         {

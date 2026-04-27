@@ -73,16 +73,16 @@ public class Protocol_Tests
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
 
-        new RequestNodesMessage(8, 100).Write(writer);
-        HeartbeatMessage.Instance.Write(writer);
-        ReleaseNodesMessage.Instance.Write(writer);
+        writer.Write(new RequestNodesMessage(8, 100));
+        writer.Write(HeartbeatMessage.Instance);
+        writer.Write(ReleaseNodesMessage.Instance);
 
         stream.Position = 0;
         using BinaryReader reader = new(stream);
 
-        ClientMessage.Read(reader).ShouldBe(new RequestNodesMessage(8, 100));
-        ClientMessage.Read(reader).ShouldBe(HeartbeatMessage.Instance);
-        ClientMessage.Read(reader).ShouldBe(ReleaseNodesMessage.Instance);
+        reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(8, 100));
+        reader.ReadClientMessage().ShouldBe(HeartbeatMessage.Instance);
+        reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class Protocol_Tests
         stream.Position = 0;
         using BinaryReader reader = new(stream);
 
-        Should.Throw<InternalErrorException>(() => ClientMessage.Read(reader));
+        Should.Throw<InternalErrorException>(() => reader.ReadClientMessage());
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class Protocol_Tests
         stream.Position = 0;
         using BinaryReader reader = new(stream);
 
-        Should.Throw<InternalErrorException>(() => ServerMessage.Read(reader));
+        Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class Protocol_Tests
         stream.Position = 0;
         using BinaryReader reader = new(stream);
 
-        Should.Throw<InternalErrorException>(() => ClientMessage.Read(reader));
+        Should.Throw<InternalErrorException>(() => reader.ReadClientMessage());
     }
 
     [Fact]
@@ -143,28 +143,28 @@ public class Protocol_Tests
         stream.Position = 0;
         using BinaryReader reader = new(stream);
 
-        Should.Throw<InternalErrorException>(() => ServerMessage.Read(reader));
+        Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
     }
 
     private static ClientMessage WriteAndReadClientMessage(ClientMessage message)
     {
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
-        message.Write(writer);
+        writer.Write(message);
 
         stream.Position = 0;
         using BinaryReader reader = new(stream);
-        return ClientMessage.Read(reader);
+        return reader.ReadClientMessage();
     }
 
     private static ServerMessage WriteAndReadCoordinatorMessage(ServerMessage message)
     {
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
-        message.Write(writer);
+        writer.Write(message);
 
         stream.Position = 0;
         using BinaryReader reader = new(stream);
-        return ServerMessage.Read(reader);
+        return reader.ReadServerMessage();
     }
 }

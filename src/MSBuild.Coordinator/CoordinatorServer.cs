@@ -117,13 +117,13 @@ internal sealed partial class CoordinatorServer(
             using BinaryReader initialReader = new(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
 
             // The first message must be RequestNodes.
-            ClientMessage firstMessage = ClientMessage.Read(initialReader);
+            ClientMessage firstMessage = initialReader.ReadClientMessage();
 
             if (firstMessage is not RequestNodesMessage request)
             {
                 _logger.WriteLine($"Server: Rejected client — first message was {firstMessage.GetType().Name}");
                 using BinaryWriter errorWriter = new(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
-                new ErrorMessage("First message must be RequestNodes").Write(errorWriter);
+                errorWriter.Write(new ErrorMessage("First message must be RequestNodes"));
                 pipeStream.Dispose();
                 return;
             }
@@ -145,12 +145,12 @@ internal sealed partial class CoordinatorServer(
             if (grantedNodes > 0)
             {
                 _logger.WriteLine($"Server: Granted {grantedNodes} nodes to PID {request.ProcessId}");
-                new NodeGrantMessage(grantedNodes).Write(connection.Writer);
+                connection.Writer.Write(new NodeGrantMessage(grantedNodes));
             }
             else
             {
                 _logger.WriteLine($"Server: PID {request.ProcessId} queued (no nodes available)");
-                WaitMessage.Instance.Write(connection.Writer);
+                connection.Writer.Write(WaitMessage.Instance);
 
                 // The grant will be fulfilled later when resources free up.
             }
@@ -164,7 +164,7 @@ internal sealed partial class CoordinatorServer(
 
                 try
                 {
-                    message = await Task.Run(() => ClientMessage.Read(connection.Reader), token);
+                    message = await Task.Run(() => connection.Reader.ReadClientMessage(), token);
                 }
                 catch (EndOfStreamException)
                 {
@@ -242,7 +242,7 @@ internal sealed partial class CoordinatorServer(
                 try
                 {
                     _logger.WriteLine($"Server: Granting {grant.GrantedNodes} deferred nodes to PID {grant.ProcessId}");
-                    new NodeGrantMessage(grant.GrantedNodes).Write(waitingConnection.Writer);
+                    waitingConnection.Writer.Write(new NodeGrantMessage(grant.GrantedNodes));
                 }
                 catch (IOException)
                 {
