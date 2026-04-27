@@ -565,6 +565,78 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// When a relative wildcard ItemSpec has a multi-segment fixed directory containing a tilde
+        /// (e.g. "SubDir/ALONGD~1/*.txt"), GetLongPathName inside SplitFileSpec resolves the tilde
+        /// segment against CWD instead of TaskEnvironment.ProjectDirectory. If CWD contains a
+        /// directory whose 8.3 short name matches but whose long name differs, the resolution
+        /// produces the wrong long name, the absolutized path doesn't exist in the project directory,
+        /// and GetFiles returns no results.
+        ///
+        /// This test sets CWD to a directory whose "SubDir" contains a long-named child that maps
+        /// to the same 8.3 short name as the project directory's child. It then verifies that
+        /// CreateItem still finds the file in the project directory — which currently fails.
+        /// </summary>
+        [WindowsOnlyFact(additionalMessage: "8.3 short names are Windows-only.")]
+        public void WildcardWithShortName_ResolvesAgainstProjectDirectory_NotCwd()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            // Project directory: SubDir/ALongDirectoryNameHere/test.txt
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            string projectSubDir = Path.Combine(projectDir.Path, "SubDir");
+            string projectChild = Path.Combine(projectSubDir, "ALongDirectoryNameHere");
+            Directory.CreateDirectory(projectChild);
+            File.WriteAllText(Path.Combine(projectChild, "test.txt"), "project-content");
+
+            // Determine the 8.3 short name for the child directory.
+            string shortChildPath = NativeMethodsShared.GetShortFilePath(projectChild);
+            string shortChildName = Path.GetFileName(shortChildPath);
+
+            // If 8.3 names are disabled on this volume, the short name won't contain '~' — skip.
+            if (!shortChildName.Contains('~'))
+            {
+                _testOutput.WriteLine($"Skipping: 8.3 names appear disabled (short name was '{shortChildName}').");
+                return;
+            }
+
+            // CWD directory: SubDir/ALongDirectoryNameThere/decoy.txt
+            // "ALongDirectoryNameThere" shares the first 6 characters with "ALongDirectoryNameHere",
+            // so in its own parent it also gets short name ALONGD~1.
+            TransientTestFolder cwdDir = env.CreateFolder(createFolder: true);
+            string cwdSubDir = Path.Combine(cwdDir.Path, "SubDir");
+            string cwdChild = Path.Combine(cwdSubDir, "ALongDirectoryNameThere");
+            Directory.CreateDirectory(cwdChild);
+            File.WriteAllText(Path.Combine(cwdChild, "decoy.txt"), "decoy-content");
+
+            // Verify the decoy also gets the same short name.
+            string shortDecoyPath = NativeMethodsShared.GetShortFilePath(cwdChild);
+            string shortDecoyName = Path.GetFileName(shortDecoyPath);
+            shortDecoyName.ShouldBe(shortChildName, StringCompareShould.IgnoreCase,
+                "Both directories should have the same 8.3 short name since they share the first 6 characters.");
+
+            // Set CWD to cwdDir — GetLongPathName will resolve the short name against this directory.
+            env.SetCurrentDirectory(cwdDir.Path);
+
+            // ItemSpec uses the 8.3 short name in a multi-segment relative path.
+            // SplitFileSpec splits into fixedDir = "SubDir/ALONGD~1/", GetLongPathName resolves
+            // "ALONGD~1" under "SubDir" in CWD → gets "ALongDirectoryNameThere" (WRONG).
+            // GetFileSearchData then absolutizes to "{projectDir}/SubDir/ALongDirectoryNameThere/"
+            // which doesn't exist → returns empty.
+            string itemSpec = Path.Combine("SubDir", shortChildName, "*.txt");
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem(itemSpec) },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1, $"Expected 1 file from project directory, but got {t.Include.Length}. " +
+                "GetLongPathName likely resolved the short name against CWD instead of ProjectDirectory.");
+            Path.GetFileName(t.Include[0].ItemSpec).ShouldBe("test.txt");
+        }
+
+        /// <summary>
         /// Pre-expanded literal items (no wildcards) produce identical output regardless of
         /// ProjectDirectory, Exclude, and AdditionalMetadata settings.
         /// </summary>
