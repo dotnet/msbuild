@@ -218,5 +218,52 @@ namespace Microsoft.Build.UnitTests
             // All three targets should have been run.
             logger.AssertLogContains("CallTarget Outputs: a.txt;b.txt;c.txt");
         }
+
+        /// <summary>
+        /// Verifies that separate CallTarget task instances maintain independent output state.
+        /// Two sequential invocations targeting different targets produce correct, independent
+        /// outputs with no shared mutable state interference.
+        /// </summary>
+        [Fact]
+        public void CallTargetInstances_MaintainIndependentOutputState()
+        {
+            // Build two projects sequentially (BuildManager is process-global),
+            // verifying that each CallTarget instance maintains independent _targetOutputs.
+            MockLogger loggerA = ObjectModelHelpers.BuildProjectExpectSuccess("""
+                <Project>
+                    <Target Name="Build">
+                        <CallTarget Targets="TargetA">
+                            <Output TaskParameter="TargetOutputs" ItemName="ResultA" />
+                        </CallTarget>
+                        <Message Text="OutputA: @(ResultA)" />
+                    </Target>
+                    <Target Name="TargetA" Outputs="alpha.txt">
+                        <Message Text="Inside TargetA" />
+                    </Target>
+                </Project>
+                """);
+
+            MockLogger loggerB = ObjectModelHelpers.BuildProjectExpectSuccess("""
+                <Project>
+                    <Target Name="Build">
+                        <CallTarget Targets="TargetB">
+                            <Output TaskParameter="TargetOutputs" ItemName="ResultB" />
+                        </CallTarget>
+                        <Message Text="OutputB: @(ResultB)" />
+                    </Target>
+                    <Target Name="TargetB" Outputs="beta.txt">
+                        <Message Text="Inside TargetB" />
+                    </Target>
+                </Project>
+                """);
+
+            loggerA.AssertLogContains("Inside TargetA");
+            loggerA.AssertLogContains("OutputA: alpha.txt");
+            loggerA.AssertLogDoesntContain("Inside TargetB");
+
+            loggerB.AssertLogContains("Inside TargetB");
+            loggerB.AssertLogContains("OutputB: beta.txt");
+            loggerB.AssertLogDoesntContain("Inside TargetA");
+        }
     }
 }
