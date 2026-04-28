@@ -75,7 +75,7 @@ jobs:
 
           after=
           project_id=
-          echo -n "" > iteration-fields.jsonl
+          : > iteration-fields.jsonl
 
           while true; do
             if [ -n "$after" ]; then
@@ -86,7 +86,9 @@ jobs:
 
             check_graphql_errors project-page.json "Project field query"
 
-            project_id="${project_id:-$(jq -r '.data.organization.projectV2.id // empty' project-page.json)}"
+            if [ -z "$project_id" ]; then
+              project_id="$(jq -r '.data.organization.projectV2.id // empty' project-page.json)"
+            fi
             jq -c '.data.organization.projectV2.fields.nodes[]? | select(.__typename == "ProjectV2IterationField")' project-page.json >> iteration-fields.jsonl
 
             if [ "$(jq -r '.data.organization.projectV2.fields.pageInfo.hasNextPage' project-page.json)" != "true" ]; then
@@ -101,6 +103,7 @@ jobs:
             exit 1
           fi
 
+          # Prefer the expected "Sprint" field name, then GitHub's default "Iteration" field name.
           iteration_field="$(jq -s -c '
             map({
               priority: (if .name == "Sprint" then 0 elif .name == "Iteration" then 1 else 2 end),
@@ -117,6 +120,7 @@ jobs:
           iteration_field_id="$(jq -r '.id' <<< "$iteration_field")"
           today="$(date -u +%Y-%m-%d)"
           seconds_per_day=86400
+          # GitHub Projects iteration duration is measured in days; the end date is exclusive.
           current_iteration_id="$(jq -r --arg today "$today" --argjson secondsPerDay "$seconds_per_day" '
             [
               .configuration.iterations[]
