@@ -1,4 +1,4 @@
-# Template to check if only non-build files have changed (documentation and .github)
+# Template to check if only non-build files have changed (documentation, .github, and .config)
 # Sets a pipeline variable 'onlyDocChanged' to 1 if only non-build files changed, 0 otherwise
 # This template should be included at the start of test jobs to determine if tests should run
 
@@ -8,7 +8,7 @@ steps:
     $changedFiles
     $onlyDocChanged = 1
     foreach ($file in $changedFiles) {
-      $isNonBuildFile = ($file -match "^documentation/") -or ($file -match "^\.github/")
+      $isNonBuildFile = ($file -match "^documentation/") -or ($file -match "^\.github/") -or ($file -match "^\.config/")
       if(!$isNonBuildFile)
       {
         $onlyDocChanged = 0

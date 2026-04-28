@@ -8,6 +8,7 @@ trigger:
     exclude:
     - documentation/**
     - .github/**
+    - .config/**
 
 variables:
 - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
