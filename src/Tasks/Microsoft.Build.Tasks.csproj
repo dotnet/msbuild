@@ -252,6 +252,7 @@
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs" />
     <Compile Include="TaskTranslatorHelpers.cs" />
+    <Compile Include="TaskEnvironmentExtensions.cs" />
     <Compile Include="Telemetry.cs" />
     <Compile Include="ToolTaskExtension.cs" />
     <Compile Include="Touch.cs" />
