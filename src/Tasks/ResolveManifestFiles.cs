@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
         private bool _canPublish;
         private Dictionary<string, ITaskItem> _runtimePackAssets;
         // map of satellite assemblies that are included in References
-        private SatelliteRefAssemblyMap _satelliteAssembliesPassedAsReferences = new SatelliteRefAssemblyMap();
+        private SatelliteRefAssemblyMap _satelliteAssembliesPassedAsReferences;
         #endregion
 
         #region Properties
@@ -158,12 +158,13 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         #endregion
 
         public override bool Execute()
         {
+            _satelliteAssembliesPassedAsReferences = new SatelliteRefAssemblyMap(TaskEnvironment);
             _extraFiles = Util.SortItems(_extraFiles, TaskEnvironment);
             _files = Util.SortItems(_files, TaskEnvironment);
             _managedAssemblies = Util.SortItems(_managedAssemblies, TaskEnvironment);
@@ -413,7 +414,9 @@ namespace Microsoft.Build.Tasks
                         }
 
                         // Apply the culture publishing rules to include or exclude satellite assemblies
-                        AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
+                        AssemblyIdentity identity = String.IsNullOrEmpty(item.ItemSpec)
+                            ? null
+                            : AssemblyIdentity.FromManagedAssembly(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
                         if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                         {
                             CultureInfo satelliteCulture = new CultureInfo(identity.Culture);
@@ -770,7 +773,9 @@ namespace Microsoft.Build.Tasks
             // We're using AssemblyIdentity.FromManagedAssembly here because it just does an
             // OpenScope and returns null if not an assembly, which is much faster.
 
-            AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
+            AssemblyIdentity identity = String.IsNullOrEmpty(item.ItemSpec)
+                ? null
+                : AssemblyIdentity.FromManagedAssembly(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
             if (item.ItemSpec.EndsWith(".dll") && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
@@ -911,6 +916,12 @@ namespace Microsoft.Build.Tasks
         private class SatelliteRefAssemblyMap : IEnumerable
         {
             private readonly Dictionary<string, MapEntry> _dictionary = new Dictionary<string, MapEntry>(StringComparer.InvariantCultureIgnoreCase);
+            private readonly TaskEnvironment _taskEnvironment;
+
+            public SatelliteRefAssemblyMap(TaskEnvironment taskEnvironment)
+            {
+                _taskEnvironment = taskEnvironment;
+            }
 
             public MapEntry this[string fusionName]
             {
@@ -923,7 +934,9 @@ namespace Microsoft.Build.Tasks
 
             public bool ContainsItem(ITaskItem item)
             {
-                AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
+                AssemblyIdentity identity = string.IsNullOrEmpty(item.ItemSpec)
+                    ? null
+                    : AssemblyIdentity.FromManagedAssembly(_taskEnvironment.GetAbsolutePath(item.ItemSpec));
                 if (identity != null)
                 {
                     return _dictionary.ContainsKey(identity.ToString());
@@ -934,8 +947,10 @@ namespace Microsoft.Build.Tasks
             public void Add(ITaskItem item)
             {
                 var entry = new MapEntry(item, true);
-                AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
-                if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
+                AssemblyIdentity identity = string.IsNullOrEmpty(item.ItemSpec)
+                    ? null
+                    : AssemblyIdentity.FromManagedAssembly(_taskEnvironment.GetAbsolutePath(item.ItemSpec));
+                if (identity != null && !string.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                 {
                     // Use satellite assembly strong name signature as key
                     string key = identity.ToString();

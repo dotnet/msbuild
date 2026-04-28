@@ -239,7 +239,7 @@ namespace Microsoft.Build.Tasks
                         name = Path.GetFileName(item.ItemSpec);
                     }
                     FileReference file = AddFileFromItem(item);
-                    if (!file.ImportComComponent(item.ItemSpec, manifest.OutputMessages, name))
+                    if (!file.ImportComComponent(TaskEnvironment.GetAbsolutePath(item.ItemSpec), manifest.OutputMessages, name))
                     {
                         success = false;
                     }
