@@ -26,7 +26,7 @@ jobs:
           query_project_page()
           {
             query_args=(-F "organization=$PROJECT_OWNER" -F "projectNumber=$PROJECT_NUMBER")
-            if [ -n "${1:-}" ]; then
+            if [ $# -gt 0 ]; then
               query_args+=(-f "after=$1")
             fi
 
@@ -63,10 +63,14 @@ jobs:
 
           after=
           project_id=
-          printf '' > iteration-fields.jsonl
+          truncate -s 0 iteration-fields.jsonl
 
           while true; do
-            query_project_page "$after" > project-page.json
+            if [ -n "$after" ]; then
+              query_project_page "$after" > project-page.json
+            else
+              query_project_page > project-page.json
+            fi
 
             if jq -e '.errors and (.errors | length > 0)' project-page.json > /dev/null; then
               echo "GraphQL query failed:"
@@ -90,7 +94,7 @@ jobs:
           fi
 
           iteration_field="$(jq -s -c '
-            (map(select(.name == "Sprint")) + map(select(.name == "Iteration")) + .)[0] // empty
+            map(select(.name == "Sprint"))[0] // map(select(.name == "Iteration"))[0] // .[0] // empty
           ' iteration-fields.jsonl)"
           if [ -z "$iteration_field" ]; then
             echo "Could not find an iteration field on project $PROJECT_OWNER/$PROJECT_NUMBER."
@@ -104,8 +108,8 @@ jobs:
             [
               .configuration.iterations[]
               | select(
-                  (.startDate <= $today) and
-                  (((.startDate + "T00:00:00Z") | fromdateiso8601) + (.duration * $secondsPerDay) > (($today + "T00:00:00Z") | fromdateiso8601))
+                  ((((.startDate + "T00:00:00Z") | fromdateiso8601) + (.duration * $secondsPerDay) | todateiso8601 | split("T")[0]) as $endDate
+                  | (.startDate <= $today) and ($today < $endDate))
                 )
             ]
             | sort_by(.startDate)
