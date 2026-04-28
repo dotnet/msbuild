@@ -33,6 +33,20 @@ This newly-built MSBuild will be located at `artifacts\bin\bootstrap\net472\MSBu
 
 MSBuild can be run on Unix systems that support .NET Core. Set-up instructions can be viewed on the wiki: [Building Testing and Debugging on .Net Core MSBuild](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
 
+### Building MSBuild with Bazel
+
+An experimental Bazel entry point is available for environments that invoke builds through Bazel:
+
+```sh
+bazel build //:msbuild
+```
+
+This target delegates to the repository's supported `build.sh` script. To pass arguments to the build script, use:
+
+```sh
+bazel run //:build_msbuild -- -v quiet
+```
+
 ## Localization
 
 You can turn on localized builds via the `/p:LocalizedBuild=true` command line argument. For more information on localized builds and how to make contributions to MSBuild's translations, see our [localization documentation](documentation/wiki/Localization.md)

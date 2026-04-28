@@ -1,0 +1,36 @@
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "repo_sources",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            ".dotnet/**",
+            ".git/**",
+            ".github/agents/**",
+            ".tools/**",
+            "artifacts/**",
+            "bazel-*/**",
+        ],
+    ) + [
+        ".editorconfig",
+        ".gitattributes",
+        ".gitignore",
+        ".vsconfig",
+    ],
+)
+
+genrule(
+    name = "msbuild",
+    srcs = [":repo_sources"],
+    outs = ["msbuild_build.stamp"],
+    cmd = "$(location tools/bazel/build_msbuild.sh) --stamp-output $@ -v quiet",
+    local = True,
+    tools = ["tools/bazel/build_msbuild.sh"],
+)
+
+sh_binary(
+    name = "build_msbuild",
+    srcs = ["tools/bazel/build_msbuild.sh"],
+    data = [":repo_sources"],
+)

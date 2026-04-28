@@ -1,0 +1,8 @@
+artifacts
+.dotnet
+.git
+.tools
+bazel-bin
+bazel-msbuild
+bazel-out
+bazel-testlogs
