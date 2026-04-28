@@ -775,7 +775,7 @@ namespace ClassLibrary3
         /// <returns>The Stream</returns>
         private Stream CreateFileStream(AbsolutePath path, FileMode mode, FileAccess access)
         {
-            if (String.Equals(path, "SR1.strings", StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(Path.GetFileName(path.Value), "SR1.strings", StringComparison.OrdinalIgnoreCase))
             {
                 return StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }");
             }
