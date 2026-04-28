@@ -51,6 +51,8 @@ internal sealed partial class CoordinatorServer(
 
         _logger.WriteLine($"Server: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
 
+        HashSet<Task> clientTasks = [];
+
         try
         {
             while (!token.IsCancellationRequested)
@@ -70,7 +72,11 @@ internal sealed partial class CoordinatorServer(
                 // CancellationToken.None is intentional: we don't want Task.Run to cancel
                 // before HandleClientAsync starts, which would orphan the pipe stream.
                 // HandleClientAsync receives the cancellation token for its own loop.
-                _ = Task.Run(() => HandleClientAsync(pipeStream, token), CancellationToken.None);
+                Task clientTask = Task.Run(() => HandleClientAsync(pipeStream, token), CancellationToken.None);
+                clientTasks.Add(clientTask);
+
+                // Remove task from tracking when it completes to prevent unbounded growth.
+                _ = clientTask.ContinueWith(_ => clientTasks.Remove(clientTask), TaskScheduler.Default);
             }
         }
         finally
@@ -78,6 +84,20 @@ internal sealed partial class CoordinatorServer(
             _logger.WriteLine("Server: Accept loop exiting");
             _heartbeatMonitor?.Dispose();
             _shutdownTimer?.Dispose();
+
+            // Wait for all remaining client tasks to complete before exiting.
+            // This ensures logging (which may reference the test context) completes cleanly.
+            if (clientTasks.Count > 0)
+            {
+                try
+                {
+                    await Task.WhenAll(clientTasks);
+                }
+                catch
+                {
+                    // Swallow exceptions from client tasks; they're already logged.
+                }
+            }
         }
     }
 
