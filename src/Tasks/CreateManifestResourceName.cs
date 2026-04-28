@@ -20,8 +20,15 @@ namespace Microsoft.Build.Tasks
     /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
-    public abstract class CreateManifestResourceName : TaskExtension
+    public abstract class CreateManifestResourceName : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// The task environment used for thread-safe file system access. Set by MSBuild for
+        /// multithreaded execution; defaults to a process-wide fallback for legacy hosting.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
+
         #region Properties
         internal const string resxFileExtension = ".resx";
         internal const string restextFileExtension = ".restext";
@@ -190,7 +197,8 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        if (FileSystems.Default.FileExists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
+                        string conventionProbePath = Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon);
+                        if (FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(conventionProbePath)))
                         {
                             dependentUpon = conventionDependentUpon;
                         }
@@ -215,7 +223,7 @@ namespace Microsoft.Build.Tasks
                     if (isDependentOnSourceFile)
                     {
                         string pathToDependent = Path.Combine(Path.GetDirectoryName(fileName), dependentUpon);
-                        binaryStream = createFileStream(pathToDependent, FileMode.Open, FileAccess.Read);
+                        binaryStream = createFileStream(TaskEnvironment.GetAbsolutePath(pathToDependent), FileMode.Open, FileAccess.Read);
                     }
 
                     // Put the task item into a dictionary so we can access it from a derived class quickly.
