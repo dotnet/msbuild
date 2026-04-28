@@ -26,7 +26,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             var engine = new MockEngine(true);
             var task = new CreateCSharpManifestResourceName
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
                 ResourceFiles = new ITaskItem[] { new TaskItem("") },
                 RootNamespace = "Test"
@@ -63,7 +62,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(true),
                 ResourceFiles = new ITaskItem[] { new TaskItem(pathWithDotDot) },
                 RootNamespace = "Test",
@@ -91,7 +89,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(true),
                 ResourceFiles = new ITaskItem[] { new TaskItem(pathWithForwardSlashes) },
                 RootNamespace = "Test"
@@ -118,7 +115,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(true),
                 ResourceFiles = new ITaskItem[] { new TaskItem(mixedPath) },
                 RootNamespace = "Test"
@@ -137,7 +133,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new AddToWin32Manifest
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(true),
                 ApplicationManifest = null,
                 OutputDirectory = folder.Path,
@@ -172,7 +167,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(true),
                 ResourceFiles = new ITaskItem[] { invalidItem, validItem },
                 RootNamespace = "Test"
@@ -199,7 +193,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(true),
                 ResourceFiles = new ITaskItem[] { new TaskItem(resxPath) },
                 RootNamespace = "Test"
@@ -223,7 +216,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(true),
                 ResourceFiles = new ITaskItem[] { new TaskItem(resxPath) },
                 RootNamespace = "Test"

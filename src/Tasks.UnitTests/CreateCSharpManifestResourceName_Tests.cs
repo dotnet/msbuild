@@ -358,7 +358,6 @@ namespace Microsoft.Build.UnitTests
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("SR1.resx");
             i.SetMetadata("BuildAction", "EmbeddedResource");
             i.SetMetadata("DependentUpon", "SR1.strings");        // Normally, this would be a C# file.
@@ -393,7 +392,6 @@ namespace Microsoft.Build.UnitTests
                 CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i }
                 };
@@ -434,7 +432,6 @@ namespace Microsoft.Build.UnitTests
                 CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i }
                 };
@@ -468,7 +465,6 @@ namespace Microsoft.Build.UnitTests
                 CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i }
                 };
@@ -503,7 +499,6 @@ namespace Microsoft.Build.UnitTests
                 CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i }
                 };
@@ -535,7 +530,6 @@ namespace Microsoft.Build.UnitTests
                 CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i }
                 };
@@ -570,7 +564,6 @@ namespace Microsoft.Build.UnitTests
                 CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = false,
                     ResourceFiles = new ITaskItem[] { i }
                 };
@@ -607,7 +600,6 @@ namespace Microsoft.Build.UnitTests
                 CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
                 {
                     BuildEngine = new MockEngine(),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i },
                 };
@@ -801,7 +793,6 @@ namespace ClassLibrary3
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("strings.resx");
 
             t.ResourceFiles = new ITaskItem[] { i };
@@ -827,7 +818,6 @@ namespace ClassLibrary3
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("pic.bmp");
             i.SetMetadata("Type", "Non-Resx");
 
@@ -853,7 +843,6 @@ namespace ClassLibrary3
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("pic.bmp");
             i.SetMetadata("LogicalName", "foo");
             i.SetMetadata("Type", "Non-Resx");
@@ -880,7 +869,6 @@ namespace ClassLibrary3
             CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("strings.resx");
             i.SetMetadata("Type", "Resx");
 

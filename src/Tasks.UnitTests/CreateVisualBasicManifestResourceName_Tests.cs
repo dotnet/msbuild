@@ -344,7 +344,6 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ITaskItem i = new TaskItem("SR1.resx");
 
@@ -391,7 +390,6 @@ End Namespace");
                 CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName
                 {
                     BuildEngine = new MockEngine(_testOutput),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     UseDependentUponConvention = true,
                     ResourceFiles = new ITaskItem[] { i },
                 };
@@ -515,7 +513,6 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("strings.resx");
 
             t.ResourceFiles = new ITaskItem[] { i };
@@ -541,7 +538,6 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("pic.bmp");
             i.SetMetadata("Type", "Non-Resx");
 
@@ -567,7 +563,6 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("pic.bmp");
             i.SetMetadata("LogicalName", "foo");
             i.SetMetadata("Type", "Non-Resx");
@@ -594,7 +589,6 @@ End Namespace
             CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
 
             t.BuildEngine = new MockEngine();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ITaskItem i = new TaskItem("strings.resx");
             i.SetMetadata("Type", "Resx");
 
