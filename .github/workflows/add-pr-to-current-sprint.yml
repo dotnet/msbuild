@@ -23,6 +23,18 @@ jobs:
         run: |
           set -euo pipefail
 
+          check_graphql_errors()
+          {
+            response_file="$1"
+            operation="$2"
+
+            if jq -e '.errors and (.errors | length > 0)' "$response_file" > /dev/null; then
+              echo "$operation failed:"
+              jq -r '.errors[].message' "$response_file"
+              exit 1
+            fi
+          }
+
           query_project_page()
           {
             query_args=(-F "organization=$PROJECT_OWNER" -F "projectNumber=$PROJECT_NUMBER")
@@ -63,7 +75,7 @@ jobs:
 
           after=
           project_id=
-          truncate -s 0 iteration-fields.jsonl
+          true > iteration-fields.jsonl
 
           while true; do
             if [ -n "$after" ]; then
@@ -72,11 +84,7 @@ jobs:
               query_project_page > project-page.json
             fi
 
-            if jq -e '.errors and (.errors | length > 0)' project-page.json > /dev/null; then
-              echo "GraphQL query failed:"
-              jq -r '.errors[].message' project-page.json
-              exit 1
-            fi
+            check_graphql_errors project-page.json "Project field query"
 
             project_id="${project_id:-$(jq -r '.data.organization.projectV2.id // empty' project-page.json)}"
             jq -c '.data.organization.projectV2.fields.nodes[]? | select(.__typename == "ProjectV2IterationField")' project-page.json >> iteration-fields.jsonl
@@ -94,7 +102,12 @@ jobs:
           fi
 
           iteration_field="$(jq -s -c '
-            map(select(.name == "Sprint"))[0] // map(select(.name == "Iteration"))[0] // .[0] // empty
+            map({
+              priority: (if .name == "Sprint" then 0 elif .name == "Iteration" then 1 else 2 end),
+              field: .
+            })
+            | sort_by(.priority)
+            | .[0].field // empty
           ' iteration-fields.jsonl)"
           if [ -z "$iteration_field" ]; then
             echo "Could not find an iteration field on project $PROJECT_OWNER/$PROJECT_NUMBER."
@@ -108,7 +121,8 @@ jobs:
             [
               .configuration.iterations[]
               | select(
-                  ((((.startDate + "T00:00:00Z") | fromdateiso8601) + (.duration * $secondsPerDay) | todateiso8601 | split("T")[0]) as $endDate
+                  ((.startDate + "T00:00:00Z") | fromdateiso8601) as $startDate
+                  | ($startDate + (.duration * $secondsPerDay) | todateiso8601 | split("T")[0]) as $endDate
                   | (.startDate <= $today) and ($today < $endDate))
                 )
             ]
@@ -121,7 +135,7 @@ jobs:
             exit 1
           fi
 
-          item_id="$(gh api graphql \
+          gh api graphql \
             -f projectId="$project_id" \
             -f contentId="$PR_NODE_ID" \
             -f query='
@@ -131,8 +145,14 @@ jobs:
                     id
                   }
                 }
-              }' \
-            --jq '.data.addProjectV2ItemById.item.id')"
+              }' > add-item.json
+          check_graphql_errors add-item.json "Adding pull request to project"
+
+          item_id="$(jq -r '.data.addProjectV2ItemById.item.id // empty' add-item.json)"
+          if [ -z "$item_id" ]; then
+            echo "Adding pull request to project did not return a project item ID."
+            exit 1
+          fi
 
           gh api graphql \
             -f projectId="$project_id" \
@@ -153,4 +173,10 @@ jobs:
                     id
                   }
                 }
-              }'
+              }' > update-item.json
+          check_graphql_errors update-item.json "Setting current sprint"
+
+          if [ -z "$(jq -r '.data.updateProjectV2ItemFieldValue.projectV2Item.id // empty' update-item.json)" ]; then
+            echo "Setting current sprint did not return an updated project item ID."
+            exit 1
+          fi
