@@ -23,7 +23,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     private readonly BinaryWriter _writer;
     private readonly Timer _heartbeatTimer;
     private readonly ICoordinatorLogger _logger;
-    private bool _disposed;
+    private volatile bool _disposed;
 
     /// <summary>
     ///  The number of nodes granted by the coordinator.
@@ -215,7 +215,13 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
 
         _disposed = true;
-        _heartbeatTimer.Dispose();
+
+        // Stop heartbeat timer and wait for any in-flight callback to complete.
+        // This prevents SendHeartbeat from running after resources are disposed.
+        using (var disposeEvent = new ManualResetEvent(false))
+        {
+            _heartbeatTimer.Dispose(disposeEvent);
+        }
 
         _logger.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
 
