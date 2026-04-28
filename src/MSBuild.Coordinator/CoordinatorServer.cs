@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO.Pipes;
 using Microsoft.Build.Framework.Coordinator;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Coordinator;
 
@@ -23,8 +23,9 @@ internal sealed partial class CoordinatorServer(
     private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
     private readonly int _missedHeartbeatsThreshold = settings.MissedHeartbeatsThreshold;
     private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
-    private readonly ConcurrentDictionary<int, ClientConnection> _connectionsByProcessId = new();
+    private readonly Dictionary<int, ClientConnection> _connectionsByProcessId = [];
     private readonly object _budgetLock = new();
+    private readonly ReaderWriterLockSlim _connectionLock = new();
     private readonly CancellationTokenSource _cts = new();
     private readonly ICoordinatorLogger _logger = logger ?? DefaultLogger.Instance;
     private Timer? _heartbeatMonitor;
@@ -149,7 +150,11 @@ internal sealed partial class CoordinatorServer(
 
             BuildGrant grant = new(request.ProcessId, request.RequestedNodes);
             connection = new ClientConnection(grant, pipeStream);
-            _connectionsByProcessId[request.ProcessId] = connection;
+
+            using (_connectionLock.EnterDisposableWriteLock())
+            {
+                _connectionsByProcessId[request.ProcessId] = connection;
+            }
 
             // Try to grant nodes.
             int grantedNodes;
@@ -237,7 +242,15 @@ internal sealed partial class CoordinatorServer(
     /// </summary>
     private void ReleaseConnection(ClientConnection connection)
     {
-        _connectionsByProcessId.TryRemove(connection.Grant.ProcessId, out _);
+        using (_connectionLock.EnterDisposableWriteLock())
+        {
+            // Only remove if this connection is still current for the PID.
+            if (_connectionsByProcessId.TryGetValue(connection.Grant.ProcessId, out var current) &&
+                current == connection)
+            {
+                _connectionsByProcessId.Remove(connection.Grant.ProcessId);
+            }
+        }
 
         ImmutableArray<BuildGrant> newlyGranted;
 
@@ -251,10 +264,17 @@ internal sealed partial class CoordinatorServer(
             _logger.WriteLine($"Server: Draining wait queue, {newlyGranted.Length} build(s) to notify");
         }
 
-        // Notify newly granted builds outside the lock.
+        // Notify newly granted builds outside the locks.
         foreach (BuildGrant grant in newlyGranted)
         {
-            if (_connectionsByProcessId.TryGetValue(grant.ProcessId, out ClientConnection? waitingConnection))
+            bool found;
+            ClientConnection? waitingConnection;
+            using (_connectionLock.EnterDisposableReadLock())
+            {
+                found = _connectionsByProcessId.TryGetValue(grant.ProcessId, out waitingConnection);
+            }
+
+            if (found && waitingConnection is not null)
             {
                 try
                 {
@@ -281,7 +301,14 @@ internal sealed partial class CoordinatorServer(
     {
         DateTime threshold = DateTime.UtcNow - TimeSpan.FromMilliseconds(_heartbeatIntervalMs * _missedHeartbeatsThreshold);
 
-        foreach (ClientConnection connection in _connectionsByProcessId.Values)
+        List<ClientConnection> connectionsToCheck;
+
+        using (_connectionLock.EnterDisposableReadLock())
+        {
+            connectionsToCheck = [.. _connectionsByProcessId.Values];
+        }
+
+        foreach (ClientConnection connection in connectionsToCheck)
         {
             if (connection.Grant.LastHeartbeat >= threshold)
             {
@@ -295,6 +322,8 @@ internal sealed partial class CoordinatorServer(
             }
 
             _logger.WriteLine($"Server: Reclaiming grant from dead PID {connection.Grant.ProcessId}");
+
+            // ReleaseConnection will acquire its own write lock.
             ReleaseConnection(connection);
         }
     }
@@ -343,5 +372,6 @@ internal sealed partial class CoordinatorServer(
         _heartbeatMonitor?.Dispose();
         _shutdownTimer?.Dispose();
         _cts.Dispose();
+        _connectionLock.Dispose();
     }
 }

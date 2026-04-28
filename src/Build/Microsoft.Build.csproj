@@ -188,7 +188,6 @@
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />
-    <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
     <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />
