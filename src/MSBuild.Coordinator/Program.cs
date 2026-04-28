@@ -7,8 +7,10 @@ using Microsoft.Build;
 using Microsoft.Build.Coordinator;
 using Microsoft.Build.Framework.Coordinator;
 
+CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
+
 // Ensure single instance using a named mutex.
-string mutexName = $"Global\\{Protocol.GetPipeName()}";
+string mutexName = $"Global\\{settings.PipeName}";
 
 using Mutex mutex = new(initiallyOwned: false, mutexName, out bool createdNew);
 
@@ -19,31 +21,14 @@ if (!createdNew)
     return 1;
 }
 
-int totalBudget = GetEnvironmentInt(
-    Protocol.NodeBudgetEnvironmentVariable,
-    Environment.ProcessorCount);
-
-int heartbeatIntervalMs = GetEnvironmentInt(
-    Protocol.HeartbeatIntervalEnvironmentVariable,
-    Protocol.DefaultHeartbeatIntervalMs);
-
-int shutdownTimeoutMs = GetEnvironmentInt(
-    Protocol.ShutdownTimeoutEnvironmentVariable,
-    60_000);
-
-string pipeName = Protocol.GetPipeName();
-
 Console.WriteLine($"MSBuild Coordinator starting.");
-Console.WriteLine($"  Pipe: {pipeName}");
-Console.WriteLine($"  Node budget: {totalBudget}");
-Console.WriteLine($"  Heartbeat interval: {heartbeatIntervalMs}ms");
-Console.WriteLine($"  Shutdown timeout: {shutdownTimeoutMs}ms");
+Console.WriteLine($"  Pipe: {settings.PipeName}");
+Console.WriteLine($"  Node budget: {settings.TotalNodeBudget}");
+Console.WriteLine($"  Heartbeat interval: {settings.HeartbeatIntervalMs}ms");
+Console.WriteLine($"  Shutdown timeout: {settings.ShutdownTimeoutMs}ms");
 
 using CoordinatorServer server = new(
-    totalBudget,
-    pipeName,
-    heartbeatIntervalMs,
-    shutdownTimeoutMs: shutdownTimeoutMs);
+    settings);
 
 using CancellationTokenSource cts = new();
 
@@ -64,10 +49,3 @@ catch (OperationCanceledException)
 
 Console.WriteLine("MSBuild Coordinator shut down.");
 return 0;
-
-int GetEnvironmentInt(string variable, int defaultValue)
-{
-    string? value = Environment.GetEnvironmentVariable(variable);
-
-    return int.TryParse(value, out int result) ? result : defaultValue;
-}

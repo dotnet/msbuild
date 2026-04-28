@@ -14,18 +14,15 @@ namespace Microsoft.Build.Coordinator;
 ///  manages node grants, and monitors build health via heartbeats.
 /// </summary>
 internal sealed partial class CoordinatorServer(
-    int totalBudget,
-    string pipeName,
-    int heartbeatIntervalMs = Protocol.DefaultHeartbeatIntervalMs,
-    int missedHeartbeatsThreshold = Protocol.DefaultMissedHeartbeatsThreshold,
-    int shutdownTimeoutMs = 60_000,
+    CoordinatorSettings settings,
     ICoordinatorLogger? logger = null) : IDisposable
 {
-    private readonly NodeBudgetManager _budgetManager = new(totalBudget);
-    private readonly string _pipeName = pipeName;
-    private readonly int _heartbeatIntervalMs = heartbeatIntervalMs;
-    private readonly int _missedHeartbeatsThreshold = missedHeartbeatsThreshold;
-    private readonly int _shutdownTimeoutMs = shutdownTimeoutMs;
+    private readonly CoordinatorSettings _settings = settings;
+    private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget);
+    private readonly string _pipeName = settings.PipeName;
+    private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
+    private readonly int _missedHeartbeatsThreshold = settings.MissedHeartbeatsThreshold;
+    private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
     private readonly ConcurrentDictionary<int, ClientConnection> _connectionsByProcessId = new();
     private readonly object _budgetLock = new();
     private readonly CancellationTokenSource _cts = new();
@@ -52,7 +49,7 @@ internal sealed partial class CoordinatorServer(
         // Start auto-shutdown timer.
         ResetShutdownTimer();
 
-        _logger.WriteLine($"Server: Accept loop started on pipe '{_pipeName}' (budget={totalBudget})");
+        _logger.WriteLine($"Server: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
 
         try
         {

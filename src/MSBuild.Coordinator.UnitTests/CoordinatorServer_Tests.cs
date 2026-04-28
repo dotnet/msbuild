@@ -18,6 +18,12 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
     private readonly TestLogger _logger = new(testOutput);
 
+    private CoordinatorSettings DefaultSettings => CoordinatorSettings.Default with
+    {
+        PipeName = _pipeName,
+        ShutdownTimeoutMs = Timeout.Infinite,
+    };
+
     public void Dispose()
     {
         _cts.Cancel();
@@ -27,10 +33,10 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     [Fact]
     public async Task SingleClient_ReceivesNodeGrant()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientAsync();
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
@@ -49,10 +55,10 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     [Fact]
     public async Task SingleClient_RequestLessThanBudget_GrantsOnlyRequested()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientAsync();
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
@@ -71,11 +77,11 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     [Fact]
     public async Task MultipleClients_FairShareAllocation()
     {
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 8);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client takes all 8 nodes.
-        using NamedPipeClientStream client1 = await ConnectClientAsync();
+        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
         using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
@@ -84,7 +90,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
             .GrantedNodes.ShouldBe(8);
 
         // Second client should get a Wait.
-        using NamedPipeClientStream client2 = await ConnectClientAsync();
+        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
@@ -107,11 +113,11 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     {
         // Budget of 8. One active client holds all 8. Two clients wait.
         // When the active client releases, both waiters should get fair-share grants.
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 8);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client takes all 8 nodes.
-        using NamedPipeClientStream client1 = await ConnectClientAsync();
+        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
         using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
@@ -120,7 +126,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
             .GrantedNodes.ShouldBe(8);
 
         // Second client waits.
-        using NamedPipeClientStream client2 = await ConnectClientAsync();
+        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
@@ -128,7 +134,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // Third client waits.
-        using NamedPipeClientStream client3 = await ConnectClientAsync();
+        using NamedPipeClientStream client3 = await ConnectClientPipeAsync();
         using BinaryWriter writer3 = new(client3, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader3 = new(client3, Encoding.UTF8, leaveOpen: true);
 
@@ -149,6 +155,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         writer2.Write(ReleaseNodesMessage.Instance);
         writer3.Write(ReleaseNodesMessage.Instance);
         _cts.Cancel();
+
         await serverTask;
     }
 
@@ -158,11 +165,11 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         // Budget of 4. One active client holds all 4. Two clients wait.
         // The first waiter disconnects. When the active client releases,
         // the remaining waiter should get a grant.
-        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // Active client takes all 4 nodes.
-        using NamedPipeClientStream client1 = await ConnectClientAsync();
+        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
         using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
@@ -170,7 +177,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         // First waiter.
-        NamedPipeClientStream client2 = await ConnectClientAsync();
+        NamedPipeClientStream client2 = await ConnectClientPipeAsync();
         BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
@@ -178,7 +185,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // Second waiter.
-        using NamedPipeClientStream client3 = await ConnectClientAsync();
+        using NamedPipeClientStream client3 = await ConnectClientPipeAsync();
         using BinaryWriter writer3 = new(client3, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader3 = new(client3, Encoding.UTF8, leaveOpen: true);
 
@@ -200,6 +207,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
         writer3.Write(ReleaseNodesMessage.Instance);
         _cts.Cancel();
+
         await serverTask;
     }
 
@@ -210,31 +218,28 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
         // Budget of 16 with 4 clients each requesting 4.
         // All should connect and receive grants without waiting.
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // Connect all clients concurrently.
         Task<NamedPipeClientStream>[] connectTasks =
         [
-            ConnectClientAsync(),
-            ConnectClientAsync(),
-            ConnectClientAsync(),
-            ConnectClientAsync(),
+            ConnectClientPipeAsync(),
+            ConnectClientPipeAsync(),
+            ConnectClientPipeAsync(),
+            ConnectClientPipeAsync(),
         ];
 
         NamedPipeClientStream[] clients = await Task.WhenAll(connectTasks);
 
         try
         {
-            // Send requests concurrently.
-            Task[] requestTasks = new Task[clients.Length];
-
+            // Send requests.
             for (int i = 0; i < clients.Length; i++)
             {
                 int processId = 20001 + i;
                 BinaryWriter w = new(clients[i], Encoding.UTF8, leaveOpen: true);
                 w.Write(new RequestNodesMessage(requestedNodes: 4, processId: processId));
-                requestTasks[i] = Task.CompletedTask;
             }
 
             // All should receive grants (no waits).
@@ -256,6 +261,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
             }
 
             _cts.Cancel();
+
             await serverTask;
         }
 #pragma warning restore CA2000 // Dispose objects before losing scope
@@ -264,10 +270,10 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     [Fact]
     public async Task Heartbeat_DoesNotCauseError()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientAsync();
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
@@ -283,17 +289,18 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         writer.Write(ReleaseNodesMessage.Instance);
 
         _cts.Cancel();
+
         await serverTask;
     }
 
     [Fact]
     public async Task ClientDisconnect_ReleasesGrant()
     {
-        using CoordinatorServer server = new(totalBudget: 4, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
         Task serverTask = server.RunAsync(_cts.Token);
 
         // First client connects, gets grant, then disconnects abruptly.
-        NamedPipeClientStream client1 = await ConnectClientAsync();
+        NamedPipeClientStream client1 = await ConnectClientPipeAsync();
         BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
@@ -301,7 +308,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         // Second client queued.
-        using NamedPipeClientStream client2 = await ConnectClientAsync();
+        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
@@ -320,16 +327,17 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
         writer2.Write(ReleaseNodesMessage.Instance);
         _cts.Cancel();
+
         await serverTask;
     }
 
     [Fact]
     public async Task InvalidFirstMessage_ReceivesError()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
         Task serverTask = server.RunAsync(_cts.Token);
 
-        using NamedPipeClientStream client = await ConnectClientAsync();
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
@@ -340,13 +348,19 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         response.ShouldBeOfType<ErrorMessage>();
 
         _cts.Cancel();
+
         await serverTask;
     }
 
     [Fact]
     public async Task AutoShutdown_ExitsWhenNoBuildsActive()
     {
-        using CoordinatorServer server = new(totalBudget: 16, _pipeName, shutdownTimeoutMs: 500, logger: _logger);
+        using CoordinatorServer server = CreateServer(
+            DefaultSettings with
+            {
+                TotalNodeBudget = 16,
+                ShutdownTimeoutMs = 500,
+            });
 
         // Server should shut itself down after 500ms with no clients.
         Task serverTask = server.RunAsync(_cts.Token);
@@ -360,13 +374,13 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     [Fact]
     public async Task SamePidReconnects_CleanlyHandled()
     {
-        using CoordinatorServer server = new(totalBudget: 8, _pipeName, shutdownTimeoutMs: Timeout.Infinite, logger: _logger);
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 8);
         Task serverTask = server.RunAsync(_cts.Token);
 
         int pid = 30001;
 
         // First connection.
-        NamedPipeClientStream client1 = await ConnectClientAsync();
+        NamedPipeClientStream client1 = await ConnectClientPipeAsync();
         BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
@@ -381,7 +395,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         // Reconnect with the same PID. The server will overwrite the old connection
         // entry when it processes the new RequestNodes, and the old connection's
         // finally block will clean up its grant independently.
-        using NamedPipeClientStream client2 = await ConnectClientAsync();
+        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
@@ -393,13 +407,20 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
         writer2.Write(ReleaseNodesMessage.Instance);
         _cts.Cancel();
+
         await serverTask;
     }
 
-    private async Task<NamedPipeClientStream> ConnectClientAsync()
+    private async Task<NamedPipeClientStream> ConnectClientPipeAsync()
     {
         NamedPipeClientStream client = new(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
         await client.ConnectAsync(5000);
         return client;
     }
+
+    private CoordinatorServer CreateServer(int totalNodeBudget)
+        => CreateServer(DefaultSettings with { TotalNodeBudget = totalNodeBudget });
+
+    private CoordinatorServer CreateServer(CoordinatorSettings settings)
+        => new(settings, _logger);
 }

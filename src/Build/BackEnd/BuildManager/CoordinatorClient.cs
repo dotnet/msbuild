@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Shared;
 
@@ -56,23 +55,21 @@ internal sealed partial class CoordinatorClient : IDisposable
     ///  Attempts to connect to the coordinator and request a node grant.
     ///  Returns null if the coordinator is not available or an error occurs.
     /// </summary>
-    public static CoordinatorClient? TryConnect(
-        int requestedNodes,
-        int connectionTimeoutMs = 5000)
+    public static CoordinatorClient? TryConnect(int requestedNodes, CoordinatorSettings? settings = null)
     {
+        settings ??= CoordinatorSettings.FromEnvironment();
         ICoordinatorLogger logger = DefaultLogger.Instance;
-        string pipeName = Protocol.GetPipeName();
 
         NamedPipeClientStream? pipeStream = null;
 
         try
         {
-            pipeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-            logger.WriteLine($"CoordinatorClient: Connecting to pipe '{pipeName}'");
+            logger.WriteLine($"CoordinatorClient: Connecting to pipe '{settings.PipeName}'");
 
             // Try to connect to an existing coordinator.
-            if (!TryConnectToPipe(pipeStream, connectionTimeoutMs))
+            if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
             {
                 logger.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
 
@@ -86,11 +83,11 @@ internal sealed partial class CoordinatorClient : IDisposable
 
                 // The first pipe may be in a bad state after a failed connect. Create a new one.
                 pipeStream.Dispose();
-                pipeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
                 logger.WriteLine("CoordinatorClient: Retrying connection after launch");
 
-                if (!TryConnectToPipe(pipeStream, connectionTimeoutMs))
+                if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
                 {
                     logger.WriteLine("CoordinatorClient: Retry connection failed");
                     pipeStream.Dispose();
@@ -99,11 +96,13 @@ internal sealed partial class CoordinatorClient : IDisposable
             }
 
             logger.WriteLine("CoordinatorClient: Connected to coordinator");
-            return TryNegotiate(pipeStream, requestedNodes, EnvironmentUtilities.CurrentProcessId, logger);
+
+            return TryNegotiate(pipeStream, requestedNodes, settings, logger);
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
             logger.WriteLine($"CoordinatorClient: Exception during connect: {ex.Message}");
+
             // Any failure in coordinator communication should not break the build.
             pipeStream?.Dispose();
             return null;
@@ -111,26 +110,25 @@ internal sealed partial class CoordinatorClient : IDisposable
     }
 
     /// <summary>
-    ///  Attempts to connect to a coordinator at the given pipe name and request a node grant.
+    ///  Attempts to connect to a coordinator using the provided settings and request a node grant.
     ///  This overload does not attempt to launch the coordinator and is intended for testing.
     /// </summary>
     internal static CoordinatorClient? TryConnectToServer(
-        string pipeName,
         int requestedNodes,
-        int processId,
-        int connectionTimeoutMs = 5000,
+        CoordinatorSettings? settings = null,
         ICoordinatorLogger? logger = null)
     {
+        settings ??= CoordinatorSettings.Default;
         logger ??= DefaultLogger.Instance;
         NamedPipeClientStream? pipeStream = null;
 
         try
         {
-            pipeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-            logger.WriteLine($"CoordinatorClient: Connecting to test pipe '{pipeName}'");
+            logger.WriteLine($"CoordinatorClient: Connecting to test pipe '{settings.PipeName}'");
 
-            if (!TryConnectToPipe(pipeStream, connectionTimeoutMs))
+            if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
             {
                 logger.WriteLine("CoordinatorClient: Test connection timed out");
                 pipeStream.Dispose();
@@ -138,7 +136,8 @@ internal sealed partial class CoordinatorClient : IDisposable
             }
 
             logger.WriteLine("CoordinatorClient: Connected to test server");
-            return TryNegotiate(pipeStream, requestedNodes, processId, logger);
+
+            return TryNegotiate(pipeStream, requestedNodes, settings, logger);
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
@@ -155,19 +154,15 @@ internal sealed partial class CoordinatorClient : IDisposable
     private static CoordinatorClient? TryNegotiate(
         NamedPipeClientStream pipeStream,
         int requestedNodes,
-        int processId,
+        CoordinatorSettings settings,
         ICoordinatorLogger logger)
     {
-        int heartbeatIntervalMs = GetEnvironmentInt(
-            Protocol.HeartbeatIntervalEnvironmentVariable,
-            Protocol.DefaultHeartbeatIntervalMs);
-
-        BinaryReader reader = new(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
-        BinaryWriter writer = new(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
+        var reader = new BinaryReader(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
+        var writer = new BinaryWriter(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
 
         // Send the node request.
-        logger.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {processId})");
-        writer.Write(new RequestNodesMessage(requestedNodes, processId));
+        logger.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId})");
+        writer.Write(new RequestNodesMessage(requestedNodes, settings.ProcessId));
 
         // Read the response.
         ServerMessage response = reader.ReadServerMessage();
@@ -176,7 +171,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         {
             case NodeGrantMessage grant:
                 logger.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
-                return new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, heartbeatIntervalMs, logger);
+                return new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
 
             case WaitMessage:
                 logger.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
@@ -187,7 +182,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                 if (grantAfterWait is NodeGrantMessage deferredGrant)
                 {
                     logger.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes");
-                    return new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, heartbeatIntervalMs, logger);
+                    return new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
                 }
 
                 logger.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name}");
@@ -333,11 +328,5 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
 
         return null;
-    }
-
-    private static int GetEnvironmentInt(string variable, int defaultValue)
-    {
-        string? value = Environment.GetEnvironmentVariable(variable);
-        return int.TryParse(value, out int result) ? result : defaultValue;
     }
 }

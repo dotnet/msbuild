@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using Microsoft.Build.BackEnd;
-
 namespace Microsoft.Build.Framework.Coordinator;
 
 /// <summary>
@@ -15,21 +12,6 @@ internal static class Protocol
     ///  Protocol version. Increment when the wire format changes.
     /// </summary>
     public const byte Version = 1;
-
-    /// <summary>
-    ///  Default named pipe name base.
-    /// </summary>
-    public const string PipeNameBase = "msbuild-coordinator";
-
-    /// <summary>
-    ///  Default heartbeat interval in milliseconds.
-    /// </summary>
-    public const int DefaultHeartbeatIntervalMs = 5_000;
-
-    /// <summary>
-    ///  Default number of missed heartbeats before a grant is reclaimed.
-    /// </summary>
-    public const int DefaultMissedHeartbeatsThreshold = 3;
 
     /// <summary>
     ///  Environment variable that enables the build coordinator.
@@ -57,21 +39,4 @@ internal static class Protocol
     ///  name instead of the default user-scoped pipe name.
     /// </summary>
     public const string PipeNameEnvironmentVariable = "MSBUILDCOORDINATORPIPENAME";
-
-    /// <summary>
-    ///  Gets the named pipe name for the coordinator. On Unix-like systems, the pipe name
-    ///  is placed under /tmp to avoid exceeding Unix Domain Socket path length limits.
-    ///  If <see cref="PipeNameEnvironmentVariable"/> is set, that value is used directly.
-    /// </summary>
-    public static string GetPipeName()
-    {
-        string? overrideName = Environment.GetEnvironmentVariable(PipeNameEnvironmentVariable);
-        if (!string.IsNullOrEmpty(overrideName))
-        {
-            return NamedPipeUtil.GetPlatformSpecificPipeName(overrideName);
-        }
-
-        string userIdentifier = Environment.UserName;
-        return NamedPipeUtil.GetPlatformSpecificPipeName($"{PipeNameBase}-{userIdentifier}");
-    }
 }

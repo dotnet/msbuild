@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Shouldly;
@@ -11,20 +10,6 @@ namespace Microsoft.Build.Coordinator.UnitTests;
 
 public class Protocol_Tests
 {
-    [Fact]
-    public void GetPipeName_ContainsBase()
-    {
-        string pipeName = Protocol.GetPipeName();
-        pipeName.ShouldContain(Protocol.PipeNameBase);
-    }
-
-    [Fact]
-    public void GetPipeName_ContainsUserName()
-    {
-        string pipeName = Protocol.GetPipeName();
-        pipeName.ShouldContain(Environment.UserName);
-    }
-
     [Fact]
     public void RequestNodes_RoundTrips()
     {
