@@ -18,12 +18,15 @@ namespace Microsoft.Build.Tasks.UnitTests
     /// </summary>
     public class ManifestTaskEnvironmentTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public ManifestTaskEnvironmentTests(ITestOutputHelper output) => _output = output;
         // Test 1: Empty ItemSpec - verifies exception handling matches pre-migration behavior
         // GetAbsolutePath throws on empty, but this flows through existing exception handling
         [Fact]
         public void CreateManifestResourceName_EmptyItemSpec_ShouldFail()
         {
-            var engine = new MockEngine(true);
+            var engine = new MockEngine(_output);
             var task = new CreateCSharpManifestResourceName
             {
                 BuildEngine = engine,
@@ -46,7 +49,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void CreateManifestResourceName_PathWithDotDot_ShouldResolve()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
             var subFolder = Path.Combine(folder.Path, "sub");
             Directory.CreateDirectory(subFolder);
@@ -62,7 +65,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                BuildEngine = new MockEngine(true),
+                BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(pathWithDotDot) },
                 RootNamespace = "Test",
                 UseDependentUponConvention = true
@@ -76,7 +79,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void CreateManifestResourceName_ForwardSlashes_ShouldWork()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
             var subFolder = Path.Combine(folder.Path, "Resources");
             Directory.CreateDirectory(subFolder);
@@ -89,7 +92,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                BuildEngine = new MockEngine(true),
+                BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(pathWithForwardSlashes) },
                 RootNamespace = "Test"
             };
@@ -102,7 +105,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void CreateManifestResourceName_MixedSlashes_ShouldWork()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
             var subFolder = Path.Combine(folder.Path, "Sub", "Folder");
             Directory.CreateDirectory(subFolder);
@@ -115,7 +118,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                BuildEngine = new MockEngine(true),
+                BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(mixedPath) },
                 RootNamespace = "Test"
             };
@@ -128,12 +131,12 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void AddToWin32Manifest_NullApplicationManifest_HandledGracefully()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
 
             var task = new AddToWin32Manifest
             {
-                BuildEngine = new MockEngine(true),
+                BuildEngine = new MockEngine(_output),
                 ApplicationManifest = null,
                 OutputDirectory = folder.Path,
                 SupportedArchitectures = "amd64"
@@ -148,7 +151,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void CreateManifestResourceName_BatchProcessing_ContinuesAfterError()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
             
             // Create one valid resource
@@ -167,7 +170,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                BuildEngine = new MockEngine(true),
+                BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { invalidItem, validItem },
                 RootNamespace = "Test"
             };
@@ -175,15 +178,16 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Should return false due to error, but should still process both items
             bool result = task.Execute();
             result.ShouldBeFalse();
-            // Both items should have manifest names assigned (even though task failed)
-            task.ManifestResourceNames.Length.ShouldBe(2);
+            // The valid item should still have been processed successfully
+            task.ManifestResourceNames[1].ShouldNotBeNull();
+            task.ManifestResourceNames[1].ItemSpec.ShouldNotBeNullOrEmpty();
         }
 
         // Test 7: Deeply nested folder - tests path handling with many segments
         [Fact]
         public void CreateManifestResourceName_DeepNesting_ShouldWork()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
             var deepFolder = Path.Combine(folder.Path, "a", "b", "c", "d", "e");
             Directory.CreateDirectory(deepFolder);
@@ -193,7 +197,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                BuildEngine = new MockEngine(true),
+                BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(resxPath) },
                 RootNamespace = "Test"
             };
@@ -206,7 +210,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void CreateManifestResourceName_PathWithSpaces_ShouldWork()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
             var spaceFolder = Path.Combine(folder.Path, "My Resources");
             Directory.CreateDirectory(spaceFolder);
@@ -216,7 +220,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var task = new CreateCSharpManifestResourceName
             {
-                BuildEngine = new MockEngine(true),
+                BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(resxPath) },
                 RootNamespace = "Test"
             };
