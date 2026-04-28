@@ -11,3 +11,40 @@
 /NuGet.config           @dotnet/kitten
 /Directory.Build*       @dotnet/kitten
 /.git*                  @dotnet/kitten
+
+# Files changed by @sujitnayak.
+/eng/Versions.props                                      @dotnet/kitten @sujitnayak
+/src/MSBuild/MSBuild/Microsoft.Build.CommonTypes.xsd     @sujitnayak
+/src/Tasks/BootstrapperUtil/BootstrapperBuilder.cs       @sujitnayak
+/src/Tasks/FormatUrl.cs                                  @sujitnayak
+/src/Tasks/GenerateLauncher.cs                           @sujitnayak
+/src/Tasks/GenerateManifestBase.cs                       @sujitnayak
+/src/Tasks/ManifestUtil/ApplicationManifest.cs           @sujitnayak
+/src/Tasks/ManifestUtil/AssemblyIdentity.cs              @sujitnayak
+/src/Tasks/ManifestUtil/CngLightup.cs                    @sujitnayak
+/src/Tasks/ManifestUtil/ComImporter.cs                   @sujitnayak
+/src/Tasks/ManifestUtil/Constants.cs                     @sujitnayak
+/src/Tasks/ManifestUtil/DeployManifest.cs                @sujitnayak
+/src/Tasks/ManifestUtil/LauncherBuilder.cs               @sujitnayak
+/src/Tasks/ManifestUtil/Manifest.cs                      @sujitnayak
+/src/Tasks/ManifestUtil/PathUtil.cs                      @sujitnayak
+/src/Tasks/ManifestUtil/SecurityUtil.cs                  @sujitnayak
+/src/Tasks/ManifestUtil/mansign2.cs                      @sujitnayak
+/src/Tasks/Microsoft.Build.Tasks.csproj                  @sujitnayak
+/src/Tasks/Microsoft.Common.CurrentVersion.targets       @sujitnayak
+/src/Tasks/ResolveManifestFiles.cs                       @sujitnayak
+/src/Tasks/Resources/Strings.resx                        @sujitnayak
+/src/Tasks/Resources/xlf/Strings.cs.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.de.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.es.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.fr.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.it.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.ja.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.ko.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.pl.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.pt-BR.xlf               @sujitnayak
+/src/Tasks/Resources/xlf/Strings.ru.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.tr.xlf                  @sujitnayak
+/src/Tasks/Resources/xlf/Strings.zh-Hans.xlf             @sujitnayak
+/src/Tasks/Resources/xlf/Strings.zh-Hant.xlf             @sujitnayak
+/src/Tasks/SignFile.cs                                   @sujitnayak
