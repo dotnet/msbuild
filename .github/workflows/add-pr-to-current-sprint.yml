@@ -1,0 +1,117 @@
+name: Add PR to Current Sprint
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  pull-requests: read
+  projects: write
+
+jobs:
+  add-to-current-sprint:
+    if: github.repository_owner == 'dotnet'
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_OWNER: dotnet
+      PROJECT_NUMBER: 117
+      PR_NODE_ID: ${{ github.event.pull_request.node_id }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Add pull request to the current sprint
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh api graphql \
+            -F organization="$PROJECT_OWNER" \
+            -F projectNumber="$PROJECT_NUMBER" \
+            -f query='
+              query($organization: String!, $projectNumber: Int!) {
+                organization(login: $organization) {
+                  projectV2(number: $projectNumber) {
+                    id
+                    fields(first: 100) {
+                      nodes {
+                        __typename
+                        ... on ProjectV2IterationField {
+                          id
+                          name
+                          configuration {
+                            iterations {
+                              id
+                              title
+                              startDate
+                              duration
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }' > project.json
+
+          project_id="$(jq -r '.data.organization.projectV2.id // empty' project.json)"
+          if [ -z "$project_id" ]; then
+            echo "Could not find project $PROJECT_OWNER/$PROJECT_NUMBER."
+            exit 1
+          fi
+
+          iteration_field="$(jq -c '
+            [.data.organization.projectV2.fields.nodes[] | select(.__typename == "ProjectV2IterationField")]
+            | (map(select(.name == "Sprint")) + map(select(.name == "Iteration")) + .)[0] // empty
+          ' project.json)"
+          if [ -z "$iteration_field" ]; then
+            echo "Could not find an iteration field on project $PROJECT_OWNER/$PROJECT_NUMBER."
+            exit 1
+          fi
+
+          iteration_field_id="$(jq -r '.id' <<< "$iteration_field")"
+          today="$(date -u +%Y-%m-%d)"
+          current_iteration_id="$(jq -r --arg today "$today" '
+            .configuration.iterations[]
+            | select(
+                (.startDate <= $today) and
+                (((.startDate + "T00:00:00Z") | fromdateiso8601) + (.duration * 86400) > (($today + "T00:00:00Z") | fromdateiso8601))
+              )
+            | .id
+          ' <<< "$iteration_field" | head -n 1)"
+          if [ -z "$current_iteration_id" ]; then
+            echo "Could not find a current sprint for $today on project $PROJECT_OWNER/$PROJECT_NUMBER."
+            exit 1
+          fi
+
+          item_id="$(gh api graphql \
+            -f projectId="$project_id" \
+            -f contentId="$PR_NODE_ID" \
+            -f query='
+              mutation($projectId: ID!, $contentId: ID!) {
+                addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                  item {
+                    id
+                  }
+                }
+              }' \
+            --jq '.data.addProjectV2ItemById.item.id')"
+
+          gh api graphql \
+            -f projectId="$project_id" \
+            -f itemId="$item_id" \
+            -f fieldId="$iteration_field_id" \
+            -f iterationId="$current_iteration_id" \
+            -f query='
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $iterationId: String!) {
+                updateProjectV2ItemFieldValue(
+                  input: {
+                    projectId: $projectId
+                    itemId: $itemId
+                    fieldId: $fieldId
+                    value: { iterationId: $iterationId }
+                  }
+                ) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }'
