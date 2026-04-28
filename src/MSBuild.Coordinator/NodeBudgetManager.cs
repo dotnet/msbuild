@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Immutable;
+using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Coordinator;
 
@@ -41,10 +42,7 @@ internal sealed class NodeBudgetManager
 
     public NodeBudgetManager(int totalBudget)
     {
-        if (totalBudget < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(totalBudget), totalBudget, "Total budget must be at least 1.");
-        }
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(totalBudget, nameof(totalBudget));
 
         TotalBudget = totalBudget;
     }
@@ -104,7 +102,7 @@ internal sealed class NodeBudgetManager
     /// </summary>
     private ImmutableArray<BuildGrant> DrainWaitQueue()
     {
-        var newlyGranted = ImmutableArray.CreateBuilder<BuildGrant>();
+        using RefArrayBuilder<BuildGrant> newlyGranted = new();
 
         while (_waitQueue.Count > 0 && AvailableNodes > 0)
         {
