@@ -1,4 +1,4 @@
-// IMPORTANT: This file is read by the merge flow from main branch only. 
+// IMPORTANT: This file is read by the merge flow from main branch only.
 {
     "merge-flow-configurations": {
         // MSBuild servicing chain from oldest supported through currently-supported to main
