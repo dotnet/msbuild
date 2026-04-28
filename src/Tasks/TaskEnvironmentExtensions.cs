@@ -6,7 +6,7 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Extension methods for <see cref="TaskEnvironment"/> used by built-in tasks.
+    /// Extension methods for <see cref="TaskEnvironment"/> and <see cref="AbsolutePath"/> used by built-in tasks.
     /// </summary>
     internal static class TaskEnvironmentExtensions
     {
@@ -15,9 +15,31 @@ namespace Microsoft.Build.Tasks
         /// Returns <see langword="null"/> if <paramref name="paths"/> is <see langword="null"/>.
         /// Empty or null entries are passed through unchanged.
         /// </summary>
-        internal static string[]? GetAbsolutePathsOrNull(this TaskEnvironment taskEnvironment, string[]? paths)
+        internal static AbsolutePath[]? GetAbsolutePathsOrNull(this TaskEnvironment taskEnvironment, string[]? paths)
         {
-            if (paths == null)
+            if (paths is null)
+            {
+                return null;
+            }
+
+            var result = new AbsolutePath[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+            {
+                result[i] = string.IsNullOrEmpty(paths[i])
+                    ? new AbsolutePath(paths[i], ignoreRootedCheck: true)
+                    : taskEnvironment.GetAbsolutePath(paths[i]);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Converts an array of <see cref="AbsolutePath"/> to a string array.
+        /// Returns <see langword="null"/> if <paramref name="paths"/> is <see langword="null"/>.
+        /// </summary>
+        internal static string[]? ToStringArray(this AbsolutePath[]? paths)
+        {
+            if (paths is null)
             {
                 return null;
             }
@@ -25,9 +47,7 @@ namespace Microsoft.Build.Tasks
             var result = new string[paths.Length];
             for (int i = 0; i < paths.Length; i++)
             {
-                result[i] = string.IsNullOrEmpty(paths[i])
-                    ? paths[i]
-                    : taskEnvironment.GetAbsolutePath(paths[i]).Value;
+                result[i] = paths[i].Value;
             }
 
             return result;

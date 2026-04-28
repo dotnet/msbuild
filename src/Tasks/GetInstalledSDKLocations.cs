@@ -144,15 +144,18 @@ namespace Microsoft.Build.Tasks
             // Dictionary of ESDKs. Each entry is a (location, platform version) tuple
             IDictionary<string, Tuple<string, string>> installedSDKs = null;
 
-            string[] absoluteDirectoryRoots = TaskEnvironment.GetAbsolutePathsOrNull(SDKDirectoryRoots);
-            string[] absoluteExtensionRoots = TaskEnvironment.GetAbsolutePathsOrNull(SDKExtensionDirectoryRoots);
+            AbsolutePath[] absoluteDirectoryRoots = TaskEnvironment.GetAbsolutePathsOrNull(SDKDirectoryRoots);
+            AbsolutePath[] absoluteExtensionRoots = TaskEnvironment.GetAbsolutePathsOrNull(SDKExtensionDirectoryRoots);
 
             try
             {
                 Log.LogMessageFromResources("GetInstalledSDKs.SearchingForSDKs", _targetPlatformIdentifier, _targetPlatformVersion);
 
                 Version platformVersion = Version.Parse(TargetPlatformVersion);
-                installedSDKs = ToolLocationHelper.GetPlatformExtensionSDKLocationsAndVersions(absoluteDirectoryRoots, absoluteExtensionRoots, SDKRegistryRoot, TargetPlatformIdentifier, platformVersion);
+                installedSDKs = ToolLocationHelper.GetPlatformExtensionSDKLocationsAndVersions(
+                    absoluteDirectoryRoots.ToStringArray(),
+                    absoluteExtensionRoots.ToStringArray(),
+                    SDKRegistryRoot, TargetPlatformIdentifier, platformVersion);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
