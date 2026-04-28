@@ -63,15 +63,12 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                string cacheDirectory = FileUtilities.GetCacheDirectory();
-                if (!FileSystems.Default.DirectoryExists(cacheDirectory))
-                {
-                    Directory.CreateDirectory(cacheDirectory);
-                }
+                // Store the temporary archive in TempFileDirectory rather than GetCacheDirectory()
+                // because ClearCacheDirectory() wipes the cache dir during build shutdown.
+                string tempDirectory = FileUtilities.TempFileDirectory;
 
-                // Archive file will be temporarily stored in MSBuild cache folder and deleted when no longer needed
                 _archiveFilePath = Path.Combine(
-                    cacheDirectory,
+                    tempDirectory,
                     GetArchiveFilePath(
                         Path.GetFileName(logFilePath),
                         sourcesArchiveExtension));
@@ -304,7 +301,9 @@ namespace Microsoft.Build.Logging
         public void DeleteArchive()
         {
             Close();
-            File.Delete(_archiveFilePath);
+
+            // Best effort — the archive may already have been cleaned up.
+            FileUtilities.DeleteNoThrow(_archiveFilePath);
         }
     }
 }

@@ -117,7 +117,7 @@ namespace Microsoft.Build.Tasks
                             // 2. If there is no existing metadata then apply the new
                             if ((!PreserveExistingMetadata) || String.IsNullOrEmpty(newItem.GetMetadata(nameAndValue.Key)))
                             {
-                                if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(nameAndValue.Key))
+                                if (ItemSpecModifiers.IsItemSpecModifier(nameAndValue.Key))
                                 {
                                     // Explicitly setting built-in metadata, is not allowed.
                                     Log.LogErrorWithCodeFromResources("CreateItem.AdditionalMetadataError", nameAndValue.Key);
@@ -194,7 +194,7 @@ namespace Microsoft.Build.Tasks
                                 {
                                     if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
                                     {
-                                        newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
+                                        newItem.SetMetadata(ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
                                     }
                                 }
 

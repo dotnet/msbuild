@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {

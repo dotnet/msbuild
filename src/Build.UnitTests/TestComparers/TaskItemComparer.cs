@@ -50,8 +50,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
 
             foreach (string metadataName in x.MetadataNames)
             {
-                if (!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName) ||
-                    FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+                if (!ItemSpecModifiers.IsItemSpecModifier(metadataName) ||
+                    ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
                 {
                     if (x.GetMetadata(metadataName) != y.GetMetadata(metadataName))
                     {
@@ -62,8 +62,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
 
             foreach (string metadataName in y.MetadataNames)
             {
-                if (!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName) ||
-                    FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+                if (!ItemSpecModifiers.IsItemSpecModifier(metadataName) ||
+                    ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
                 {
                     if (x.GetMetadata(metadataName) != y.GetMetadata(metadataName))
                     {

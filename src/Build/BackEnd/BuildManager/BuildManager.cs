@@ -38,7 +38,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
-using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
+using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -724,13 +724,13 @@ namespace Microsoft.Build.Execution
             // VS builds discard many msbuild events so attach a binlogger to capture them all.
             IEnumerable<ILogger> AppendDebuggingLoggers(IEnumerable<ILogger> loggers)
             {
-                if (DebugUtils.ShouldDebugCurrentProcess is false ||
+                if (FrameworkDebugUtils.ShouldDebugCurrentProcess is false ||
                     Traits.Instance.DebugEngine is false)
                 {
                     return loggers;
                 }
 
-                var binlogPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_BuildManager_{_hostName}.binlog");
+                var binlogPath = DebugUtils.FindNextAvailableDebugFilePath($"{FrameworkDebugUtils.ProcessInfoString}_BuildManager_{_hostName}.binlog");
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
@@ -811,7 +811,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            if (!DebugUtils.ShouldDebugCurrentProcess)
+            if (!FrameworkDebugUtils.ShouldDebugCurrentProcess)
             {
                 return;
             }
@@ -1105,6 +1105,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 TaskRouter.ClearCache();
+                ItemSpecModifiers.ClearDefiningProjectCache();
             }
             catch (Exception e)
             {
@@ -1231,7 +1232,15 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void RecordCrashTelemetry(Exception exception, bool isUnhandled)
         {
-            string? host = _buildTelemetry?.BuildEngineHost ??  BuildEnvironmentState.GetHostName();
+            string? host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
+
+            int? activeNodeCount;
+            int? submissionCount;
+            lock (_syncLock)
+            {
+                activeNodeCount = _activeNodes?.Count;
+                submissionCount = _buildSubmissions?.Count;
+            }
 
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
@@ -1240,56 +1249,131 @@ namespace Microsoft.Build.Execution
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                host);
+                host,
+                isStandaloneExecution: _buildTelemetry?.IsStandaloneExecution ?? false,
+                maxNodeCount: _buildParameters?.MaxNodeCount,
+                activeNodeCount,
+                submissionCount);
         }
 
         /// <summary>
         /// Extracts build state under lock and delegates to <see cref="CrashTelemetryRecorder"/>
-        /// for EndBuild hang diagnostic telemetry emission. Also writes diagnostics to disk
-        /// via <see cref="ExceptionHandling.DumpHangDiagnosticsToFile"/>.
+        /// for EndBuild hang diagnostic telemetry emission.
         /// </summary>
         private void EmitEndBuildHangDiagnostics(string waitPhase, Stopwatch hangWatch)
         {
-            int pendingSubmissionCount;
-            int submissionsWithResultNoLogging = 0;
-            bool threadExceptionRecorded;
-            int unmatchedProjectStartedCount;
-            string? host;
-
-            lock (_syncLock)
+            try
             {
-                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
+                var telemetry = new CrashTelemetry
                 {
-                    if (submission.BuildResultBase is not null && !submission.LoggingCompleted)
+                    ExitType = CrashExitType.EndBuildHang,
+                    EndBuildWaitPhase = waitPhase,
+                    EndBuildWaitDurationMs = hangWatch.ElapsedMilliseconds,
+                    BuildEngineVersion = ProjectCollection.Version?.ToString(),
+                    BuildEngineFrameworkName = NativeMethodsShared.FrameworkName,
+                    IsStandaloneExecution = _buildTelemetry?.IsStandaloneExecution ?? false,
+                    MaxNodeCount = _buildParameters?.MaxNodeCount,
+                    ActiveNodeCount = _activeNodes.Count,
+                };
+
+                lock (_syncLock)
+                {
+                    var submissionDetailParts = new List<string>(_buildSubmissions.Count);
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
-                        submissionsWithResultNoLogging++;
+                        if (submission.BuildResultBase is not null && !submission.LoggingCompleted)
+                        {
+                            telemetry.SubmissionsWithResultNoLogging = (telemetry.SubmissionsWithResultNoLogging ?? 0) + 1;
+                        }
+
+                        submissionDetailParts.Add(string.Join(":",
+                            submission.SubmissionId,
+                            submission.IsStarted,
+                            submission.BuildResultBase is not null,
+                            submission.BuildResultBase?.Exception is not null,
+                            submission.LoggingCompleted));
+                    }
+
+                    telemetry.PendingSubmissionCount = _buildSubmissions.Count;
+                    telemetry.ThreadExceptionRecorded = _threadException is not null;
+                    telemetry.UnmatchedProjectStartedCount = _projectStartedEvents.Count;
+                    telemetry.BuildEngineHost = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
+                    telemetry.IsShuttingDown = _shuttingDown;
+                    telemetry.IsCancellationRequested = _executionCancellationTokenSource?.IsCancellationRequested ?? false;
+                    telemetry.WorkQueueDepth = _workQueue?.InputCount;
+
+                    if (submissionDetailParts.Count > 0)
+                    {
+                        telemetry.SubmissionDetails = string.Join(";", submissionDetailParts);
+                    }
+
+                    telemetry.EnableNodeReuse = _buildParameters?.EnableNodeReuse;
+
+                    if (_activeNodes.Count > 0)
+                    {
+                        telemetry.ActiveNodeIds = string.Join(",", _activeNodes);
+
+                        // Collect per-node details: what each stuck node was last executing.
+                        if (_scheduler is not null)
+                        {
+                            var nodeDetails = new List<string>(_activeNodes.Count);
+                            foreach (int nodeId in _activeNodes)
+                            {
+                                try
+                                {
+                                    BuildRequest? executingRequest = _scheduler.GetExecutingRequestByNode(nodeId);
+                                    if (executingRequest is not null)
+                                    {
+                                        string? projectFile = _configCache?[executingRequest.ConfigurationId]?.ProjectFullPath;
+                                        string projectName = projectFile is not null ? Path.GetFileName(projectFile) : "?";
+                                        nodeDetails.Add($"{nodeId}:{executingRequest.ConfigurationId}:{projectName}");
+                                    }
+                                    else
+                                    {
+                                        nodeDetails.Add($"{nodeId}:idle");
+                                    }
+                                }
+                                catch
+                                {
+                                    nodeDetails.Add($"{nodeId}:error");
+                                }
+                            }
+
+                            if (nodeDetails.Count > 0)
+                            {
+                                telemetry.ActiveNodeDetails = string.Join(";", nodeDetails);
+                            }
+                        }
                     }
                 }
 
-                pendingSubmissionCount = _buildSubmissions.Count;
-                threadExceptionRecorded = _threadException is not null;
-                unmatchedProjectStartedCount = _projectStartedEvents.Count;
-                host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
+                try
+                {
+                    ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
+                    if (loggingService is not null)
+                    {
+                        telemetry.LoggingServiceState = loggingService.ServiceState.ToString();
+                        telemetry.LoggingEventQueueDepth = loggingService.EventQueueCount;
+
+                        ICollection<string>? loggerTypes = loggingService.RegisteredLoggerTypeNames;
+                        if (loggerTypes is { Count: > 0 })
+                        {
+                            telemetry.RegisteredLoggerTypeNames = string.Join(";", loggerTypes);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Best effort: accessing the logging service may fail during shutdown.
+                }
+
+                CrashTelemetryRecorder.EmitEndBuildHangDiagnostics(telemetry);
             }
-
-            string diagnostics = $"Phase={waitPhase}, Duration={hangWatch.ElapsedMilliseconds}ms, " +
-                $"PendingSubmissions={pendingSubmissionCount}, WithResultNoLogging={submissionsWithResultNoLogging}, " +
-                $"ThreadException={threadExceptionRecorded}, UnmatchedProjectStarted={unmatchedProjectStartedCount}";
-
-            ExceptionHandling.DumpHangDiagnosticsToFile(diagnostics);
-
-            CrashTelemetryRecorder.CollectAndEmitEndBuildHangDiagnostics(
-                waitPhase,
-                hangWatch.ElapsedMilliseconds,
-                pendingSubmissionCount,
-                submissionsWithResultNoLogging,
-                threadExceptionRecorded,
-                unmatchedProjectStartedCount,
-                ProjectCollection.Version?.ToString(),
-                NativeMethodsShared.FrameworkName,
-                host);
+            catch (Exception)
+            {
+                // Best effort: hang diagnostics must never cause EndBuild to fail.
+            }
         }
-
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.
@@ -1759,7 +1843,7 @@ namespace Microsoft.Build.Execution
             {
                 // On the off chance we get an exception from our exception handler (oh, the irony!), we want to know about it (and still not kill this block
                 // which could lead to a somewhat mysterious hang.)
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
             }
         }
 
@@ -2156,7 +2240,7 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                var logPath = DebugUtils.FindNextAvailableDebugFilePath($"{DebugUtils.ProcessInfoString}_ProjectGraph.dot");
+                var logPath = DebugUtils.FindNextAvailableDebugFilePath($"{FrameworkDebugUtils.ProcessInfoString}_ProjectGraph.dot");
 
                 File.WriteAllText(logPath, graph.ToDot(targetList));
             }
@@ -2605,6 +2689,13 @@ namespace Microsoft.Build.Execution
                 configuration.ProjectTargets ??= result.ProjectTargets;
             }
 
+            // Update the evaluation ID if it's valid - this propagates the eval ID
+            // from worker nodes to the central node for cached result scenarios.
+            if (result.EvaluationId != BuildEventContext.InvalidEvaluationId)
+            {
+                configuration.ProjectEvaluationId = result.EvaluationId;
+            }
+
             // Only report results to the project cache services if it's the result for a build submission.
             // Note that graph builds create a submission for each node in the graph, so each node in the graph will be
             // handled here. This intentionally mirrors the behavior for cache requests, as it doesn't make sense to
@@ -2662,8 +2753,8 @@ namespace Microsoft.Build.Execution
                     foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                        string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
-                        loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
+                        string exception = DebugUtils.ReadAnyExceptionFromFile(_instantiationTimeUtc);
+                        loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, DebugUtils.DebugDumpPath, exception);
                     }
                 }
                 else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.Values.Count == 0)
@@ -2672,7 +2763,7 @@ namespace Microsoft.Build.Execution
                     if (shutdownPacket.Exception != null)
                     {
                         ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
-                        loggingService?.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, shutdownPacket.Exception.ToString());
+                        loggingService?.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, DebugUtils.DebugDumpPath, shutdownPacket.Exception.ToString());
                         OnThreadException(shutdownPacket.Exception);
                     }
                 }
@@ -2926,9 +3017,7 @@ namespace Microsoft.Build.Execution
                     _buildParameters?.ProjectRootElementCache?.Clear();
 
                     FileMatcher.ClearCaches();
-#if !CLR2COMPATIBILITY
                     FileUtilities.ClearFileExistenceCache();
-#endif
                 }
 
                 _noActiveSubmissionsEvent?.Set();

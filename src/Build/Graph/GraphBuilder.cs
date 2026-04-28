@@ -15,6 +15,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -51,6 +52,14 @@ namespace Microsoft.Build.Graph
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
         private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
+
+        /// <summary>
+        /// Tracks which projects are referencing each project. Used to provide better error messages
+        /// when a referenced project fails to load.
+        /// Key: The project being referenced
+        /// Value: Set of projects that reference it
+        /// </summary>
+        private readonly ConcurrentDictionary<ConfigurationMetadata, ConcurrentBag<string>> _projectReferrers = new();
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -527,10 +536,44 @@ namespace Microsoft.Build.Graph
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
 
-            var projectInstance = _projectInstanceFactory(
-                configurationMetadata.ProjectFullPath,
-                globalProperties,
-                _projectCollection);
+            ProjectInstance projectInstance;
+            try
+            {
+                projectInstance = _projectInstanceFactory(
+                    configurationMetadata.ProjectFullPath,
+                    globalProperties,
+                    _projectCollection);
+            }
+            catch (InvalidProjectFileException ex) when (_projectReferrers.TryGetValue(configurationMetadata, out var referrers) && !referrers.IsEmpty)
+            {
+                // Enrich the exception with information about which project(s) referenced this project
+                string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
+
+                string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
+                    configurationMetadata.ProjectFullPath,
+                    referrerList);
+
+                // Append the specific reason from the inner exception (e.g. "Could not find file '...'")
+                // without doing any locale-specific string manipulation on the outer exception's message.
+                string innerDetail = ex.InnerException?.Message;
+                if (!string.IsNullOrEmpty(innerDetail))
+                {
+                    enrichedMessage = $"{enrichedMessage} {innerDetail}";
+                }
+
+                throw new InvalidProjectFileException(
+                    ex.ProjectFile ?? configurationMetadata.ProjectFullPath,
+                    ex.LineNumber,
+                    ex.ColumnNumber,
+                    ex.EndLineNumber,
+                    ex.EndColumnNumber,
+                    enrichedMessage,
+                    ex.ErrorSubcategory,
+                    ex.ErrorCode,
+                    ex.HelpKeyword,
+                    ex.InnerException);
+            }
 
             if (projectInstance == null)
             {
@@ -583,6 +626,10 @@ namespace Microsoft.Build.Graph
                         referenceInfo.ReferenceConfiguration.ProjectFullPath,
                         referenceInfo.ReferenceConfiguration.ProjectFullPath));
                 }
+
+                // Track that this project is referencing the target project
+                _projectReferrers.GetOrAdd(referenceInfo.ReferenceConfiguration, _ => new ConcurrentBag<string>())
+                    .Add(parsedProject.ProjectInstance.FullPath);
 
                 SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
 

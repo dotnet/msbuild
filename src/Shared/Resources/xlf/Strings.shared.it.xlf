@@ -85,11 +85,6 @@
         <target state="translated">MSBuild prevede un oggetto "{0}" valido.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.PathTooLong">
-        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
-        <target state="translated">Il percorso {0} supera il limite massimo dei percorsi del sistema operativo. Il nome completo del file deve essere composto da meno di {1}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
         <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
         <target state="translated">MSB5028: il file di filtro della soluzione in "{0}" include il progetto "{1}" che non è presente nel file di soluzione in "{2}".</target>

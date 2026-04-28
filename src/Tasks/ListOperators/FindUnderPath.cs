@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets the task execution environment for thread-safe path resolution.
         /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Filter based on whether items fall under this path or not.
@@ -67,16 +67,18 @@ namespace Microsoft.Build.Tasks
                 {
                     conePath =
                         Strings.WeakIntern(
-                            TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(Path.ItemSpec)).GetCanonicalForm());
+                            TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(Path.ItemSpec)).GetCanonicalForm());
                 }
                 else
                 {
                     conePath =
                         Strings.WeakIntern(
-                            System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(Path.ItemSpec))));
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
+                            System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(Path.ItemSpec))));
+#pragma warning restore MSBuildTask0002
                 }
 
-                conePath = FrameworkFileUtilities.EnsureTrailingSlash(conePath);
+                conePath = FileUtilities.EnsureTrailingSlash(conePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -98,13 +100,15 @@ namespace Microsoft.Build.Tasks
                     {
                         fullPath =
                             Strings.WeakIntern(
-                                TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(item.ItemSpec)).GetCanonicalForm());
+                                TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(item.ItemSpec)).GetCanonicalForm());
                     }
                     else
                     {
                         fullPath =
                             Strings.WeakIntern(
-                                System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(item.ItemSpec))));
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
+                                System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(item.ItemSpec))));
+#pragma warning restore MSBuildTask0002
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

@@ -7,6 +7,7 @@ using System.IO;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Xunit;
 
 #nullable disable
@@ -260,7 +261,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                    file = FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.SetProperty("p", "v0");
                     import.Save(file);

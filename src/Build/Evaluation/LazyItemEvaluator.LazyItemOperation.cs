@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable

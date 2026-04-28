@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution

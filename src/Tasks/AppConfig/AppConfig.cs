@@ -4,8 +4,7 @@
 using System;
 using System.IO;
 using System.Xml;
-
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 

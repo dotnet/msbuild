@@ -164,6 +164,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Returns the number of events currently queued for processing.
+        /// </summary>
+        public int EventQueueCount => 0;
+
+        /// <summary>
         /// Properties to serialize from the child node to the parent node
         /// </summary>
         public string[] PropertiesToSerialize

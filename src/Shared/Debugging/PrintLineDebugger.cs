@@ -115,7 +115,7 @@ namespace Microsoft.Build.Shared.Debugging
         {
             return new PrintLineDebugger(
                 prependProcessInfo
-                    ? $"{DebugUtils.ProcessInfoString}_{id}"
+                    ? $"{FrameworkDebugUtils.ProcessInfoString}_{id}"
                     : id,
                 writer);
         }

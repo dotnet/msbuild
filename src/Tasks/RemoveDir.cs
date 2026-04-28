@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _directories;
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         [Required]
         public ITaskItem[] Directories

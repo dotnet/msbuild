@@ -37,6 +37,12 @@ namespace Microsoft.Build.BackEnd
     internal class BuildRequestEngine : IBuildRequestEngine, IBuildComponent
     {
         /// <summary>
+        /// Static lock serializing trace file writes across all BuildRequestEngine instances.
+        /// In multithreaded (-mt) mode, multiple engines share the same process and trace file.
+        /// </summary>
+        private static readonly object s_traceLock = new();
+
+        /// <summary>
         /// The starting unresolved configuration id assigned by the engine.
         /// </summary>
         private const int StartingUnresolvedConfigId = -1;
@@ -131,7 +137,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = DebugUtils.DebugPath;
+            _debugDumpPath = FrameworkDebugUtils.DebugPath;
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
 
             if (String.IsNullOrEmpty(_debugDumpPath))
@@ -201,6 +207,11 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, "Engine must be in the Uninitiailzed state, but is {0}", _status);
 
             _nodeLoggingContext = loggingContext;
+
+            // Create a per-BuildRequestEngine telemetry collector via the provider.
+            // Each BuildRequestEngine owns its collector — no cross-engine sharing, no singleton contention.
+            var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
+            _nodeLoggingContext.TelemetryCollector = telemetryProvider.CreateCollector();
 
             // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
@@ -296,9 +307,8 @@ namespace Microsoft.Build.BackEnd
                     IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
-                    // Flush and send the final telemetry data if they are being collected
-                    ITelemetryForwarder telemetryForwarder = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
-                    telemetryForwarder.FinalizeProcessing(_nodeLoggingContext);
+                    // Flush and send the per-BuildRequestEngine telemetry data if any was collected.
+                    _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },
@@ -394,11 +404,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             string projectDirectoryFullPath = Path.GetDirectoryName(config.ProjectFullPath);
                             var environmentVariables = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
-                            taskEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectoryFullPath, environmentVariables));
+                            taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectoryFullPath, environmentVariables);
                         }
                         else
                         {
-                            taskEnvironment = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+                            taskEnvironment = TaskEnvironment.Fallback;
                         }
 
                         BuildRequestEntry entry = new BuildRequestEntry(request, config, taskEnvironment);
@@ -1439,7 +1449,7 @@ namespace Microsoft.Build.BackEnd
                                 // Dump all engine exceptions to a temp file
                                 // so that we have something to go on in the
                                 // event of a failure
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
 
                                 // Raise the exception to the host, so that it can signal termination of the build.
                                 RaiseEngineException(e);
@@ -1559,15 +1569,24 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
-                lock (this)
+                lock (s_traceLock)
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-
-                    using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
+                    try
                     {
-                        string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
-                        file.Flush();
+                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
+                        using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
+                        {
+                            string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
+                            file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
+                            file.Flush();
+                        }
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Trace file failures must never crash the build engine.
+                        // Matches the defensive pattern used by Scheduler.TraceScheduler.
+                        _nodeLoggingContext?.LogCommentFromText(MessageImportance.Low, $"Failed to write to engine trace file: {e}");
                     }
                 }
             }

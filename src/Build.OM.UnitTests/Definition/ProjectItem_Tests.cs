@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                path = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, String.Empty);
                 FileInfo info = new FileInfo(path);
 
@@ -2053,7 +2053,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                    file = FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.AddItem("i", "i1");
                     import.Save(file);
@@ -2084,7 +2084,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                    file = FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.AddItem("i", "i1");
                     import.Save(file);
@@ -2115,7 +2115,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                    file = FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     ProjectItem item = import.AddItem("i", "i1")[0];
                     item.SetMetadataValue("m", "m0");
@@ -2478,7 +2478,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project = ObjectModelHelpers.CreateInMemoryProject(content);
             var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
 
-            if (FileUtilities.GetIsFileSystemCaseSensitive())
+            if (FileUtilities.IsFileSystemCaseSensitive)
             {
                 items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "g2" });
 

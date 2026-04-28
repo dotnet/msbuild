@@ -4,9 +4,6 @@
 using System;
 using System.Reflection;
 using Microsoft.Build.Framework;
-#if NET35
-using Microsoft.Build.Shared;
-#endif
 
 #nullable disable
 

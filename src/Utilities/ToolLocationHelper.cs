@@ -664,7 +664,7 @@ namespace Microsoft.Build.Utilities
             string legacyWindowsMetadataLocation = Path.Combine(sdkRoot, "Windows Metadata");
             if (FileUtilities.DirectoryExistsNoThrow(legacyWindowsMetadataLocation))
             {
-                legacyWindowsMetadataLocation = FrameworkFileUtilities.EnsureTrailingSlash(legacyWindowsMetadataLocation);
+                legacyWindowsMetadataLocation = FileUtilities.EnsureTrailingSlash(legacyWindowsMetadataLocation);
                 referenceDirectories.Add(legacyWindowsMetadataLocation);
             }
 
@@ -1767,7 +1767,7 @@ namespace Microsoft.Build.Utilities
                 {
                     // We found the framework reference assembly directory with mscorlib in it
                     // that's our standard lib path, so return it, with no trailing slash.
-                    return FrameworkFileUtilities.EnsureNoTrailingSlash(referenceAssemblyDirectory);
+                    return FileUtilities.EnsureNoTrailingSlash(referenceAssemblyDirectory);
                 }
             }
 
@@ -1841,7 +1841,7 @@ namespace Microsoft.Build.Utilities
                 {
                     // We found the framework reference assembly directory with mscorlib in it
                     // that's our standard lib path, so return it, with no trailing slash.
-                    return FrameworkFileUtilities.EnsureNoTrailingSlash(legacyMsCorlib20Path);
+                    return FileUtilities.EnsureNoTrailingSlash(legacyMsCorlib20Path);
                 }
 
                 // If for some reason the 2.0 framework is not installed in its default location then maybe someone is using the ".net 4.0" reference assembly
@@ -1858,7 +1858,7 @@ namespace Microsoft.Build.Utilities
                 {
                     // We found the framework reference assembly directory with mscorlib in it
                     // that's our standard lib path, so return it, with no trailing slash.
-                    return FrameworkFileUtilities.EnsureNoTrailingSlash(referenceAssemblyDirectory);
+                    return FileUtilities.EnsureNoTrailingSlash(referenceAssemblyDirectory);
                 }
             }
 
@@ -2427,7 +2427,7 @@ namespace Microsoft.Build.Utilities
 
             if (FileUtilities.DirectoryExistsNoThrow(referenceAssemblyPath))
             {
-                referenceAssemblyPath = FrameworkFileUtilities.EnsureTrailingSlash(referenceAssemblyPath);
+                referenceAssemblyPath = FileUtilities.EnsureTrailingSlash(referenceAssemblyPath);
                 contentDirectories.Add(referenceAssemblyPath);
             }
         }
@@ -2553,7 +2553,7 @@ namespace Microsoft.Build.Utilities
                             string pathToSDKManifest = Path.Combine(sdkVersionDirectory.FullName, "SDKManifest.xml");
                             if (FileUtilities.FileExistsNoThrow(pathToSDKManifest))
                             {
-                                targetPlatformSDK.ExtensionSDKs.Add(SDKKey, FrameworkFileUtilities.EnsureTrailingSlash(sdkVersionDirectory.FullName));
+                                targetPlatformSDK.ExtensionSDKs.Add(SDKKey, FileUtilities.EnsureTrailingSlash(sdkVersionDirectory.FullName));
                             }
                             else
                             {
@@ -2826,7 +2826,7 @@ namespace Microsoft.Build.Utilities
                                                     if (fileExists(sdkManifestFileLocation))
                                                     {
                                                         ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", "Adding SDK '{0}'  at '{1}' to the list of found sdks.", sdkKey, directoryName);
-                                                        targetPlatformSDK.ExtensionSDKs.Add(sdkKey, FrameworkFileUtilities.EnsureTrailingSlash(directoryName));
+                                                        targetPlatformSDK.ExtensionSDKs.Add(sdkKey, FileUtilities.EnsureTrailingSlash(directoryName));
                                                     }
                                                     else
                                                     {
@@ -3056,7 +3056,7 @@ namespace Microsoft.Build.Utilities
                                     string pathToPlatformManifest = Path.Combine(platformVersion.FullName, "Platform.xml");
                                     if (FileUtilities.FileExistsNoThrow(pathToPlatformManifest))
                                     {
-                                        sdk.Platforms.Add(sdkKey, FrameworkFileUtilities.EnsureTrailingSlash(platformVersion.FullName));
+                                        sdk.Platforms.Add(sdkKey, FileUtilities.EnsureTrailingSlash(platformVersion.FullName));
                                     }
                                     else
                                     {

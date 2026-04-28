@@ -8,14 +8,13 @@ using System.IO;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.Collections;
 using System.Resources;
-using Microsoft.Build.Shared;
 #endif
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -371,7 +370,7 @@ namespace Microsoft.Build.Tasks
                 Debug.Assert(outputFiles != null, "OutputFiles hasn't been set");
                 foreach (string outputFileName in outputFiles)
                 {
-                    var outputFile = new FileInfo(FrameworkFileUtilities.FixFilePath(outputFileName));
+                    var outputFile = new FileInfo(FileUtilities.FixFilePath(outputFileName));
                     if (!outputFile.Exists || outputFile.LastWriteTime < LastModified)
                     {
                         return false;

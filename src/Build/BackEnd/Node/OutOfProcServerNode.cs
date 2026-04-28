@@ -340,7 +340,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleBuildCancel()
         {
-            CommunicationsUtilities.Trace("Received request to cancel build running on MSBuild Server. MSBuild server will shutdown.}");
+            CommunicationsUtilities.Trace("Received request to cancel build running on MSBuild Server. MSBuild server will shutdown.");
             _cancelRequested = true;
             BuildManager.DefaultBuildManager.CancelAllSubmissions();
         }
@@ -380,7 +380,7 @@ namespace Microsoft.Build.Experimental
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
-            CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;

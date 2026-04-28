@@ -3,6 +3,7 @@
 
 using System;
 using System.Xml;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable

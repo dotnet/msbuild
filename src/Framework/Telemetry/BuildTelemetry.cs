@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
@@ -72,8 +73,40 @@ namespace Microsoft.Build.Framework.Telemetry
 
         /// <summary>
         /// Path to project file.
+        /// Only the file name (no directory) is emitted in telemetry to avoid leaking PII
+        /// (usernames, directory structure) that are commonly embedded in full paths.
         /// </summary>
         public string? ProjectPath { get; set; }
+
+        /// <summary>
+        /// Well-known target names that are safe to emit in cleartext.
+        /// Custom target names could reveal project internals and are hashed.
+        /// </summary>
+        private static readonly HashSet<string> KnownTargetNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Build",
+            "Clean",
+            "Rebuild",
+            "Restore",
+            "Pack",
+            "Publish",
+            "Test",
+            "VSTest",
+            "Run",
+            "GetTargetFrameworks",
+            "GetTargetFrameworksWithPlatformForSingleTargetFramework",
+            "GetReferenceNearestTargetFrameworkTask",
+            "GetTargetPath",
+            "GetNativeManifest",
+            "ResolveAssemblyReferences",
+            "ResolveProjectReferences",
+            "CoreCompile",
+            "Compile",
+            "PrepareForBuild",
+            "GenerateBuildDependencyFile",
+            "GenerateBindingRedirects",
+            "GenerateRuntimeConfigurationFiles",
+        };
 
         /// <summary>
         /// Host in which MSBuild build was executed.
@@ -137,7 +170,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             AddIfNotNull(BuildEngineHost);
             AddIfNotNull(BuildSuccess);
-            AddIfNotNull(BuildTarget);
+            AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion);
             AddIfNotNull(BuildCheckEnabled);
             AddIfNotNull(MultiThreadedModeEnabled);
@@ -165,9 +198,9 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildEngineFrameworkName);
             AddIfNotNull(BuildEngineHost);
             AddIfNotNull(InitialMSBuildServerState);
-            AddIfNotNull(ProjectPath);
+            AddIfNotNull(ProjectPath != null ? Path.GetFileName(ProjectPath) : null, nameof(ProjectPath));
             AddIfNotNull(ServerFallbackReason);
-            AddIfNotNull(BuildTarget);
+            AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion?.ToString(), nameof(BuildEngineVersion));
             AddIfNotNull(BuildSuccess?.ToString(), nameof(BuildSuccess));
             AddIfNotNull(BuildCheckEnabled?.ToString(), nameof(BuildCheckEnabled));
@@ -199,6 +232,34 @@ namespace Microsoft.Build.Framework.Telemetry
                     properties[key] = value;
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the build target name if it is a well-known target, otherwise returns a SHA-256 hash.
+        /// This prevents custom target names (which could reveal proprietary project details) from being
+        /// sent in cleartext telemetry.
+        /// BuildTarget may be a comma-separated list of target names (e.g., "Build,Clean"),
+        /// so each target is sanitized individually.
+        /// </summary>
+        internal static string? SanitizeBuildTarget(string? buildTarget)
+        {
+            if (buildTarget is null)
+            {
+                return null;
+            }
+
+            // BuildTarget can be a comma-separated list (set via string.Join(",", targetNames)).
+            // Split, sanitize each target individually, and rejoin.
+            string[] targets = buildTarget.Split(',');
+            for (int i = 0; i < targets.Length; i++)
+            {
+                string target = targets[i].Trim();
+                targets[i] = KnownTargetNames.Contains(target)
+                    ? target
+                    : TelemetryDataUtils.GetHashed(target);
+            }
+
+            return string.Join(",", targets);
         }
     }
 }

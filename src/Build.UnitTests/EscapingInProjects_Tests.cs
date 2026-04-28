@@ -18,12 +18,10 @@ using Microsoft.Build.Utilities;
 #if FEATURE_COMPILE_IN_TESTS
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
 #endif
-using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 #if FEATURE_COMPILE_IN_TESTS
 using Microsoft.Build.Shared;
 #endif

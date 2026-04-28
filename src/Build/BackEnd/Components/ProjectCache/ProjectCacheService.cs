@@ -24,7 +24,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
+using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 
 #pragma warning disable CS0618 // Type or member is obsolete, this class is adapting to both Experimental and new plugin APIs
 namespace Microsoft.Build.ProjectCache
@@ -805,14 +805,40 @@ namespace Microsoft.Build.ProjectCache
             BuildEventContext buildEventContext,
             CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowInternalNull(requestConfiguration.Project, nameof(requestConfiguration.Project));
-
             if (_projectCachePlugins.IsEmpty)
             {
                 return;
             }
 
-            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
+            // The ProjectInstance may not be loaded on the in-proc node when the project was built on an
+            // out-of-proc worker. VS submits builds by project path (without a ProjectInstance), so the
+            // configuration is added to the in-proc cache with _project=null. The worker node loads and
+            // evaluates the project locally, but the ProjectInstance is never transferred back — it's too
+            // large to serialize across the named pipe (only the BuildResult with target outcomes is returned).
+            //
+            // This method is reached because ShouldUseCache is shared by two call sites:
+            //   1. Pre-build (BuildManager.ExecuteSubmission): decides whether to issue a cache request.
+            //      The project isn't evaluated yet, so ShouldUseCache must return true in VS/global-plugin
+            //      scenarios without requiring IsLoaded. The cache request path (PostCacheRequest) handles
+            //      loading the project itself via EvaluateProjectIfNecessary.
+            //   2. Post-build (BuildManager.HandleResult): decides whether to notify cache plugins about
+            //      the build result. Here the in-proc config may still have no ProjectInstance if the
+            //      project was built on an out-of-proc node.
+            //
+            // We check IsLoaded rather than Project==null because the Project getter asserts !IsCached
+            // and would throw if the configuration happens to be in cached-to-disk state. IsLoaded is
+            // a safe read-only check (_project?.IsLoaded == true) with no side effects.
+            //
+            // Skipping is safe: the build already completed successfully and the cache plugin's
+            // HandleProjectFinishedAsync needs a loaded ProjectInstance to determine which plugins
+            // apply (via GetProjectCacheDescriptors) and to provide project context to the plugin.
+            if (!requestConfiguration.IsLoaded)
+            {
+                return;
+            }
+
+            // If the ProjectInstance was evicted to disk to save memory, restore it before accessing
+            // the Project property below (whose getter asserts !IsCached).
             if (requestConfiguration.IsCached)
             {
                 requestConfiguration.RetrieveFromCache();

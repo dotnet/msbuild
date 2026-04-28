@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework.BuildException;
 

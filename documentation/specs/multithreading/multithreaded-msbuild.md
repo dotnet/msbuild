@@ -138,6 +138,8 @@ The scheduler is already capable of juggling multiple projects, and there's alre
 
 The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, CLI or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode creating all the thread nodes in the entry process for simplicity--in final production these will be in an [MSBuild Server process](#msbuild-server-integration).
 
+In the current implementation, enabling multithreaded mode implies that all worker nodes are in-proc. Out-of-proc worker-node topologies for multithreaded execution remain future work.
+
 ```mermaid
 sequenceDiagram
 
@@ -234,7 +236,7 @@ The `MSBuildMultiThreadableTaskAttribute` is **non-inheritable** (`Inherited = f
 * Derived classes cannot accidentally inherit thread-safety assumptions from base classes
 * The routing decision is always explicit and visible in the task's source code
 
-Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior.
+Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior. If task implements `IMultiThreadableTask`, `TaskEnvironment` should be backed by `MultiProcessTaskEnvironmentDriver.Instance`, which acts as a fallback for explicit instantiation and task host scenarios.
 
 ## Tasks transition
 
@@ -245,6 +247,8 @@ To ease task authoring, we will provide a Roslyn analyzer that will check for kn
 ## Interaction with `DisableInProcNode`
 
 We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
+
+This section describes the intended Visual Studio topology, not the current implementation invariant that multithreaded mode implies all worker nodes are in-proc.
 
 ```mermaid
 sequenceDiagram

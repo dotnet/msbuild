@@ -14,6 +14,9 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         TargetsExecutionData = targetsExecutionData;
     }
 
+    /// <summary>
+    /// Merges all data from another <see cref="IWorkerNodeTelemetryData"/> into this instance.
+    /// </summary>
     public void Add(IWorkerNodeTelemetryData other)
     {
         foreach (var task in other.TasksExecutionData)
@@ -27,10 +30,12 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
+    /// <summary>
+    /// Adds or aggregates task execution data.
+    /// </summary>
     public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
     {
-        TaskExecutionStats? taskExecutionStats;
-        if (!TasksExecutionData.TryGetValue(task, out taskExecutionStats))
+        if (!TasksExecutionData.TryGetValue(task, out TaskExecutionStats? taskExecutionStats))
         {
             taskExecutionStats = new(cumulativeExecutionTime, executionsCount, totalMemoryConsumption, factoryName, taskHostRuntime);
             TasksExecutionData[task] = taskExecutionStats;
@@ -45,6 +50,9 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
+    /// <summary>
+    /// Adds or updates target execution data.
+    /// </summary>
     public void AddTarget(TaskOrTargetTelemetryKey target, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
     {
         if (TargetsExecutionData.TryGetValue(target, out var existingStats))
@@ -70,6 +78,8 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
     }
 
     public WorkerNodeTelemetryData() : this([], []) { }
+
+    public bool IsEmpty => TasksExecutionData.Count == 0 && TargetsExecutionData.Count == 0;
 
     public Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
 

@@ -269,15 +269,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         TaskHostIsRunningMultipleNodesResponse = 0x25,
 
-        /// <summary>
-        /// Request from TaskHost to parent for Yield/Reacquire operations.
-        /// </summary>
-        TaskHostYieldRequest = 0x26,
-
-        /// <summary>
-        /// Response from parent to TaskHost acknowledging yield/reacquire.
-        /// </summary>
-        TaskHostYieldResponse = 0x27,
+        // 0x26-0x27 reserved for future TaskHost callback packet types
 
         #endregion
 
@@ -347,11 +339,12 @@ namespace Microsoft.Build.BackEnd
         /// 1: .NET task host support.
         /// 2: Added support for translating/reading HostServices, ProjectFile, TargetName in TaskHostConfiguration.
         /// 3: Added App Host support.
+        /// 4: Added IsRunningMultipleNodes, Request/ReleaseCores, BuildProjectFile callbacks support for OOP TaskHost.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
         /// </summary>
-        public const byte PacketVersion = 3;
+        public const byte PacketVersion = 4;
 
         // Flag bits in upper 2 bits
         private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000

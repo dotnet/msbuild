@@ -22,7 +22,6 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -2198,7 +2197,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x86");
-            string dotNet40Path = FrameworkFileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
+            string dotNet40Path = FileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
             pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x64");
@@ -2281,7 +2280,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x86");
-            string dotNet40Path = FrameworkFileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
+            string dotNet40Path = FileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
             pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x64");

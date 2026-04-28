@@ -85,11 +85,6 @@
         <target state="translated">Nástroj MSBuild očekává platný objekt {0}.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.PathTooLong">
-        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
-        <target state="translated">Cesta: {0} překračuje maximální limit pro cestu k OS. Plně kvalifikovaný název souboru musí být kratší než {1} znaků.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
         <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
         <target state="translated">MSB5028: Soubor filtru řešení v {0} obsahuje projekt {1}, který není v souboru řešení v {2}.</target>

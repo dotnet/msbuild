@@ -95,9 +95,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _projectFile;
 
-#if !NET35
         private HostServices _hostServices;
-#endif
 
         /// <summary>
         /// The set of parameters to apply to the task prior to execution.
@@ -167,9 +165,7 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> buildProcessEnvironment,
             CultureInfo culture,
             CultureInfo uiCulture,
-#if !NET35
             HostServices hostServices,
-#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -206,9 +202,7 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
-#if !NET35
             _hostServices = hostServices;
-#endif
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
@@ -308,7 +302,6 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-#if !NET35
         /// <summary>
         /// The HostServices to be used by the task host.
         /// </summary>
@@ -318,7 +311,6 @@ namespace Microsoft.Build.BackEnd
             get
             { return _hostServices; }
         }
-#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined.
@@ -525,25 +517,13 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
             translator.Translate(collection: ref _warningsAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
             translator.Translate(collection: ref _warningsNotAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
         }
 
         /// <summary>

@@ -3,8 +3,6 @@
 
 using System;
 #if FEATURE_APPDOMAIN
-using System.Collections.Generic;
-using System.Linq;
 #endif
 using System.Reflection;
 #if FEATURE_ASSEMBLYLOADCONTEXT
@@ -17,9 +15,6 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 {
     internal sealed class AssemblyLoadsTracker : MarshalByRefObject, IDisposable
     {
-#if FEATURE_APPDOMAIN
-        private static readonly List<AssemblyLoadsTracker> s_instances = new();
-#endif
         private readonly LoggingContext? _loggingContext;
         private readonly LoggingService? _loggingService;
         private readonly AssemblyLoadingContext _context;
@@ -61,26 +56,6 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             AppDomain? appDomain = null)
             => StartTracking(null, loggingService, context, initiator, null, appDomain);
 
-
-
-#if FEATURE_APPDOMAIN
-        public static void StopTracking(AppDomain appDomain)
-        {
-            if (!appDomain.IsDefaultAppDomain())
-            {
-                lock (s_instances)
-                {
-                    foreach (AssemblyLoadsTracker tracker in s_instances.Where(t => t._appDomain == appDomain))
-                    {
-                        tracker.StopTracking();
-                    }
-
-                    s_instances.RemoveAll(t => t._appDomain == appDomain);
-                }
-            }
-        }
-#endif
-
         public void Dispose()
         {
             StopTracking();
@@ -121,16 +96,19 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
                 return EmptyDisposable.Instance;
             }
 
-            var tracker = new AssemblyLoadsTracker(loggingContext, loggingService, context, initiatorType, appDomain ?? AppDomain.CurrentDomain);
 #if FEATURE_APPDOMAIN
-            if (appDomain != null && !appDomain.IsDefaultAppDomain())
+            if (appDomain != null && appDomain != AppDomain.CurrentDomain)
             {
-                lock (s_instances)
-                {
-                    s_instances.Add(tracker);
-                }
+                // Subscribing to AssemblyLoad on a remote AppDomain causes the event handler to be
+                // invoked through a transparent proxy. AssemblyLoadEventArgs is not [Serializable],
+                // so marshaling it across the AppDomain boundary throws SerializationException.
+                // Skip assembly load tracking for tasks running in separate AppDomains.
+                return EmptyDisposable.Instance;
             }
 #endif
+
+            var tracker = new AssemblyLoadsTracker(loggingContext, loggingService, context, initiatorType, appDomain ?? AppDomain.CurrentDomain);
+
             tracker.StartTracking();
             return tracker;
         }

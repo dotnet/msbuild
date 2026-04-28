@@ -1,0 +1,143 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+#nullable disable
+
+namespace Microsoft.Build.Collections
+{
+    /// <summary>
+    /// A read-only wrapper over an empty collection.
+    /// </summary>
+    /// <remarks>
+    /// Thus this is an omission from the BCL.
+    /// </remarks>
+    /// <typeparam name="T">Type of element in the collection</typeparam>
+    internal class ReadOnlyEmptyCollection<T> : ICollection<T>, ICollection
+    {
+        /// <summary>
+        /// Backing live collection
+        /// </summary>
+        private static ReadOnlyEmptyCollection<T> s_instance;
+
+        /// <summary>
+        /// Private default constructor as this is a singleton
+        /// </summary>
+        private ReadOnlyEmptyCollection()
+        {
+        }
+
+        /// <summary>
+        /// Get the instance
+        /// </summary>
+        public static ReadOnlyEmptyCollection<T> Instance
+        {
+            get
+            {
+                if (s_instance == null)
+                {
+                    s_instance = new ReadOnlyEmptyCollection<T>();
+                }
+
+                return s_instance;
+            }
+        }
+
+        /// <summary>
+        /// Pass through for underlying collection
+        /// </summary>
+        public int Count
+        {
+            get { return 0; }
+        }
+
+        /// <summary>
+        /// Returns true.
+        /// </summary>
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
+
+        /// <summary>
+        /// Whether collection is synchronized
+        /// </summary>
+        bool ICollection.IsSynchronized
+        {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// Sync root
+        /// </summary>
+        object ICollection.SyncRoot
+        {
+            get { return this; }
+        }
+
+        /// <summary>
+        /// Prohibited on read only collection: throws
+        /// </summary>
+        public void Add(T item)
+        {
+            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+        }
+
+        /// <summary>
+        /// Prohibited on read only collection: throws
+        /// </summary>
+        public void Clear()
+        {
+            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+        }
+
+        /// <summary>
+        /// Pass through for underlying collection
+        /// </summary>
+        public bool Contains(T item)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// Pass through for underlying collection
+        /// </summary>
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+        }
+
+        /// <summary>
+        /// Prohibited on read only collection: throws
+        /// </summary>
+        public bool Remove(T item)
+        {
+            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+        }
+
+        /// <summary>
+        /// Get an enumerator over an empty collection
+        /// </summary>
+        public IEnumerator<T> GetEnumerator()
+        {
+            yield break;
+        }
+
+        /// <summary>
+        /// Get an enumerator over an empty collection
+        /// </summary>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        /// <summary>
+        /// ICollection version of CopyTo
+        /// </summary>
+        void ICollection.CopyTo(Array array, int index)
+        {
+        }
+    }
+}

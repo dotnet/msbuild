@@ -2,17 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
-
-#if !TASKHOST
-using System.Buffers.Binary;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Eventing;
-#endif
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Internal
 {
@@ -124,12 +121,8 @@ namespace Microsoft.Build.Internal
                 throw new IOException($"Incomplete header read.  {headerBytesRead} of {HeaderLength} bytes read.");
             }
 
-#if TASKHOST
-            int packetLength = BitConverter.ToInt32(_headerData, 1);
-#else
             int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerData, 1, 4));
             MSBuildEventSource.Log.PacketReadSize(packetLength);
-#endif
 
             // Read the packet. Set the buffer length now to avoid additional resizing during the read.
             _readBuffer.Position = 0;
@@ -144,7 +137,6 @@ namespace Microsoft.Build.Internal
             return DeserializePacket();
         }
 
-#if !TASKHOST
         internal async Task WritePacketAsync(INodePacket packet, CancellationToken cancellationToken = default)
         {
             int messageLength = WritePacketToBuffer(packet);
@@ -194,7 +186,6 @@ namespace Microsoft.Build.Internal
 
             return DeserializePacket();
         }
-#endif
 
         private int WritePacketToBuffer(INodePacket packet)
         {
@@ -233,7 +224,6 @@ namespace Microsoft.Build.Internal
             return totalBytesRead;
         }
 
-#if !TASKHOST
         private async ValueTask<int> ReadAsync(byte[] buffer, int bytesToRead, CancellationToken cancellationToken)
         {
             int totalBytesRead = 0;
@@ -256,7 +246,6 @@ namespace Microsoft.Build.Internal
 
             return totalBytesRead;
         }
-#endif
 
         private INodePacket DeserializePacket()
         {

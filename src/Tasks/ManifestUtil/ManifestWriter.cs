@@ -6,7 +6,7 @@ using System.Collections;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 

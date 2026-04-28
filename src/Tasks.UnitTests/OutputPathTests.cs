@@ -5,13 +5,13 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 
 using Shouldly;
 
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

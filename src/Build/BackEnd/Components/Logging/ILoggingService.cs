@@ -142,6 +142,16 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Returns the number of events currently queued for processing.
+        /// Used for hang diagnostics to determine if the logging pipeline is backed up.
+        /// Returns 0 for synchronous logging or when the queue is not available.
+        /// </summary>
+        int EventQueueCount
+        {
+            get;
+        }
+
+        /// <summary>
         /// List of properties to serialize from the child node
         /// </summary>
         string[] PropertiesToSerialize

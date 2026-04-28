@@ -900,12 +900,12 @@ class X
             // The short path to temp
             string tempShortPath = NativeMethodsShared.IsUnixLike
                                        ? tempPath
-                                       : FrameworkFileUtilities.EnsureTrailingSlash(
+                                       : FileUtilities.EnsureTrailingSlash(
                                            NativeMethodsShared.GetShortFilePath(tempPath).ToUpperInvariant());
             // The long path to temp
             string tempLongPath = NativeMethodsShared.IsUnixLike
                                       ? tempPath
-                                      : FrameworkFileUtilities.EnsureTrailingSlash(
+                                      : FileUtilities.EnsureTrailingSlash(
                                           NativeMethodsShared.GetLongFilePath(tempPath).ToUpperInvariant());
 
             // We don't want to be including these as dependencies or outputs:

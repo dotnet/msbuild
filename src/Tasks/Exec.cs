@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -22,8 +21,7 @@ namespace Microsoft.Build.Tasks
     /// for it to complete, and then returns True if the process completed successfully, and False if an error occurred.
     /// </summary>
     // UNDONE: ToolTask has a "UseCommandProcessor" flag that duplicates much of the code in this class. Remove the duplication.
-    [MSBuildMultiThreadableTask]
-    public class Exec : ToolTaskExtension, IMultiThreadableTask
+    public class Exec : ToolTaskExtension
     {
         #region Constructors
 
@@ -48,7 +46,7 @@ namespace Microsoft.Build.Tasks
 
         // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
-        private AbsolutePath _workingDirectory;
+        private string _workingDirectory;
         private ITaskItem[] _outputs;
         internal bool workingDirectoryIsUNC; // internal for unit testing
         private string _batchFile;
@@ -83,9 +81,6 @@ namespace Microsoft.Build.Tasks
         public string WorkingDirectory { get; set; }
 
         public bool IgnoreExitCode { get; set; }
-
-        /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Enable the pipe of the standard out to an item (StandardOutput).
@@ -463,12 +458,10 @@ namespace Microsoft.Build.Tasks
             }
 
             // determine what the working directory for the exec command is going to be -- if the user specified a working
-            // directory use that, otherwise default to the project directory (TaskEnvironment.ProjectDirectory). Using the
-            // project directory instead of the process current directory is important for correctness in multithreaded (/mt)
-            // builds, where the process working directory may not match the project being built.
+            // directory use that, otherwise it's the current directory
             _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
-                ? TaskEnvironment.GetAbsolutePath(WorkingDirectory)
-                : TaskEnvironment.ProjectDirectory;
+                ? WorkingDirectory
+                : Directory.GetCurrentDirectory();
 
             // check if the working directory we're going to use for the exec command is a UNC path
             workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern(_workingDirectory);
@@ -477,7 +470,7 @@ namespace Microsoft.Build.Tasks
             // will not be able to auto-map to the UNC path
             if (workingDirectoryIsUNC && NativeMethods.AllDrivesMapped())
             {
-                Log.LogErrorWithCodeFromResources("Exec.AllDriveLettersMappedError", _workingDirectory.OriginalValue);
+                Log.LogErrorWithCodeFromResources("Exec.AllDriveLettersMappedError", _workingDirectory);
                 return false;
             }
 
@@ -540,7 +533,7 @@ namespace Microsoft.Build.Tasks
             // So verify it's valid here.
             if (!FileSystems.Default.DirectoryExists(_workingDirectory))
             {
-                throw new DirectoryNotFoundException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Exec.InvalidWorkingDirectory", _workingDirectory.OriginalValue));
+                throw new DirectoryNotFoundException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Exec.InvalidWorkingDirectory", _workingDirectory));
             }
 
             if (workingDirectoryIsUNC)
@@ -565,59 +558,6 @@ namespace Microsoft.Build.Tasks
         internal string GetWorkingDirectoryAccessor()
         {
             return GetWorkingDirectory();
-        }
-
-        /// <summary>
-        /// Gets the ProcessStartInfo for the spawned process, with environment variables from TaskEnvironment.
-        /// In multithreaded mode, TaskEnvironment contains the virtualized environment for this project,
-        /// which must be passed to the spawned process since it won't inherit it from the (shared) process environment.
-        /// </summary>
-        protected override ProcessStartInfo GetProcessStartInfo(
-            string pathToTool,
-            string commandLineCommands,
-            string responseFileSwitch)
-        {
-            // Get the base ProcessStartInfo with all ToolTask settings (command line, redirections, encodings, etc.)
-            // This also applies EnvironmentVariables overrides from the task property.
-            ProcessStartInfo startInfo = base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
-
-            // Replace the inherited process environment with the virtualized one from TaskEnvironment.
-            // TaskEnvironment.GetProcessStartInfo() already configures env vars and working directory correctly
-            // for both multithreaded (virtualized) and multi-process (inherited) modes.
-            ProcessStartInfo taskEnvStartInfo = TaskEnvironment.GetProcessStartInfo();
-            startInfo.Environment.Clear();
-            foreach (var kvp in taskEnvStartInfo.Environment)
-            {
-                startInfo.Environment[kvp.Key] = kvp.Value;
-            }
-
-            // Re-apply obsolete EnvironmentOverride and EnvironmentVariables property overrides —
-            // they should take precedence over TaskEnvironment. The base class already applied these,
-            // but we cleared the environment above, so we need to re-apply them.
-#pragma warning disable 0618 // obsolete
-            Dictionary<string, string> envOverrides = EnvironmentOverride;
-            if (envOverrides != null)
-            {
-                foreach (KeyValuePair<string, string> entry in envOverrides)
-                {
-                    startInfo.Environment[entry.Key] = entry.Value;
-                }
-            }
-#pragma warning restore 0618
-
-            if (EnvironmentVariables != null)
-            {
-                foreach (string entry in EnvironmentVariables)
-                {
-                    string[] nameValuePair = entry.Split(['='], 2);
-                    if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
-                    {
-                        startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
-                    }
-                }
-            }
-
-            return startInfo;
         }
 
         /// <summary>

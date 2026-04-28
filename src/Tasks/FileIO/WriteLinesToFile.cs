@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
         private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// File to write lines to.
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks
             }
 
             ErrorUtilities.VerifyThrowArgumentLength(File.ItemSpec);
-            AbsolutePath filePath = FrameworkFileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(File.ItemSpec));
+            AbsolutePath filePath = FileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(File.ItemSpec));
             string contentsAsString = string.Empty;
 
             if (Lines != null && Lines.Length > 0)

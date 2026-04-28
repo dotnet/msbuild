@@ -3,7 +3,6 @@
 
 #if NETFRAMEWORK
 using System;
-
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #endif
@@ -20,6 +19,7 @@ namespace Microsoft.Build.Tasks
     /// This class defines the "AL" XMake task, which enables using al.exe to link
     /// modules and resource files into assemblies.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class AL : ToolTaskExtension, IALTaskContract
     {
         #region Properties
@@ -305,12 +305,12 @@ namespace Microsoft.Build.Tasks
 
             // If COMPLUS_InstallRoot\COMPLUS_Version are set (the dogfood world), we want to find it there, instead of
             // the SDK, which may or may not be installed. The following will look there.
-            if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_InstallRoot")) || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_Version")))
+            if (!String.IsNullOrEmpty(TaskEnvironment.GetEnvironmentVariable("COMPLUS_InstallRoot")) || !String.IsNullOrEmpty(TaskEnvironment.GetEnvironmentVariable("COMPLUS_Version")))
             {
                 pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolExe, TargetDotNetFrameworkVersion.Latest);
             }
 
-            if (String.IsNullOrEmpty(pathToTool) || !FileSystems.Default.FileExists(pathToTool))
+            if (String.IsNullOrEmpty(pathToTool) || !FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(pathToTool)))
             {
                 // The bitness of al.exe should match the platform being built
                 // Yoda condition prevents null reference exception if Platform is null.
@@ -318,10 +318,18 @@ namespace Microsoft.Build.Tasks
                                         "x64".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? ProcessorArchitecture.AMD64 : // x64 maps to AMD64 in GeneratePathToTool
                                         ProcessorArchitecture.CurrentProcessArchitecture;
 
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(f => SdkToolsPathUtility.FileInfoExists(f), archToLookFor, SdkToolsPath, ToolExe, Log, true);
+                pathToTool = SdkToolsPathUtility.GeneratePathToTool(
+                    f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
+                    archToLookFor,
+                    SdkToolsPath,
+                    ToolExe,
+                    Log,
+                    true);
             }
 
-            return pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
 
         /// <summary>
@@ -400,6 +408,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Stub AL task for .NET Core.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public sealed class AL : TaskRequiresFramework, IALTaskContract
     {
         public AL()

@@ -45,7 +45,7 @@ namespace Microsoft.Build.FileAccesses
         {
             _scheduler = host.GetComponent(BuildComponentType.Scheduler) as IScheduler;
             _configCache = host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
-            _tempDirectory = FrameworkFileUtilities.EnsureNoTrailingSlash(FileUtilities.TempFileDirectory);
+            _tempDirectory = FileUtilities.EnsureNoTrailingSlash(FileUtilities.TempFileDirectory);
         }
 
         public void ShutdownComponent()

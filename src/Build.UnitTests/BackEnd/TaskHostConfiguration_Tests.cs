@@ -43,17 +43,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     buildProcessEnvironment: null,
                     culture: Thread.CurrentThread.CurrentCulture,
                     uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                    null,
-#endif
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
-                    appDomainSetup:
-#if FEATURE_APPDOMAIN
-                    null,
+                    appDomainSetup: null,
 #endif
-                    lineNumberOfTask:
-#endif
-                    1,
+                    lineNumberOfTask: 1,
                     columnNumberOfTask: 1,
                     projectFileOfTask: @"c:\my project\myproj.proj",
                     targetName: "",
@@ -83,17 +77,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     buildProcessEnvironment: null,
                     culture: Thread.CurrentThread.CurrentCulture,
                     uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                    null,
-#endif
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
-                    appDomainSetup:
-#if FEATURE_APPDOMAIN
-                    null,
+                    appDomainSetup: null,
 #endif
-                    lineNumberOfTask:
-#endif
-                    1,
+                    lineNumberOfTask: 1,
                     columnNumberOfTask: 1,
                     projectFileOfTask: @"c:\my project\myproj.proj",
                     targetName: "",
@@ -123,17 +111,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     buildProcessEnvironment: null,
                     culture: Thread.CurrentThread.CurrentCulture,
                     uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                    null,
-#endif
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
-                    appDomainSetup:
-#if FEATURE_APPDOMAIN
-                    null,
+                    appDomainSetup: null,
 #endif
-                    lineNumberOfTask:
-#endif
-                    1,
+                    lineNumberOfTask: 1,
                     columnNumberOfTask: 1,
                     projectFileOfTask: @"c:\my project\myproj.proj",
                     targetName: "",
@@ -165,17 +147,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     buildProcessEnvironment: null,
                     culture: Thread.CurrentThread.CurrentCulture,
                     uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                    null,
-#endif
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
-                    appDomainSetup:
-#if FEATURE_APPDOMAIN
-                    null,
+                    appDomainSetup: null,
 #endif
-                    lineNumberOfTask:
-#endif
-                    1,
+                    lineNumberOfTask: 1,
                     columnNumberOfTask: 1,
                     projectFileOfTask: @"c:\my project\myproj.proj",
                     targetName: "",
@@ -205,17 +181,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                    null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -236,17 +206,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -268,17 +232,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -305,17 +263,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -342,17 +294,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -386,17 +332,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -442,9 +382,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
                 appDomainSetup: setup,
                 lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
@@ -499,17 +437,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -555,17 +487,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -609,17 +535,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -662,17 +582,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -722,17 +636,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",
@@ -777,17 +685,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 buildProcessEnvironment: null,
                 culture: Thread.CurrentThread.CurrentCulture,
                 uiCulture: Thread.CurrentThread.CurrentUICulture,
-#if !NET35
-                null,
-#endif
+                hostServices: null,
 #if FEATURE_APPDOMAIN
-                appDomainSetup:
-#if FEATURE_APPDOMAIN
-                null,
+                appDomainSetup: null,
 #endif
-                lineNumberOfTask:
-#endif
-                1,
+                lineNumberOfTask: 1,
                 columnNumberOfTask: 1,
                 projectFileOfTask: @"c:\my project\myproj.proj",
                 targetName: "TargetName",

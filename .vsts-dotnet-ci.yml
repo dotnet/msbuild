@@ -22,7 +22,13 @@ jobs:
       $versionsFile = "eng/Versions.props"
 
       [xml]$xml = Get-Content $versionsFile
-      $finalVersionKind = $xml.Project.PropertyGroup.DotNetFinalVersionKind
+      $finalVersionNode = $xml.SelectSingleNode('//DotNetFinalVersionKind')
+      if ($null -eq $finalVersionNode -or [string]::IsNullOrWhiteSpace($finalVersionNode.InnerText)) {
+        Write-Host "##vso[task.logissue type=error;sourcepath=eng/Versions.props;linenumber=1;]DotNetFinalVersionKind element is missing or empty in eng/Versions.props."
+        exit 1
+      }
+
+      $finalVersionKind = $finalVersionNode.InnerText.Trim()
       if ($finalVersionKind -ne 'release') {
         Write-Host "Since it is not released, skip the version bump check.";
         return
@@ -272,7 +278,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --skipTests --stage2Properties '/mt'
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --skipTests --stage2Properties '/mt /p:BuildAnalyzer=true'
     displayName: 'Build with bootstrapped MSBuild and -mt mode'
     condition: eq(variables.onlyDocChanged, 0)
     env:
