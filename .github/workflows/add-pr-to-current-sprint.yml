@@ -75,7 +75,7 @@ jobs:
 
           after=
           project_id=
-          true > iteration-fields.jsonl
+          echo -n "" > iteration-fields.jsonl
 
           while true; do
             if [ -n "$after" ]; then
@@ -126,6 +126,7 @@ jobs:
                   | (.startDate <= $today) and ($today < $endDate))
                 )
             ]
+            # If project iterations overlap, choose the newest active iteration.
             | sort_by(.startDate)
             | reverse
             | .[0].id // empty
