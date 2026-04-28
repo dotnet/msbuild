@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem OutputManifest { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         public override bool Execute()
         {

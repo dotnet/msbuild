@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         private AbsolutePath? GetManifestPath()
         {

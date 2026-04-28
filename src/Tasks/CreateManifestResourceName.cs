@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] ResourceFilesWithManifestResourceNames { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         #endregion
 

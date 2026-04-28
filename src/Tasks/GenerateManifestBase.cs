@@ -82,7 +82,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkMoniker { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         protected internal AssemblyReference AddAssemblyNameFromItem(ITaskItem item, AssemblyReferenceType referenceType)
         {
