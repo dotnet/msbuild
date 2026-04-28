@@ -18,8 +18,12 @@ namespace Microsoft.Build.Tasks
     /// Resolves metadata for the specified set of assemblies.
     /// </summary>
     [SupportedOSPlatform("windows")]
-    public class GetAssembliesMetadata : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class GetAssembliesMetadata : TaskExtension, IMultiThreadableTask
     {
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         /// <summary>
         /// Assembly paths.
         /// </summary>
@@ -38,15 +42,27 @@ namespace Microsoft.Build.Tasks
             var assembliesMetadata = new List<ITaskItem>();
             foreach (string assemblyPath in AssemblyPaths)
             {
-                // During DTB the referenced project may not has been built yet, so we need to check if the assembly already exists.
-                if (FileSystems.Default.FileExists(assemblyPath))
+                // Preserve original behavior: silently skip null/empty entries instead of throwing
+                // ArgumentException from GetAbsolutePath (Sin 6).
+                if (string.IsNullOrEmpty(assemblyPath))
                 {
-                    using (AssemblyInformation assemblyInformation = new(assemblyPath))
+                    continue;
+                }
+
+                AbsolutePath absoluteAssemblyPath = TaskEnvironment.GetAbsolutePath(assemblyPath);
+
+                // During DTB the referenced project may not has been built yet, so we need to check if the assembly already exists.
+                if (FileSystems.Default.FileExists(absoluteAssemblyPath))
+                {
+                    using (AssemblyInformation assemblyInformation = new(absoluteAssemblyPath))
                     {
                         AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();
 
                         if (attributes != null)
                         {
+                            // Preserve original [Output] behavior (Sin 1): emit the user-supplied path,
+                            // not the absolutized form, as the resulting item's ItemSpec.
+                            attributes.AssemblyFullPath = absoluteAssemblyPath.OriginalValue;
                             assembliesMetadata.Add(CreateItemWithMetadata(attributes));
                         }
                     }
