@@ -12,29 +12,12 @@
 /Directory.Build*       @dotnet/kitten
 /.git*                  @dotnet/kitten
 
-# Files changed by @sujitnayak.
-/eng/Versions.props                                      @dotnet/kitten @sujitnayak
-/src/MSBuild/MSBuild/Microsoft.Build.CommonTypes.xsd     @sujitnayak
-/src/Tasks/BootstrapperUtil/BootstrapperBuilder.cs       @sujitnayak
-/src/Tasks/FormatUrl.cs                                  @sujitnayak
-/src/Tasks/GenerateLauncher.cs                           @sujitnayak
-/src/Tasks/GenerateManifestBase.cs                       @sujitnayak
-/src/Tasks/ManifestUtil/**                               @sujitnayak
-/src/Tasks/Microsoft.Build.Tasks.csproj                  @sujitnayak
-/src/Tasks/Microsoft.Common.CurrentVersion.targets       @sujitnayak
-/src/Tasks/ResolveManifestFiles.cs                       @sujitnayak
-/src/Tasks/Resources/Strings.resx                        @sujitnayak
-/src/Tasks/Resources/xlf/Strings.cs.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.de.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.es.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.fr.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.it.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.ja.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.ko.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.pl.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.pt-BR.xlf               @sujitnayak
-/src/Tasks/Resources/xlf/Strings.ru.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.tr.xlf                  @sujitnayak
-/src/Tasks/Resources/xlf/Strings.zh-Hans.xlf             @sujitnayak
-/src/Tasks/Resources/xlf/Strings.zh-Hant.xlf             @sujitnayak
-/src/Tasks/SignFile.cs                                   @sujitnayak
+# Build tasks that have source in this repo and ship in `Microsoft.Build.Tasks.Core.dll`
+# but are owned by the ClickOnce team.
+/src/Tasks/BootstrapperUtil/**                           @dotnet/msbuild-clickonce
+/src/Tasks/FormatUrl.cs                                  @dotnet/msbuild-clickonce
+/src/Tasks/GenerateLauncher.cs                           @dotnet/msbuild-clickonce
+/src/Tasks/GenerateManifestBase.cs                       @dotnet/msbuild-clickonce
+/src/Tasks/ManifestUtil/**                               @dotnet/msbuild-clickonce
+/src/Tasks/ResolveManifestFiles.cs                       @dotnet/msbuild-clickonce
+/src/Tasks/SignFile.cs                                   @dotnet/msbuild-clickonce
