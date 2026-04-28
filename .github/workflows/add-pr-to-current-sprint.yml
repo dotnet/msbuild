@@ -23,16 +23,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          after_args=()
-          project_id=
-          : > iteration-fields.jsonl
+          query_project_page()
+          {
+            query_args=(-F "organization=$PROJECT_OWNER" -F "projectNumber=$PROJECT_NUMBER")
+            if [ -n "${1:-}" ]; then
+              query_args+=(-f "after=$1")
+            fi
 
-          while true; do
-            gh api graphql \
-              -F organization="$PROJECT_OWNER" \
-              -F projectNumber="$PROJECT_NUMBER" \
-              "${after_args[@]}" \
-              -f query='
+            gh api graphql "${query_args[@]}" -f query='
               query($organization: String!, $projectNumber: Int!, $after: String) {
                 organization(login: $organization) {
                   projectV2(number: $projectNumber) {
@@ -60,7 +58,15 @@ jobs:
                     }
                   }
                 }
-              }' > project-page.json
+              }'
+          }
+
+          after=
+          project_id=
+          printf '' > iteration-fields.jsonl
+
+          while true; do
+            query_project_page "$after" > project-page.json
 
             if jq -e '.errors and (.errors | length > 0)' project-page.json > /dev/null; then
               echo "GraphQL query failed:"
@@ -75,7 +81,7 @@ jobs:
               break
             fi
 
-            after_args=(-f "after=$(jq -r '.data.organization.projectV2.fields.pageInfo.endCursor' project-page.json)")
+            after="$(jq -r '.data.organization.projectV2.fields.pageInfo.endCursor' project-page.json)"
           done
 
           if [ -z "$project_id" ]; then
@@ -93,18 +99,19 @@ jobs:
 
           iteration_field_id="$(jq -r '.id' <<< "$iteration_field")"
           today="$(date -u +%Y-%m-%d)"
-          current_iteration_id="$(jq -r --arg today "$today" '
+          seconds_per_day=86400
+          current_iteration_id="$(jq -r --arg today "$today" --argjson secondsPerDay "$seconds_per_day" '
             [
               .configuration.iterations[]
               | select(
                   (.startDate <= $today) and
-                  (((.startDate + "T00:00:00Z") | fromdateiso8601) + (.duration * 86400) > (($today + "T00:00:00Z") | fromdateiso8601))
+                  (((.startDate + "T00:00:00Z") | fromdateiso8601) + (.duration * $secondsPerDay) > (($today + "T00:00:00Z") | fromdateiso8601))
                 )
             ]
             | sort_by(.startDate)
             | reverse
             | .[0].id // empty
-          ' <<< "$iteration_field" | head -n 1)"
+          ' <<< "$iteration_field")"
           if [ -z "$current_iteration_id" ]; then
             echo "Could not find a current sprint for $today on project $PROJECT_OWNER/$PROJECT_NUMBER."
             exit 1
