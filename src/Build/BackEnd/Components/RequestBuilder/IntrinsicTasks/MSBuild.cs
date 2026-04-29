@@ -656,7 +656,6 @@ namespace Microsoft.Build.BackEnd
                     // auto-generated body reads it as `SkipNonexistentTargets="$(_MSBuildInheritedSkipNonexistentTargets)"`
                     // on its inner <MSBuild> tasks.
                     if (skipNonexistentTargets
-                        && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
                         && FileUtilities.IsMetaprojectFilename(projectNames[i]))
                     {
                         var augmented = new Dictionary<string, string>(

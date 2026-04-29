@@ -29,9 +29,6 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
-### 18.8
-- [Solution metaproj propagates user-set `SkipNonexistentTargets="true"` through to its inner `<MSBuild>` tasks for non-default targets via the `_MSBuildInheritedSkipNonexistentTargets` global property, fixing MSB4057 when running `/t:CustomTarget` against a solution with inter-project dependencies and a `Directory.Solution.targets` that opts in.](https://github.com/dotnet/msbuild/issues/11025)
-
 ### 18.7
 - [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.
 

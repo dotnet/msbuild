@@ -1422,9 +1422,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static string GetInheritedSkipNonexistentTargetsExpression(string targetName)
         {
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
-                || string.IsNullOrEmpty(targetName)
-                || _defaultTargetNames.Contains(targetName))
+            if (string.IsNullOrEmpty(targetName) || _defaultTargetNames.Contains(targetName))
             {
                 return null;
             }
