@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             newTask.View.RemoveChild(newOutputPropWithConfig2.View);
             Assert.Equal(4, newTask.View.Outputs.Count);
 
-            newTask.QueryChildrenWithValidation<ProjectOutputElement>((po) => po.TaskParameter.EndsWith("1"), 4);
+            newTask.QueryChildrenWithValidation<ProjectOutputElement>((po) => po.TaskParameter.EndsWith("1", StringComparison.Ordinal), 4);
 
             newTask.Verify();
         }

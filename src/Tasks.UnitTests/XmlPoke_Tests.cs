@@ -211,7 +211,9 @@ namespace Microsoft.Build.UnitTests
 
             string result = File.ReadAllText(xmlInputPath);
             XmlDocument xmlDocument = new XmlDocument();
+#pragma warning disable CA3075
             xmlDocument.LoadXml(result);
+#pragma warning restore CA3075
             List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
             foreach (var node in nodes)
             {
@@ -367,7 +369,9 @@ namespace Microsoft.Build.UnitTests
 
             XmlDocument xmlDocument = new XmlDocument();
 
+#pragma warning disable CA3075
             xmlDocument.LoadXml(result);
+#pragma warning restore CA3075
 
             return xmlDocument;
         }

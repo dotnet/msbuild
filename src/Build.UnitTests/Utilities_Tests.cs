@@ -313,7 +313,9 @@ namespace Microsoft.Build.UnitTests
         protected string GetXmlContents(string xmlText)
         {
             XmlDocumentWithLocation xmldoc = new XmlDocumentWithLocation(loadAsReadOnly);
+#pragma warning disable CA3075 // Insecure DTD processing - testing internal API
             xmldoc.LoadXml(xmlText);
+#pragma warning restore CA3075
 
             XmlElementWithLocation rootElement = (XmlElementWithLocation)xmldoc.FirstChild;
             Console.WriteLine("originalxml = " + xmlText);

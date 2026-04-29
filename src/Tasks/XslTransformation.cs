@@ -495,7 +495,7 @@ namespace Microsoft.Build.Tasks
                         using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), new XmlReaderSettings { CloseInput = true }, _filePath.Value))
                         {
                             XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
-                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, new XmlUrlResolver());
+                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, null);
                         }
                         break;
                     case XslModes.XsltCompiledDll:

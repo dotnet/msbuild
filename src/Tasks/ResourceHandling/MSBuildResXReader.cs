@@ -26,9 +26,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             try
             {
-                using (var xmlReader = new XmlTextReader(s))
+                using (var xmlReader = XmlReader.Create(s, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
                 {
-                    xmlReader.WhitespaceHandling = WhitespaceHandling.All;
 
                     XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
                     foreach (XElement elem in doc.Element("root").Elements())
@@ -337,7 +336,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 stringValue = stringValue.Trim();
                 string fileName;
                 string remainingString;
-                if (stringValue.StartsWith("\""))
+                if (stringValue.StartsWith("\"", StringComparison.Ordinal))
                 {
                     int lastIndexOfQuote = stringValue.LastIndexOf('"');
                     if (lastIndexOfQuote - 1 < 0)

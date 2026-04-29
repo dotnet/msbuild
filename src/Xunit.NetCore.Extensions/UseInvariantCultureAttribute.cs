@@ -11,7 +11,7 @@ using Xunit.v3;
 namespace Xunit.NetCore.Extensions
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class UseInvariantCultureAttribute : BeforeAfterTestAttribute
+    public sealed class UseInvariantCultureAttribute : BeforeAfterTestAttribute
     {
         private CultureInfo? originalCulture;
         private CultureInfo? originalUICulture;

@@ -3,6 +3,7 @@
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
 
+using System;
 using System.Runtime.Loader;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -25,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             // This probably doesn't need to be how it is forever: https://github.com/dotnet/msbuild/issues/5041
             if (thisLoadContext.GetType().FullName == typeof(MSBuildLoadContext).FullName)
             {
-                if (!thisLoadContext.Name.EndsWith(typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name + ".dll"))
+                if (!thisLoadContext.Name.EndsWith(typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name + ".dll", StringComparison.Ordinal))
                 {
                     Log.LogError($"Unexpected AssemblyLoadContext name: \"{thisLoadContext.Name}\", but the current executing assembly was {typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name}");
                 }

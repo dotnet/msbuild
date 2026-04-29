@@ -134,7 +134,7 @@ public class NodeStatus_Transition_Tests
                 throw;
             }
 
-            if (!ex.Message.StartsWith("Directory:"))
+            if (!ex.Message.StartsWith("Directory:", StringComparison.Ordinal))
             {
                 throw;
             }
@@ -169,7 +169,7 @@ public class NodeStatus_Transition_Tests
 
         void Extract(string line, string prefix, ref string? output)
         {
-            if (line.StartsWith($"{prefix}: "))
+            if (line.StartsWith($"{prefix}: ", StringComparison.Ordinal))
             {
                 output = line.Substring(prefix.Length + 2);
             }

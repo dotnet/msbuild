@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#pragma warning disable CA3075 // Insecure DTD processing in XML - testing internal XmlDocumentWithLocation.Load API
+
 using System;
 using System.IO;
 using System.Reflection;

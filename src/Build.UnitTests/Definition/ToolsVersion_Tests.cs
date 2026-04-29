@@ -959,7 +959,7 @@ namespace Microsoft.Build.UnitTests.Definition
             // Cause an exception if the path is invalid
             Path.GetFileName(path);
 
-            string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString())
+            string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
                                                   ? path.Substring(0, path.Length - 1)
                                                   : path;
             // NOTE: the Replace calls below are a very minimal attempt to convert a basic, cmd.exe-style wildcard
@@ -982,7 +982,9 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             string xmlContents = _defaultTasksFileMap[path];
             XmlDocumentWithLocation xmlDocument = new XmlDocumentWithLocation();
-            xmlDocument.LoadXml(xmlContents);
+            #pragma warning disable CA3075 // Insecure DTD processing in XML - testing internal API
+                        xmlDocument.LoadXml(xmlContents);
+            #pragma warning restore CA3075
             return xmlDocument;
         }
 

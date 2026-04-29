@@ -458,7 +458,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 foreach (string packagePath in packagePaths)
                 {
-                    if (folder.Length >= packagePath.Length && folder.Substring(0, packagePath.Length).ToLowerInvariant().CompareTo(packagePath) == 0)
+                    if (folder.Length >= packagePath.Length && string.Compare(folder.Substring(0, packagePath.Length), packagePath, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         string relPath = folder.Substring(packagePath.Length);
                         if (!folders.Contains(relPath))
@@ -1956,10 +1956,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             using (var reader = new XmlNodeReader(input))
             {
                 Stream s = GetEmbeddedResourceStream(CONFIG_TRANSFORM);
-                var d = new XPathDocument(s);
+                using var xsltReader = XmlReader.Create(s, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
+                var d = new XPathDocument(xsltReader);
                 var xslc = new XslCompiledTransform();
                 // Using the Trusted Xslt is fine as the style sheet comes from our own assembly.
-                xslc.Load(d, XsltSettings.TrustedXslt, new XmlUrlResolver());
+                xslc.Load(d, XsltSettings.TrustedXslt, null);
 
                 var xml = new XPathDocument(reader);
 

@@ -985,7 +985,9 @@ public class EndToEndTests : IDisposable
         var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
 
         var doc = new XmlDocument();
+#pragma warning disable CA3075 // Insecure DTD processing - loading known local template file
         doc.LoadXml(File.ReadAllText(nugetTemplatePath));
+#pragma warning restore CA3075
         if (doc.DocumentElement != null)
         {
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");

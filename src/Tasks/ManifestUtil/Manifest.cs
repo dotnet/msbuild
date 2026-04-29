@@ -782,7 +782,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         return 0;
                     }
 
-                    return xRef.SortName.CompareTo(yRef.SortName);
+                    return string.Compare(xRef.SortName, yRef.SortName, StringComparison.Ordinal);
                 }
 
                 Debug.Fail("Comparing objects that are not BaseReferences");
