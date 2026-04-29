@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -28,10 +29,10 @@ public class CoordinatorIntegration_Tests : IDisposable
         string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
 
         // Enable the coordinator with an isolated pipe name and a small budget.
-        _env.SetEnvironmentVariable(Protocol.UseCoordinatorEnvironmentVariable, "1");
-        _env.SetEnvironmentVariable(Protocol.PipeNameEnvironmentVariable, pipeName);
-        _env.SetEnvironmentVariable(Protocol.NodeBudgetEnvironmentVariable, "4");
-        _env.SetEnvironmentVariable(Protocol.ShutdownTimeoutEnvironmentVariable, "5000");
+        _env.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
+        _env.SetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName, pipeName);
+        _env.SetEnvironmentVariable(Traits.CoordinatorNodeBudgetEnvVarName, "4");
+        _env.SetEnvironmentVariable(Traits.CoordinatorShutdownTimeoutEnvVarName, "5000");
 
         // Enable comm tracing so we can verify coordinator participation.
         _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
@@ -96,10 +97,10 @@ public class CoordinatorIntegration_Tests : IDisposable
         string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
 
         // Budget of 2, but the build requests 16.
-        _env.SetEnvironmentVariable(Protocol.UseCoordinatorEnvironmentVariable, "1");
-        _env.SetEnvironmentVariable(Protocol.PipeNameEnvironmentVariable, pipeName);
-        _env.SetEnvironmentVariable(Protocol.NodeBudgetEnvironmentVariable, "2");
-        _env.SetEnvironmentVariable(Protocol.ShutdownTimeoutEnvironmentVariable, "5000");
+        _env.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
+        _env.SetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName, pipeName);
+        _env.SetEnvironmentVariable(Traits.CoordinatorNodeBudgetEnvVarName, "2");
+        _env.SetEnvironmentVariable(Traits.CoordinatorShutdownTimeoutEnvVarName, "5000");
         _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
 
         // This project logs the effective MaxNodeCount via the reserved property.

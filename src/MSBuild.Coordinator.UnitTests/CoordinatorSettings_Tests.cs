@@ -53,10 +53,10 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
-        env.SetEnvironmentVariable(Protocol.PipeNameEnvironmentVariable, "coordinator-env-test-pipe");
-        env.SetEnvironmentVariable(Protocol.HeartbeatIntervalEnvironmentVariable, "1234");
-        env.SetEnvironmentVariable(Protocol.NodeBudgetEnvironmentVariable, "7");
-        env.SetEnvironmentVariable(Protocol.ShutdownTimeoutEnvironmentVariable, "9876");
+        env.SetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName, "coordinator-env-test-pipe");
+        env.SetEnvironmentVariable(Traits.CoordinatorHeartbeatIntervalEnvVarName, "1234");
+        env.SetEnvironmentVariable(Traits.CoordinatorNodeBudgetEnvVarName, "7");
+        env.SetEnvironmentVariable(Traits.CoordinatorShutdownTimeoutEnvVarName, "9876");
 
         CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
 
