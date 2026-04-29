@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -646,6 +646,27 @@ namespace Microsoft.Build.BackEnd
                     {
                         toolsVersions[i] = projects[i].GetMetadata("ToolsVersion");
                     }
+
+                    // https://github.com/dotnet/msbuild/issues/11025
+                    // SkipNonexistentTargets is a per-task attribute scoped to the immediate dispatch.
+                    // When the callee is a synthesised metaproj (a wrapper that re-emits MSBuild calls
+                    // to the real underlying projects), the user's attribute would normally be lost
+                    // before reaching those inner dispatches. Propagate the user's intent one level
+                    // by setting a well-known global property on the metaproj request; the metaproj's
+                    // auto-generated body reads it as `SkipNonexistentTargets="$(_MSBuildInheritedSkipNonexistentTargets)"`
+                    // on its inner <MSBuild> tasks.
+                    if (skipNonexistentTargets
+                        && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+                        && FileUtilities.IsMetaprojectFilename(projectNames[i]))
+                    {
+                        var augmented = new Dictionary<string, string>(
+                            projectProperties[i] ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+                            StringComparer.OrdinalIgnoreCase)
+                        {
+                            [PropertyNames.MSBuildInheritedSkipNonexistentTargets] = "true",
+                        };
+                        projectProperties[i] = augmented;
+                    }
                 }
             }
 
@@ -756,3 +777,4 @@ namespace Microsoft.Build.BackEnd
         #endregion
     }
 }
+
