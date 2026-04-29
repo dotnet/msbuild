@@ -158,13 +158,9 @@ namespace Microsoft.Build.Shared
         internal const string BuildNonexistentProjectsByDefault = "_" + nameof(BuildNonexistentProjectsByDefault);
 
         /// <summary>
-        /// Set by the &lt;MSBuild&gt; intrinsic task on the callee's global properties when the
-        /// outer task was invoked with <c>SkipNonexistentTargets="true"</c> and the callee is a
-        /// synthesised <c>*.metaproj</c>. The metaproj's auto-generated body reads this via
-        /// <c>SkipNonexistentTargets="$(_MSBuildInheritedSkipNonexistentTargets)"</c> on its
-        /// inner &lt;MSBuild&gt; tasks, which propagates the user's intent one dispatch level
-        /// further so that projects which legitimately do not implement the user target are
-        /// silently skipped instead of raising MSB4057.
+        /// Set on the callee's globals when an outer &lt;MSBuild SkipNonexistentTargets="true"&gt;
+        /// dispatches to a <c>*.metaproj</c>. The metaproj's synthesised inner tasks read it via
+        /// <c>$(_MSBuildInheritedSkipNonexistentTargets)</c> to honour the user's intent.
         /// See https://github.com/dotnet/msbuild/issues/11025.
         /// </summary>
         internal const string MSBuildInheritedSkipNonexistentTargets = "_MSBuildInheritedSkipNonexistentTargets";

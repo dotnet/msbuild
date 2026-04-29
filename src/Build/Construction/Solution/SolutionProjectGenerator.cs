@@ -71,12 +71,8 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Property reference emitted as the <c>SkipNonexistentTargets</c> attribute on every
-        /// synthesised inner &lt;MSBuild&gt; task in a metaproject. The reference evaluates to
-        /// <c>"true"</c> only when the engine pre-populated <c>$(_MSBuildInheritedSkipNonexistentTargets)</c>
-        /// on the metaproject's globals — which it does only when the outer caller's &lt;MSBuild&gt;
-        /// task itself had <c>SkipNonexistentTargets="true"</c>. Otherwise the reference evaluates
-        /// to the empty string and the engine treats it as <c>false</c> (today's behaviour).
-        /// See https://github.com/dotnet/msbuild/issues/11025.
+        /// synthesised inner &lt;MSBuild&gt; task in a metaproject. See
+        /// <see cref="ForwardInheritedSkipNonexistentTargets(ProjectTaskInstance)"/>.
         /// </summary>
         private const string InheritedSkipNonexistentTargetsExpression = "$(" + PropertyNames.MSBuildInheritedSkipNonexistentTargets + ")";
 
@@ -829,7 +825,6 @@ namespace Microsoft.Build.Construction
                     false);
 
                 // Add global project reference
-                // Add global project reference.
                 AddProjectBuildTask(traversalInstance, null, targetElement, string.Join(";", _targetNames), "@(ProjectReference)", string.Empty, string.Empty);
             }
 
@@ -1343,11 +1338,6 @@ namespace Microsoft.Build.Construction
             }
             else
             {
-                // AddMetaprojectTargetForUnknownProjectType emits only Message/Warning instances —
-                // it never emits an inner <MSBuild> task — so the SkipNonexistentTargets
-                // propagation handled by AddProjectBuildTask / AddReferencesBuildTask does not
-                // apply here (and MSB4057 cannot originate from these synthesised targets).
-                // See https://github.com/dotnet/msbuild/issues/11025.
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, null, unknownProjectTypeErrorMessage);
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Clean", unknownProjectTypeErrorMessage);
                 AddMetaprojectTargetForUnknownProjectType(traversalProject, metaprojectInstance, project, "Rebuild", unknownProjectTypeErrorMessage);
@@ -1459,17 +1449,12 @@ namespace Microsoft.Build.Construction
                 task.SetParameter("Properties", SolutionProperties);
             }
 
-            // Forward the user's outer SkipNonexistentTargets="true" through the metaproj boundary.
-            // The reference evaluates to "true" only when the engine pre-populated the property
-            // (which it does only when the outer caller's <MSBuild> task itself had
-            // SkipNonexistentTargets="true"); otherwise it evaluates to empty (today's behaviour).
-            // See https://github.com/dotnet/msbuild/issues/11025.
-            task.SetParameter("SkipNonexistentTargets", InheritedSkipNonexistentTargetsExpression);
-
             if (!string.IsNullOrEmpty(outputItem))
             {
                 task.AddOutputItem("TargetOutputs", outputItem, String.Empty);
             }
+
+            ForwardInheritedSkipNonexistentTargets(task);
         }
 
         /// <summary>
@@ -2098,13 +2083,26 @@ namespace Microsoft.Build.Construction
             task.SetParameter("BuildInParallel", "True");
             task.SetParameter("Properties", SolutionProperties);
 
-            // See AddProjectBuildTask for rationale. https://github.com/dotnet/msbuild/issues/11025
-            task.SetParameter("SkipNonexistentTargets", InheritedSkipNonexistentTargetsExpression);
-
             if (outputItem != null)
             {
                 task.AddOutputItem("TargetOutputs", outputItem, String.Empty);
             }
+
+            ForwardInheritedSkipNonexistentTargets(task);
+        }
+
+        /// <summary>
+        /// Forwards the user's outer <c>SkipNonexistentTargets="true"</c> through the metaproj
+        /// boundary by emitting a property reference. The reference evaluates to <c>"true"</c>
+        /// only when the engine pre-populated <c>$(_MSBuildInheritedSkipNonexistentTargets)</c>
+        /// (which it does only when the outer caller's &lt;MSBuild&gt; task itself had
+        /// <c>SkipNonexistentTargets="true"</c>); otherwise it evaluates to empty and the engine
+        /// treats it as <c>false</c> — today's behaviour.
+        /// See https://github.com/dotnet/msbuild/issues/11025.
+        /// </summary>
+        private static void ForwardInheritedSkipNonexistentTargets(ProjectTaskInstance task)
+        {
+            task.SetParameter("SkipNonexistentTargets", InheritedSkipNonexistentTargetsExpression);
         }
 
         /// <summary>
