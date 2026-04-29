@@ -84,9 +84,6 @@ namespace Microsoft.Build.Tasks
 
         public bool IgnoreExitCode { get; set; }
 
-        /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
-
         /// <summary>
         /// Enable the pipe of the standard out to an item (StandardOutput).
         /// </summary>
@@ -565,59 +562,6 @@ namespace Microsoft.Build.Tasks
         internal string GetWorkingDirectoryAccessor()
         {
             return GetWorkingDirectory();
-        }
-
-        /// <summary>
-        /// Gets the ProcessStartInfo for the spawned process, with environment variables from TaskEnvironment.
-        /// In multithreaded mode, TaskEnvironment contains the virtualized environment for this project,
-        /// which must be passed to the spawned process since it won't inherit it from the (shared) process environment.
-        /// </summary>
-        protected override ProcessStartInfo GetProcessStartInfo(
-            string pathToTool,
-            string commandLineCommands,
-            string responseFileSwitch)
-        {
-            // Get the base ProcessStartInfo with all ToolTask settings (command line, redirections, encodings, etc.)
-            // This also applies EnvironmentVariables overrides from the task property.
-            ProcessStartInfo startInfo = base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
-
-            // Replace the inherited process environment with the virtualized one from TaskEnvironment.
-            // TaskEnvironment.GetProcessStartInfo() already configures env vars and working directory correctly
-            // for both multithreaded (virtualized) and multi-process (inherited) modes.
-            ProcessStartInfo taskEnvStartInfo = TaskEnvironment.GetProcessStartInfo();
-            startInfo.Environment.Clear();
-            foreach (var kvp in taskEnvStartInfo.Environment)
-            {
-                startInfo.Environment[kvp.Key] = kvp.Value;
-            }
-
-            // Re-apply obsolete EnvironmentOverride and EnvironmentVariables property overrides —
-            // they should take precedence over TaskEnvironment. The base class already applied these,
-            // but we cleared the environment above, so we need to re-apply them.
-#pragma warning disable 0618 // obsolete
-            Dictionary<string, string> envOverrides = EnvironmentOverride;
-            if (envOverrides != null)
-            {
-                foreach (KeyValuePair<string, string> entry in envOverrides)
-                {
-                    startInfo.Environment[entry.Key] = entry.Value;
-                }
-            }
-#pragma warning restore 0618
-
-            if (EnvironmentVariables != null)
-            {
-                foreach (string entry in EnvironmentVariables)
-                {
-                    string[] nameValuePair = entry.Split(['='], 2);
-                    if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
-                    {
-                        startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
-                    }
-                }
-            }
-
-            return startInfo;
         }
 
         /// <summary>
