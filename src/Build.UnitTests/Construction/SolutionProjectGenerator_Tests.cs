@@ -2401,15 +2401,14 @@ EndGlobal
         }
 
         /// <summary>
-        /// Generator side of the G-0 fix for https://github.com/dotnet/msbuild/issues/11025.
+        /// Generator side of the fix for https://github.com/dotnet/msbuild/issues/11025.
         ///
-        /// Asserts that the synthesised metaproject's user-target inner &lt;MSBuild&gt; tasks set
-        /// <c>SkipNonexistentTargets="$(_MSBuildInheritedSkipNonexistentTargets)"</c> — a property
-        /// reference, not a literal "true". The reference evaluates to "true" only when the
-        /// engine pre-populates the inherited property (which it only does when the outer caller
-        /// itself opted in via <c>SkipNonexistentTargets="true"</c>). For default targets
-        /// (Build/Clean/Rebuild/Publish/...) the attribute must NOT be emitted at all — their
-        /// absence is a real authoring bug that must continue to surface as MSB4057.
+        /// Asserts that every synthesised inner &lt;MSBuild&gt; task on a metaproject target
+        /// carries <c>SkipNonexistentTargets="$(_MSBuildInheritedSkipNonexistentTargets)"</c>
+        /// — a property reference, not a literal "true". The reference evaluates to "true"
+        /// only when the engine pre-populates the property (i.e. only when the outer caller's
+        /// outer &lt;MSBuild&gt; task itself opted in via <c>SkipNonexistentTargets="true"</c>),
+        /// so default behaviour is preserved.
         /// </summary>
         [Fact]
         public void Issue11025_MetaprojInnerTasksUseInheritedSkipNonexistentTargetsExpression()
@@ -2455,31 +2454,24 @@ EndGlobal
                          i.FullPath.EndsWith("a.csproj.metaproj", StringComparison.OrdinalIgnoreCase));
                 metaprojectForA.ShouldNotBeNull("Expected a metaproject for project 'a' to be generated because it has an inter-project dependency.");
 
-                metaprojectForA.Targets.ShouldContainKey("xyz");
-                ProjectTargetInstance xyzTarget = metaprojectForA.Targets["xyz"];
-
-                ProjectTaskInstance[] xyzMsbuildTasks = xyzTarget.Tasks
-                    .Where(t => string.Equals(t.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-                xyzMsbuildTasks.ShouldNotBeEmpty("xyz target in metaproject should contain at least one <MSBuild> task.");
-
                 const string ExpectedExpression = "$(_MSBuildInheritedSkipNonexistentTargets)";
-                foreach (ProjectTaskInstance task in xyzMsbuildTasks)
-                {
-                    task.GetParameter("SkipNonexistentTargets").ShouldBe(
-                        ExpectedExpression,
-                        customMessage: $"Inner <MSBuild Projects='{task.GetParameter("Projects")}' Targets='{task.GetParameter("Targets")}'> on metaproj target 'xyz' must set SkipNonexistentTargets to a property reference so the engine-back-propagated user intent is honoured (issue #11025).");
-                }
 
-                // Default targets must NOT carry the attribute — their absence is a real authoring bug.
-                metaprojectForA.Targets.ShouldContainKey("Build");
-                ProjectTargetInstance buildTarget = metaprojectForA.Targets["Build"];
-                foreach (ProjectTaskInstance buildTask in buildTarget.Tasks
-                    .Where(t => string.Equals(t.Name, "MSBuild", StringComparison.OrdinalIgnoreCase)))
+                // Every inner <MSBuild> task on every target of the metaproject must carry the property reference,
+                // including default targets (Build/Clean/Rebuild/Publish) and the user target xyz.
+                foreach (string targetName in new[] { "Build", "Clean", "Rebuild", "Publish", "xyz" })
                 {
-                    string buildSkip = buildTask.GetParameter("SkipNonexistentTargets");
-                    string.IsNullOrEmpty(buildSkip).ShouldBeTrue(
-                        $"Default 'Build' target must NOT set SkipNonexistentTargets, but found '{buildSkip}'.");
+                    metaprojectForA.Targets.ShouldContainKey(targetName);
+                    ProjectTaskInstance[] msbuildTasks = metaprojectForA.Targets[targetName].Tasks
+                        .Where(t => string.Equals(t.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
+                    msbuildTasks.ShouldNotBeEmpty($"target '{targetName}' should contain at least one <MSBuild> task.");
+
+                    foreach (ProjectTaskInstance task in msbuildTasks)
+                    {
+                        task.GetParameter("SkipNonexistentTargets").ShouldBe(
+                            ExpectedExpression,
+                            customMessage: $"Inner <MSBuild Projects='{task.GetParameter("Projects")}' Targets='{task.GetParameter("Targets")}'> on metaproj target '{targetName}' must set SkipNonexistentTargets to a property reference (issue #11025).");
+                    }
                 }
             }
         }
