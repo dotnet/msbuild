@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -77,13 +78,31 @@ internal class Handshake
         var options = (int)nodeType | (handshakeVersion << 24);
         CommunicationsUtilities.Trace($"Building handshake for node type {nodeType}, (version {handshakeVersion}): options {options}.");
 
-        // Calculate salt from environment and tools directory
+        // Calculate salt from environment, tools directory, and (for non-TaskHost paths) the
+        // effective temp directory. The temp directory is included so that two MSBuild invocations
+        // launched with different TMP/TEMP/TMPDIR environments do not reuse each other's worker
+        // nodes — without this, build A finishing and clearing its per-build temp folder would
+        // break a still-running build B that inherited the same node and expected its own temp
+        // folder to remain available (https://github.com/dotnet/msbuild/issues/13594).
+        //
+        // TaskHost paths are intentionally excluded from the temp-dir contribution:
+        //   - NET TaskHost (parent .NET Framework MSBuild ↔ child shipped from a separately-
+        //     released .NET SDK) tolerates version skew via NetTaskHostHandshakeVersion below;
+        //     adding a salt input that isn't synchronized across both drops would break VS+SDK
+        //     combinations until both sides picked up the change.
+        //   - CLR2 TaskHost has NodeReuse disabled by design, so there is no cross-build reuse
+        //     surface to protect.
         string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-
-        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
+        bool isTaskHost = IsHandshakeOptionEnabled(nodeType, HandshakeOptions.TaskHost);
+        string tempDirectory = isTaskHost ? string.Empty : Path.GetTempPath();
+        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}{tempDirectory}");
 
         CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
         CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
+        if (!isTaskHost)
+        {
+            CommunicationsUtilities.Trace($"Temp directory is {tempDirectory}");
+        }
 
         // Get session ID if needed (expensive call)
         int sessionId = 0;
