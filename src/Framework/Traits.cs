@@ -141,7 +141,7 @@ namespace Microsoft.Build.Framework
         /// zeroes it for the spawned MSBuild Server / TaskHost child processes.
         /// Allows code running inside those child processes to detect that they were launched
         /// in server mode.
-        /// Wee need it for restore task workaround https://github.com/dotnet/msbuild/issues/13315.
+        /// We need it for restore task workaround https://github.com/dotnet/msbuild/issues/13315.
         /// </summary>
         internal const string OriginalUseMSBuildServerEnvVarName = "_MSBUILDORIGINALUSESERVER";
 

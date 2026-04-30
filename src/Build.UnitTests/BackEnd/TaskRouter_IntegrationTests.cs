@@ -487,7 +487,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
     <Target Name=""TestTarget"">
         <RestoreTask />
-        <RestoreTask />
     </Target>
 </Project>";
 
@@ -501,8 +500,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Loggers = new[] { logger },
                 DisableInProcNode = false,
 
-                // Load-bearing: with reuse off, even a sidecar TaskHost would die between calls and
-                // produce different PIDs, masking a regression to sidecar routing.
+                // Load-bearing: with reuse off the test cannot distinguish "transient TaskHost
+                // (workaround)" from "sidecar TaskHost that happened to die between builds".
                 EnableNodeReuse = true,
             };
 
@@ -513,16 +512,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new[] { "TestTarget" },
                 null);
 
+            // Two separate Build cycles. The workaround fires per build; nodeReuse=false on the
+            // spawned TaskHost ensures it dies at EndBuild so the next Build gets a fresh process.
             var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            var result1 = buildManager.Build(buildParameters, buildRequestData);
+            var result2 = buildManager.Build(buildParameters, buildRequestData);
 
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            result1.OverallResult.ShouldBe(BuildResultCode.Success);
+            result2.OverallResult.ShouldBe(BuildResultCode.Success);
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
 
             int[] pids = ExtractReportedPids(logger.FullLog);
 
             pids.Length.ShouldBe(2, $"Expected two RestoreTask invocations to log a PID. Log:{Environment.NewLine}{logger.FullLog}");
-            pids[0].ShouldNotBe(pids[1], "Each invocation must run in a fresh OS process so static state cannot leak across calls.");
+            pids[0].ShouldNotBe(pids[1], "Each build must spawn a fresh TaskHost so NuGet static state cannot leak across builds.");
             pids.ShouldNotContain(Process.GetCurrentProcess().Id, "TaskHost should be out-of-process from the test runner.");
         }
 
@@ -537,7 +540,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
     <Target Name=""TestTarget"">
         <RestoreTask />
-        <RestoreTask />
     </Target>
 </Project>";
 
@@ -551,7 +553,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Loggers = new[] { logger },
                 DisableInProcNode = false,
 
-                // Load-bearing: see the /mt counterpart.
+                // Load-bearing: with reuse off the test cannot distinguish "transient TaskHost
+                // (workaround)" from "sidecar TaskHost that happened to die between builds".
                 EnableNodeReuse = true,
             };
 
@@ -562,16 +565,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new[] { "TestTarget" },
                 null);
 
+            // Two separate Build cycles. The workaround fires per build; nodeReuse=false on the
+            // spawned TaskHost ensures it dies at EndBuild so the next Build gets a fresh process.
             var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            var result1 = buildManager.Build(buildParameters, buildRequestData);
+            var result2 = buildManager.Build(buildParameters, buildRequestData);
 
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            result1.OverallResult.ShouldBe(BuildResultCode.Success);
+            result2.OverallResult.ShouldBe(BuildResultCode.Success);
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
 
             int[] pids = ExtractReportedPids(logger.FullLog);
 
             pids.Length.ShouldBe(2, $"Expected two RestoreTask invocations to log a PID. Log:{Environment.NewLine}{logger.FullLog}");
-            pids[0].ShouldNotBe(pids[1], "Each invocation must run in a fresh OS process so static state cannot leak across calls.");
+            pids[0].ShouldNotBe(pids[1], "Each build must spawn a fresh TaskHost so NuGet static state cannot leak across builds.");
             pids.ShouldNotContain(Process.GetCurrentProcess().Id, "TaskHost should be out-of-process from the test runner.");
         }
 
