@@ -458,7 +458,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 foreach (string packagePath in packagePaths)
                 {
-                    if (folder.Length >= packagePath.Length && string.Compare(folder.Substring(0, packagePath.Length).ToLowerInvariant(), packagePath, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (folder.Length >= packagePath.Length && folder.StartsWith(packagePath, StringComparison.OrdinalIgnoreCase))
                     {
                         string relPath = folder.Substring(packagePath.Length);
                         if (!folders.Contains(relPath))

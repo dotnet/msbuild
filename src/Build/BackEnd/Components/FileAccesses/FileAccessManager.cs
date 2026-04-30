@@ -69,7 +69,7 @@ namespace Microsoft.Build.FileAccesses
                 ManualResetEventSlim handle = _fileAccessCompletionWaitHandles.GetOrAdd(globalRequestId, static _ => new ManualResetEventSlim());
                 handle.Set();
             }
-            else if (_tempDirectory != null && fileAccessPath.StartsWith(_tempDirectory, StringComparison.Ordinal))
+            else if (_tempDirectory != null && fileAccessPath.StartsWith(_tempDirectory, FileUtilities.PathComparison))
             {
                 // Ignore MSBuild's temp directory as these are related to internal MSBuild functionality and not always directly related to the execution of the project itself,
                 // so should not be exposed to handlers. Note that this is not %TEMP% but instead a subdir under %TEMP% which is only expected to be used by MSBuild.

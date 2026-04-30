@@ -478,7 +478,7 @@ namespace Microsoft.Build.Tasks
                         {
                             using var sr = new StringReader(_data);
                             using var xmlReader = XmlReader.Create(sr);
-                            xslct.Load(xmlReader, XsltSettings.Default, null);
+                            xslct.Load(xmlReader, XsltSettings.Default, new XmlUrlResolver());
                             break;
                         }
                     case XslModes.XsltFile:
