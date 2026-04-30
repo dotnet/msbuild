@@ -471,7 +471,6 @@ namespace Microsoft.Build.Tasks
             public XslCompiledTransform LoadXslt(bool useTrustedSettings)
             {
                 XslCompiledTransform xslct = new XslCompiledTransform();
-                XsltSettings settings = XsltSettings.Default;
 
                 switch (_xslMode)
                 {
@@ -479,15 +478,11 @@ namespace Microsoft.Build.Tasks
                         {
                             using var sr = new StringReader(_data);
                             using var xmlReader = XmlReader.Create(sr);
-                            xslct.Load(xmlReader, settings, new XmlUrlResolver());
+                            xslct.Load(xmlReader, XsltSettings.Default, null);
                             break;
                         }
                     case XslModes.XsltFile:
-                        if (useTrustedSettings)
-                        {
-                            settings = XsltSettings.TrustedXslt;
-                        }
-                        else
+                        if (!useTrustedSettings)
                         {
                             _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _filePath.Value.OriginalValue);
                         }
@@ -496,9 +491,17 @@ namespace Microsoft.Build.Tasks
                         {
                             XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
                             // Preserve existing behavior: XSLT files can use local xsl:import/xsl:include paths resolved relative to the stylesheet.
-#pragma warning disable CA3076 // Insecure XSLT Script Execution
-                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, new XmlUrlResolver());
-#pragma warning restore CA3076 // Insecure XSLT Script Execution
+                            XPathDocument stylesheet = new XPathDocument(reader, xmlSpaceOption);
+                            if (useTrustedSettings)
+                            {
+#pragma warning disable CA3076 // UseTrustedSettings intentionally enables trusted XSLT features. Justification: Respecting user's choice to use trusted settings.
+                                xslct.Load(stylesheet, XsltSettings.TrustedXslt, new XmlUrlResolver());
+#pragma warning restore CA3076
+                            }
+                            else
+                            {
+                                xslct.Load(stylesheet, XsltSettings.Default, new XmlUrlResolver());
+                            }
                         }
                         break;
                     case XslModes.XsltCompiledDll:

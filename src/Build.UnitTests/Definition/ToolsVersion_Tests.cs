@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -982,9 +983,12 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             string xmlContents = _defaultTasksFileMap[path];
             XmlDocumentWithLocation xmlDocument = new XmlDocumentWithLocation();
-            #pragma warning disable CA3075 // Insecure DTD processing in XML - testing internal API
-                        xmlDocument.LoadXml(xmlContents);
-            #pragma warning restore CA3075
+            using (StringReader sreader = new StringReader(xmlContents))
+            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                xmlDocument.Load(reader);
+            }
+
             return xmlDocument;
         }
 
