@@ -20,6 +20,19 @@ using Constants = Microsoft.Build.Framework.Constants;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+
+    /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
     /// </summary>
@@ -656,7 +669,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
             {
-                CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
+                CommunicationsUtilities.Trace($"DisconnectFromHost: Node context already removed for key: {nodeKey}");
                 return;
             }
 
@@ -702,7 +715,7 @@ namespace Microsoft.Build.BackEnd
                 return default;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext, nodeLaunchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, spawning executable from {nodeLaunchData.MSBuildLocation}.");
 
             IList<NodeContext> nodeContexts = GetNodes(
                 nodeLaunchData,
@@ -786,7 +799,7 @@ namespace Microsoft.Build.BackEnd
 
             if (FileSystems.Default.FileExists(appHostPath))
             {
-                CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {appHostPath}.");
 
                 IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
@@ -808,7 +821,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, resolvedDotnetHostPath);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found at {appHostPath}, falling back to dotnet.exe from {resolvedDotnetHostPath}.");
 
             return new NodeLaunchData(
                 resolvedDotnetHostPath,

@@ -207,6 +207,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// The location of each referenced assembly and file is required for hash computation and assembly identity resolution.
         /// Any resulting errors or warnings are reported in the OutputMessages collection.
         /// </summary>
+        /// <remarks>
+        /// WARNING: This overload uses <see cref="System.IO.Directory.GetCurrentDirectory()"/> to resolve relative paths,
+        /// which is not safe in multithreaded (-mt) MSBuild mode. Use the <see cref="ResolveFiles(string[])"/> overload
+        /// with explicit search paths (e.g., from <c>TaskEnvironment.ProjectDirectory</c>) instead.
+        /// </remarks>
         public void ResolveFiles()
         {
             string defaultDir = String.Empty;

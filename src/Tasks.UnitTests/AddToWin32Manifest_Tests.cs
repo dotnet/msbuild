@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             AddToWin32Manifest task = new AddToWin32Manifest()
             {
-                BuildEngine = new MockEngine(_testOutput)
+                BuildEngine = new MockEngine(_testOutput),
             };
 
             using (TestEnvironment env = TestEnvironment.Create())
