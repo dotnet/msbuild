@@ -17,7 +17,7 @@ ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJi
 ParseAndRemoveBooleanParameter(argList, "--ci", out bool ci);
 
 // In CI mode, run all benchmarks unless the caller already specified a filter.
-if (ci && !argList.Contains("--filter"))
+if (ci && !argList.Any(a => a == "--filter" || a.StartsWith("--filter=")))
 {
     argList.Add("--filter");
     argList.Add("*");
