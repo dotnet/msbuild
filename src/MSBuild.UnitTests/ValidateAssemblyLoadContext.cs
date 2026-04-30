@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             // This probably doesn't need to be how it is forever: https://github.com/dotnet/msbuild/issues/5041
             if (thisLoadContext.GetType().FullName == typeof(MSBuildLoadContext).FullName)
             {
-                if (!thisLoadContext.Name.EndsWith(typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name + ".dll", StringComparison.CurrentCulture))
+                if (!thisLoadContext.Name.EndsWith(typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name + ".dll", StringComparison.Ordinal))
                 {
                     Log.LogError($"Unexpected AssemblyLoadContext name: \"{thisLoadContext.Name}\", but the current executing assembly was {typeof(ValidateAssemblyLoadContext).Assembly.GetName().Name}");
                 }

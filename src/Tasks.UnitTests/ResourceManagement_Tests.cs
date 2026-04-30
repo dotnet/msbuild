@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     BuildEngine9.ReleaseCores(grantedCores);
                 }", "<UseCores />");
 
-            var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ", StringComparison.CurrentCulture)).ToArray();
+            var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ", StringComparison.Ordinal)).ToArray();
             filteredMessages.Length.ShouldBe(1);
             GetTrailingIntegerFromMessage(filteredMessages[0]).ShouldBeGreaterThan(0);
         }
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     // Note that we're missing a call to ReleaseCores() so we rely on cores being released after the task is finished.
                 }", "<UseCores /> <UseCores />");
 
-            var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ", StringComparison.CurrentCulture)).ToArray();
+            var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ", StringComparison.Ordinal)).ToArray();
             filteredMessages.Length.ShouldBe(2);
 
             int grantedCores1 = GetTrailingIntegerFromMessage(filteredMessages[0]);
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     Log.LogMessage(""Number of cores acquired: "" + grantedCores2);
                 }", "<UseCores />");
 
-            var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ", StringComparison.CurrentCulture)).ToArray();
+            var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ", StringComparison.Ordinal)).ToArray();
             filteredMessages.Length.ShouldBe(2);
 
             int grantedCores1 = GetTrailingIntegerFromMessage(filteredMessages[0]);

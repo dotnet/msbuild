@@ -136,7 +136,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
         internal static IEnumerable<ProjectGraphNode> GetNodesWithProjectNumber(ProjectGraph graph, int projectNum)
         {
-            return graph.ProjectNodes.Where(node => node.ProjectInstance.FullPath.EndsWith(projectNum + ".proj", StringComparison.CurrentCulture));
+            return graph.ProjectNodes.Where(node => node.ProjectInstance.FullPath.EndsWith(projectNum + ".proj", StringComparison.Ordinal));
         }
 
         internal static ProjectGraphNode GetOuterBuild(ProjectGraph graph, int projectNumber)

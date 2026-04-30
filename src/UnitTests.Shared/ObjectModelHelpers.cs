@@ -513,7 +513,7 @@ namespace Microsoft.Build.UnitTests
                 string singleExpectedItemStringTrimmed = singleExpectedItemString.Trim();
                 if (singleExpectedItemStringTrimmed.Length > 0)
                 {
-                    int indexOfColon = singleExpectedItemStringTrimmed.IndexOf(": ", StringComparison.CurrentCulture);
+                    int indexOfColon = singleExpectedItemStringTrimmed.IndexOf(": ", StringComparison.Ordinal);
                     if (indexOfColon == -1)
                     {
                         expectedItems.Add(new Utilities.TaskItem(singleExpectedItemStringTrimmed));

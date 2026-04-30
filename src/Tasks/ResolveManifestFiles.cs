@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -37,7 +37,8 @@ namespace Microsoft.Build.Tasks
     ///    Apply Group and Optional attributes from PublishFile items to built items
     ///    (8) Insure all output items have a TargetPath, and if in a Group that IsOptional is set
     /// </comment>
-    public sealed class ResolveManifestFiles : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public sealed class ResolveManifestFiles : TaskExtension, IMultiThreadableTask
     {
         #region Fields
 
@@ -129,6 +130,8 @@ namespace Microsoft.Build.Tasks
         public string AssemblyName { get; set; }
 
         public bool LauncherBasedDeployment { get; set; } = false;
+
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         public string TargetFrameworkVersion
         {
@@ -402,7 +405,9 @@ namespace Microsoft.Build.Tasks
                         }
 
                         // Apply the culture publishing rules to include or exclude satellite assemblies
-                        AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
+                        AssemblyIdentity identity = String.IsNullOrEmpty(item.ItemSpec)
+                            ? null
+                            : AssemblyIdentity.FromManagedAssembly(this.TaskEnvironment.GetAbsolutePath(item.ItemSpec));
                         if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                         {
                             CultureInfo satelliteCulture = new CultureInfo(identity.Culture);
@@ -760,8 +765,8 @@ namespace Microsoft.Build.Tasks
 
             AssemblyIdentity identity = String.IsNullOrEmpty(item.ItemSpec)
                 ? null
-                : AssemblyIdentity.FromManagedAssembly(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
-            if (item.ItemSpec.EndsWith(".dll", StringComparison.CurrentCulture) && identity == null && !isDotNetCore)
+                : AssemblyIdentity.FromManagedAssembly(this.TaskEnvironment.GetAbsolutePath(item.ItemSpec));
+            if (item.ItemSpec.EndsWith(".dll", StringComparison.Ordinal) && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
                 // in a referenced nuget package, which will yield null here. We just need to ignore those

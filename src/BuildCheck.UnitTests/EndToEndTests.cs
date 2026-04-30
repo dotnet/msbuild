@@ -137,7 +137,7 @@ public class EndToEndTests : IDisposable
         void AssertHasResourceForCulture(string culture, bool isResourceExpected)
         {
             KeyValuePair<string, JsonNode?> resource = output.DepsJsonResources.FirstOrDefault(
-                o => o.Value?["locale"]?.ToString().Equals(culture, StringComparison.CurrentCulture) ?? false);
+                o => o.Value?["locale"]?.ToString().Equals(culture, StringComparison.Ordinal) ?? false);
             // if not found - the KVP will be default
             resource.Equals(default(KeyValuePair<string, JsonNode?>)).ShouldBe(!isResourceExpected,
                 $"Resource for culture {culture} was {(isResourceExpected ? "not " : "")}found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");

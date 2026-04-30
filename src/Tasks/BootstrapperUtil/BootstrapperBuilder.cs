@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -458,7 +458,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 foreach (string packagePath in packagePaths)
                 {
-                    if (folder.Length >= packagePath.Length && string.Compare(folder.Substring(0, packagePath.Length).ToLowerInvariant(), packagePath, StringComparison.CurrentCulture) == 0)
+                    if (folder.Length >= packagePath.Length && string.Compare(folder.Substring(0, packagePath.Length).ToLowerInvariant(), packagePath, StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         string relPath = folder.Substring(packagePath.Length);
                         if (!folders.Contains(relPath))

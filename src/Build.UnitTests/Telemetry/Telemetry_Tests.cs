@@ -247,7 +247,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using var activityStoppedEvent = new ManualResetEventSlim(false);
             using var listener = new ActivityListener
             {
-                ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.DefaultActivitySourceNamespace, StringComparison.CurrentCulture),
+                ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.DefaultActivitySourceNamespace, StringComparison.Ordinal),
                 Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStarted = a => { lock (capturedActivities) { capturedActivities.Add(a); } },
                 ActivityStopped = a =>
