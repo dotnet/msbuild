@@ -380,7 +380,16 @@ namespace Microsoft.Build.Experimental
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
+            // Preserve our sidecar across SetEnvironment, which would otherwise wipe it. https://github.com/dotnet/msbuild/issues/13315
+            string? originalUseServer = Environment.GetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName);
+
             FrameworkCommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+
+            if (originalUseServer is not null)
+            {
+                Environment.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, originalUseServer);
+            }
+
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;

@@ -306,6 +306,9 @@ namespace Microsoft.Build.BackEnd
                 if (useMSBuildServerEnvVarValue is not null)
                 {
                     Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
+
+                    // Preserve the original value for child processes to read. https://github.com/dotnet/msbuild/issues/13315
+                    Environment.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, useMSBuildServerEnvVarValue);
                 }
                 return func();
             }
@@ -314,6 +317,7 @@ namespace Microsoft.Build.BackEnd
                 if (useMSBuildServerEnvVarValue is not null)
                 {
                     Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, useMSBuildServerEnvVarValue);
+                    Environment.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, null);
                 }
             }
         }

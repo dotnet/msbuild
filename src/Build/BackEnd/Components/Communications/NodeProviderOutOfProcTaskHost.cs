@@ -614,11 +614,17 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            in TaskHostParameters taskHostParameters)
+            in TaskHostParameters taskHostParameters,
+            out int hostProcessId,
+            out bool wasNewlyCreated)
         {
+            hostProcessId = -1;
+            wasNewlyCreated = false;
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(nodeKey))
             {
+                wasNewlyCreated = true;
                 nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
             }
             else
@@ -633,6 +639,16 @@ namespace Microsoft.Build.BackEnd
                 // Map the transport ID directly to the handlers for O(1) packet routing
                 _nodeIdToPacketFactory[context.NodeId] = factory;
                 _nodeIdToPacketHandler[context.NodeId] = handler;
+
+                try
+                {
+                    hostProcessId = context.Process?.Id ?? -1;
+                }
+                catch (Exception)
+                {
+                    // Process has already exited; PID is unavailable.
+                    hostProcessId = -1;
+                }
 
                 // Configure the node.
                 context.SendData(configuration);

@@ -356,7 +356,7 @@ namespace Microsoft.Build.BackEnd
             if (_loadedType?.Type != null && TaskRouter.IsKnownProblematicTask(_loadedType.Type))
             {
                 bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
-                bool isServerMode = Traits.Instance.UseMSBuildServer;
+                bool isServerMode = Traits.Instance.WasLaunchedInMSBuildServerMode;
 
                 if (isMultiThreaded || isServerMode)
                 {
