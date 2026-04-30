@@ -383,17 +383,12 @@ namespace Microsoft.Build.BackEnd
 
                     if (_connectedToTaskHost)
                     {
-                        // Per-invocation TaskHost diagnostics. Complements the existing "ExecutingTaskInTaskHost"
-                        // (logged at Execute entry) which captures task name, assembly, runtime, architecture.
-                        // This adds the runtime-only details: which OS process actually hosted the task, who spawned
-                        // it, whether a fresh NodeContext was allocated, and the sidecar / node-reuse routing.
-                        // https://github.com/dotnet/msbuild/issues/13315
                         _taskLoggingContext.LogCommentFromText(
                             MessageImportance.Low,
                             "TaskHost details for task \"{0}\": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.",
                             _taskType.Type.Name,
                             hostProcessId,
-                            System.Diagnostics.Process.GetCurrentProcess().Id,
+                            Process.GetCurrentProcess().Id,
                             wasNewlyCreated,
                             _useSidecarTaskHost,
                             effectiveNodeReuse);
