@@ -18,6 +18,13 @@ namespace Microsoft.Build.UnitTests
 {
     public class FileLogger_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public FileLogger_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         /// Basic test of the file logger.  Writes to a log file in the temp directory.
         /// </summary>
@@ -482,49 +489,45 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DistributedFileLoggerParameters()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder folder = env.CreateFolder();
+            env.SetCurrentDirectory(folder.Path);
+
             DistributedFileLogger fileLogger = new DistributedFileLogger();
-            try
-            {
-                fileLogger.NodeId = 0;
-                fileLogger.Initialize(new EventSourceSink());
-                Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=msbuild0.log;", StringComparison.OrdinalIgnoreCase));
-                fileLogger.Shutdown();
 
-                fileLogger.NodeId = 3;
-                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile.log");
-                fileLogger.Initialize(new EventSourceSink());
-                Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile3.log") + ";", StringComparison.OrdinalIgnoreCase));
-                fileLogger.Shutdown();
+            fileLogger.NodeId = 0;
+            fileLogger.Initialize(new EventSourceSink());
+            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=msbuild0.log;", StringComparison.OrdinalIgnoreCase));
+            fileLogger.Shutdown();
 
-                fileLogger.NodeId = 4;
-                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile.log");
-                fileLogger.Initialize(new EventSourceSink());
-                Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "mylogfile4.log") + ";", StringComparison.OrdinalIgnoreCase));
-                fileLogger.Shutdown();
+            fileLogger.NodeId = 3;
+            fileLogger.Parameters = "logfile=" + Path.Combine(folder.Path, "mylogfile.log");
+            fileLogger.Initialize(new EventSourceSink());
+            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(folder.Path, "mylogfile3.log") + ";", StringComparison.OrdinalIgnoreCase));
+            fileLogger.Shutdown();
 
-                Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
-                fileLogger.NodeId = 1;
-                fileLogger.Parameters = "logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura", "mylogfile.log");
-                fileLogger.Initialize(new EventSourceSink());
-                Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(Directory.GetCurrentDirectory(), "tempura", "mylogfile1.log") + ";", StringComparison.OrdinalIgnoreCase));
-                fileLogger.Shutdown();
-            }
-            finally
-            {
-                if (Directory.Exists(Path.Combine(Directory.GetCurrentDirectory(), "tempura")))
-                {
-                    File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "tempura", "mylogfile1.log"));
-                    FileUtilities.DeleteWithoutTrailingBackslash(Path.Combine(Directory.GetCurrentDirectory(), "tempura"));
-                }
-                File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile0.log"));
-                File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile3.log"));
-                File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "mylogfile4.log"));
-            }
+            fileLogger.NodeId = 4;
+            fileLogger.Parameters = "logfile=" + Path.Combine(folder.Path, "mylogfile.log");
+            fileLogger.Initialize(new EventSourceSink());
+            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(folder.Path, "mylogfile4.log") + ";", StringComparison.OrdinalIgnoreCase));
+            fileLogger.Shutdown();
+
+            string tempuraDir = Path.Combine(folder.Path, "tempura");
+            Directory.CreateDirectory(tempuraDir);
+            fileLogger.NodeId = 1;
+            fileLogger.Parameters = "logfile=" + Path.Combine(tempuraDir, "mylogfile.log");
+            fileLogger.Initialize(new EventSourceSink());
+            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(tempuraDir, "mylogfile1.log") + ";", StringComparison.OrdinalIgnoreCase));
+            fileLogger.Shutdown();
         }
 
         [Fact]
         public void DistributedLoggerNullEmpty()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFolder folder = env.CreateFolder();
+            env.SetCurrentDirectory(folder.Path);
+
             Assert.Throws<LoggerException>(() =>
             {
                 DistributedFileLogger fileLogger = new DistributedFileLogger();
