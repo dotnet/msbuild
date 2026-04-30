@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -23,7 +22,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     // UNDONE: ToolTask has a "UseCommandProcessor" flag that duplicates much of the code in this class. Remove the duplication.
     [MSBuildMultiThreadableTask]
-    public class Exec : ToolTaskExtension, IMultiThreadableTask
+    public class Exec : ToolTaskExtension
     {
         #region Constructors
 
