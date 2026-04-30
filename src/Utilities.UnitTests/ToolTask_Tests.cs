@@ -1005,6 +1005,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(1, false)]
         [InlineData(3, false)]
         [InlineData(3, true)]
+        [SkipOnCI("This test is consistently flaky even after multiple attempts to stabilize it")]
         public void ToolTaskThatTimeoutAndRetry(int repeats, bool timeoutOnFirstExecution)
         {
             using var env = TestEnvironment.Create(_output);
