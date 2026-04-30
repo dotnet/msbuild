@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             AddToWin32Manifest task = new AddToWin32Manifest()
             {
-                BuildEngine = new MockEngine(_testOutput)
+                BuildEngine = new MockEngine(_testOutput),
             };
 
             using (TestEnvironment env = TestEnvironment.Create())
