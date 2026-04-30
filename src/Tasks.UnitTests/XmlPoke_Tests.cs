@@ -371,10 +371,11 @@ namespace Microsoft.Build.UnitTests
             string result = File.ReadAllText(xmlInputPath);
 
             XmlDocument xmlDocument = new XmlDocument();
-
-#pragma warning disable CA3075
-            xmlDocument.LoadXml(result);
-#pragma warning restore CA3075
+            using (StringReader sreader = new StringReader(result))
+            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                xmlDocument.Load(reader);
+            }
 
             return xmlDocument;
         }
