@@ -159,9 +159,6 @@ namespace Microsoft.Build.Tasks
             set => _targetFrameworkIdentifier = value;
         }
 
-        /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
-
         #endregion
 
         public override bool Execute()
