@@ -63,7 +63,8 @@ namespace Microsoft.Build.UnitTests
 
                 if (NativeMethodsShared.IsWindows)
                 {
-                    commandLine.ShouldContain("ping", Case.Insensitive);
+                    // Windows is treated as an unsupported OS for command-line retrieval; commandLine is null.
+                    commandLine.ShouldBeNull();
                 }
                 else
                 {
@@ -93,8 +94,8 @@ namespace Microsoft.Build.UnitTests
 
                 if (NativeMethodsShared.IsWindows)
                 {
-                    // ping -n 31 127.0.0.1 – at minimum "127.0.0.1" or "31" should appear
-                    commandLine.ShouldMatch(@"(127\.0\.0\.1|31)");
+                    // Windows is treated as an unsupported OS for command-line retrieval; commandLine is null.
+                    commandLine.ShouldBeNull();
                 }
                 else
                 {
