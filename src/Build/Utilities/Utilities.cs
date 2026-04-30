@@ -484,7 +484,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static PropertyDictionary<ProjectPropertyInstance> GetEnvironmentProperties(bool makeReadOnly)
         {
-            IDictionary<string, string> environmentVariablesBag = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+            IDictionary<string, string> environmentVariablesBag = CommunicationsUtilities.GetEnvironmentVariables();
 
             var envPropertiesHashSet = new RetrievableValuedEntryHashSet<ProjectPropertyInstance>(environmentVariablesBag.Count + 2, MSBuildNameIgnoreCaseComparer.Default);
 
