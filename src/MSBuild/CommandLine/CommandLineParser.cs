@@ -643,7 +643,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// <returns>Whether envVar is an environment variable</returns>
         private static bool IsEnvironmentVariable(string envVar)
         {
-            return envVar.StartsWith("%", StringComparison.Ordinal) && envVar.EndsWith("%", StringComparison.Ordinal) && envVar.Length > 1;
+            return envVar.StartsWith("%", StringComparison.CurrentCulture) && envVar.EndsWith("%", StringComparison.CurrentCulture) && envVar.Length > 1;
         }
 
         /// <summary>

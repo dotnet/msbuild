@@ -513,7 +513,7 @@ namespace Microsoft.Build.UnitTests
                 string singleExpectedItemStringTrimmed = singleExpectedItemString.Trim();
                 if (singleExpectedItemStringTrimmed.Length > 0)
                 {
-                    int indexOfColon = singleExpectedItemStringTrimmed.IndexOf(": ", StringComparison.Ordinal);
+                    int indexOfColon = singleExpectedItemStringTrimmed.IndexOf(": ", StringComparison.CurrentCulture);
                     if (indexOfColon == -1)
                     {
                         expectedItems.Add(new Utilities.TaskItem(singleExpectedItemStringTrimmed));
@@ -613,7 +613,7 @@ namespace Microsoft.Build.UnitTests
         {
             XmlDocument xmldoc = new XmlDocument { XmlResolver = null };
             using (var sr = new StringReader(xml))
-            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
             {
                 xmldoc.Load(reader);
             }

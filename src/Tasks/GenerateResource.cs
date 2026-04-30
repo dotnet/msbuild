@@ -3049,9 +3049,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void AddResourcesUsingMinimalCoreResxParsing(string filename, ReaderInfo reader)
         {
-            using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-            using (var xmlReader = XmlReader.Create(fileStream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, IgnoreWhitespace = true }))
+            using (var xmlReader = new XmlTextReader(filename) { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null })
             {
+                xmlReader.WhitespaceHandling = WhitespaceHandling.None;
                 XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
                 foreach (XElement dataElem in doc.Element("root").Elements("data"))
                 {

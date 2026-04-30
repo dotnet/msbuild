@@ -959,7 +959,7 @@ namespace Microsoft.Build.UnitTests.Definition
             // Cause an exception if the path is invalid
             Path.GetFileName(path);
 
-            string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal)
+            string pathWithoutTrailingSlash = path.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.CurrentCulture)
                                                   ? path.Substring(0, path.Length - 1)
                                                   : path;
             // NOTE: the Replace calls below are a very minimal attempt to convert a basic, cmd.exe-style wildcard

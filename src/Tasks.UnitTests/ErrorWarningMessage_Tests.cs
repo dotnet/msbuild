@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.True(retval);
-            Assert.NotEqual(-1, e.Log.IndexOf("messagetext", StringComparison.Ordinal));
+            Assert.NotEqual(-1, e.Log.IndexOf("messagetext", StringComparison.CurrentCulture));
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.True(retval);
-            Assert.NotEqual(-1, e.Log.IndexOf("messagetext\n  messagetext2  \n\nmessagetext3", StringComparison.Ordinal));
+            Assert.NotEqual(-1, e.Log.IndexOf("messagetext\n  messagetext2  \n\nmessagetext3", StringComparison.CurrentCulture));
         }
 
         /// <summary>

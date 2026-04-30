@@ -495,7 +495,10 @@ namespace Microsoft.Build.Tasks
                         using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), new XmlReaderSettings { CloseInput = true }, _filePath.Value))
                         {
                             XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
-                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, null);
+                            // Preserve existing behavior: XSLT files can use local xsl:import/xsl:include paths resolved relative to the stylesheet.
+#pragma warning disable CA3076 // Insecure XSLT Script Execution
+                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, new XmlUrlResolver());
+#pragma warning restore CA3076 // Insecure XSLT Script Execution
                         }
                         break;
                     case XslModes.XsltCompiledDll:

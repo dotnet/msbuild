@@ -96,29 +96,29 @@ namespace Microsoft.Build.Logging.StructuredLogger
             const string taskAssemblyPattern = "Using \"(?<task>.+)\" task from (assembly|the task factory) \"(?<assembly>.+)\"\\.";
 
             // Task Input / Outputs
-            if (messageArgs.Message.StartsWith(TaskParameterMessagePrefix, StringComparison.Ordinal))
+            if (messageArgs.Message.StartsWith(TaskParameterMessagePrefix, StringComparison.CurrentCulture))
             {
                 _build.AddTaskParameter(messageArgs, TaskParameterMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(OutputItemsMessagePrefix, StringComparison.Ordinal))
+            else if (messageArgs.Message.StartsWith(OutputItemsMessagePrefix, StringComparison.CurrentCulture))
             {
                 _build.AddTaskParameter(messageArgs, OutputItemsMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(OutputPropertyMessagePrefix, StringComparison.Ordinal))
+            else if (messageArgs.Message.StartsWith(OutputPropertyMessagePrefix, StringComparison.CurrentCulture))
             {
                 _build.AddTaskParameter(messageArgs, OutputPropertyMessagePrefix);
             }
 
             // Item / Property groups
-            else if (messageArgs.Message.StartsWith(PropertyGroupMessagePrefix, StringComparison.Ordinal))
+            else if (messageArgs.Message.StartsWith(PropertyGroupMessagePrefix, StringComparison.CurrentCulture))
             {
                 _build.AddPropertyGroup(messageArgs, PropertyGroupMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(ItemGroupIncludeMessagePrefix, StringComparison.Ordinal))
+            else if (messageArgs.Message.StartsWith(ItemGroupIncludeMessagePrefix, StringComparison.CurrentCulture))
             {
                 _build.AddItemGroup(messageArgs, ItemGroupIncludeMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(ItemGroupRemoveMessagePrefix, StringComparison.Ordinal))
+            else if (messageArgs.Message.StartsWith(ItemGroupRemoveMessagePrefix, StringComparison.CurrentCulture))
             {
                 _build.AddItemGroup(messageArgs, ItemGroupRemoveMessagePrefix);
             }

@@ -55,7 +55,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static void SafeLoadXml(XmlDocument doc, string xml)
         {
             using (var sr = new StringReader(xml))
-            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
             {
                 doc.Load(reader);
             }

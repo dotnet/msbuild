@@ -80,7 +80,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Stream s = Util.GetEmbeddedResourceStream(resource);
 
             int t2 = Environment.TickCount;
-            using var xsltReader = XmlReader.Create(s, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
+            using var xsltReader = XmlReader.Create(s, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null });
             XPathDocument d = new XPathDocument(xsltReader);
             Util.WriteLog($"new XPathDocument(1) t={Environment.TickCount - t2}");
 

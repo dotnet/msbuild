@@ -916,7 +916,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 resolverContext.Logger.LogMessage("MockSdkResolver1 running", MessageImportance.Normal);
 
-                if (sdk.Name.StartsWith("1", StringComparison.Ordinal))
+                if (sdk.Name.StartsWith("1", StringComparison.CurrentCulture))
                 {
                     return factory.IndicateSuccess("resolverpath1", "version1");
                 }
@@ -935,7 +935,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 resolverContext.Logger.LogMessage("MockSdkResolver2 running", MessageImportance.Normal);
 
-                if (sdk.Name.StartsWith("2", StringComparison.Ordinal))
+                if (sdk.Name.StartsWith("2", StringComparison.CurrentCulture))
                 {
                     return factory.IndicateSuccess("resolverpath2", "version2", new[] { "WARNING2" });
                 }
@@ -954,7 +954,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 resolverContext.Logger.LogMessage("MockSdkResolverWithResolvableSdkPattern1 running", MessageImportance.Normal);
 
-                if (sdk.Name.StartsWith("11", StringComparison.Ordinal))
+                if (sdk.Name.StartsWith("11", StringComparison.CurrentCulture))
                 {
                     return factory.IndicateSuccess("resolverpathwithresolvablesdkpattern1", "version3");
                 }
@@ -973,7 +973,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 resolverContext.Logger.LogMessage("MockSdkResolverWithResolvableSdkPattern2 running", MessageImportance.Normal);
 
-                if (sdk.Name.StartsWith("2", StringComparison.Ordinal))
+                if (sdk.Name.StartsWith("2", StringComparison.CurrentCulture))
                 {
                     return factory.IndicateSuccess("resolverpathwithresolvablesdkpattern2", "version4", new[] { "WARNING4" });
                 }

@@ -491,7 +491,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             _inputTrustInfoDocument = new XmlDocument { XmlResolver = null };
             using (var sr = new StringReader(xml))
-            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
             {
                 _inputTrustInfoDocument.Load(reader);
             }

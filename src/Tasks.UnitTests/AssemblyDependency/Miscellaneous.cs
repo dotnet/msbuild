@@ -499,7 +499,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     item.GetMetadata(ItemMetadataNames.winMDFile).ShouldBe("NOPE", StringCompareShould.IgnoreCase);
                     item.GetMetadata(ItemMetadataNames.winmdImplmentationFile).ShouldBe("IMPL", StringCompareShould.IgnoreCase);
                 }
-                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "System.Data.dll"), StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "System.Data.dll"), StringComparison.CurrentCulture))
                 {
                     systemDataFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
@@ -507,35 +507,35 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
                     item.GetMetadata("FusionName").ShouldBe("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 }
-                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "MyGacAssembly.dll"), StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "MyGacAssembly.dll"), StringComparison.CurrentCulture))
                 {
                     myGacAssemblyFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
                 }
-                else if (item.ItemSpec.EndsWith(s_myPrivateAssemblyRelPath, StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(s_myPrivateAssemblyRelPath, StringComparison.CurrentCulture))
                 {
                     myPrivateAssemblyFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
                 }
-                else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyCopyLocalAssembly.dll"), StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyCopyLocalAssembly.dll"), StringComparison.CurrentCulture))
                 {
                     myCopyLocalAssemblyFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
                 }
-                else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyDontCopyLocalAssembly.dll"), StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyDontCopyLocalAssembly.dll"), StringComparison.CurrentCulture))
                 {
                     myDontCopyLocalAssemblyFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
                     item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
                 }
-                else if (item.ItemSpec.EndsWith(s_myMissingAssemblyRelPath, StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(s_myMissingAssemblyRelPath, StringComparison.CurrentCulture))
                 {
                     missingAssemblyFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
@@ -568,7 +568,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Process the dependencies.
             foreach (ITaskItem item in t.ResolvedDependencyFiles)
             {
-                if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "SysTem.dll"), StringComparison.Ordinal))
+                if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "SysTem.dll"), StringComparison.CurrentCulture))
                 {
                     systemFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
@@ -576,7 +576,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
                     item.GetMetadata("FusionName").ShouldBe("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 }
-                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "mscorlib.dll"), StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "mscorlib.dll"), StringComparison.CurrentCulture))
                 {
                     mscorlibFound = true;
                     item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
@@ -773,7 +773,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     int j;
                     for (j = 0; j < assembliesCount; j++)
                     {
-                        if (item.ItemSpec.EndsWith(expectedItemSpec[j], StringComparison.Ordinal))
+                        if (item.ItemSpec.EndsWith(expectedItemSpec[j], StringComparison.CurrentCulture))
                         {
                             assembliesFound[j] = true;
                             string assemblyName = Enum.GetName(typeof(EmbedInteropTypes_Indices), j);
@@ -859,15 +859,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.pdb"), StringComparison.Ordinal))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.pdb"), StringComparison.CurrentCulture))
                 {
                     pdbFound = true;
                 }
-                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.xml"), StringComparison.Ordinal))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.xml"), StringComparison.CurrentCulture))
                 {
                     xmlFound = true;
                 }
-                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.pri"), StringComparison.Ordinal))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.pri"), StringComparison.CurrentCulture))
                 {
                     priFound = true;
                 }
@@ -957,11 +957,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool xmlFound = false;
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.licenses"), StringComparison.Ordinal))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.licenses"), StringComparison.CurrentCulture))
                 {
                     licensesFound = true;
                 }
-                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.xml"), StringComparison.Ordinal))
+                if (item.ItemSpec.EndsWith(Path.Combine("AssemblyFolder", "SomeAssembly.xml"), StringComparison.CurrentCulture))
                 {
                     xmlFound = true;
                 }
@@ -7804,15 +7804,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             foreach (ITaskItem item in t.ResolvedFiles)
             {
                 int mask = 0;
-                if (item.ItemSpec.EndsWith(@"\A.dll", StringComparison.Ordinal))
+                if (item.ItemSpec.EndsWith(@"\A.dll", StringComparison.CurrentCulture))
                 {
                     mask = 1;
                 }
-                else if (item.ItemSpec.EndsWith(@"\B.dll", StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(@"\B.dll", StringComparison.CurrentCulture))
                 {
                     mask = 2;
                 }
-                else if (item.ItemSpec.EndsWith(@"\C.dll", StringComparison.Ordinal))
+                else if (item.ItemSpec.EndsWith(@"\C.dll", StringComparison.CurrentCulture))
                 {
                     mask = 4;
                 }

@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
                 if (String.Equals(s.Substring(0, startsWith.Length), startsWith, StringComparison.OrdinalIgnoreCase))
                 {
                     // If this doesn't match the 'except' then this is an error.
-                    if (!String.Equals(s, except, StringComparison.Ordinal))
+                    if (!String.Equals(s, except, StringComparison.CurrentCulture))
                     {
                         msg += String.Format(" Found something!\r\n");
                         Console.WriteLine(msg);
@@ -217,7 +217,7 @@ namespace Microsoft.Build.UnitTests
 
             msg += String.Format(" Searching for [{0}]\r\n", lookFor);
 
-            if (cl.IndexOf(lookFor, StringComparison.Ordinal) == -1)
+            if (cl.IndexOf(lookFor, StringComparison.CurrentCulture) == -1)
             {
                 msg += "Not found!\r\n";
                 Console.WriteLine(msg);
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
 
             msg += String.Format(" Searching for [{0}]\r\n", lookFor);
-            if (cl.IndexOf(lookFor, StringComparison.Ordinal) != -1)
+            if (cl.IndexOf(lookFor, StringComparison.CurrentCulture) != -1)
             {
                 msg += "Found!\r\n";
                 Console.WriteLine(msg);

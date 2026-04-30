@@ -636,7 +636,7 @@ namespace System.Deployment.Internal.CodeSigning
             XmlDocument licenseDom = new XmlDocument { XmlResolver = null };
             licenseDom.PreserveWhitespace = true;
             using (var sr = new StringReader(licenseTemplate))
-            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
             {
                 licenseDom.Load(reader);
             }

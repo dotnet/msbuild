@@ -1393,7 +1393,7 @@ namespace Microsoft.Build.Framework
             {
                 indexOfFirstNonSlashChar++;
             }
-            if (path.IndexOf(splitPath[0], StringComparison.Ordinal) != indexOfFirstNonSlashChar)
+            if (path.IndexOf(splitPath[0], StringComparison.CurrentCulture) != indexOfFirstNonSlashChar)
             {
                 // path was already relative so just return it
                 return FixFilePath(path);
