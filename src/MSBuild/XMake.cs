@@ -4091,12 +4091,6 @@ namespace Microsoft.Build.CommandLine
                     Console.WriteLine(warning);
                 }
             }
-            catch (NotSupportedException ex)
-            {
-                // The log file format is not supported (e.g. minimum reader version too high).
-                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
-                Console.WriteLine(message);
-            }
             catch (Exception ex)
             {
                 var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
