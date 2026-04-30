@@ -1294,18 +1294,48 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
+            // Avoid processing events after shutdown has cleaned up resources.
+            // External code (e.g., plugin adapters) may hold references to LoggingService
+            // and attempt to log after shutdown has nullified internal state.
+            if (_serviceState == LoggingServiceState.Shutdown)
+            {
+                return;
+            }
+
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
-                // Block until queue is not full.
-                while (_eventQueue.Count >= _queueCapacity)
+                // Capture local references to prevent race with CleanLoggingEventProcessing
+                // which sets these fields to null during shutdown.
+                ConcurrentQueue<object> eventQueue = _eventQueue;
+                AutoResetEvent dequeueEvent = _dequeueEvent;
+                AutoResetEvent enqueueEvent = _enqueueEvent;
+
+                // Double-check after capturing references in case shutdown raced between
+                // the _serviceState check above and the field reads.
+                if (eventQueue == null || dequeueEvent == null || enqueueEvent == null)
                 {
-                    // Block and wait for dequeue event.
-                    _dequeueEvent.WaitOne();
+                    return;
                 }
 
-                _eventQueue.Enqueue(buildEvent);
-                _enqueueEvent.Set();
+                try
+                {
+                    // Block until queue is not full.
+                    while (eventQueue.Count >= _queueCapacity)
+                    {
+                        // Block and wait for dequeue event.
+                        dequeueEvent.WaitOne();
+                    }
+
+                    eventQueue.Enqueue(buildEvent);
+                    enqueueEvent.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Shutdown disposed the wait handles after we captured them;
+                    // silently drop the event.
+                    return;
+                }
             }
             else
             {

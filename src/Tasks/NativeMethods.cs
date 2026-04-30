@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 using System.Text;
@@ -835,7 +836,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="newFileName"></param>
         /// <param name="flags"></param>
         /// <returns></returns>
-        internal static bool MoveFileEx(string existingFileName, string newFileName, MoveFileFlags flags)
+        internal static bool MoveFileEx(AbsolutePath existingFileName, AbsolutePath newFileName, MoveFileFlags flags)
         {
             if (NativeMethodsShared.IsWindows)
             {
@@ -860,7 +861,7 @@ namespace Microsoft.Build.Tasks
                 throw new IOException("Moving target is read-only");
             }
 
-            if (string.Equals(existingFileName, newFileName, StringComparison.Ordinal))
+            if (existingFileName == newFileName)
             {
                 return true;
             }

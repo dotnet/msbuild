@@ -115,6 +115,12 @@ bar", false)]
                 Assert.Equal(2, children[0].ChildNodes.Count);
                 Assert.Equal(string.Empty, children[0].ChildNodes[0].Value);
                 Assert.Equal(string.Empty, children[0].ChildNodes[1].Value);
+
+                // We cleared at the beginning, but then we set MSBUILDLOADALLFILESASREADONLY to 1.
+                // This means that opening the project will cache s_readOnlyFlags as ReadOnlyLoadFlags.LoadAllReadOnly
+                // Keeping the cached ReadOnlyLoadFlags.LoadAllReadOnly can impact subsequent tests that are running in the same process.
+                // So ensure to re-clear.
+                XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
             }
         }
 

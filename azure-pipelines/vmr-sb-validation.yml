@@ -13,7 +13,7 @@ parameters:
 - name: extraPropertiesStage2
   displayName: 'Extra MSBuild properties for stage 2 (e.g., /p:DotNetBuildMT=true)'
   type: string
-  default: '/p:DotNetBuildMT=true /p:MSBuildMTExcludedReposOverride=runtime%3Broslyn%3Baspnetcore%3Bsdk%3Befcore%3Bwinforms%3Bwpf%3Brazor%3Bsource-build-reference-packages'
+  default: '/p:DotNetBuildMT=true /p:MSBuildMTExcludedReposOverride=roslyn'
 
 variables:
 - template: /eng/common/templates/variables/pool-providers.yml@self

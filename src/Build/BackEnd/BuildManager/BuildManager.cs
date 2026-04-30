@@ -1105,6 +1105,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 TaskRouter.ClearCache();
+                ItemSpecModifiers.ClearDefiningProjectCache();
             }
             catch (Exception e)
             {
@@ -2686,6 +2687,13 @@ namespace Microsoft.Build.Execution
                 configuration.ProjectDefaultTargets ??= result.DefaultTargets;
                 configuration.ProjectInitialTargets ??= result.InitialTargets;
                 configuration.ProjectTargets ??= result.ProjectTargets;
+            }
+
+            // Update the evaluation ID if it's valid - this propagates the eval ID
+            // from worker nodes to the central node for cached result scenarios.
+            if (result.EvaluationId != BuildEventContext.InvalidEvaluationId)
+            {
+                configuration.ProjectEvaluationId = result.EvaluationId;
             }
 
             // Only report results to the project cache services if it's the result for a build submission.

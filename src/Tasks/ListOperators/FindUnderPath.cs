@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets the task execution environment for thread-safe path resolution.
         /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Filter based on whether items fall under this path or not.
@@ -73,7 +73,9 @@ namespace Microsoft.Build.Tasks
                 {
                     conePath =
                         Strings.WeakIntern(
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
                             System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(Path.ItemSpec))));
+#pragma warning restore MSBuildTask0002
                 }
 
                 conePath = FileUtilities.EnsureTrailingSlash(conePath);
@@ -104,7 +106,9 @@ namespace Microsoft.Build.Tasks
                     {
                         fullPath =
                             Strings.WeakIntern(
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
                                 System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(item.ItemSpec))));
+#pragma warning restore MSBuildTask0002
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

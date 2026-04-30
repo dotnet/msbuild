@@ -24,7 +24,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework.Telemetry;
 using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 
 #pragma warning disable CS0618 // Type or member is obsolete, this class is adapting to both Experimental and new plugin APIs
@@ -811,37 +810,38 @@ namespace Microsoft.Build.ProjectCache
                 return;
             }
 
-            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
+            // The ProjectInstance may not be loaded on the in-proc node when the project was built on an
+            // out-of-proc worker. VS submits builds by project path (without a ProjectInstance), so the
+            // configuration is added to the in-proc cache with _project=null. The worker node loads and
+            // evaluates the project locally, but the ProjectInstance is never transferred back — it's too
+            // large to serialize across the named pipe (only the BuildResult with target outcomes is returned).
+            //
+            // This method is reached because ShouldUseCache is shared by two call sites:
+            //   1. Pre-build (BuildManager.ExecuteSubmission): decides whether to issue a cache request.
+            //      The project isn't evaluated yet, so ShouldUseCache must return true in VS/global-plugin
+            //      scenarios without requiring IsLoaded. The cache request path (PostCacheRequest) handles
+            //      loading the project itself via EvaluateProjectIfNecessary.
+            //   2. Post-build (BuildManager.HandleResult): decides whether to notify cache plugins about
+            //      the build result. Here the in-proc config may still have no ProjectInstance if the
+            //      project was built on an out-of-proc node.
+            //
+            // We check IsLoaded rather than Project==null because the Project getter asserts !IsCached
+            // and would throw if the configuration happens to be in cached-to-disk state. IsLoaded is
+            // a safe read-only check (_project?.IsLoaded == true) with no side effects.
+            //
+            // Skipping is safe: the build already completed successfully and the cache plugin's
+            // HandleProjectFinishedAsync needs a loaded ProjectInstance to determine which plugins
+            // apply (via GetProjectCacheDescriptors) and to provide project context to the plugin.
+            if (!requestConfiguration.IsLoaded)
+            {
+                return;
+            }
+
+            // If the ProjectInstance was evicted to disk to save memory, restore it before accessing
+            // the Project property below (whose getter asserts !IsCached).
             if (requestConfiguration.IsCached)
             {
                 requestConfiguration.RetrieveFromCache();
-            }
-
-            // The Project property may be null if the configuration was created from a remote node
-            // request or the project was never loaded locally (e.g., in VS scenario where ShouldUseCache
-            // returns true before checking IsLoaded). Skip cache result handling in this case.
-            if (requestConfiguration.Project is null)
-            {
-                string projectCacheState = string.Join(":",
-                    requestConfiguration.ConfigurationId,
-                    Path.GetFileName(requestConfiguration.ProjectFullPath),
-                    requestConfiguration.IsLoaded,
-                    requestConfiguration.IsCached,
-                    requestConfiguration.WasGeneratedByNode,
-                    _isVsScenario,
-                    _globalProjectCacheDescriptor is not null);
-
-                CrashTelemetryRecorder.EmitEndBuildHangDiagnostics(new CrashTelemetry
-                {
-                    ExitType = CrashExitType.ProjectCacheFailure,
-                    ExceptionMessage = "Project unexpectedly null in HandleBuildResultAsync",
-                    BuildEngineVersion = Evaluation.ProjectCollection.Version?.ToString(),
-                    BuildEngineFrameworkName = NativeMethodsShared.FrameworkName,
-                    BuildEngineHost = BuildEnvironmentState.GetHostName(),
-                    IsStandaloneExecution = false,
-                    ProjectCacheState = projectCacheState,
-                });
-                return;
             }
 
             // Filter to plugins which apply to the project, if any

@@ -876,6 +876,13 @@ namespace Microsoft.Build.Framework
                 return false;
             }
 
+            // In MT mode the process CWD should not be used when resolving the first relative path segment. Use the
+            // thread-local working directory so the directory existence heuristic runs against the correct project directory.
+            if (string.IsNullOrEmpty(baseDirectory))
+            {
+                baseDirectory = CurrentThreadWorkingDirectory ?? "";
+            }
+
             // The first slash will either be at the beginning of the string or after the first directory name
             int directoryLength = value.Slice(1).IndexOf('/') + 1;
             bool shouldCheckDirectory = directoryLength != 0;
@@ -1333,7 +1340,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns true if the specified filename is a metaproject file (.metaproj), otherwise false.
         /// </summary>
-        internal static bool IsMetaprojectFilename(string filename)
+        internal static bool IsMetaprojectFilename(string? filename)
         {
             return HasExtension(filename, ".metaproj");
         }
@@ -1343,14 +1350,14 @@ namespace Microsoft.Build.Framework
             return HasExtension(filename, ".binlog");
         }
 
-        private static bool HasExtension(string filename, string extension)
+        private static bool HasExtension(string? filename, string extension)
         {
             if (String.IsNullOrEmpty(filename))
             {
                 return false;
             }
 
-            return filename.EndsWith(extension, PathComparison);
+            return filename!.EndsWith(extension, PathComparison);
         }
 
         /// <summary>

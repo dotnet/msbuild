@@ -15,7 +15,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Exception = System.Exception;
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
@@ -426,12 +425,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     if (string.IsNullOrEmpty(msBuildExePath))
                     {
                         // Use the executing assembly path as fallback
-                        msBuildExePath = BuildEnvironmentHelper.ExecutingAssemblyPath;
-                        // If that's also null/empty, use test assembly location
-                        if (string.IsNullOrEmpty(msBuildExePath))
-                        {
-                            msBuildExePath = typeof(BuildEnvironmentHelper).Assembly.Location;
-                        }
+                        msBuildExePath = Path.GetFullPath(Assembly.GetExecutingAssembly().Location);
                     }
 
                     BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(
