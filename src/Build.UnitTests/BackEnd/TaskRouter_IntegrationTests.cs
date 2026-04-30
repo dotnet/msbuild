@@ -384,18 +384,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
 
-        /// <summary>
-        /// Verifies that TaskRouter.IsKnownProblematicTask returns true for NuGet.Build.Tasks.RestoreTask.
-        /// </summary>
         [Fact]
         public void IsKnownProblematicTask_ReturnsTrueForRestoreTask()
         {
             TaskRouter.IsKnownProblematicTask(typeof(global::NuGet.Build.Tasks.RestoreTask)).ShouldBeTrue();
         }
 
-        /// <summary>
-        /// Verifies that TaskRouter.IsKnownProblematicTask returns false for regular tasks.
-        /// </summary>
         [Fact]
         public void IsKnownProblematicTask_ReturnsFalseForRegularTask()
         {
@@ -403,14 +397,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             TaskRouter.IsKnownProblematicTask(typeof(AttributeTestTask)).ShouldBeFalse();
         }
 
-        /// <summary>
-        /// Verifies that a known problematic task (RestoreTask) is routed to TaskHost
-        /// in multi-threaded mode.
-        /// </summary>
         [Fact]
         public void ProblematicTask_RoutedToTaskHost_InMultiThreadedMode()
         {
-            // Arrange
             string projectContent = $@"
 <Project>
     <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
@@ -439,28 +428,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new[] { "TestTarget" },
                 null);
 
-            // Act
             var buildManager = BuildManager.DefaultBuildManager;
             var result = buildManager.Build(buildParameters, buildRequestData);
 
-            // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
             logger.FullLog.ShouldContain("RestoreTask executed");
         }
 
-        /// <summary>
-        /// Verifies that a known problematic task (RestoreTask) is routed to TaskHost
-        /// when the current process was launched in MSBuild Server mode (even without /mt).
-        /// The workaround branch checks the <see cref="Traits.OriginalUseMSBuildServerEnvVarName"/>
-        /// sidecar env var (set by NodeLauncher.DisableMSBuildServer in production) rather than
-        /// MSBUILDUSESERVER, because the latter is intentionally zeroed in spawned child processes.
-        /// See https://github.com/dotnet/msbuild/issues/13315.
-        /// </summary>
         [Fact]
         public void ProblematicTask_RoutedToTaskHost_InServerMode()
         {
-            // Arrange: simulate the NodeLauncher having captured an original "1" before zeroing.
+            // Production: NodeLauncher.DisableMSBuildServer captures "1" before zeroing MSBUILDUSESERVER.
             _env.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, "1");
 
             string projectContent = $@"
@@ -491,38 +470,17 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new[] { "TestTarget" },
                 null);
 
-            // Act
             var buildManager = BuildManager.DefaultBuildManager;
             var result = buildManager.Build(buildParameters, buildRequestData);
 
-            // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
             logger.FullLog.ShouldContain("RestoreTask executed");
         }
 
-        /// <summary>
-        /// Verifies the actual behavioural guarantee of the workaround for
-        /// https://github.com/dotnet/msbuild/issues/13315: two consecutive invocations
-        /// of a known problematic task (RestoreTask) execute in DIFFERENT OS processes,
-        /// ensuring static singleton state (e.g. NuGet's PluginManager,
-        /// EnvironmentVariableWrapper) cannot leak across calls.
-        ///
-        /// This guards against a regression where the workaround's transient-TaskHost
-        /// route is replaced with a sidecar TaskHost: the existing
-        /// <see cref="ProblematicTask_RoutedToTaskHost_InMultiThreadedMode"/> test
-        /// would still pass (the task is still "in a TaskHost"), but a long-lived
-        /// sidecar would defeat the entire purpose of the workaround.
-        ///
-        /// EnableNodeReuse is intentionally true: a sidecar TaskHost spawned without
-        /// the workaround would be reused across both calls (same PID), whereas the
-        /// workaround forces nodeReuse=false on the spawned host, producing a fresh
-        /// process per call.
-        /// </summary>
         [Fact]
         public void ProblematicTask_GetsFreshProcess_OnEachInvocation_InMultiThreadedMode()
         {
-            // Arrange: two RestoreTask invocations in the same target.
             string projectContent = $@"
 <Project>
     <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
@@ -543,11 +501,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Loggers = new[] { logger },
                 DisableInProcNode = false,
 
-                // Intentionally true: this is what makes the test meaningful. Without
-                // the workaround, a sidecar TaskHost with nodeReuse=true would be
-                // reused for the second call (same PID). With the workaround,
-                // useSidecarTaskHost=false forces nodeReuse=false on the spawned
-                // host, so each call gets a fresh process.
+                // Load-bearing: with reuse off, even a sidecar TaskHost would die between calls and
+                // produce different PIDs, masking a regression to sidecar routing.
                 EnableNodeReuse = true,
             };
 
@@ -558,17 +513,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new[] { "TestTarget" },
                 null);
 
-            // Act
             var buildManager = BuildManager.DefaultBuildManager;
             var result = buildManager.Build(buildParameters, buildRequestData);
 
-            // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            // Both invocations must have routed through a TaskHost (rather than the in-proc node).
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
 
-            // Extract the PIDs reported by each invocation.
             int[] pids = ExtractReportedPids(logger.FullLog);
 
             pids.Length.ShouldBe(2, $"Expected two RestoreTask invocations to log a PID. Log:{Environment.NewLine}{logger.FullLog}");
@@ -576,25 +526,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             pids.ShouldNotContain(Process.GetCurrentProcess().Id, "TaskHost should be out-of-process from the test runner.");
         }
 
-        /// <summary>
-        /// Server-mode counterpart to <see cref="ProblematicTask_GetsFreshProcess_OnEachInvocation_InMultiThreadedMode"/>.
-        /// Verifies the same behavioural guarantee — two consecutive RestoreTask invocations
-        /// run in different OS processes so static singleton state cannot leak across calls —
-        /// when the trigger is "current process is the MSBuild Server" rather than /mt.
-        ///
-        /// This guards against a regression where the workaround's transient-TaskHost route
-        /// is preserved for /mt mode but accidentally broken for server mode (or vice versa):
-        /// the routing-only test (<see cref="ProblematicTask_RoutedToTaskHost_InServerMode"/>)
-        /// would still pass because the task is "in a TaskHost", but a sidecar TaskHost with
-        /// node reuse would defeat the entire purpose of the workaround.
-        ///
-        /// EnableNodeReuse is intentionally true: see the corresponding comment on the /mt
-        /// counterpart for why this is load-bearing for the test's correctness.
-        /// </summary>
         [Fact]
         public void ProblematicTask_GetsFreshProcess_OnEachInvocation_InServerMode()
         {
-            // Arrange: simulate the NodeLauncher having captured an original "1" before zeroing.
             _env.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, "1");
 
             string projectContent = $@"
@@ -617,10 +551,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Loggers = new[] { logger },
                 DisableInProcNode = false,
 
-                // Intentionally true: see the corresponding test for /mt mode for the
-                // reasoning. Without nodeReuse=true the test cannot distinguish "sidecar
-                // TaskHost reused" from "transient TaskHost spawned fresh", so it would
-                // pass even if the workaround silently regressed for server mode.
+                // Load-bearing: see the /mt counterpart.
                 EnableNodeReuse = true,
             };
 
@@ -631,17 +562,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new[] { "TestTarget" },
                 null);
 
-            // Act
             var buildManager = BuildManager.DefaultBuildManager;
             var result = buildManager.Build(buildParameters, buildRequestData);
 
-            // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            // Both invocations must have routed through a TaskHost (rather than the in-proc node).
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
 
-            // Extract the PIDs reported by each invocation.
             int[] pids = ExtractReportedPids(logger.FullLog);
 
             pids.Length.ShouldBe(2, $"Expected two RestoreTask invocations to log a PID. Log:{Environment.NewLine}{logger.FullLog}");
@@ -649,11 +575,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             pids.ShouldNotContain(Process.GetCurrentProcess().Id, "TaskHost should be out-of-process from the test runner.");
         }
 
-        /// <summary>
-        /// Extracts the OS PIDs reported by each invocation of the fake RestoreTask
-        /// (defined below as <see cref="global::NuGet.Build.Tasks.RestoreTask"/>),
-        /// which logs <c>"RestoreTask executed in PID=&lt;n&gt;"</c> on every call.
-        /// </summary>
         private static int[] ExtractReportedPids(string log)
         {
             var pids = new List<int>();
@@ -665,14 +586,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             return pids.ToArray();
         }
 
-        /// <summary>
-        /// Verifies that a known problematic task (RestoreTask) runs in-process
-        /// when neither multi-threaded mode nor server mode is active.
-        /// </summary>
         [Fact]
         public void ProblematicTask_RunsInProcess_WhenNoMTOrServer()
         {
-            // Arrange
             string projectContent = $@"
 <Project>
     <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
@@ -701,14 +617,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new[] { "TestTarget" },
                 null);
 
-            // Act
             var buildManager = BuildManager.DefaultBuildManager;
             var result = buildManager.Build(buildParameters, buildRequestData);
 
-            // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            // Should run in-process when neither MT nor server mode
             TaskRouterTestHelper.AssertTaskRanInProcess(logger, "RestoreTask");
             logger.FullLog.ShouldContain("RestoreTask executed");
         }
