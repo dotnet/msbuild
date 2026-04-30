@@ -37,6 +37,7 @@ dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark.Includ
 - `--collect-etw` - Enable ETW (Event Tracing for Windows) profiling diagnostics
 - `--disable-ngen` - Disable NGEN/ReadyToRun to measure pure JIT performance
 - `--disable-inlining` - Disable JIT inlining for more accurate method-level profiling
+- `--ci` - Run all benchmarks once in dry mode (in-process) to verify they execute without errors
 
 These custom options can be combined with any BenchmarkDotNet options:
 

@@ -6,6 +6,7 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.InProcess.Emit;
 using static MSBuild.Benchmarks.Extensions;
 
 var argList = new List<string>(args);
@@ -13,17 +14,33 @@ var argList = new List<string>(args);
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
 ParseAndRemoveBooleanParameter(argList, "--disable-ngen", out bool disableNGen);
 ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJitInlining);
+ParseAndRemoveBooleanParameter(argList, "--ci", out bool ci);
+
+// In CI mode, run all benchmarks unless the caller already specified a filter.
+if (ci && !argList.Contains("--filter"))
+{
+    argList.Add("--filter");
+    argList.Add("*");
+}
 
 return BenchmarkSwitcher
     .FromAssembly(typeof(Program).Assembly)
-    .Run([.. argList], GetConfig(collectEtw, disableNGen, disableJitInlining))
+    .Run([.. argList], GetConfig(collectEtw, disableNGen, disableJitInlining, ci))
     .ToExitCode();
 
-static IConfig GetConfig(bool collectEtw, bool disableNGen, bool disableJitInlining)
+static IConfig GetConfig(bool collectEtw, bool disableNGen, bool disableJitInlining, bool ci)
 {
     if (Debugger.IsAttached)
     {
         return new DebugInProcessConfig();
+    }
+
+    // CI dry-run: execute every benchmark exactly once in-process to verify they don't crash.
+    if (ci)
+    {
+        return ManualConfig.Create(DefaultConfig.Instance)
+            .AddJob(Job.Dry.WithToolchain(InProcessEmitToolchain.Instance))
+            .WithOption(ConfigOptions.DisableOptimizationsValidator, true);
     }
 
     IConfig config = DefaultConfig.Instance;
