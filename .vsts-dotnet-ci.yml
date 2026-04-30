@@ -659,7 +659,10 @@ jobs:
         arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - script: dotnet run -c Release -f net10.0 --project src/MSBuild.Benchmarks/MSBuild.Benchmarks.csproj -- --ci
+  - script: eng\common\build.cmd -restore -build -configuration Release -projects $(Build.SourcesDirectory)\src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj
+    displayName: Restore and build benchmarks project
+    condition: eq(variables.onlyDocChanged, 0)
+  - script: .dotnet\dotnet.exe run -c Release -f net10.0 --no-build --project src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj -- --ci
     displayName: Run benchmarks in dry mode
     condition: eq(variables.onlyDocChanged, 0)
   - task: PublishBuildArtifacts@1
@@ -691,7 +694,10 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update && sudo apt-get install -y libxml2
     displayName: Install dependencies
-  - bash: dotnet run -c Release -f net10.0 --project src/MSBuild.Benchmarks/MSBuild.Benchmarks.csproj -- --ci
+  - bash: ./eng/common/build.sh --restore --build --configuration Release --projects $(Build.SourcesDirectory)/src/MSBuild.Benchmarks/MSBuild.Benchmarks.csproj
+    displayName: Restore and build benchmarks project
+    condition: eq(variables.onlyDocChanged, 0)
+  - bash: .dotnet/dotnet run -c Release -f net10.0 --no-build --project src/MSBuild.Benchmarks/MSBuild.Benchmarks.csproj -- --ci
     displayName: Run benchmarks in dry mode
     condition: eq(variables.onlyDocChanged, 0)
   - task: PublishBuildArtifacts@1
