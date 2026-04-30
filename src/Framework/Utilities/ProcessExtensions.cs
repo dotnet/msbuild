@@ -166,478 +166,197 @@ namespace Microsoft.Build.Shared
 
 #if NET
         /// <summary>
-        /// Windows-specific command line retrieval via WMI COM interfaces.
-        /// Queries Win32_Process for the CommandLine property using IWbemLocator/IWbemServices.
+        /// Windows-specific command line retrieval via the Windows Debug Engine COM interface (dbgeng.dll).
+        /// Uses <c>IDebugClient::GetRunningProcessDescription</c> to obtain the target process's command line
+        /// without querying WMI and without directly calling <c>NtQueryInformationProcess</c>. This avoids the
+        /// performance and reliability issues of the WMI service while still using only documented public APIs.
         /// </summary>
         [SupportedOSPlatform("windows")]
         private static class Windows
         {
-            // WMI COM interface GUIDs
-            private static readonly Guid CLSID_WbemLocator = new Guid("4590F811-1D3A-11D0-891F-00AA004B2E24");
-            private static readonly Guid IID_IWbemLocator = new Guid("DC12A687-737F-11CF-884D-00AA004B2E24");
-
-            // WBEM status codes
-            private const int WBEM_S_NO_ERROR = 0;
-            private const int WBEM_S_FALSE = 1; // No more objects in enumeration
-            private const int WBEM_FLAG_FORWARD_ONLY = 0x00000020;
-            private const int WBEM_FLAG_RETURN_IMMEDIATELY = 0x00000010;
-            private const int WBEM_INFINITE = -1;
-
-
-            // RPC authentication/impersonation constants (used by CoInitializeSecurity and CoSetProxyBlanket)
-            private const int RPC_C_AUTHN_LEVEL_DEFAULT = 0;
-            private const int RPC_C_AUTHN_LEVEL_CALL = 3;
-            private const int RPC_C_IMP_LEVEL_IMPERSONATE = 3;
-            private const int RPC_C_AUTHN_WINNT = 10;
-            private const int RPC_C_AUTHZ_NONE = 0;
-            private const int EOAC_NONE = 0;
-
-            // CoCreateInstance: in-process server
-            private const int CLSCTX_INPROC_SERVER = 1;
-
-            // HRESULTs for conditions that are not fatal failures
-            private const int RPC_E_TOO_LATE = unchecked((int)0x80010119);     // CoInitializeSecurity already called
-
-            [DllImport("ole32.dll")]
-            private static extern int CoInitializeEx(IntPtr pvReserved, int dwCoInit);
-
-            [DllImport("ole32.dll")]
-            private static extern int CoInitializeSecurity(
-                IntPtr pSecDesc,
-                int cAuthSvc,
-                IntPtr asAuthSvc,
-                IntPtr pReserved,
-                int dwAuthnLevel,
-                int dwImpLevel,
-                IntPtr pAuthList,
-                int dwCapabilities,
-                IntPtr pReserved3);
-
-            [DllImport("ole32.dll")]
-            private static extern int CoCreateInstance(
-                ref Guid rclsid,
-                IntPtr pUnkOuter,
-                int dwClsContext,
-                ref Guid riid,
-                [MarshalAs(UnmanagedType.Interface)] out IWbemLocator ppv);
-
-            [DllImport("ole32.dll")]
-            private static extern int CoSetProxyBlanket(
-                [MarshalAs(UnmanagedType.IUnknown)] object pProxy,
-                int dwAuthnSvc,
-                int dwAuthzSvc,
-                IntPtr pServerPrincName,
-                int dwAuthnLevel,
-                int dwImpLevel,
-                IntPtr pAuthInfo,
-                int dwCapabilities);
-
-            [ComImport]
-            [Guid("DC12A687-737F-11CF-884D-00AA004B2E24")]
-            [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-            private interface IWbemLocator
-            {
-                [PreserveSig]
-                int ConnectServer(
-                    [MarshalAs(UnmanagedType.BStr)] string strNetworkResource,
-                    [MarshalAs(UnmanagedType.BStr)] string? strUser,
-                    [MarshalAs(UnmanagedType.BStr)] string? strPassword,
-                    [MarshalAs(UnmanagedType.BStr)] string? strLocale,
-                    int lSecurityFlags,
-                    [MarshalAs(UnmanagedType.BStr)] string? strAuthority,
-                    IntPtr pCtx,
-                    [MarshalAs(UnmanagedType.Interface)] out IWbemServices ppNamespace);
-            }
-
-            [Guid("44ACA674-E8FC-11D0-A07C-00C04FB68820")]
-            [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-            [ComImport]
-            internal interface IWbemContext
-            {
-                [PreserveSig]
-                int Clone([MarshalAs(UnmanagedType.Interface)] out IWbemContext ppNewCopy);
-
-                [PreserveSig]
-                int GetNames(int lFlags, IntPtr pNames);
-
-                [PreserveSig]
-                int BeginEnumeration(int lFlags);
-
-                [PreserveSig]
-                int Next(int lFlags, [MarshalAs(UnmanagedType.BStr)] out string pstrName, IntPtr pValue);
-
-                [PreserveSig]
-                int EndEnumeration();
-
-                [PreserveSig]
-                int SetValue([MarshalAs(UnmanagedType.LPWStr)] string wszName, int lFlags, IntPtr pValue);
-
-                [PreserveSig]
-                int GetValue([MarshalAs(UnmanagedType.LPWStr)] string wszName, int lFlags, IntPtr pValue);
-
-                [PreserveSig]
-                int DeleteValue([MarshalAs(UnmanagedType.LPWStr)] string wszName, int lFlags);
-
-                [PreserveSig]
-                int DeleteAll();
-            }
-
-            [ComImport]
-            [Guid("9556DC99-828C-11CF-A37E-00AA003240C7")]
-            [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-            private interface IWbemServices
-            {
-                [PreserveSig]
-                int OpenNamespace(
-                    [MarshalAs(UnmanagedType.BStr)] string strNamespace,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr ppWorkingNamespace,
-                    IntPtr ppResult);
-
-                [PreserveSig]
-                int CancelAsyncCall(IntPtr pSink);
-
-                [PreserveSig]
-                int QueryObjectSink(int lFlags, IntPtr ppResponseHandler);
-
-                [PreserveSig]
-                int GetObject(
-                    [MarshalAs(UnmanagedType.BStr)] string strObjectPath,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr ppObject,
-                    IntPtr ppCallResult);
-
-                [PreserveSig]
-                int GetObjectAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strObjectPath,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int PutClass(IntPtr pObject, int lFlags, IntPtr pCtx, IntPtr ppCallResult);
-
-                [PreserveSig]
-                int PutClassAsync(IntPtr pObject, int lFlags, IntPtr pCtx, IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int DeleteClass(
-                    [MarshalAs(UnmanagedType.BStr)] string strClass,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr ppCallResult);
-
-                [PreserveSig]
-                int DeleteClassAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strClass,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int CreateClassEnum(
-                    [MarshalAs(UnmanagedType.BStr)] string strSuperclass,
-                    int lFlags,
-                    IntPtr pCtx,
-                    [MarshalAs(UnmanagedType.Interface)] out IEnumWbemClassObject ppEnum);
-
-                [PreserveSig]
-                int CreateClassEnumAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strSuperclass,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int PutInstance(IntPtr pInst, int lFlags, IntPtr pCtx, IntPtr ppCallResult);
-
-                [PreserveSig]
-                int PutInstanceAsync(IntPtr pInst, int lFlags, IntPtr pCtx, IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int DeleteInstance(
-                    [MarshalAs(UnmanagedType.BStr)] string strObjectPath,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr ppCallResult);
-
-                [PreserveSig]
-                int DeleteInstanceAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strObjectPath,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int CreateInstanceEnum(
-                    [MarshalAs(UnmanagedType.BStr)] string strFilter,
-                    int lFlags,
-                    IntPtr pCtx,
-                    [MarshalAs(UnmanagedType.Interface)] out IEnumWbemClassObject ppEnum);
-
-                [PreserveSig]
-                int CreateInstanceEnumAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strFilter,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int ExecQuery(
-                    [In][MarshalAs(UnmanagedType.BStr)] string strQueryLanguage,
-                    [In][MarshalAs(UnmanagedType.BStr)] string strQuery,
-                    [In] int lFlags,
-                    [In] IWbemContext? pCtx,
-                    [MarshalAs(UnmanagedType.Interface)] out IEnumWbemClassObject ppEnum);
-
-                [PreserveSig]
-                int ExecQueryAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strQueryLanguage,
-                    [MarshalAs(UnmanagedType.BStr)] string strQuery,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int ExecNotificationQuery(
-                    [MarshalAs(UnmanagedType.BStr)] string strQueryLanguage,
-                    [MarshalAs(UnmanagedType.BStr)] string strQuery,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr ppEnum);
-
-                [PreserveSig]
-                int ExecNotificationQueryAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strQueryLanguage,
-                    [MarshalAs(UnmanagedType.BStr)] string strQuery,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pResponseHandler);
-
-                [PreserveSig]
-                int ExecMethod(
-                    [MarshalAs(UnmanagedType.BStr)] string strObjectPath,
-                    [MarshalAs(UnmanagedType.BStr)] string strMethodName,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pInParams,
-                    IntPtr ppOutParams,
-                    IntPtr ppCallResult);
-
-                [PreserveSig]
-                int ExecMethodAsync(
-                    [MarshalAs(UnmanagedType.BStr)] string strObjectPath,
-                    [MarshalAs(UnmanagedType.BStr)] string strMethodName,
-                    int lFlags,
-                    IntPtr pCtx,
-                    IntPtr pInParams,
-                    IntPtr pResponseHandler);
-            }
-
-            [ComImport]
-            [Guid("027947E1-D731-11CE-A357-000000000001")]
-            [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-            private interface IEnumWbemClassObject
-            {
-                [PreserveSig]
-                int Reset();
-
-                [PreserveSig]
-                int Next(
-                    int lTimeout,
-                    uint uCount,
-                    [MarshalAs(UnmanagedType.Interface)] out IWbemClassObject apObjects,
-                    out uint puReturned);
-
-                [PreserveSig]
-                int NextAsync(uint uCount, IntPtr pSink);
-
-                [PreserveSig]
-                int Clone([MarshalAs(UnmanagedType.Interface)] out IEnumWbemClassObject ppEnum);
-
-                [PreserveSig]
-                int Skip(int lTimeout, uint nCount);
-            }
-
-            [ComImport]
-            [Guid("DC12A681-737F-11CF-884D-00AA004B2E24")]
-            [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-            private interface IWbemClassObject
-            {
-                [PreserveSig]
-                int GetQualifierSet(IntPtr ppQualSet);
-
-                [PreserveSig]
-                int Get(
-                    [MarshalAs(UnmanagedType.LPWStr)] string wszName,
-                    int lFlags,
-                    ref object pVal,
-                    IntPtr pType,
-                    IntPtr plFlavor);
-
-                [PreserveSig]
-                int Put([MarshalAs(UnmanagedType.LPWStr)] string wszName, int lFlags, ref object pVal, int type);
-
-                [PreserveSig]
-                int Delete([MarshalAs(UnmanagedType.LPWStr)] string wszName);
-
-                [PreserveSig]
-                int GetNames([MarshalAs(UnmanagedType.LPWStr)] string wszQualifierName, int lFlags, ref object pQualifierVal, IntPtr pNames);
-
-                [PreserveSig]
-                int BeginEnumeration(int lEnumFlags);
-
-                [PreserveSig]
-                int Next(int lFlags, [MarshalAs(UnmanagedType.BStr)] out string strName, ref object pVal, IntPtr pType, IntPtr plFlavor);
-
-                [PreserveSig]
-                int EndEnumeration();
-
-                [PreserveSig]
-                int GetPropertyQualifierSet([MarshalAs(UnmanagedType.LPWStr)] string wszProperty, IntPtr ppQualSet);
-
-                [PreserveSig]
-                int Clone([MarshalAs(UnmanagedType.Interface)] out IWbemClassObject ppCopy);
-
-                [PreserveSig]
-                int GetObjectText(int lFlags, [MarshalAs(UnmanagedType.BStr)] out string pstrObjectText);
-
-                [PreserveSig]
-                int SpawnDerivedClass(int lFlags, IntPtr ppNewClass);
-
-                [PreserveSig]
-                int SpawnInstance(int lFlags, IntPtr ppNewInstance);
-
-                [PreserveSig]
-                int CompareTo(int lFlags, IntPtr pCompareTo);
-
-                [PreserveSig]
-                int GetPropertyOrigin([MarshalAs(UnmanagedType.LPWStr)] string wszName, [MarshalAs(UnmanagedType.BStr)] out string pstrClassName);
-
-                [PreserveSig]
-                int InheritsFrom([MarshalAs(UnmanagedType.LPWStr)] string strAncestor);
-
-                [PreserveSig]
-                int GetMethod([MarshalAs(UnmanagedType.LPWStr)] string wszName, int lFlags, IntPtr ppInSignature, IntPtr ppOutSignature);
-
-                [PreserveSig]
-                int PutMethod([MarshalAs(UnmanagedType.LPWStr)] string wszName, int lFlags, IntPtr pInSignature, IntPtr pOutSignature);
-
-                [PreserveSig]
-                int DeleteMethod([MarshalAs(UnmanagedType.LPWStr)] string wszName);
-
-                [PreserveSig]
-                int BeginMethodEnumeration(int lEnumFlags);
-
-                [PreserveSig]
-                int NextMethod(int lFlags, [MarshalAs(UnmanagedType.BStr)] out string pstrName, IntPtr ppInSignature, IntPtr ppOutSignature);
-
-                [PreserveSig]
-                int EndMethodEnumeration();
-
-                [PreserveSig]
-                int GetMethodQualifierSet([MarshalAs(UnmanagedType.LPWStr)] string wszMethod, IntPtr ppQualSet);
-
-                [PreserveSig]
-                int GetMethodOrigin([MarshalAs(UnmanagedType.LPWStr)] string wszMethodName, [MarshalAs(UnmanagedType.BStr)] out string pstrClassName);
-            }
-
+            // Flags for IDebugClient::GetRunningProcessDescription.
+            // By default the Description output contains a concatenation of service names, MTS package names,
+            // command line, session id, and user name. We exclude everything except the command line.
+            private const int DEBUG_PROC_DESC_NO_PATHS = 0x00000001;
+            private const int DEBUG_PROC_DESC_NO_SERVICES = 0x00000002;
+            private const int DEBUG_PROC_DESC_NO_MTS_PACKAGES = 0x00000004;
+            private const int DEBUG_PROC_DESC_NO_SESSION_ID = 0x00000010;
+            private const int DEBUG_PROC_DESC_NO_USER_NAME = 0x00000020;
+
+            private const int DescriptionFlags =
+                DEBUG_PROC_DESC_NO_PATHS
+                | DEBUG_PROC_DESC_NO_SERVICES
+                | DEBUG_PROC_DESC_NO_MTS_PACKAGES
+                | DEBUG_PROC_DESC_NO_SESSION_ID
+                | DEBUG_PROC_DESC_NO_USER_NAME;
+
+            // IID_IDebugClient (dbgeng.h).
+            private static readonly Guid IID_IDebugClient = new Guid("27fe5639-8407-4f47-8364-ee118fb08ac8");
 
             /// <summary>
-            /// Retrieves the command line for a process by querying WMI Win32_Process via COM.
-            /// Runs: SELECT CommandLine FROM Win32_Process WHERE ProcessId='<paramref name="processId"/>'
+            /// Creates an <c>IDebugClient</c> instance. Exported from dbgeng.dll; acts as the COM-style factory
+            /// for the Debug Engine interfaces (not a standard CoCreateInstance target).
+            /// </summary>
+            [DllImport("dbgeng.dll", ExactSpelling = true)]
+            private static extern int DebugCreate(
+                ref Guid interfaceId,
+                [MarshalAs(UnmanagedType.Interface)] out IDebugClient iface);
+
+            /// <summary>
+            /// Minimal <c>IDebugClient</c> declaration. The vtable order of the eight preceding methods must be
+            /// preserved even though we never call them; only <see cref="GetRunningProcessDescription"/> is used.
+            /// Signatures use <see cref="IntPtr"/> for parameters we don't care about to avoid marshalling costs.
+            /// </summary>
+            [ComImport]
+            [Guid("27fe5639-8407-4f47-8364-ee118fb08ac8")]
+            [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+            private interface IDebugClient
+            {
+                [PreserveSig]
+                int AttachKernel(uint flags, IntPtr connectOptions);
+
+                [PreserveSig]
+                int GetKernelConnectionOptions(IntPtr buffer, uint bufferSize, out uint optionsSize);
+
+                [PreserveSig]
+                int SetKernelConnectionOptions(IntPtr options);
+
+                [PreserveSig]
+                int StartProcessServer(uint flags, IntPtr options, IntPtr reserved);
+
+                [PreserveSig]
+                int ConnectProcessServer(IntPtr remoteOptions, out ulong server);
+
+                [PreserveSig]
+                int DisconnectProcessServer(ulong server);
+
+                [PreserveSig]
+                int GetRunningProcessSystemIds(ulong server, IntPtr ids, uint count, out uint actualCount);
+
+                [PreserveSig]
+                int GetRunningProcessSystemIdByExecutableName(ulong server, IntPtr exeName, uint flags, out uint id);
+
+                [PreserveSig]
+                int GetRunningProcessDescription(
+                    ulong server,
+                    uint systemId,
+                    uint flags,
+                    // Explicit LPArray marshalling is required here. Without it the default COM marshalling for a
+                    // managed array parameter on a COM interface is UnmanagedType.SafeArray, which causes the CLR's
+                    // MngdSafeArrayMarshaler to attempt to interpret the raw ANSI buffer returned by dbgeng as a
+                    // SAFEARRAY on the way back out, corrupting marshaller state and surfacing as an
+                    // ExecutionEngineException. SizeParamIndex points at the corresponding length parameter.
+                    [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 4)] byte[]? exeName,
+                    uint exeNameSize,
+                    out uint actualExeNameSize,
+                    [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 7)] byte[]? description,
+                    uint descriptionSize,
+                    out uint actualDescriptionSize);
+            }
+
+            /// <summary>
+            /// Retrieves the command line for a process via <c>dbgeng!IDebugClient::GetRunningProcessDescription</c>.
+            /// Returns <c>null</c> if the target cannot be inspected (e.g. access denied, protected process, or the
+            /// debug engine is unavailable).
             /// </summary>
             internal static string? GetCommandLine(int processId)
             {
-                int hr = CoInitializeSecurity(
-                    IntPtr.Zero,
-                    -1,
-                    IntPtr.Zero,
-                    IntPtr.Zero,
-                    RPC_C_AUTHN_LEVEL_DEFAULT,
-                    RPC_C_IMP_LEVEL_IMPERSONATE,
-                    IntPtr.Zero,
-                    EOAC_NONE,
-                    IntPtr.Zero);
-                // RPC_E_TOO_LATE (0x80010119) means another call already set security — not fatal.
-                if (hr != WBEM_S_NO_ERROR && hr != RPC_E_TOO_LATE)
+                Guid iid = IID_IDebugClient;
+                int hr = DebugCreate(ref iid, out IDebugClient? client);
+                if (hr < 0 || client is null)
                 {
-                    throw new InvalidOperationException(
-                        $"WMI CoInitializeSecurity failed for PID {processId}. HRESULT: 0x{hr:X8}");
-                }
-
-                Guid clsid = CLSID_WbemLocator;
-                Guid iid = IID_IWbemLocator;
-                hr = CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX_INPROC_SERVER, ref iid, out IWbemLocator locator);
-                if (hr != WBEM_S_NO_ERROR)
-                {
-                    throw new InvalidOperationException(
-                        $"WMI CoCreateInstance failed for PID {processId}. HRESULT: 0x{hr:X8}");
-                }
-
-                hr = locator.ConnectServer(
-                    @"ROOT\CIMV2",
-                    strUser: null, strPassword: null, strLocale: null,
-                    lSecurityFlags: 0, strAuthority: null,
-                    pCtx: IntPtr.Zero,
-                    out IWbemServices services);
-                if (hr != WBEM_S_NO_ERROR)
-                {
-                    throw new InvalidOperationException(
-                        $"WMI ConnectServer failed for PID {processId}. HRESULT: 0x{hr:X8}");
-                }
-
-                hr = CoSetProxyBlanket(
-                    services,
-                    RPC_C_AUTHN_WINNT,
-                    RPC_C_AUTHZ_NONE,
-                    IntPtr.Zero,
-                    RPC_C_AUTHN_LEVEL_CALL,
-                    RPC_C_IMP_LEVEL_IMPERSONATE,
-                    IntPtr.Zero,
-                    EOAC_NONE);
-                if (hr != WBEM_S_NO_ERROR)
-                {
-                    throw new InvalidOperationException(
-                        $"WMI CoSetProxyBlanket failed for PID {processId}. HRESULT: 0x{hr:X8}");
-                }
-
-                string query = $"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{processId}'";
-                hr = services.ExecQuery(
-                    "WQL",
-                    query,
-                    WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
-                    null,
-                    out IEnumWbemClassObject enumerator);
-                if (hr != WBEM_S_NO_ERROR)
-                {
-                    throw new InvalidOperationException(
-                        $"WMI ExecQuery failed for PID {processId}. HRESULT: 0x{hr:X8}");
-                }
-
-                hr = enumerator.Next(WBEM_INFINITE, 1, out IWbemClassObject obj, out uint returned);
-                if (hr == WBEM_S_FALSE || returned == 0)
-                {
-                    // No matching process found.
                     return null;
                 }
-                if (hr != WBEM_S_NO_ERROR)
+
+                try
                 {
-                    throw new InvalidOperationException(
-                        $"WMI IEnumWbemClassObject.Next failed for PID {processId}. HRESULT: 0x{hr:X8}");
+                    // First call with null buffers to discover required sizes.
+                    hr = client.GetRunningProcessDescription(
+                        server: 0,
+                        systemId: (uint)processId,
+                        flags: DescriptionFlags,
+                        exeName: null, exeNameSize: 0, actualExeNameSize: out uint exeSize,
+                        description: null, descriptionSize: 0, actualDescriptionSize: out uint descSize);
+
+                    // hr can be S_OK or an inline status indicating buffer too small; either way sizes come back populated
+                    // on supported OS versions. A hard failure means the PID can't be inspected.
+                    if (hr < 0 && exeSize == 0 && descSize == 0)
+                    {
+                        return null;
+                    }
+
+                    byte[]? exeBuffer = null;
+                    byte[]? descBuffer = null;
+                    try
+                    {
+                        exeBuffer = exeSize > 0 ? ArrayPool<byte>.Shared.Rent((int)exeSize) : null;
+                        descBuffer = descSize > 0 ? ArrayPool<byte>.Shared.Rent((int)descSize) : null;
+
+                        hr = client.GetRunningProcessDescription(
+                            server: 0,
+                            systemId: (uint)processId,
+                            flags: DescriptionFlags,
+                            exeName: exeBuffer,
+                            exeNameSize: exeBuffer is null ? 0 : (uint)exeBuffer.Length,
+                            actualExeNameSize: out exeSize,
+                            description: descBuffer,
+                            descriptionSize: descBuffer is null ? 0 : (uint)descBuffer.Length,
+                            actualDescriptionSize: out descSize);
+                        if (hr < 0)
+                        {
+                            return null;
+                        }
+
+                        // Buffers are ANSI and include the trailing null terminator in the returned size.
+                        string exe = DecodeAnsi(exeBuffer, exeSize);
+                        string desc = DecodeAnsi(descBuffer, descSize);
+
+                        // With our exclusion flags the Description should contain just the command line (may be empty
+                        // for protected or system processes, in which case fall back to the executable name).
+                        if (!string.IsNullOrEmpty(desc))
+                        {
+                            return desc;
+                        }
+
+                        return string.IsNullOrEmpty(exe) ? null : exe;
+                    }
+                    finally
+                    {
+                        if (exeBuffer is not null)
+                        {
+                            ArrayPool<byte>.Shared.Return(exeBuffer);
+                        }
+                        if (descBuffer is not null)
+                        {
+                            ArrayPool<byte>.Shared.Return(descBuffer);
+                        }
+                    }
+                }
+                finally
+                {
+                    Marshal.ReleaseComObject(client);
+                }
+            }
+
+            /// <summary>
+            /// Decodes an ANSI byte buffer whose <paramref name="length"/> includes a trailing null terminator.
+            /// Returns <see cref="string.Empty"/> if the buffer is null, empty, or contains only a terminator.
+            /// </summary>
+            private static string DecodeAnsi(byte[]? buffer, uint length)
+            {
+                if (buffer is null || length == 0)
+                {
+                    return string.Empty;
                 }
 
-                object val = null!;
-                hr = obj.Get("CommandLine", 0, ref val, IntPtr.Zero, IntPtr.Zero);
-                if (hr != WBEM_S_NO_ERROR)
+                // Strip the trailing null terminator that dbgeng includes in the reported size.
+                int effective = (int)length;
+                if (effective > 0 && buffer[effective - 1] == 0)
                 {
-                    throw new InvalidOperationException(
-                        $"WMI IWbemClassObject.Get(\"CommandLine\") failed for PID {processId}. HRESULT: 0x{hr:X8}");
+                    effective--;
                 }
 
-                return val as string;
+                return effective > 0 ? Encoding.Default.GetString(buffer, 0, effective) : string.Empty;
             }
         }
 #endif
