@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../SR.resx">
     <body>
@@ -130,6 +130,16 @@
       <trans-unit id="WhitespacePathNotAllowedOnWindows">
         <source>Path cannot be null or whitespace on Windows.</source>
         <target state="new">Path cannot be null or whitespace on Windows.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_contains_no_elements">
+        <source>'{0}' contains no elements.</source>
+        <target state="new">'{0}' contains no elements.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_does_not_contain_matching_element">
+        <source>'{0}' does not contain matching element.</source>
+        <target state="new">'{0}' does not contain matching element.</target>
         <note />
       </trans-unit>
     </body>

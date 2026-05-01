@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../SR.resx">
     <body>
@@ -119,7 +119,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw SDK systemu Windows, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw Windows SDK, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
@@ -130,6 +130,16 @@
       <trans-unit id="WhitespacePathNotAllowedOnWindows">
         <source>Path cannot be null or whitespace on Windows.</source>
         <target state="new">Path cannot be null or whitespace on Windows.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_contains_no_elements">
+        <source>'{0}' contains no elements.</source>
+        <target state="new">'{0}' contains no elements.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_does_not_contain_matching_element">
+        <source>'{0}' does not contain matching element.</source>
+        <target state="new">'{0}' does not contain matching element.</target>
         <note />
       </trans-unit>
     </body>
