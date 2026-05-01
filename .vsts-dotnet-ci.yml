@@ -674,7 +674,7 @@ jobs:
       PathtoPublish: 'BenchmarkDotNet.Artifacts'
       ArtifactName: 'BenchmarksDryRunWindows'
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
 
 - job: BenchmarksDryRunLinux
   displayName: "Benchmarks Dry Run (Linux)"
@@ -712,6 +712,6 @@ jobs:
       PathtoPublish: 'BenchmarkDotNet.Artifacts'
       ArtifactName: 'BenchmarksDryRunLinux'
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
 
 - template: /eng/common/templates/jobs/source-build.yml
