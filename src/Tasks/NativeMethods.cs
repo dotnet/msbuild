@@ -794,6 +794,33 @@ namespace Microsoft.Build.Tasks
 #endif
 
         //------------------------------------------------------------------------------
+        // clonefile (macOS APFS copy-on-write clone)
+        //------------------------------------------------------------------------------
+#if !TASKHOST
+        [DllImport("libc", SetLastError = true)]
+        private static extern int clonefile(string src, string dst, uint flags);
+
+        /// <summary>
+        /// Attempts to create a copy-on-write clone of a file using macOS clonefile(2).
+        /// Returns true on success. On any failure (non-APFS filesystem, cross-device,
+        /// destination exists, etc.), returns false and sets errorMessage — the caller
+        /// should fall back to File.Copy.
+        /// </summary>
+        internal static bool TryCloneFile(string source, string destination, out string errorMessage)
+        {
+            if (clonefile(source, destination, 0) == 0)
+            {
+                errorMessage = null;
+                return true;
+            }
+
+            int errno = Marshal.GetLastWin32Error();
+            errorMessage = $"clonefile failed with errno {errno}";
+            return false;
+        }
+#endif
+
+        //------------------------------------------------------------------------------
         // CreateHardLink
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

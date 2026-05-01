@@ -110,6 +110,7 @@ namespace Microsoft.Build.Tasks
 
         internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
         internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
+        internal const string ExperimentalCopyEnvVar = "MSBUILD_EXPERIMENTAL_COPY";
 
         /// <summary>
         /// Force the copy to retry even when it hits ERROR_ACCESS_DENIED -- normally we wouldn't retry in this case since
@@ -118,6 +119,12 @@ namespace Microsoft.Build.Tasks
         /// Initialized from TaskEnvironment in Execute() for MT-safety.
         /// </summary>
         private bool _alwaysRetryCopy;
+
+        /// <summary>
+        /// When true, attempt to use macOS clonefile(2) for copy-on-write clones before falling
+        /// back to File.Copy. Enabled by the MSBUILD_EXPERIMENTAL_COPY=1 environment variable.
+        /// </summary>
+        private bool _useCloneFile;
 
         private static readonly bool s_copyInParallel = GetParallelismFromEnvironment();
 
@@ -376,7 +383,25 @@ namespace Microsoft.Build.Tasks
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.Path, destinationFileState.Path);
 
-                File.Copy(sourceFileState.Path, destinationFileState.Path, true);
+                bool cloned = false;
+#if !TASKHOST
+                // On macOS APFS, clonefile(2) creates a copy-on-write clone in O(1) time.
+                // Skip when CopyWithoutDelete is active and dest exists, since clonefile requires dest not to exist.
+                if (_useCloneFile
+                    && !(Traits.Instance.EscapeHatches.CopyWithoutDelete && destinationFileState.FileExists))
+                {
+                    cloned = NativeMethods.TryCloneFile(sourceFileState.Path, destinationFileState.Path, out errorMessage);
+                    if (!cloned)
+                    {
+                        Log.LogMessage(MessageImportance.Low, RetryingAsFileCopy, sourceFileState.Path, destinationFileState.Path, errorMessage);
+                    }
+                }
+#endif
+
+                if (!cloned)
+                {
+                    File.Copy(sourceFileState.Path, destinationFileState.Path, true);
+                }
             }
 
             // If the destinationFile file exists, then make sure it's read-write.
@@ -454,6 +479,9 @@ namespace Microsoft.Build.Tasks
             }
 
             _alwaysRetryCopy = TaskEnvironment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
+
+            _useCloneFile = NativeMethodsShared.IsOSX
+                && TaskEnvironment.GetEnvironmentVariable(ExperimentalCopyEnvVar) == "1";
 
             // Env var sets the default for UseSymboliclinksIfPossible, but explicit task parameter wins.
             if (!_useSymboliclinksIfPossibleExplicitlySet

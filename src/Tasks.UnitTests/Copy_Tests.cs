@@ -3226,5 +3226,184 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        #region clonefile tests
+
+        /// <summary>
+        /// Creates a Copy task targeting a single file, with the experimental clone env var set as specified.
+        /// </summary>
+        private Copy CreateCloneCopyTask(TestEnvironment env, string sourcePath, string destPath, bool enableClone, bool skipUnchanged = false)
+        {
+            env.SetEnvironmentVariable(Copy.ExperimentalCopyEnvVar, enableClone ? "1" : null);
+            return new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = new MockEngine(_testOutputHelper),
+                SourceFiles = [new TaskItem(sourcePath)],
+                DestinationFiles = [new TaskItem(destPath)],
+                SkipUnchangedFiles = skipUnchanged,
+                RetryDelayMilliseconds = 1,
+            };
+        }
+
+        [MacOSOnlyFact]
+        public void CloneFile_HappyPath_ProducesIdenticalContent()
+        {
+            using var env = TestEnvironment.Create(_testOutputHelper);
+            string destPath = Path.Combine(env.DefaultTestDirectory.Path, "dest.txt");
+
+            CreateCloneCopyTask(env, env.CreateFile("source.txt", "Hello, clonefile!").Path, destPath, enableClone: true)
+                .Execute().ShouldBeTrue();
+
+            File.ReadAllText(destPath).ShouldBe("Hello, clonefile!");
+        }
+
+        [MacOSOnlyFact]
+        public void CloneFile_CopyOnWriteDivergence_WritingDestDoesNotAffectSource()
+        {
+            using var env = TestEnvironment.Create(_testOutputHelper);
+            var sourceFile = env.CreateFile("source.txt", "Original source content");
+            string destPath = Path.Combine(env.DefaultTestDirectory.Path, "dest.txt");
+
+            CreateCloneCopyTask(env, sourceFile.Path, destPath, enableClone: true).Execute().ShouldBeTrue();
+            File.WriteAllText(destPath, "Modified destination content");
+
+            File.ReadAllText(sourceFile.Path).ShouldBe("Original source content");
+        }
+
+        [MacOSOnlyFact]
+        public void CloneFile_ReadOnlySource_ProducesWritableDestination()
+        {
+            using var env = TestEnvironment.Create(_testOutputHelper);
+            var sourceFile = env.CreateFile("source.txt", "read-only content");
+            File.SetAttributes(sourceFile.Path, FileAttributes.ReadOnly);
+            string destPath = Path.Combine(env.DefaultTestDirectory.Path, "dest.txt");
+
+            try
+            {
+                CreateCloneCopyTask(env, sourceFile.Path, destPath, enableClone: true).Execute().ShouldBeTrue();
+                File.ReadAllText(destPath).ShouldBe("read-only content");
+                (File.GetAttributes(destPath) & FileAttributes.ReadOnly).ShouldBe((FileAttributes)0);
+            }
+            finally
+            {
+                File.SetAttributes(sourceFile.Path, FileAttributes.Normal);
+                if (File.Exists(destPath))
+                {
+                    File.SetAttributes(destPath, FileAttributes.Normal);
+                }
+            }
+        }
+
+        [MacOSOnlyFact]
+        public void CloneFile_EnvVarNotSet_FallsBackToFileCopy()
+        {
+            using var env = TestEnvironment.Create(_testOutputHelper);
+            string destPath = Path.Combine(env.DefaultTestDirectory.Path, "dest.txt");
+
+            CreateCloneCopyTask(env, env.CreateFile("source.txt", "file copy content").Path, destPath, enableClone: false)
+                .Execute().ShouldBeTrue();
+
+            File.ReadAllText(destPath).ShouldBe("file copy content");
+        }
+
+        [MacOSOnlyFact]
+        public void CloneFile_IncrementalBuild_SecondCopyIsSkipped()
+        {
+            using var env = TestEnvironment.Create(_testOutputHelper);
+            var sourceFile = env.CreateFile("source.txt", "incremental content");
+            string destPath = Path.Combine(env.DefaultTestDirectory.Path, "dest.txt");
+
+            var task1 = CreateCloneCopyTask(env, sourceFile.Path, destPath, enableClone: true);
+            task1.Execute().ShouldBeTrue();
+            task1.WroteAtLeastOneFile.ShouldBeTrue();
+
+            var task2 = CreateCloneCopyTask(env, sourceFile.Path, destPath, enableClone: true, skipUnchanged: true);
+            task2.Execute().ShouldBeTrue();
+            task2.WroteAtLeastOneFile.ShouldBeFalse();
+        }
+
+        /// <summary>
+        /// Performance: clonefile should be meaningfully faster than File.Copy for bulk file
+        /// operations on macOS APFS. Files range from 1 KB to 1 MB to simulate realistic build output.
+        /// </summary>
+        [MacOSOnlyFact]
+        public void CloneFile_Performance_FasterThanFileCopy()
+        {
+            const int fileCount = 1000;
+            const int minSizeBytes = 1024;        // 1 KB
+            const int maxSizeBytes = 1024 * 1024;  // 1 MB
+
+            using var env = TestEnvironment.Create(_testOutputHelper);
+            string sourceDir = Path.Combine(env.DefaultTestDirectory.Path, "perf_source");
+            Directory.CreateDirectory(sourceDir);
+
+            // Create source files with gradually increasing sizes
+            string[] sourceFiles = new string[fileCount];
+            for (int i = 0; i < fileCount; i++)
+            {
+                int size = minSizeBytes + (int)((long)(maxSizeBytes - minSizeBytes) * i / (fileCount - 1));
+                byte[] content = new byte[size];
+                Random.Shared.NextBytes(content);
+                sourceFiles[i] = Path.Combine(sourceDir, $"file_{i:D4}.bin");
+                File.WriteAllBytes(sourceFiles[i], content);
+            }
+
+            // Helper to build task items for a destination directory
+            (ITaskItem[] src, ITaskItem[] dst) BuildItems(string destDir)
+            {
+                Directory.CreateDirectory(destDir);
+                var s = new ITaskItem[fileCount];
+                var d = new ITaskItem[fileCount];
+                for (int i = 0; i < fileCount; i++)
+                {
+                    s[i] = new TaskItem(sourceFiles[i]);
+                    d[i] = new TaskItem(Path.Combine(destDir, $"file_{i:D4}.bin"));
+                }
+                return (s, d);
+            }
+
+            // Measure File.Copy
+            var (normalSrc, normalDst) = BuildItems(Path.Combine(env.DefaultTestDirectory.Path, "perf_dest_normal"));
+            env.SetEnvironmentVariable(Copy.ExperimentalCopyEnvVar, null);
+            var taskNormal = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = new MockEngine(_testOutputHelper),
+                SourceFiles = normalSrc,
+                DestinationFiles = normalDst,
+                RetryDelayMilliseconds = 1,
+            };
+            var swNormal = Stopwatch.StartNew();
+            taskNormal.Execute().ShouldBeTrue();
+            swNormal.Stop();
+
+            // Measure clonefile
+            var (cloneSrc, cloneDst) = BuildItems(Path.Combine(env.DefaultTestDirectory.Path, "perf_dest_clone"));
+            env.SetEnvironmentVariable(Copy.ExperimentalCopyEnvVar, "1");
+            var taskClone = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = new MockEngine(_testOutputHelper),
+                SourceFiles = cloneSrc,
+                DestinationFiles = cloneDst,
+                RetryDelayMilliseconds = 1,
+            };
+            var swClone = Stopwatch.StartNew();
+            taskClone.Execute().ShouldBeTrue();
+            swClone.Stop();
+
+            long normalMs = swNormal.ElapsedMilliseconds;
+            long cloneMs = swClone.ElapsedMilliseconds;
+            _testOutputHelper.WriteLine($"File.Copy: {normalMs}ms, clonefile: {cloneMs}ms, speedup: {(double)normalMs / Math.Max(cloneMs, 1):F1}x");
+
+            // Spot-check correctness
+            File.Exists(cloneDst[0].ItemSpec).ShouldBeTrue();
+            File.Exists(cloneDst[fileCount - 1].ItemSpec).ShouldBeTrue();
+
+            cloneMs.ShouldBeLessThan(normalMs, $"clonefile ({cloneMs}ms) should be faster than File.Copy ({normalMs}ms)");
+        }
+
+        #endregion
     }
 }
