@@ -662,10 +662,10 @@ jobs:
   - script: eng\common\build.cmd -restore -configuration Release
     displayName: Install .NET SDK and restore packages
     condition: eq(variables.onlyDocChanged, 0)
-  - script: .dotnet\dotnet.exe build -c Release -f net10.0 src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj
+  - script: .dotnet\dotnet.exe build --no-restore -c Release -f net10.0 src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj
     displayName: Build benchmarks project
     condition: eq(variables.onlyDocChanged, 0)
-  - script: .dotnet\dotnet.exe run -c Release -f net10.0 --no-build --project src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj -- --ci
+  - script: .dotnet\dotnet.exe run -c Release -f net10.0 --no-build --no-restore --project src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj -- --ci
     displayName: Run benchmarks in dry mode
     condition: eq(variables.onlyDocChanged, 0)
   - task: PublishBuildArtifacts@1
