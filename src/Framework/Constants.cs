@@ -92,6 +92,13 @@ namespace Microsoft.Build.Framework
 
         internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
 
+        /// <summary>
+        /// Name of the MSBuild property that opts in to serializing the import graph
+        /// to out-of-process build nodes, making it available to tasks via
+        /// <see cref="EngineServices.ImportEdges"/>.
+        /// </summary>
+        internal const string MSBuildProvideImportGraphPropertyName = "MSBuildProvideImportGraph";
+
         internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
     }
 }

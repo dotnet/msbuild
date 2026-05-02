@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
 {
@@ -55,5 +56,35 @@ namespace Microsoft.Build.Framework
         public virtual bool IsTaskInputLoggingEnabled => throw new NotImplementedException();
 
         public virtual bool IsOutOfProcRarNodeEnabled => throw new NotImplementedException();
+
+#nullable enable
+        /// <summary>
+        /// Gets the import edges discovered during project evaluation, representing the graph of
+        /// <c>&lt;Import&gt;</c> relationships between project files.
+        /// </summary>
+        /// <value>
+        /// A read-only list of <see cref="ProjectImportEdge"/> values describing each import relationship,
+        /// or <see langword="null"/> if the import graph is not available on this node.
+        /// </value>
+        /// <remarks>
+        /// <para>
+        /// The import graph is always available when the task runs on the in-process node.
+        /// For out-of-process nodes, set the MSBuild property <c>MSBuildProvideImportGraph</c> to <c>true</c>
+        /// in your project to opt in to serializing import graph data across nodes.
+        /// </para>
+        /// <para>
+        /// Tasks can use pattern matching to access this property:
+        /// <code>
+        /// if (BuildEngine is IBuildEngine10 { EngineServices.ImportEdges: IReadOnlyList&lt;ProjectImportEdge&gt; edges })
+        /// {
+        ///     // use edges
+        /// }
+        /// </code>
+        /// The pattern naturally handles older engines (where the property is absent) and
+        /// out-of-proc nodes where the data was not serialized (where the property returns <see langword="null"/>).
+        /// </para>
+        /// </remarks>
+        public virtual IReadOnlyList<ProjectImportEdge>? ImportEdges => null;
+#nullable restore
     }
 }

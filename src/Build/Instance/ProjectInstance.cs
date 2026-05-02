@@ -811,6 +811,7 @@ namespace Microsoft.Build.Execution
                 ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths);
                 _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
                 ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
+                ImportEdges = that.ImportEdges;
 
                 this.EvaluatedItemElements = that.EvaluatedItemElements;
 
@@ -1259,6 +1260,18 @@ namespace Microsoft.Build.Execution
         /// This list will contain duplicate imports if an import is imported multiple times. However, only the first import was used in evaluation.
         /// </summary>
         public IReadOnlyList<string> ImportPathsIncludingDuplicates { get; private set; }
+
+        /// <summary>
+        /// Gets the structured import edges discovered during evaluation, representing the graph
+        /// of <c>&lt;Import&gt;</c> relationships between project files.
+        /// </summary>
+        /// <remarks>
+        /// Each edge connects an importing file to the file it imported. The root project's own
+        /// entry is excluded; only real import relationships are represented.
+        /// May be <see langword="null"/> on out-of-process nodes if the project did not opt in
+        /// to serializing import edges via the <c>MSBuildProvideImportGraph</c> property.
+        /// </remarks>
+        internal IReadOnlyList<ProjectImportEdge> ImportEdges { get; private set; }
 
         /// <summary>
         /// DefaultTargets specified in the project, or
@@ -2536,8 +2549,10 @@ namespace Microsoft.Build.Execution
                 ProjectItemDefinitionInstance.FactoryForDeserialization,
                 capacity => new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(capacity, MSBuildNameIgnoreCaseComparer.Default));
 
-            // ignore _importPaths/ImportPaths. Only used by public API users, not nodes
-            // ignore _importPathsIncludingDuplicates/ImportPathsIncludingDuplicates. Only used by public API users, not nodes
+            // ImportPaths/ImportPathsIncludingDuplicates are not serialized — only used by public API consumers.
+            // ImportEdges are conditionally serialized when MSBuildProvideImportGraph is set (see TranslateImportEdges).
+
+            TranslateImportEdges(translator);
         }
 
         private void TranslateToolsetSpecificState(ITranslator translator)
@@ -2547,6 +2562,69 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _explicitToolsVersionSpecified);
             translator.Translate(ref _originalProjectToolsVersion);
             translator.Translate(ref _subToolsetVersion);
+        }
+
+        /// <summary>
+        /// Conditionally serializes import edge data across nodes.
+        /// The data is only written when the project has opted in via the
+        /// <c>MSBuildProvideImportGraph</c> property.
+        /// </summary>
+        private void TranslateImportEdges(ITranslator translator)
+        {
+            bool hasImportEdges = false;
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                hasImportEdges = ImportEdges is { Count: > 0 }
+                    && string.Equals(
+                        _properties?.GetProperty(Constants.MSBuildProvideImportGraphPropertyName)?.EvaluatedValue,
+                        "true",
+                        StringComparison.OrdinalIgnoreCase);
+            }
+
+            // Bidirectional: on write this persists the flag, on read it recovers it.
+            translator.Translate(ref hasImportEdges);
+
+            if (!hasImportEdges)
+            {
+                return;
+            }
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                int count = ImportEdges.Count;
+                translator.Translate(ref count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    ProjectImportEdge edge = ImportEdges[i];
+                    string importedPath = edge.ImportedProjectPath;
+                    string importingPath = edge.ImportingProjectPath;
+                    string sdkName = edge.SdkName;
+                    translator.Translate(ref importedPath);
+                    translator.Translate(ref importingPath);
+                    translator.Translate(ref sdkName);
+                }
+            }
+            else
+            {
+                int count = 0;
+                translator.Translate(ref count);
+
+                var edges = new List<ProjectImportEdge>(count);
+                for (int i = 0; i < count; i++)
+                {
+                    string importedPath = null;
+                    string importingPath = null;
+                    string sdkName = null;
+                    translator.Translate(ref importedPath);
+                    translator.Translate(ref importingPath);
+                    translator.Translate(ref sdkName);
+                    edges.Add(new ProjectImportEdge(importedPath, importingPath, sdkName));
+                }
+
+                ImportEdges = edges.AsReadOnly();
+            }
         }
 
         private void TranslateProperties(ITranslator translator)
@@ -3352,17 +3430,26 @@ namespace Microsoft.Build.Execution
         private void CreateImportsSnapshot(IList<ResolvedImport> importClosure, IList<ResolvedImport> importClosureWithDuplicates)
         {
             var importPaths = new List<string>(Math.Max(0, importClosure.Count - 1) /* outer project */);
+            var importEdges = new List<ProjectImportEdge>(Math.Max(0, importClosure.Count - 1));
+
             foreach (var resolvedImport in importClosure)
             {
                 // Exclude outer project itself
                 if (resolvedImport.ImportingElement != null)
                 {
-                    importPaths.Add(resolvedImport.ImportedProject.FullPath);
+                    string importedPath = resolvedImport.ImportedProject.FullPath;
+                    importPaths.Add(importedPath);
+
+                    importEdges.Add(new ProjectImportEdge(
+                        importedPath,
+                        resolvedImport.ImportingElement.ContainingProject.FullPath,
+                        resolvedImport.SdkResult?.SdkReference.Name));
                 }
             }
 
             _importPaths = importPaths;
             ImportPaths = importPaths.AsReadOnly();
+            ImportEdges = importEdges.AsReadOnly();
 
             var importPathsIncludingDuplicates = new List<string>(Math.Max(0, importClosureWithDuplicates.Count - 1) /* outer project */);
             foreach (var resolvedImport in importClosureWithDuplicates)

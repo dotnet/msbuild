@@ -943,6 +943,10 @@ namespace Microsoft.Build.BackEnd
 
             public override bool IsOutOfProcRarNodeEnabled => _taskHost._host.BuildParameters.EnableRarNode;
 
+            /// <inheritdoc/>
+            public override IReadOnlyList<ProjectImportEdge> ImportEdges =>
+                _taskHost._requestEntry.RequestConfiguration.Project?.ImportEdges;
+
 #if FEATURE_REPORTFILEACCESSES
             /// <summary>
             /// Reports a file access from a task.
