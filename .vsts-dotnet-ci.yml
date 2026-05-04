@@ -291,6 +291,42 @@ jobs:
     continueOnError: true
     condition: always()
 
+- job: BootstrapMSBuildWithMTModeOnWindows
+  displayName: "Windows Core Multithreaded Mode"
+  pool:
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
+  timeoutInMinutes: 120
+  steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
+  - task: BatchScript@1
+    displayName: 'Build with bootstrapped MSBuild and -mt mode'
+    inputs:
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -skipTests -stage2Properties "/mt /p:BuildAnalyzer=true"'
+    condition: eq(variables.onlyDocChanged, 0)
+    env:
+      MSBUILDUSESERVER: "1"
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'MTModeOnWindows build logs'
+    continueOnError: true
+    condition: always()
+
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
   variables:

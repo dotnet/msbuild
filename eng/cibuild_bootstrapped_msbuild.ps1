@@ -5,6 +5,8 @@ Param(
   [switch] $prepareMachine,
   [bool] $buildStage1 = $True,
   [bool] $onlyDocChanged = 0,
+  [switch] $skipTests,
+  [string] $stage2Properties = "",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -117,14 +119,22 @@ try {
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
+  # Mirrors cibuild_bootstrapped_msbuild.sh. Some MSBuild scenarios (notably /mt routing tasks
+  # to a sidecar TaskHost) require this so the apphost-based child can locate the runtime.
+  # The SDK CLI (`dotnet msbuild`) sets it automatically; `dotnet exec MSBuild.dll` does not.
+  $env:DOTNET_HOST_PATH=$dotnetExePath
+
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Create bootstrap environment as it's required when also running tests
-  if ($onlyDocChanged) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
+  # - $stage2Properties are appended to the stage 2 build only (matching cibuild_bootstrapped_msbuild.sh).
+  #   Use this for switches like /mt that should not be passed to the SDK MSBuild used in stage 1.
+  $stage2Args = if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() }
+  if ($onlyDocChanged -or $skipTests) {
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Args
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties @stage2Args
   }
 
   exit $lastExitCode
