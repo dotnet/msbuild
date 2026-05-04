@@ -138,7 +138,11 @@ try {
   #   onlyDocChanged=1 → bootstrap not created (artifacts not needed downstream)
   #   skipTests        → bootstrap IS created (downstream MAY consume it), tests omitted
   #   default          → bootstrap created, tests run
-  $stage2Args = if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() }
+  # The @(...) wrapper is important: when -split returns exactly one element PowerShell
+  # gives back a string, and `& cmd @stringVar` splats its characters one-per-argument
+  # (so "/mt" becomes "/", "m", "t"). Wrapping with @() forces an array even for a
+  # single token.
+  $stage2Args = @(if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() })
   if ($onlyDocChanged) {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Args
   }
