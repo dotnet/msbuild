@@ -111,7 +111,7 @@ namespace Microsoft.Build.Framework
             // a rooted base directory, Path.GetFullPath silently trims the trailing whitespace, masking the
             // error. Preserve the historical Windows contract by explicitly rejecting whitespace-only input.
             // Unix retains the historical accepting behavior because whitespace is a valid filename character there.
-            if (NativeMethods.IsWindows && path.Length > 0 && path.Trim().Length == 0)
+            if (NativeMethods.IsWindows && string.IsNullOrWhiteSpace(path))
             {
                 throw new ArgumentException(SR.WhitespacePathNotAllowedOnWindows, nameof(path));
             }
