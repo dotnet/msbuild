@@ -60,13 +60,28 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Retrieves the full command line for a process in a cross-platform manner.
-        /// On Windows with CsWin32, defaults to WMI as the command-line source.
+        /// On Windows, command-line retrieval is opt-in via the <c>MSBUILDPROCESSCOMMANDLINESOURCE</c>
+        /// environment variable (values: <c>Wmi</c> or <c>DebugEngine</c>); when unset, the command line
+        /// is not retrieved.
         /// </summary>
         /// <param name="process">The process to get the command line for.</param>
         /// <param name="commandLine">The command line string, or null if it cannot be retrieved.</param>
         /// <returns>True if the command line was successfully retrieved, false if there was an error or the platform doesn't support command line retrieval.</returns>
         public static bool TryGetCommandLine(this Process? process, out string? commandLine)
-            => TryGetCommandLine(process, CommandLineSource.Wmi, out commandLine);
+            => TryGetCommandLine(process, GetConfiguredCommandLineSource(), out commandLine);
+
+        private static CommandLineSource GetConfiguredCommandLineSource()
+        {
+            string? value = Environment.GetEnvironmentVariable("MSBUILDPROCESSCOMMANDLINESOURCE");
+            if (string.IsNullOrEmpty(value))
+            {
+                return CommandLineSource.None;
+            }
+
+            return Enum.TryParse(value, ignoreCase: true, out CommandLineSource parsed)
+                ? parsed
+                : CommandLineSource.None;
+        }
 
         /// <summary>
         /// Retrieves the full command line for a process, allowing the caller to choose the
@@ -87,6 +102,12 @@ namespace Microsoft.Build.Shared
 #if FEATURE_WINDOWSINTEROP && NET
                 if (NativeMethods.IsWindows)
                 {
+                    if (source == CommandLineSource.None)
+                    {
+                        commandLine = null;
+                        return true;
+                    }
+
                     commandLine = Windows.GetCommandLine(process.Id, source);
                     return true;
                 }
@@ -195,6 +216,12 @@ namespace Microsoft.Build.Shared
         public enum CommandLineSource
         {
             /// <summary>
+            /// Do not attempt to retrieve the command line. Default behavior; <see cref="TryGetCommandLine(Process?, out string?)"/>
+            /// returns <see langword="true"/> with a <see langword="null"/> command line on Windows.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
             /// Query WMI's <c>Win32_Process.CommandLine</c> via <c>IWbemLocator</c>/<c>IWbemServices</c>.
             /// </summary>
             Wmi,
@@ -234,8 +261,9 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal static string? GetCommandLine(int processId, CommandLineSource source) => source switch
             {
+                CommandLineSource.Wmi => GetCommandLineViaWmi(processId),
                 CommandLineSource.DebugEngine => GetCommandLineViaDebugEngine(processId),
-                _ => GetCommandLineViaWmi(processId),
+                _ => null,
             };
 
             /// <summary>
