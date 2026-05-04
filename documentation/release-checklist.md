@@ -18,6 +18,7 @@ Fill in these values before starting. Version increments are irregular — they 
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{STABLE_SNAP_DATE}}` | Date VS snaps `rel/insiders` → `rel/stable`. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{VS_SHIP_DATE}}` | Date VS ships publicly (GA). Post-GA tasks (nuget.org, docs) happen after this. | |
+| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest MSBuild build inserted into VS — used as the ApiCompat baseline when bumping `main` to `{{NEXT_VERSION}}`. In the DevDiv VS repo, open [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBmain) on the `main` branch and read the `version` field of the `Microsoft.Build` component. Use only the part **before** the `+` (e.g. for `"version": "18.7.1-servicing-26230-11+024f5b03..."` use `18.7.1-servicing-26230-11`). | |
 
 **Derived values** (do not edit — computed from inputs):
 - Release branch: `vs{{THIS_RELEASE_VERSION}}`
@@ -85,7 +86,7 @@ Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge
 Create **one PR in `main`** containing all of the following changes:
 
 - [ ] **2.1** `eng/Versions.props`: Update `VersionPrefix` to `{{NEXT_VERSION}}.0`
-- [ ] **2.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to the last released version (the `{{PREVIOUS_RELEASE_VERSION}}` GA version published to nuget.org).
+- [ ] **2.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` (see Inputs table for how to determine).
 - [ ] **2.3** If needed, update `CompatibilitySuppressions.xml` files. Run: \
 `dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true` \
 See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for details.
