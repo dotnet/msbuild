@@ -87,9 +87,7 @@ try {
   else
   {
     $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
-    $propsFile = Join-Path $PSScriptRoot "Versions.props"
-    $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
-    $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
+    $buildToolCommand = "msbuild"
     $buildToolFramework = "net"
 
     $env:DOTNET_ROOT="$bootstrapRoot\core"
@@ -118,15 +116,6 @@ try {
 
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
-
-  # Mirrors cibuild_bootstrapped_msbuild.sh:96. Required so the apphost-based child task host
-  # (NodeProviderOutOfProcTaskHost.ResolveAppHostOrFallback) can locate the runtime when the
-  # parent MSBuild is launched as `dotnet exec MSBuild.dll` (which, unlike the SDK CLI
-  # `dotnet msbuild`, does not set DOTNET_HOST_PATH automatically). Trying to switch the
-  # invocation to `dotnet msbuild` here would be cleaner but the SDK CLI's argument
-  # translation mangles `/mt` into `/m` + `t`, so we keep the explicit `MSBuild.dll` path
-  # and set DOTNET_HOST_PATH ourselves.
-  $env:DOTNET_HOST_PATH=$dotnetExePath
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
