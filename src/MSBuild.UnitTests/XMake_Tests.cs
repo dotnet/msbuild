@@ -22,10 +22,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -582,7 +580,7 @@ namespace Microsoft.Build.UnitTests
             process.ExitCode.ShouldBe(0);
 
             string output = process.StandardOutput.ReadToEnd();
-            output.EndsWith(Environment.NewLine).ShouldBeTrue();
+            output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeTrue();
 
             process.Close();
         }
@@ -622,7 +620,7 @@ namespace Microsoft.Build.UnitTests
             process.ExitCode.ShouldBe(0);
 
             string output = process.StandardOutput.ReadToEnd();
-            output.EndsWith(Environment.NewLine).ShouldBeFalse();
+            output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeFalse();
 
             process.Close();
         }
