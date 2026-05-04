@@ -2689,6 +2689,13 @@ namespace Microsoft.Build.Execution
                 configuration.ProjectTargets ??= result.ProjectTargets;
             }
 
+            // Update the evaluation ID if it's valid - this propagates the eval ID
+            // from worker nodes to the central node for cached result scenarios.
+            if (result.EvaluationId != BuildEventContext.InvalidEvaluationId)
+            {
+                configuration.ProjectEvaluationId = result.EvaluationId;
+            }
+
             // Only report results to the project cache services if it's the result for a build submission.
             // Note that graph builds create a submission for each node in the graph, so each node in the graph will be
             // handled here. This intentionally mirrors the behavior for cache requests, as it doesn't make sense to

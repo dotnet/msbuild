@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
         public bool HaveLoggedBuildFinishedEvent { get; set; }
 
         void IBuildEventSink.Consume(BuildEventArgs buildEvent, int sinkId) => (this as IBuildEventSink).Consume(buildEvent);
-        
+
         void IBuildEventSink.Consume(BuildEventArgs buildEvent)
         {
             // map the incoming build event to the appropriate event handler
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests
         {
             _outputHelper = outputHelper;
             _mockTerminal = new Terminal(_outputWriter);
-            
+
             _terminallogger = new TerminalLogger(_mockTerminal);
             _terminallogger.Initialize(_centralNodeEventSource, _nodeCount);
             _terminallogger._createStopwatch = () => new MockStopwatch();
@@ -914,11 +914,11 @@ namespace Microsoft.Build.UnitTests
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
 
                 // Execute MSBuild with binary, file and terminal loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success, outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Execute MSBuild with binary and file loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success, outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Read the binary log and replay into mockLogger
@@ -1027,7 +1027,7 @@ namespace Microsoft.Build.UnitTests
             {
                 // Create multiple projects that will build in parallel
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
-                
+
                 // Create three simple projects
                 TransientTestFile project1 = env.CreateFile(logFolder, "project1.proj", @"
 <Project>
@@ -1035,21 +1035,21 @@ namespace Microsoft.Build.UnitTests
         <Message Text='Building project1' Importance='High' />
     </Target>
 </Project>");
-                
+
                 TransientTestFile project2 = env.CreateFile(logFolder, "project2.proj", @"
 <Project>
     <Target Name='Build'>
         <Message Text='Building project2' Importance='High' />
     </Target>
 </Project>");
-                
+
                 TransientTestFile project3 = env.CreateFile(logFolder, "project3.proj", @"
 <Project>
     <Target Name='Build'>
         <Message Text='Building project3' Importance='High' />
     </Target>
 </Project>");
-                
+
                 // Create a solution file that builds all projects in parallel
                 string solutionContents = $@"
 <Project>
@@ -1133,6 +1133,31 @@ namespace Microsoft.Build.UnitTests
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
+        }
+
+        [Fact]
+        public void MetaprojProjectStartedDoesNotCrash()
+        {
+#if DEBUG
+            // Metaproj files (generated for solution multi-targeting builds) are never evaluated,
+            // so they have no matching ProjectEvaluationFinished event. TerminalLogger should
+            // handle ProjectStarted for metaproj files without hitting the Debug.Assert that
+            // checks for prior evaluation info. In Release mode this test is a no-op because
+            // Debug.Assert is compiled out.
+            string metaprojFile = NativeMethods.IsUnixLike ? "/src/solution.sln.metaproj" : @"C:\src\solution.sln.metaproj";
+
+            BuildEventContext buildContext = MakeBuildEventContext(evalId: -1, projectContextId: 10);
+
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+
+            Should.NotThrow(() =>
+            {
+                _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(metaprojFile, "Build", buildEventContext: buildContext));
+                _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(metaprojFile, true, buildEventContext: buildContext));
+            });
+
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
+#endif
         }
     }
 }
