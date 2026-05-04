@@ -261,6 +261,39 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
 
+# Dedicated /mt validation that turns on the ThreadSafeTaskAnalyzer (BuildAnalyzer=true),
+# kept as a separate Linux Core job because the analyzer is more expensive and the regular
+# bootstrapped CI jobs (which all run /mt now too) do not need it.
+- job: BootstrapMSBuildWithMTMode
+  displayName: "Linux Core Multithreaded Mode"
+  pool:
+    vmImage: 'ubuntu-latest'
+  timeoutInMinutes: 120
+  steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
+  - bash: sudo apt-get update
+  - bash: sudo apt-get install -y libxml2
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --skipTests --stage2Properties '/mt /p:BuildAnalyzer=true'
+    displayName: 'Build with bootstrapped MSBuild and -mt mode'
+    condition: eq(variables.onlyDocChanged, 0)
+    env:
+      MSBUILDUSESERVER: "1"
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'MTModeOnLinux build logs'
+    continueOnError: true
+    condition: always()
+
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
   variables:
@@ -288,13 +321,13 @@ jobs:
     displayName: cibuild.cmd
     inputs:
       filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release -test'
+      arguments: '-configuration Release -test /mt'
     condition: eq(variables.onlyDocChanged, 0)
   - task: BatchScript@1
     displayName: cibuild.cmd without test
     inputs:
       filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release'
+      arguments: '-configuration Release /mt'
     condition: eq(variables.onlyDocChanged, 1)
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
