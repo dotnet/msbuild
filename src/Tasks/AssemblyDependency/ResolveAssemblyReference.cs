@@ -1129,7 +1129,7 @@ namespace Microsoft.Build.Tasks
         
         /// <summary>
         /// Converts a path to an <see cref="AbsolutePath"/>. Returns <c>default</c> for null or empty paths.
-        /// Under Wave 18.6, absolutizes relative paths via <see cref="TaskEnvironment"/>.
+        /// Under Wave 18.8, absolutizes relative paths via <see cref="TaskEnvironment"/>.
         /// Otherwise, wraps the raw string to preserve pre-wave behavior.
         /// </summary>
         private AbsolutePath MakeAbsolutePath(string path)
@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.Tasks
         /// Converts a path to an <see cref="AbsolutePath"/> in canonical form (resolves ".." etc.).
         /// Returns <c>default</c> for null or empty paths.
         /// Canonical form is needed for paths used in string comparisons.
-        /// Under Wave 18.6, absolutizes and canonicalizes. Otherwise, wraps the raw string.
+        /// Under Wave 18.8, absolutizes and canonicalizes. Otherwise, wraps the raw string.
         /// </summary>
         private AbsolutePath MakeCanonicalPath(string path)
         {
@@ -2509,7 +2509,7 @@ namespace Microsoft.Build.Tasks
                                 // Prior to Wave18_8, empty strings would cause TaskEnvironment.GetAbsolutePath() to throw an exception,
                                 // which would be caught and logged as an error, stopping RAR execution.
                                 // With the new behavior, empty strings are silently ignored (treated like null).
-                                // When Wave 18.6 is disabled, we preserve the old failure behavior.
+                                // When Wave 18.8 is disabled, we preserve the old failure behavior.
                                 // When cleaning up this change wave, also clean up the _appConfigValueIsEmptyString field.
                                 
                                 // Note, second part of the sentence is not localized: this is a temporary fallback behind a change wave that is off by default
