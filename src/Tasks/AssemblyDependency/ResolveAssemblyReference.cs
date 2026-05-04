@@ -705,7 +705,7 @@ namespace Microsoft.Build.Tasks
                 {
                     _appConfigFile = MakeAbsolutePath(value);
                 }
-                else if (value == string.Empty && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                else if (value == string.Empty && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
                 {
                     _appConfigValueIsEmptyString = true;
                 }
@@ -1139,7 +1139,7 @@ namespace Microsoft.Build.Tasks
                 return default;
             }
 
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
                 ? TaskEnvironment.GetAbsolutePath(path)
                 : new AbsolutePath(path, ignoreRootedCheck: true);
         }
@@ -1166,7 +1166,7 @@ namespace Microsoft.Build.Tasks
                 return default;
             }
 
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
                 ? TaskEnvironment.GetAbsolutePath(path).TryGetCanonicalForm(Log)
                 : new AbsolutePath(path, ignoreRootedCheck: true);
         }
@@ -2503,10 +2503,10 @@ namespace Microsoft.Build.Tasks
                         {
                             appConfigRemappedAssemblies = GetAssemblyRemappingsFromAppConfig();
 
-                            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6) && _appConfigValueIsEmptyString)
+                            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8) && _appConfigValueIsEmptyString)
                             {
                                 // Preserve backward compatibility for empty AppConfigFile handling.
-                                // Prior to Wave18_6, empty strings would cause TaskEnvironment.GetAbsolutePath() to throw an exception,
+                                // Prior to Wave18_8, empty strings would cause TaskEnvironment.GetAbsolutePath() to throw an exception,
                                 // which would be caught and logged as an error, stopping RAR execution.
                                 // With the new behavior, empty strings are silently ignored (treated like null).
                                 // When Wave 18.6 is disabled, we preserve the old failure behavior.

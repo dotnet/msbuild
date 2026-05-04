@@ -1365,7 +1365,7 @@ namespace Microsoft.Build.Tasks
             // If the path was resolved, then specify the full path on the reference.
             if (resolvedPath != null)
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
                 {
                     resolvedPath = FileUtilities.FixFilePath(_taskEnvironment.GetAbsolutePath(resolvedPath).GetCanonicalForm()).Value;
                 }

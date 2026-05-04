@@ -571,7 +571,7 @@ namespace Microsoft.Build.Tasks
             {
                 SystemState sysState = null;
                 string stateFilePath = null;
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
                 {
                     AbsolutePath stateFileAbsolutePath = taskEnvironment.GetAbsolutePath(stateFile.ItemSpec);
                     stateFilePath = stateFileAbsolutePath.Value;
