@@ -700,8 +700,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Theory]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         [MemberData(nameof(GetHardLinksSymLinks))]
         public void DoNotNormallyCopyOverReadOnlyFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
