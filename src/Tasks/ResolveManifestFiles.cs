@@ -131,8 +131,6 @@ namespace Microsoft.Build.Tasks
 
         public bool LauncherBasedDeployment { get; set; } = false;
 
-        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
-
         public string TargetFrameworkVersion
         {
             get
@@ -158,6 +156,9 @@ namespace Microsoft.Build.Tasks
             }
             set => _targetFrameworkIdentifier = value;
         }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         #endregion
 

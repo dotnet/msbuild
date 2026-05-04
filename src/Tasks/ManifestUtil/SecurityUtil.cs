@@ -52,11 +52,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
         private const string ToolName = "signtool.exe";
 #if !RUNTIME_TYPE_NETCORE
-        private static XmlDocument LoadXmlDocument(string xml)
+        private static XmlDocument LoadXmlDocument(string path)
         {
             var doc = new XmlDocument { XmlResolver = null };
 
-            using (var sr = new StringReader(xml))
+            using (var sr = new StringReader(path))
             using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
             {
                 doc.Load(reader);
@@ -275,7 +275,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (!string.IsNullOrEmpty(resultInString))
             {
-                var doc = LoadXmlDocument(resultInString);
+                XmlDocument doc = LoadXmlDocument(resultInString);
 
                 return doc.DocumentElement;
             }

@@ -2497,7 +2497,7 @@ namespace Microsoft.Build.Tasks
 
                     if (candidateAssemblyName != null)
                     {
-                        if (String.Equals(requestedAssemblyName.Name, candidateAssemblyName.Name, StringComparison.OrdinalIgnoreCase))
+                        if (String.Equals(requestedAssemblyName.Name, candidateAssemblyName.Name, StringComparison.CurrentCultureIgnoreCase))
                         {
                             return Assembly.UnsafeLoadFrom(_assemblyFiles[i].ItemSpec);
                         }
