@@ -1571,6 +1571,23 @@ namespace Microsoft.Build.UnitTests
             successfulExit.ShouldBeTrue();
         }
 
+        [Fact]
+        public void ResponseFileNoticeIsPrintedOnSwitchError()
+        {
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("foo.proj", content);
+            var projectPath = directory.CreateFile("bar.proj", content).Path;
+            var rspPath = directory.CreateFile("Directory.Build.rsp", "foo.proj").Path;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
+
+            successfulExit.ShouldBeFalse();
+            output.ShouldContain("Some command line switches were read from the auto-response file");
+            output.ShouldContain(rspPath);
+            output.ShouldContain("MSB1008");
+        }
+
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files. Sanity test when there isn't one.
