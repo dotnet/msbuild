@@ -820,6 +820,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 File.SetAttributes(destination.Path, FileAttributes.Normal);
+                ChangeWaves.ResetStateForTests();
             }
         }
 
