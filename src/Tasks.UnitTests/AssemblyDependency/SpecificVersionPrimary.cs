@@ -62,7 +62,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyNames;
             t.SearchPaths = DefaultPaths;
             t.AppConfigFile = appConfigFile;
@@ -127,7 +126,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyNames;
             t.SearchPaths = DefaultPaths;
             t.AppConfigFile = appConfigFile;
@@ -178,7 +176,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -231,7 +228,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -284,7 +280,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;

@@ -25,7 +25,6 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFile standardCache = env.CreateFile(".cache");
                 ResolveAssemblyReference t = new ResolveAssemblyReference()
                 {
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     _cache = new SystemState()
                 };
                 t._cache.instanceLocalFileStateCache = new Dictionary<string, SystemState.FileState>() {
@@ -61,7 +60,6 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFile standardCache = env.CreateFile(".cache");
                 ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference()
                 {
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     _cache = new SystemState()
                 };
                 rarWriterTask._cache.instanceLocalFileStateCache = new() {
@@ -91,7 +89,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference()
                 {
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
                 rarReaderTask.StateFile = standardCache.Path;
                 rarReaderTask.AssemblyInformationCachePaths = new ITaskItem[]
@@ -116,7 +113,6 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFile precomputedCache = env.CreateFile(".cache");
                 ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference()
                 {
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     _cache = new SystemState()
                 };
                 string dllName = Path.Combine(Path.GetDirectoryName(precomputedCache.Path), "randomFolder", "dll.dll");
@@ -139,7 +135,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference()
                 {
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
                 rarReaderTask.StateFile = precomputedCache.Path.Substring(0, precomputedCache.Path.Length - 6); // Not a real path; should not be used.
                 rarReaderTask.AssemblyInformationCachePaths = new ITaskItem[]

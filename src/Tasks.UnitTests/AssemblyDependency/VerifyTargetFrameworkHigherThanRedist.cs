@@ -40,7 +40,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -82,7 +81,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false);
 
             Assert.Equal(0, e.Warnings); // "Expected NO warning in this scenario."
@@ -115,7 +113,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false);
 
@@ -144,7 +141,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t1 = new ResolveAssemblyReference();
-            t1.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t1.TargetFrameworkVersion = "v4.5";
 
             ExecuteRAROnItemsAndRedist(t1, e, items, redistString, false);
@@ -154,7 +150,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t1.ResolvedFiles);
 
             ResolveAssemblyReference t2 = new ResolveAssemblyReference();
-            t2.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t2.TargetFrameworkVersion = "v4.0";
 
             ExecuteRAROnItemsAndRedist(t2, e, items, redistString, false);
@@ -166,7 +161,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
-            t3.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t3.TargetFrameworkVersion = "v4.5";
             t3.UnresolveFrameworkAssembliesFromHigherFrameworks = true;
 
@@ -197,7 +191,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false);
 
             Assert.Equal(0, e.Warnings); // "Expected one warning in this scenario."
@@ -226,7 +219,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -257,7 +249,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false);
 
             Assert.Equal(2, e.Warnings); // "Expected one warning in this scenario."
@@ -286,7 +277,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t1 = new ResolveAssemblyReference();
-            t1.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t1.TargetFrameworkVersion = "v5.0";
 
             ExecuteRAROnItemsAndRedist(t1, e, items, redistString, false);
@@ -297,7 +287,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Single(t1.ResolvedFiles);
 
             ResolveAssemblyReference t2 = new ResolveAssemblyReference();
-            t2.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t2.TargetFrameworkVersion = "v4.0";
 
             ExecuteRAROnItemsAndRedist(t2, e, items, redistString, false);
@@ -310,7 +299,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
-            t3.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             // t2.TargetFrameworkVersion is null
 
             ExecuteRAROnItemsAndRedist(t3, e, items, redistString, false);
@@ -344,7 +332,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -378,7 +365,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false);
 
@@ -414,7 +400,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -445,7 +430,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false);
 
@@ -486,7 +470,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false, additionalPaths);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -527,7 +510,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             additionalPaths.Add(s_myVersion90Path + Path.DirectorySeparatorChar);
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, false, additionalPaths);
 

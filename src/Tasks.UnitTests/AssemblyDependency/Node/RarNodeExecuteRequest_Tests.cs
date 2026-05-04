@@ -21,7 +21,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference clientRar = new()
             {
                 BuildEngine = new MockEngine(),
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Assemblies = [new TaskItem("System"), new TaskItem("System.IO")],
                 AssemblyFiles = [],
                 AllowedAssemblyExtensions = [".dll", ".exe"],
@@ -66,10 +65,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 MinimumMessageImportance = MessageImportance.Normal,
                 SetIsTaskInputLoggingEnabled = false,
             };
-            ResolveAssemblyReference clientRar = new() { BuildEngine = mockEngine, TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            ResolveAssemblyReference clientRar = new() { BuildEngine = mockEngine };
             RarNodeExecuteRequest request = new(clientRar);
 
-            ResolveAssemblyReference nodeRar = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            ResolveAssemblyReference nodeRar = new();
             request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(mockEngine.LineNumberOfTaskNode, nodeRar.BuildEngine.LineNumberOfTaskNode);
@@ -93,7 +92,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference clientRar = new()
             {
                 BuildEngine = mockEngine,
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 AllowOutOfProcNode = true,
             };
             RarNodeExecuteRequest request = new(clientRar);
