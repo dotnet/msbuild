@@ -44,7 +44,7 @@ namespace Microsoft.Build.Framework
         /// Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build),
         /// equivalent to passing -multiThreaded / -mt on the command line.
         /// </summary>
-        public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMT") == "1";
+        public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMULTITHREADED") == "1";
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
