@@ -18,7 +18,34 @@ Fill in these values before starting. Version increments are irregular — they 
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{STABLE_SNAP_DATE}}` | Date VS snaps `rel/insiders` → `rel/stable`. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{VS_SHIP_DATE}}` | Date VS ships publicly (GA). Post-GA tasks (nuget.org, docs) happen after this. | |
-| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest MSBuild build inserted into VS — used as the ApiCompat baseline when bumping `main` to `{{NEXT_VERSION}}`. In the DevDiv VS repo, open [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBmain) on the `main` branch and read the `version` field of the `Microsoft.Build` component. Use only the part **before** the `+` (e.g. for `"version": "18.7.1-servicing-26230-11+024f5b03..."` use `18.7.1-servicing-26230-11`). | |
+| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild build produced from the `vs{{THIS_RELEASE_VERSION}}` branch — used as the ApiCompat baseline. See [How to determine `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`](#how-to-determine-package_validation_baseline_version) below. | |
+
+### How to determine `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`
+
+**The value is the latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild package that is both:**
+
+1. **Published on the public [dotnet-tools feed](https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools)** — this is the feed `darc publish` pushes to and that ApiCompat restores baselines from. If the version isn't here, ApiCompat fails with `NU1102`.
+2. **Produced from a commit reachable from `vs{{THIS_RELEASE_VERSION}}`** — i.e. a `vs{{THIS_RELEASE_VERSION}}` commit prior to stabilization, or the `main` commit `vs{{THIS_RELEASE_VERSION}}` was branched from.
+
+**Two tempting wrong answers — and why they're wrong:**
+
+| Wrong pick | Why it fails |
+|---|---|
+| ❌ The `{{THIS_RELEASE_VERSION}}.X` package that actually ships in VS (e.g. `18.7.1`) | After Phase 4.2 `Stabilize-Release.ps1` runs, builds become **final-versioned**. Final-versioned packages go to **isolated per-build internal feeds** (so multiple builds can share a version label) — they are deliberately kept off `dotnet-tools`. So `18.7.1` is not resolvable from public CI. |
+| ❌ Blindly the most recent `{{THIS_RELEASE_VERSION}}.0-preview-*` on `dotnet-tools` | After `vs{{THIS_RELEASE_VERSION}}` branches, `main` keeps producing `{{THIS_RELEASE_VERSION}}.0-preview-*` until **this** main-bump PR merges — so the most recent feed entries may be `{{NEXT_VERSION}}`-content builds wearing `{{THIS_RELEASE_VERSION}}` branding. Picking one drifts the API baseline forward and silently hides real compat breaks. |
+
+**Procedure:**
+
+1. Open [MSBuild official build pipeline 9434](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434).
+2. Filter runs to branch `vs{{THIS_RELEASE_VERSION}}`. Find the run that final-branded the release (it produces `{{THIS_RELEASE_VERSION}}.X` — no `-preview-` — corresponding to the commit that ran `Stabilize-Release.ps1`). Anything successful **before** that on `vs{{THIS_RELEASE_VERSION}}` is a candidate.
+3. If `vs{{THIS_RELEASE_VERSION}}` has no successful pre-stabilization preview runs (common — the branch sees little churn before stabilization), fall back to the most recent successful `main` run whose commit is the branch-point ancestor: \
+`git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}` gives the SHA — find a `main` run at or before that SHA in pipeline 9434.
+4. Read the package version from that run's `Pack` step output: `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` (example: `18.7.0-preview-26230-02`).
+   - **Decoding tip** (lets you cross-reference feed ↔ build at a glance): `NNNNN` = `YY[Month×50+Day]`, `NN` = revision-of-day. So `26230-02` ↔ build `20260430.02` (year 26, April 30 → 4×50+30 = 230, 2nd run of the day).
+5. Verify the exact version is on the [dotnet-tools feed](https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools) (search `Microsoft.Build`). If not, fall back to the next-older eligible run.
+6. Use that version. Do **not** include any `+sha` suffix.
+
+**Known gap** (track in your release tracking issue): the procedure is manual because `dotnet-tools` contains both pre- and post-branch-point `main` builds under identical `{{THIS_RELEASE_VERSION}}.0-preview-*` branding. If/when publishing is fixed so `main` builds never carry stale branding (e.g. auto-bumping `main`'s `VersionPrefix` at branch-snap), this collapses to "latest `{{THIS_RELEASE_VERSION}}.0-preview-*` on `dotnet-tools`" — programmatically queryable.
 
 **Derived values** (do not edit — computed from inputs):
 - Release branch: `vs{{THIS_RELEASE_VERSION}}`
