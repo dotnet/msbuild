@@ -36,6 +36,11 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="BinlogFormatVersionMismatch">
+        <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
+        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
+      </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
         <source>Content already acquired as StreamReader via GetContentReader.</source>
         <target state="translated">Содержимое, уже получено как StreamReader через GetContentReader.</target>
