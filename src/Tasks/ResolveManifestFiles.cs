@@ -415,7 +415,7 @@ namespace Microsoft.Build.Tasks
                         // Apply the culture publishing rules to include or exclude satellite assemblies
                         AssemblyIdentity identity = String.IsNullOrEmpty(item.ItemSpec)
                             ? null
-                            : AssemblyIdentity.FromManagedAssembly(this.TaskEnvironment.GetAbsolutePath(item.ItemSpec));
+                            : AssemblyIdentity.FromManagedAssembly(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
                         if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                         {
                             CultureInfo satelliteCulture = new CultureInfo(identity.Culture);
@@ -774,7 +774,7 @@ namespace Microsoft.Build.Tasks
 
             AssemblyIdentity identity = String.IsNullOrEmpty(item.ItemSpec)
                 ? null
-                : AssemblyIdentity.FromManagedAssembly(this.TaskEnvironment.GetAbsolutePath(item.ItemSpec));
+                : AssemblyIdentity.FromManagedAssembly(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
             if (item.ItemSpec.EndsWith(".dll", StringComparison.Ordinal) && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file

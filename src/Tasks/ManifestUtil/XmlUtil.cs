@@ -88,7 +88,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var xslc = new XslCompiledTransform();
             // Using the Trusted Xslt is fine as the style sheet comes from our own assemblies.
             // This is similar to the prior this.GetType().Assembly/Evidence method that was used in the now depricated XslTransform.
-            xslc.Load(d, XsltSettings.TrustedXslt, null);
+#pragma warning disable CA3076 // Trusted embedded stylesheet; preserve existing resource resolution behavior.
+            xslc.Load(d, XsltSettings.TrustedXslt, s_resolver);
+#pragma warning restore CA3076
             Util.WriteLog($"XslCompiledTransform.Load t={Environment.TickCount - t3}");
 
             // Need to copy input stream because XmlReader will close it,
