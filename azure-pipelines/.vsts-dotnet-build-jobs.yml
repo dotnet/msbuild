@@ -12,6 +12,9 @@ parameters:
 - name: enableOptProf
   type: boolean
   default: false
+- name: additionalBuildArgs
+  type: string
+  default: ''
 
 jobs:
 - job: Windows_NT
@@ -147,6 +150,7 @@ jobs:
               /p:GenerateSbom=true
               /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
               /p:IsExperimental=${{ parameters.isExperimental }}
+              ${{ parameters.additionalBuildArgs }}
 
     displayName: Build
     condition: succeeded()
