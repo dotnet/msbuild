@@ -129,9 +129,16 @@ try {
   # - Create bootstrap environment as it's required when also running tests
   # - $stage2Properties are appended to the stage 2 build only (matching cibuild_bootstrapped_msbuild.sh).
   #   Use this for switches like /mt that should not be passed to the SDK MSBuild used in stage 1.
+  # Branches mirror cibuild_bootstrapped_msbuild.sh exactly:
+  #   onlyDocChanged=1 → bootstrap not created (artifacts not needed downstream)
+  #   skipTests        → bootstrap IS created (downstream MAY consume it), tests omitted
+  #   default          → bootstrap created, tests run
   $stage2Args = if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() }
-  if ($onlyDocChanged -or $skipTests) {
+  if ($onlyDocChanged) {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Args
+  }
+  elseif ($skipTests) {
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties @stage2Args
   }
   else {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties @stage2Args
