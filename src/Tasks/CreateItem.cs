@@ -159,7 +159,12 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FileMatcher.HasWildcards(i.ItemSpec))
                     {
-                        FileMatcher.Default.GetFileSpecInfo(i.ItemSpec, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
+                        // Absolutize against TaskEnvironment.ProjectDirectory so that any short-name (e.g. "ALONGD~1")
+                        // segments inside the fixed directory portion are resolved against the project directory
+                        // rather than the process current directory (which FileMatcher.GetLongPathName would otherwise use).
+                        string absoluteItemSpec = TaskEnvironment.GetAbsolutePath(i.ItemSpec);
+
+                        FileMatcher.Default.GetFileSpecInfo(absoluteItemSpec, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
                         bool logDriveEnumeratingWildcard = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
                         if (logDriveEnumeratingWildcard)
                         {
@@ -182,7 +187,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else if (isLegalFileSpec)
                         {
-                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(TaskEnvironment.ProjectDirectory, i.ItemSpec);
+                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(TaskEnvironment.ProjectDirectory, absoluteItemSpec);
                             if (globFailure != null)
                             {
                                 Log.LogMessage(MessageImportance.Low, globFailure);
@@ -193,7 +198,7 @@ namespace Microsoft.Build.Tasks
                                 TaskItem newItem = new TaskItem(i) { ItemSpec = file };
 
                                 // Compute the RecursiveDir portion.
-                                FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
+                                FileMatcher.Result match = FileMatcher.Default.FileMatch(absoluteItemSpec, file);
                                 if (match.isLegalFileSpec && match.isMatch)
                                 {
                                     if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
