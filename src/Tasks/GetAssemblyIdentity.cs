@@ -23,8 +23,12 @@ namespace Microsoft.Build.Tasks
     ///  Input:  Assembly Include="foo.exe"
     ///  Output: Identity Include="Foo, Version=1.0.0.0", Name="Foo, Version="1.0.0.0"
     /// </comment>
-    public class GetAssemblyIdentity : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class GetAssemblyIdentity : TaskExtension, IMultiThreadableTask
     {
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         private ITaskItem[] _assemblyFiles;
 
         [Required]
@@ -65,10 +69,14 @@ namespace Microsoft.Build.Tasks
             var list = new List<ITaskItem>();
             foreach (ITaskItem item in AssemblyFiles)
             {
+                string assemblyPath = !string.IsNullOrEmpty(item.ItemSpec)
+                    ? TaskEnvironment.GetAbsolutePath(item.ItemSpec)
+                    : item.ItemSpec;
+
                 AssemblyName an;
                 try
                 {
-                    an = AssemblyName.GetAssemblyName(item.ItemSpec);
+                    an = AssemblyName.GetAssemblyName(assemblyPath);
                 }
                 catch (BadImageFormatException e)
                 {
@@ -100,6 +108,7 @@ namespace Microsoft.Build.Tasks
                 item.CopyMetadataTo(newItem);
                 list.Add(newItem);
             }
+
             Assemblies = list.ToArray();
             return !Log.HasLoggedErrors;
         }

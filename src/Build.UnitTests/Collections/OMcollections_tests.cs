@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// </summary>
         private int ProjectItemInstanceComparer(ProjectItemInstance one, ProjectItemInstance two)
         {
-            return String.Compare(one.EvaluatedInclude, two.EvaluatedInclude);
+            return String.Compare(one.EvaluatedInclude, two.EvaluatedInclude, StringComparison.Ordinal);
         }
     }
 }

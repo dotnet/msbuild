@@ -10,6 +10,7 @@
     <IsTestProject>true</IsTestProject>
     <IsUnitTestProject>true</IsUnitTestProject>
     <IsLibraryTestProject>true</IsLibraryTestProject>
+    <OutputType>Exe</OutputType>
 
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
