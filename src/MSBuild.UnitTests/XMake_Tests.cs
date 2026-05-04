@@ -1574,6 +1574,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileNoticeIsPrintedOnSwitchError()
         {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
             var directory = _env.CreateFolder();
             var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
             directory.CreateFile("foo.proj", content);
@@ -1583,8 +1584,28 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
 
             successfulExit.ShouldBeFalse();
-            output.ShouldContain("Some command line switches were read from the auto-response file");
+            int noticeIndex = output.IndexOf("Some command line switches were read from the auto-response file", StringComparison.OrdinalIgnoreCase);
+            int errorIndex = output.IndexOf("MSB1008", StringComparison.OrdinalIgnoreCase);
+            noticeIndex.ShouldBeGreaterThanOrEqualTo(0);
+            errorIndex.ShouldBeGreaterThanOrEqualTo(0);
+            noticeIndex.ShouldBeLessThan(errorIndex);
             output.ShouldContain(rspPath);
+        }
+
+        [Fact]
+        public void ExplicitResponseFileNoticeIsNotPrintedOnSwitchError()
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("foo.proj", content);
+            var projectPath = directory.CreateFile("bar.proj", content).Path;
+            var rspPath = directory.CreateFile("explicit.rsp", "foo.proj").Path;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\" @\"{rspPath}\" -noAutoResponse", out var successfulExit, _output);
+
+            successfulExit.ShouldBeFalse();
+            output.ShouldNotContain("Some command line switches were read from the auto-response file");
             output.ShouldContain("MSB1008");
         }
 
