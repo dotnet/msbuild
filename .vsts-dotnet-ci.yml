@@ -327,13 +327,13 @@ jobs:
     displayName: cibuild.cmd
     inputs:
       filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release -test /mt'
+      arguments: '-configuration Release -test'
     condition: eq(variables.onlyDocChanged, 0)
   - task: BatchScript@1
     displayName: cibuild.cmd without test
     inputs:
       filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release /mt'
+      arguments: '-configuration Release'
     condition: eq(variables.onlyDocChanged, 1)
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
