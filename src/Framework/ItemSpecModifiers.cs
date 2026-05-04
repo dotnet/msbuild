@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -53,34 +53,15 @@ internal static class ItemSpecModifiers
     ];
 
     /// <summary>
-    ///  <para>
-    ///   Caches derivable item-spec modifier results for a single item spec.
-    ///   Stored on item instances (e.g., TaskItem, ProjectItemInstance.TaskItem)
-    ///   alongside the item spec, replacing the former <c>string _fullPath</c> field.
-    ///  </para>
-    ///  <para>
-    ///   Time-based modifiers (ModifiedTime, CreatedTime, AccessedTime) and RecursiveDir
-    ///   are intentionally excluded — time-based modifiers hit the file system and should
-    ///   not be cached, and RecursiveDir requires wildcard context that only the caller has.
-    ///  </para>
-    ///  <para>
-    ///   DefiningProject* modifiers are cached separately in a static shared cache
-    ///   (<see cref="s_definingProjectCache"/>) keyed by the defining project path,
-    ///   since many items share the same defining project.
-    ///  </para>
+    ///  Per-item cache for the FullPath modifier. Other derivable modifiers (RootDir,
+    ///  Filename, Extension, RelativeDir, Directory) are intentionally NOT cached here
+    ///  because TaskItem is a MarshalByRefObject on .NET Framework, and copying a
+    ///  multi-field struct cross-AppDomain causes allocation regression in VS.
     /// </summary>
     internal struct Cache
     {
         public string? FullPath;
-        public string? RootDir;
-        public string? Filename;
-        public string? Extension;
-        public string? RelativeDir;
-        public string? Directory;
 
-        /// <summary>
-        ///  Clears all cached values. Called when the item spec changes.
-        /// </summary>
         public void Clear()
             => this = default;
     }
@@ -420,19 +401,19 @@ internal static class ItemSpecModifiers
                     return cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec);
 
                 case ItemSpecModifierKind.RootDir:
-                    return cache.RootDir ??= ComputeRootDir(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
+                    return ComputeRootDir(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
                 case ItemSpecModifierKind.Filename:
-                    return cache.Filename ??= ComputeFilename(itemSpec);
+                    return ComputeFilename(itemSpec);
 
                 case ItemSpecModifierKind.Extension:
-                    return cache.Extension ??= ComputeExtension(itemSpec);
+                    return ComputeExtension(itemSpec);
 
                 case ItemSpecModifierKind.RelativeDir:
-                    return cache.RelativeDir ??= ComputeRelativeDir(itemSpec);
+                    return ComputeRelativeDir(itemSpec);
 
                 case ItemSpecModifierKind.Directory:
-                    return cache.Directory ??= ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
+                    return ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
                 case ItemSpecModifierKind.RecursiveDir:
                     return string.Empty;

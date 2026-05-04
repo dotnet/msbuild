@@ -24,7 +24,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Constants = Microsoft.Build.Framework.Constants;
 
@@ -1001,7 +1000,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(normalMessage);
             logger.AssertLogContains(lowMessage);
 
-            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred")).ToArray();
+            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred", StringComparison.Ordinal)).ToArray();
 
             deferredMessages.Length.ShouldBe(3);
 

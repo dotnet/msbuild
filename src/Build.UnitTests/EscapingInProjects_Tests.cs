@@ -22,7 +22,6 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 #if FEATURE_COMPILE_IN_TESTS
 using Microsoft.Build.Shared;
 #endif
@@ -828,7 +827,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         </None>
                     </ItemGroup>
                 </Project>";
-            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
             Project project = new Project(reader);
             ProjectItem item = project.GetItems("None").Single();
 
@@ -874,7 +873,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
@@ -906,7 +905,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 

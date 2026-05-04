@@ -208,6 +208,11 @@ namespace Microsoft.Build.BackEnd
 
             _nodeLoggingContext = loggingContext;
 
+            // Create a per-BuildRequestEngine telemetry collector via the provider.
+            // Each BuildRequestEngine owns its collector — no cross-engine sharing, no singleton contention.
+            var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
+            _nodeLoggingContext.TelemetryCollector = telemetryProvider.CreateCollector();
+
             // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
             // (which we have named action) and does something with it (in this case calls invoke on it.)
@@ -302,9 +307,8 @@ namespace Microsoft.Build.BackEnd
                     IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
-                    // Flush and send the final telemetry data if they are being collected
-                    ITelemetryForwarder telemetryForwarder = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
-                    telemetryForwarder.FinalizeProcessing(_nodeLoggingContext);
+                    // Flush and send the per-BuildRequestEngine telemetry data if any was collected.
+                    _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },
