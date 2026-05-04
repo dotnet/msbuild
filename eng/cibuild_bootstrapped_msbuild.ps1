@@ -119,16 +119,21 @@ try {
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
-  # Mirrors cibuild_bootstrapped_msbuild.sh. Some MSBuild scenarios (notably /mt routing tasks
-  # to a sidecar TaskHost) require this so the apphost-based child can locate the runtime.
-  # The SDK CLI (`dotnet msbuild`) sets it automatically; `dotnet exec MSBuild.dll` does not.
+  # Mirrors cibuild_bootstrapped_msbuild.sh:96. Required so the apphost-based child task host
+  # (NodeProviderOutOfProcTaskHost.ResolveAppHostOrFallback) can locate the runtime when the
+  # parent MSBuild is launched as `dotnet exec MSBuild.dll` (which, unlike the SDK CLI
+  # `dotnet msbuild`, does not set DOTNET_HOST_PATH automatically). Trying to switch the
+  # invocation to `dotnet msbuild` here would be cleaner but the SDK CLI's argument
+  # translation mangles `/mt` into `/m` + `t`, so we keep the explicit `MSBuild.dll` path
+  # and set DOTNET_HOST_PATH ourselves.
   $env:DOTNET_HOST_PATH=$dotnetExePath
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Create bootstrap environment as it's required when also running tests
   # - $stage2Properties are appended to the stage 2 build only (matching cibuild_bootstrapped_msbuild.sh).
-  #   Use this for switches like /mt that should not be passed to the SDK MSBuild used in stage 1.
+  #   Use this for switches like /mt that should not be passed to the stable MSBuild used in stage 1
+  #   until a stable version of MT is available in the images.
   # Branches mirror cibuild_bootstrapped_msbuild.sh exactly:
   #   onlyDocChanged=1 → bootstrap not created (artifacts not needed downstream)
   #   skipTests        → bootstrap IS created (downstream MAY consume it), tests omitted
