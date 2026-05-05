@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -249,6 +250,16 @@ namespace Microsoft.Build.Tasks
                 ToolExe,
                 Log,
                 true);
+
+        protected override ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
+        {
+            if (!string.IsNullOrEmpty(pathToTool) && Path.GetFileName(pathToTool).Length != pathToTool.Length)
+            {
+                pathToTool = TaskEnvironment.GetAbsolutePath(pathToTool);
+            }
+
+            return base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+        }
 
         /// <summary>
         /// Validate parameters, log errors and warnings and return true if Execute should proceed.
