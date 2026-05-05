@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string results = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:diag", out bool success);
 
             int count = 0;
-            for (int index = results.IndexOf("Task \"Message\""); index >= 0; index = results.IndexOf("Task \"Message\"", index))
+            for (int index = results.IndexOf("Task \"Message\"", StringComparison.Ordinal); index >= 0; index = results.IndexOf("Task \"Message\"", index, StringComparison.Ordinal))
             {
                 count++;
                 index += 14; // Skip to the end of this string
