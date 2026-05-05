@@ -22,10 +22,10 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Exports a managed assembly to a windows runtime metadata.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class WinMDExp : ToolTaskExtension, IWinMDExpTaskContract
     {
         #region Properties
-
         /// <summary>
         /// Set of references to pass to the winmdexp tool.
         /// </summary>
@@ -240,10 +240,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The full path of the tool to execute.
         /// </summary>
-        protected override string GenerateFullPathToTool()
-        {
-            return SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
-        }
+        protected override string GenerateFullPathToTool() => SdkToolsPathUtility.GeneratePathToTool(
+                f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
+                Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
+                SdkToolsPath,
+                ToolExe,
+                Log,
+                true);
 
         /// <summary>
         /// Validate parameters, log errors and warnings and return true if Execute should proceed.
@@ -266,11 +271,12 @@ namespace Microsoft.Build.Tasks
         {
             if (!String.IsNullOrEmpty(OutputWindowsMetadataFile))
             {
-                var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(OutputWindowsMetadataFile);
-                var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(WinMDModule);
+                AbsolutePath outputWindowsMetadataFile = TaskEnvironment.GetAbsolutePath(OutputWindowsMetadataFile);
+                AbsolutePath winMDModule = TaskEnvironment.GetAbsolutePath(WinMDModule);
 
-                // If the last write time of the input file is less than the last write time of the output file
-                // then the output is newer then the input so we do not need to re-run the tool.
+                var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputWindowsMetadataFile);
+                var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(winMDModule);
+
                 if (outputWriteTime > winMDModuleWriteTime)
                 {
                     return true;
@@ -279,6 +285,7 @@ namespace Microsoft.Build.Tasks
 
             return false;
         }
+
         #endregion
     }
 
