@@ -1282,6 +1282,194 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);
             Assert.Equal("v4", group["p1"].EvaluatedValue);
         }
+
+        /// <summary>
+        /// Regression coverage for the perf fix in <see cref="Lookup.GetItems"/> when many
+        /// items are removed across batches: the result must still contain exactly the items
+        /// that were not removed, regardless of whether the implementation uses the
+        /// linear-scan fast path or the HashSet path.
+        /// </summary>
+        [Fact]
+        public void GetItemsAfterManyBatchedRemoves_ReturnsCorrectItems()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+            const int baseCount = 200;
+            const int batchCount = 50; // 50 batches × 4 = 200 removes total → exercises HashSet path
+            const int batchSize = 4;
+
+            var allItems = new List<ProjectItemInstance>(baseCount);
+            for (int i = 0; i < baseCount; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath);
+                table1.Add(item);
+                allItems.Add(item);
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            lookup.EnterScope("x");
+
+            var removedSet = new HashSet<ProjectItemInstance>();
+            for (int b = 0; b < batchCount; b++)
+            {
+                var batch = new List<ProjectItemInstance>(batchSize);
+                for (int k = 0; k < batchSize; k++)
+                {
+                    int idx = b * batchSize + k;
+                    batch.Add(allItems[idx]);
+                    removedSet.Add(allItems[idx]);
+                }
+                lookup.RemoveItems(itemType, batch);
+            }
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            Assert.Equal(baseCount - (batchCount * batchSize), remaining.Count);
+            foreach (ProjectItemInstance item in remaining)
+            {
+                Assert.DoesNotContain(item, removedSet);
+            }
+            // And no expected-remaining item is missing
+            for (int i = batchCount * batchSize; i < baseCount; i++)
+            {
+                Assert.Contains(allItems[i], remaining);
+            }
+        }
+
+        /// <summary>
+        /// Boundary check: at totalRemoves == 8 the linear-scan path is used, at 9 the
+        /// HashSet path is used. Both must produce the same result.
+        /// </summary>
+        [Theory]
+        [InlineData(8)]
+        [InlineData(9)]
+        public void GetItems_LinearAndHashSetPathsAgree(int removeCount)
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+
+            var allItems = new List<ProjectItemInstance>();
+            for (int i = 0; i < 50; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath);
+                table1.Add(item);
+                allItems.Add(item);
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            lookup.EnterScope("x");
+
+            var toRemove = allItems.Take(removeCount).ToList();
+            lookup.RemoveItems(itemType, toRemove);
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            Assert.Equal(50 - removeCount, remaining.Count);
+            foreach (var removed in toRemove)
+            {
+                Assert.DoesNotContain(removed, remaining);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that GetItems uses reference equality (matching pre-#12320 behavior).
+        /// Two different <see cref="ProjectItemInstance"/> instances with identical
+        /// EvaluatedInclude must be treated as distinct: removing one must not remove the other.
+        /// </summary>
+        [Fact]
+        public void GetItems_RemoveUsesReferenceEquality_NotValueEquality()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+            const string sharedSpec = "duplicate.cpp";
+
+            // Many items so the HashSet path is exercised
+            var allItems = new List<ProjectItemInstance>();
+            for (int i = 0; i < 30; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, sharedSpec, project.FullPath);
+                table1.Add(item);
+                allItems.Add(item);
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            lookup.EnterScope("x");
+
+            // Remove only the first 10 references, even though all share the same EvaluatedInclude
+            var toRemove = allItems.Take(10).ToList();
+            lookup.RemoveItems(itemType, toRemove);
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            // Exactly the 20 untouched references should remain
+            Assert.Equal(20, remaining.Count);
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.DoesNotContain(allItems[i], remaining);
+            }
+            for (int i = 10; i < 30; i++)
+            {
+                Assert.Contains(allItems[i], remaining);
+            }
+        }
+
+        /// <summary>
+        /// Merged-subscope variant of <see cref="GetItemsAfterManyBatchedRemoves_ReturnsCorrectItems"/>:
+        /// each batch lives in a child scope that is then merged into the outer scope, mirroring
+        /// how batched intrinsic-task removes accumulate. Exercises the HashSet path with
+        /// removes coming from multiple scope levels (multiple lists in <c>allRemoves</c>).
+        /// </summary>
+        [Fact]
+        public void GetItemsAfterMergedSubScopeRemoves_ReturnsCorrectItems()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+            const int baseCount = 100;
+            const int batchCount = 20;
+            const int batchSize = 3;
+
+            var allItems = new List<ProjectItemInstance>(baseCount);
+            for (int i = 0; i < baseCount; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath);
+                table1.Add(item);
+                allItems.Add(item);
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            Lookup.Scope outer = lookup.EnterScope("outer");
+
+            for (int b = 0; b < batchCount; b++)
+            {
+                Lookup.Scope inner = lookup.EnterScope("batch");
+
+                var batch = new List<ProjectItemInstance>(batchSize);
+                for (int k = 0; k < batchSize; k++)
+                {
+                    batch.Add(allItems[b * batchSize + k]);
+                }
+                lookup.RemoveItems(itemType, batch);
+                inner.LeaveScope();
+            }
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            Assert.Equal(baseCount - (batchCount * batchSize), remaining.Count);
+            for (int i = 0; i < batchCount * batchSize; i++)
+            {
+                Assert.DoesNotContain(allItems[i], remaining);
+            }
+            for (int i = batchCount * batchSize; i < baseCount; i++)
+            {
+                Assert.Contains(allItems[i], remaining);
+            }
+
+            outer.LeaveScope();
+        }
     }
 
     internal sealed class LookupHelpers
