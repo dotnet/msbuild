@@ -285,7 +285,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     if (bytesRead == 0)
                                     {
                                         // Incomplete read.  Abort.
-                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
+                                        ErrorUtilities.ThrowInternalError($"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
                                     }
 
                                     packetBytesRead += bytesRead;
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd.Client
                                 catch
                                 {
                                     // Error while deserializing or handling packet. Logging additional info.
-                                    CommunicationsUtilities.Trace("Packet factory failed to receive package. Exception while deserializing packet {0}.", packetType);
+                                    CommunicationsUtilities.Trace($"Packet factory failed to receive package. Exception while deserializing packet {packetType}.");
                                     throw;
                                 }
 
@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd.Client
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Exception occurred in the packet pump: {0}", ex);
+                CommunicationsUtilities.Trace($"Exception occurred in the packet pump: {ex}");
                 PacketPumpException = ex;
             }
 

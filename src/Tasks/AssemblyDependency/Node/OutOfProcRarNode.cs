@@ -61,11 +61,11 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
             if (shutdownException == null)
             {
-                CommunicationsUtilities.Trace("Shutting down with reason: {0}");
+                CommunicationsUtilities.Trace($"Shutting down with reason: {shutdownReason}");
             }
             else
             {
-                CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}", shutdownReason, shutdownException);
+                CommunicationsUtilities.Trace($"Shutting down with reason: {shutdownReason}, and exception: {shutdownException}");
             }
 
             return shutdownReason;
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 endpointTasks[i] = Task.Run(() => endpoint.RunAsync(cancellationToken), cancellationToken);
             }
 
-            CommunicationsUtilities.Trace("{0} RAR endpoints started.", endpoints.Length);
+            CommunicationsUtilities.Trace($"{endpoints.Length} RAR endpoints started.");
 
             await Task.WhenAll(endpointTasks);
 

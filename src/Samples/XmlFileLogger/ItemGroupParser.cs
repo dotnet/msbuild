@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
                 switch (GetNumberOfLeadingSpaces(line))
                 {
                     case 4:
-                        if (line.EndsWith("=", StringComparison.Ordinal))
+                        if (line[line.Length - 1] == '=')
                         {
                             name = line.Substring(4, line.Length - 5);
                         }
