@@ -4047,7 +4047,12 @@ namespace Microsoft.Build.CommandLine
             bool isBuildCheckEnabled)
         {
 
-            var replayEventSource = new BinaryLogReplayEventSource();
+            var replayEventSource = new BinaryLogReplayEventSource() { AllowForwardCompatibility = true };
+
+            // Required when AllowForwardCompatibility is true — the reader requires a subscriber
+            // for recoverable errors when skipping unknown events from newer-version binlogs.
+            // For same-version binlogs the skip flags are not set, so this handler never fires.
+            replayEventSource.RecoverableReadError += _ => { };
 
             var eventSource = isBuildCheckEnabled ?
                 BuildCheckReplayModeConnector.GetMergedEventSource(BuildManager.DefaultBuildManager, replayEventSource) :
@@ -4081,6 +4086,11 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
+
+                if (replayEventSource.FormatVersionMismatchWarning is string warning)
+                {
+                    Console.WriteLine(warning);
+                }
             }
             catch (Exception ex)
             {
