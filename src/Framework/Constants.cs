@@ -92,6 +92,12 @@ namespace Microsoft.Build.Framework
 
         internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
 
+        /// <summary>
+        /// Name of the MSBuild property that opts in to synthesizing <c>MSBuildImportedProject</c>
+        /// items from the import closure during evaluation.
+        /// </summary>
+        internal const string MSBuildProvideImportedProjectsPropertyName = "MSBuildProvideImportedProjects";
+
         internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
     }
 }
