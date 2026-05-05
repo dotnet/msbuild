@@ -639,7 +639,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     RenderBuildSummary();
                 }
 
-                if (_showSummary == true && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
+                if (_registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
                 {
                     Terminal.WriteLine(string.Empty);
 
