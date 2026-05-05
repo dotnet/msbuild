@@ -105,7 +105,6 @@
   <ItemGroup Condition="'$(FeatureWindowsInterop)' == 'true'">
     <PackageReference Include="Microsoft.Windows.CsWin32">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
