@@ -3376,6 +3376,34 @@ namespace Microsoft.Build.Execution
 
             _importPathsIncludingDuplicates = importPathsIncludingDuplicates;
             ImportPathsIncludingDuplicates = importPathsIncludingDuplicates.AsReadOnly();
+
+            // Optionally synthesize MSBuildImportedProject items from the import closure,
+            // making the import tree available to targets and tasks as regular items.
+            if (string.Equals(
+                    _properties?.GetProperty(Constants.MSBuildProvideImportedProjectsPropertyName)?.EvaluatedValue,
+                    "true",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (ResolvedImport resolvedImport in importClosure)
+                {
+                    if (resolvedImport.ImportingElement is not null)
+                    {
+                        string sdkName = resolvedImport.SdkResult?.SdkReference.Name;
+                        KeyValuePair<string, string> importingPath = new("ImportingProjectPath", resolvedImport.ImportingElement.ContainingProject.FullPath);
+
+                        IEnumerable<KeyValuePair<string, string>> metadata = sdkName is null
+                            ? [importingPath]
+                            : [importingPath, new("Sdk", sdkName)];
+
+                        _items.Add(new ProjectItemInstance(
+                            project: this,
+                            itemType: "MSBuildImportedProject",
+                            includeEscaped: resolvedImport.ImportedProject.FullPath,
+                            directMetadata: metadata,
+                            definingFileEscaped: FullPath));
+                    }
+                }
+            }
         }
 
         /// <summary>
