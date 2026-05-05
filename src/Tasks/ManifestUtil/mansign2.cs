@@ -633,13 +633,10 @@ namespace System.Deployment.Internal.CodeSigning
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.", Justification = "Suppressed since the xml being loaded is a constant defined in this file.")]
         private static XmlDocument CreateLicenseDom(CmiManifestSigner2 signer, XmlElement principal, byte[] hash)
         {
-            XmlDocument licenseDom = new XmlDocument { XmlResolver = null };
+            XmlDocument licenseDom = new XmlDocument();
             licenseDom.PreserveWhitespace = true;
-            using (var sr = new StringReader(licenseTemplate))
-            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
-            {
-                licenseDom.Load(reader);
-            }
+            // CA3057: DoNotUseLoadXml. Suppressed since the xml being loaded is a constant defined in this file.
+            licenseDom.LoadXml(licenseTemplate);
             XmlNamespaceManager nsm = new XmlNamespaceManager(licenseDom.NameTable);
             nsm.AddNamespace("r", LicenseNamespaceUri);
             nsm.AddNamespace("as", AuthenticodeNamespaceUri);

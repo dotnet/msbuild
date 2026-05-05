@@ -447,7 +447,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             var importElement = project.Imports[0].ImportingElement;
             var sdk = GetParsedSdk(importElement);
 
-            if (sdkVersion.StartsWith("min=", StringComparison.Ordinal))
+            if (sdkVersion.StartsWith("min="))
             {
                 // Ignore version when min= string is specified
                 sdkVersion = null;

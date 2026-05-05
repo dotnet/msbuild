@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Tasks;
@@ -35,7 +34,7 @@ namespace Microsoft.Build.UnitTests
                 "    </runtime>\n" +
                 "</configuration>";
 
-            using var xmlReader = XmlReader.Create(new StringReader(xml));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
             app.Read(xmlReader);
 
             string s = Summarize(app);
@@ -61,7 +60,7 @@ namespace Microsoft.Build.UnitTests
                 "    </runtime>\n" +
                 "</configuration>";
 
-            using var xmlReader = XmlReader.Create(new StringReader(xml));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
             app.Read(xmlReader);
 
             string s = Summarize(app);
@@ -108,7 +107,7 @@ namespace Microsoft.Build.UnitTests
                 "    </system.net>\n" +
                 "</configuration>";
 
-            using var xmlReader = XmlReader.Create(new StringReader(xml));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
             app.Read(xmlReader);
 
             string s = Summarize(app);
@@ -173,7 +172,7 @@ namespace Microsoft.Build.UnitTests
                 "    </system.runtime.remoting>\n" +
                 "</configuration>        ";
 
-            using var xmlReader = XmlReader.Create(new StringReader(xml));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
             app.Read(xmlReader);
 
             string s = Summarize(app);
@@ -199,7 +198,7 @@ namespace Microsoft.Build.UnitTests
                 "    </runtime>\n" +
                 "</configuration>";
 
-            using var xmlReader = XmlReader.Create(new StringReader(xml));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
             app.Read(xmlReader);
 
             string s = Summarize(app);

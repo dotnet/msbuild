@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 using Shouldly;
 using Xunit;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
@@ -314,11 +313,7 @@ namespace Microsoft.Build.UnitTests
         protected string GetXmlContents(string xmlText)
         {
             XmlDocumentWithLocation xmldoc = new XmlDocumentWithLocation(loadAsReadOnly);
-            using (StringReader sreader = new StringReader(xmlText))
-            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
-            {
-                xmldoc.Load(reader);
-            }
+            xmldoc.LoadXml(xmlText);
 
             XmlElementWithLocation rootElement = (XmlElementWithLocation)xmldoc.FirstChild;
             Console.WriteLine("originalxml = " + xmlText);

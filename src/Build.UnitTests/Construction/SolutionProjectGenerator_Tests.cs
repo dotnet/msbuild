@@ -1323,11 +1323,11 @@ namespace Microsoft.Build.UnitTests.Construction
                 foreach (ITaskItem item in instance.Items)
                 {
                     string skipNonexistentProjects = item.GetMetadata("SkipNonexistentProjects");
-                    if (item.ItemSpec.EndsWith("ClassLibrary1.csproj", StringComparison.Ordinal))
+                    if (item.ItemSpec.EndsWith("ClassLibrary1.csproj"))
                     {
                         Assert.Equal("False", skipNonexistentProjects);
                     }
-                    else if (item.ItemSpec.EndsWith("MainApp.metaproj", StringComparison.Ordinal))
+                    else if (item.ItemSpec.EndsWith("MainApp.metaproj"))
                     {
                         Assert.Equal("Build", skipNonexistentProjects);
                     }
