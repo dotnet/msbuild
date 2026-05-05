@@ -634,15 +634,17 @@ public sealed partial class TerminalLogger : INodeLogger
                     RenderBuildSummary();
                 }
 
-                if (_showSummary == true)
+                if (_showSummary == true && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
                 {
-                    foreach (var logger in _registeredLoggers)
+                    Terminal.WriteLine(string.Empty);
+
+                    foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
                     {
-                        foreach (var outputPath in logger.OutputFilePaths)
-                        {
-                            string displayPath = $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}";
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
-                        }
+                        string displayPaths = string.Join(
+                            CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
+                            logger.OutputFilePaths.Select(outputPath => $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
+
+                        Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
                     }
                 }
 
@@ -719,7 +721,7 @@ public sealed partial class TerminalLogger : INodeLogger
             case ProjectEvaluationFinishedEventArgs evalFinish:
                 CaptureEvalContext(evalFinish);
                 break;
-            case LoggerRegisteredEventArgs loggerEvent:
+            case LoggersRegisteredEventArgs loggerEvent:
                 _registeredLoggers.AddRange(loggerEvent.Loggers);
                 break;
         }

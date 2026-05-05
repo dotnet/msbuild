@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -17,17 +18,29 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initialize a new instance of the RegisteredLoggerInfo class.
         /// </summary>
-        public RegisteredLoggerInfo(string loggerName, IReadOnlyList<string>? outputFilePaths = null, LoggerVerbosity? verbosity = null)
+        public RegisteredLoggerInfo(string loggerName, IReadOnlyList<string>? outputFilePaths = null, LoggerVerbosity? verbosity = null, string? loggerTypeFullName = null, string? parameters = null)
         {
             LoggerName = loggerName;
             OutputFilePaths = outputFilePaths ?? Array.Empty<string>();
             Verbosity = verbosity;
+            LoggerTypeFullName = loggerTypeFullName;
+            Parameters = parameters;
         }
 
         /// <summary>
         /// The name of the logger.
         /// </summary>
         public string LoggerName { get; }
+
+        /// <summary>
+        /// The full type name of the logger.
+        /// </summary>
+        public string? LoggerTypeFullName { get; }
+
+        /// <summary>
+        /// The logger parameters.
+        /// </summary>
+        public string? Parameters { get; }
 
         /// <summary>
         /// The output file paths for the logger.
@@ -41,20 +54,20 @@ namespace Microsoft.Build.Framework
     }
 
     /// <summary>
-    /// Arguments for the logger registered event, containing one or more logger registrations.
+    /// Arguments for the loggers registered event, containing one or more logger registrations.
     /// </summary>
     [Serializable]
-    public sealed class LoggerRegisteredEventArgs : BuildStatusEventArgs
+    public sealed class LoggersRegisteredEventArgs : BuildStatusEventArgs
     {
-        internal LoggerRegisteredEventArgs()
+        internal LoggersRegisteredEventArgs()
         {
         }
 
         /// <summary>
-        /// Initialize a new instance of the LoggerRegisteredEventArgs class.
+        /// Initialize a new instance of the LoggersRegisteredEventArgs class.
         /// </summary>
         /// <param name="loggers">The list of registered loggers.</param>
-        public LoggerRegisteredEventArgs(IReadOnlyList<RegisteredLoggerInfo> loggers)
+        public LoggersRegisteredEventArgs(IReadOnlyList<RegisteredLoggerInfo> loggers)
             : base(FormatMessage(loggers), null, null)
         {
             Loggers = loggers;
@@ -72,7 +85,10 @@ namespace Microsoft.Build.Framework
                 return string.Empty;
             }
 
-            return string.Join("; ", withPaths.Select(l => $"{l.LoggerName}: {string.Join(", ", l.OutputFilePaths)}"));
+            return string.Join("; ", withPaths.Select(l => FormatResourceStringIgnoreCodeAndKeyword(
+                "LogFileOutputPath",
+                l.LoggerName,
+                string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", l.OutputFilePaths))));
         }
 
         /// <summary>
@@ -88,6 +104,8 @@ namespace Microsoft.Build.Framework
             foreach (var logger in Loggers)
             {
                 writer.Write(logger.LoggerName);
+                writer.Write(logger.LoggerTypeFullName ?? string.Empty);
+                writer.Write(logger.Parameters ?? string.Empty);
                 writer.Write(logger.Verbosity.HasValue);
                 if (logger.Verbosity.HasValue)
                 {
@@ -111,6 +129,8 @@ namespace Microsoft.Build.Framework
             for (int i = 0; i < count; i++)
             {
                 string loggerName = reader.ReadString();
+                string loggerTypeFullName = reader.ReadString();
+                string parameters = reader.ReadString();
 
                 LoggerVerbosity? verbosity = null;
                 if (reader.ReadBoolean())
@@ -125,7 +145,7 @@ namespace Microsoft.Build.Framework
                     outputFilePaths[j] = reader.ReadString();
                 }
 
-                loggers.Add(new RegisteredLoggerInfo(loggerName, outputFilePaths, verbosity));
+                loggers.Add(new RegisteredLoggerInfo(loggerName, outputFilePaths, verbosity, loggerTypeFullName, parameters));
             }
 
             Loggers = loggers;

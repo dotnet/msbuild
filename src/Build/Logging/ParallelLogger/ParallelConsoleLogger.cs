@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -276,17 +276,19 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // Show paths to the files created by enabled loggers.
-            if (ShowSummary == true)
+            if (ShowSummary == true && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
             {
-                foreach (var logger in _registeredLoggers)
+                WriteNewLine();
+
+                foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
                 {
-                    foreach (var outputPath in logger.OutputFilePaths)
-                    {
-                        string displayPath = setColor != DontSetColor
+                    string displayPaths = string.Join(
+                        CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
+                        logger.OutputFilePaths.Select(outputPath => setColor != DontSetColor
                             ? $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"
-                            : outputPath;
-                        WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPath));
-                    }
+                            : outputPath));
+
+                    WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
                 }
             }
 
@@ -1229,7 +1231,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     propertyOutputMap[evaluationKey] = value;
                 }
             }
-            else if (e is LoggerRegisteredEventArgs loggerEvent)
+            else if (e is LoggersRegisteredEventArgs loggerEvent)
             {
                 _registeredLoggers.AddRange(loggerEvent.Loggers);
             }

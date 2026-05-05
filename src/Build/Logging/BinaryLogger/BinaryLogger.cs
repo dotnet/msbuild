@@ -298,7 +298,20 @@ namespace Microsoft.Build.Logging
         internal string FilePath { get; private set; }
 
         /// <inheritdoc/>
-        string IFileOutputLogger.OutputFilePath => FilePath;
+        System.Collections.Generic.IReadOnlyList<string> IFileOutputLogger.OutputFilePaths
+        {
+            get
+            {
+                if (AdditionalFilePaths == null || AdditionalFilePaths.Count == 0)
+                {
+                    return new[] { FilePath };
+                }
+
+                var outputFilePaths = new List<string>(AdditionalFilePaths.Count + 1) { FilePath };
+                outputFilePaths.AddRange(AdditionalFilePaths);
+                return outputFilePaths;
+            }
+        }
 
         /// <summary>
         /// Gets or sets additional output file paths. When set, the binlog will be copied to all these paths
