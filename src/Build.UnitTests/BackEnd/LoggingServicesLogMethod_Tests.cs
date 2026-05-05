@@ -1079,14 +1079,16 @@ namespace Microsoft.Build.UnitTests.Logging
                 project.Build(new ILogger[] { fileLogger, mockLogger }).ShouldBeTrue();
             }
 
-            // Check that MockLogger captured a LoggerRegisteredEventArgs containing the file logger path
+            // Check that MockLogger captured a LoggersRegisteredEventArgs containing the file logger path
             var registeredEvent = mockLogger.AllBuildEvents
-                .OfType<LoggerRegisteredEventArgs>()
+                .OfType<LoggersRegisteredEventArgs>()
                 .FirstOrDefault(e => e.Loggers.Any(l => l.LoggerName == nameof(FileLogger)));
             registeredEvent.ShouldNotBeNull();
             var fileLoggerDesc = registeredEvent.Loggers.First(l => l.LoggerName == nameof(FileLogger));
             var expectedPath = Path.GetFullPath(logFilePath);
             fileLoggerDesc.OutputFilePaths.ShouldContain(expectedPath);
+            fileLoggerDesc.LoggerTypeFullName.ShouldBe(typeof(FileLogger).FullName);
+            fileLoggerDesc.Parameters.ShouldBe(fileLogger.Parameters);
 
             // Check the file log itself contains the exact path
             var fileLogContents = File.ReadAllText(logFilePath);

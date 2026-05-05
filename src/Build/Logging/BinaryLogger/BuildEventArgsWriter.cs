@@ -221,7 +221,7 @@ namespace Microsoft.Build.Logging
                 case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: return Write(projectEvaluationFinished);
                 case BuildCheckTracingEventArgs buildCheckTracing: return Write(buildCheckTracing);
                 case BuildCheckAcquisitionEventArgs buildCheckAcquisition: return Write(buildCheckAcquisition);
-                case LoggerRegisteredEventArgs loggerRegistered: return Write(loggerRegistered);
+                case LoggersRegisteredEventArgs loggersRegistered: return Write(loggersRegistered);
                 default:
                     // convert all unrecognized objects to message
                     // and just preserve the message
@@ -317,13 +317,15 @@ namespace Microsoft.Build.Logging
             return BinaryLogRecordKind.BuildCanceled;
         }
 
-        private BinaryLogRecordKind Write(LoggerRegisteredEventArgs e)
+        private BinaryLogRecordKind Write(LoggersRegisteredEventArgs e)
         {
             WriteBuildEventArgsFields(e);
             Write(e.Loggers.Count);
             foreach (var logger in e.Loggers)
             {
                 WriteDeduplicatedString(logger.LoggerName);
+                WriteDeduplicatedString(logger.LoggerTypeFullName);
+                WriteDeduplicatedString(logger.Parameters);
                 Write(logger.Verbosity.HasValue);
                 if (logger.Verbosity.HasValue)
                 {
@@ -337,7 +339,7 @@ namespace Microsoft.Build.Logging
                 }
             }
 
-            return BinaryLogRecordKind.LoggerRegistered;
+            return BinaryLogRecordKind.LoggersRegistered;
         }
 
         private BinaryLogRecordKind Write(ProjectEvaluationStartedEventArgs e)

@@ -153,6 +153,10 @@
   <data name="PathMustBeRooted" xml:space="preserve">
     <value>Path must be rooted.</value>
   </data>
+  <data name="LogFileOutputPath" xml:space="preserve">
+    <value>{0} wrote to: {1}</value>
+    <comment>{0} is the logger name. {1} is a comma-separated list of full file paths.</comment>
+  </data>
   <data name="PathTooLong" xml:space="preserve">
     <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
   </data>

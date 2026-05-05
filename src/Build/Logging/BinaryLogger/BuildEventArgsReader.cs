@@ -330,7 +330,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
                 BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
                 BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
-                BinaryLogRecordKind.LoggerRegistered => ReadLoggerRegisteredEventArgs(),
+                BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
                 _ => null
             };
 
@@ -1288,7 +1288,7 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
-        private BuildEventArgs ReadLoggerRegisteredEventArgs()
+        private BuildEventArgs ReadLoggersRegisteredEventArgs()
         {
             var fields = ReadBuildEventArgsFields();
             int count = ReadInt32();
@@ -1296,6 +1296,8 @@ namespace Microsoft.Build.Logging
             for (int i = 0; i < count; i++)
             {
                 string loggerName = ReadDeduplicatedString()!;
+                string loggerTypeFullName = ReadDeduplicatedString()!;
+                string parameters = ReadDeduplicatedString()!;
 
                 LoggerVerbosity? verbosity = null;
                 if (ReadBoolean())
@@ -1310,10 +1312,10 @@ namespace Microsoft.Build.Logging
                     outputFilePaths[j] = ReadDeduplicatedString()!;
                 }
 
-                loggers.Add(new RegisteredLoggerInfo(loggerName, outputFilePaths, verbosity));
+                loggers.Add(new RegisteredLoggerInfo(loggerName, outputFilePaths, verbosity, loggerTypeFullName, parameters));
             }
 
-            var e = new LoggerRegisteredEventArgs(loggers);
+            var e = new LoggersRegisteredEventArgs(loggers);
             SetCommonFields(e, fields);
 
             return e;

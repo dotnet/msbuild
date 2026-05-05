@@ -5,6 +5,6 @@ namespace Microsoft.Build.Logging
 {
     internal interface IFileOutputLogger
     {
-        string OutputFilePath { get; }
+        System.Collections.Generic.IReadOnlyList<string> OutputFilePaths { get; }
     }
 }

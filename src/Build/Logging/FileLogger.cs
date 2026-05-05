@@ -244,7 +244,7 @@ namespace Microsoft.Build.Logging
         internal string FilePath => Path.GetFullPath(_logFileName);
 
         /// <inheritdoc/>
-        string IFileOutputLogger.OutputFilePath => FilePath;
+        System.Collections.Generic.IReadOnlyList<string> IFileOutputLogger.OutputFilePaths => new[] { FilePath };
 
         /// <summary>
         /// fileWriter is the stream that has been opened on our log file.

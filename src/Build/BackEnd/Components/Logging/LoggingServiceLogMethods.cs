@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -408,7 +408,8 @@ namespace Microsoft.Build.BackEnd.Logging
             foreach (ILogger logger in Loggers)
             {
                 ILogger actualLogger = UnwrapLogger(logger);
-                listOfLoggers.Add(actualLogger.GetType().Name);
+                Type loggerType = actualLogger.GetType();
+                listOfLoggers.Add(loggerType.FullName ?? loggerType.Name);
             }
             if (listOfLoggers.Count != 0)
             {
@@ -429,27 +430,31 @@ namespace Microsoft.Build.BackEnd.Logging
             foreach (ILogger logger in Loggers)
             {
                 ILogger actualLogger = UnwrapLogger(logger);
+                Type loggerType = actualLogger.GetType();
 
                 var outputFilePaths = new List<string>();
-                if (actualLogger is IFileOutputLogger fileLogger && !string.IsNullOrEmpty(fileLogger.OutputFilePath))
+                if (actualLogger is IFileOutputLogger fileLogger)
                 {
-                    outputFilePaths.Add(fileLogger.OutputFilePath);
-                }
-
-                if (actualLogger is BinaryLogger bl && bl.AdditionalFilePaths != null)
-                {
-                    outputFilePaths.AddRange(bl.AdditionalFilePaths);
+                    foreach (string outputFilePath in fileLogger.OutputFilePaths)
+                    {
+                        if (!string.IsNullOrEmpty(outputFilePath))
+                        {
+                            outputFilePaths.Add(outputFilePath);
+                        }
+                    }
                 }
 
                 loggerDescriptions.Add(new RegisteredLoggerInfo(
-                    loggerName: actualLogger.GetType().Name,
+                    loggerName: loggerType.Name,
                     outputFilePaths: outputFilePaths.Count > 0 ? outputFilePaths : null,
-                    verbosity: actualLogger.Verbosity));
+                    verbosity: actualLogger.Verbosity,
+                    loggerTypeFullName: loggerType.FullName,
+                    parameters: actualLogger.Parameters));
             }
 
             if (loggerDescriptions.Count > 0)
             {
-                var registerEvent = new LoggerRegisteredEventArgs(loggerDescriptions);
+                var registerEvent = new LoggersRegisteredEventArgs(loggerDescriptions);
                 registerEvent.BuildEventContext = BuildEventContext.Invalid;
                 ProcessLoggingEvent(registerEvent);
             }
