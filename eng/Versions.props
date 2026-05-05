@@ -81,7 +81,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.106</BootstrapSdkVersion>
+    <!-- Derived from global.json so it can never lag tools.dotnet -->
+    <BootstrapSdkVersion>$(DotNetCliVersion)</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">

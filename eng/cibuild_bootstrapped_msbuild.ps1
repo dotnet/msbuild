@@ -85,8 +85,11 @@ try {
   else
   {
     $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
-    $propsFile = Join-Path $PSScriptRoot "Versions.props"
-    $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
+    $globalJsonPath = Join-Path $PSScriptRoot "..\global.json"
+    $bootstrapSdkVersion = (Get-Content $globalJsonPath -Raw | ConvertFrom-Json).tools.dotnet
+    if ([string]::IsNullOrWhiteSpace($bootstrapSdkVersion)) {
+      throw "Could not read tools.dotnet from $globalJsonPath."
+    }
     $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
     $buildToolFramework = "net"
 
