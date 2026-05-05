@@ -268,14 +268,6 @@ jobs:
     displayName: Execute cleanup tasks
     condition: succeededOrFailed()
 
-  # Component Governance is injected automatically by the 1ES Official
-  # Pipeline Template (templates-official/job/job.yml) since arcade
-  # 10.0.0-beta.26222.2 (PR dotnet/msbuild#13434), which removed the
-  # standalone eng/common/templates-official/steps/component-governance.yml
-  # shim. No explicit step is needed here. To opt out for a specific
-  # pipeline, set sdl.componentgovernance.* in the extends parameters of
-  # that pipeline (e.g. .vsts-dotnet-exp-perf.yml).
-
 - template: /eng/common/templates-official/jobs/source-build.yml@self
   parameters:
     platforms:
