@@ -31,7 +31,7 @@ Fill in these values before starting. Version increments are irregular — they 
 
 | Wrong pick | Why it fails |
 |---|---|
-| ❌ The `{{THIS_RELEASE_VERSION}}.X` package that actually ships in VS (e.g. `18.7.1`) | After Phase 4.2 `Stabilize-Release.ps1` runs, builds become **final-versioned**. Final-versioned packages go to **isolated per-build internal feeds** (so multiple builds can share a version label) — they are deliberately kept off `dotnet-tools`. So `18.7.1` is not resolvable from public CI. |
+| ❌ The `{{THIS_RELEASE_VERSION}}.X` package that actually ships in VS (e.g. `18.7.1`) | After Phase 4.2 `Stabilize-Release.ps1` runs, builds become **final-versioned**. So such package is not resolvable from public CI. |
 | ❌ Blindly the most recent `{{THIS_RELEASE_VERSION}}.0-preview-*` on `dotnet-tools` | After `vs{{THIS_RELEASE_VERSION}}` branches, `main` keeps producing `{{THIS_RELEASE_VERSION}}.0-preview-*` until **this** main-bump PR merges — so the most recent feed entries may be `{{NEXT_VERSION}}`-content builds wearing `{{THIS_RELEASE_VERSION}}` branding. Picking one drifts the API baseline forward and silently hides real compat breaks. |
 
 **Procedure:**
@@ -45,7 +45,7 @@ Fill in these values before starting. Version increments are irregular — they 
 5. Verify the exact version is on the [dotnet-tools feed](https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools) (search `Microsoft.Build`). If not, fall back to the next-older eligible run.
 6. Use that version. Do **not** include any `+sha` suffix.
 
-**Known gap** (track in your release tracking issue): the procedure is manual because `dotnet-tools` contains both pre- and post-branch-point `main` builds under identical `{{THIS_RELEASE_VERSION}}.0-preview-*` branding. If/when publishing is fixed so `main` builds never carry stale branding (e.g. auto-bumping `main`'s `VersionPrefix` at branch-snap), this collapses to "latest `{{THIS_RELEASE_VERSION}}.0-preview-*` on `dotnet-tools`" — programmatically queryable.
+**Known gap** (track in your release tracking issue): the procedure is manual because `dotnet-tools` contains both pre- and post-branch-point `main` builds under identical `{{THIS_RELEASE_VERSION}}.0-preview-*` branding. If/when publishing is fixed so `main` builds never carry stale branding, this collapses to "latest `{{THIS_RELEASE_VERSION}}.0-preview-*` on `dotnet-tools`" — programmatically queryable.
 
 **Derived values** (do not edit — computed from inputs):
 - Release branch: `vs{{THIS_RELEASE_VERSION}}`
