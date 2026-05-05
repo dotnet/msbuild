@@ -8,6 +8,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -1325,15 +1326,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
 
-            Assert.Equal(baseCount - (batchCount * batchSize), remaining.Count);
+            remaining.Count.ShouldBe(baseCount - (batchCount * batchSize));
             foreach (ProjectItemInstance item in remaining)
             {
-                Assert.DoesNotContain(item, removedSet);
+                removedSet.ShouldNotContain(item);
             }
             // And no expected-remaining item is missing
             for (int i = batchCount * batchSize; i < baseCount; i++)
             {
-                Assert.Contains(allItems[i], remaining);
+                remaining.ShouldContain(allItems[i]);
             }
         }
 
@@ -1366,10 +1367,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
 
-            Assert.Equal(50 - removeCount, remaining.Count);
+            remaining.Count.ShouldBe(50 - removeCount);
             foreach (var removed in toRemove)
             {
-                Assert.DoesNotContain(removed, remaining);
+                remaining.ShouldNotContain(removed);
             }
         }
 
@@ -1405,14 +1406,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
 
             // Exactly the 20 untouched references should remain
-            Assert.Equal(20, remaining.Count);
+            remaining.Count.ShouldBe(20);
             for (int i = 0; i < 10; i++)
             {
-                Assert.DoesNotContain(allItems[i], remaining);
+                remaining.ShouldNotContain(allItems[i]);
             }
             for (int i = 10; i < 30; i++)
             {
-                Assert.Contains(allItems[i], remaining);
+                remaining.ShouldContain(allItems[i]);
             }
         }
 
@@ -1458,17 +1459,97 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
 
-            Assert.Equal(baseCount - (batchCount * batchSize), remaining.Count);
+            remaining.Count.ShouldBe(baseCount - (batchCount * batchSize));
             for (int i = 0; i < batchCount * batchSize; i++)
             {
-                Assert.DoesNotContain(allItems[i], remaining);
+                remaining.ShouldNotContain(allItems[i]);
             }
             for (int i = batchCount * batchSize; i < baseCount; i++)
             {
-                Assert.Contains(allItems[i], remaining);
+                remaining.ShouldContain(allItems[i]);
             }
 
             outer.LeaveScope();
+        }
+
+        /// <summary>
+        /// Removes that don't match anything in the base group must be no-ops: the original
+        /// items must all survive. Exercises the HashSet path with totalRemoves above the
+        /// threshold while none of the removes correspond to existing items.
+        /// </summary>
+        [Fact]
+        public void GetItems_RemovesNotInGroup_AreNoOps()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const string itemType = "i";
+
+            var originalItems = new List<ProjectItemInstance>();
+            for (int i = 0; i < 30; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"original_{i}", project.FullPath);
+                table1.Add(item);
+                originalItems.Add(item);
+            }
+
+            // Build 20 distinct ProjectItemInstance references that were never added to table1.
+            var phantomRemoves = new List<ProjectItemInstance>();
+            for (int i = 0; i < 20; i++)
+            {
+                phantomRemoves.Add(new ProjectItemInstance(project, itemType, $"phantom_{i}", project.FullPath));
+            }
+
+            Lookup lookup = LookupHelpers.CreateLookup(table1);
+            lookup.EnterScope("x");
+            lookup.RemoveItems(itemType, phantomRemoves);
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            remaining.Count.ShouldBe(30);
+            foreach (var original in originalItems)
+            {
+                remaining.ShouldContain(original);
+            }
+        }
+
+        /// <summary>
+        /// The HashSet path filters both <c>groupFound</c> AND <c>allAdds</c>. This test
+        /// covers the adds branch: add many new items, then remove a subset (above threshold)
+        /// and verify exactly the unremoved adds survive in the GetItems result.
+        /// </summary>
+        [Fact]
+        public void GetItems_RemoveSubsetOfAdds_ReturnsRemainingAdds()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            // Empty base table: groupFound will be empty, so the HashSet path applies only to adds.
+            Lookup lookup = LookupHelpers.CreateLookup(new ItemDictionary<ProjectItemInstance>());
+            const string itemType = "i";
+
+            lookup.EnterScope("x");
+
+            var addedItems = new List<ProjectItemInstance>();
+            for (int i = 0; i < 20; i++)
+            {
+                var item = new ProjectItemInstance(project, itemType, $"add_{i}", project.FullPath);
+                addedItems.Add(item);
+                lookup.AddNewItem(item);
+            }
+
+            // Remove 15 of the adds → totalRemoves > 8 → HashSet path exercised on the adds branch.
+            var toRemove = addedItems.Take(15).ToList();
+            lookup.RemoveItems(itemType, toRemove);
+
+            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
+
+            remaining.Count.ShouldBe(5);
+            for (int i = 0; i < 15; i++)
+            {
+                remaining.ShouldNotContain(addedItems[i]);
+            }
+            for (int i = 15; i < 20; i++)
+            {
+                remaining.ShouldContain(addedItems[i]);
+            }
         }
     }
 
