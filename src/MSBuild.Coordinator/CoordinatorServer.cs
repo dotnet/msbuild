@@ -22,7 +22,6 @@ internal sealed partial class CoordinatorServer(
     private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget);
     private readonly string _pipeName = settings.PipeName;
     private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
-    private readonly int _missedHeartbeatsThreshold = settings.MissedHeartbeatsThreshold;
     private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
     private readonly Dictionary<int, ClientConnection> _connectionsByProcessId = [];
     private readonly object _budgetLock = new();
@@ -302,7 +301,7 @@ internal sealed partial class CoordinatorServer(
     /// </summary>
     private void CheckHeartbeats(object? state)
     {
-        DateTime threshold = DateTime.UtcNow - TimeSpan.FromMilliseconds(_heartbeatIntervalMs * _missedHeartbeatsThreshold);
+        DateTime threshold = DateTime.UtcNow - TimeSpan.FromMilliseconds(_settings.HeartbeatTimeoutMs);
 
         List<ClientConnection> connectionsToCheck;
 

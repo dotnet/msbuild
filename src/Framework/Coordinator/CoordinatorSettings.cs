@@ -16,9 +16,14 @@ internal sealed record class CoordinatorSettings()
     public const int DefaultMissedHeartbeatsThreshold = 3;
     public const int DefaultConnectionTimeoutMs = 5_000;
     public const int DefaultShutdownTimeoutMs = 60_000;
+    public const int MaxHeartbeatIntervalMs = 300_000;
 
     private static string DefaultPipeName => $"{PipeNameBase}-{Environment.UserName}";
 
+    private int? _heartbeatIntervalMs;
+    private int? _missedHeartbeatsThreshold;
+    private int? _connectionTimeoutMs;
+    private int? _shutdownTimeoutMs;
     private int? _totalNodeBudget;
     private int? _processId;
 
@@ -33,9 +38,19 @@ internal sealed record class CoordinatorSettings()
         init => field = NamedPipeUtil.GetPlatformSpecificPipeName(value);
     }
 
-    public int HeartbeatIntervalMs { get; init; } = DefaultHeartbeatIntervalMs;
+    public int HeartbeatIntervalMs
+    {
+        get => _heartbeatIntervalMs ??= DefaultHeartbeatIntervalMs;
+        init => _heartbeatIntervalMs = value > 0
+            ? Math.Min(value, MaxHeartbeatIntervalMs)
+            : DefaultHeartbeatIntervalMs;
+    }
 
-    public int MissedHeartbeatsThreshold { get; init; } = DefaultMissedHeartbeatsThreshold;
+    public int MissedHeartbeatsThreshold
+    {
+        get => _missedHeartbeatsThreshold ??= DefaultMissedHeartbeatsThreshold;
+        init => _missedHeartbeatsThreshold = value > 0 ? value : DefaultMissedHeartbeatsThreshold;
+    }
 
     public int TotalNodeBudget
     {
@@ -43,15 +58,28 @@ internal sealed record class CoordinatorSettings()
         init => _totalNodeBudget = value <= 0 ? Environment.ProcessorCount : value;
     }
 
-    public int ShutdownTimeoutMs { get; init; } = DefaultShutdownTimeoutMs;
+    public int ShutdownTimeoutMs
+    {
+        get => _shutdownTimeoutMs ??= DefaultShutdownTimeoutMs;
+        init => _shutdownTimeoutMs = value >= 0 ? value : DefaultShutdownTimeoutMs;
+    }
 
-    public int ConnectionTimeoutMs { get; init; } = DefaultConnectionTimeoutMs;
+    public int ConnectionTimeoutMs
+    {
+        get => _connectionTimeoutMs ??= DefaultConnectionTimeoutMs;
+        init => _connectionTimeoutMs = value > 0 ? value : DefaultConnectionTimeoutMs;
+    }
 
     public int ProcessId
     {
         get => _processId ??= EnvironmentUtilities.CurrentProcessId;
         init => _processId = value > 0 ? value : EnvironmentUtilities.CurrentProcessId;
     }
+
+    /// <summary>
+    ///  Computes the heartbeat timeout in milliseconds using long arithmetic to avoid overflow.
+    /// </summary>
+    public long HeartbeatTimeoutMs => (long)HeartbeatIntervalMs * MissedHeartbeatsThreshold;
 
     public static CoordinatorSettings FromEnvironment()
     {
