@@ -104,7 +104,7 @@ namespace Microsoft.Build.Tasks
                     if (NativeMethodsShared.IsWindows)
                     {
                         var data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-                        bool success = NativeMethodsShared.GetFileAttributesEx(_filename, 0, ref data);
+                        bool success = NativeMethodsShared.GetFileAttributesEx(NativeMethodsShared.EnsureExtendedLengthPath(_filename), 0, ref data);
 
                         if (!success)
                         {

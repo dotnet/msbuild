@@ -3226,5 +3226,60 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        /// <summary>
+        /// Regression test: MSB3030 when copying a long-path file in a multi-targeting build.
+        /// devenv.exe is not longPathAware; the net472 test host has the same condition.
+        /// </summary>
+        [Fact]
+        public void CopyFileWithLongPath()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            // Exact filename from the bug report (%27 = apostrophe in the csproj Include attribute).
+            string longFileName = new string('A', 218) + "' [[]] === .binf";
+            string tempBase = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            string sourceDir = Path.Combine(tempBase, "Serializer", "Data", "BinaryFormatterSerializedModels");
+            string sourcePath = Path.Combine(sourceDir, longFileName);
+            string destDir = Path.Combine(tempBase, "bin", "Debug", "net48");
+            string destPath = Path.Combine(destDir, "Serializer", "Data", "BinaryFormatterSerializedModels", longFileName);
+
+            Directory.CreateDirectory(sourceDir);
+
+            try
+            {
+                if (sourcePath.Length <= NativeMethodsShared.MAX_PATH)
+                {
+                    return; // Path not long enough on this machine; nothing to test.
+                }
+
+                // Use \\?\ for creation — the net472 test host is not longPathAware.
+                File.WriteAllText(@"\\?\" + sourcePath, "content");
+
+                // Simulate CopyToOutputDirectory=PreserveNewest copying to the net48 output folder.
+                var engine = new MockEngine(true);
+                var task = new Copy
+                {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    BuildEngine = engine,
+                    SourceFiles = new ITaskItem[] { new TaskItem(sourcePath) },
+                    DestinationFiles = new ITaskItem[] { new TaskItem(destPath) },
+                    RetryDelayMilliseconds = 1,
+                };
+
+                task.Execute().ShouldBeTrue(engine.Log);
+                task.WroteAtLeastOneFile.ShouldBeTrue();
+                File.Exists(@"\\?\" + destPath).ShouldBeTrue("Destination file should exist after copying long-path file.");
+            }
+            finally
+            {
+                try { File.Delete(@"\\?\" + sourcePath); } catch { }
+                try { File.Delete(@"\\?\" + destPath); } catch { }
+                try { Directory.Delete(tempBase, true); } catch { }
+            }
+        }
     }
 }

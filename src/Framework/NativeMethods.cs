@@ -1193,7 +1193,7 @@ internal static class NativeMethods
                 }
 
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = NativeMethods.GetFileAttributesEx(path, 0, ref data);
+                bool success = NativeMethods.GetFileAttributesEx(EnsureExtendedLengthPath(path), 0, ref data);
 
                 if (success && (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
@@ -1820,6 +1820,26 @@ internal static class NativeMethods
 
     #region helper methods
 
+    /// <summary>
+    /// Prepends the \\?\ extended-length path prefix when <paramref name="path"/> is at or
+    /// beyond <see cref="MAX_PATH"/> characters and does not already carry the prefix.
+    /// This allows Win32 APIs to accept paths longer than MAX_PATH in processes that do not
+    /// declare longPathAware in their application manifest (e.g. devenv.exe).
+    /// Returns the original string unchanged on non-Windows or for short paths.
+    /// </summary>
+    internal static string EnsureExtendedLengthPath(string path)
+    {
+        if (!IsWindows || path == null || path.Length < MAX_PATH ||
+            path.StartsWith(@"\\?\", StringComparison.Ordinal))
+        {
+            return path;
+        }
+
+        return path.StartsWith(@"\\", StringComparison.Ordinal)
+            ? @"\\?\UNC\" + path.Substring(2)
+            : @"\\?\" + path;
+    }
+
     internal static bool DirectoryExists(string fullPath)
     {
         return IsWindows
@@ -1831,7 +1851,7 @@ internal static class NativeMethods
     internal static bool DirectoryExistsWindows(string fullPath)
     {
         WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-        bool success = GetFileAttributesEx(fullPath, 0, ref data);
+        bool success = GetFileAttributesEx(EnsureExtendedLengthPath(fullPath), 0, ref data);
         return success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
     }
 
@@ -1846,7 +1866,7 @@ internal static class NativeMethods
     internal static bool FileExistsWindows(string fullPath)
     {
         WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-        bool success = GetFileAttributesEx(fullPath, 0, ref data);
+        bool success = GetFileAttributesEx(EnsureExtendedLengthPath(fullPath), 0, ref data);
         return success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
     }
 
@@ -1861,7 +1881,7 @@ internal static class NativeMethods
     internal static bool FileOrDirectoryExistsWindows(string path)
     {
         WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-        return GetFileAttributesEx(path, 0, ref data);
+        return GetFileAttributesEx(EnsureExtendedLengthPath(path), 0, ref data);
     }
 
     #endregion
