@@ -94,7 +94,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Name of the MSBuild property that opts in to synthesizing <c>MSBuildImportedProject</c>
-        /// items from the import closure during evaluation.
+        /// items from the import closure during <c>ProjectInstance</c> creation.
         /// </summary>
         internal const string MSBuildProvideImportedProjectsPropertyName = "MSBuildProvideImportedProjects";
 

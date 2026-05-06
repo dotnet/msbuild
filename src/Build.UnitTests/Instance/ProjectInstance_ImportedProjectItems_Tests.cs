@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 }));
 
             string projectContent = """
-                <Project Sdk='MyTestSdk'>
+                <Project Sdk="MyTestSdk">
                     <PropertyGroup>
                         <MSBuildProvideImportedProjects>true</MSBuildProvideImportedProjects>
                     </PropertyGroup>
@@ -206,6 +206,36 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 item.GetMetadataValue("Sdk").ShouldBe("MyTestSdk");
             }
+        }
+
+        [Fact]
+        public void ImportedProjectItemsCreatedWhenSetViaGlobalProperty()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string importContent = "<Project />";
+            var importFile = env.CreateFile("import.targets", importContent);
+
+            string projectContent = $"""
+                <Project>
+                    <Import Project="{importFile.Path}" />
+                </Project>
+                """;
+            var projectFile = env.CreateFile("test.proj", projectContent);
+
+            var globalProperties = new Dictionary<string, string>
+            {
+                { "MSBuildProvideImportedProjects", "true" },
+            };
+
+            using var collection = new ProjectCollection();
+            var project = new Project(projectFile.Path, globalProperties, toolsVersion: null, collection);
+            ProjectInstance instance = project.CreateProjectInstance();
+
+            var items = instance.GetItems("MSBuildImportedProject").ToList();
+            items.Count.ShouldBe(1);
+            items[0].EvaluatedInclude.ShouldBe(importFile.Path);
+            items[0].GetMetadataValue("ImportingProjectPath").ShouldBe(projectFile.Path);
         }
     }
 }
