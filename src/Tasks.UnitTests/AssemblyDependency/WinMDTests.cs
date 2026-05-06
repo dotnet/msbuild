@@ -162,14 +162,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.dll"))
+                if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.dll", FileUtilities.PathComparison))
                 {
                     dllFound = true;
                     Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime));
                     Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile));
                     Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
                 }
-                if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.pri"))
+                if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.pri", FileUtilities.PathComparison))
                 {
                     priFound = true;
 

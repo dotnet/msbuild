@@ -268,13 +268,6 @@ jobs:
     displayName: Execute cleanup tasks
     condition: succeededOrFailed()
 
-  - template: /eng/common/templates-official/steps/component-governance.yml@self
-    parameters:
-      ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
-        disableComponentGovernance: false
-      ${{ else }}:
-        disableComponentGovernance: true
-
 - template: /eng/common/templates-official/jobs/source-build.yml@self
   parameters:
     platforms:

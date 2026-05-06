@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -11,7 +11,7 @@ using Xunit.v3;
 namespace Xunit.NetCore.Extensions
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class UseInvariantCultureAttribute : BeforeAfterTestAttribute
+    public sealed class UseInvariantCultureAttribute : BeforeAfterTestAttribute
     {
         private CultureInfo? originalCulture;
         private CultureInfo? originalUICulture;
