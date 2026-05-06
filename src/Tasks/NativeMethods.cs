@@ -698,10 +698,11 @@ namespace Microsoft.Build.Tasks
             {
 #if FEATURE_WINDOWSINTEROP
                 hardLinkCreated = Windows.Win32.PInvoke.CreateHardLink(newFileName, exitingFileName);
+                errorMessage = hardLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
 #else
                 hardLinkCreated = false;
+                errorMessage = "CreateHardLink is not supported in this build (FEATURE_WINDOWSINTEROP is disabled).";
 #endif
-                errorMessage = hardLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
             }
             else
             {

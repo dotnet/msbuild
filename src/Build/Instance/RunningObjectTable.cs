@@ -102,13 +102,34 @@ namespace Microsoft.Build.Execution
                 throw new COMException("Failed to obtain the Running Object Table.");
             }
 
+            // The IRunningObjectTable pointer was obtained on an MTA thread; calling through
+            // it from an STA caller would bypass COM apartment marshalling. Run all ROT calls
+            // on an MTA thread so the moniker creation and GetObject invocation happen in the
+            // same apartment as the pointer's owner.
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
+            {
+                return GetObjectCore(rotPtr, itemName);
+            }
+
+            return Task.Run(() => GetObjectCore(rotPtr, itemName)).GetAwaiter().GetResult();
+        }
+
+        [SupportedOSPlatform("windows5.0")]
+        private static unsafe object GetObjectCore(nint rotPtr, string itemName)
+        {
             IRunningObjectTable* rot = (IRunningObjectTable*)rotPtr;
 
-            nint monikerPtr = CreateItemMonikerOnMtaThread(itemName);
-            using ComScope<IMoniker> moniker = new((IMoniker*)monikerPtr);
+            IMoniker* monikerRaw;
+            HRESULT hr = PInvoke.CreateItemMoniker("!", itemName, &monikerRaw);
+            if (hr.Failed)
+            {
+                throw new COMException("CreateItemMoniker failed", hr);
+            }
+
+            using ComScope<IMoniker> moniker = new(monikerRaw);
 
             IUnknown* pUnk = null;
-            HRESULT hr = rot->GetObject(moniker.Pointer, &pUnk);
+            hr = rot->GetObject(moniker.Pointer, &pUnk);
             if (hr.Failed)
             {
                 ThrowComExceptionWithDetails(hr, itemName);
@@ -125,30 +146,6 @@ namespace Microsoft.Build.Execution
                     pUnk->Release();
                 }
             }
-        }
-
-        [SupportedOSPlatform("windows5.0")]
-        private static nint CreateItemMonikerOnMtaThread(string itemName)
-        {
-            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
-            {
-                return CreateItemMonikerCore(itemName);
-            }
-
-            // To avoid deadlock, create the moniker on a threadpool thread which guarantees MTA.
-            return Task.Run(() => CreateItemMonikerCore(itemName)).GetAwaiter().GetResult();
-        }
-
-        [SupportedOSPlatform("windows5.0")]
-        private static unsafe nint CreateItemMonikerCore(string itemName)
-        {
-            IMoniker* moniker;
-            HRESULT hr = PInvoke.CreateItemMoniker("!", itemName, &moniker);
-            if (hr.Failed)
-            {
-                throw new COMException("CreateItemMoniker failed", hr);
-            }
-            return (nint)moniker;
         }
 
         /// <summary>

@@ -199,6 +199,10 @@ namespace Microsoft.Build.BackEnd
                     {
                         fixed (char* pEnvironmentBlock = environmentBlock)
                         {
+                            // Note: CreateProcess is documented to be allowed to modify lpCommandLine in-place
+                            // (it may insert a null terminator to split the exe from the args). The buffer must
+                            // not be read after a successful call. We only read commandLine again on failure
+                            // (for tracing), where in practice the OS does not mutate the buffer.
                             result = PInvoke.CreateProcess(
                                 lpApplicationName: pExeName,
                                 lpCommandLine: pCommandLine,

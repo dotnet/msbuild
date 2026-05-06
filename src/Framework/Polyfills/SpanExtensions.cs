@@ -10,6 +10,7 @@
 
 #if !NET
 
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace System;
@@ -55,9 +56,10 @@ internal static class SpanExtensions
     public static int IndexOfAnyExcept<T>(this ReadOnlySpan<T> span, T value)
         where T : IEquatable<T>
     {
+        EqualityComparer<T> comparer = EqualityComparer<T>.Default;
         for (int i = 0; i < span.Length; i++)
         {
-            if (!span[i].Equals(value))
+            if (!comparer.Equals(span[i], value))
             {
                 return i;
             }

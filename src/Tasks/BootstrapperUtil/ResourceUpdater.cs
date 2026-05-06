@@ -142,6 +142,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return returnValue;
 #pragma warning restore CA1416
 #else
+            results.AddMessage(BuildMessage.CreateMessage(
+                BuildMessageSeverity.Error,
+                "GenerateBootstrapper.General",
+                $"Unable to update resources for {filename}: bootstrapper resource updates require Windows interop support, which is not available in this build."));
             return false;
 #endif
         }
@@ -153,6 +157,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         [System.Runtime.Versioning.SupportedOSPlatform("windows5.0")]
         private static unsafe bool UpdateResource(HANDLE hUpdate, int lpType, string lpName, ReadOnlySpan<byte> data)
         {
+            // MAKEINTRESOURCE: Windows treats pointer values below 0x10000 as integer resource IDs.
+            System.Diagnostics.Debug.Assert(lpType is >= 0 and < 0x10000, "MAKEINTRESOURCE values must be below 64K.");
+
             fixed (char* pName = lpName)
             {
                 fixed (byte* pData = data)
