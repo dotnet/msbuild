@@ -221,6 +221,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         using (var disposeEvent = new ManualResetEvent(false))
         {
             _heartbeatTimer.Dispose(disposeEvent);
+            disposeEvent.WaitOne();
         }
 
         _logger.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
