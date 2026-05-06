@@ -8,9 +8,11 @@
 
 The **MSBuild Build Coordinator** is a resource management system that orchestrates and enforces fair-share allocation of build nodes across multiple simultaneous MSBuild processes. It prevents system resource exhaustion by maintaining a global node budget and dynamically distributing available nodes among competing builds.
 
+The coordinator runs as a **separate process** (`MSBuild.Coordinator`), not inside `MSBuild.exe`. MSBuild clients connect to it over named pipes, request grants, and continue building with the granted node count.
+
 ### Purpose
 
-When multiple MSBuild processes run concurrently (common in CI/CD environments, distributed builds, or user multi-tasking), each process could independently attempt to spawn the maximum number of nodes, leading to:
+When multiple MSBuild processes run concurrently (common in user multi-tasking), each process could independently attempt to spawn the maximum number of nodes, leading to:
 - System resource exhaustion
 - Excessive memory consumption
 - CPU contention and slowdown
@@ -22,6 +24,8 @@ The coordinator solves this by:
 3. **Monitoring build health** via periodic heartbeats
 4. **Auto-shutting down** after a timeout period
 
+*Note*: The current default budget is intentionally conservative for V1. As we gather real-world usage data, we should experiment with alternative defaults (including moderate oversubscription above 1x processor count) and tune this value for better throughput without destabilizing interactive machine workloads.
+
 ---
 
 ## Architecture Overview
@@ -31,36 +35,39 @@ The coordinator solves this by:
 │                    System with Multiple Builds                   │
 └──────────────────────────────────────────────────────────────────┘
 
-  Build 1               Build 2               Build 3
-    │                     │                     │
-    │ RequestNodes(4)     │ RequestNodes(4)     │ RequestNodes(4)
-    │                     │                     │
-    └─────────────────────┼─────────────────────┘
-            (via Named Pipes - IPC)
-                    ↓
-      ┌────────────────────────────────────┐
-      │   MSBuild Build Coordinator        │
-      │                                    │
-      │  ┌──────────────────────────────┐  │
-      │  │  Node Budget Manager         │  │
-      │  │  • Total Budget: 8 nodes     │  │
-      │  │  • Allocated: 8              │  │
-      │  │  • Available: 0              │  │
-      │  └──────────────────────────────┘  │
-      │                                    │
-      │  ┌──────────────────────────────┐  │
-      │  │  Active Builds               │  │
-      │  │  • Build 1: 4 nodes          │  │
-      │  │  • Build 2: 4 nodes          │  │
-      │  └──────────────────────────────┘  │
-      │                                    │
-      │  ┌──────────────────────────────┐  │
-      │  │  Waiting Builds Queue        │  │
-      │  │  • Build 3: waiting          │  │
-      │  └──────────────────────────────┘  │
-      └────────────────────────────────────┘
-            ↓                      ↓
-    Grant(nodes=2)        Wait(queued)
+  Build 1                 Build 2                 Build 3
+    │                       │                       │
+    │ RequestNodes(4)       │ RequestNodes(4)       │ RequestNodes(4)
+    │                       │                       │
+    │ ◄── NodeGrant(4)      │ ◄── NodeGrant(4)      │ ◄── Wait(queued)
+    │                       │                       │
+    └───────────────────────┼───────────────────────┘
+              (via Named Pipes - IPC)
+                      ↓
+        ┌────────────────────────────────────┐
+        │   MSBuild Build Coordinator        │
+        │                                    │
+        │  ┌──────────────────────────────┐  │
+        │  │  Node Budget Manager         │  │
+        │  │  • Total Budget: 8 nodes     │  │
+        │  │  • Allocated: 8              │  │
+        │  │  • Available: 0              │  │
+        │  └──────────────────────────────┘  │
+        │                                    │
+        │  ┌──────────────────────────────┐  │
+        │  │  Active Builds               │  │
+        │  │  • Build 1: 4 nodes          │  │
+        │  │  • Build 2: 4 nodes          │  │
+        │  └──────────────────────────────┘  │
+        │                                    │
+        │  ┌──────────────────────────────┐  │
+        │  │  Waiting Builds Queue        │  │
+        │  │  • Build 3: waiting          │  │
+        │  └──────────────────────────────┘  │
+        └────────────────────────────────────┘
+
+  Later, when one 4-node build releases:
+    Build 3 ◄── NodeGrant(4)
 ```
 
 ---
@@ -69,52 +76,21 @@ The coordinator solves this by:
 
 ### Key Components
 
-**Coordinator Server** ([src/MSBuild.Coordinator/](src/MSBuild.Coordinator/))
-- `CoordinatorServer.cs` - Main server that listens for client connections via named pipe
+**Coordinator Server** ([src/MSBuild.Coordinator/](../src/MSBuild.Coordinator/))
+- `CoordinatorServer.cs` - Main coordinator server that listens for client connections via named pipe
 - `NodeBudgetManager.cs` - Implements node allocation and fair-share logic
 - `ClientConnection.cs` - Manages individual client connections
 - `BuildGrant.cs` - Represents a node allocation to a build
 - `Program.cs` - Server launcher and singleton instance management
 
-**Client-Side** ([src/Build/BackEnd/BuildManager/](src/Build/BackEnd/BuildManager/))
+**Client-Side** ([src/Build/BackEnd/BuildManager/](../src/Build/BackEnd/BuildManager/))
 - `CoordinatorClient.cs` - Client connection handler integrated into BuildManager
 - `BuildManager.cs` - Requests nodes from coordinator and sets build parallelism
 
-**Protocol** ([src/Framework/Coordinator/](src/Framework/Coordinator/))
+**Protocol** ([src/Framework/Coordinator/](../src/Framework/Coordinator/))
 - Message types: `RequestNodesMessage`, `HeartbeatMessage`, `ReleaseNodesMessage`, `NodeGrantMessage`, `WaitMessage`, `ErrorMessage`
 - `CoordinatorSettings.cs` - Configuration management
 - `Protocol.cs` - Protocol versioning
-
-### Directory Structure
-
-```
-src/
-├── MSBuild.Coordinator/                           # Coordinator server executable
-│   ├── CoordinatorServer.cs
-│   ├── NodeBudgetManager.cs
-│   ├── ClientConnection.cs
-│   ├── BuildGrant.cs
-│   ├── Program.cs
-│   └── ...
-├── Framework/Coordinator/                         # Protocol and interfaces
-│   ├── RequestNodesMessage.cs
-│   ├── HeartbeatMessage.cs
-│   ├── ReleaseNodesMessage.cs
-│   ├── NodeGrantMessage.cs
-│   ├── WaitMessage.cs
-│   ├── ErrorMessage.cs
-│   ├── CoordinatorSettings.cs
-│   ├── Protocol.cs
-│   └── ...
-├── Build/BackEnd/BuildManager/
-│   ├── BuildManager.cs
-│   ├── CoordinatorClient.cs
-│   └── ...
-└── MSBuild.Coordinator.UnitTests/
-    ├── CoordinatorServerTests.cs
-    ├── NodeBudgetManagerTests.cs
-    └── ...
-```
 
 ---
 
@@ -136,7 +112,7 @@ The coordinator uses a binary protocol with six message types:
 
 Each message includes a protocol version for compatibility verification.
 
-**Source:** [src/Framework/Coordinator/](src/Framework/Coordinator/)
+**Source:** [src/Framework/Coordinator/](../src/Framework/Coordinator/)
 
 ### Message Flow Example
 
@@ -149,9 +125,9 @@ Successful Grant:
 
 Build Queued:
   Build → RequestNodesMessage(4)
-  Build ← WaitMessage (queue position 1)
+  Build ← WaitMessage
   Build → Heartbeat (every 5s while waiting)
-  Eventually: Build ← NodeGrantMessage(2) [after fair-share calculation]
+  Eventually: Build ← NodeGrantMessage(N) [N is fair-share computed from available nodes and contenders, capped by requested nodes (N <= 4 here)]
 ```
 
 ---
@@ -160,31 +136,50 @@ Build Queued:
 
 ### Core Concept
 
-When multiple builds compete for limited nodes, the coordinator distributes them fairly using:
+When multiple builds compete for limited nodes, the coordinator computes a fair share per grant. The contender count depends on the phase:
+
+Initial request path (`TryGrant`):
 
 ```
 fair_share = max(1, available_nodes / (waiting_builds + 1))
+granted_nodes = min(fair_share, requested_nodes)
+```
+
+Wait-queue drain path (`DrainWaitQueue`):
+
+```
+fair_share = max(1, available_nodes / waiting_builds)
+granted_nodes = min(fair_share, requested_nodes)
 ```
 
 This ensures:
-- Every waiting build gets at least 1 node
-- Available nodes are divided equally among contenders
-- Nodes are processed from the wait queue as they become available
+- Each grant is capped by what the build requested
+- Available nodes are divided across contenders in the current phase
+- Wait-queue entries are processed FIFO as nodes become available
 
 ### Example Scenarios
 
-**Two Competing Builds** (8 total nodes)
-- Build A gets 4 nodes (active)
-- Build B requests 4 nodes → Available: 4, Waiting: 1
-- Fair share: max(1, 4 / 2) = 2 nodes
-- Build B granted 2 nodes
+**First Build Requests Full Budget** (8 total nodes)
+- No builds are active and no builds are waiting
+- Build A requests 8 nodes
+- Fair share on initial request path: max(1, 8 / (0 + 1)) = 8 nodes
+- Build A granted min(8, 8) = 8 nodes
 
-**Multiple Builds in Queue** (8 total nodes)
-- Build A uses 4 nodes
-- Build B waiting (wants 6) and Build C waiting (wants 8)
-- When A completes: 4 nodes available, 2 waiting
-- Build B: fair_share = max(1, 4 / 2) = 2 nodes
-- Build C: fair_share = max(1, 2 / 1) = 2 nodes
+**Three Full-Budget Requests Launched Together** (8 total nodes)
+- Builds A, B, and C are launched at roughly the same time, each requesting 8 nodes
+  - *Note*: This is the default when `MaxNodeCount` is not specified: each build requests `Environment.ProcessorCount` (the full default budget)
+- First processed request (A): available 8, waiting 0 → fair_share = max(1, 8 / (0 + 1)) = 8 → A granted 8
+- Next processed requests (B, then C): available 0, so both receive `WaitMessage` and enter the wait queue
+- When A releases, drain begins with available 8 and 2 waiters:
+- B: fair_share = max(1, 8 / 2) = 4 → granted 4
+- C: fair_share = max(1, 4 / 1) = 4 → granted 4
+
+**Queued Mixed-Demand Scenario** (8 total nodes)
+- Build A and Build X are active with 4 nodes each (budget fully allocated)
+- Build B requests 6 and Build C requests 8 while available is 0, so both are queued
+- When Build A releases, drain begins with available 4 and 2 waiters
+- Build B: fair_share = max(1, 4 / 2) = 2 → granted min(2, 6) = 2
+- Build C: fair_share = max(1, 2 / 1) = 2 → granted min(2, 8) = 2
 
 ---
 
@@ -192,22 +187,33 @@ This ensures:
 
 ### How Coordination Works
 
-During build initialization:
+**During build initialization:**
 
 1. BuildManager checks if `MSBUILDUSECOORDINATOR` environment variable is set
 2. If enabled, `CoordinatorClient` attempts to connect to the coordinator
 3. Sends `RequestNodesMessage` with desired node count
 4. Receives either `NodeGrantMessage` (nodes granted) or `WaitMessage` (queued)
+   - *Note*: If `WaitMessage` is received, `CoordinatorClient` starts sending periodic heartbeats while waiting for the deferred `NodeGrantMessage`, so the coordinator doesn't consider it stale during the queue wait.
 5. Updates build's maximum node count based on grant
-6. During execution, spawns build nodes limited by this capped value
-7. On completion, sends `ReleaseNodesMessage` to free nodes for other builds
+
+> [!NOTE] V1 Behavior
+> The number of nodes granted to a build is fixed at initialization and does not change during the build's lifetime. The grant persists as long as the build is running (indicated by heartbeats) and is released only when the build completes.
+
+**During build execution:**
+
+6. BuildManager spawns build nodes up to the maximum node count, which may have been limited by the number of nodes granted by the coordinator
+7. `CoordinatorClient` continues sending periodic heartbeats to indicate the build is still active
+
+**On build completion:**
+
+8. Sends `ReleaseNodesMessage` to free nodes for other waiting builds
 
 **Key Principle:** The coordinator is entirely optional. If it's unavailable or disabled, the build uses its requested node count without coordination.
 
 **Sources:**
-- [src/Build/BackEnd/BuildManager/BuildManager.cs](src/Build/BackEnd/BuildManager/BuildManager.cs)
-- [src/Build/BackEnd/BuildManager/CoordinatorClient.cs](src/Build/BackEnd/BuildManager/CoordinatorClient.cs)
-- [src/Framework/Traits.cs](src/Framework/Traits.cs) - Enablement logic
+- [src/Build/BackEnd/BuildManager/BuildManager.cs](../src/Build/BackEnd/BuildManager/BuildManager.cs)
+- [src/Build/BackEnd/BuildManager/CoordinatorClient.cs](../src/Build/BackEnd/BuildManager/CoordinatorClient.cs)
+- [src/Framework/Traits.cs](../src/Framework/Traits.cs) - Enablement logic
 
 ---
 
@@ -223,6 +229,8 @@ During build initialization:
 | `MSBUILDCOORDINATORHEARTBEAT` | 5000 | Override heartbeat interval (ms) |
 | `MSBUILDCOORDINATORSHUTDOWNTIMEOUT` | 60000 | Override shutdown timeout (ms) |
 
+*Note*: `MSBUILDCOORDINATORNODEBUDGET` is the primary knob for throughput experiments, including testing moderate oversubscription factors above 1x processor count.
+
 ---
 
 ## Lifecycle and Operation
@@ -230,11 +238,11 @@ During build initialization:
 ### Coordinator Startup
 
 1. When first MSBuild process needs coordination, it attempts to start the coordinator
-2. Coordinator uses a system-wide mechanism to ensure only one instance runs
+2. Coordinator uses a system-wide mutex to ensure only one instance runs
 3. If an instance already exists, the new process connects as a client instead
 4. Coordinator listens on a named pipe for client connections
 
-**Source:** [src/MSBuild.Coordinator/Program.cs](src/MSBuild.Coordinator/Program.cs)
+**Source:** [src/MSBuild.Coordinator/Program.cs](../src/MSBuild.Coordinator/Program.cs)
 
 ### Heartbeat Monitoring
 
@@ -246,7 +254,7 @@ The coordinator detects stalled or crashed clients through periodic heartbeats:
 - Coordinator automatically releases nodes allocated to stalled client
 - Waiting builds can then be granted those nodes
 
-**Source:** [src/MSBuild.Coordinator/CoordinatorServer.cs](src/MSBuild.Coordinator/CoordinatorServer.cs)
+**Source:** [src/MSBuild.Coordinator/CoordinatorServer.cs](../src/MSBuild.Coordinator/CoordinatorServer.cs)
 
 ### Graceful Shutdown
 
@@ -258,7 +266,7 @@ When a build completes normally:
 4. If no active or waiting clients remain, coordinator enters timeout mode
 5. After 60 seconds of inactivity, coordinator exits
 
-**Source:** [src/MSBuild.Coordinator/CoordinatorServer.cs](src/MSBuild.Coordinator/CoordinatorServer.cs)
+**Source:** [src/MSBuild.Coordinator/CoordinatorServer.cs](../src/MSBuild.Coordinator/CoordinatorServer.cs)
 
 ---
 
@@ -277,8 +285,8 @@ The coordinator system is designed to be fully optional:
 This means coordinator failures never block or degrade build execution—they only disable coordination.
 
 **Sources:**
-- [src/Build/BackEnd/BuildManager/CoordinatorClient.cs](src/Build/BackEnd/BuildManager/CoordinatorClient.cs)
-- [src/MSBuild.Coordinator/CoordinatorServer.cs](src/MSBuild.Coordinator/CoordinatorServer.cs)
+- [src/Build/BackEnd/BuildManager/CoordinatorClient.cs](../src/Build/BackEnd/BuildManager/CoordinatorClient.cs)
+- [src/MSBuild.Coordinator/CoordinatorServer.cs](../src/MSBuild.Coordinator/CoordinatorServer.cs)
 
 ---
 
@@ -286,7 +294,7 @@ This means coordinator failures never block or degrade build execution—they on
 
 ### Unit Tests
 
-Comprehensive test coverage in [src/MSBuild.Coordinator.UnitTests/](src/MSBuild.Coordinator.UnitTests/):
+Comprehensive test coverage in [src/MSBuild.Coordinator.UnitTests/](../src/MSBuild.Coordinator.UnitTests/):
 
 - Protocol serialization/deserialization
 - Node budget manager allocation logic
@@ -301,8 +309,8 @@ Comprehensive test coverage in [src/MSBuild.Coordinator.UnitTests/](src/MSBuild.
 
 For detailed implementation information, refer to:
 
-- **Server Implementation:** `src/MSBuild.Coordinator/`
-- **Protocol Definitions:** `src/Framework/Coordinator/`
-- **Client Integration:** `src/Build/BackEnd/BuildManager/` 
-- **Configuration:** `src/Framework/Traits.cs`, `src/Framework/Coordinator/CoordinatorSettings.cs`
-- **Tests:** `src/MSBuild.Coordinator.UnitTests/`
+- **Server Implementation:** [src/MSBuild.Coordinator/](../src/MSBuild.Coordinator/)
+- **Protocol Definitions:** [src/Framework/Coordinator/](../src/Framework/Coordinator/)
+- **Client Integration:** [src/Build/BackEnd/BuildManager/](../src/Build/BackEnd/BuildManager/)
+- **Configuration:** [src/Framework/Traits.cs](../src/Framework/Traits.cs), [src/Framework/Coordinator/CoordinatorSettings.cs](../src/Framework/Coordinator/CoordinatorSettings.cs)
+- **Tests:** [src/MSBuild.Coordinator.UnitTests/](../src/MSBuild.Coordinator.UnitTests/)
