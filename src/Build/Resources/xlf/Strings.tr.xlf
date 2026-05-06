@@ -38,7 +38,7 @@
       </trans-unit>
       <trans-unit id="BinlogFormatVersionMismatch">
         <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
-        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <target state="translated">MSB4281: İkili günlük dosyası MSBuild'in geçerli sürümünden (biçim sürümü {1}) daha yeni bir sürümünde (biçim sürümü {0}) oluşturuldu. Yeniden yürütmede bazı veriler eksik olabilir.</target>
         <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
