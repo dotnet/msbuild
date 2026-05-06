@@ -214,6 +214,8 @@ internal sealed partial class CoordinatorServer(
                     case ReleaseNodesMessage:
                         _logger.WriteLine($"Server: PID {request.ProcessId} released grant");
                         ReleaseConnection(connection);
+                        connection.Dispose();
+                        connection = null;
                         return;
                 }
             }
