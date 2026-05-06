@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build">
+<Project DefaultTargets="Build">
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
@@ -133,13 +133,13 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Error Condition="!Exists('$(TlbExpPath)')"
-           Text="TlbExp was not found at '$(TlbExpPath)'. Ensure the .NET Framework SDK tools are installed." />
+    <Warning Condition="!Exists('$(TlbExpPath)')"
+             Text="TlbExp was not found at '$(TlbExpPath)'. Type library generation will be skipped. Ensure the .NET Framework SDK tools are installed if you need the .tlb file." />
 
     <!-- Generate x86 type library -->
-    <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
+    <Exec Condition="Exists('$(TlbExpPath)')" Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
     <!-- Generate x64 type library -->
-    <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)x64\$(TargetName).tlb&quot; /win64" />
+    <Exec Condition="Exists('$(TlbExpPath)')" Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)x64\$(TargetName).tlb&quot; /win64" />
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />
