@@ -15,6 +15,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32.Storage.FileSystem;
+#endif
 
 #nullable disable
 
@@ -960,7 +963,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         public void NewSymlinkOldDestinationIsUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: New,
@@ -971,7 +974,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         public void OldSymlinkOldDestinationIsUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Old,
@@ -982,7 +985,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         public void OldSymlinkNewDestinationIsNotUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Old,
@@ -993,7 +996,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         public void NewSymlinkNewDestinationIsNotUpToDate()
         {
             SimpleSymlinkInputCheck(symlinkWriteTime: Middle,
@@ -1004,15 +1007,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         private static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, UInt32 dwFlags);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         private static extern bool SetFileTime(SafeFileHandle hFile, ref long creationTime,
             ref long lastAccessTime, ref long lastWriteTime);
 
-        [SupportedOSPlatform("windows")]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CreateFileW")]
+        [SupportedOSPlatform("windows6.1")]
+        private static extern SafeFileHandle CreateFileForSymlink(
+            string lpFileName,
+            uint dwDesiredAccess,
+            uint dwShareMode,
+            IntPtr lpSecurityAttributes,
+            uint dwCreationDisposition,
+            uint dwFlagsAndAttributes,
+            IntPtr hTemplateFile);
+
+        [SupportedOSPlatform("windows6.1")]
         private void SimpleSymlinkInputCheck(DateTime symlinkWriteTime, DateTime targetWriteTime,
             DateTime outputWriteTime, bool expectedOutOfDate)
         {
@@ -1038,11 +1052,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // File.SetLastWriteTime on the symlink sets the target write time,
                 // so set the symlink's write time the hard way
-                using (SafeFileHandle handle =
-                    NativeMethodsShared.CreateFile(
-                        inputSymlink, NativeMethodsShared.GENERIC_READ | 0x100 /* FILE_WRITE_ATTRIBUTES */,
-                        NativeMethodsShared.FILE_SHARE_READ, IntPtr.Zero, NativeMethodsShared.OPEN_EXISTING,
-                        NativeMethodsShared.FILE_ATTRIBUTE_NORMAL | NativeMethodsShared.FILE_FLAG_OPEN_REPARSE_POINT,
+                using (SafeFileHandle handle = CreateFileForSymlink(
+                        inputSymlink,
+                        (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_READ | 0x100 /* FILE_WRITE_ATTRIBUTES */,
+                        (uint)FILE_SHARE_MODE.FILE_SHARE_READ,
+                        IntPtr.Zero,
+                        (uint)FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                        (uint)(FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL | FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_OPEN_REPARSE_POINT),
                         IntPtr.Zero))
                 {
                     if (handle.IsInvalid)

@@ -70,6 +70,12 @@
     <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
   </PropertyGroup>
 
+  <!-- If we build and package OS specific libraries then this condition should just become $([MSBuild]::IsOSPlatform('windows')) -->
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <DefineConstants>$(DefineConstants);FEATURE_WINDOWSINTEROP</DefineConstants>
+    <FeatureWindowsInterop>true</FeatureWindowsInterop>
+  </PropertyGroup>
+
   <PropertyGroup>
     <!-- Useful for tests that need OS information as a constant -->
     <DefineConstants Condition="$([MSBuild]::IsOSPlatform('windows'))">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
