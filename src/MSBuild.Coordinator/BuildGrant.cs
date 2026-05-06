@@ -35,6 +35,9 @@ internal sealed class BuildGrant
 
     public BuildGrant(int processId, int requestedNodes)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(processId);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(requestedNodes);
+
         ProcessId = processId;
         RequestedNodes = requestedNodes;
         GrantedNodes = 0;
