@@ -545,9 +545,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// When the current process is <c>dotnet</c> and <paramref name="msbuildLocation"/> points
         /// at the MSBuild AppHost, returns the sibling <c>MSBuild.dll</c> (so workers launch via
-        /// <c>dotnet MSBuild.dll</c> instead of the slower AppHost). Otherwise returns the input
+        /// <c>dotnet MSBuild.dll</c> instead of the AppHost). Otherwise returns the input
         /// unchanged. Shared by <see cref="GetNodes"/> and <see cref="ResolveProcessNamesToSearch"/>.
         /// </summary>
+        /// <remarks>
+        /// This is a point-in-time workaround, not a permanent design choice. The AppHost was
+        /// disabled for worker nodes by https://github.com/dotnet/msbuild/pull/13452 because it
+        /// caused a NuGet restore performance regression (devdiv2857570). Once that regression is
+        /// understood and resolved, worker nodes should launch via the AppHost again and this
+        /// remap (along with its callers) should be removed. Tracked by
+        /// https://github.com/dotnet/msbuild/issues/13464.
+        /// </remarks>
         private static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
         {
             if (string.IsNullOrEmpty(msbuildLocation)
