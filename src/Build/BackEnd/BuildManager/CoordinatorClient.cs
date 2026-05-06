@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Shared;
@@ -157,52 +158,101 @@ internal sealed partial class CoordinatorClient : IDisposable
         CoordinatorSettings settings,
         ICoordinatorLogger logger)
     {
-        var reader = new BinaryReader(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
-        var writer = new BinaryWriter(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
+        var reader = new BinaryReader(pipeStream, Encoding.UTF8, leaveOpen: true);
+        var writer = new BinaryWriter(pipeStream, Encoding.UTF8, leaveOpen: true);
 
-        // Send the node request.
-        logger.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId})");
-        writer.Write(new RequestNodesMessage(requestedNodes, settings.ProcessId));
-
-        // Read the response.
-        ServerMessage response = reader.ReadServerMessage();
-
-        switch (response)
+        try
         {
-            case NodeGrantMessage grant:
-                logger.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
-                return new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
+            // Send the node request.
+            logger.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId})");
+            writer.Write(new RequestNodesMessage(requestedNodes, settings.ProcessId));
 
-            case WaitMessage:
-                logger.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
+            // Read the response.
+            ServerMessage response = reader.ReadServerMessage();
 
-                // Wait for a grant to arrive.
-                ServerMessage grantAfterWait = reader.ReadServerMessage();
+            switch (response)
+            {
+                case NodeGrantMessage grant:
+                    logger.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
 
-                if (grantAfterWait is NodeGrantMessage deferredGrant)
-                {
-                    logger.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes");
-                    return new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
-                }
+                    var client = new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
 
-                logger.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name}");
+                    // Ownership transferred to client
+                    reader = null;
+                    writer = null;
 
-                // Unexpected response after wait.
-                reader.Dispose();
-                writer.Dispose();
+                    return client;
+
+                case WaitMessage:
+                    logger.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
+
+                    // Send heartbeats while waiting so the server doesn't consider us stale.
+                    using (Timer heartbeatPump = CreateHeartbeatPump(writer, settings.HeartbeatIntervalMs))
+                    {
+                        ServerMessage grantAfterWait = reader.ReadServerMessage();
+
+                        if (grantAfterWait is NodeGrantMessage deferredGrant)
+                        {
+                            logger.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes");
+
+                            var deferredClient = new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
+
+                            // Ownership transferred to deferred client
+                            reader = null;
+                            writer = null;
+
+                            return deferredClient;
+                        }
+
+                        logger.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name}");
+                    }
+
+                    return null;
+
+                default:
+                    logger.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
+                    return null;
+            }
+        }
+        finally
+        {
+            // On success paths, reader/writer are set to null to indicate ownership
+            // was transferred to the CoordinatorClient instance, which will dispose them.
+            reader?.Dispose();
+            writer?.Dispose();
+
+            // If either reader or writer is still non-null, negotiation failed and
+            // no CoordinatorClient took ownership of the pipe stream.
+            if (reader is not null || writer is not null)
+            {
                 pipeStream.Dispose();
-                return null;
-
-            default:
-                logger.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
-
-                // Error or unexpected response.
-                reader.Dispose();
-                writer.Dispose();
-                pipeStream.Dispose();
-                return null;
+            }
         }
     }
+
+    /// <summary>
+    ///  Creates a heartbeat pump that periodically writes a heartbeat message to the given writer.
+    ///  Dispose the returned timer to stop the pump.
+    /// </summary>
+    private static Timer CreateHeartbeatPump(BinaryWriter writer, int intervalMs)
+        => new(
+            static state =>
+            {
+                try
+                {
+                    if (state is BinaryWriter w)
+                    {
+                        w.Write(HeartbeatMessage.Instance);
+                    }
+                }
+                catch
+                {
+                    // Pipe may be broken; swallow and let the next read detect it.
+                }
+            },
+            state: writer,
+            dueTime: intervalMs,
+            period: intervalMs);
 
     /// <summary>
     ///  Releases the node grant and disconnects from the coordinator.
