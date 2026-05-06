@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO.Pipes;
@@ -52,7 +53,7 @@ internal sealed partial class CoordinatorServer(
 
         _logger.WriteLine($"Server: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
 
-        HashSet<Task> clientTasks = [];
+        ConcurrentDictionary<Task, byte> clientTasks = [];
 
         try
         {
@@ -74,10 +75,10 @@ internal sealed partial class CoordinatorServer(
                 // before HandleClientAsync starts, which would orphan the pipe stream.
                 // HandleClientAsync receives the cancellation token for its own loop.
                 Task clientTask = Task.Run(() => HandleClientAsync(pipeStream, token), CancellationToken.None);
-                clientTasks.Add(clientTask);
+                clientTasks.TryAdd(clientTask, 0);
 
                 // Remove task from tracking when it completes to prevent unbounded growth.
-                _ = clientTask.ContinueWith(_ => clientTasks.Remove(clientTask), TaskScheduler.Default);
+                _ = clientTask.ContinueWith(_ => clientTasks.TryRemove(clientTask, out byte _), TaskScheduler.Default);
             }
         }
         finally
@@ -88,11 +89,13 @@ internal sealed partial class CoordinatorServer(
 
             // Wait for all remaining client tasks to complete before exiting.
             // This ensures logging (which may reference the test context) completes cleanly.
-            if (clientTasks.Count > 0)
+            ICollection<Task> remainingTasks = clientTasks.Keys;
+
+            if (remainingTasks.Count > 0)
             {
                 try
                 {
-                    await Task.WhenAll(clientTasks);
+                    await Task.WhenAll(remainingTasks);
                 }
                 catch
                 {
