@@ -211,7 +211,12 @@ namespace Microsoft.Build.UnitTests
 
             string result = File.ReadAllText(xmlInputPath);
             XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(result);
+            using (StringReader sreader = new StringReader(result))
+            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                xmlDocument.Load(reader);
+            }
+
             List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
             foreach (var node in nodes)
             {
@@ -366,8 +371,11 @@ namespace Microsoft.Build.UnitTests
             string result = File.ReadAllText(xmlInputPath);
 
             XmlDocument xmlDocument = new XmlDocument();
-
-            xmlDocument.LoadXml(result);
+            using (StringReader sreader = new StringReader(result))
+            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                xmlDocument.Load(reader);
+            }
 
             return xmlDocument;
         }

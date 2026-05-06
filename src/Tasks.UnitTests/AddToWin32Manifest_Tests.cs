@@ -60,8 +60,15 @@ namespace Microsoft.Build.Tasks.UnitTests
                     XmlDocument expectedDoc = new XmlDocument();
                     XmlDocument actualDoc = new XmlDocument();
 
-                    expectedDoc.Load(expectedManifest);
-                    actualDoc.Load(generatedManifest);
+                    using (var reader = XmlReader.Create(expectedManifest))
+                    {
+                        expectedDoc.Load(reader);
+                    }
+
+                    using (var reader = XmlReader.Create(generatedManifest))
+                    {
+                        actualDoc.Load(reader);
+                    }
 
                     expectedDoc.OuterXml.ShouldBe(actualDoc.OuterXml);
                     expectedDoc.InnerXml.ShouldBe(actualDoc.InnerXml);
@@ -124,10 +131,15 @@ namespace Microsoft.Build.Tasks.UnitTests
                     XmlDocument expectedDoc = new XmlDocument();
                     XmlDocument actualDoc = new XmlDocument();
 
-                    expectedDoc.Load(expectedManifest);
-                    using (MemoryStream stream = new MemoryStream(actualManifestBytes))
+                    using (var reader = XmlReader.Create(expectedManifest))
                     {
-                        actualDoc.Load(stream);
+                        expectedDoc.Load(reader);
+                    }
+
+                    using (MemoryStream stream = new MemoryStream(actualManifestBytes))
+                    using (var reader = XmlReader.Create(stream))
+                    {
+                        actualDoc.Load(reader);
                     }
 
                     NormalizeLineEndings(expectedDoc.OuterXml).ShouldBe(NormalizeLineEndings(actualDoc.OuterXml));
