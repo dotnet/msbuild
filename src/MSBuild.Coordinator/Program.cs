@@ -28,8 +28,7 @@ Console.WriteLine($"  Node budget: {settings.TotalNodeBudget}");
 Console.WriteLine($"  Heartbeat interval: {settings.HeartbeatIntervalMs}ms");
 Console.WriteLine($"  Shutdown timeout: {settings.ShutdownTimeoutMs}ms");
 
-using CoordinatorServer server = new(
-    settings);
+using CoordinatorServer server = new(settings);
 
 using CancellationTokenSource cts = new();
 
