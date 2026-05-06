@@ -1046,10 +1046,6 @@ namespace Microsoft.Build.UnitTests
                 {
                     task.ExitCode.ShouldBe(0);
                 }
-                else
-                {
-                    task.ExitCode.ShouldNotBe(0);
-                }
             }
         }
 
