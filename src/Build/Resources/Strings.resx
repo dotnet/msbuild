@@ -2135,6 +2135,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>
   </data>
+  <data name="BinlogFormatVersionMismatch" xml:space="preserve">
+    <value>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</value>
+    <comment>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</comment>
+  </data>
   <data name="CustomCheckSuccessfulAcquisition" xml:space="preserve">
     <value>Custom check rule: '{0}' has been registered successfully.</value>
     <comment>The message is emitted on successful loading of the custom check rule in process.</comment>
@@ -2477,7 +2481,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
-        Next message code should be MSB4281
+        Next message code should be MSB4282
 
         Don't forget to update this comment after using a new code.
   -->

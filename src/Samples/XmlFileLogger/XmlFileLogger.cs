@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -96,29 +96,29 @@ namespace Microsoft.Build.Logging.StructuredLogger
             const string taskAssemblyPattern = "Using \"(?<task>.+)\" task from (assembly|the task factory) \"(?<assembly>.+)\"\\.";
 
             // Task Input / Outputs
-            if (messageArgs.Message.StartsWith(TaskParameterMessagePrefix))
+            if (messageArgs.Message.StartsWith(TaskParameterMessagePrefix, StringComparison.Ordinal))
             {
                 _build.AddTaskParameter(messageArgs, TaskParameterMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(OutputItemsMessagePrefix))
+            else if (messageArgs.Message.StartsWith(OutputItemsMessagePrefix, StringComparison.Ordinal))
             {
                 _build.AddTaskParameter(messageArgs, OutputItemsMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(OutputPropertyMessagePrefix))
+            else if (messageArgs.Message.StartsWith(OutputPropertyMessagePrefix, StringComparison.Ordinal))
             {
                 _build.AddTaskParameter(messageArgs, OutputPropertyMessagePrefix);
             }
 
             // Item / Property groups
-            else if (messageArgs.Message.StartsWith(PropertyGroupMessagePrefix))
+            else if (messageArgs.Message.StartsWith(PropertyGroupMessagePrefix, StringComparison.Ordinal))
             {
                 _build.AddPropertyGroup(messageArgs, PropertyGroupMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(ItemGroupIncludeMessagePrefix))
+            else if (messageArgs.Message.StartsWith(ItemGroupIncludeMessagePrefix, StringComparison.Ordinal))
             {
                 _build.AddItemGroup(messageArgs, ItemGroupIncludeMessagePrefix);
             }
-            else if (messageArgs.Message.StartsWith(ItemGroupRemoveMessagePrefix))
+            else if (messageArgs.Message.StartsWith(ItemGroupRemoveMessagePrefix, StringComparison.Ordinal))
             {
                 _build.AddItemGroup(messageArgs, ItemGroupRemoveMessagePrefix);
             }
