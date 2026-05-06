@@ -53,6 +53,11 @@ internal sealed class NodeBudgetManager
     /// </summary>
     public int TryGrant(BuildGrant grant)
     {
+        if (grant.RequestedNodes <= 0)
+        {
+            return 0;
+        }
+
         int available = AvailableNodes;
 
         if (available <= 0)
