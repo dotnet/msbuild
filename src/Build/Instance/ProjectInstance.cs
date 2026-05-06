@@ -3380,28 +3380,36 @@ namespace Microsoft.Build.Execution
             // Optionally synthesize MSBuildImportedProject items from the import closure,
             // making the import tree available to targets and tasks as regular items.
             if (string.Equals(
-                    _properties?.GetProperty(Constants.MSBuildProvideImportedProjectsPropertyName)?.EvaluatedValue,
-                    "true",
-                    StringComparison.OrdinalIgnoreCase))
+                _properties?.GetProperty(Constants.MSBuildProvideImportedProjectsPropertyName)?.EvaluatedValue,
+                "true",
+                StringComparison.OrdinalIgnoreCase))
             {
-                foreach (ResolvedImport resolvedImport in importClosure)
+                List<KeyValuePair<string, string>> metadata = null;
+
+                foreach (ResolvedImport import in importClosure)
                 {
-                    if (resolvedImport.ImportingElement is not null)
+                    if (import.ImportingElement is null)
                     {
-                        string sdkName = resolvedImport.SdkResult?.SdkReference.Name;
-                        KeyValuePair<string, string> importingPath = new("ImportingProjectPath", resolvedImport.ImportingElement.ContainingProject.FullPath);
-
-                        IEnumerable<KeyValuePair<string, string>> metadata = sdkName is null
-                            ? [importingPath]
-                            : [importingPath, new("Sdk", sdkName)];
-
-                        _items.Add(new ProjectItemInstance(
-                            project: this,
-                            itemType: "MSBuildImportedProject",
-                            includeEscaped: resolvedImport.ImportedProject.FullPath,
-                            directMetadata: metadata,
-                            definingFileEscaped: FullPath));
+                        // Skip the outer project itself, which is not an import.
+                        continue;
                     }
+
+                    metadata ??= [];
+                    metadata.Clear();
+
+                    metadata.Add(new("ImportingProjectPath", import.ImportingElement.ContainingProject.EscapedFullPath));
+
+                    if (import.SdkResult?.SdkReference?.Name is { } sdkName)
+                    {
+                        metadata.Add(new("Sdk", sdkName));
+                    }
+
+                    _items.Add(new ProjectItemInstance(
+                        project: this,
+                        itemType: "MSBuildImportedProject",
+                        includeEscaped: import.ImportedProject.EscapedFullPath,
+                        directMetadata: metadata,
+                        definingFileEscaped: EscapingUtilities.Escape(FullPath)));
                 }
             }
         }

@@ -4,13 +4,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Unittest;
+using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
