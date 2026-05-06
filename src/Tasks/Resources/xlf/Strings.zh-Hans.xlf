@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
@@ -620,8 +620,8 @@
         <note />
       </trans-unit>
       <trans-unit id="General.FailedToCanonicalizePath">
-        <source>Could not canonicalize path "{0}": {1}. The path will be used as-is.</source>
-        <target state="new">Could not canonicalize path "{0}": {1}. The path will be used as-is.</target>
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="new">Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
