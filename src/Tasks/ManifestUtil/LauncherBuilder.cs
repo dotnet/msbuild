@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
         }
 
-        public LauncherBuilder(string launcherPath, string launcherPathForMessages)
+        internal LauncherBuilder(string launcherPath, string launcherPathForMessages)
         {
             LauncherPath = launcherPath;
             LauncherPathForMessages = launcherPathForMessages;
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return Build(filename, outputPath, outputPath);
         }
 
-        public BuildResults Build(string filename, string outputPath, string outputPathForMessages)
+        internal BuildResults Build(string filename, string outputPath, string outputPathForMessages)
         {
             string launcherFilename = Path.GetFileName(LauncherPath);
 
