@@ -104,8 +104,8 @@ namespace Microsoft.Build.Framework
             foreach (var logger in Loggers)
             {
                 writer.Write(logger.LoggerName);
-                writer.Write(logger.LoggerTypeFullName ?? string.Empty);
-                writer.Write(logger.Parameters ?? string.Empty);
+                writer.WriteOptionalString(logger.LoggerTypeFullName);
+                writer.WriteOptionalString(logger.Parameters);
                 writer.Write(logger.Verbosity.HasValue);
                 if (logger.Verbosity.HasValue)
                 {
@@ -129,8 +129,8 @@ namespace Microsoft.Build.Framework
             for (int i = 0; i < count; i++)
             {
                 string loggerName = reader.ReadString();
-                string loggerTypeFullName = reader.ReadString();
-                string parameters = reader.ReadString();
+                string? loggerTypeFullName = reader.ReadOptionalString();
+                string? parameters = reader.ReadOptionalString();
 
                 LoggerVerbosity? verbosity = null;
                 if (reader.ReadBoolean())
