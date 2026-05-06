@@ -569,7 +569,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private static IList<Process> FilterProcessesByNodeMode(List<Process> processes, NodeMode expectedNodeMode, string expectedProcessName)
         {
-            CommunicationsUtilities.Trace($"Filtering {processes.Length} candidate processes by NodeMode {expectedNodeMode} for process name '{expectedProcessName}'");
+            CommunicationsUtilities.Trace($"Filtering {processes.Count} candidate processes by NodeMode {expectedNodeMode} for process name '{expectedProcessName}'");
 
             List<Process> filtered = new(capacity: processes.Count);
 
