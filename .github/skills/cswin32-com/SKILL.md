@@ -31,7 +31,7 @@ rot.Pointer->SomeMethod(...);
 
 ## Manual COM Structs (Not in Metadata)
 
-For interfaces not in Win32 metadata (e.g. WMI), define struct-based implementations in their own files, excluded via `<Compile Remove>` in source builds. Guard with `#if FEATURE_WINDOWSINTEROP && NET` (needs `delegate* unmanaged`).
+For interfaces not in Win32 metadata (e.g. WMI), define struct-based implementations in their own files, excluded via `<Compile Remove>` in source builds. Guard with `#if FEATURE_WINDOWSINTEROP && NET` because manual structs typically use the static-abstract `IComIID` member (only emitted on .NET 7+) — unlike CsWin32-generated COM types, which can run on net472 via the `IComIID` polyfill (see below).
 
 ```csharp
 [SupportedOSPlatform("windows6.1")]
@@ -63,9 +63,9 @@ internal unsafe struct IWbemLocator : IComIID
 ```
 
 **Requirements:**
-- `delegate* unmanaged[Stdcall]` — needs .NET 5+
+- `delegate* unmanaged[Stdcall]` — C# 9 / IL `calli`, works on net472 too
+- Static-abstract `IComIID` on .NET 7+ (gate manual structs with `#if NET`); the net472 polyfill is instance-based and is **not** attached to CsWin32-generated structs, so `ComScope<T>` over generated COM types is .NET-only
 - Exact vtable indices — unused slots can be omitted as long as used method indices are correct
-- Dual `IComIID` — static abstract on .NET 7+, instance-based on net472 (polyfill in `src/Framework/Framework/`)
 - `char*` with `fixed` for BSTR string parameters
 - CS0592 prevents `[SupportedOSPlatform]` on structs — put on individual methods instead
 
@@ -86,6 +86,30 @@ hr = PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, IID.Get
 - Use `IID.Get<T>()` — do not take `&localGuid`
 - Initialize `ComScope<T>` with `new()`. It implicitly converts to `T**` / `void**` output parameters
 
+## IComIID Polyfill (.NET Framework / netstandard2.0)
+
+CsWin32 emits `IComIID` (with static-abstract `Guid`) and attaches it to every generated COM struct **only on .NET 7+**. On older targets:
+
+- The `IComIID` interface itself is missing — provide an instance-based version at `src/Framework/Polyfills/IComIID.cs`.
+- Generated COM structs do not have `IComIID` in their base list — provide a partial struct that adds it.
+
+This is a **known case that always requires polyfilling** for .NET Framework support. Pattern in [`src/Framework/Polyfills/IComIIDPolyfills.cs`](../../../src/Framework/Polyfills/IComIIDPolyfills.cs):
+
+```csharp
+namespace Windows.Win32.System.Com;
+
+internal partial struct IRunningObjectTable : IComIID
+{
+    readonly Guid IComIID.Guid => IID_Guid; // CsWin32-emitted field, always present
+}
+```
+
+When a new CsWin32-generated COM type is used through `ComScope<T>`, add a partial entry to that file. Modeled after [winforms `IDataObject.cs`](https://github.com/dotnet/winforms/blob/main/src/System.Private.Windows.Core/src/Framework/Windows/Win32/System/Com/IDataObject.cs).
+
+Both polyfill files are gated with `#if !NET` so they compile on net472/netstandard2.0 and become empty on .NET (where CsWin32 emits its own static-abstract `IComIID` and attaches it to generated structs).
+
+For manual COM structs (WMI, Setup Configuration, etc.) that already use the static-abstract `IComIID` form, the polyfill approach won't compile on net472 — those structs stay .NET-only via `<Compile Remove>`.
+
 ## Lifetime & Access
 
 - `ComScope<T>` is a `ref struct` — use with `using`. Calls `Release()` on dispose.
@@ -98,8 +122,9 @@ hr = PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, IID.Get
 |----------|----------|
 | `src/Framework/Windows/Win32/System/Com/` | `ComScope.cs`, `ComClassFactory.cs` |
 | `src/Framework/Windows/Win32/IID.cs` | Generic IID lookup |
-| `src/Framework/Utilities/Wmi/` | Manual WMI structs (.NET-only) |
-| `src/Framework/Framework/` | net472 `IComIID` polyfill |
+| `src/Framework/Utilities/Wmi/` | Manual WMI structs (.NET-only — use static-abstract `IComIID`) |
+| `src/Framework/Polyfills/IComIID.cs` | net472/netstandard2.0 instance-based `IComIID` polyfill (`#if !NET`) |
+| `src/Framework/Polyfills/IComIIDPolyfills.cs` | Per-struct partials attaching `IComIID` to CsWin32-generated COM types on net472/netstandard2.0 |
 
 ## CS3016 CLS Compliance
 

@@ -640,22 +640,26 @@ namespace Microsoft.Build.Tasks
 
                 fixed (char* bufferPtr = buffer)
                 {
-                    // Run GetFileVersion, this should succeed using the initial buffer.
-                    // It also returns the dwLength which is used if there is insufficient buffer.
-                    HRESULT hresult = NativeMethods.GetFileVersion(path, bufferPtr, bufferLength, out int dwLength);
-
-                    if (hresult == (HRESULT)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
+                    fixed (char* pathPtr = path)
                     {
-                        // Allocate new buffer based on the returned length.
-                        buffer.EnsureCapacity(dwLength);
-                        fixed (char* newBufferPtr = buffer)
-                        {
-                            // Run GetFileVersion again, this should succeed using the new buffer.
-                            hresult = NativeMethods.GetFileVersion(path, newBufferPtr, dwLength, out dwLength);
-                        }
-                    }
+                        // Run GetFileVersion, this should succeed using the initial buffer.
+                        // It also returns the dwLength which is used if there is insufficient buffer.
+                        uint dwLength = 0;
+                        HRESULT hresult = Windows.Win32.PInvoke.GetFileVersion(pathPtr, bufferPtr, (uint)bufferLength, &dwLength);
 
-                    return hresult == HRESULT.S_OK ? buffer.Slice(0, dwLength - 1).ToString() : string.Empty;
+                        if (hresult == (HRESULT)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
+                        {
+                            // Allocate new buffer based on the returned length.
+                            buffer.EnsureCapacity((int)dwLength);
+                            fixed (char* newBufferPtr = buffer)
+                            {
+                                // Run GetFileVersion again, this should succeed using the new buffer.
+                                hresult = Windows.Win32.PInvoke.GetFileVersion(pathPtr, newBufferPtr, dwLength, &dwLength);
+                            }
+                        }
+
+                        return hresult == HRESULT.S_OK ? buffer.Slice(0, (int)dwLength - 1).ToString() : string.Empty;
+                    }
                 }
             }
 #else

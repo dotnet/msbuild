@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows5.0")]
         public void TestRunningObjectTableErrorLogging()
         {
             var rot = new RunningObjectTable();
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows5.0")]
         public void TestRunningObjectTableErrorDoesNotMaskOriginalError()
         {
             var rot = new RunningObjectTable();
@@ -168,7 +168,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows5.0")]
         public void TestRunningObjectTableSuccessDoesNotThrow()
         {
             var stateInHostObject = 42;
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows5.0")]
         public void TestRunningObjectTableErrorMessageIsMultiLine()
         {
             var rot = new RunningObjectTable();
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows5.0")]
         public void TestTranslationRemoteHostObjects()
         {
             var stateInHostObject = 3;
