@@ -34,5 +34,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
   - Set this to force all tasks to run out of process (except inline tasks).
 - `MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC`
   - Set this to force all inline tasks to run out of process. It is not compatible with custom TaskFactories.
+- `MSBUILDFORCEMULTITHREADED=1`
+  - Set this to force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build), equivalent to passing `-multiThreaded` / `-mt` on the command line. Useful for opting in without modifying command lines.
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
   - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.
