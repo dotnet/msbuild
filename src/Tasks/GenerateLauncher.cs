@@ -18,14 +18,15 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates a bootstrapper for ClickOnce deployment projects.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     [SupportedOSPlatform("windows")]
-    public sealed class GenerateLauncher : TaskExtension
+    public sealed class GenerateLauncher : TaskExtension, IMultiThreadableTask
     {
         private const string LAUNCHER_EXE = "Launcher.exe";
         private const string ENGINE_PATH = "Engine"; // relative to ClickOnce bootstrapper path
 
         #region Properties
-
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
         public ITaskItem EntryPoint { get; set; }
 
         public string LauncherPath { get; set; }
@@ -57,14 +58,16 @@ namespace Microsoft.Build.Tasks
                     ENGINE_PATH,
                     LAUNCHER_EXE);
             }
-
             if (EntryPoint == null)
             {
                 Log.LogErrorWithCodeFromResources("GenerateLauncher.InvalidInput");
                 return false;
             }
 
-            var launcherBuilder = new LauncherBuilder(LauncherPath);
+            string launcherPath = string.IsNullOrEmpty(LauncherPath) ? LauncherPath : TaskEnvironment.GetAbsolutePath(LauncherPath);
+            string outputPath = string.IsNullOrEmpty(OutputPath) ? OutputPath : TaskEnvironment.GetAbsolutePath(OutputPath);
+
+            var launcherBuilder = new LauncherBuilder(launcherPath, LauncherPath);
             string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
 
             // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
@@ -77,7 +80,7 @@ namespace Microsoft.Build.Tasks
                 entryPointFileName = AssemblyName;
             }
 
-            BuildResults results = launcherBuilder.Build(entryPointFileName, OutputPath);
+            BuildResults results = launcherBuilder.Build(entryPointFileName, outputPath, OutputPath);
 
             BuildMessage[] messages = results.Messages;
             if (messages != null)
@@ -98,8 +101,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-
-            OutputEntryPoint = new TaskItem(Path.Combine(Path.GetDirectoryName(EntryPoint.ItemSpec), results.KeyFile));
+            string outputEntryPoint = Path.Combine(Path.GetDirectoryName(EntryPoint.ItemSpec), results.KeyFile);
+            OutputEntryPoint = new TaskItem(outputEntryPoint);
             OutputEntryPoint.SetMetadata(ItemMetadataNames.targetPath, results.KeyFile);
 
             return !Log.HasLoggedErrors;
