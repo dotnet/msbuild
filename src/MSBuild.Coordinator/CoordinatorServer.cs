@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO.Pipes;
+using System.Text;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Internal;
 
@@ -134,7 +135,7 @@ internal sealed partial class CoordinatorServer(
 
         try
         {
-            using BinaryReader initialReader = new(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
+            using BinaryReader initialReader = new(pipeStream, Encoding.UTF8, leaveOpen: true);
 
             // The first message must be RequestNodes.
             ClientMessage firstMessage = initialReader.ReadClientMessage();
@@ -142,8 +143,17 @@ internal sealed partial class CoordinatorServer(
             if (firstMessage is not RequestNodesMessage request)
             {
                 _logger.WriteLine($"Server: Rejected client — first message was {firstMessage.GetType().Name}");
-                using BinaryWriter errorWriter = new(pipeStream, System.Text.Encoding.UTF8, leaveOpen: true);
+                using BinaryWriter errorWriter = new(pipeStream, Encoding.UTF8, leaveOpen: true);
                 errorWriter.Write(new ErrorMessage("First message must be RequestNodes"));
+                pipeStream.Dispose();
+                return;
+            }
+
+            if (request.ProcessId <= 0 || request.RequestedNodes <= 0)
+            {
+                _logger.WriteLine($"Server: Rejected client — invalid request (PID={request.ProcessId}, RequestedNodes={request.RequestedNodes})");
+                using BinaryWriter errorWriter = new(pipeStream, Encoding.UTF8, leaveOpen: true);
+                errorWriter.Write(new ErrorMessage("Invalid request: ProcessId and RequestedNodes must be > 0"));
                 pipeStream.Dispose();
                 return;
             }
