@@ -2366,8 +2366,15 @@ namespace Microsoft.Build.CommandLine
             return isBuildCheckEnabled;
         }
 
-        private static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
+        internal static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
         {
+            // Allow forcing multi-threaded mode via an environment variable, for example to opt in
+            // without modifying command lines (parallel to MSBUILDDISABLENODEREUSE for /nodeReuse).
+            if (Traits.Instance.ForceMultiThreaded)
+            {
+                return true;
+            }
+
             return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
         }
 
