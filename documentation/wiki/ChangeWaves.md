@@ -29,6 +29,14 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.8
+- [RAR task multithreading support: absolutize and canonicalize paths via TaskEnvironment](https://github.com/dotnet/msbuild/pull/13319)
+  - `ResolveAssemblyReference` input paths (`AppConfigFile`, `StateFile`, `CandidateAssemblyFiles`, `TargetFrameworkDirectories`, etc.) are absolutized relative to the project directory via `TaskEnvironment.GetAbsolutePath` instead of relying on process-wide current directory.
+  - `AssemblyFoldersFromConfigResolver` skips entries with empty `DirectoryPath` instead of falling back to the project directory.
+  - `ReferenceTable` resolved reference `FullPath` uses canonical form (`GetCanonicalForm`) instead of `NormalizePath`.
+  - `SystemState` precomputed-cache deserialization absolutizes state file paths via `TaskEnvironment` instead of using raw `ItemSpec` strings.
+  - Empty-string `AppConfigFile` is silently ignored (no error) instead of triggering a legacy error path.
+
 ### 18.7
 - [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.
 
