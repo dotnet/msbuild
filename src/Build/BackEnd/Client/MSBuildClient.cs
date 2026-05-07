@@ -459,7 +459,20 @@ namespace Microsoft.Build.Experimental
                 ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
-                using Process msbuildProcess = nodeLauncher.Start(new NodeLaunchData(_msbuildLocation, string.Join(" ", msBuildServerOptions)), nodeId: 0);
+
+                // Apply the same DOTNET_ROOT environment overrides we pass to worker nodes (see
+                // NodeProviderOutOfProc.CreateNode). When the parent MSBuild process is the
+                // apphost (native executable), the launched server child is also the apphost and
+                // needs DOTNET_ROOT to locate the runtime. Without these overrides the server
+                // process fails to start, the named pipe is never opened, and the client times
+                // out after 20s. See https://github.com/dotnet/msbuild/issues for the Aspire
+                // DOTNET_CLI_USE_MSBUILD_SERVER=true regression.
+                NodeLaunchData launchData = new(
+                    MSBuildLocation: _msbuildLocation,
+                    CommandLineArgs: string.Join(" ", msBuildServerOptions),
+                    EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides()!);
+
+                using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
                 CommunicationsUtilities.Trace($"Server started with PID: {msbuildProcess?.Id}");
             }
             catch (Exception ex)
