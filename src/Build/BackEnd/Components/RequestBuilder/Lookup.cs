@@ -92,6 +92,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<ProjectItemInstance, ProjectItemInstance> _cloneTable;
 
+        /// <summary>
+        /// Threshold above which <see cref="GetItems"/> builds a <see cref="HashSet{T}"/> of removes
+        /// for O(1) membership testing instead of the linear scan in <c>ShouldRemoveItem</c>.
+        /// Below this count the linear scan is cheaper than the hashset allocation + hashing
+        /// overhead. Conservative; calibrated against <c>LookupGetItemsBenchmark</c>.
+        /// </summary>
+        private const int RemoveSetHashThreshold = 8;
+
         #endregion
 
         #region Constructors
@@ -551,10 +559,28 @@ namespace Microsoft.Build.BackEnd
                 return groupFound;
             }
 
-            // Set the initial sizes to avoid resizing during import
+            // Set the initial sizes to avoid resizing during import. allAdds and allRemoves
+            // are List<List<...>>, so .Count gives the number of inner lists (one per scope
+            // level); we need the total item count across all those lists to size correctly.
             int itemsCount = groupFound?.Count ?? 0;    // Start with initial set
-            itemsCount += allAdds?.Count ?? 0;          // Add all the additions
-            itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
+            int totalAdds = 0;
+            if (allAdds != null)
+            {
+                foreach (List<ProjectItemInstance> adds in allAdds)
+                {
+                    totalAdds += adds.Count;
+                }
+            }
+            itemsCount += totalAdds;
+            int totalRemoves = 0;
+            if (allRemoves != null)
+            {
+                foreach (List<ProjectItemInstance> removes in allRemoves)
+                {
+                    totalRemoves += removes.Count;
+                }
+            }
+            itemsCount -= totalRemoves;
             if (itemsCount < 0)
             {
                 itemsCount = 0;
@@ -574,27 +600,20 @@ namespace Microsoft.Build.BackEnd
             // and the pre-#12320 ItemDictionary-based behavior, where _nodes was a
             // Dictionary<T, LinkedListNode<T>> also keyed by reference equality. If
             // ProjectItemInstance ever gains value-equality semantics, the historical
-            // GetItems contract here must be re-examined too. The 8-item threshold is a
-            // conservative heuristic: below it the original linear scan is cheaper than the
-            // HashSet allocation + hashing overhead. See LookupGetItemsBenchmark.
+            // GetItems contract here must be re-examined too.
+            // Skip the HashSet allocation entirely if there's nothing to filter against
+            // (no items in groupFound and no adds), since the early-out at the top of the
+            // method only excludes the case where adds/removes/modifies are *all* null.
             HashSet<ProjectItemInstance> removeSet = null;
-            if (allRemoves != null)
+            bool willFilter = (groupFound?.Count > 0) || allAdds != null;
+            if (willFilter && totalRemoves > RemoveSetHashThreshold)
             {
-                int totalRemoves = 0;
+                removeSet = new HashSet<ProjectItemInstance>(totalRemoves);
                 foreach (List<ProjectItemInstance> removes in allRemoves)
                 {
-                    totalRemoves += removes.Count;
-                }
-
-                if (totalRemoves > 8)
-                {
-                    removeSet = new HashSet<ProjectItemInstance>(totalRemoves);
-                    foreach (List<ProjectItemInstance> removes in allRemoves)
+                    foreach (ProjectItemInstance remove in removes)
                     {
-                        foreach (ProjectItemInstance remove in removes)
-                        {
-                            removeSet.Add(remove);
-                        }
+                        removeSet.Add(remove);
                     }
                 }
             }

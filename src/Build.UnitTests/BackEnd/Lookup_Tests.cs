@@ -1339,40 +1339,75 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Boundary check: at totalRemoves == 8 the linear-scan path is used, at 9 the
-        /// HashSet path is used. Both must produce the same result.
+        /// Boundary check: at totalRemoves == <see cref="Lookup_Tests.RemoveSetHashThreshold"/>
+        /// the linear-scan path is used; one above it the HashSet path is used. Both must
+        /// return the exact same result set when given equivalent effective inputs (same
+        /// real removes, padded with phantom no-op removes to push one execution above
+        /// the threshold).
         /// </summary>
-        [Theory]
-        [InlineData(8)]
-        [InlineData(9)]
-        public void GetItems_LinearAndHashSetPathsAgree(int removeCount)
+        [Fact]
+        public void GetItems_LinearAndHashSetPathsAgreeOnEffectiveResult()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
+            const int baseCount = 50;
+            const int realRemoveCount = 5;
+            const int linearTotal = RemoveSetHashThreshold;       // == 8: linear path
+            const int hashSetTotal = RemoveSetHashThreshold + 1;  // == 9: hashset path
             const string itemType = "i";
 
-            var allItems = new List<ProjectItemInstance>();
-            for (int i = 0; i < 50; i++)
+            // Build items once and share between both runs so the resulting collections
+            // contain the same ProjectItemInstance references, allowing reference-equal
+            // set comparison.
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            var allItems = new List<ProjectItemInstance>(baseCount);
+            for (int i = 0; i < baseCount; i++)
             {
-                var item = new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath);
-                table1.Add(item);
-                allItems.Add(item);
+                allItems.Add(new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath));
             }
 
-            Lookup lookup = LookupHelpers.CreateLookup(table1);
-            lookup.EnterScope("x");
-
-            var toRemove = allItems.Take(removeCount).ToList();
-            lookup.RemoveItems(itemType, toRemove);
-
-            ICollection<ProjectItemInstance> remaining = lookup.GetItems(itemType);
-
-            remaining.Count.ShouldBe(50 - removeCount);
-            foreach (var removed in toRemove)
+            // Phantom (no-op) remove references to pad totalRemoves above the threshold.
+            var phantoms = new List<ProjectItemInstance>();
+            for (int i = 0; i < hashSetTotal - realRemoveCount; i++)
             {
-                remaining.ShouldNotContain(removed);
+                phantoms.Add(new ProjectItemInstance(project, itemType, $"phantom_{i}", project.FullPath));
+            }
+
+            ICollection<ProjectItemInstance> linearResult = RunWith(allItems, phantoms.Take(linearTotal - realRemoveCount).ToList(), realRemoveCount, itemType);
+            ICollection<ProjectItemInstance> hashSetResult = RunWith(allItems, phantoms, realRemoveCount, itemType);
+
+            linearResult.Count.ShouldBe(baseCount - realRemoveCount);
+            hashSetResult.Count.ShouldBe(baseCount - realRemoveCount);
+            // Reference-equal set comparison: both paths must return the exact same items.
+            new HashSet<ProjectItemInstance>(hashSetResult).SetEquals(linearResult).ShouldBeTrue();
+
+            static ICollection<ProjectItemInstance> RunWith(
+                List<ProjectItemInstance> allItems,
+                List<ProjectItemInstance> phantomRemoves,
+                int realRemoveCount,
+                string itemType)
+            {
+                var table = new ItemDictionary<ProjectItemInstance>();
+                foreach (var item in allItems)
+                {
+                    table.Add(item);
+                }
+
+                Lookup lookup = LookupHelpers.CreateLookup(table);
+                lookup.EnterScope("x");
+
+                var toRemove = new List<ProjectItemInstance>(realRemoveCount + phantomRemoves.Count);
+                for (int i = 0; i < realRemoveCount; i++)
+                {
+                    toRemove.Add(allItems[i]);
+                }
+                toRemove.AddRange(phantomRemoves);
+
+                lookup.RemoveItems(itemType, toRemove);
+                return lookup.GetItems(itemType);
             }
         }
+
+        // Mirrors the constant inside Lookup so tests stay aligned if it changes.
+        private const int RemoveSetHashThreshold = 8;
 
         /// <summary>
         /// Verifies that GetItems uses reference equality (matching pre-#12320 behavior).

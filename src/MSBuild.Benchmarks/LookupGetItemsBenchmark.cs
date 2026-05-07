@@ -46,10 +46,12 @@ public class LookupGetItemsBenchmark
     public void GlobalSetup()
     {
         // A real ProjectInstance is needed by ProjectItemInstance ctors but we do not
-        // build it; we only use it as a host for ProjectItemInstance.
-        var projectXml = Microsoft.Build.Construction.ProjectRootElement.Create();
+        // build it; we only use it as a host for ProjectItemInstance. Use a dedicated
+        // ProjectCollection so the benchmark does not leak state into the global one.
+        using var pc = new ProjectCollection();
+        var projectXml = Microsoft.Build.Construction.ProjectRootElement.Create(pc);
         projectXml.AddTarget("_");
-        var project = new Project(projectXml);
+        var project = new Project(projectXml, null, null, pc);
         _project = project.CreateProjectInstance();
 
         // Build a Qt-ish set of source paths. Use varied lengths so ShouldRemoveItem's
