@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Windows.Win32;
@@ -150,8 +151,11 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                string[] resources = paths;
-                res = PInvoke.RmRegisterResources(handle, resources, default(ReadOnlySpan<RM_UNIQUE_PROCESS>), default(ReadOnlySpan<string>));
+                // Call the pointer overload directly. The CsWin32 ReadOnlySpan<string> wrapper has a bug
+                // where it rents arrays from ArrayPool, then iterates the (possibly larger) rented array
+                // in the finally block calling GCHandle.Free() on uninitialized entries — causing an
+                // InvalidOperationException ("Handle is not initialized.") for any non-empty input.
+                res = RegisterResources(handle, paths);
                 if (res != 0)
                 {
                     throw GetException(res, "RmRegisterResources", "Could not register resources.");
@@ -220,6 +224,46 @@ namespace Microsoft.Build.Utilities
             }
 
             return [];
+        }
+
+        /// <summary>
+        /// Pins each path and calls <see cref="PInvoke.RmRegisterResources(uint, uint, PCWSTR*, uint, RM_UNIQUE_PROCESS*, uint, PCWSTR*)"/>
+        /// directly. The CsWin32 <see cref="ReadOnlySpan{T}"/>-based wrapper rents arrays from
+        /// <see cref="System.Buffers.ArrayPool{T}"/>, then in its finally block iterates the (possibly oversized)
+        /// rented array calling <c>GCHandle.Free()</c> on uninitialized entries, which throws.
+        /// </summary>
+        [SupportedOSPlatform("windows6.0.6000")]
+        private static unsafe WIN32_ERROR RegisterResources(uint handle, string[] paths)
+        {
+            GCHandle[] gcHandles = new GCHandle[paths.Length];
+            try
+            {
+                PCWSTR* fileNamePtrs = stackalloc PCWSTR[paths.Length == 0 ? 1 : paths.Length];
+                for (int i = 0; i < paths.Length; i++)
+                {
+                    gcHandles[i] = GCHandle.Alloc(paths[i], GCHandleType.Pinned);
+                    fileNamePtrs[i] = (char*)gcHandles[i].AddrOfPinnedObject();
+                }
+
+                return PInvoke.RmRegisterResources(
+                    handle,
+                    nFiles: (uint)paths.Length,
+                    rgsFileNames: paths.Length == 0 ? null : fileNamePtrs,
+                    nApplications: 0,
+                    rgApplications: null,
+                    nServices: 0,
+                    rgsServiceNames: null);
+            }
+            finally
+            {
+                for (int i = 0; i < gcHandles.Length; i++)
+                {
+                    if (gcHandles[i].IsAllocated)
+                    {
+                        gcHandles[i].Free();
+                    }
+                }
+            }
         }
 
         private static Exception GetException(WIN32_ERROR res, string apiName, string message)
