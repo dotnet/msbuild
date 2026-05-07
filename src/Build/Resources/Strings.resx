@@ -750,6 +750,10 @@
     <value>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</value>
     <comment>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</comment>
   </data>
+  <data name="MSBuildTaskInheritedSkipNonexistentTargets" xml:space="preserve">
+    <value>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</value>
+    <comment>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</comment>
+  </data>
   <data name="MSBuildToolsPathIsNotSpecified" xml:space="preserve">
     <value>MSB4141: MSBuildToolsPath is not specified for the ToolsVersion "{0}" defined at "{1}", or the value specified evaluates to the empty string.</value>
     <comment>{StrBegin="MSB4141: "}</comment>
