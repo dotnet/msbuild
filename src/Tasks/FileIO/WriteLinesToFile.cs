@@ -36,12 +36,8 @@ namespace Microsoft.Build.Tasks
             // File.Move(overwrite) is available natively on .NET 5+.
             System.IO.File.Move(source, destination, overwrite: true);
 #else
-            // netstandard2.0: overwrite overload unavailable; delete destination first.
-            if (System.IO.File.Exists(destination))
-            {
-                System.IO.File.Delete(destination);
-            }
-            System.IO.File.Move(source, destination);
+            // netstandard2.0 output is ref asm only and never executed at runtime.
+            throw new PlatformNotSupportedException();
 #endif
         }
 
