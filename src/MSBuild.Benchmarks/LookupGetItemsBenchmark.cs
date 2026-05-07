@@ -138,4 +138,27 @@ public class LookupGetItemsBenchmark
         outer.LeaveScope();
         return observedCount;
     }
+
+    /// <summary>
+    /// Read-only baseline: the most common GetItems usage in real builds. The fix must not
+    /// regress this path. With no removes/adds/modifies in scope, GetItems takes its
+    /// early-out branch and returns the underlying collection directly with zero allocation.
+    /// Used to verify we preserve PR #12320's wins on the no-remove path.
+    /// </summary>
+    [Benchmark]
+    public int ReadOnly_NoRemoves()
+    {
+        var lookup = new Lookup(_baseItems, new PropertyDictionary<ProjectPropertyInstance>());
+        lookup.EnterScope("readonly");
+
+        int observedCount = 0;
+        // Same number of GetItems calls as the other scenarios for fair comparison.
+        for (int i = 0; i < _removeBatches.Count; i++)
+        {
+            ICollection<ProjectItemInstance> items = lookup.GetItems(ItemType);
+            observedCount = items.Count;
+        }
+
+        return observedCount;
+    }
 }

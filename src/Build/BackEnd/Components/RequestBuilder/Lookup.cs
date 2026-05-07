@@ -92,14 +92,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<ProjectItemInstance, ProjectItemInstance> _cloneTable;
 
-        /// <summary>
-        /// Threshold above which <see cref="GetItems"/> builds a <see cref="HashSet{T}"/> of removes
-        /// for O(1) membership testing instead of the linear scan in <c>ShouldRemoveItem</c>.
-        /// Below this count the linear scan is cheaper than the hashset allocation + hashing
-        /// overhead. Conservative; calibrated against <c>LookupGetItemsBenchmark</c>.
-        /// </summary>
-        private const int RemoveSetHashThreshold = 8;
-
         #endregion
 
         #region Constructors
@@ -592,21 +584,20 @@ namespace Microsoft.Build.BackEnd
             // a new one.
             List<ProjectItemInstance> result = new(itemsCount);
 
-            // PERF: When there are enough removes that the linear-scan ShouldRemoveItem
-            // helper would be quadratic over (groupFound + adds), build a HashSet for O(1)
-            // membership tests. ProjectItemInstance has no overridden Equals/GetHashCode so
-            // the default comparer gives reference equality - this is intentional and matches
-            // both ShouldRemoveItem's ultimate identity check (`itemAsTaskItem == removeAsTaskItem`)
-            // and the pre-#12320 ItemDictionary-based behavior, where _nodes was a
-            // Dictionary<T, LinkedListNode<T>> also keyed by reference equality. If
-            // ProjectItemInstance ever gains value-equality semantics, the historical
-            // GetItems contract here must be re-examined too.
-            // Skip the HashSet allocation entirely if there's nothing to filter against
-            // (no items in groupFound and no adds), since the early-out at the top of the
-            // method only excludes the case where adds/removes/modifies are *all* null.
+            // PERF: When there are any removes, build a HashSet for O(1) membership tests.
+            // ProjectItemInstance has no overridden Equals/GetHashCode so the default comparer
+            // gives reference equality - this is intentional and matches the pre-#12320
+            // ItemDictionary-based behavior, where _nodes was a Dictionary<T, LinkedListNode<T>>
+            // also keyed by reference equality. If ProjectItemInstance ever gains value-equality
+            // semantics, the historical GetItems contract here must be re-examined too.
+            // Threshold-tuning measurements (see LookupRemoveThresholdSweep) show HashSet
+            // outperforms a linear scan starting at M=1 for any realistic groupFound size
+            // (>= 100 items); only sub-microsecond differences exist below that. Skip the
+            // HashSet allocation if there is nothing to filter against (no items in groupFound
+            // and no adds), or if every per-scope remove list is empty.
             HashSet<ProjectItemInstance> removeSet = null;
             bool willFilter = (groupFound?.Count > 0) || allAdds != null;
-            if (willFilter && totalRemoves > RemoveSetHashThreshold)
+            if (willFilter && totalRemoves > 0)
             {
                 removeSet = new HashSet<ProjectItemInstance>(totalRemoves);
                 foreach (List<ProjectItemInstance> removes in allRemoves)
@@ -620,27 +611,16 @@ namespace Microsoft.Build.BackEnd
 
             if (groupFound?.Count > 0)
             {
-                if (allRemoves == null)
+                if (removeSet == null)
                 {
-                    // No removes, so use fast path for ICollection<T>.
+                    // No removes (or nothing to filter), so use fast path for ICollection<T>.
                     result.AddRange(groupFound);
                 }
-                else if (removeSet != null)
+                else
                 {
                     foreach (ProjectItemInstance item in groupFound)
                     {
                         if (!removeSet.Contains(item))
-                        {
-                            result.Add(item);
-                        }
-                    }
-                }
-                else
-                {
-                    // Otherwise, need to filter any items marked for removal.
-                    foreach (ProjectItemInstance item in groupFound)
-                    {
-                        if (!ShouldRemoveItem(item, allRemoves))
                         {
                             result.Add(item);
                         }
@@ -655,27 +635,16 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (List<ProjectItemInstance> adds in allAdds)
                 {
-                    if (allRemoves == null)
+                    if (removeSet == null)
                     {
                         // No removes, so use fast path for ICollection<T>.
                         result.AddRange(adds);
                     }
-                    else if (removeSet != null)
+                    else
                     {
                         foreach (ProjectItemInstance item in adds)
                         {
                             if (!removeSet.Contains(item))
-                            {
-                                result.Add(item);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Otherwise, need to filter any items marked for removal.
-                        foreach (ProjectItemInstance item in adds)
-                        {
-                            if (!ShouldRemoveItem(item, allRemoves))
                             {
                                 result.Add(item);
                             }
@@ -691,35 +660,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return result;
-
-            // Helper to perform a linear search across the removes.
-            // PERF: This linear search is still cheaper than combining all removes into hashsets and performing a lookup
-            // due to allocation and hashcode costs, provided that we can quickly filter out false matches.
-            // For larger remove sets, GetItems builds a HashSet and uses that instead - see above.
-            static bool ShouldRemoveItem(ProjectItemInstance item, List<List<ProjectItemInstance>> allRemoves)
-            {
-                ITaskItem2 itemAsTaskItem = item;
-                string evaluatedInclude = itemAsTaskItem.EvaluatedIncludeEscaped;
-
-                foreach (List<ProjectItemInstance> removes in allRemoves)
-                {
-                    foreach (ProjectItemInstance remove in removes)
-                    {
-                        // Get access to allocation-free item spec property.
-                        ITaskItem2 removeAsTaskItem = remove;
-
-                        // Start with the item spec length as a fast filter for false matches.
-                        if (evaluatedInclude.Length == removeAsTaskItem.EvaluatedIncludeEscaped.Length
-                            && StringComparer.Ordinal.Equals(evaluatedInclude, removeAsTaskItem.EvaluatedIncludeEscaped)
-                            && itemAsTaskItem == removeAsTaskItem)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
         }
 
         /// <summary>

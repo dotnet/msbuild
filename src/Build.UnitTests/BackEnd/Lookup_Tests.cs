@@ -1339,19 +1339,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Boundary check: at totalRemoves == <see cref="Lookup_Tests.RemoveSetHashThreshold"/>
-        /// the linear-scan path is used; one above it the HashSet path is used. Both must
-        /// return the exact same result set when given equivalent effective inputs (same
-        /// real removes, padded with phantom no-op removes to push one execution above
-        /// the threshold).
+        /// Effective output is independent of how many phantom (no-op) removes are mixed
+        /// with the real ones. Whether the implementation uses a small or large remove set
+        /// internally must not change which items survive.
         /// </summary>
         [Fact]
-        public void GetItems_LinearAndHashSetPathsAgreeOnEffectiveResult()
+        public void GetItems_PhantomRemovesDoNotChangeResult()
         {
             const int baseCount = 50;
             const int realRemoveCount = 5;
-            const int linearTotal = RemoveSetHashThreshold;       // == 8: linear path
-            const int hashSetTotal = RemoveSetHashThreshold + 1;  // == 9: hashset path
             const string itemType = "i";
 
             // Build items once and share between both runs so the resulting collections
@@ -1364,20 +1360,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 allItems.Add(new ProjectItemInstance(project, itemType, $"item_{i}", project.FullPath));
             }
 
-            // Phantom (no-op) remove references to pad totalRemoves above the threshold.
+            // Phantom (no-op) remove references padding the second run.
             var phantoms = new List<ProjectItemInstance>();
-            for (int i = 0; i < hashSetTotal - realRemoveCount; i++)
+            for (int i = 0; i < 20; i++)
             {
                 phantoms.Add(new ProjectItemInstance(project, itemType, $"phantom_{i}", project.FullPath));
             }
 
-            ICollection<ProjectItemInstance> linearResult = RunWith(allItems, phantoms.Take(linearTotal - realRemoveCount).ToList(), realRemoveCount, itemType);
-            ICollection<ProjectItemInstance> hashSetResult = RunWith(allItems, phantoms, realRemoveCount, itemType);
+            ICollection<ProjectItemInstance> noPhantoms = RunWith(allItems, [], realRemoveCount, itemType);
+            ICollection<ProjectItemInstance> withPhantoms = RunWith(allItems, phantoms, realRemoveCount, itemType);
 
-            linearResult.Count.ShouldBe(baseCount - realRemoveCount);
-            hashSetResult.Count.ShouldBe(baseCount - realRemoveCount);
-            // Reference-equal set comparison: both paths must return the exact same items.
-            new HashSet<ProjectItemInstance>(hashSetResult).SetEquals(linearResult).ShouldBeTrue();
+            noPhantoms.Count.ShouldBe(baseCount - realRemoveCount);
+            withPhantoms.Count.ShouldBe(baseCount - realRemoveCount);
+            // Reference-equal set comparison: both runs must return the exact same items.
+            new HashSet<ProjectItemInstance>(withPhantoms).SetEquals(noPhantoms).ShouldBeTrue();
 
             static ICollection<ProjectItemInstance> RunWith(
                 List<ProjectItemInstance> allItems,
@@ -1405,9 +1401,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return lookup.GetItems(itemType);
             }
         }
-
-        // Mirrors the constant inside Lookup so tests stay aligned if it changes.
-        private const int RemoveSetHashThreshold = 8;
 
         /// <summary>
         /// Verifies that GetItems uses reference equality (matching pre-#12320 behavior).
