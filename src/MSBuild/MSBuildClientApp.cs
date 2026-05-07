@@ -70,7 +70,21 @@ namespace Microsoft.Build.CommandLine
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = exitResult.MSBuildClientExitType.ToString();
                 }
 
-                // Server is busy, fallback to old behavior.
+                // Surface a single user-visible message on stderr when the failure is something
+                // other than the well-understood "another client is racing us for the launch
+                // mutex" case. Without this the user sees no indication that MSBuild Server was
+                // requested but unavailable; previously a connection timeout would even crash
+                // the process. See https://github.com/dotnet/msbuild/issues for the
+                // DOTNET_CLI_USE_MSBUILD_SERVER=true regression in 10.0.300.
+                if (exitResult.MSBuildClientExitType != MSBuildClientExitType.ServerBusy)
+                {
+                    string detail = exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect
+                        ? "could not connect to the server (it may have failed to start; ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime, or set MSBUILDDEBUGCOMM=1 for diagnostics)"
+                        : exitResult.MSBuildClientExitType.ToString();
+                    Console.Error.WriteLine($"MSBuild server unavailable ({detail}); falling back to in-proc build.");
+                }
+
+                // Server is busy / unavailable, fallback to old behavior.
                 return MSBuildApp.Execute(commandLineArgs);
             }
 
