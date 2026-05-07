@@ -8,6 +8,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using EventSourceSink = Microsoft.Build.BackEnd.Logging.EventSourceSink;
 using Project = Microsoft.Build.Evaluation.Project;
@@ -497,19 +498,25 @@ namespace Microsoft.Build.UnitTests
 
             fileLogger.NodeId = 0;
             fileLogger.Initialize(new EventSourceSink());
-            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=msbuild0.log;", StringComparison.OrdinalIgnoreCase));
+            fileLogger.InternalFilelogger.Parameters.ShouldBe(
+                "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=msbuild0.log;",
+                StringCompareShould.IgnoreCase);
             fileLogger.Shutdown();
 
             fileLogger.NodeId = 3;
             fileLogger.Parameters = "logfile=" + Path.Combine(folder.Path, "mylogfile.log");
             fileLogger.Initialize(new EventSourceSink());
-            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(folder.Path, "mylogfile3.log") + ";", StringComparison.OrdinalIgnoreCase));
+            fileLogger.InternalFilelogger.Parameters.ShouldBe(
+                "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(folder.Path, "mylogfile3.log") + ";",
+                StringCompareShould.IgnoreCase);
             fileLogger.Shutdown();
 
             fileLogger.NodeId = 4;
             fileLogger.Parameters = "logfile=" + Path.Combine(folder.Path, "mylogfile.log");
             fileLogger.Initialize(new EventSourceSink());
-            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(folder.Path, "mylogfile4.log") + ";", StringComparison.OrdinalIgnoreCase));
+            fileLogger.InternalFilelogger.Parameters.ShouldBe(
+                "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(folder.Path, "mylogfile4.log") + ";",
+                StringCompareShould.IgnoreCase);
             fileLogger.Shutdown();
 
             string tempuraDir = Path.Combine(folder.Path, "tempura");
@@ -517,7 +524,9 @@ namespace Microsoft.Build.UnitTests
             fileLogger.NodeId = 1;
             fileLogger.Parameters = "logfile=" + Path.Combine(tempuraDir, "mylogfile.log");
             fileLogger.Initialize(new EventSourceSink());
-            Assert.Equal(0, string.Compare(fileLogger.InternalFilelogger.Parameters, "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(tempuraDir, "mylogfile1.log") + ";", StringComparison.OrdinalIgnoreCase));
+            fileLogger.InternalFilelogger.Parameters.ShouldBe(
+                "ForceNoAlign;ShowEventId;ShowCommandLine;logfile=" + Path.Combine(tempuraDir, "mylogfile1.log") + ";",
+                StringCompareShould.IgnoreCase);
             fileLogger.Shutdown();
         }
 
