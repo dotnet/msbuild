@@ -222,7 +222,7 @@ internal static class NativeMethods
         uint len = 0;
         const int ERROR_INSUFFICIENT_BUFFER = 122;
 
-        if (!PInvoke.GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, null, ref len) &&
+        if (!PInvoke.GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore, null, &len) &&
             Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
         {
             using BufferScope<byte> buffer = new((int)len);
@@ -231,7 +231,7 @@ internal static class NativeMethods
                 if (PInvoke.GetLogicalProcessorInformationEx(
                     LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore,
                     (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)bufferPtr,
-                    ref len))
+                    &len))
                 {
                     int processorCount = 0;
                     byte* ptr = bufferPtr;
@@ -1222,13 +1222,13 @@ internal static class NativeMethods
     internal static unsafe string GetFullPath(string path)
     {
         using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-        int fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, null);
+        int fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
 
         // If user is using long paths we could need to allocate a larger buffer
         if (fullPathLength > buffer.Length)
         {
             buffer.EnsureCapacity(fullPathLength);
-            fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, null);
+            fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
         }
 
         if (fullPathLength == 0)
