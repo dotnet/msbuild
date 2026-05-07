@@ -23,8 +23,12 @@ This skill covers everything you need to manage issues and the project board for
 | Project node ID | `PVT_kwDOAIt-yc4ABM5F` |
 | Sprint field ID (iteration) | `PVTIF_lADOAIt-yc4ABM5FzgAtMGI` |
 
-Field IDs for `Status`, `Area`, `Priority`, etc. can be looked up on demand:
+These IDs are stable but can be re-derived if the project is ever recreated or migrated:
 ```bash
+# Project node ID
+gh api graphql -f query='{ organization(login:"dotnet") { projectV2(number:117) { id } } }'
+
+# All field IDs (Sprint, Status, Area, Priority, …)
 gh project field-list 117 --owner dotnet --format json | jq '.fields[] | {id,name,type}'
 ```
 
@@ -48,13 +52,13 @@ gh auth refresh -s project
 gh issue view 13315 --repo dotnet/msbuild --json title,body,state,assignees,labels
 
 # Comment (use --body-file to avoid shell-quoting traps with multi-line markdown)
-gh issue comment 13315 --repo dotnet/msbuild --body-file /tmp/comment.md
+gh issue comment 13315 --repo dotnet/msbuild --body-file ./comment.md
 
 # Amend body (overwrite — there is no append; use view → edit → write)
-gh issue edit 13597 --repo dotnet/msbuild --body-file /tmp/new-body.md
+gh issue edit 13597 --repo dotnet/msbuild --body-file ./new-body.md
 
 # Create
-gh issue create --repo dotnet/msbuild --title "Title" --body-file /tmp/body.md
+gh issue create --repo dotnet/msbuild --title "Title" --body-file ./body.md
 
 # Add labels / assignees
 gh issue edit 13315 --repo dotnet/msbuild --add-label "Area: Server" --add-assignee someuser
@@ -137,11 +141,14 @@ while True:
         }}
       }}
     }}'''
-    r = subprocess.run(['gh','api','graphql','-f',f'query={query}'],
-                       capture_output=True, text=True, check=True)
+    try:
+        r = subprocess.run(['gh','api','graphql','-f',f'query={query}'],
+                           capture_output=True, text=True, check=True)
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"GraphQL query failed: {e.stderr}") from e
     page = json.loads(r.stdout)['data']['organization']['projectV2']['items']
     for node in page['nodes']:
-        sprint = None
+        sprint = status = None
         assignees = []
         for fv in node.get('fieldValues', {}).get('nodes', []):
             if not fv:                              # null entries for unset fields
@@ -149,10 +156,12 @@ while True:
             fname = (fv.get('field') or {}).get('name', '')
             if fname == 'Sprint':
                 sprint = fv.get('title')
+            elif fname == 'Status':
+                status = fv.get('name')
             elif fname == 'Assignees':
                 assignees = [u['login'] for u in (fv.get('users') or {}).get('nodes', [])]
-        results.append({'id': node['id'], 'sprint': sprint, 'assignees': assignees,
-                        'content': node.get('content')})
+        results.append({'id': node['id'], 'sprint': sprint, 'status': status,
+                        'assignees': assignees, 'content': node.get('content')})
     if not page['pageInfo']['hasNextPage']:
         break
     cursor = page['pageInfo']['endCursor']
@@ -288,6 +297,7 @@ When summarizing meetings or chat threads into GitHub:
 - ✅ Use team voice ("the team agreed", "open question", "follow-up needed").
 - ✅ Keep objective, decision-relevant content (problem statement, scope, exit criteria, repro steps, numbers).
 - ❌ No personal names or "X said / Y replied".
+- ❌ No full email addresses of external contributors (use GitHub handles instead).
 - ❌ No internal-only identifiers (room names, recording IDs, agent fleet identifiers, partner-team contractor names).
 - ❌ No speculation about other teams' motives or anything resembling internal politics.
 - ❌ No confidential roadmap dates or unreleased product details unless already public.
@@ -297,8 +307,8 @@ When summarizing meetings or chat threads into GitHub:
 
 | Goal | Sketch |
 |---|---|
-| Add a status comment to N issues | `for n in 13315 13702 …; do gh issue comment $n --repo dotnet/msbuild --body-file /tmp/c-$n.md; done` |
-| Replace a one-line issue body with a full Context / Exit-criteria / Out-of-scope spec | `gh issue edit <n> --repo dotnet/msbuild --body-file /tmp/body.md` |
+| Add a status comment to N issues | `for n in 13315 13702 …; do gh issue comment $n --repo dotnet/msbuild --body-file ./c-$n.md; done` |
+| Replace a one-line issue body with a full Context / Exit-criteria / Out-of-scope spec | `gh issue edit <n> --repo dotnet/msbuild --body-file ./body.md` |
 | Move all unassigned items from sprint X to sprint Y | GraphQL pagination loop above + `gh project item-edit --iteration-id` per item |
 | File a new issue and put it in the current sprint | `gh issue create` → `addProjectV2ItemById` → `updateProjectV2ItemFieldValue` |
 | Audit "what's in the current sprint that has no owner" | GraphQL pagination loop, filter on `Sprint == "<current>"` and empty `Assignees` |
