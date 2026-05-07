@@ -15,10 +15,9 @@ namespace Microsoft.Build.Tasks
     /// id validation checks to fail.
     ///
     /// NOTE: This class is not the implementation that actually runs at build time. The MSBuild engine
-    /// resolves &lt;CallTarget&gt; to the intrinsic implementation in <c>Microsoft.Build.BackEnd.CallTarget</c>
-    /// (under <c>src/Build/BackEnd/Components/RequestBuilder/IntrinsicTasks/CallTarget.cs</c>). This type
-    /// is retained only for backwards compatibility in case a third-party task derives from it; it should
-    /// not be used directly.
+    /// NOTE: This class is not the implementation that actually runs at build time. The MSBuild engine
+    /// resolves &lt;CallTarget&gt; to a private implementation. This type is retained only for
+    /// backwards compatibility in case a third-party task derives from it; it should not be used.
     /// </remarks>
     [RunInMTA]
     public class CallTarget : TaskExtension
