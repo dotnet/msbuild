@@ -725,12 +725,18 @@ public sealed partial class TerminalLogger : INodeLogger
             EvalContext evalContext = new(e.BuildEventContext);
             string? targetFramework = null;
             string? runtimeIdentifier = null;
+            
             if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
             {
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
+
+            // Per-project metaproj files (e.g. MyProject.csproj.metaproj) are constructed
+            // directly without evaluation, so they won't have a matching ProjectEvaluationFinished event.
+            System.Diagnostics.Debug.Assert(
+                evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
+                "EvalProjectInfo should have been captured before ProjectStarted");
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
             _projects[c] = projectInfo;

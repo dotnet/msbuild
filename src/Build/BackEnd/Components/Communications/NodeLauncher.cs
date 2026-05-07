@@ -2,23 +2,27 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
 #endif
 
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+#if FEATURE_WINDOWSINTEROP
+using System.Collections.Generic;
+using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Text;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 #nullable disable
 
@@ -60,11 +64,17 @@ namespace Microsoft.Build.BackEnd
             string exeName = ResolveExecutableName(nodeLaunchData.MSBuildLocation, out bool isNativeAppHost);
             uint creationFlags = GetCreationFlags(out bool redirectStreams);
 
-            CommunicationsUtilities.Trace("Launching node from {0}", nodeLaunchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"Launching node from {nodeLaunchData.MSBuildLocation}");
 
-            return NativeMethodsShared.IsWindows
-                ? StartProcessWindows(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
-                : StartProcessUnix(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost);
+#if FEATURE_WINDOWSINTEROP
+            if (NativeMethodsShared.IsWindows)
+            {
+                return StartProcessWindows(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost);
+            }
+#endif
+            return NativeMethodsShared.IsUnixLike
+                ? StartProcessUnix(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
+                : throw new PlatformNotSupportedException();
 
             static void ValidateMSBuildLocation(string msbuildLocation)
             {
@@ -141,22 +151,20 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 Process process = Process.Start(processStartInfo);
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
+                CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {process.Id}");
                 return process;
             }
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace(
-                    "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                    nodeLaunchData.MSBuildLocation,
-                    commandLineArgs,
-                    ex.ToString());
+                    $"Failed to launch node from {nodeLaunchData.MSBuildLocation}. CommandLine: {commandLineArgs}{Environment.NewLine}{ex}");
 
                 throw new NodeFailedToLaunchException(ex);
             }
         }
 
-        [SupportedOSPlatform("windows")]
+#if FEATURE_WINDOWSINTEROP
+        [SupportedOSPlatform("windows6.1")]
         private static Process StartProcessWindows(NodeLaunchData nodeLaunchData, string exeName, uint creationFlags, bool redirectStreams, bool isNativeAppHost)
         {
             // Repeat the executable name as the first token of the command line because the command line
@@ -203,18 +211,14 @@ namespace Microsoft.Build.BackEnd
                     var e = new System.ComponentModel.Win32Exception();
 
                     CommunicationsUtilities.Trace(
-                        "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {3}",
-                        nodeLaunchData.MSBuildLocation,
-                        e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                        e.Message,
-                        commandLineArgs);
+                        $"Failed to launch node from {nodeLaunchData.MSBuildLocation}. System32 Error code {e.NativeErrorCode.ToString(CultureInfo.InvariantCulture)}. Description {e.Message}. CommandLine: {commandLineArgs}");
 
                     throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
                 }
 
                 CloseProcessHandles(processInfo);
 
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", processInfo.dwProcessId, exeName);
+                CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {processInfo.dwProcessId}");
                 return Process.GetProcessById(processInfo.dwProcessId);
             }
             finally
@@ -227,19 +231,23 @@ namespace Microsoft.Build.BackEnd
 
             static void CloseProcessHandles(BackendNativeMethods.PROCESS_INFORMATION processInfo)
             {
-                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+#pragma warning disable CA1416 // static local functions don't inherit [SupportedOSPlatform] (analyzer limitation)
+                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != new IntPtr(-1))
                 {
-                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
+                    PInvoke.CloseHandle((HANDLE)processInfo.hProcess);
                 }
 
-                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != new IntPtr(-1))
                 {
-                    NativeMethodsShared.CloseHandle(processInfo.hThread);
+                    PInvoke.CloseHandle((HANDLE)processInfo.hThread);
                 }
+#pragma warning restore CA1416
             }
         }
+#endif
 
-        [SupportedOSPlatform("windows")]
+#if FEATURE_WINDOWSINTEROP
+        [SupportedOSPlatform("windows6.1")]
         private static BackendNativeMethods.STARTUP_INFO CreateStartupInfo(bool redirectStreams)
         {
             var startInfo = new BackendNativeMethods.STARTUP_INFO
@@ -297,6 +305,7 @@ namespace Microsoft.Build.BackEnd
 
             return Marshal.StringToHGlobalUni(sb.ToString());
         }
+#endif
 
         private static Process DisableMSBuildServer(Func<Process> func)
         {

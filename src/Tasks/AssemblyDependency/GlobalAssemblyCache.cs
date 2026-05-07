@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Windows.Win32.Foundation;
 
 #nullable disable
 
@@ -182,31 +183,25 @@ namespace Microsoft.Build.Tasks
 
             string value;
 
-            if (NativeMethodsShared.IsWindows)
+            // net472-only = inherently Windows. CsWin32 types used directly.
+            uint hr = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
+
+            ErrorUtilities.VerifyThrow(hr == HRESULT.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
+
+            var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>() };
+
+            assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
+
+            if (assemblyInfo.cbAssemblyInfo == 0)
             {
-                uint hr = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
-
-                ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
-
-                var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>() };
-
-                assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
-
-                if (assemblyInfo.cbAssemblyInfo == 0)
-                {
-                    return null;
-                }
-
-                assemblyInfo.pszCurrentAssemblyPathBuf = new string(new char[assemblyInfo.cchBuf]);
-
-                assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
-
-                value = assemblyInfo.pszCurrentAssemblyPathBuf;
+                return null;
             }
-            else
-            {
-                value = NativeMethods.AssemblyCacheEnum.AssemblyPathFromStrongName(strongName);
-            }
+
+            assemblyInfo.pszCurrentAssemblyPathBuf = new string(new char[assemblyInfo.cchBuf]);
+
+            assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
+
+            value = assemblyInfo.pszCurrentAssemblyPathBuf;
 
             return value;
         }

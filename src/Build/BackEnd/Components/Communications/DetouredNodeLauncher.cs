@@ -70,7 +70,7 @@ namespace Microsoft.Build.BackEnd
             // parser logic expects it and will otherwise skip the first argument
             var commandLineArgs = $"\"{launchData.MSBuildLocation}\" {launchData.CommandLineArgs}";
 
-            CommunicationsUtilities.Trace("Launching node from {0}", launchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"Launching node from {launchData.MSBuildLocation}");
 
             string exeName = launchData.MSBuildLocation;
 
@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd
                 _sandboxedProcesses.Add(sp);
             }
 
-            CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", sp.ProcessId, exeName);
+            CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {sp.ProcessId}");
             return Process.GetProcessById(sp.ProcessId);
         }
 
