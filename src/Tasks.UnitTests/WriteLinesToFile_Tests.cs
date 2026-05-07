@@ -452,7 +452,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void TransactionalModePreservesAllData()
+        public void TransactionalModeSucceedsWithConcurrentOverwrites()
         {
             using (var testEnv = TestEnvironment.Create(_output))
             {

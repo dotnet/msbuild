@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -8,7 +8,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
-
+using Windows.Win32;
+using Windows.Win32.Storage.FileSystem;
 
 namespace Microsoft.Build.Shared.FileSystem
 {
@@ -29,7 +30,7 @@ namespace Microsoft.Build.Shared.FileSystem
     /// Windows-specific implementation of file system operations using Windows native invocations.
     /// TODO For potential extra perf gains, provide native implementations for all IFileSystem methods and stop inheriting from ManagedFileSystem
     /// </summary>
-    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows6.1")]
     internal sealed class WindowsFileSystem : ManagedFileSystem
     {
         private static readonly WindowsFileSystem Instance = new();
@@ -61,7 +62,9 @@ namespace Microsoft.Build.Shared.FileSystem
                 throw new PathTooLongException(SR.FormatPathTooLong(path, NativeMethods.MaxPath));
             }
 
-            return NativeMethods.DirectoryExistsWindows(path);
+            uint attrs = PInvoke.GetFileAttributes(path);
+            return attrs != PInvoke.INVALID_FILE_ATTRIBUTES
+                && (attrs & (uint)FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0;
         }
 
         public override bool FileExists(string path)
@@ -73,10 +76,7 @@ namespace Microsoft.Build.Shared.FileSystem
 #endif
         }
 
-        public override bool FileOrDirectoryExists(string path)
-        {
-            return NativeMethods.FileOrDirectoryExistsWindows(path);
-        }
+        public override bool FileOrDirectoryExists(string path) => PInvoke.GetFileAttributes(path) != PInvoke.INVALID_FILE_ATTRIBUTES;
 
         public override DateTime GetLastWriteTimeUtc(string path)
         {

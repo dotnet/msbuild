@@ -1039,7 +1039,10 @@ namespace Microsoft.Build.Tasks
                                 // to a failure to reset the readonly bit properly, in which case retrying will succeed.  This seems to be
                                 // a pretty edge scenario, but since some of our internal builds appear to be hitting it, provide a secret
                                 // environment variable to allow overriding the default behavior and forcing retries in this circumstance as well.
-                                if (!_alwaysRetryCopy)
+                                // On at least some non-Windows platforms (e.g. macOS https://github.com/dotnet/msbuild/issues/13463), access denied can also indicate a
+                                // transient lock conflict (e.g. EACCES from a concurrent clonefile/flock), so we only skip retries for
+                                // access denied on Windows.
+                                if (!_alwaysRetryCopy && (NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_7)))
                                 {
                                     throw;
                                 }

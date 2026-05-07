@@ -7,14 +7,18 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Utilities;
 #endif
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
+using Windows.Win32.Foundation;
+#endif
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
@@ -39,7 +43,6 @@ namespace Microsoft.Build.Tasks
         private readonly IMetaDataDispenser _metadataDispenser;
         private readonly IMetaDataAssemblyImport _assemblyImport;
         private static Guid s_importerGuid = new Guid(((GuidAttribute)Attribute.GetCustomAttribute(typeof(IMetaDataImport), typeof(GuidAttribute), false)).Value);
-        private readonly Assembly _assembly;
 #endif
         private readonly string _sourceFile;
         private FrameworkName _frameworkName;
@@ -74,16 +77,10 @@ namespace Microsoft.Build.Tasks
             _sourceFile = sourceFile;
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-            if (NativeMethodsShared.IsWindows)
-            {
-                // Create the metadata dispenser and open scope on the source file.
-                _metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-                _assemblyImport = (IMetaDataAssemblyImport)_metadataDispenser.OpenScope(sourceFile, 0, ref s_importerGuid);
-            }
-            else
-            {
-                _assembly = Assembly.ReflectionOnlyLoadFrom(sourceFile);
-            }
+            // net472-only = inherently Windows. CsWin32 types used directly.
+            // Create the metadata dispenser and open scope on the source file.
+            _metadataDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
+            _assemblyImport = (IMetaDataAssemblyImport)_metadataDispenser.OpenScope(sourceFile, 0, ref s_importerGuid);
 #endif
         }
 
@@ -361,7 +358,7 @@ namespace Microsoft.Build.Tasks
         {
             int hr = import2.GetCustomAttributeByName(assemblyScope, attributeName, out IntPtr data, out uint valueLen);
 
-            if (hr == NativeMethodsShared.S_OK)
+            if (hr == HRESULT.S_OK)
             {
                 // if an custom attribute exists, parse the contents of the blob
                 if (NativeMethods.TryReadMetadataString(_sourceFile, data, valueLen, out string propertyValue))
@@ -380,33 +377,7 @@ namespace Microsoft.Build.Tasks
         private FrameworkName GetFrameworkName()
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-            if (!NativeMethodsShared.IsWindows)
-            {
-                CustomAttributeData attr = null;
-
-                foreach (CustomAttributeData a in _assembly.GetCustomAttributesData())
-                {
-                    try
-                    {
-                        if (a.AttributeType == typeof(TargetFrameworkAttribute))
-                        {
-                            attr = a;
-                            break;
-                        }
-                    }
-                    catch
-                    {
-                    }
-                }
-
-                string name = null;
-                if (attr != null)
-                {
-                    name = (string)attr.ConstructorArguments[0].Value;
-                }
-                return name == null ? null : new FrameworkName(name);
-            }
-
+            // net472-only = inherently Windows.
             FrameworkName frameworkAttribute = null;
             try
             {
@@ -653,10 +624,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="path">path to the file</param>
         /// <returns>The CLR runtime version or empty if the path does not exist.</returns>
-        internal static string GetRuntimeVersion(string path)
+        internal static unsafe string GetRuntimeVersion(string path)
         {
 #if FEATURE_MSCOREE
-            if (NativeMethodsShared.IsWindows)
+            // net472-only = inherently Windows. CsWin32 types used directly.
             {
 #if DEBUG
                 // Just to make sure and exercise the code that uses dwLength to allocate the buffer
@@ -665,33 +636,27 @@ namespace Microsoft.Build.Tasks
 #else
                 int bufferLength = 11; // 11 is the length of a runtime version and null terminator v2.0.50727/0
 #endif
+                using BufferScope<char> buffer = new(stackalloc char[bufferLength]);
 
-                unsafe
+                fixed (char* bufferPtr = buffer)
                 {
-                    // Allocate an initial buffer
-                    char* runtimeVersion = stackalloc char[bufferLength];
-
                     // Run GetFileVersion, this should succeed using the initial buffer.
                     // It also returns the dwLength which is used if there is insufficient buffer.
-                    uint hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out int dwLength);
+                    HRESULT hresult = NativeMethods.GetFileVersion(path, bufferPtr, bufferLength, out int dwLength);
 
-                    if (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER)
+                    if (hresult == (HRESULT)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
                     {
                         // Allocate new buffer based on the returned length.
-                        char* runtimeVersion2 = stackalloc char[dwLength];
-                        runtimeVersion = runtimeVersion2;
-
-                        // Get the RuntimeVersion in this second call.
-                        bufferLength = dwLength;
-                        hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out dwLength);
+                        buffer.EnsureCapacity(dwLength);
+                        fixed (char* newBufferPtr = buffer)
+                        {
+                            // Run GetFileVersion again, this should succeed using the new buffer.
+                            hresult = NativeMethods.GetFileVersion(path, newBufferPtr, dwLength, out dwLength);
+                        }
                     }
 
-                    return hresult == NativeMethodsShared.S_OK ? new string(runtimeVersion, 0, dwLength - 1) : string.Empty;
+                    return hresult == HRESULT.S_OK ? buffer.Slice(0, dwLength - 1).ToString() : string.Empty;
                 }
-            }
-            else
-            {
-                return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
             }
 #else
             return ManagedRuntimeVersionReader.GetRuntimeVersion(path);
@@ -705,12 +670,8 @@ namespace Microsoft.Build.Tasks
         private AssemblyNameExtension[] ImportAssemblyDependencies()
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
+            // net472-only = inherently Windows.
             var asmRefs = new List<AssemblyNameExtension>();
-
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return _assembly.GetReferencedAssemblies().Select(a => new AssemblyNameExtension(a)).ToArray();
-            }
 
             IntPtr asmRefEnum = IntPtr.Zero;
             var asmRefTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
