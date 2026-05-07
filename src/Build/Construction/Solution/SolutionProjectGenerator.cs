@@ -70,13 +70,6 @@ namespace Microsoft.Build.Construction
         private const string SolutionConfigurationAndPlatformProperties = "Configuration=$(Configuration); Platform=$(Platform)";
 
         /// <summary>
-        /// Property reference emitted as the <c>SkipNonexistentTargets</c> attribute on every
-        /// synthesised inner &lt;MSBuild&gt; task in a metaproject. See
-        /// <see cref="ForwardSolutionMetaprojSkipNonexistentTargets(ProjectTaskInstance)"/>.
-        /// </summary>
-        private const string SolutionMetaprojSkipNonexistentTargetsExpression = "$(" + PropertyNames.SolutionMetaprojSkipNonexistentTargets + ")";
-
-        /// <summary>
         /// The Special Target name which when <see cref="_batchProjectTargets"/> is enabled, all P2P references will just execute this target.
         /// </summary>
         internal const string SolutionProjectReferenceAllTargets = "SlnProjectResolveProjectReference";
@@ -1284,19 +1277,6 @@ namespace Microsoft.Build.Construction
             // does not have disk representation to load project from.
             metaprojectInstance.TranslateEntireState = true;
 
-            // Forward the user-set opt-in property from solution scope to the metaproject as a
-            // non-global property so that it is in scope when the synthesised inner <MSBuild>
-            // tasks evaluate `SkipNonexistentTargets="$(SolutionMetaprojSkipNonexistentTargets)"`.
-            // We deliberately do NOT add this to the metaproject's global properties: that would
-            // change its ConfigurationId and cause cache misses when the engine re-resolves the
-            // in-memory metaproject for a build request whose globals do not include the property.
-            // See https://github.com/dotnet/msbuild/issues/11025.
-            string solutionMetaprojSkipNonexistentTargets = traversalProject.GetPropertyValue(PropertyNames.SolutionMetaprojSkipNonexistentTargets);
-            if (!string.IsNullOrEmpty(solutionMetaprojSkipNonexistentTargets))
-            {
-                metaprojectInstance.SetProperty(PropertyNames.SolutionMetaprojSkipNonexistentTargets, solutionMetaprojSkipNonexistentTargets);
-            }
-
             // Add the project references which must build before this one.
             AddMetaprojectReferenceItems(traversalProject, metaprojectInstance, project);
 
@@ -1466,8 +1446,6 @@ namespace Microsoft.Build.Construction
             {
                 task.AddOutputItem("TargetOutputs", outputItem, String.Empty);
             }
-
-            ForwardSolutionMetaprojSkipNonexistentTargets(task);
         }
 
         /// <summary>
@@ -2100,23 +2078,6 @@ namespace Microsoft.Build.Construction
             {
                 task.AddOutputItem("TargetOutputs", outputItem, String.Empty);
             }
-
-            ForwardSolutionMetaprojSkipNonexistentTargets(task);
-        }
-
-        /// <summary>
-        /// Forwards the <c>SolutionMetaprojSkipNonexistentTargets</c> opt-in property from the
-        /// solution scope into the synthesised metaproj inner &lt;MSBuild&gt; task as a property
-        /// reference. When the user sets <c>SolutionMetaprojSkipNonexistentTargets=true</c>
-        /// (e.g. in <c>Directory.Solution.props</c>), the reference resolves to <c>"true"</c>
-        /// at task execution time and projects which do not implement the dispatched target
-        /// are silently skipped. Otherwise the reference resolves to the empty string and the
-        /// engine treats it as <c>false</c> — today's behaviour.
-        /// See https://github.com/dotnet/msbuild/issues/11025.
-        /// </summary>
-        private static void ForwardSolutionMetaprojSkipNonexistentTargets(ProjectTaskInstance task)
-        {
-            task.SetParameter("SkipNonexistentTargets", SolutionMetaprojSkipNonexistentTargetsExpression);
         }
 
         /// <summary>
@@ -2528,5 +2489,3 @@ namespace Microsoft.Build.Construction
         }
     }
 }
-
-

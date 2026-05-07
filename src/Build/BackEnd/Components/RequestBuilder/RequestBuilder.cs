@@ -371,12 +371,26 @@ namespace Microsoft.Build.BackEnd
                 ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
                 bool skipStaticGraphIsolationConstraints = (isolateProjects != ProjectIsolationMode.False && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath))
                     || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation;
+
+                // https://github.com/dotnet/msbuild/issues/11025
+                // SkipNonexistentTargets is a per-task attribute scoped to the immediate dispatch.
+                // When the current request is a synthesised metaproject (a wrapper that re-emits
+                // <MSBuild> calls to the real underlying projects), its inner dispatches are
+                // generator-authored plumbing rather than user code; the user's intent expressed
+                // on the call site that dispatched into the metaproject should propagate one level
+                // further so that projects which legitimately do not implement the dispatched target
+                // are silently skipped instead of raising MSB4057. Inheriting via the build request
+                // flag (rather than via globals) keeps the callee's ConfigurationId unchanged, so
+                // in-memory metaproject ConfigCache entries continue to match.
+                bool inheritedSkipFromMetaproj = _requestEntry.RequestConfiguration.IsTraversal
+                    && (_requestEntry.Request.BuildRequestDataFlags & BuildRequestDataFlags.SkipNonexistentTargets) == BuildRequestDataFlags.SkipNonexistentTargets;
+
                 requests[i] = new FullyQualifiedBuildRequest(
                     config: config,
                     targets: targets,
                     resultsNeeded: waitForResults,
                     skipStaticGraphIsolationConstraints: skipStaticGraphIsolationConstraints,
-                    flags: skipNonexistentTargets
+                    flags: skipNonexistentTargets || inheritedSkipFromMetaproj
                         ? BuildRequestDataFlags.SkipNonexistentTargets
                         : BuildRequestDataFlags.None);
             }
