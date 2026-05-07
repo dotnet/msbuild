@@ -471,8 +471,7 @@ namespace Microsoft.Build.Experimental
                 // apphost (native executable), the launched server child is also the apphost and
                 // needs DOTNET_ROOT to locate the runtime. Without these overrides the server
                 // process fails to start, the named pipe is never opened, and the client times
-                // out after 20s. See https://github.com/dotnet/msbuild/issues for the Aspire
-                // DOTNET_CLI_USE_MSBUILD_SERVER=true regression.
+                // out after 20s (the DOTNET_CLI_USE_MSBUILD_SERVER=true regression in 10.0.300).
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
                     CommandLineArgs: string.Join(" ", msBuildServerOptions),

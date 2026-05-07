@@ -74,8 +74,7 @@ namespace Microsoft.Build.CommandLine
                 // other than the well-understood "another client is racing us for the launch
                 // mutex" case. Without this the user sees no indication that MSBuild Server was
                 // requested but unavailable; previously a connection timeout would even crash
-                // the process. See https://github.com/dotnet/msbuild/issues for the
-                // DOTNET_CLI_USE_MSBUILD_SERVER=true regression in 10.0.300.
+                // the process (the DOTNET_CLI_USE_MSBUILD_SERVER=true regression in 10.0.300).
                 if (exitResult.MSBuildClientExitType != MSBuildClientExitType.ServerBusy)
                 {
                     string detail = exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect
