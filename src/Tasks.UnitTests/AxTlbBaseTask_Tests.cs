@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 Assert.Equal(badParameterValue, t.KeyFile); // "New KeyFile value should be set"
                 CommandLine.ValidateHasParameter(
                     t,
-                    @"/keyfile:" + badParameterValue,
+                    @"/keyfile:" + Path.GetFullPath(badParameterValue),
                     false /* no response file */);
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.InvalidKeyFileSpecified", t.KeyFile);
 

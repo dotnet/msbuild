@@ -3,6 +3,8 @@
 
 using System;
 
+using Microsoft.Build.Framework;
+
 #nullable disable
 
 namespace Microsoft.Build.Tasks
@@ -40,6 +42,7 @@ namespace Microsoft.Build.Tasks
         /// Defines the "TlbImp" MSBuild task, which enables using TlbImp.exe
         /// to generate assemblies from type libraries.
         /// </summary>
+        [MSBuildMultiThreadableTask]
         internal class TlbImp : AxTlbBaseTask
         {
             #region Properties
@@ -236,7 +239,7 @@ namespace Microsoft.Build.Tasks
             protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
             {
                 // .ocx file being imported
-                commandLine.AppendFileNameIfNotNull(TypeLibName);
+                commandLine.AppendFileNameIfNotNull(AbsolutizeIfNotEmpty(TypeLibName));
 
                 // options
                 commandLine.AppendSwitchIfNotNull("/asmversion:", AssemblyVersion?.ToString());
@@ -244,7 +247,7 @@ namespace Microsoft.Build.Tasks
                 commandLine.AppendSwitchIfNotNull("/machine:", Machine);
                 commandLine.AppendWhenTrue("/noclassmembers", Bag, "PreventClassMembers");
                 commandLine.AppendWhenTrue("/nologo", Bag, "NoLogo");
-                commandLine.AppendSwitchIfNotNull("/out:", OutputAssembly);
+                commandLine.AppendSwitchIfNotNull("/out:", AbsolutizeIfNotEmpty(OutputAssembly));
                 commandLine.AppendWhenTrue("/silent", Bag, "Silent");
                 commandLine.AppendWhenTrue("/sysarray", Bag, "SafeArrayAsSystemArray");
                 commandLine.AppendSwitchIfNotNull("/transform:", ConvertTransformFlagsToCommandLineCommand(Transform));
@@ -253,12 +256,20 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (var referenceFile in ReferenceFiles)
                     {
-                        commandLine.AppendSwitchIfNotNull("/reference:", referenceFile);
+                        commandLine.AppendSwitchIfNotNull("/reference:", AbsolutizeIfNotEmpty(referenceFile));
                     }
                 }
 
                 base.AddCommandLineCommands(commandLine);
             }
+
+            /// <summary>
+            /// Returns the absolutized form of <paramref name="path"/> when it is non-empty,
+            /// or the original value when null/empty (preserves prior null/empty handling of
+            /// the CommandLineBuilderExtension Append*IfNotNull helpers).
+            /// </summary>
+            private string AbsolutizeIfNotEmpty(string path)
+                => string.IsNullOrEmpty(path) ? path : TaskEnvironment.GetAbsolutePath(path).Value;
 
             /// <summary>
             /// Validates the parameters passed to the task

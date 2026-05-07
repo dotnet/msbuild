@@ -107,14 +107,16 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
-                SdkToolsPathUtility.FileInfoExists,
+                f => string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(f)
+                    : SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f)),
                 Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolName,
                 Log,
                 true);
 
-            return pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
 
         /// <summary>
@@ -125,8 +127,8 @@ namespace Microsoft.Build.Tasks
         {
             // Verify that a path for the tool exists -- if the tool doesn't exist in it
             // we'll worry about that later
-            if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
-                (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
+            if ((string.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(ToolPath))) &&
+                (string.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(SdkToolsPath))))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -155,13 +157,14 @@ namespace Microsoft.Build.Tasks
             // throw an error.
             //
             // So use /publickey if that's all our KeyFile contains, but KeyFile otherwise.
+            string absoluteKeyFile = string.IsNullOrEmpty(KeyFile) ? KeyFile : TaskEnvironment.GetAbsolutePath(KeyFile).Value;
             if (_delaySigningAndKeyFileOnlyContainsPublicKey)
             {
-                commandLine.AppendSwitchIfNotNull("/publickey:", KeyFile);
+                commandLine.AppendSwitchIfNotNull("/publickey:", absoluteKeyFile);
             }
             else
             {
-                commandLine.AppendSwitchIfNotNull("/keyfile:", KeyFile);
+                commandLine.AppendSwitchIfNotNull("/keyfile:", absoluteKeyFile);
             }
 
             commandLine.AppendSwitchIfNotNull("/keycontainer:", KeyContainer);
@@ -179,7 +182,7 @@ namespace Microsoft.Build.Tasks
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                if (FileSystems.Default.FileExists(KeyFile))
+                if (FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(KeyFile)))
                 {
                     keyFileExists = true;
                 }
@@ -216,7 +219,8 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    StrongNameUtils.GetStrongNameKey(Log, KeyFile, KeyContainer, out keyPair, out publicKey);
+                    string keyFileForRead = string.IsNullOrEmpty(KeyFile) ? KeyFile : TaskEnvironment.GetAbsolutePath(KeyFile).Value;
+                    StrongNameUtils.GetStrongNameKey(Log, keyFileForRead, KeyContainer, out keyPair, out publicKey);
                 }
                 catch (StrongNameException e)
                 {

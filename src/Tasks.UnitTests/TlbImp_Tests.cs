@@ -41,11 +41,11 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             t.ReferenceFiles = new string[] { "File1.dll", "File2.dll" };
             CommandLine.ValidateHasParameter(
                 t,
-                "/reference:File1.dll",
+                "/reference:" + Path.GetFullPath("File1.dll"),
                 false /* no response file */);
             CommandLine.ValidateHasParameter(
                 t,
-                "/reference:File2.dll",
+                "/reference:" + Path.GetFullPath("File2.dll"),
                 false /* no response file */);
         }
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 
             t.TypeLibName = testParameterValue;
             Assert.Equal(testParameterValue, t.TypeLibName); // "New TypeLibName value should be set"
-            CommandLine.ValidateHasParameter(t, testParameterValue, false /* no response file */);
+            CommandLine.ValidateHasParameter(t, Path.GetFullPath(testParameterValue), false /* no response file */);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             Assert.Equal(testParameterValue, t.OutputAssembly); // "New OutputAssembly value should be set"
             CommandLine.ValidateHasParameter(
                 t,
-                @"/out:" + testParameterValue,
+                @"/out:" + Path.GetFullPath(testParameterValue),
                 false /* no response file */);
         }
 
