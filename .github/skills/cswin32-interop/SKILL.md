@@ -134,5 +134,8 @@ dotnet msbuild MSBuild.SourceBuild.slnf /p:DotNetBuildSourceOnly=true -v:q
 
 **Everything** only referenced inside `#if FEATURE_WINDOWSINTEROP` must also be guarded:
 - **IDE0005**: `using` directives — most common failure
-- **IDE0051/IDE0052**: Private members (methods, fields)
+- **IDE0051/IDE0052**: Private members (methods, fields, including helpers like `StringToByteArray`, constants like `ERROR_SHARING_VIOLATION`)
+- **CA1823**: Unused private fields (e.g. constants only consumed inside the guard)
 - **CS1587**: XML doc comments (move inside `#if`, not before)
+
+The same applies when adding **polyfills** in `src/Framework/Polyfills/` (e.g. `IComIID`, `SpanExtensions`, `IndexOfAnyExcept`): polyfills usually live behind `#if !NET` (or similar TFM guards) but are still consumed from `#if FEATURE_WINDOWSINTEROP` code paths. Always run the source-build to confirm the polyfill, its callers, and any helper members compile cleanly when interop is disabled — a polyfill referenced only by Windows-only code will trip IDE0051/CA1823 in source-only builds.

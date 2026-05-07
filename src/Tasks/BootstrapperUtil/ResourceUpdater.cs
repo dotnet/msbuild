@@ -1,14 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
+#if FEATURE_WINDOWSINTEROP
+using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.Framework;
-#if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
 using Windows.Win32.Foundation;
 #endif
@@ -17,7 +17,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal class ResourceUpdater
     {
+#if FEATURE_WINDOWSINTEROP
         private const int ERROR_SHARING_VIOLATION = -2147024864;
+#endif
         private readonly List<StringResource> _stringResources = new List<StringResource>();
         private readonly List<FileResource> _fileResources = new List<FileResource>();
 
@@ -174,7 +176,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
             }
         }
-#endif
 
         private static byte[] StringToByteArray(string str)
         {
@@ -185,6 +186,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             data[data.Length - 1] = 0;
             return data;
         }
+#endif
 
         private class StringResource
         {
