@@ -117,6 +117,14 @@ try {
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
+  # Mirrors cibuild_bootstrapped_msbuild.sh:96. Required for some test scenarios that spawn
+  # MSBuild grandchildren which need to launch .NET task hosts (notably net472 x86 testhosts
+  # invoking .NET Core MSBuild → /mt → sidecar TaskHost). The SDK CLI `dotnet msbuild` sets
+  # DOTNET_HOST_PATH for the MSBuild process it spawns, but does not propagate it into the
+  # parent script's environment, so we set it here for child processes (tests, their MSBuild
+  # grandchildren) to inherit.
+  $env:DOTNET_HOST_PATH=$dotnetExePath
+
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Create bootstrap environment as it's required when also running tests
