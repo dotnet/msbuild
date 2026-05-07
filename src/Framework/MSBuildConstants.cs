@@ -158,12 +158,17 @@ namespace Microsoft.Build.Shared
         internal const string BuildNonexistentProjectsByDefault = "_" + nameof(BuildNonexistentProjectsByDefault);
 
         /// <summary>
-        /// Set on the callee's globals when an outer &lt;MSBuild SkipNonexistentTargets="true"&gt;
-        /// dispatches to a <c>*.metaproj</c>. The metaproj's synthesised inner tasks read it via
-        /// <c>$(_MSBuildInheritedSkipNonexistentTargets)</c> to honour the user's intent.
+        /// User-settable property: when set to <c>"true"</c> in <c>Directory.Solution.props</c>
+        /// or any other property scope visible to the solution traversal, the synthesised
+        /// metaproject's inner &lt;MSBuild&gt; tasks emit <c>SkipNonexistentTargets="true"</c>,
+        /// so projects which legitimately do not implement a target dispatched via the
+        /// metaproject are silently skipped instead of raising MSB4057. Forwarded from the
+        /// traversal to each metaproject via <c>_metaprojectGlobalProperties</c> so the metaproj's
+        /// emitted <c>SkipNonexistentTargets="$(SolutionMetaprojSkipNonexistentTargets)"</c>
+        /// property reference resolves correctly.
         /// See https://github.com/dotnet/msbuild/issues/11025.
         /// </summary>
-        internal const string MSBuildInheritedSkipNonexistentTargets = "_MSBuildInheritedSkipNonexistentTargets";
+        internal const string SolutionMetaprojSkipNonexistentTargets = nameof(SolutionMetaprojSkipNonexistentTargets);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.

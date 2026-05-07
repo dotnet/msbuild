@@ -2402,15 +2402,16 @@ EndGlobal
         /// <summary>
         /// Generator side of the fix for https://github.com/dotnet/msbuild/issues/11025.
         ///
-        /// Asserts that every synthesised inner &lt;MSBuild&gt; task on a metaproject target
-        /// carries <c>SkipNonexistentTargets="$(_MSBuildInheritedSkipNonexistentTargets)"</c>
-        /// — a property reference, not a literal "true". The reference evaluates to "true"
-        /// only when the engine pre-populates the property (i.e. only when the outer caller's
-        /// outer &lt;MSBuild&gt; task itself opted in via <c>SkipNonexistentTargets="true"</c>),
-        /// so default behaviour is preserved.
+        /// Asserts that every synthesised inner &lt;MSBuild&gt; task on every metaproject
+        /// target carries <c>SkipNonexistentTargets="$(SolutionMetaprojSkipNonexistentTargets)"</c>
+        /// — a property reference, not a literal "true". The reference resolves to "true"
+        /// only when the user opts in by setting <c>SolutionMetaprojSkipNonexistentTargets=true</c>
+        /// in solution scope (typically via <c>Directory.Solution.props</c>); otherwise it
+        /// resolves to the empty string and the engine treats it as <c>false</c>, preserving
+        /// today's MSB4057 behaviour.
         /// </summary>
         [Fact]
-        public void Issue11025_MetaprojInnerTasksUseInheritedSkipNonexistentTargetsExpression()
+        public void Issue11025_MetaprojInnerTasksUseSolutionMetaprojSkipNonexistentTargetsExpression()
         {
             const string solutionFileContents =
                 """
@@ -2453,10 +2454,8 @@ EndGlobal
                          i.FullPath.EndsWith("a.csproj.metaproj", StringComparison.OrdinalIgnoreCase));
                 metaprojectForA.ShouldNotBeNull("Expected a metaproject for project 'a' to be generated because it has an inter-project dependency.");
 
-                const string ExpectedExpression = "$(_MSBuildInheritedSkipNonexistentTargets)";
+                const string ExpectedExpression = "$(SolutionMetaprojSkipNonexistentTargets)";
 
-                // Every inner <MSBuild> task on every target of the metaproject must carry the property reference,
-                // including default targets (Build/Clean/Rebuild/Publish) and the user target xyz.
                 foreach (string targetName in new[] { "Build", "Clean", "Rebuild", "Publish", "xyz" })
                 {
                     metaprojectForA.Targets.ShouldContainKey(targetName);
@@ -2476,82 +2475,132 @@ EndGlobal
         }
 
         /// <summary>
-        /// Engine side of the G-0 fix for https://github.com/dotnet/msbuild/issues/11025.
+        /// Real end-to-end regression test for https://github.com/dotnet/msbuild/issues/11025.
         ///
-        /// Asserts that when the &lt;MSBuild&gt; intrinsic task dispatches to a callee whose path
-        /// ends in <c>.metaproj</c> with <c>SkipNonexistentTargets="true"</c>, it sets the
-        /// well-known global property <c>_MSBuildInheritedSkipNonexistentTargets=true</c> on the
-        /// callee. We exercise this with a wrapper project dispatching to a synthetic
-        /// <c>*.metaproj</c> file that simply echoes the property value.
+        /// Reproduces the issue reporter's scenario as faithfully as possible: a solution with
+        /// an inter-project <c>ProjectSection(ProjectDependencies)</c> dependency and a custom
+        /// solution-wide target that not every project implements. On <c>main</c> this fails
+        /// with <c>MSB4057</c> from the metaproject's synthesised inner &lt;MSBuild&gt; task
+        /// dispatching to a project that lacks the target.
+        ///
+        /// With the fix, the user opts in by setting
+        /// <c>&lt;SolutionMetaprojSkipNonexistentTargets&gt;true&lt;/SolutionMetaprojSkipNonexistentTargets&gt;</c>
+        /// in <c>Directory.Solution.props</c>; the property is forwarded to each metaproject's
+        /// globals, and the metaproject's inner tasks resolve their
+        /// <c>SkipNonexistentTargets="$(SolutionMetaprojSkipNonexistentTargets)"</c> attribute
+        /// to <c>"true"</c>, silently skipping the missing target instead of failing.
         /// </summary>
         [Fact]
-        public void Issue11025_EngineSetsInheritedPropertyOnMetaprojDispatch()
+        public void Issue11025_BuildSucceedsWhenUserOptsInViaSolutionMetaprojSkipNonexistentTargets()
         {
             using (TestEnvironment env = TestEnvironment.Create(output))
             {
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
 
-                env.CreateFile(folder, "echo.metaproj",
+                env.CreateFile(folder, "a.csproj",
                     """
                     <Project>
-                      <Target Name="xyz">
-                        <Message Importance="High" Text="ECHO[_MSBuildInheritedSkipNonexistentTargets=$(_MSBuildInheritedSkipNonexistentTargets)]" />
-                      </Target>
+                      <Target Name="Build" />
+                    </Project>
+                    """);
+                env.CreateFile(folder, "b.csproj",
+                    """
+                    <Project>
+                      <Target Name="Build" />
+                    </Project>
+                    """);
+                env.CreateFile(folder, "Directory.Solution.props",
+                    """
+                    <Project>
+                      <PropertyGroup>
+                        <SolutionMetaprojSkipNonexistentTargets>true</SolutionMetaprojSkipNonexistentTargets>
+                      </PropertyGroup>
                     </Project>
                     """);
 
-                TransientTestFile wrapper = env.CreateFile(folder, "wrapper.proj",
+                TransientTestFile sln = env.CreateFile(folder, "b.sln",
                     """
-                    <Project>
-                      <Target Name="Build">
-                        <MSBuild Projects="echo.metaproj" Targets="xyz" SkipNonexistentTargets="true" />
-                      </Target>
-                    </Project>
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "a", "a.csproj", "{2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F} = {DCACBC11-AC42-45EC-BD9C-90B776F3424F}
+                        EndProjectSection
+                    EndProject
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "b", "b.csproj", "{DCACBC11-AC42-45EC-BD9C-90B776F3424F}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        EndGlobalSection
+                    EndGlobal
                     """);
 
-                string buildOutput = RunnerUtilities.ExecMSBuild("\"" + wrapper.Path + "\"", out bool success);
-                success.ShouldBeTrue($"wrapper.proj must build successfully. Output:\n{buildOutput}");
-                buildOutput.ShouldContain(
-                    "ECHO[_MSBuildInheritedSkipNonexistentTargets=true]",
-                    customMessage: $"Engine must set _MSBuildInheritedSkipNonexistentTargets=true as a global property on the metaproj callee when dispatched with SkipNonexistentTargets=true (issue #11025). Output:\n{buildOutput}");
+                string buildOutput = RunnerUtilities.ExecMSBuild("\"" + sln.Path + "\" /t:xyz", out bool success);
+                success.ShouldBeTrue($"Build of {sln.Path} /t:xyz with SolutionMetaprojSkipNonexistentTargets=true must succeed (issue #11025). MSBuild output:\n{buildOutput}");
+                buildOutput.ShouldNotContain("MSB4057");
             }
         }
 
         /// <summary>
-        /// Companion to <see cref="Issue11025_EngineSetsInheritedPropertyOnMetaprojDispatch"/>:
-        /// when the outer task does NOT set <c>SkipNonexistentTargets="true"</c>, the inherited
-        /// property is NOT set, preserving today's behaviour.
+        /// Companion to <see cref="Issue11025_BuildSucceedsWhenUserOptsInViaSolutionMetaprojSkipNonexistentTargets"/>:
+        /// when the user does NOT set <c>SolutionMetaprojSkipNonexistentTargets=true</c>, the
+        /// legacy MSB4057 must still surface — the fix is opt-in and does not change behaviour
+        /// for solutions that have not opted in.
         /// </summary>
         [Fact]
-        public void Issue11025_EngineDoesNotSetInheritedPropertyWhenSkipNonexistentTargetsIsNotTrue()
+        public void Issue11025_BuildStillFailsWhenUserDidNotOptIn()
         {
             using (TestEnvironment env = TestEnvironment.Create(output))
             {
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
 
-                env.CreateFile(folder, "echo.metaproj",
+                env.CreateFile(folder, "a.csproj",
                     """
                     <Project>
-                      <Target Name="xyz">
-                        <Message Importance="High" Text="ECHO[_MSBuildInheritedSkipNonexistentTargets=$(_MSBuildInheritedSkipNonexistentTargets)]" />
-                      </Target>
+                      <Target Name="Build" />
+                    </Project>
+                    """);
+                env.CreateFile(folder, "b.csproj",
+                    """
+                    <Project>
+                      <Target Name="Build" />
                     </Project>
                     """);
 
-                TransientTestFile wrapper = env.CreateFile(folder, "wrapper.proj",
+                TransientTestFile sln = env.CreateFile(folder, "b.sln",
                     """
-                    <Project>
-                      <Target Name="Build">
-                        <MSBuild Projects="echo.metaproj" Targets="xyz" />
-                      </Target>
-                    </Project>
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "a", "a.csproj", "{2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F} = {DCACBC11-AC42-45EC-BD9C-90B776F3424F}
+                        EndProjectSection
+                    EndProject
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "b", "b.csproj", "{DCACBC11-AC42-45EC-BD9C-90B776F3424F}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        EndGlobalSection
+                    EndGlobal
                     """);
 
-                string buildOutput = RunnerUtilities.ExecMSBuild("\"" + wrapper.Path + "\"", out bool success);
-                success.ShouldBeTrue($"wrapper.proj must build successfully. Output:\n{buildOutput}");
-                buildOutput.ShouldContain(
-                    "ECHO[_MSBuildInheritedSkipNonexistentTargets=]",
-                    customMessage: "Without outer SkipNonexistentTargets=true the inherited property must remain unset (legacy behaviour preserved).");
+                string buildOutput = RunnerUtilities.ExecMSBuild("\"" + sln.Path + "\" /t:xyz", out bool success);
+                success.ShouldBeFalse($"Build of {sln.Path} /t:xyz without opt-in must fail (legacy behaviour preserved). MSBuild output:\n{buildOutput}");
+                buildOutput.ShouldContain("MSB4057");
             }
         }
 
