@@ -132,6 +132,43 @@ internal static class Assumed
     }
 
     /// <summary>
+    ///  Asserts that <paramref name="collection"/> is not <see langword="null"/> and not empty.
+    /// </summary>
+    /// <typeparam name="T">The element type of the collection.</typeparam>
+    /// <param name="collection">The collection expected to be non-null and non-empty.</param>
+    /// <param name="message">An optional error message. If not provided, a default message is generated.</param>
+    /// <param name="collectionExpression">The caller's source expression for <paramref name="collection"/>, captured automatically.</param>
+    public static void NotNullOrEmpty<T>(
+        [NotNull] IReadOnlyCollection<T>? collection,
+        string? message = null,
+        [CallerArgumentExpression(nameof(collection))] string? collectionExpression = null)
+    {
+        if (collection is null || collection.Count == 0)
+        {
+            InternalError.Throw(message ?? $"Expected {GetValueString(collectionExpression)} to be non-null and non-empty.");
+        }
+    }
+
+    /// <summary>
+    ///  Asserts that <paramref name="collection"/> is not <see langword="null"/> and not empty, using
+    ///  a conditional interpolated string handler to avoid formatting when the assertion passes.
+    /// </summary>
+    /// <typeparam name="T">The element type of the collection.</typeparam>
+    /// <param name="collection">The collection expected to be non-null and non-empty.</param>
+    /// <param name="handler">
+    ///  The interpolated string handler that produces the error message only when the collection is <see langword="null"/> or empty.
+    /// </param>
+    public static void NotNullOrEmpty<T>(
+        [NotNull] IReadOnlyCollection<T>? collection,
+        [InterpolatedStringHandlerArgument(nameof(collection))] ref NotNullOrEmptyCollectionInterpolatedStringHandler<T> handler)
+    {
+        if (collection is null || collection.Count == 0)
+        {
+            InternalError.Throw(handler.GetFormattedText());
+        }
+    }
+
+    /// <summary>
     ///  Asserts that <paramref name="condition"/> is <see langword="true"/>.
     ///  This should be used to validate that internal assumptions hold, where failure
     ///  indicates a bug in MSBuild itself. Do not use for user input validation.
@@ -245,6 +282,51 @@ internal static class Assumed
     }
 
     /// <summary>
+    ///  Asserts that <paramref name="value"/> equals <paramref name="other"/> using the specified
+    ///  <see cref="StringComparison"/>.
+    /// </summary>
+    /// <param name="value">The actual string value.</param>
+    /// <param name="other">The expected string value.</param>
+    /// <param name="comparisonType">The <see cref="StringComparison"/> to use for the comparison.</param>
+    /// <param name="message">An optional error message. If not provided, a default message is generated.</param>
+    /// <param name="valueExpression">The caller's source expression for <paramref name="value"/>, captured automatically.</param>
+    public static void Equal(
+        string? value,
+        string? other,
+        StringComparison comparisonType,
+        string? message = null,
+        [CallerArgumentExpression(nameof(value))] string? valueExpression = null)
+    {
+        if (!string.Equals(value, other, comparisonType))
+        {
+            InternalError.Throw(message ?? $"Expected {GetValueString(valueExpression)} to be equal to '{GetStringOrNull(other)}' ({comparisonType}).");
+        }
+    }
+
+    /// <summary>
+    ///  Asserts that <paramref name="value"/> equals <paramref name="other"/> using the specified
+    ///  <see cref="StringComparison"/>, using a conditional interpolated string handler to avoid
+    ///  formatting when the assertion passes.
+    /// </summary>
+    /// <param name="value">The actual string value.</param>
+    /// <param name="other">The expected string value.</param>
+    /// <param name="comparisonType">The <see cref="StringComparison"/> to use for the comparison.</param>
+    /// <param name="handler">
+    ///  The interpolated string handler that produces the error message only when the values are not equal.
+    /// </param>
+    public static void Equal(
+        string? value,
+        string? other,
+        StringComparison comparisonType,
+        [InterpolatedStringHandlerArgument(nameof(value), nameof(other), nameof(comparisonType))] ref StringEqualInterpolatedStringHandler handler)
+    {
+        if (!string.Equals(value, other, comparisonType))
+        {
+            InternalError.Throw(handler.GetFormattedText());
+        }
+    }
+
+    /// <summary>
     ///  Asserts that <paramref name="value"/> does not equal <paramref name="other"/>
     ///  using <see cref="EqualityComparer{T}.Default"/>.
     /// </summary>
@@ -281,6 +363,51 @@ internal static class Assumed
         [InterpolatedStringHandlerArgument(nameof(value), nameof(other))] ref NotEqualInterpolatedStringHandler<T> handler)
     {
         if (EqualityComparer<T>.Default.Equals(value, other))
+        {
+            InternalError.Throw(handler.GetFormattedText());
+        }
+    }
+
+    /// <summary>
+    ///  Asserts that <paramref name="value"/> does not equal <paramref name="other"/> using the specified
+    ///  <see cref="StringComparison"/>.
+    /// </summary>
+    /// <param name="value">The actual string value.</param>
+    /// <param name="other">The value that <paramref name="value"/> must not equal.</param>
+    /// <param name="comparisonType">The <see cref="StringComparison"/> to use for the comparison.</param>
+    /// <param name="message">An optional error message. If not provided, a default message is generated.</param>
+    /// <param name="valueExpression">The caller's source expression for <paramref name="value"/>, captured automatically.</param>
+    public static void NotEqual(
+        string? value,
+        string? other,
+        StringComparison comparisonType,
+        string? message = null,
+        [CallerArgumentExpression(nameof(value))] string? valueExpression = null)
+    {
+        if (string.Equals(value, other, comparisonType))
+        {
+            InternalError.Throw(message ?? $"Expected {GetValueString(valueExpression)} to not be equal to '{GetStringOrNull(other)}' ({comparisonType}).");
+        }
+    }
+
+    /// <summary>
+    ///  Asserts that <paramref name="value"/> does not equal <paramref name="other"/> using the specified
+    ///  <see cref="StringComparison"/>, using a conditional interpolated string handler to avoid
+    ///  formatting when the assertion passes.
+    /// </summary>
+    /// <param name="value">The actual string value.</param>
+    /// <param name="other">The value that <paramref name="value"/> must not equal.</param>
+    /// <param name="comparisonType">The <see cref="StringComparison"/> to use for the comparison.</param>
+    /// <param name="handler">
+    ///  The interpolated string handler that produces the error message only when the values are equal.
+    /// </param>
+    public static void NotEqual(
+        string? value,
+        string? other,
+        StringComparison comparisonType,
+        [InterpolatedStringHandlerArgument(nameof(value), nameof(other), nameof(comparisonType))] ref StringNotEqualInterpolatedStringHandler handler)
+    {
+        if (string.Equals(value, other, comparisonType))
         {
             InternalError.Throw(handler.GetFormattedText());
         }
@@ -664,10 +791,7 @@ internal static class Assumed
     /// </returns>
     [DoesNotReturn]
     public static T Unreachable<T>(string? message = null)
-    {
-        InternalError.Throw(message ?? "Unreachable code reached.");
-        return default;
-    }
+        => InternalError.Throw<T>(message ?? "Unreachable code reached.");
 
     /// <summary>
     ///  Marks a code path as unreachable and nominally returns a value of type <typeparamref name="T"/>.
@@ -682,10 +806,7 @@ internal static class Assumed
     /// </returns>
     [DoesNotReturn]
     public static T Unreachable<T>(ref UnconditionalInterpolatedStringHandler handler)
-    {
-        InternalError.Throw(handler.GetFormattedText());
-        return default;
-    }
+        => InternalError.Throw<T>(handler.GetFormattedText());
 
     /// <summary>
     ///  Formats a value for display in assertion error messages. Returns <c>'value'</c> if non-null,
@@ -799,6 +920,36 @@ internal static class Assumed
     }
 
     /// <summary>
+    ///  Conditional interpolated string handler for the collection-based <c>NotNullOrEmpty</c> overload.
+    ///  Only formats the interpolated string when the collection is <see langword="null"/> or empty.
+    /// </summary>
+    /// <typeparam name="T">The element type of the collection.</typeparam>
+    [InterpolatedStringHandler]
+    public ref struct NotNullOrEmptyCollectionInterpolatedStringHandler<T>
+    {
+        private StringBuilderHelper _builder;
+
+        public NotNullOrEmptyCollectionInterpolatedStringHandler(int literalLength, int formattedCount, IReadOnlyCollection<T>? collection, out bool isEnabled)
+        {
+            isEnabled = collection is null || collection.Count == 0;
+            _builder = isEnabled ? new(literalLength) : default;
+        }
+
+        public readonly void AppendLiteral(string value)
+            => _builder.AppendLiteral(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value)
+            => _builder.AppendFormatted(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value, string format)
+            where TValue : IFormattable
+            => _builder.AppendFormatted(value, format);
+
+        public string GetFormattedText()
+            => _builder.GetFormattedText();
+    }
+
+    /// <summary>
     ///  Conditional interpolated string handler for <see cref="True(bool, ref TrueInterpolatedStringHandler)"/>.
     ///  Only formats the interpolated string when the condition is <see langword="false"/>.
     /// </summary>
@@ -887,6 +1038,36 @@ internal static class Assumed
     }
 
     /// <summary>
+    ///  Conditional interpolated string handler for
+    ///  <see cref="Equal(string?, string?, StringComparison, ref StringEqualInterpolatedStringHandler)"/>.
+    ///  Only formats the interpolated string when the strings are not equal using the specified comparison.
+    /// </summary>
+    [InterpolatedStringHandler]
+    public ref struct StringEqualInterpolatedStringHandler
+    {
+        private StringBuilderHelper _builder;
+
+        public StringEqualInterpolatedStringHandler(int literalLength, int formattedCount, string? value, string? other, StringComparison comparisonType, out bool isEnabled)
+        {
+            isEnabled = !string.Equals(value, other, comparisonType);
+            _builder = isEnabled ? new(literalLength) : default;
+        }
+
+        public readonly void AppendLiteral(string value)
+            => _builder.AppendLiteral(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value)
+            => _builder.AppendFormatted(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value, string format)
+            where TValue : IFormattable
+            => _builder.AppendFormatted(value, format);
+
+        public string GetFormattedText()
+            => _builder.GetFormattedText();
+    }
+
+    /// <summary>
     ///  Conditional interpolated string handler for <see cref="NotEqual{T}(T, T, ref NotEqualInterpolatedStringHandler{T})"/>.
     ///  Only formats the interpolated string when the values are equal.
     /// </summary>
@@ -899,6 +1080,36 @@ internal static class Assumed
         public NotEqualInterpolatedStringHandler(int literalLength, int formattedCount, T value, T other, out bool isEnabled)
         {
             isEnabled = EqualityComparer<T>.Default.Equals(value, other);
+            _builder = isEnabled ? new(literalLength) : default;
+        }
+
+        public readonly void AppendLiteral(string value)
+            => _builder.AppendLiteral(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value)
+            => _builder.AppendFormatted(value);
+
+        public readonly void AppendFormatted<TValue>(TValue value, string format)
+            where TValue : IFormattable
+            => _builder.AppendFormatted(value, format);
+
+        public string GetFormattedText()
+            => _builder.GetFormattedText();
+    }
+
+    /// <summary>
+    ///  Conditional interpolated string handler for
+    ///  <see cref="NotEqual(string?, string?, StringComparison, ref StringNotEqualInterpolatedStringHandler)"/>.
+    ///  Only formats the interpolated string when the strings are equal using the specified comparison.
+    /// </summary>
+    [InterpolatedStringHandler]
+    public ref struct StringNotEqualInterpolatedStringHandler
+    {
+        private StringBuilderHelper _builder;
+
+        public StringNotEqualInterpolatedStringHandler(int literalLength, int formattedCount, string? value, string? other, StringComparison comparisonType, out bool isEnabled)
+        {
+            isEnabled = string.Equals(value, other, comparisonType);
             _builder = isEnabled ? new(literalLength) : default;
         }
 

@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
@@ -546,5 +548,172 @@ public class Assumed_Tests
         string? myValue = null;
         var ex = Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty(myValue));
         ex.Message.ShouldContain("myValue");
+    }
+
+    // Equal with StringComparison
+
+    [Fact]
+    public void Equal_StringComparison_DoesNotThrow_WhenEqualOrdinal()
+    {
+        Assumed.Equal("abc", "abc", StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Equal_StringComparison_DoesNotThrow_WhenEqualIgnoreCase()
+    {
+        Assumed.Equal("ABC", "abc", StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Equal_StringComparison_Throws_WhenNotEqualOrdinal()
+    {
+        Should.Throw<InternalErrorException>(() => Assumed.Equal("ABC", "abc", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Equal_StringComparison_Throws_WhenNotEqual()
+    {
+        Should.Throw<InternalErrorException>(() => Assumed.Equal("abc", "def", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Equal_StringComparison_HandlesNulls()
+    {
+        Assumed.Equal(null, null, StringComparison.Ordinal);
+        Should.Throw<InternalErrorException>(() => Assumed.Equal(null, "abc", StringComparison.Ordinal));
+        Should.Throw<InternalErrorException>(() => Assumed.Equal("abc", null, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Equal_StringComparison_InterpolatedHandler_DoesNotThrow_WhenEqual()
+    {
+        Assumed.Equal("ABC", "abc", StringComparison.OrdinalIgnoreCase, $"should not format");
+    }
+
+    [Fact]
+    public void Equal_StringComparison_InterpolatedHandler_Throws_WhenNotEqual()
+    {
+        Should.Throw<InternalErrorException>(() =>
+        {
+            Assumed.Equal("ABC", "abc", StringComparison.Ordinal, $"not equal");
+        });
+    }
+
+    [Fact]
+    public void Equal_StringComparison_WithDefaultMessage_IncludesExpression()
+    {
+        string myValue = "ABC";
+        var ex = Should.Throw<InternalErrorException>(() => Assumed.Equal(myValue, "abc", StringComparison.Ordinal));
+        ex.Message.ShouldContain("myValue");
+    }
+
+    // NotEqual with StringComparison
+
+    [Fact]
+    public void NotEqual_StringComparison_DoesNotThrow_WhenNotEqualOrdinal()
+    {
+        Assumed.NotEqual("ABC", "abc", StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NotEqual_StringComparison_DoesNotThrow_WhenNotEqual()
+    {
+        Assumed.NotEqual("abc", "def", StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void NotEqual_StringComparison_Throws_WhenEqualOrdinal()
+    {
+        Should.Throw<InternalErrorException>(() => Assumed.NotEqual("abc", "abc", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void NotEqual_StringComparison_Throws_WhenEqualIgnoreCase()
+    {
+        Should.Throw<InternalErrorException>(() => Assumed.NotEqual("ABC", "abc", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void NotEqual_StringComparison_HandlesNulls()
+    {
+        Should.Throw<InternalErrorException>(() => Assumed.NotEqual(null, null, StringComparison.Ordinal));
+        Assumed.NotEqual(null, "abc", StringComparison.Ordinal);
+        Assumed.NotEqual("abc", null, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NotEqual_StringComparison_InterpolatedHandler_DoesNotThrow_WhenNotEqual()
+    {
+        Assumed.NotEqual("ABC", "abc", StringComparison.Ordinal, $"should not format");
+    }
+
+    [Fact]
+    public void NotEqual_StringComparison_InterpolatedHandler_Throws_WhenEqual()
+    {
+        Should.Throw<InternalErrorException>(() =>
+        {
+            Assumed.NotEqual("ABC", "abc", StringComparison.OrdinalIgnoreCase, $"were equal");
+        });
+    }
+
+    [Fact]
+    public void NotEqual_StringComparison_WithDefaultMessage_IncludesExpression()
+    {
+        string myValue = "abc";
+        var ex = Should.Throw<InternalErrorException>(() => Assumed.NotEqual(myValue, "abc", StringComparison.Ordinal));
+        ex.Message.ShouldContain("myValue");
+    }
+
+    // NotNullOrEmpty for IReadOnlyCollection<T>
+
+    [Fact]
+    public void NotNullOrEmpty_Collection_DoesNotThrow_WhenNonEmpty()
+    {
+        Assumed.NotNullOrEmpty<int>([1, 2, 3]);
+    }
+
+    [Fact]
+    public void NotNullOrEmpty_Collection_Throws_WhenNull()
+    {
+        Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty<int>(null));
+    }
+
+    [Fact]
+    public void NotNullOrEmpty_Collection_Throws_WhenEmpty()
+    {
+        Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty<int>([]));
+    }
+
+    [Fact]
+    public void NotNullOrEmpty_Collection_InterpolatedHandler_DoesNotThrow_WhenNonEmpty()
+    {
+        List<int> items = [1, 2, 3];
+        Assumed.NotNullOrEmpty(items, $"should not format");
+    }
+
+    [Fact]
+    public void NotNullOrEmpty_Collection_InterpolatedHandler_Throws_WhenNull()
+    {
+        Should.Throw<InternalErrorException>(() =>
+        {
+            Assumed.NotNullOrEmpty<int>(null, $"was null");
+        });
+    }
+
+    [Fact]
+    public void NotNullOrEmpty_Collection_InterpolatedHandler_Throws_WhenEmpty()
+    {
+        Should.Throw<InternalErrorException>(() =>
+        {
+            Assumed.NotNullOrEmpty(Array.Empty<int>(), $"was empty");
+        });
+    }
+
+    [Fact]
+    public void NotNullOrEmpty_Collection_WithDefaultMessage_IncludesExpression()
+    {
+        List<string>? myCollection = null;
+        var ex = Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty(myCollection));
+        ex.Message.ShouldContain("myCollection");
     }
 }

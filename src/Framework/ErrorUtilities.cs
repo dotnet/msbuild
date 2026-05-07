@@ -66,14 +66,7 @@ internal static class FrameworkErrorUtilities
     public static void VerifyThrowInternalLength<T>(
         [NotNull] T[]? parameterValue,
         [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-    {
-        Assumed.NotNull(parameterValue, valueExpression: parameterName);
-
-        if (parameterValue.Length == 0)
-        {
-            InternalError.Throw($"{parameterName} unexpectedly empty");
-        }
-    }
+        => Assumed.NotNullOrEmpty(parameterValue, collectionExpression: parameterName);
 
     /// <summary>
     /// Helper to throw an InternalErrorException when the specified parameter is not a rooted path.
