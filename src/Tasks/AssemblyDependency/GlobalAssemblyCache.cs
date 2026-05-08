@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
         private static string GetLocationImpl(AssemblyNameExtension assemblyName, string targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
+            ArgumentNullException.ThrowIfNull(assemblyName);
             ErrorUtilities.VerifyThrow(assemblyName.FullName != null, "Got a null assembly name fullname.");
 
             string strongName = assemblyName.FullName;
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static SortedDictionary<Version, SortedDictionary<AssemblyNameExtension, string>> GenerateListOfAssembliesByRuntime(string strongName, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetedRuntime);
+            ArgumentNullException.ThrowIfNull(targetedRuntime);
 
             IEnumerable<AssemblyNameExtension> gacEnum = getGacEnumerator(strongName);
 
@@ -179,7 +179,7 @@ namespace Microsoft.Build.Tasks
         internal static string RetrievePathFromFusionName(string strongName)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(strongName);
+            ArgumentNullException.ThrowIfNull(strongName);
 
             string value;
 

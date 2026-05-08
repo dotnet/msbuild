@@ -46,7 +46,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTaskElement(XmlElementWithLocation xmlElement, ProjectTargetElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
         }
 
         /// <summary>
@@ -323,7 +323,7 @@ namespace Microsoft.Build.Construction
             lock (_locker)
             {
                 ErrorUtilities.VerifyThrowArgumentLength(name);
-                ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
+                ArgumentNullException.ThrowIfNull(unevaluatedValue);
                 ErrorUtilities.VerifyThrowArgument(!XMakeAttributes.IsSpecialTaskAttribute(name), "CannotAccessKnownAttributes", name);
 
                 _parameters = null;

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -734,7 +734,7 @@ namespace Microsoft.Build.Execution
             string definingFileEscaped,
             bool useItemDefinitionsWithoutModification)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
+            ArgumentNullException.ThrowIfNull(projectToUse, "project");
             ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
             XmlUtilities.VerifyThrowArgumentValidElementName(itemTypeToUse);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(itemTypeToUse), "OM_ReservedName", itemTypeToUse);
@@ -933,7 +933,7 @@ namespace Microsoft.Build.Execution
                     ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
                     // Historically empty string was allowed
-                    ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
+                    ArgumentNullException.ThrowIfNull(value, "ItemSpec");
 
                     _includeEscaped = value;
                     _cachedModifiers.Clear(); // Clear cached values
@@ -1519,7 +1519,7 @@ namespace Microsoft.Build.Execution
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
+                ArgumentNullException.ThrowIfNull(destinationItem);
 
                 string originalItemSpec = null;
                 if (addOriginalItemSpec)

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory);
+            ArgumentNullException.ThrowIfNull(factory);
 
             // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Evaluation
 
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)

@@ -73,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AddConfiguration(BuildRequestConfiguration config, Configurations configurations)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config);
+            ArgumentNullException.ThrowIfNull(config);
             ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
 
             if (!configurations.ById.TryAdd(config.ConfigurationId, config))
@@ -91,7 +91,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config);
+            ArgumentNullException.ThrowIfNull(config);
             return GetMatchingConfiguration(new ConfigurationMetadata(config));
         }
 
@@ -102,7 +102,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configMetadata);
+            ArgumentNullException.ThrowIfNull(configMetadata);
             if (!_configurations.ByMetadata.TryGetValue(configMetadata, out BuildRequestConfiguration config))
             {
                 return null;
@@ -120,7 +120,7 @@ namespace Microsoft.Build.BackEnd
             Configurations configurations = _configurations;
 
             // If there is no matching configuration, let the caller create one.
-            ErrorUtilities.VerifyThrowArgumentNull(configMetadata);
+            ArgumentNullException.ThrowIfNull(configMetadata);
             if (!configurations.ByMetadata.TryGetValue(configMetadata, out BuildRequestConfiguration configuration))
             {
                 configuration = callback(null, loadProject);
@@ -315,7 +315,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The build component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
         }
 
         /// <summary>

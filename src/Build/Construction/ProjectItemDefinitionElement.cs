@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Xml;
@@ -31,7 +32,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemDefinitionElement(XmlElement xmlElement, ProjectItemDefinitionGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace Microsoft.Build.Construction
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name);
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
+            ArgumentNullException.ThrowIfNull(unevaluatedValue);
 
             if (expressAsAttribute)
             {

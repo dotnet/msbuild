@@ -94,7 +94,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource);
+            ArgumentNullException.ThrowIfNull(eventSource);
             ParseFileLoggerParameters();
             string fileName = _logFile;
 

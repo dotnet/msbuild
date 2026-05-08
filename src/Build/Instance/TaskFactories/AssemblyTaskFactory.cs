@@ -198,7 +198,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ArgumentNullException.ThrowIfNull(task);
 #if FEATURE_APPDOMAIN
             if (_tasksAndAppDomains.TryRemove(task, out AppDomain appDomain))
             {
@@ -250,7 +250,7 @@ namespace Microsoft.Build.BackEnd
             ElementLocation elementLocation,
             string taskProjectFile)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
+            ArgumentNullException.ThrowIfNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
             bool taskHostParamsMatchCurrentProc = true;

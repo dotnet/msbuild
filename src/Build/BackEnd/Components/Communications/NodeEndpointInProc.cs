@@ -107,7 +107,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="nodeId">The ID of the node this endpoint manages.</param>
         private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host, int nodeId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
 
             _status = LinkStatus.Inactive;
             _mode = commMode;
@@ -339,7 +339,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet);
+            ArgumentNullException.ThrowIfNull(packet);
             ErrorUtilities.VerifyThrow(_mode == EndpointMode.Asynchronous, "EndPoint mode is synchronous, should be asynchronous");
             ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
             ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");

@@ -116,8 +116,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetBuilderCallback">An <see cref="ITargetBuilderCallback"/> to use to invoke targets and build projects.</param>
         public TaskHost(IBuildComponentHost host, BuildRequestEntry requestEntry, ElementLocation taskLocation, ITargetBuilderCallback targetBuilderCallback)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
+            ArgumentNullException.ThrowIfNull(host);
+            ArgumentNullException.ThrowIfNull(requestEntry);
             ErrorUtilities.VerifyThrowInternalNull(taskLocation);
 
             _host = host;
@@ -410,7 +410,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -480,7 +480,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -521,7 +521,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -562,7 +562,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -653,7 +653,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(eventName);
+                ArgumentNullException.ThrowIfNull(eventName);
 
                 if (!_activeProxy)
                 {
@@ -969,8 +969,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public async Task<BuildEngineResult> InternalBuildProjects(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames);
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
+            ArgumentNullException.ThrowIfNull(projectFileNames);
+            ArgumentNullException.ThrowIfNull(globalProperties);
             VerifyActiveProxy();
 
             BuildEngineResult result;
@@ -1142,8 +1142,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames);
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
+            ArgumentNullException.ThrowIfNull(projectFileNames);
+            ArgumentNullException.ThrowIfNull(globalProperties);
             VerifyActiveProxy();
 
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;

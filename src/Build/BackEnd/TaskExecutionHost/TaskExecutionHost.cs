@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, in TaskHostParameters taskIdentityParameters, int scheduledNodeId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ArgumentNullException.ThrowIfNull(loggingContext);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
@@ -413,7 +413,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
         public bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameters);
+            ArgumentNullException.ThrowIfNull(parameters);
 
             bool taskInitialized = true;
 

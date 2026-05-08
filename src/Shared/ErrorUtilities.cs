@@ -364,7 +364,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgumentLength([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
     {
-        VerifyThrowArgumentNull(parameter, parameterName);
+        ArgumentNullException.ThrowIfNull(parameter, parameterName);
 
         if (parameter.Length == 0)
         {
@@ -378,7 +378,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgumentLength<T>([NotNull] IReadOnlyCollection<T> parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
     {
-        VerifyThrowArgumentNull(parameter, parameterName);
+        ArgumentNullException.ThrowIfNull(parameter, parameterName);
 
         if (parameter.Count == 0)
         {
@@ -409,7 +409,7 @@ internal static class ErrorUtilities
     /// </summary>
     internal static void VerifyThrowArgumentInvalidPath([NotNull] string parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
     {
-        VerifyThrowArgumentNull(parameter, parameterName);
+        ArgumentNullException.ThrowIfNull(parameter, parameterName);
 
         if (FileUtilities.PathIsInvalid(parameter))
         {
@@ -432,14 +432,6 @@ internal static class ErrorUtilities
     /// <summary>
     /// Throws an ArgumentNullException if the given parameter is null.
     /// </summary>
-    internal static void VerifyThrowArgumentNull([NotNull] object? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        VerifyThrowArgumentNull(parameter, parameterName, "Shared.ParameterCannotBeNull");
-    }
-
-    /// <summary>
-    /// Throws an ArgumentNullException if the given parameter is null.
-    /// </summary>
     internal static void VerifyThrowArgumentNull([NotNull] object? parameter, string? parameterName, string resourceName)
     {
         ResourceUtilities.VerifyResourceStringExists(resourceName);
@@ -450,7 +442,7 @@ internal static class ErrorUtilities
     }
 
     [DoesNotReturn]
-    internal static void ThrowArgumentNull(string? parameterName, string resourceName)
+    private static void ThrowArgumentNull(string? parameterName, string resourceName)
     {
         // Most ArgumentNullException overloads append its own rather clunky multi-line message. So use the one overload that doesn't.
         throw new ArgumentNullException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
@@ -484,7 +476,7 @@ internal static class ErrorUtilities
         string arrayIndexParameterName,
         int requiredCapacity)
     {
-        VerifyThrowArgumentNull(array, arrayParameterName);
+        ArgumentNullException.ThrowIfNull(array, arrayParameterName);
         VerifyThrowArgumentOutOfRange(arrayIndex >= 0 && arrayIndex < array.Length, arrayIndexParameterName);
 
         int arrayCapacity = array.Length - arrayIndex;

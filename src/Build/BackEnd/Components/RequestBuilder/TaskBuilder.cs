@@ -308,7 +308,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if successful</returns>
         private async ValueTask<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup);
+            ArgumentNullException.ThrowIfNull(lookup);
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;

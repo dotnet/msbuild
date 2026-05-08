@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -542,8 +542,8 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The results for the target.</param>
         public void AddResultsForTarget(string target, TargetResult result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(target);
-            ErrorUtilities.VerifyThrowArgumentNull(result);
+            ArgumentNullException.ThrowIfNull(target);
+            ArgumentNullException.ThrowIfNull(result);
 
             lock (this)
             {
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Execution
         /// <param name="results">The results to merge in.</param>
         public void MergeResults(BuildResult results)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(results);
+            ArgumentNullException.ThrowIfNull(results);
             ErrorUtilities.VerifyThrow(results.ConfigurationId == ConfigurationId, "Result configurations don't match");
 
             // If we are merging with ourself or with a shallow clone, do nothing.

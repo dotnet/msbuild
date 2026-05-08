@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -170,11 +170,11 @@ namespace Microsoft.Build.BackEnd
             LoggingContext loggingContext,
             bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback);
-            ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(requestEntry);
+            ArgumentNullException.ThrowIfNull(targetBuilderCallback);
+            ArgumentNullException.ThrowIfNull(targetSpecification, "targetName");
+            ArgumentNullException.ThrowIfNull(baseLookup, "lookup");
+            ArgumentNullException.ThrowIfNull(host);
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;

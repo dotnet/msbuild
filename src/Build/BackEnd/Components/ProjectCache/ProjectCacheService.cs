@@ -221,7 +221,7 @@ namespace Microsoft.Build.ProjectCache
             }
             else
             {
-                ErrorUtilities.VerifyThrowArgumentNull(projectCacheDescriptor.PluginAssemblyPath, nameof(projectCacheDescriptor.PluginAssemblyPath));
+                ArgumentNullException.ThrowIfNull(projectCacheDescriptor.PluginAssemblyPath);
 
                 string pluginAssemblyPath = projectCacheDescriptor.PluginAssemblyPath!;
                 pluginTypeName = pluginAssemblyPath; // Just in case the assembly can't be loaded, the path would be helpful to help identify the problem.

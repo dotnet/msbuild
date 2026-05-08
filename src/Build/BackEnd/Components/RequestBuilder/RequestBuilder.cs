@@ -199,8 +199,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to build.</param>
         public void BuildRequest(NodeLoggingContext loggingContext, BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
-            ErrorUtilities.VerifyThrowArgumentNull(entry);
+            ArgumentNullException.ThrowIfNull(loggingContext);
+            ArgumentNullException.ThrowIfNull(entry);
             ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
@@ -335,10 +335,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
-            ErrorUtilities.VerifyThrowArgumentNull(projectFiles);
-            ErrorUtilities.VerifyThrowArgumentNull(properties);
-            ErrorUtilities.VerifyThrowArgumentNull(targets);
-            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions);
+            ArgumentNullException.ThrowIfNull(projectFiles);
+            ArgumentNullException.ThrowIfNull(properties);
+            ArgumentNullException.ThrowIfNull(targets);
+            ArgumentNullException.ThrowIfNull(toolsVersions);
             ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
             ErrorUtilities.VerifyThrow(projectFiles.Length == properties.Length, "Properties and project counts not the same");
             ErrorUtilities.VerifyThrow(projectFiles.Length == toolsVersions.Length, "Tools versions and project counts not the same");
@@ -554,7 +554,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "RequestBuilder already initialized.");
             _componentHost = host;
         }

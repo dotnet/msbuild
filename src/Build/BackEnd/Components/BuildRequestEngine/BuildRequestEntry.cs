@@ -1,6 +1,7 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -123,9 +124,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskEnvironment">Task environment information that would be passed to tasks executing for the build request.</param>
         internal BuildRequestEntry(BuildRequest request, BuildRequestConfiguration requestConfiguration, TaskEnvironment taskEnvironment)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(request);
-            ErrorUtilities.VerifyThrowArgumentNull(requestConfiguration);
-            ErrorUtilities.VerifyThrowArgumentNull(taskEnvironment);
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(requestConfiguration);
+            ArgumentNullException.ThrowIfNull(taskEnvironment);
             ErrorUtilities.VerifyThrow(requestConfiguration.ConfigurationId == request.ConfigurationId, "Configuration id mismatch");
 
             GlobalLock = new LockType();
@@ -312,7 +313,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(result);
+                ArgumentNullException.ThrowIfNull(result);
 
                 ErrorUtilities.VerifyThrow(
                     State == BuildRequestEntryState.Waiting || _outstandingRequests == null,
@@ -483,7 +484,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(result);
+                ArgumentNullException.ThrowIfNull(result);
                 ErrorUtilities.VerifyThrow(Result == null, "Entry already Completed.");
 
                 // If this request is determined to be a success, then all outstanding items must have been taken care of

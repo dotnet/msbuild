@@ -91,7 +91,7 @@ namespace Microsoft.Build.Execution
             TaskHostParameters factoryIdentityParameters,
             TaskRegistry.RegisteredTaskRecord.Stats? statistics = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskFactory);
+            ArgumentNullException.ThrowIfNull(taskFactory);
             ErrorUtilities.VerifyThrowArgumentLength(taskName);
             _taskFactory = taskFactory;
             _taskName = taskName;
@@ -201,8 +201,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SetPropertyValue(ITask task, TaskPropertyInfo property, object value)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
-            ErrorUtilities.VerifyThrowArgumentNull(property);
+            ArgumentNullException.ThrowIfNull(task);
+            ArgumentNullException.ThrowIfNull(property);
 
             IGeneratedTask? generatedTask = task as IGeneratedTask;
             if (generatedTask != null)
@@ -221,8 +221,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal object? GetPropertyValue(ITask task, TaskPropertyInfo property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
-            ErrorUtilities.VerifyThrowArgumentNull(property);
+            ArgumentNullException.ThrowIfNull(task);
+            ArgumentNullException.ThrowIfNull(property);
 
             IGeneratedTask? generatedTask = task as IGeneratedTask;
             if (generatedTask != null)

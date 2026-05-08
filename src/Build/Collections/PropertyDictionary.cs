@@ -523,7 +523,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
+            ArgumentNullException.ThrowIfNull(projectProperty);
 
             using (_lock.EnterDisposableWriteLock())
             {

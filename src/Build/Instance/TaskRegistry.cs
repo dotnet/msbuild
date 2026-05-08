@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.Execution
                 int registrationOrderId,
                 string containingFileFullPath)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
+                ArgumentNullException.ThrowIfNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
                 _taskFactoryAssemblyLoadInfo = assemblyLoadInfo;
                 _taskFactoryParameters = taskFactoryParameters;
@@ -1675,8 +1675,8 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml);
-                    ErrorUtilities.VerifyThrowArgumentNull(expander);
+                    ArgumentNullException.ThrowIfNull(projectUsingTaskXml);
+                    ArgumentNullException.ThrowIfNull(expander);
 
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)

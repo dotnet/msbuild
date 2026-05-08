@@ -49,7 +49,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(ProjectElementLink link)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(link);
+            ArgumentNullException.ThrowIfNull(link);
 
             _xmlSource = link;
         }
@@ -60,8 +60,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlElement);
-            ErrorUtilities.VerifyThrowArgumentNull(containingProject);
+            ArgumentNullException.ThrowIfNull(xmlElement);
+            ArgumentNullException.ThrowIfNull(containingProject);
 
             _xmlSource = (XmlElementWithLocation)xmlElement;
             _parent = parent;
@@ -262,7 +262,7 @@ namespace Microsoft.Build.Construction
             internal set
             {
                 ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
-                ErrorUtilities.VerifyThrowArgumentNull(value, "ContainingProject");
+                ArgumentNullException.ThrowIfNull(value, "ContainingProject");
 
                 if (_parent == null)
                 {
@@ -350,7 +350,7 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element);
+            ArgumentNullException.ThrowIfNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void SaveOperatingEnvironment(TaskExecutionContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+            ArgumentNullException.ThrowIfNull(context);
 
             context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
             context.SavedEnvironment = new Dictionary<string, string>(
@@ -1141,7 +1141,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void RestoreOperatingEnvironment(TaskExecutionContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+            ArgumentNullException.ThrowIfNull(context);
 
             if (context.SavedCurrentDirectory is null || context.SavedEnvironment is null)
             {

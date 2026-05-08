@@ -76,8 +76,7 @@ namespace Microsoft.Build.Execution
         /// <param name="skipReason">The reason why the target was skipped, if applicable.</param>
         internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null, TargetSkipReason skipReason = TargetSkipReason.None)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(items);
-            ErrorUtilities.VerifyThrowArgumentNull(result);
+            ArgumentNullException.ThrowIfNull(items);
             _items = items;
             _result = result;
             _originalBuildEventContext = originalBuildEventContext;

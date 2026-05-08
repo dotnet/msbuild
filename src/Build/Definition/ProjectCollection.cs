@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1072,7 +1072,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void AddToolset(Toolset toolset)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(toolset);
+            ArgumentNullException.ThrowIfNull(toolset);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets[toolset.ToolsVersion] = toolset;
@@ -1441,7 +1441,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public void UnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return;
@@ -1591,7 +1591,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElement">The project XML root element to unload.</param>
         public bool TryUnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return false;
@@ -1730,7 +1730,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterLoggerInternal(ILogger logger)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(logger);
+            ArgumentNullException.ThrowIfNull(logger);
             Debug.Assert(_locker.IsWriteLockHeld);
             _loggingService.RegisterLogger(new Logging.ReusableLogger(logger));
         }

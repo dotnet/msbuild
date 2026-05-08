@@ -225,8 +225,8 @@ namespace Microsoft.Build.Evaluation
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowArgumentNull(condition);
-            ErrorUtilities.VerifyThrowArgumentNull(expander);
+            ArgumentNullException.ThrowIfNull(condition);
+            ArgumentNullException.ThrowIfNull(expander);
             ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory);
 
             // An empty condition is equivalent to a "true" condition.
@@ -236,7 +236,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // If the condition wasn't empty, there must be a location for it
-            ErrorUtilities.VerifyThrowArgumentNull(elementLocation);
+            ArgumentNullException.ThrowIfNull(elementLocation);
 
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
@@ -434,10 +434,10 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem,
                 ProjectRootElementCacheBase? projectRootElementCache = null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(condition);
-                ErrorUtilities.VerifyThrowArgumentNull(expander);
-                ErrorUtilities.VerifyThrowArgumentNull(evaluationDirectory);
-                ErrorUtilities.VerifyThrowArgumentNull(elementLocation);
+                ArgumentNullException.ThrowIfNull(condition);
+                ArgumentNullException.ThrowIfNull(expander);
+                ArgumentNullException.ThrowIfNull(evaluationDirectory);
+                ArgumentNullException.ThrowIfNull(elementLocation);
 
                 Condition = condition;
                 _expander = expander;

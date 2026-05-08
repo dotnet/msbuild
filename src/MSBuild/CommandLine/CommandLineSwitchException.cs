@@ -54,7 +54,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             StreamingContext context) :
             base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info);
+            ArgumentNullException.ThrowIfNull(info);
 
             commandLineArg = info.GetString("commandLineArg");
         }

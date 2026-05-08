@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_FILE_TRACKER
@@ -338,7 +338,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputs">ITaskItem array of outputs.</param>
         public static string FormatRootingMarker(ITaskItem[] sources, ITaskItem[] outputs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources);
+            ArgumentNullException.ThrowIfNull(sources);
 
             // So we don't have to deal with null checks.
             outputs ??= Array.Empty<ITaskItem>();
@@ -756,7 +756,7 @@ namespace Microsoft.Build.Utilities
             // Only log when we have been passed a TaskLoggingHelper
             if (Log != null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+                ArgumentNullException.ThrowIfNull(messageResourceName);
 
                 Log.LogMessage(importance, AssemblyResources.GetString(messageResourceName), messageArgs);
             }

@@ -107,11 +107,11 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The target's outputs and result codes</returns>
         public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry);
-            ErrorUtilities.VerifyThrowArgumentNull(callback, "requestBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames);
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup);
+            ArgumentNullException.ThrowIfNull(loggingContext, "projectLoggingContext");
+            ArgumentNullException.ThrowIfNull(entry);
+            ArgumentNullException.ThrowIfNull(callback, "requestBuilderCallback");
+            ArgumentNullException.ThrowIfNull(targetNames);
+            ArgumentNullException.ThrowIfNull(baseLookup);
             ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
             ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
 
@@ -217,7 +217,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
             _componentHost = host;
             _isTelemetryRequested = host.BuildParameters.IsTelemetryEnabled;
         }

@@ -42,8 +42,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public CommandLineGenerator(Rule rule, Dictionary<string, Object> parameterValues)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(rule);
-            ErrorUtilities.VerifyThrowArgumentNull(parameterValues);
+            ArgumentNullException.ThrowIfNull(rule);
+            ArgumentNullException.ThrowIfNull(parameterValues);
 
             // Parse the Xaml file
             var parser = new TaskParser();

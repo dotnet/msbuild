@@ -216,8 +216,8 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
             ErrorUtilities.VerifyThrowArgumentLength(toolsPath);
-            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties);
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
+            ArgumentNullException.ThrowIfNull(environmentProperties);
+            ArgumentNullException.ThrowIfNull(globalProperties);
 
             _toolsVersion = toolsVersion;
             this.ToolsPath = toolsPath;

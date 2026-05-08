@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Utilities
             string itemSpec,
             bool treatAsFilePath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
+            ArgumentNullException.ThrowIfNull(itemSpec);
 
             _itemSpec = treatAsFilePath ? FileUtilities.FixFilePath(itemSpec) : itemSpec;
         }
@@ -120,7 +120,7 @@ namespace Microsoft.Build.Utilities
             IDictionary itemMetadata) :
             this(itemSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata);
+            ArgumentNullException.ThrowIfNull(itemMetadata);
 
             if (itemMetadata.Count > 0)
             {
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Utilities
         public TaskItem(
             ITaskItem sourceItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sourceItem);
+            ArgumentNullException.ThrowIfNull(sourceItem);
 
             // Attempt to preserve escaped state
             if (!(sourceItem is ITaskItem2 sourceItemAsITaskItem2))
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Utilities
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ItemSpec));
+                ArgumentNullException.ThrowIfNull(value, nameof(ItemSpec));
 
                 _itemSpec = FileUtilities.FixFilePath(value);
                 _cachedModifiers.Clear();
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="metadataName">Name of metadata to remove.</param>
         public void RemoveMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
+            ArgumentNullException.ThrowIfNull(metadataName);
             ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
@@ -340,7 +340,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="destinationItem">The item to copy metadata to.</param>
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
+            ArgumentNullException.ThrowIfNull(destinationItem);
 
             // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
             // between items, and need to know the source item where the metadata came from
@@ -490,7 +490,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The item-spec of the item.</returns>
         public static explicit operator string(TaskItem taskItemToCast)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast);
+            ArgumentNullException.ThrowIfNull(taskItemToCast);
             return taskItemToCast.ItemSpec;
         }
 

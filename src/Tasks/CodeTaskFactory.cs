@@ -360,7 +360,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ArgumentNullException.ThrowIfNull(task);
         }
 
         /// <summary>

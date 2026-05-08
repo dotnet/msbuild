@@ -7,7 +7,9 @@ using System.IO;
 using System.Diagnostics;
 #endif
 using Microsoft.Build.Framework;
+#if RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Shared;
+#endif
 #if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -152,7 +154,7 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(BuildAssemblyName));
+                ArgumentNullException.ThrowIfNull(value, nameof(BuildAssemblyName));
                 Bag[nameof(BuildAssemblyName)] = value;
             }
             get => (string)Bag[nameof(BuildAssemblyName)];
@@ -163,7 +165,7 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(BuildAssemblyPath));
+                ArgumentNullException.ThrowIfNull(value, nameof(BuildAssemblyPath));
                 _buildAssemblyPath = value;
             }
 

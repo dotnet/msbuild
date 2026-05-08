@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
@@ -37,10 +38,10 @@ namespace Microsoft.Build.Evaluation
         public ToolsetPropertyDefinition(string name, string value, IElementLocation source)
         {
             ErrorUtilities.VerifyThrowArgumentLength(name);
-            ErrorUtilities.VerifyThrowArgumentNull(source);
+            ArgumentNullException.ThrowIfNull(source);
 
             // value can be the empty string but not null
-            ErrorUtilities.VerifyThrowArgumentNull(value);
+            ArgumentNullException.ThrowIfNull(value);
 
             _name = name;
             _value = value;

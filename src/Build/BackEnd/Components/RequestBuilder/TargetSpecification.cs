@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -30,7 +31,7 @@ namespace Microsoft.Build.BackEnd
         internal TargetSpecification(string targetName, ElementLocation referenceLocation, TargetBuiltReason targetBuiltReason = TargetBuiltReason.None)
         {
             ErrorUtilities.VerifyThrowArgumentLength(targetName);
-            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation);
+            ArgumentNullException.ThrowIfNull(referenceLocation);
 
             this._targetName = targetName;
             this._referenceLocation = referenceLocation;

@@ -35,7 +35,7 @@ namespace Microsoft.Build.Construction
         internal ProjectExtensionsElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Content));
+                ArgumentNullException.ThrowIfNull(value, nameof(Content));
                 if (Link != null)
                 {
                     ExtensionLink.Content = value;
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Construction
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(name);
-                ErrorUtilities.VerifyThrowArgumentNull(value, "value");
+                ArgumentNullException.ThrowIfNull(value);
 
                 if (Link != null)
                 {
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc/>
         public override void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element);
+            ArgumentNullException.ThrowIfNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)

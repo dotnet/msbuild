@@ -34,8 +34,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal ReadOnlyConvertingDictionary(IDictionary<K, V> backing, Func<V, N> converter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(backing);
-            ErrorUtilities.VerifyThrowArgumentNull(converter);
+            ArgumentNullException.ThrowIfNull(backing);
+            ArgumentNullException.ThrowIfNull(converter);
 
             _backing = backing;
             _converter = converter;

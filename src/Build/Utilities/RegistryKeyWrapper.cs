@@ -66,8 +66,8 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal RegistryKeyWrapper(string registryKeyPath, RegistryKey registryHive)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(registryKeyPath);
-            ErrorUtilities.VerifyThrowArgumentNull(registryHive);
+            ArgumentNullException.ThrowIfNull(registryKeyPath);
+            ArgumentNullException.ThrowIfNull(registryHive);
 
             _registryKeyPath = registryKeyPath;
             _registryHive = registryHive;

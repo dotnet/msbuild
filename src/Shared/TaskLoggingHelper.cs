@@ -49,7 +49,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="taskInstance">task containing an instance of this class</param>
         public TaskLoggingHelper(ITask taskInstance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskInstance);
+            ArgumentNullException.ThrowIfNull(taskInstance);
             _taskInstance = taskInstance;
             TaskName = taskInstance.GetType().Name;
         }
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TaskLoggingHelper(IBuildEngine buildEngine, string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildEngine);
+            ArgumentNullException.ThrowIfNull(buildEngine);
             ErrorUtilities.VerifyThrowArgumentLength(taskName);
             TaskName = taskName;
             _buildEngine = buildEngine;
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public string ExtractMessageCode(string message, out string messageWithoutCodePrefix)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             messageWithoutCodePrefix = ResourceUtilities.ExtractMessageCode(false /* any code */, message, out string code);
 
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="InvalidOperationException">Thrown when the <c>TaskResources</c> property of the owner task is not set.</exception>
         public virtual string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName);
+            ArgumentNullException.ThrowIfNull(resourceName);
             ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
 
             string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>unformatted</c> is null.</exception>
         public virtual string FormatString([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string unformatted, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unformatted);
+            ArgumentNullException.ThrowIfNull(unformatted);
 
             return ResourceUtilities.FormatString(unformatted, args);
         }
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Utilities
         public void LogMessage(MessageImportance importance, [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message, params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 #if DEBUG
             if (messageArgs?.Length > 0)
             {
@@ -361,7 +361,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             if (!LogsMessagesOfImportance(importance))
             {
@@ -423,7 +423,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -487,7 +487,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             if (!LogsMessagesOfImportance(importance))
             {
@@ -511,8 +511,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="content">The content of the file.</param>
         public void LogIncludeGeneratedFile(string filePath, string content)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(filePath);
-            ErrorUtilities.VerifyThrowArgumentNull(content);
+            ArgumentNullException.ThrowIfNull(filePath);
+            ArgumentNullException.ThrowIfNull(content);
 
             var e = new GeneratedFileUsedEventArgs(filePath, content);
 
@@ -602,7 +602,7 @@ namespace Microsoft.Build.Utilities
         public void LogCommandLine(MessageImportance importance, string commandLine)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(commandLine);
+            ArgumentNullException.ThrowIfNull(commandLine);
 
             if (!LogsMessagesOfImportance(importance))
             {
@@ -698,7 +698,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -775,7 +775,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -858,7 +858,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -926,7 +926,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(exception);
+            ArgumentNullException.ThrowIfNull(exception);
 
             // For an AggregateException call LogErrorFromException on each inner exception
             if (exception is AggregateException aggregateException)
@@ -1020,7 +1020,7 @@ namespace Microsoft.Build.Utilities
             params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message);
+            ArgumentNullException.ThrowIfNull(message);
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -1116,7 +1116,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -1197,7 +1197,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             string subcategory = null;
 
@@ -1249,7 +1249,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(exception);
+            ArgumentNullException.ThrowIfNull(exception);
 
             string message = exception.Message;
 
@@ -1291,7 +1291,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(fileName);
+            ArgumentNullException.ThrowIfNull(fileName);
 
             bool errorsFound;
 
@@ -1318,7 +1318,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(stream);
+            ArgumentNullException.ThrowIfNull(stream);
 
             bool errorsFound = false;
             string lineOfText;
@@ -1346,7 +1346,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(lineOfText);
+            ArgumentNullException.ThrowIfNull(lineOfText);
 
             bool isError = false;
             CanonicalError.Parts messageParts = CanonicalError.Parse(lineOfText);
@@ -1546,8 +1546,8 @@ namespace Microsoft.Build.Utilities
             string messageResourceName,
             params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(exception);
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+            ArgumentNullException.ThrowIfNull(exception);
+            ArgumentNullException.ThrowIfNull(messageResourceName);
 
             if (exception is AggregateException aggregateException)
             {

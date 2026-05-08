@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXamlDocument(TextReader reader, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reader);
+            ArgumentNullException.ThrowIfNull(reader);
             ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
 
             object rootObject = XamlServices.Load(reader);
