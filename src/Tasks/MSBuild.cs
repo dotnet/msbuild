@@ -145,30 +145,15 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string SkipNonexistentProjects
         {
-            get
+            get => _skipNonExistentProjects switch
             {
-                switch (_skipNonExistentProjects)
-                {
-                    case SkipNonExistentProjectsBehavior.Undefined:
-                        return "Undefined";
+                SkipNonExistentProjectsBehavior.Undefined => "Undefined",
+                SkipNonExistentProjectsBehavior.Build => "Build",
+                SkipNonExistentProjectsBehavior.Error => "False",
+                SkipNonExistentProjectsBehavior.Skip => "True",
 
-                    case SkipNonExistentProjectsBehavior.Build:
-                        return "Build";
-
-                    case SkipNonExistentProjectsBehavior.Error:
-                        return "False";
-
-                    case SkipNonExistentProjectsBehavior.Skip:
-                        return "True";
-
-                    default:
-                        ErrorUtilities.ThrowInternalError($"Unexpected case {_skipNonExistentProjects}");
-                        break;
-                }
-
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                _ => Assumed.Unreachable<string>($"Unexpected case {_skipNonExistentProjects}"),
+            };
 
             set
             {
@@ -178,7 +163,6 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-
 
         /// <summary>
         /// Unescape Targets, Properties (including Properties and AdditionalProperties as Project item metadata)

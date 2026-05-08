@@ -561,7 +561,7 @@ namespace Microsoft.Build.BackEnd
                     case NodeProviderType.Remote:
                     default:
                         // this should never happen in the current MSBuild.
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                        Assumed.Unreachable();
                         break;
                 }
             }
@@ -1607,7 +1607,7 @@ namespace Microsoft.Build.BackEnd
 
                         break;
                     default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                        Assumed.Unreachable();
                         break;
                 }
 

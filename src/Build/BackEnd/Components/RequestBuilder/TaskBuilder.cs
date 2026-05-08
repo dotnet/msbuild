@@ -977,7 +977,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                        Assumed.Unreachable();
                     }
                 }
 

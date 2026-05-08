@@ -7,7 +7,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 #endif
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 #if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
 using Windows.Win32.Storage.FileSystem;
@@ -136,7 +135,7 @@ namespace Microsoft.Build.Tasks
 
                             // Otherwise this will give at least something
                             NativeMethodsShared.ThrowExceptionForErrorCode(error);
-                            ErrorUtilities.ThrowInternalErrorUnreachable();
+                            Assumed.Unreachable();
                         }
 
                         Exists = true;

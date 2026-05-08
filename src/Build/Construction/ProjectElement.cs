@@ -630,15 +630,11 @@ namespace Microsoft.Build.Construction
             /// Dummy required implementation
             /// </summary>
             internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer parent, ProjectElement previousSibling, ProjectElement nextSibling)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-            }
+                => Assumed.Unreachable();
 
             /// <inheritdoc />
             protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
-            {
-                return new WrapperForProjectRootElement(ContainingProject);
-            }
+                => new WrapperForProjectRootElement(ContainingProject);
         }
     }
 }

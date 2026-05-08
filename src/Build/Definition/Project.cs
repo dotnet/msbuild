@@ -2445,24 +2445,13 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public override bool IsBuildEnabled
             {
-                get
+                get => _isBuildEnabled switch
                 {
-                    switch (_isBuildEnabled)
-                    {
-                        case BuildEnabledSetting.BuildEnabled:
-                            return true;
-
-                        case BuildEnabledSetting.BuildDisabled:
-                            return false;
-
-                        case BuildEnabledSetting.UseProjectCollectionSetting:
-                            return ProjectCollection.IsBuildEnabled;
-
-                        default:
-                            ErrorUtilities.ThrowInternalErrorUnreachable();
-                            return false;
-                    }
-                }
+                    BuildEnabledSetting.BuildEnabled => true,
+                    BuildEnabledSetting.BuildDisabled => false,
+                    BuildEnabledSetting.UseProjectCollectionSetting => ProjectCollection.IsBuildEnabled,
+                    _ => Assumed.Unreachable<bool>(),
+                };
 
                 set => _isBuildEnabled = value ? BuildEnabledSetting.BuildEnabled : BuildEnabledSetting.BuildDisabled;
             }
@@ -2857,7 +2846,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                        Assumed.Unreachable();
                     }
 
                     // Result is inconclusive if properties are present
@@ -4576,12 +4565,9 @@ namespace Microsoft.Build.Evaluation
             /// Not for internal use.
             /// </comment>
             public bool EvaluateCondition(string condition)
-            {
                 // This is for the debugger, which should not get a live Project object,
                 // so this is not implemented.
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return false;
-            }
+                => Assumed.Unreachable<bool>();
 
             #region IItemProvider<ProjectItem> Members
 

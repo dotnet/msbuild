@@ -150,7 +150,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
             else
@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
         }
@@ -256,7 +256,7 @@ namespace Microsoft.Build.BackEnd
                     _wrappedParameter = exceptionParam;
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                     break;
             }
         }

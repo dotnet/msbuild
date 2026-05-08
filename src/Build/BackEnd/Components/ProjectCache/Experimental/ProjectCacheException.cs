@@ -18,7 +18,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     {
         private ProjectCacheException()
         {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
+            Assumed.Unreachable();
         }
 
         private ProjectCacheException(

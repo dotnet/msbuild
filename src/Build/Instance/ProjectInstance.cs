@@ -1553,13 +1553,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         Dictionary<string, List<string>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ConditionedProperties
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
-        }
+            => Assumed.Unreachable<Dictionary<string, List<string>>>();
 
         /// <summary>
         /// Whether evaluation should collect items ignoring condition,
@@ -1815,9 +1809,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddItemIgnoringCondition(ProjectItemInstance item)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Adds a new item definition
@@ -1842,9 +1834,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddToAllEvaluatedPropertiesList(ProjectPropertyInstance property)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
@@ -1856,9 +1846,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddToAllEvaluatedItemDefinitionMetadataList(ProjectMetadataInstance itemDefinitionMetadatum)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Items encountered during evaluation. These are read during the third evaluation pass.
@@ -1870,9 +1858,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddToAllEvaluatedItemsList(ProjectItemInstance item)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Retrieves an existing item definition, if any.

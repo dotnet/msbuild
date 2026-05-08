@@ -127,49 +127,22 @@ namespace Microsoft.Build.Evaluation
         }
 
         internal string String
-        {
-            get
+            => _tokenString ?? _tokenType switch
             {
-                if (_tokenString != null)
-                {
-                    return _tokenString;
-                }
-
-                // Return a token string for
-                // an error message.
-                switch (_tokenType)
-                {
-                    case TokenType.Comma:
-                        return ",";
-                    case TokenType.LeftParenthesis:
-                        return "(";
-                    case TokenType.RightParenthesis:
-                        return ")";
-                    case TokenType.LessThan:
-                        return "<";
-                    case TokenType.GreaterThan:
-                        return ">";
-                    case TokenType.LessThanOrEqualTo:
-                        return "<=";
-                    case TokenType.GreaterThanOrEqualTo:
-                        return ">=";
-                    case TokenType.And:
-                        return "and";
-                    case TokenType.Or:
-                        return "or";
-                    case TokenType.EqualTo:
-                        return "==";
-                    case TokenType.NotEqualTo:
-                        return "!=";
-                    case TokenType.Not:
-                        return "!";
-                    case TokenType.EndOfInput:
-                        return null;
-                    default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        return null;
-                }
-            }
-        }
+                TokenType.Comma => ",",
+                TokenType.LeftParenthesis => "(",
+                TokenType.RightParenthesis => ")",
+                TokenType.LessThan => "<",
+                TokenType.GreaterThan => ">",
+                TokenType.LessThanOrEqualTo => "<=",
+                TokenType.GreaterThanOrEqualTo => ">=",
+                TokenType.And => "and",
+                TokenType.Or => "or",
+                TokenType.EqualTo => "==",
+                TokenType.NotEqualTo => "!=",
+                TokenType.Not => "!",
+                TokenType.EndOfInput => null,
+                _ => Assumed.Unreachable<string>(),
+            };
     }
 }

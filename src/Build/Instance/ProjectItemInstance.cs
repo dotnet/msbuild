@@ -1394,19 +1394,13 @@ namespace Microsoft.Build.Execution
             /// Evaluation never creates ITaskItems, so this should never be called.
             /// </remarks>
             ProjectMetadataInstance IItem<ProjectMetadataInstance>.GetMetadata(string name)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                => Assumed.Unreachable<ProjectMetadataInstance>();
 
             /// <summary>
             /// Set metadata
             /// </summary>
             ProjectMetadataInstance IItem<ProjectMetadataInstance>.SetMetadata(ProjectMetadataElement metadataElement, string evaluatedInclude)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                => Assumed.Unreachable<ProjectMetadataInstance>();
 
             /// <summary>
             /// ITaskItem implementation which returns the specified metadata value, unescaped.
@@ -2474,7 +2468,7 @@ namespace Microsoft.Build.Execution
                 public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<TaskItem> destinationItems)
                 {
                     // Not difficult to implement, but we do not expect to go here.
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
 

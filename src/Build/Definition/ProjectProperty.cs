@@ -603,7 +603,7 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
 
