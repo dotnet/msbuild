@@ -6,7 +6,7 @@ namespace Microsoft.Build.Framework.Logging;
 /// <summary>
 /// Enumerates the text colors supported by VT100 terminal.
 /// </summary>
-internal enum TerminalColor
+public enum TerminalColor
 {
     Black = 30,
     Red = 31,

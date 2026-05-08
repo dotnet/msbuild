@@ -24,7 +24,7 @@ internal sealed class TerminalNodesFrame
     public int Height { get; }
     public int NodesCount { get; private set; }
 
-    public TerminalNodesFrame(TerminalNodeStatus?[] nodes, int width, int height)
+    public TerminalNodesFrame(ReadOnlySpan<TerminalNodeStatus?> nodes, int width, int height)
     {
         Width = Math.Min(width, MaxColumn);
         Height = height;

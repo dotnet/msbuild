@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if DEBUG
-using System;
-#endif
 using Microsoft.Build.Framework.Logging;
 
 namespace Microsoft.Build.Logging;
@@ -11,7 +8,7 @@ namespace Microsoft.Build.Logging;
 /// <summary>
 /// Encapsulates the per-node data shown in live node output.
 /// </summary>
-internal class TerminalNodeStatus
+public class TerminalNodeStatus
 {
     public string Project { get; }
     public string? TargetFramework { get; }
@@ -34,7 +31,7 @@ internal class TerminalNodeStatus
 #if DEBUG
         if (target.Contains("\x1B"))
         {
-            throw new ArgumentException("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
+            throw new System.ArgumentException("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
         }
 #endif
         Project = project;
@@ -84,6 +81,17 @@ internal class TerminalNodeStatus
 
     public override int GetHashCode()
     {
-        throw new System.NotImplementedException();
+#if NETCOREAPP
+        return System.HashCode.Combine(Project, TargetFramework, RuntimeIdentifier, Target, TargetPrefixColor, TargetPrefix);
+#else
+        int hash = 17;
+        hash = hash * 31 + (Project?.GetHashCode() ?? 0);
+        hash = hash * 31 + (TargetFramework?.GetHashCode() ?? 0);
+        hash = hash * 31 + (RuntimeIdentifier?.GetHashCode() ?? 0);
+        hash = hash * 31 + (Target?.GetHashCode() ?? 0);
+        hash = hash * 31 + TargetPrefixColor.GetHashCode();
+        hash = hash * 31 + (TargetPrefix?.GetHashCode() ?? 0);
+        return hash;
+#endif
     }
 }
