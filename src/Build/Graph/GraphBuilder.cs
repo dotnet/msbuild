@@ -50,6 +50,7 @@ namespace Microsoft.Build.Graph
         private readonly ProjectInterpretation _projectInterpretation;
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
+        private readonly ProjectGraphMode _graphMode;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
         private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
 
@@ -67,6 +68,7 @@ namespace Microsoft.Build.Graph
             ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory,
             ProjectInterpretation projectInterpretation,
             int degreeOfParallelism,
+            ProjectGraphMode mode,
             CancellationToken cancellationToken)
         {
             var (actualEntryPoints, solutionDependencies) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
@@ -85,6 +87,7 @@ namespace Microsoft.Build.Graph
             _projectCollection = projectCollection;
             _projectInstanceFactory = projectInstanceFactory;
             _projectInterpretation = projectInterpretation;
+            _graphMode = mode;
         }
 
         public void BuildGraph()
@@ -617,7 +620,7 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching, _graphMode))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {

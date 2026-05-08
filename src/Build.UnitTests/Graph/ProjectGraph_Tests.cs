@@ -14,6 +14,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -3001,6 +3002,64 @@ $@"
             bool mentionsProject1 = innerException.Message.Contains(project1.Path);
             bool mentionsProject2 = innerException.Message.Contains(project2.Path);
             (mentionsProject1 || mentionsProject2).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Test1()
+        {
+            using var env = TestEnvironment.Create();
+
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworks>net472;net10.0</TargetFrameworks>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            TransientTestFile project2 = env.CreateFile("project2.proj", $"""
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{project1.Path}">
+                      <SetTargetFramework>TargetFramework=net472</SetTargetFramework>
+                    </ProjectReference>
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var projectGraph = new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(project2.Path)],
+                    Mode = ProjectGraphMode.Full
+                });
+
+            var sorted = projectGraph.ProjectNodesTopologicallySorted.ToList();
+
+            sorted[0].ProjectInstance.FullPath.ShouldBe(project1.Path);
+            sorted[0].ProjectInstance.GlobalProperties.Count.ShouldBe(2); // IsGraphBuild=true plus TargetFramework=net10.0 (inner build)
+            sorted[0].ProjectReferences.Count.ShouldBe(0);
+            sorted[0].ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+
+            sorted[1].ProjectInstance.FullPath.ShouldBe(project1.Path);
+            sorted[1].ProjectInstance.GlobalProperties.Count.ShouldBe(2); // IsGraphBuild=true plus TargetFramework=net472 (inner build)
+            sorted[1].ProjectReferences.Count.ShouldBe(0);
+            sorted[1].ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+
+            sorted[2].ProjectInstance.FullPath.ShouldBe(project1.Path);
+            sorted[2].ProjectInstance.GlobalProperties.Count.ShouldBe(1); // IsGraphBuild=true (outer build)
+            sorted[2].ProjectReferences.Count.ShouldBe(2); // Should have project references to the two inner builds
+            sorted[2].ProjectType.ShouldBe(ProjectInterpretation.ProjectType.OuterBuild);
+
+            sorted[3].ProjectInstance.FullPath.ShouldBe(project2.Path);
+            sorted[3].ProjectInstance.GlobalProperties.Count.ShouldBe(1); // IsGraphBuild=true
+            sorted[3].ProjectReferences.Count.ShouldBe(3); // Should have project references to the outer build of project1 and the two inner builds
+            sorted[3].ProjectType.ShouldBe(ProjectInterpretation.ProjectType.NonMultitargeting);
         }
 
         public void Dispose()
