@@ -347,18 +347,6 @@ internal static class ErrorUtilities
     }
 
     /// <summary>
-    /// Throws an ArgumentOutOfRangeException using the given parameter name
-    /// if the condition is false.
-    /// </summary>
-    internal static void VerifyThrowArgumentOutOfRange([DoesNotReturnIf(false)] bool condition, [CallerArgumentExpression(nameof(condition))] string? parameterName = null)
-    {
-        if (!condition)
-        {
-            ThrowArgumentOutOfRange(parameterName);
-        }
-    }
-
-    /// <summary>
     /// Throws an ArgumentNullException if the given collection is null
     /// and ArgumentException if it has zero length.
     /// </summary>
@@ -463,7 +451,8 @@ internal static class ErrorUtilities
         int requiredCapacity)
     {
         ArgumentNullException.ThrowIfNull(array, arrayParameterName);
-        VerifyThrowArgumentOutOfRange(arrayIndex >= 0 && arrayIndex < array.Length, arrayIndexParameterName);
+        ArgumentOutOfRangeException.ThrowIfNegative(arrayIndex, arrayIndexParameterName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(arrayIndex, array.Length, arrayIndexParameterName);
 
         int arrayCapacity = array.Length - arrayIndex;
         if (requiredCapacity > arrayCapacity)

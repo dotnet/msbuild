@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
 
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
@@ -44,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal BuildRequestUnblocker(int globalRequestIdToResume)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(globalRequestIdToResume != BuildRequest.InvalidGlobalRequestId, nameof(globalRequestIdToResume));
+            ArgumentOutOfRangeException.ThrowIfEqual(globalRequestIdToResume, BuildRequest.InvalidGlobalRequestId);
             _blockedGlobalRequestId = globalRequestIdToResume;
         }
 

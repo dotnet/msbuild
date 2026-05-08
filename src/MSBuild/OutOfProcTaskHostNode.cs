@@ -689,7 +689,7 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(requestedCores);
 
             if (!CallbacksSupported)
             {
@@ -705,7 +705,7 @@ namespace Microsoft.Build.CommandLine
 
         public void ReleaseCores(int coresToRelease)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(coresToRelease);
 
             if (!CallbacksSupported)
             {

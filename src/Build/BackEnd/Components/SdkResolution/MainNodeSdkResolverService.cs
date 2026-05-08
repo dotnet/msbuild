@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.SdkResolverService, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.SdkResolverService);
 
             return new MainNodeSdkResolverService();
         }

@@ -37,7 +37,7 @@ namespace Microsoft.Build.FileAccesses
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.FileAccessManager, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.FileAccessManager);
             return new FileAccessManager();
         }
 
