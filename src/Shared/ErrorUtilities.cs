@@ -347,20 +347,6 @@ internal static class ErrorUtilities
     }
 
     /// <summary>
-    /// Throws an ArgumentNullException if the given collection is null
-    /// and ArgumentException if it has zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentLength<T>([NotNull] IReadOnlyCollection<T> parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        ArgumentNullException.ThrowIfNull(parameter, parameterName);
-
-        if (parameter.Count == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
-
-    /// <summary>
     /// Throws an ArgumentException if the given collection is not null but of zero length.
     /// </summary>
     internal static void VerifyThrowArgumentLengthIfNotNull<T>([MaybeNull] IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)

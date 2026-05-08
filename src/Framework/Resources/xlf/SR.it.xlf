@@ -47,6 +47,11 @@
         <target state="translated">{0} ("{1}") deve essere diverso da "{2}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="Argument_EmptyCollection">
+        <source>The collection must contain at least one element.</source>
+        <target state="new">The collection must contain at least one element.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
         <target state="translated">Il valore non può essere una stringa vuota o composto interamente da spazi vuoti.</target>

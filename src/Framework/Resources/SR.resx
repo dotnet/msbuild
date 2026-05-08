@@ -123,6 +123,9 @@
   <data name="Argument_EmptyString" xml:space="preserve">
     <value>The value cannot be an empty string.</value>
   </data>
+  <data name="Argument_EmptyCollection" xml:space="preserve">
+    <value>The collection must contain at least one element.</value>
+  </data>
   <data name="ArgumentOutOfRange_Generic_MustBeNonZero" xml:space="preserve">
     <value>{0} ('{1}') must be a non-zero value.</value>
   </data>

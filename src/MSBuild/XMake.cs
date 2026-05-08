@@ -658,7 +658,7 @@ namespace Microsoft.Build.CommandLine
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
-            ErrorUtilities.VerifyThrowArgumentLength(commandLine);
+            ArgumentException.ThrowIfNullOrEmpty(commandLine);
 
             AppDomain.CurrentDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
 
