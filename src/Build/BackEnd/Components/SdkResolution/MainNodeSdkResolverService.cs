@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             Assumed.NotNull(sdk);
             Assumed.NotNull(loggingContext);
             Assumed.NotNull(sdkReferenceLocation);
-            ErrorUtilities.VerifyThrowInternalLength(projectPath, nameof(projectPath));
+            Assumed.NotNullOrEmpty(projectPath);
 
             return _cachedSdkResolver.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
         }

@@ -681,7 +681,7 @@ namespace Microsoft.Build.Execution
             ProjectUsingTaskElement projectUsingTaskInXml,
             bool overrideTask)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
+            Assumed.NotNullOrEmpty(taskName);
             Assumed.NotNull(assemblyLoadInfo);
 
             // Lazily allocate the hashtable

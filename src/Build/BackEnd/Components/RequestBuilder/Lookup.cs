@@ -450,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
+            Assumed.NotNullOrEmpty(name);
 
             return GetProperty(name, 0, name.Length - 1);
         }

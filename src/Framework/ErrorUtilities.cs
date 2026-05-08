@@ -63,11 +63,6 @@ internal static class FrameworkErrorUtilities
             => _builder.GetFormattedText();
     }
 
-    public static void VerifyThrowInternalLength<T>(
-        [NotNull] T[]? parameterValue,
-        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-        => Assumed.NotNullOrEmpty(parameterValue, collectionExpression: parameterName);
-
     /// <summary>
     /// Helper to throw an InternalErrorException when the specified parameter is not a rooted path.
     /// This should be used ONLY if this would indicate a bug in MSBuild rather than

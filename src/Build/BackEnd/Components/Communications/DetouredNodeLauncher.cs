@@ -57,7 +57,7 @@ namespace Microsoft.Build.BackEnd
         public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(launchData.MSBuildLocation, nameof(launchData.MSBuildLocation));
+            Assumed.NotNullOrEmpty(launchData.MSBuildLocation);
 
             Assumed.NotNull(_fileAccessManager);
 

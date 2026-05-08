@@ -2226,7 +2226,7 @@ namespace Microsoft.Build.Execution
                 internal ProjectItemInstanceFactory(ProjectInstance project, string itemType)
                     : this(project)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
+                    Assumed.NotNullOrEmpty(itemType);
                     this.ItemType = itemType;
                 }
 
@@ -2256,7 +2256,7 @@ namespace Microsoft.Build.Execution
                 /// <returns>A new instance item.</returns>
                 public ProjectItemInstance CreateItem(string include, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+                    Assumed.NotNullOrEmpty(ItemType);
 
                     ProjectItemInstance item = new ProjectItemInstance(_project, ItemType, include, definingProject);
 
@@ -2289,7 +2289,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ProjectItemInstance CreateItem(string evaluatedInclude, string evaluatedIncludeBeforeWildcardExpansion, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+                    Assumed.NotNullOrEmpty(ItemType);
 
                     return new ProjectItemInstance(_project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion, definingProject);
                 }
@@ -2318,7 +2318,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+                    Assumed.NotNullOrEmpty(ItemType);
                     Assumed.NotNull(source);
 
                     // The new item inherits any metadata originating in item definitions, which

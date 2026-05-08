@@ -78,17 +78,6 @@ internal static class ErrorUtilities
         }
     }
 
-    /// <inheritdoc cref="Assumed.NotNullOrEmpty(string?, string?, string?)"/>
-    internal static void VerifyThrowInternalLength(
-        [NotNull] string? parameterValue,
-        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-        => Assumed.NotNullOrEmpty(parameterValue, valueExpression: parameterName);
-
-    internal static void VerifyThrowInternalLength<T>(
-        [NotNull] T[]? parameterValue,
-        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-        => FrameworkErrorUtilities.VerifyThrowInternalLength(parameterValue, parameterName);
-
     /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalRooted(string)"/>
     internal static void VerifyThrowInternalRooted(string value)
         => FrameworkErrorUtilities.VerifyThrowInternalRooted(value);
