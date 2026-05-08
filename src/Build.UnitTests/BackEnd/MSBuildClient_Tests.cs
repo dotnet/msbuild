@@ -13,13 +13,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// <summary>
     /// Tests for the <see cref="MSBuildClient"/> fallback behaviour.
     /// </summary>
-    /// <remarks>
-    /// Regression coverage for the .NET 10.0.300 / Aspire timeout: when
-    /// <c>DOTNET_CLI_USE_MSBUILD_SERVER=true</c> is honoured but the server child cannot start
-    /// (e.g. the apphost can't find the .NET runtime), <see cref="MSBuildClient.Execute"/> must
-    /// not propagate a <see cref="System.TimeoutException"/> &#8212; it must return an exit type that
-    /// causes the host (<c>MSBuildClientApp</c>) to fall back to in-proc execution.
-    /// </remarks>
     public sealed class MSBuildClient_Tests
     {
         /// <summary>
@@ -27,6 +20,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// The client must report a recoverable exit type (LaunchError / UnableToConnect /
         /// UnknownServerState / ServerBusy) rather than letting an exception escape.
         /// </summary>
+        /// <remarks>
+        /// Regression coverage for the .NET 10.0.300 / Aspire timeout: when
+        /// <c>DOTNET_CLI_USE_MSBUILD_SERVER=true</c> is honoured but the server child cannot start
+        /// (e.g. the apphost can't find the .NET runtime), <see cref="MSBuildClient.Execute"/> must
+        /// not propagate a <see cref="System.TimeoutException"/> &#8212; it must return an exit type that
+        /// causes the host (<c>MSBuildClientApp</c>) to fall back to in-proc execution.
+        /// </remarks>
         [Fact]
         public void Execute_WithUnreachableServer_DoesNotPropagateException()
         {

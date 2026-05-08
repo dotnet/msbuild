@@ -1736,6 +1736,33 @@
   </data>
   <!-- **** TaskHost strings end **** -->
 
+  <!-- **** MSBuild Server fallback strings begin **** -->
+  <data name="MSBuildServerUnavailable" xml:space="preserve">
+    <value>MSBuild server unavailable: {0} Falling back to in-proc build.</value>
+    <comment>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used (e.g. that it crashed or did not respond). It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchTimeout / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed.</comment>
+  </data>
+  <data name="MSBuildServerCrashedOnLaunch" xml:space="preserve">
+    <value>the server process exited with code {0} immediately after launch (ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime; set MSBUILDDEBUGCOMM=1 for diagnostics).</value>
+    <comment>LOCALIZATION: {0} is the integer process exit code.</comment>
+  </data>
+  <data name="MSBuildServerLaunchTimeout" xml:space="preserve">
+    <value>the server process did not respond in time and may have failed to start (ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime; set MSBUILDDEBUGCOMM=1 for diagnostics).</value>
+    <comment>LOCALIZATION: No format arguments.</comment>
+  </data>
+  <data name="MSBuildServerLaunchError" xml:space="preserve">
+    <value>the server process could not be launched (set MSBUILDDEBUGCOMM=1 for diagnostics).</value>
+    <comment>LOCALIZATION: No format arguments.</comment>
+  </data>
+  <data name="MSBuildServerStateUnknown" xml:space="preserve">
+    <value>the current server state could not be determined (set MSBUILDDEBUGCOMM=1 for diagnostics).</value>
+    <comment>LOCALIZATION: No format arguments.</comment>
+  </data>
+  <data name="MSBuildServerConnectFailed" xml:space="preserve">
+    <value>could not connect to the server (set MSBUILDDEBUGCOMM=1 for diagnostics).</value>
+    <comment>LOCALIZATION: No format arguments. Used when no specific cause has been identified for a connection failure.</comment>
+  </data>
+  <!-- **** MSBuild Server fallback strings end **** -->
+
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 

@@ -379,6 +379,36 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
         <target state="translated">nie ustawiono</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildServerConnectFailed">
+        <source>could not connect to the server (set MSBUILDDEBUGCOMM=1 for diagnostics).</source>
+        <target state="new">could not connect to the server (set MSBUILDDEBUGCOMM=1 for diagnostics).</target>
+        <note>LOCALIZATION: No format arguments. Used when no specific cause has been identified for a connection failure.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerCrashedOnLaunch">
+        <source>the server process exited with code {0} immediately after launch (ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime; set MSBUILDDEBUGCOMM=1 for diagnostics).</source>
+        <target state="new">the server process exited with code {0} immediately after launch (ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime; set MSBUILDDEBUGCOMM=1 for diagnostics).</target>
+        <note>LOCALIZATION: {0} is the integer process exit code.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerLaunchError">
+        <source>the server process could not be launched (set MSBUILDDEBUGCOMM=1 for diagnostics).</source>
+        <target state="new">the server process could not be launched (set MSBUILDDEBUGCOMM=1 for diagnostics).</target>
+        <note>LOCALIZATION: No format arguments.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerLaunchTimeout">
+        <source>the server process did not respond in time and may have failed to start (ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime; set MSBUILDDEBUGCOMM=1 for diagnostics).</source>
+        <target state="new">the server process did not respond in time and may have failed to start (ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime; set MSBUILDDEBUGCOMM=1 for diagnostics).</target>
+        <note>LOCALIZATION: No format arguments.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerStateUnknown">
+        <source>the current server state could not be determined (set MSBUILDDEBUGCOMM=1 for diagnostics).</source>
+        <target state="new">the current server state could not be determined (set MSBUILDDEBUGCOMM=1 for diagnostics).</target>
+        <note>LOCALIZATION: No format arguments.</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerUnavailable">
+        <source>MSBuild server unavailable: {0} Falling back to in-proc build.</source>
+        <target state="new">MSBuild server unavailable: {0} Falling back to in-proc build.</target>
+        <note>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used (e.g. that it crashed or did not respond). It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchTimeout / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed.</note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">Wersja programu MSBuild {0} dla {1}</target>

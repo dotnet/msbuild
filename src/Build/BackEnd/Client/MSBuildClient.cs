@@ -683,6 +683,9 @@ namespace Microsoft.Build.Experimental
         /// Emits a single diagnostic trace entry describing why connection to the MSBuild server
         /// failed, including the launched server PID (if any) and its current state. This makes
         /// the otherwise-opaque 20s timeout actionable when MSBUILDDEBUGCOMM tracing is enabled.
+        /// Also populates <see cref="MSBuildClientExitResult.ServerProcessExitCode"/> when the
+        /// launched server child has already exited, so the host can surface that fact to the
+        /// user-visible "falling back to in-proc" message instead of a generic timeout.
         /// </summary>
         private void LogConnectFailureDiagnostics(int timeoutMilliseconds, bool isTimeout, string? errorMessage)
         {
@@ -692,11 +695,19 @@ namespace Microsoft.Build.Experimental
                 try
                 {
                     using Process? launched = Process.GetProcessById(pid);
-                    serverState = launched is null
-                        ? $"PID {pid} (no longer present)"
-                        : launched.HasExited
-                            ? $"PID {pid} (already exited with code {launched.ExitCode})"
-                            : $"PID {pid} (still running)";
+                    if (launched is null)
+                    {
+                        serverState = $"PID {pid} (no longer present)";
+                    }
+                    else if (launched.HasExited)
+                    {
+                        _exitResult.ServerProcessExitCode = launched.ExitCode;
+                        serverState = $"PID {pid} (already exited with code {launched.ExitCode})";
+                    }
+                    else
+                    {
+                        serverState = $"PID {pid} (still running)";
+                    }
                 }
                 catch (ArgumentException)
                 {

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
@@ -77,10 +78,8 @@ namespace Microsoft.Build.CommandLine
                 // the process (the DOTNET_CLI_USE_MSBUILD_SERVER=true regression in 10.0.300).
                 if (exitResult.MSBuildClientExitType != MSBuildClientExitType.ServerBusy)
                 {
-                    string detail = exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect
-                        ? "could not connect to the server (it may have failed to start; ensure DOTNET_ROOT is set so the apphost can locate the .NET runtime, or set MSBUILDDEBUGCOMM=1 for diagnostics)"
-                        : exitResult.MSBuildClientExitType.ToString();
-                    Console.Error.WriteLine($"MSBuild server unavailable ({detail}); falling back to in-proc build.");
+                    string detail = GetServerFallbackDetail(exitResult);
+                    Console.Error.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("MSBuildServerUnavailable", detail));
                 }
 
                 // Server is busy / unavailable, fallback to old behavior.
@@ -96,6 +95,26 @@ namespace Microsoft.Build.CommandLine
             }
 
             return MSBuildApp.ExitType.MSBuildClientFailure;
+        }
+
+        /// <summary>
+        /// Picks the most specific localized "why MSBuild server was unavailable" sub-message for
+        /// the user-visible fallback notice. Prefers the "server crashed immediately on launch"
+        /// detail over a generic timeout when the launched server's exit code is known.
+        /// </summary>
+        private static string GetServerFallbackDetail(MSBuildClientExitResult exitResult)
+        {
+            return exitResult.MSBuildClientExitType switch
+            {
+                MSBuildClientExitType.LaunchError => AssemblyResources.GetString("MSBuildServerLaunchError"),
+                MSBuildClientExitType.UnknownServerState => AssemblyResources.GetString("MSBuildServerStateUnknown"),
+                MSBuildClientExitType.UnableToConnect when exitResult.ServerProcessExitCode is int code =>
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "MSBuildServerCrashedOnLaunch",
+                        code.ToString(CultureInfo.InvariantCulture)),
+                MSBuildClientExitType.UnableToConnect => AssemblyResources.GetString("MSBuildServerLaunchTimeout"),
+                _ => AssemblyResources.GetString("MSBuildServerConnectFailed"),
+            };
         }
     }
 }
