@@ -1369,7 +1369,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log, bool referenceIsUnified = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate);
+            Assumed.NotNull(conflictCandidate);
             log.Append(Strings.FourSpaces);
 
             string resource = referenceIsUnified ? "ResolveAssemblyReference.UnifiedReferenceDependsOn" : "ResolveAssemblyReference.ReferenceDependsOn";

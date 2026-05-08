@@ -283,7 +283,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildParameters(BuildParameters other, bool resetEnvironment = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other);
+            Assumed.NotNull(other);
 
             _buildId = other._buildId;
             _culture = other._culture;
@@ -762,7 +762,7 @@ namespace Microsoft.Build.Execution
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "EnvironmentPropertiesInternal");
+                Assumed.NotNull(value, valueExpression: "EnvironmentPropertiesInternal");
                 _environmentProperties = value;
             }
         }

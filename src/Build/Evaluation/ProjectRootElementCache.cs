@@ -345,7 +345,7 @@ namespace Microsoft.Build.Evaluation
             if (projectRootElement == null || projectRootElementIsInvalid)
             {
                 projectRootElement = loadProjectRootElement(projectFile, this);
-                ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
+                Assumed.NotNull(projectRootElement);
                 ErrorUtilities.VerifyThrow(
                     projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
                     $"Got project back with incorrect path. Expected path: {projectFile}, received path: {projectRootElement.FullPath}.");
@@ -532,7 +532,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private void RenameEntryInternal(string oldFullPathIfAny, ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElement.FullPath, "FullPath");
+            Assumed.NotNull(projectRootElement.FullPath);
 
             if (oldFullPathIfAny != null)
             {

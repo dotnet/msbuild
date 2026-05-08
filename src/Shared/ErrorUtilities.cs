@@ -64,11 +64,6 @@ internal static class ErrorUtilities
 #endif
     }
 
-    internal static void VerifyThrowInternalNull(
-        [NotNull] object? parameter,
-        [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-        => Assumed.NotNull(parameter, valueExpression: parameterName);
-
     /// <summary>
     /// Helper to throw an InternalErrorException when a lock on the specified object is not already held.
     /// This should be used ONLY if this would indicate a bug in MSBuild rather than

@@ -617,7 +617,7 @@ namespace Microsoft.Build.Construction
             /// </summary>
             internal WrapperForProjectRootElement(ProjectRootElement containingProject)
             {
-                ErrorUtilities.VerifyThrowInternalNull(containingProject);
+                Assumed.NotNull(containingProject);
                 ContainingProject = containingProject;
             }
 

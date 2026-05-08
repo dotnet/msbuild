@@ -103,7 +103,7 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
+                Assumed.NotNull(value, "Properties can't have null value");
                 ErrorUtilities.VerifyThrow(String.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
                 Set(value);
             }
@@ -254,7 +254,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void IDictionary<string, T>.Add(string key, T value)
         {
-            ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
+            Assumed.NotNull(value, "Properties can't have null value");
             ErrorUtilities.VerifyThrow(key == value.Key, "Key must match value's key");
             Set(value);
         }

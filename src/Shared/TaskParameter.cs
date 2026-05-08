@@ -631,7 +631,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
+                Assumed.NotNull(_escapedItemSpec);
             }
 
             private TaskParameterTaskItem()
@@ -953,8 +953,8 @@ namespace Microsoft.Build.BackEnd
                 translator.Translate(ref _escapedDefiningProject);
                 translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
 
-                ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
-                ErrorUtilities.VerifyThrowInternalNull(_customEscapedMetadata);
+                Assumed.NotNull(_escapedItemSpec);
+                Assumed.NotNull(_customEscapedMetadata);
             }
 
             internal static TaskParameterTaskItem FactoryForDeserialization(ITranslator translator)

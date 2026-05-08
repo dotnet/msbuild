@@ -118,7 +118,7 @@ namespace Microsoft.Build.BackEnd
         {
             ArgumentNullException.ThrowIfNull(host);
             ArgumentNullException.ThrowIfNull(requestEntry);
-            ErrorUtilities.VerifyThrowInternalNull(taskLocation);
+            Assumed.NotNull(taskLocation);
 
             _host = host;
             _requestEntry = requestEntry;

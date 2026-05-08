@@ -1561,7 +1561,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void SetTaskHostEnvironment(IDictionary<string, string> environment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(s_mismatchedEnvironmentValues, "mismatchedEnvironmentValues");
+            Assumed.NotNull(s_mismatchedEnvironmentValues);
             IDictionary<string, string> updatedEnvironment = null;
 
             if (_updateEnvironment)
@@ -1624,7 +1624,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private IDictionary<string, string> UpdateEnvironmentForMainNode(IDictionary<string, string> environment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(s_mismatchedEnvironmentValues, "mismatchedEnvironmentValues");
+            Assumed.NotNull(s_mismatchedEnvironmentValues);
             IDictionary<string, string> updatedEnvironment = null;
 
             if (_updateEnvironment)

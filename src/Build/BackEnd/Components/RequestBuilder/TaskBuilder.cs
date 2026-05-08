@@ -554,7 +554,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
-            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method.
+            Assumed.NotNull(_taskNode); // taskNode should never be null when we're calling this method.
 
             string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
             string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);

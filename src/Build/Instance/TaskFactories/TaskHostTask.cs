@@ -177,8 +177,8 @@ namespace Microsoft.Build.BackEnd
             int scheduledNodeId,
             TaskEnvironment taskEnvironment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType);
-            ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
+            Assumed.NotNull(taskType);
+            Assumed.NotNull(taskEnvironment);
 
             _scheduledNodeId = scheduledNodeId;
 
@@ -317,7 +317,7 @@ namespace Microsoft.Build.BackEnd
                 lock (_taskHostLock)
                 {
                     _taskHostProvider = (NodeProviderOutOfProcTaskHost)_buildComponentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-                    ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
+                    Assumed.NotNull(_taskHostProvider);
                 }
 
                 string taskLocation = AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly);

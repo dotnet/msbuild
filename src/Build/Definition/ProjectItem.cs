@@ -127,7 +127,7 @@ namespace Microsoft.Build.Evaluation
                              PropertyDictionary<ProjectMetadata> directMetadataCloned,
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project);
+            Assumed.NotNull(project);
             ArgumentNullException.ThrowIfNull(xml);
 
             // Orcas accidentally allowed empty includes if they resulted from expansion: we preserve that bug
@@ -1005,7 +1005,7 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             public ProjectItem CreateItem(string evaluatedIncludeEscaped, string evaluatedIncludeBeforeWildcardExpansion, string definingProject)
             {
-                ErrorUtilities.VerifyThrowInternalNull(_xml, "xml");
+                Assumed.NotNull(_xml);
 
                 return new ProjectItem(_project, _xml, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansion, null /* no metadata */, null /* no inherited definition metadata */);
             }
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private ProjectItem CreateItem(string evaluatedIncludeEscaped, string evaluatedIncludeBeforeWildcardExpansionEscaped, ProjectItem source)
             {
-                ErrorUtilities.VerifyThrowInternalNull(_xml, "xml");
+                Assumed.NotNull(_xml);
 
                 // The new item inherits any metadata originating in item definitions, which
                 // takes precedence over its own item definition metadata.

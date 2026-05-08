@@ -98,9 +98,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
-            ErrorUtilities.VerifyThrowInternalNull(sdk);
-            ErrorUtilities.VerifyThrowInternalNull(loggingContext);
-            ErrorUtilities.VerifyThrowInternalNull(sdkReferenceLocation);
+            Assumed.NotNull(sdk);
+            Assumed.NotNull(loggingContext);
+            Assumed.NotNull(sdkReferenceLocation);
             ErrorUtilities.VerifyThrowInternalLength(projectPath, nameof(projectPath));
 
             return _cachedSdkResolver.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);

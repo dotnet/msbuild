@@ -62,7 +62,7 @@ namespace Microsoft.Build.Shared
                 result == TaskCompleteType.CrashedDuringExecution ||
                 result == TaskCompleteType.CrashedAfterExecution)
             {
-                ErrorUtilities.VerifyThrowInternalNull(taskException);
+                Assumed.NotNull(taskException);
             }
 
             if (exceptionMessage != null)

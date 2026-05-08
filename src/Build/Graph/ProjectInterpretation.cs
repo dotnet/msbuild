@@ -382,7 +382,7 @@ namespace Microsoft.Build.Graph
             bool allowCollectionReuse,
             IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectReference);
+            Assumed.NotNull(projectReference);
             ArgumentNullException.ThrowIfNull(requesterGlobalProperties);
 
             var properties = SplitPropertyNameValuePairs(ItemMetadataNames.PropertiesMetadataName, projectReference.GetMetadataValue(ItemMetadataNames.PropertiesMetadataName));

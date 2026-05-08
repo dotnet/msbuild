@@ -7,7 +7,6 @@ using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -98,8 +97,8 @@ namespace Microsoft.Build.Execution
             ProjectTaskElement element,
             IList<ProjectTaskInstanceChild> outputs)
         {
-            ErrorUtilities.VerifyThrowInternalNull(element);
-            ErrorUtilities.VerifyThrowInternalNull(outputs);
+            Assumed.NotNull(element);
+            Assumed.NotNull(outputs);
 
             // These are all immutable
             _name = element.Name;

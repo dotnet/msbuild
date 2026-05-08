@@ -36,7 +36,7 @@ namespace Microsoft.Build.Shared
         internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string? code)
         {
 #if !BUILDINGAPPXTASKS
-            ErrorUtilities.VerifyThrowInternalNull(message);
+            Assumed.NotNull(message);
 #endif
 
             code = null;

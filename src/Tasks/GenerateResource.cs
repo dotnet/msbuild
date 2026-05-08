@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Tasks
         {
             // Throw an internal error, since this method should only ever get called by other aspects of this task, not
             // anything that the user touches.
-            ErrorUtilities.VerifyThrowInternalNull(resGenCommand);
+            Assumed.NotNull(resGenCommand);
 
             // append the /useSourcePath flag if requested.
             if (UseSourcePath)

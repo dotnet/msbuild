@@ -1811,7 +1811,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void VerifyThrowInvalidOperationNotImported(ProjectRootElement otherXml)
         {
-            ErrorUtilities.VerifyThrowInternalNull(otherXml);
+            Assumed.NotNull(otherXml);
             ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
         }
 
@@ -3590,7 +3590,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal void VerifyThrowInvalidOperationNotImported(ProjectRootElement otherXml)
             {
-                ErrorUtilities.VerifyThrowInternalNull(otherXml);
+                Assumed.NotNull(otherXml);
                 ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
             }
 
@@ -4399,7 +4399,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public void AddToAllEvaluatedPropertiesList(ProjectProperty property)
             {
-                ErrorUtilities.VerifyThrowInternalNull(property);
+                Assumed.NotNull(property);
                 AllEvaluatedProperties.Add(property);
             }
 
@@ -4411,7 +4411,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public void AddToAllEvaluatedItemDefinitionMetadataList(ProjectMetadata itemDefinitionMetadatum)
             {
-                ErrorUtilities.VerifyThrowInternalNull(itemDefinitionMetadatum);
+                Assumed.NotNull(itemDefinitionMetadatum);
                 AllEvaluatedItemDefinitionMetadata.Add(itemDefinitionMetadatum);
             }
 
@@ -4423,7 +4423,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public void AddToAllEvaluatedItemsList(ProjectItem item)
             {
-                ErrorUtilities.VerifyThrowInternalNull(item);
+                Assumed.NotNull(item);
                 AllEvaluatedItems.Add(item);
             }
 

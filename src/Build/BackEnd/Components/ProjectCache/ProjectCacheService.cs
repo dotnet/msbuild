@@ -578,7 +578,7 @@ namespace Microsoft.Build.ProjectCache
 
         private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowInternalNull(buildRequest.ProjectInstance, nameof(buildRequest.ProjectInstance));
+            Assumed.NotNull(buildRequest.ProjectInstance);
 
             var buildEventFileInfo = new BuildEventFileInfo(buildRequest.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
@@ -765,7 +765,7 @@ namespace Microsoft.Build.ProjectCache
 
                 foreach (XmlElement projectConfiguration in projectConfigurations)
                 {
-                    ErrorUtilities.VerifyThrowInternalNull(projectConfiguration.Attributes, nameof(projectConfiguration.Attributes));
+                    Assumed.NotNull(projectConfiguration.Attributes);
 
                     var buildProjectInSolution = projectConfiguration.Attributes![SolutionConfiguration.BuildProjectInSolutionAttribute];
                     if (buildProjectInSolution is not null &&

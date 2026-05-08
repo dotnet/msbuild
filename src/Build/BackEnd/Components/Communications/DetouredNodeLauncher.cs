@@ -59,7 +59,7 @@ namespace Microsoft.Build.BackEnd
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(launchData.MSBuildLocation, nameof(launchData.MSBuildLocation));
 
-            ErrorUtilities.VerifyThrowInternalNull(_fileAccessManager, nameof(_fileAccessManager));
+            Assumed.NotNull(_fileAccessManager);
 
             if (!FileSystems.Default.FileExists(launchData.MSBuildLocation))
             {

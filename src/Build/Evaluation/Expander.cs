@@ -496,7 +496,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -517,7 +517,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -565,7 +565,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -639,7 +639,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
@@ -4324,7 +4324,7 @@ namespace Microsoft.Build.Evaluation
 
                         // If the type information from the cache is not loadable, it means the cache information got corrupted somehow
                         // Throw here to prevent adding null types in the cache
-                        ErrorUtilities.VerifyThrowInternalNull(receiverType, $"Type information for {typeName} was present in the allowlist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
+                        Assumed.NotNull(receiverType, $"Type information for {typeName} was present in the allowlist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
 
                         // If we've used it once, chances are that we'll be using it again
                         // We can record the type here since we know it's available for calling from the fact that is was in the AvailableStaticMethods table

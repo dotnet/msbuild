@@ -29,8 +29,8 @@ namespace Microsoft.Build.Execution
 
         public void Add(IConfigCache configCache, IResultsCache resultsCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(configCache);
-            ErrorUtilities.VerifyThrowInternalNull(resultsCache);
+            Assumed.NotNull(configCache);
+            Assumed.NotNull(resultsCache);
             ErrorUtilities.VerifyThrow(!_aggregated, "Cannot add after aggregation");
 
             _inputCaches.Add((configCache, resultsCache));

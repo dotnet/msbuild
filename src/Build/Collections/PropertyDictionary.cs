@@ -206,7 +206,7 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
+                Assumed.NotNull(value, "Properties can't have null value");
                 ErrorUtilities.VerifyThrow(String.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
                 Set(value);
             }

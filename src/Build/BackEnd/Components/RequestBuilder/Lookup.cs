@@ -101,8 +101,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(IItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems);
-            ErrorUtilities.VerifyThrowInternalNull(properties);
+            Assumed.NotNull(projectItems);
+            Assumed.NotNull(properties);
 
             _baseItems = projectItems;
             _lookupScopes = new Lookup.Scope(this, "Lookup()", properties);
@@ -1267,7 +1267,7 @@ namespace Microsoft.Build.BackEnd
 
                 set
                 {
-                    ErrorUtilities.VerifyThrowInternalNull(value, "value");
+                    Assumed.NotNull(value);
                     _modifications[metadataName] = value;
                 }
             }

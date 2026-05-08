@@ -99,7 +99,7 @@ namespace Microsoft.Build.Evaluation
                 type == TokenType.Function,
                 "Unexpected token type");
 
-            ErrorUtilities.VerifyThrowInternalNull(tokenString);
+            Assumed.NotNull(tokenString);
 
             _tokenType = type;
             _tokenString = tokenString;

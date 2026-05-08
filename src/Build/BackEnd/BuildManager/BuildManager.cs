@@ -3474,7 +3474,7 @@ namespace Microsoft.Build.Execution
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
-            ErrorUtilities.VerifyThrowInternalNull(inputCacheFiles);
+            Assumed.NotNull(inputCacheFiles);
             ErrorUtilities.VerifyThrow(_configCache == null, "caches must not be set at this point");
             ErrorUtilities.VerifyThrow(_resultsCache == null, "caches must not be set at this point");
 

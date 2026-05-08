@@ -369,7 +369,7 @@ namespace Microsoft.Build.BackEnd
 
             if (useTaskFactory)
             {
-                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
+                Assumed.NotNull(buildComponentHost);
 
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
                 mergedParameters = AddNetHostParamsIfNeeded(mergedParameters, getProperty);

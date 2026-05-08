@@ -25,7 +25,7 @@ namespace Microsoft.Build.Graph
         // No public creation.
         internal ProjectGraphNode(ProjectInstance projectInstance)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectInstance);
+            Assumed.NotNull(projectInstance);
             ProjectInstance = projectInstance;
 
             ProjectType = ProjectInterpretation.GetProjectType(projectInstance);

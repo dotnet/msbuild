@@ -163,16 +163,16 @@ namespace Microsoft.Build.Execution
             bool parentProjectSupportsReturnsAttribute)
         {
             ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowInternalNull(condition);
-            ErrorUtilities.VerifyThrowInternalNull(inputs);
-            ErrorUtilities.VerifyThrowInternalNull(outputs);
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicateOutputs);
-            ErrorUtilities.VerifyThrowInternalNull(dependsOnTargets);
-            ErrorUtilities.VerifyThrowInternalNull(beforeTargets);
-            ErrorUtilities.VerifyThrowInternalNull(afterTargets);
-            ErrorUtilities.VerifyThrowInternalNull(location);
-            ErrorUtilities.VerifyThrowInternalNull(children);
-            ErrorUtilities.VerifyThrowInternalNull(onErrorChildren);
+            Assumed.NotNull(condition);
+            Assumed.NotNull(inputs);
+            Assumed.NotNull(outputs);
+            Assumed.NotNull(keepDuplicateOutputs);
+            Assumed.NotNull(dependsOnTargets);
+            Assumed.NotNull(beforeTargets);
+            Assumed.NotNull(afterTargets);
+            Assumed.NotNull(location);
+            Assumed.NotNull(children);
+            Assumed.NotNull(onErrorChildren);
 
             _name = name;
             _condition = condition;

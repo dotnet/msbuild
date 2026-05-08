@@ -172,7 +172,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskRegistry(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
+            Assumed.NotNull(projectRootElementCache);
 
             RootElementCache = projectRootElementCache;
         }
@@ -192,8 +192,8 @@ namespace Microsoft.Build.Execution
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         internal TaskRegistry(Toolset toolset, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
-            ErrorUtilities.VerifyThrowInternalNull(toolset);
+            Assumed.NotNull(projectRootElementCache);
+            Assumed.NotNull(toolset);
 
             RootElementCache = projectRootElementCache;
             _toolset = toolset;
@@ -283,7 +283,7 @@ namespace Microsoft.Build.Execution
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile);
+            Assumed.NotNull(directoryOfImportingFile);
 #if DEBUG
             ErrorUtilities.VerifyThrow(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
 #endif
@@ -682,7 +682,7 @@ namespace Microsoft.Build.Execution
             bool overrideTask)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
+            Assumed.NotNull(assemblyLoadInfo);
 
             // Lazily allocate the hashtable
             if (_taskRegistrations == null)

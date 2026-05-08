@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         public TaskFactoryEngineContext(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild, bool forceOutOfProcessExecution)
         {
             ArgumentNullException.ThrowIfNull(loggingContext);
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             _activeProxy = true;
             _isRunningWithMultipleNodes = isRunningWithMultipleNodes;

@@ -218,11 +218,11 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingService,
             BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data);
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
-            ErrorUtilities.VerifyThrowInternalNull(evaluationContext);
-            ErrorUtilities.VerifyThrowInternalNull(loggingService);
-            ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+            Assumed.NotNull(data);
+            Assumed.NotNull(projectRootElementCache);
+            Assumed.NotNull(evaluationContext);
+            Assumed.NotNull(loggingService);
+            Assumed.NotNull(buildEventContext);
 
             _evaluationLoggingContext = new EvaluationLoggingContext(
                 loggingService,

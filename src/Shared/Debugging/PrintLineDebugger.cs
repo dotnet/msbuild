@@ -29,7 +29,7 @@ namespace Microsoft.Build.Shared.Debugging
 
                 var propertyInfo = commonWriterType.GetProperty("Writer", BindingFlags.Public | BindingFlags.Static);
 
-                ErrorUtilities.VerifyThrowInternalNull(propertyInfo);
+                Assumed.NotNull(propertyInfo);
 
                 return propertyInfo;
             });

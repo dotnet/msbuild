@@ -4,7 +4,6 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -71,7 +70,7 @@ namespace Microsoft.Build.Evaluation
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "Value");
+                Assumed.NotNull(value, valueExpression: "Value");
                 _value = value;
             }
         }

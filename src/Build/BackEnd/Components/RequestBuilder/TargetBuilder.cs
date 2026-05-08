@@ -559,7 +559,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (_buildResult.TryGetResultsForTarget(currentTargetEntry.Name, out TargetResult targetResult))
             {
-                ErrorUtilities.VerifyThrowInternalNull(targetResult, "targetResult");
+                Assumed.NotNull(targetResult);
 
                 if (targetResult.ResultCode != TargetResultCode.Skipped)
                 {
