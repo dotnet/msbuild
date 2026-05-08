@@ -112,7 +112,6 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_WINDOWSINTEROP
                     if (NativeMethodsShared.IsWindows)
                     {
-                        var data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
                         bool success = PInvoke.GetFileAttributesEx(NativeMethodsShared.EnsureExtendedLengthPath(_filename), out WIN32_FILE_ATTRIBUTE_DATA data);
 
                         if (!success)

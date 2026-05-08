@@ -684,7 +684,7 @@ internal static class NativeMethods
 #if FEATURE_WINDOWSINTEROP
         if (IsWindows)
         {
-            if (PInvoke.GetFileAttributesEx(fullPath, out WIN32_FILE_ATTRIBUTE_DATA data)
+            if (PInvoke.GetFileAttributesEx(EnsureExtendedLengthPath(fullPath), out WIN32_FILE_ATTRIBUTE_DATA data)
                 && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0)
             {
                 fileModifiedTimeUtc = DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
@@ -880,7 +880,6 @@ internal static class NativeMethods
                     return GetContentLastWriteFileUtcTime(path);
                 }
 
-                WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
                 bool success = PInvoke.GetFileAttributesEx(EnsureExtendedLengthPath(path), out WIN32_FILE_ATTRIBUTE_DATA data);
 
                 if (success && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) == 0)
@@ -1326,17 +1325,6 @@ internal static class NativeMethods
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
 
-    #endregion
-
-    #region helper methods
-
-    /// <summary>
-    /// Prepends the \\?\ extended-length path prefix when <paramref name="path"/> is at or
-    /// beyond <see cref="MAX_PATH"/> characters and does not already carry the prefix.
-    /// This allows Win32 APIs to accept paths longer than MAX_PATH in processes that do not
-    /// declare longPathAware in their application manifest (e.g. devenv.exe).
-    /// Returns the original string unchanged on non-Windows or for short paths.
-    /// </summary>
     internal static string EnsureExtendedLengthPath(string path)
     {
         if (!IsWindows || path == null || path.Length < MAX_PATH ||
@@ -1350,34 +1338,6 @@ internal static class NativeMethods
             : @"\\?\" + path;
     }
 
-    internal static bool DirectoryExists(string fullPath)
-    {
-        return IsWindows
-            ? DirectoryExistsWindows(fullPath)
-            : Directory.Exists(fullPath);
-    }
-
-    [SupportedOSPlatform("windows")]
-    internal static bool DirectoryExistsWindows(string fullPath)
-    {
-        WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-        bool success = GetFileAttributesEx(EnsureExtendedLengthPath(fullPath), 0, ref data);
-        return success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-    }
-
-    internal static bool FileExists(string fullPath)
-    {
-        return IsWindows
-            ? FileExistsWindows(fullPath)
-            : File.Exists(fullPath);
-    }
-
-    [SupportedOSPlatform("windows")]
-    internal static bool FileExistsWindows(string fullPath)
-    {
-        WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-        bool success = GetFileAttributesEx(EnsureExtendedLengthPath(fullPath), 0, ref data);
-        return success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
     internal static unsafe bool SetThreadErrorMode(int newMode, out int oldMode)
