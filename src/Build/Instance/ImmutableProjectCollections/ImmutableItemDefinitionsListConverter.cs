@@ -84,7 +84,7 @@ namespace Microsoft.Build.Instance
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), Count);
+            ErrorUtilities.VerifyCollectionCopyToArguments(array, arrayIndex, Count);
 
             int currentIndex = arrayIndex;
             void PutItemIntoArray(TCached item)

@@ -437,29 +437,35 @@ internal static class ErrorUtilities
     }
 
     /// <summary>
-    /// A utility that verifies the parameters provided to a standard ICollection<typeparamref name="T"/>.CopyTo call.
+    /// A utility that verifies the parameters provided to a standard <see cref="ICollection{T}.CopyTo"/> call.
     /// </summary>
-    /// <exception cref="ArgumentNullException">If <paramref name="array"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="arrayIndex"/> falls outside of the bounds <paramref name="array"/>.</exception>
-    /// <exception cref="ArgumentException">If there is insufficient capacity to copy the collection contents into <paramref name="array"/>
-    /// when starting at <paramref name="arrayIndex"/>.</exception>
+    /// <typeparam name="T">The element type of the collection.</typeparam>
+    /// <param name="collection">The destination collection to copy into.</param>
+    /// <param name="index">The zero-based index in <paramref name="collection"/> at which copying begins.</param>
+    /// <param name="requiredCapacity">The number of elements that need to be copied.</param>
+    /// <param name="collectionParamName">The name of the <paramref name="collection"/> parameter.</param>
+    /// <param name="indexParamName">The name of the <paramref name="index"/> parameter.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="collection"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> falls outside of the bounds of <paramref name="collection"/>.</exception>
+    /// <exception cref="ArgumentException">If there is insufficient capacity to copy the collection contents into <paramref name="collection"/>
+    /// when starting at <paramref name="index"/>.</exception>
     internal static void VerifyCollectionCopyToArguments<T>(
-        [NotNull] T[]? array,
-        string arrayParameterName,
-        int arrayIndex,
-        string arrayIndexParameterName,
-        int requiredCapacity)
+        [NotNull] ICollection<T>? collection,
+        int index,
+        int requiredCapacity,
+        [CallerArgumentExpression(nameof(collection))] string? collectionParamName = null,
+        [CallerArgumentExpression(nameof(index))] string? indexParamName = null)
     {
-        ArgumentNullException.ThrowIfNull(array, arrayParameterName);
-        ArgumentOutOfRangeException.ThrowIfNegative(arrayIndex, arrayIndexParameterName);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(arrayIndex, array.Length, arrayIndexParameterName);
+        ArgumentNullException.ThrowIfNull(collection, collectionParamName);
+        ArgumentOutOfRangeException.ThrowIfNegative(index, indexParamName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, collection.Count, indexParamName);
 
-        int arrayCapacity = array.Length - arrayIndex;
-        if (requiredCapacity > arrayCapacity)
+        int capacity = collection.Count - index;
+        if (requiredCapacity > capacity)
         {
             throw new ArgumentException(
-                ResourceUtilities.GetResourceString("Shared.CollectionCopyToFailureProvidedArrayIsTooSmall"),
-                arrayParameterName);
+                ResourceUtilities.GetResourceString("CollectionCopyToFailureProvidedArrayIsTooSmall"),
+                collectionParamName);
         }
     }
 }
