@@ -163,6 +163,7 @@
     <Compile Include="CommandLineBuilderExtension.cs" />
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
+    <Compile Include="IFixedTypeInfo.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
@@ -613,9 +614,7 @@
   </ItemGroup>
   <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
   <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
-    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
     <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->

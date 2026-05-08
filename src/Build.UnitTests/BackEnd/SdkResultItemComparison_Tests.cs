@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable disable
 
@@ -12,6 +13,45 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class SdkResultItemComparison_Tests
     {
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13490
+        /// </summary>
+        [Fact]
+        public void SdkResult_NotEqual_DifferentItemsCount()
+        {
+            var sdkRef = new SdkReference("SdkName", "1.0.0", "1.0.0");
+
+            // One property, two items
+            var result1 = new SdkResult(
+                sdkRef,
+                "path",
+                "1.0.0",
+                warnings: null,
+                propertiesToAdd: new Dictionary<string, string> { { "p1", "v1" } },
+                itemsToAdd: new Dictionary<string, SdkResultItem>
+                {
+                    { "item1", new SdkResultItem("spec1", new Dictionary<string, string>()) },
+                    { "item2", new SdkResultItem("spec2", new Dictionary<string, string>()) },
+                });
+
+            // One property, one item (items count == properties count of result1, but different items count)
+            var result2 = new SdkResult(
+                sdkRef,
+                "path",
+                "1.0.0",
+                warnings: null,
+                propertiesToAdd: new Dictionary<string, string> { { "p1", "v1" } },
+                itemsToAdd: new Dictionary<string, SdkResultItem>
+                {
+                    { "item1", new SdkResultItem("spec1", new Dictionary<string, string>()) },
+                });
+
+            // Assert both directions because the bug was asymmetric:
+            // result1.Equals(result2) could differ from result2.Equals(result1).
+            result1.ShouldNotBe(result2);
+            result2.ShouldNotBe(result1);
+        }
+
         [Fact]
         public void SdkResultItem_Equal_WithDefaultCtor()
         {

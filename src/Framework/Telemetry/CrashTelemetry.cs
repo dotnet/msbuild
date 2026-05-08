@@ -7,6 +7,9 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+#if NETFRAMEWORK
+using Windows.Win32.System.SystemInformation;
+#endif
 
 namespace Microsoft.Build.Framework.Telemetry;
 
@@ -460,10 +463,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         try
         {
 #if NETFRAMEWORK
-            NativeMethods.MemoryStatus? memoryStatus = NativeMethods.GetMemoryStatus();
-            if (memoryStatus != null)
+            if (NativeMethods.TryGetMemoryStatus(out MEMORYSTATUSEX memoryStatus))
             {
-                MemoryLoadPercent = (int)memoryStatus.MemoryLoad;
+                MemoryLoadPercent = (int)memoryStatus.dwMemoryLoad;
             }
 #else
             // On .NET Core, GC.GetGCMemoryInfo() provides the total available memory

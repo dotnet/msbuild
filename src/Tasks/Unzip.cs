@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
                     // We don't apply UnixFileMode.None because .zip files created on Windows and .zip files created
                     // with previous versions of .NET don't include permissions.
                     UnixFileMode mode = (UnixFileMode)(zipArchiveEntry.ExternalAttributes >> 16) & OwnershipPermissions;
-                    if (mode != UnixFileMode.None && !NativeMethodsShared.IsWindows)
+                    if (mode != UnixFileMode.None && NativeMethodsShared.IsUnixLike)
                     {
                         fileStreamOptions.UnixCreateMode = mode;
                     }

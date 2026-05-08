@@ -82,14 +82,14 @@ internal static class CommunicationsUtilities
     ///  Get environment block.
     /// </summary>
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows6.1")]
     private static extern unsafe char* GetEnvironmentStrings();
 
     /// <summary>
     ///  Free environment block.
     /// </summary>
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows6.1")]
     private static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
 #if NETFRAMEWORK
@@ -132,7 +132,7 @@ internal static class CommunicationsUtilities
     /// <remarks>
     ///  Copied from the BCL implementation to eliminate some expensive security asserts on .NET Framework.
     /// </remarks>
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    [System.Runtime.Versioning.SupportedOSPlatform("windows6.1")]
     private static FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
     {
         // The FrameworkDebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.

@@ -41,6 +41,12 @@ namespace Microsoft.Build.Framework
         public readonly bool ForceAllTasksOutOfProcToTaskHost = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
 
         /// <summary>
+        /// Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build),
+        /// equivalent to passing -multiThreaded / -mt on the command line.
+        /// </summary>
+        public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMULTITHREADED") == "1";
+
+        /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
