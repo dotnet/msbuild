@@ -248,7 +248,7 @@ namespace Microsoft.Build.Evaluation
             /// Throws <see cref="ObjectDisposedException"/> if this concatenator is already disposed.
             /// </summary>
             private readonly void CheckDisposed() =>
-                ErrorUtilities.VerifyThrowObjectDisposed(!_disposed, nameof(SpanBasedConcatenator));
+                ObjectDisposedException.ThrowIf(_disposed, typeof(SpanBasedConcatenator));
 
             /// <summary>
             /// Lazily initializes <see cref="_builder"/> and populates it with the first value

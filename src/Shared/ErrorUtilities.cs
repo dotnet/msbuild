@@ -408,20 +408,6 @@ internal static class ErrorUtilities
         throw new ArgumentNullException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
     }
 
-    internal static void VerifyThrowObjectDisposed([DoesNotReturnIf(false)] bool condition, string objectName)
-    {
-        if (!condition)
-        {
-            ThrowObjectDisposed(objectName);
-        }
-    }
-
-    [DoesNotReturn]
-    internal static void ThrowObjectDisposed(string objectName)
-    {
-        throw new ObjectDisposedException(objectName);
-    }
-
     /// <summary>
     /// A utility that verifies the parameters provided to a standard <see cref="ICollection{T}.CopyTo"/> call.
     /// </summary>
