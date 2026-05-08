@@ -37,7 +37,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="source">The property source</param>
         public ToolsetPropertyDefinition(string name, string value, IElementLocation source)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
             ArgumentNullException.ThrowIfNull(source);
 
             // value can be the empty string but not null

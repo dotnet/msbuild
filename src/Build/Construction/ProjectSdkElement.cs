@@ -47,7 +47,7 @@ namespace Microsoft.Build.Construction
             get => GetAttributeValue(XMakeAttributes.sdkName);
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdkName);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.sdkName);
                 SetOrRemoveAttribute(XMakeAttributes.sdkName, value, $"Set SDK Name to {value}", XMakeAttributes.sdkName);
             }
         }

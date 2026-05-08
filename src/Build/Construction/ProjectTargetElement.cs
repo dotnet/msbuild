@@ -97,7 +97,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value);
+                ArgumentException.ThrowIfNullOrEmpty(value);
                 if (Link != null)
                 {
                     TargetLink.Name = value;
@@ -378,7 +378,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectTaskElement AddTask(string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskName);
+            ArgumentException.ThrowIfNullOrEmpty(taskName);
 
             ProjectTaskElement task = ContainingProject.CreateTaskElement(taskName);
 

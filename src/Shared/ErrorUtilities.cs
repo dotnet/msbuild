@@ -359,20 +359,6 @@ internal static class ErrorUtilities
     }
 
     /// <summary>
-    /// Throws an ArgumentNullException if the given string parameter is null
-    /// and ArgumentException if it has zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentLength([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        ArgumentNullException.ThrowIfNull(parameter, parameterName);
-
-        if (parameter.Length == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
-
-    /// <summary>
     /// Throws an ArgumentNullException if the given collection is null
     /// and ArgumentException if it has zero length.
     /// </summary>

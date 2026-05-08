@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Security.Permissions;
 #endif
 using Microsoft.Build.Framework.BuildException;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -217,7 +216,7 @@ namespace Microsoft.Build.Exceptions
             Exception innerException) : base(message, innerException)
         {
             ArgumentNullException.ThrowIfNull(projectFile);
-            ErrorUtilities.VerifyThrowArgumentLength(message);
+            ArgumentException.ThrowIfNullOrEmpty(message);
 
             // Try to helpfully provide a full path if possible, but do so robustly.
             // This exception might be because the path was invalid!

@@ -161,7 +161,7 @@ namespace Microsoft.Build.Execution
             ElementLocation msbuildRuntimeLocation,
             ElementLocation msbuildArchitectureLocation)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
             ArgumentNullException.ThrowIfNull(condition);
             ArgumentNullException.ThrowIfNull(continueOnError);
 
@@ -337,8 +337,8 @@ namespace Microsoft.Build.Execution
         /// <param name="condition">The condition.</param>
         internal void AddOutputItem(string taskOutputParameterName, string itemName, string condition)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskOutputParameterName);
-            ErrorUtilities.VerifyThrowArgumentLength(itemName);
+            ArgumentException.ThrowIfNullOrEmpty(taskOutputParameterName);
+            ArgumentException.ThrowIfNullOrEmpty(itemName);
             _outputs.Add(new ProjectTaskOutputItemInstance(itemName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 
@@ -350,8 +350,8 @@ namespace Microsoft.Build.Execution
         /// <param name="condition">The condition.</param>
         internal void AddOutputProperty(string taskOutputParameterName, string propertyName, string condition)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskOutputParameterName);
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName);
+            ArgumentException.ThrowIfNullOrEmpty(taskOutputParameterName);
+            ArgumentException.ThrowIfNullOrEmpty(propertyName);
             _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 

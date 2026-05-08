@@ -56,7 +56,7 @@ namespace Microsoft.Build.Construction
             get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.project));
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.project);
 
                 SetOrRemoveAttribute(XMakeAttributes.project, value, "Set Import Project {0}", value);
             }
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Construction
             get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.sdk));
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.sdk);
                 if (UpdateSdkReference(name: value, SdkReference?.Version, SdkReference?.MinimumVersion))
                 {
                     SetOrRemoveAttribute(XMakeAttributes.sdk, value, "Set Import Sdk {0}", value);

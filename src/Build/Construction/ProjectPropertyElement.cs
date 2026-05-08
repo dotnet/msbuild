@@ -110,7 +110,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeName(string newName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newName);
+            ArgumentException.ThrowIfNullOrEmpty(newName);
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedProperty", newName);
             if (Link != null)

@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared
         {
             ArgumentNullException.ThrowIfNull(aString);
             ArgumentNullException.ThrowIfNull(oldValue);
-            ErrorUtilities.VerifyThrowArgumentLength(oldValue);
+            ArgumentException.ThrowIfNullOrEmpty(oldValue);
 
             if (newValue == null)
             {

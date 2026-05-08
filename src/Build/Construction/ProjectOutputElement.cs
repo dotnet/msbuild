@@ -57,7 +57,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value);
+                ArgumentException.ThrowIfNullOrEmpty(value);
                 SetOrRemoveAttribute(XMakeAttributes.taskParameter, value, "Set Output TaskParameter {0}", value);
             }
         }

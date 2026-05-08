@@ -92,7 +92,7 @@ namespace Microsoft.Build.Execution
             TaskRegistry.RegisteredTaskRecord.Stats? statistics = null)
         {
             ArgumentNullException.ThrowIfNull(taskFactory);
-            ErrorUtilities.VerifyThrowArgumentLength(taskName);
+            ArgumentException.ThrowIfNullOrEmpty(taskName);
             _taskFactory = taskFactory;
             _taskName = taskName;
             TaskFactoryLoadedType = taskFactoryLoadInfo;

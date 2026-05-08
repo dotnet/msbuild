@@ -2944,7 +2944,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public override ProjectProperty SetProperty(string name, string unevaluatedValue)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
                 ArgumentNullException.ThrowIfNull(unevaluatedValue);
 
                 ProjectProperty property = _data.Properties[name];
@@ -3072,8 +3072,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public override IList<ProjectItem> AddItemFast(string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(itemType);
-                ErrorUtilities.VerifyThrowArgumentLength(unevaluatedInclude);
+                ArgumentException.ThrowIfNullOrEmpty(itemType);
+                ArgumentException.ThrowIfNullOrEmpty(unevaluatedInclude);
 
                 ProjectItemGroupElement groupToAppendTo = null;
 
@@ -3199,7 +3199,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public override bool RemoveGlobalProperty(string name)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
 
                 bool result = _data.GlobalPropertiesDictionary.Remove(name);
 
@@ -4466,7 +4466,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="value">Environment variable value.</param>
             public void AddSdkResolvedEnvironmentVariable(string name, string value)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
                 ArgumentNullException.ThrowIfNull(value);
 
                 // If another SDK already set it, we do not overwrite it.
@@ -4673,7 +4673,7 @@ namespace Microsoft.Build.Evaluation
             /// </remarks>
             internal string GetPropertyValue(string name)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
 
                 ProjectProperty property = Properties[name];
                 string value = property?.EvaluatedValue ?? String.Empty;

@@ -731,8 +731,8 @@ namespace Microsoft.Build.Tasks
             public SDKReference(ITaskItem taskItem, string sdkName, string sdkVersion)
             {
                 ArgumentNullException.ThrowIfNull(taskItem);
-                ErrorUtilities.VerifyThrowArgumentLength(sdkName);
-                ErrorUtilities.VerifyThrowArgumentLength(sdkVersion);
+                ArgumentException.ThrowIfNullOrEmpty(sdkName);
+                ArgumentException.ThrowIfNullOrEmpty(sdkVersion);
 
                 ReferenceItem = taskItem;
                 SimpleName = sdkName;

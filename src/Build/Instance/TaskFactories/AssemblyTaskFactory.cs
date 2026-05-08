@@ -262,7 +262,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName);
+                ArgumentException.ThrowIfNullOrEmpty(taskName);
                 _taskName = taskName;
 
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
@@ -480,7 +480,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
+                ArgumentException.ThrowIfNullOrEmpty(taskName, "TaskName");
                 // Parameters match, so now we check to see if the task exists.
                 return _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly) != null;
             }

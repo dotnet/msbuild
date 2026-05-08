@@ -101,7 +101,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
 
                 if (Link != null)
                 {
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
                 ArgumentNullException.ThrowIfNull(value);
 
                 if (Link != null)

@@ -495,7 +495,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void UpdateUniqueProjectName(string newUniqueName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newUniqueName);
+            ArgumentException.ThrowIfNullOrEmpty(newUniqueName);
 
             _uniqueProjectName = newUniqueName;
         }

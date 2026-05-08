@@ -551,7 +551,7 @@ namespace Microsoft.Build.Evaluation
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(DefaultToolsVersion));
+                ArgumentException.ThrowIfNullOrEmpty(value, nameof(DefaultToolsVersion));
 
                 bool sendEvent = false;
                 using (_locker.EnterDisposableWriteLock())
@@ -1088,7 +1088,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
 
             bool changed;
             using (_locker.EnterDisposableWriteLock())
@@ -1132,7 +1132,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
@@ -1219,7 +1219,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A loaded project.</returns>
         public Project LoadProject(string fileName, IDictionary<string, string> globalProperties, string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(fileName);
+            ArgumentException.ThrowIfNullOrEmpty(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
             using (_locker.EnterDisposableWriteLock())

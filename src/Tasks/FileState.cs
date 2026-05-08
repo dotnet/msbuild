@@ -317,7 +317,7 @@ namespace Microsoft.Build.Tasks
             get;
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value);
+                ArgumentException.ThrowIfNullOrEmpty(value);
                 field = value;
                 _data = new Lazy<FileDirInfo>(() => new FileDirInfo(value));
             }

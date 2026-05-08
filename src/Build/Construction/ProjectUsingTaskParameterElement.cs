@@ -61,7 +61,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(Name));
+                ArgumentException.ThrowIfNullOrEmpty(value, nameof(Name));
 
                 if (Link != null) { TaskParameterLink.Name = value; return; }
                 // TODO: There seems to be a bug here

@@ -229,8 +229,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputItem(string taskParameter, string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
-            ErrorUtilities.VerifyThrowArgumentLength(itemType);
+            ArgumentException.ThrowIfNullOrEmpty(taskParameter);
+            ArgumentException.ThrowIfNullOrEmpty(itemType);
 
             return AddOutputItem(taskParameter, itemType, null);
         }
@@ -259,8 +259,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputProperty(string taskParameter, string propertyName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName);
+            ArgumentException.ThrowIfNullOrEmpty(taskParameter);
+            ArgumentException.ThrowIfNullOrEmpty(propertyName);
 
             return AddOutputProperty(taskParameter, propertyName, null);
         }
@@ -296,7 +296,7 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
 
                 EnsureParametersInitialized();
 
@@ -322,7 +322,7 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
                 ArgumentNullException.ThrowIfNull(unevaluatedValue);
                 ErrorUtilities.VerifyThrowArgument(!XMakeAttributes.IsSpecialTaskAttribute(name), "CannotAccessKnownAttributes", name);
 
@@ -411,7 +411,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ProjectTaskElement CreateDisconnected(string name, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 

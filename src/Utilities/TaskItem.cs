@@ -306,7 +306,7 @@ namespace Microsoft.Build.Utilities
             string metadataName,
             string metadataValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName);
+            ArgumentException.ThrowIfNullOrEmpty(metadataName);
 
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.

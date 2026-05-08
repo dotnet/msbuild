@@ -60,7 +60,7 @@ namespace Microsoft.Build.Utilities
         public TaskLoggingHelper(IBuildEngine buildEngine, string taskName)
         {
             ArgumentNullException.ThrowIfNull(buildEngine);
-            ErrorUtilities.VerifyThrowArgumentLength(taskName);
+            ArgumentException.ThrowIfNullOrEmpty(taskName);
             TaskName = taskName;
             _buildEngine = buildEngine;
         }

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -227,7 +226,7 @@ namespace Microsoft.Build.Evaluation
         {
             ArgumentNullException.ThrowIfNull(condition);
             ArgumentNullException.ThrowIfNull(expander);
-            ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory);
+            ArgumentException.ThrowIfNullOrEmpty(evaluationDirectory);
 
             // An empty condition is equivalent to a "true" condition.
             if (condition.Length == 0)

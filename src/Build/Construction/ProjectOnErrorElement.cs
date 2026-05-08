@@ -57,7 +57,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.executeTargets);
+                ArgumentException.ThrowIfNullOrEmpty(value, XMakeAttributes.executeTargets);
                 SetOrRemoveAttribute(XMakeAttributes.executeTargets, value, "Set OnError ExecuteTargets {0}", value);
             }
         }

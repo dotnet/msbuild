@@ -99,8 +99,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType);
-            ErrorUtilities.VerifyThrowArgumentLength(include);
+            ArgumentException.ThrowIfNullOrEmpty(itemType);
+            ArgumentException.ThrowIfNullOrEmpty(include);
 
             // If there are no items, or it turns out that there are only items with
             // item types that sort earlier, then we should go after the last child

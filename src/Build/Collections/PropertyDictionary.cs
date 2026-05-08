@@ -507,7 +507,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             using (_lock.EnterDisposableWriteLock())
             {
