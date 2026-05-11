@@ -39,38 +39,32 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetAssemblyStrongNameLevel_DelaySignedAssembly_ReturnsDelaySigned()
         {
-            string dir = Path.Combine(Path.GetTempPath(), "msbuild-sntest-" + Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(dir);
-            try
-            {
-                AssemblyName name = new AssemblyName("DelaySignedTestAssembly_" + Guid.NewGuid().ToString("N"));
-                name.SetPublicKey(typeof(string).Assembly.GetName().GetPublicKey());
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder folder = env.CreateFolder();
 
-                // Mark as delay-signed via AssemblyDelaySignAttribute.
-                CustomAttributeBuilder delaySign = new CustomAttributeBuilder(
-                    typeof(AssemblyDelaySignAttribute).GetConstructor([typeof(bool)]),
-                    [true]);
+            AssemblyName name = new AssemblyName("DelaySignedTestAssembly_" + Guid.NewGuid().ToString("N"));
+            name.SetPublicKey(typeof(string).Assembly.GetName().GetPublicKey());
 
-                AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
-                    name,
-                    AssemblyBuilderAccess.Save,
-                    dir);
-                asmBuilder.SetCustomAttribute(delaySign);
+            // Mark as delay-signed via AssemblyDelaySignAttribute.
+            CustomAttributeBuilder delaySign = new CustomAttributeBuilder(
+                typeof(AssemblyDelaySignAttribute).GetConstructor([typeof(bool)]),
+                [true]);
 
-                string fileName = name.Name + ".dll";
-                ModuleBuilder modBuilder = asmBuilder.DefineDynamicModule(name.Name, fileName);
-                modBuilder.DefineType("Stub", TypeAttributes.Public).CreateType();
-                asmBuilder.Save(fileName);
+            AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+                name,
+                AssemblyBuilderAccess.Save,
+                folder.Path);
+            asmBuilder.SetCustomAttribute(delaySign);
 
-                string asmPath = Path.Combine(dir, fileName);
-                File.Exists(asmPath).ShouldBeTrue();
+            string fileName = name.Name + ".dll";
+            ModuleBuilder modBuilder = asmBuilder.DefineDynamicModule(name.Name, fileName);
+            modBuilder.DefineType("Stub", TypeAttributes.Public).CreateType();
+            asmBuilder.Save(fileName);
 
-                StrongNameUtils.GetAssemblyStrongNameLevel(asmPath).ShouldBe(StrongNameLevel.DelaySigned);
-            }
-            finally
-            {
-                Directory.Delete(dir, recursive: true);
-            }
+            string asmPath = Path.Combine(folder.Path, fileName);
+            File.Exists(asmPath).ShouldBeTrue();
+
+            StrongNameUtils.GetAssemblyStrongNameLevel(asmPath).ShouldBe(StrongNameLevel.DelaySigned);
         }
 
         /// <summary>
@@ -80,30 +74,24 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetAssemblyStrongNameLevel_UnsignedManagedAssembly_ReturnsNone()
         {
-            string dir = Path.Combine(Path.GetTempPath(), "msbuild-sntest-" + Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(dir);
-            try
-            {
-                // Emit a trivial dynamic assembly to disk with no key file / key pair attached.
-                AssemblyName name = new AssemblyName("UnsignedTestAssembly_" + Guid.NewGuid().ToString("N"));
-                AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
-                    name,
-                    AssemblyBuilderAccess.Save,
-                    dir);
-                string fileName = name.Name + ".dll";
-                ModuleBuilder modBuilder = asmBuilder.DefineDynamicModule(name.Name, fileName);
-                modBuilder.DefineType("Stub", TypeAttributes.Public).CreateType();
-                asmBuilder.Save(fileName);
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFolder folder = env.CreateFolder();
 
-                string asmPath = Path.Combine(dir, fileName);
-                File.Exists(asmPath).ShouldBeTrue();
+            // Emit a trivial dynamic assembly to disk with no key file / key pair attached.
+            AssemblyName name = new AssemblyName("UnsignedTestAssembly_" + Guid.NewGuid().ToString("N"));
+            AssemblyBuilder asmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+                name,
+                AssemblyBuilderAccess.Save,
+                folder.Path);
+            string fileName = name.Name + ".dll";
+            ModuleBuilder modBuilder = asmBuilder.DefineDynamicModule(name.Name, fileName);
+            modBuilder.DefineType("Stub", TypeAttributes.Public).CreateType();
+            asmBuilder.Save(fileName);
 
-                StrongNameUtils.GetAssemblyStrongNameLevel(asmPath).ShouldBe(StrongNameLevel.None);
-            }
-            finally
-            {
-                Directory.Delete(dir, recursive: true);
-            }
+            string asmPath = Path.Combine(folder.Path, fileName);
+            File.Exists(asmPath).ShouldBeTrue();
+
+            StrongNameUtils.GetAssemblyStrongNameLevel(asmPath).ShouldBe(StrongNameLevel.None);
         }
 
         /// <summary>
@@ -124,40 +112,30 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetAssemblyStrongNameLevel_NonExistentFile_ReturnsUnknown()
         {
-            string missing = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".dll");
-            File.Exists(missing).ShouldBeFalse();
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile missing = env.GetTempFile(".dll");
+            File.Exists(missing.Path).ShouldBeFalse();
 
-            StrongNameUtils.GetAssemblyStrongNameLevel(missing).ShouldBe(StrongNameLevel.Unknown);
+            StrongNameUtils.GetAssemblyStrongNameLevel(missing.Path).ShouldBe(StrongNameLevel.Unknown);
         }
 
         [Fact]
         public void GetAssemblyStrongNameLevel_GarbageFile_ReturnsUnknown()
         {
-            string garbage = Path.GetTempFileName();
-            try
-            {
-                File.WriteAllBytes(garbage, [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09]);
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile garbage = env.CreateFile();
+            File.WriteAllBytes(garbage.Path, [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09]);
 
-                StrongNameUtils.GetAssemblyStrongNameLevel(garbage).ShouldBe(StrongNameLevel.Unknown);
-            }
-            finally
-            {
-                File.Delete(garbage);
-            }
+            StrongNameUtils.GetAssemblyStrongNameLevel(garbage.Path).ShouldBe(StrongNameLevel.Unknown);
         }
 
         [Fact]
         public void GetAssemblyStrongNameLevel_EmptyFile_ReturnsUnknown()
         {
-            string empty = Path.GetTempFileName();
-            try
-            {
-                StrongNameUtils.GetAssemblyStrongNameLevel(empty).ShouldBe(StrongNameLevel.Unknown);
-            }
-            finally
-            {
-                File.Delete(empty);
-            }
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile empty = env.CreateFile();
+
+            StrongNameUtils.GetAssemblyStrongNameLevel(empty.Path).ShouldBe(StrongNameLevel.Unknown);
         }
 
         [Fact]
