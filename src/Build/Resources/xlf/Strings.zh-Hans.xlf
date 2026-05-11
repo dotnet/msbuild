@@ -602,6 +602,11 @@
         <target state="translated">这些参数在此点之前已被截断。若要查看所有参数，请清除 MSBUILDTRUNCATETASKINPUTLOGGING 环境变量。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">已生成元项目“{0}”。</target>

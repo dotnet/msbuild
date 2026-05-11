@@ -602,6 +602,11 @@
         <target state="translated">Die Parameter wurden über diesen Punkt hinaus abgeschnitten. Um alle Parameter anzuzeigen, löschen Sie die Umgebungsvariable MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Das Metaprojekt "{0}" wurde generiert.</target>

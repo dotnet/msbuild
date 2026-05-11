@@ -602,6 +602,11 @@
         <target state="translated">このポイントを超えるパラメーターは切り詰められています。すべてのパラメーターを表示するには、MSBUILDTRUNCATETASKINPUTLOGGING 環境変数をクリアします。</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">メタプロジェクト "{0}" が生成されました。</target>

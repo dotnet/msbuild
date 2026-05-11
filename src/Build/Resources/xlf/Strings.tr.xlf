@@ -602,6 +602,11 @@
         <target state="translated">Parametreler bu noktanın ötesinde kısaltıldı. Tüm parametreleri görüntülemek için MSBUILDTRUNCATETASKINPUTLOGGING ortam değişkenini temizleyin.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">"{0}" meta projesi oluşturuldu.</target>
