@@ -584,17 +584,16 @@ namespace Microsoft.Build.BackEnd
             // a new one.
             List<ProjectItemInstance> result = new(itemsCount);
 
-            // PERF: When there are any removes, build a HashSet for O(1) membership tests.
-            // ProjectItemInstance has no overridden Equals/GetHashCode so the default comparer
-            // gives reference equality - this is intentional and matches the pre-#12320
-            // ItemDictionary-based behavior, where _nodes was a Dictionary<T, LinkedListNode<T>>
-            // also keyed by reference equality. If ProjectItemInstance ever gains value-equality
-            // semantics, the historical GetItems contract here must be re-examined too.
-            // Threshold-tuning measurements (see LookupRemoveThresholdSweep) show HashSet
-            // outperforms a linear scan starting at M=1 for any realistic groupFound size
-            // (>= 100 items); only sub-microsecond differences exist below that. Skip the
-            // HashSet allocation if there is nothing to filter against (no items in groupFound
-            // and no adds), or if every per-scope remove list is empty.
+            // PERF: When there are any removes, build a HashSet for O(1) membership tests
+            // while filtering groupFound and adds.
+            //
+            // HashSet uses default reference-equality semantics: ProjectItemInstance does not
+            // override Equals/GetHashCode, matching the pre-#12320 ItemDictionary _nodes
+            // (a Dictionary<T, LinkedListNode<T>>). If ProjectItemInstance ever gains
+            // value-equality semantics, this GetItems contract must be re-examined.
+            //
+            // Skip the HashSet allocation if there is nothing to filter against (no items
+            // in groupFound and no adds) or if every per-scope remove list is empty.
             HashSet<ProjectItemInstance> removeSet = null;
             bool willFilter = (groupFound?.Count > 0) || allAdds != null;
             if (willFilter && totalRemoves > 0)
