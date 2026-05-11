@@ -1988,7 +1988,11 @@
         <target state="translated">MSB3249: 애플리케이션 구성 파일 "{0}"이(가) 잘못되었습니다. {1}</target>
         <note>{StrBegin="MSB3249: "}</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="new">Application Configuration file path cannot be empty.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
+      </trans-unit>      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>
         <target state="translated">MSB3250: "{0}" 파일은 읽어올 수 없으므로 무시됩니다. 이 파일을 InstalledAssemblyTables에 전달했거나 TargetFrameworkDirectories에서 {1} 폴더를 검색하여 찾았습니다. {2}</target>
         <note>{StrBegin="MSB3250: "}</note>

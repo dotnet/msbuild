@@ -1532,6 +1532,10 @@
     <value>MSB3249: Application Configuration file "{0}" is invalid. {1}</value>
     <comment>{StrBegin="MSB3249: "}</comment>
   </data>
+  <data name="ResolveAssemblyReference.AppConfigFilePathEmpty">
+    <value>Application Configuration file path cannot be empty.</value>
+    <comment>This message can be used as the {1} in MSB3249</comment>
+  </data>
   <data name="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
     <value>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</value>
     <comment>{StrBegin="MSB3250: "}</comment>

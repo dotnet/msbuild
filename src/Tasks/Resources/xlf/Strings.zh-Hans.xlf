@@ -1988,7 +1988,11 @@
         <target state="translated">MSB3249: 应用程序配置文件“{0}”无效。{1}</target>
         <note>{StrBegin="MSB3249: "}</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="new">Application Configuration file path cannot be empty.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
+      </trans-unit>      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>
         <target state="translated">MSB3250: 将忽略文件“{0}”，因为无法读取该文件。此文件是传入到 InstalledAssemblyTables 的，或者是通过在 TargetFrameworkDirectories 中搜索 {1} 文件夹找到的。{2}</target>
         <note>{StrBegin="MSB3250: "}</note>

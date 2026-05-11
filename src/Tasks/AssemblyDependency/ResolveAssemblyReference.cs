@@ -2538,11 +2538,12 @@ namespace Microsoft.Build.Tasks
                                 // which would be caught and logged as an error, stopping RAR execution.
                                 // With the new behavior, empty strings are silently ignored (treated like null).
                                 // When Wave 18.8 is disabled, we preserve the old failure behavior.
-                                // When cleaning up this change wave, also clean up the _appConfigValueIsEmptyString field.
-                                
-                                // Note, second part of the sentence is not localized: this is a temporary fallback behind a change wave that is off by default
-                                // and will be removed when the wave is cleaned up. Not worth adding a new resource string.
-                                Log.LogErrorWithCodeFromResources("ResolveAssemblyReference.InvalidAppConfig", string.Empty, "AppConfig file path cannot be empty.");
+                                // When cleaning up this change wave, also clean up the _appConfigValueIsEmptyString field
+                                // and the ResolveAssemblyReference.AppConfigFilePathEmpty resource.
+                                Log.LogErrorWithCodeFromResources(
+                                    "ResolveAssemblyReference.InvalidAppConfig",
+                                    string.Empty,
+                                    ResourceUtilities.GetResourceString("ResolveAssemblyReference.AppConfigFilePathEmpty"));
                                 return false;
                             }
                         }
