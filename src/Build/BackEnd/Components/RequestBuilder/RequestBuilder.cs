@@ -371,6 +371,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
                 bool skipStaticGraphIsolationConstraints = (isolateProjects != ProjectIsolationMode.False && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath))
                     || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation;
+
                 requests[i] = new FullyQualifiedBuildRequest(
                     config: config,
                     targets: targets,

@@ -551,10 +551,28 @@ namespace Microsoft.Build.BackEnd
                 return groupFound;
             }
 
-            // Set the initial sizes to avoid resizing during import
+            // Set the initial sizes to avoid resizing during import. allAdds and allRemoves
+            // are List<List<...>>, so .Count gives the number of inner lists (one per scope
+            // level); we need the total item count across all those lists to size correctly.
             int itemsCount = groupFound?.Count ?? 0;    // Start with initial set
-            itemsCount += allAdds?.Count ?? 0;          // Add all the additions
-            itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
+            int totalAdds = 0;
+            if (allAdds != null)
+            {
+                foreach (List<ProjectItemInstance> adds in allAdds)
+                {
+                    totalAdds += adds.Count;
+                }
+            }
+            itemsCount += totalAdds;
+            int totalRemoves = 0;
+            if (allRemoves != null)
+            {
+                foreach (List<ProjectItemInstance> removes in allRemoves)
+                {
+                    totalRemoves += removes.Count;
+                }
+            }
+            itemsCount -= totalRemoves;
             if (itemsCount < 0)
             {
                 itemsCount = 0;
@@ -566,19 +584,42 @@ namespace Microsoft.Build.BackEnd
             // a new one.
             List<ProjectItemInstance> result = new(itemsCount);
 
+            // PERF: When there are any removes, build a HashSet for O(1) membership tests
+            // while filtering groupFound and adds.
+            //
+            // HashSet uses default reference-equality semantics: ProjectItemInstance does not
+            // override Equals/GetHashCode, matching the pre-#12320 ItemDictionary _nodes
+            // (a Dictionary<T, LinkedListNode<T>>). If ProjectItemInstance ever gains
+            // value-equality semantics, this GetItems contract must be re-examined.
+            //
+            // Skip the HashSet allocation if there is nothing to filter against (no items
+            // in groupFound and no adds) or if every per-scope remove list is empty.
+            HashSet<ProjectItemInstance> removeSet = null;
+            bool willFilter = (groupFound?.Count > 0) || allAdds != null;
+            if (willFilter && totalRemoves > 0)
+            {
+                removeSet = new HashSet<ProjectItemInstance>(totalRemoves);
+                foreach (List<ProjectItemInstance> removes in allRemoves)
+                {
+                    foreach (ProjectItemInstance remove in removes)
+                    {
+                        removeSet.Add(remove);
+                    }
+                }
+            }
+
             if (groupFound?.Count > 0)
             {
-                if (allRemoves == null)
+                if (removeSet == null)
                 {
-                    // No removes, so use fast path for ICollection<T>.
+                    // No removes (or nothing to filter), so use fast path for ICollection<T>.
                     result.AddRange(groupFound);
                 }
                 else
                 {
-                    // Otherwise, need to filter any items marked for removal.
                     foreach (ProjectItemInstance item in groupFound)
                     {
-                        if (!ShouldRemoveItem(item, allRemoves))
+                        if (!removeSet.Contains(item))
                         {
                             result.Add(item);
                         }
@@ -593,17 +634,16 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (List<ProjectItemInstance> adds in allAdds)
                 {
-                    if (allRemoves == null)
+                    if (removeSet == null)
                     {
                         // No removes, so use fast path for ICollection<T>.
                         result.AddRange(adds);
                     }
                     else
                     {
-                        // Otherwise, need to filter any items marked for removal.
                         foreach (ProjectItemInstance item in adds)
                         {
-                            if (!ShouldRemoveItem(item, allRemoves))
+                            if (!removeSet.Contains(item))
                             {
                                 result.Add(item);
                             }
@@ -619,34 +659,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return result;
-
-            // Helper to perform a linear search across the removes.
-            // PERF: This linear search is still cheaper than combining all removes into hashsets and performing a lookup
-            // due to allocation and hashcode costs, provided that we can quickly filter out false matches.
-            static bool ShouldRemoveItem(ProjectItemInstance item, List<List<ProjectItemInstance>> allRemoves)
-            {
-                ITaskItem2 itemAsTaskItem = item;
-                string evaluatedInclude = itemAsTaskItem.EvaluatedIncludeEscaped;
-
-                foreach (List<ProjectItemInstance> removes in allRemoves)
-                {
-                    foreach (ProjectItemInstance remove in removes)
-                    {
-                        // Get access to allocation-free item spec property.
-                        ITaskItem2 removeAsTaskItem = remove;
-
-                        // Start with the item spec length as a fast filter for false matches.
-                        if (evaluatedInclude.Length == removeAsTaskItem.EvaluatedIncludeEscaped.Length
-                            && StringComparer.Ordinal.Equals(evaluatedInclude, removeAsTaskItem.EvaluatedIncludeEscaped)
-                            && itemAsTaskItem == removeAsTaskItem)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
         }
 
         /// <summary>

@@ -785,6 +785,20 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
                     {
+                        // https://github.com/dotnet/msbuild/issues/11025
+                        // The metaproject's inner <MSBuild> tasks are generator-authored plumbing,
+                        // not user code, so the user's outer SkipNonexistentTargets attribute should
+                        // propagate one level further into the real underlying projects. Inheriting
+                        // here (rather than at the engine level) keeps the operative value visible
+                        // in the binlog right under this task.
+                        if (!msbuildTask.SkipNonexistentTargets
+                            && FileUtilities.IsMetaprojectFilename(_buildRequestEntry.RequestConfiguration.ProjectFullPath)
+                            && (_buildRequestEntry.Request.BuildRequestDataFlags & BuildRequestDataFlags.SkipNonexistentTargets) == BuildRequestDataFlags.SkipNonexistentTargets)
+                        {
+                            msbuildTask.SkipNonexistentTargets = true;
+                            taskLoggingContext.LogComment(MessageImportance.Low, "MSBuildTaskInheritedSkipNonexistentTargets");
+                        }
+
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
 
                         if (undeclaredProjects?.Count > 0)
