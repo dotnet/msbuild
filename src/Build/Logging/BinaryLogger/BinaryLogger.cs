@@ -109,6 +109,8 @@ namespace Microsoft.Build.Logging
         //    - new record kind: BuildCanceledEventArgs
         // version 25:
         //    - add extra information to PropertyInitialValueSetEventArgs and PropertyReassignmentEventArgs and change message formatting logic.
+        // version 26:
+        //    - new record kind: LoggersRegisteredEventArgs (reports registered loggers and their output file paths)
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -299,19 +301,9 @@ namespace Microsoft.Build.Logging
 
         /// <inheritdoc/>
         System.Collections.Generic.IReadOnlyList<string> IFileOutputLogger.OutputFilePaths
-        {
-            get
-            {
-                if (AdditionalFilePaths == null || AdditionalFilePaths.Count == 0)
-                {
-                    return new[] { FilePath };
-                }
-
-                var outputFilePaths = new List<string>(AdditionalFilePaths.Count + 1) { FilePath };
-                outputFilePaths.AddRange(AdditionalFilePaths);
-                return outputFilePaths;
-            }
-        }
+            => AdditionalFilePaths is null || AdditionalFilePaths.Count == 0
+                ? [FilePath]
+                : [FilePath, .. AdditionalFilePaths];
 
         /// <summary>
         /// Gets or sets additional output file paths. When set, the binlog will be copied to all these paths
