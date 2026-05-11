@@ -18,5 +18,15 @@ internal static class FileTimeExtensions
         /// since January 1, 1601 (UTC).
         /// </summary>
         internal long ToLong() => ((long)(uint)fileTime.dwHighDateTime << 32) | (long)(uint)fileTime.dwLowDateTime;
+
+        /// <summary>
+        /// Converts the <see cref="FILETIME"/> to a local <see cref="DateTime"/>.
+        /// </summary>
+        internal DateTime ToDateTime() => DateTime.FromFileTime(fileTime.ToLong());
+
+        /// <summary>
+        /// Converts the <see cref="FILETIME"/> to a UTC <see cref="DateTime"/>.
+        /// </summary>
+        internal DateTime ToDateTimeUtc() => DateTime.FromFileTimeUtc(fileTime.ToLong());
     }
 }

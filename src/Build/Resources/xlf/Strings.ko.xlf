@@ -602,6 +602,11 @@
         <target state="translated">이 지점 이후의 매개 변수가 잘렸습니다. 모든 매개 변수를 보려면 MSBUILDTRUNCATETASKINPUTLOGGING 환경 변수를 지우세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">메타프로젝트 "{0}"이(가) 생성되었습니다.</target>
