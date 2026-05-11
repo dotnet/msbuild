@@ -632,19 +632,20 @@ public sealed partial class TerminalLogger : INodeLogger
                 if (_showSummary == true)
                 {
                     RenderBuildSummary();
-                }
 
-                if (_registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
-                {
-                    Terminal.WriteLine(string.Empty);
-
-                    foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+                        && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
                     {
-                        string displayPaths = string.Join(
-                            CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
-                            logger.OutputFilePaths.Select(outputPath => $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
+                        Terminal.WriteLine(string.Empty);
 
-                        Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
+                        foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
+                        {
+                            string displayPaths = string.Join(
+                                CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
+                                logger.OutputFilePaths.Select(outputPath => $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
+
+                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
+                        }
                     }
                 }
 

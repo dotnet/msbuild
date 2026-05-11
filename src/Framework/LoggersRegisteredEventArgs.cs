@@ -75,7 +75,8 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Formats a summary message listing loggers with output paths.
-        /// This serves as a fallback message for loggers that do not handle this event.
+        /// This serves as a fallback message for consumers that do not handle this event;
+        /// the console/terminal loggers format their own localized output from <see cref="Loggers"/>.
         /// </summary>
         private static string? FormatMessage(IReadOnlyList<RegisteredLoggerInfo> loggers)
         {
@@ -85,8 +86,9 @@ namespace Microsoft.Build.Framework
                 return string.Empty;
             }
 
-            return string.Join("; ", withPaths.Select(l => FormatResourceStringIgnoreCodeAndKeyword(
-                "LogFileOutputPath",
+            return string.Join("; ", withPaths.Select(l => string.Format(
+                CultureInfo.CurrentCulture,
+                "{0} wrote to: {1}",
                 l.LoggerName,
                 string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", l.OutputFilePaths))));
         }
