@@ -3410,6 +3410,18 @@ namespace Microsoft.Build.Tasks
                 && BuildEngine is IBuildEngine10 buildEngine10
                 && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
             {
+                // RAR-as-a-service is not yet safe to use under multithreaded mode of execution.
+                // The shared OutOfProcRarClient instance (per build, per node) holds a single pipe
+                // connection that cannot be used concurrently from multiple RAR tasks running on
+                // separate threads. Pipe pooling and TOCTOU safety for the shared client are tracked
+                // as a follow-up; until that lands, fail fast rather than corrupt the build.
+                if (TaskEnvironment.IsMultiThreaded)
+                {
+                    throw new NotSupportedException(
+                        "ResolveAssemblyReference does not currently support running with both " +
+                        "out-of-proc RAR node and multithreaded mode enabled at the same time.");
+                }
+
                 try
                 {
 #pragma warning disable CA2000 // The OutOfProcRarClient is disposable but its disposal is handled by RegisterTaskObject.
