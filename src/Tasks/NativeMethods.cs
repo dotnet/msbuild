@@ -461,19 +461,6 @@ namespace Microsoft.Build.Tasks
     {
         #region Constants
 
-        internal static readonly IntPtr NullPtr = IntPtr.Zero;
-
-        internal const int ERROR_SUCCESS = 0;
-
-        internal const int TYPE_E_REGISTRYACCESS = -2147319780;
-        internal const int TYPE_E_CANTLOADLIBRARY = -2147312566;
-
-        internal const int HRESULT_E_CLASSNOTREGISTERED = -2147221164;
-
-        internal const int ERROR_INVALID_FILENAME = -2147024773; // Illegal characters in name
-        internal const int ERROR_ACCESS_DENIED = -2147024891; // ACL'd or r/o
-        internal const int ERROR_SHARING_VIOLATION = -2147024864; // File locked by another use
-
         internal static Guid GUID_TYPELIB_NAMESPACE = new Guid("{0F21F359-AB84-41E8-9A78-36D110E6D2F9}");
         internal static Guid GUID_ExportedFromComPlus = new Guid("{90883f05-3d28-11d2-8f17-00a0c9a6186d}");
 
@@ -517,13 +504,6 @@ namespace Microsoft.Build.Tasks
             MOVEFILE_WRITE_THROUGH = 0x00000008,
             MOVEFILE_CREATE_HARDLINK = 0x00000010,
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct CRYPTOAPI_BLOB
-        {
-            internal uint cbData;
-            internal IntPtr pbData;
         }
 
         #endregion
@@ -705,11 +685,6 @@ namespace Microsoft.Build.Tasks
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
         [SupportedOSPlatform("windows")]
         internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
-
-        //------------------------------------------------------------------------------
-        // PFXImportCertStore
-        //------------------------------------------------------------------------------
-        // (Removed: dead crypt32/advapi32 P/Invokes had no call sites in the repo.)
 
         #endregion
 
