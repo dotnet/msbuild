@@ -231,7 +231,7 @@ namespace Microsoft.Build.BackEnd
             VerifyEntryInReadyState();
 
             _continueResults = _requestEntry.Continue();
-            ErrorUtilities.VerifyThrow(_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded || (_continueResults != null), "Unexpected null results for request {0} (nr {1})", _requestEntry.Request.GlobalRequestId, _requestEntry.Request.NodeRequestId);
+            ErrorUtilities.VerifyThrow(_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded || (_continueResults != null), $"Unexpected null results for request {_requestEntry.Request.GlobalRequestId} (nr {_requestEntry.Request.NodeRequestId})");
 
             // Setting the continue event will wake up the build thread, which is suspended in StartNewBuildRequests.
             _continueEvent.Set();
@@ -630,7 +630,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.RequestBuilder, "Cannot create components of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.RequestBuilder, $"Cannot create components of type {type}");
             return new RequestBuilder();
         }
 
@@ -746,7 +746,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyEntryInReadyState()
         {
-            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Ready, "Entry is not in the Ready state, it is in the {0} state.", _requestEntry.State);
+            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Ready, $"Entry is not in the Ready state, it is in the {_requestEntry.State} state.");
         }
 
         /// <summary>
@@ -754,7 +754,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyEntryInActiveState()
         {
-            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active, "Entry is not in the Active state, it is in the {0} state.", _requestEntry.State);
+            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active, $"Entry is not in the Active state, it is in the {_requestEntry.State} state.");
         }
 
         /// <summary>
@@ -763,7 +763,7 @@ namespace Microsoft.Build.BackEnd
         private void VerifyEntryInActiveOrWaitingState()
         {
             ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active || _requestEntry.State == BuildRequestEntryState.Waiting,
-                "Entry is not in the Active or Waiting state, it is in the {0} state.", _requestEntry.State);
+                $"Entry is not in the Active or Waiting state, it is in the {_requestEntry.State} state.");
         }
 
         /// <summary>
@@ -1240,9 +1240,7 @@ namespace Microsoft.Build.BackEnd
                     // All of the results should now be on this node.
                     ErrorUtilities.VerifyThrow(
                         _requestEntry.RequestConfiguration.ResultsNodeId == _componentHost.BuildParameters.NodeId,
-                        "Results for configuration {0} were not retrieved from node {1}",
-                        _requestEntry.RequestConfiguration.ConfigurationId,
-                        _requestEntry.RequestConfiguration.ResultsNodeId);
+                        $"Results for configuration {_requestEntry.RequestConfiguration.ConfigurationId} were not retrieved from node {_requestEntry.RequestConfiguration.ResultsNodeId}");
                 }
 
                 // Build the targets
