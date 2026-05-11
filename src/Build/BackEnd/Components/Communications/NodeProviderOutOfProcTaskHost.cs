@@ -206,7 +206,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         internal void SendData(TaskHostNodeKey nodeKey, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), "Invalid host context specified: {0}.", nodeKey);
+            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), $"Invalid host context specified: {nodeKey}.");
 
             SendData(context, packet);
         }
@@ -374,7 +374,7 @@ namespace Microsoft.Build.BackEnd
 
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError("PacketReceived: no handler for node {0}, unexpected packet type {1}", node, packet.Type);
+                    ErrorUtilities.ThrowInternalError($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
                     break;
             }
         }
@@ -386,7 +386,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, "Factory cannot create components of type {0}", componentType);
+            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProcTaskHost();
         }
 

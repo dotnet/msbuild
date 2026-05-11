@@ -263,7 +263,7 @@ namespace Microsoft.Build.BackEnd
         private void LeaveScope(Lookup.Scope scopeToLeave)
         {
             ErrorUtilities.VerifyThrow(_lookupScopes.Count >= 2, "Too many calls to Leave().");
-            ErrorUtilities.VerifyThrow(Object.ReferenceEquals(scopeToLeave, _lookupScopes), "Attempting to leave with scope '{0}' but scope '{1}' is on top of the stack.", scopeToLeave.Description, _lookupScopes.Description);
+            ErrorUtilities.VerifyThrow(Object.ReferenceEquals(scopeToLeave, _lookupScopes), $"Attempting to leave with scope '{scopeToLeave.Description}' but scope '{_lookupScopes.Description}' is on top of the stack.");
 
             // Our lookup works by stopping the first time it finds an item group of the appropriate type.
             // So we can't apply an add directly into the table below because that could create a new group
