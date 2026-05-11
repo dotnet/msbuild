@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
-            if (rawFileNameCandidate != null)
+            if (!string.IsNullOrEmpty(rawFileNameCandidate))
             {
                 // {RawFileName} was passed in.
                 string fullRawFileName = taskEnvironment.GetAbsolutePath(rawFileNameCandidate).Value;
@@ -58,6 +58,23 @@ namespace Microsoft.Build.Tasks
                     var considered = new ResolutionSearchLocation
                     {
                         FileNameAttempted = fullRawFileName,
+                        SearchPath = searchPathElement,
+                        Reason = NoMatchReason.NotAFileNameOnDisk
+                    };
+                    assembliesConsideredAndRejected.Add(considered);
+                }
+            }
+            else if (rawFileNameCandidate != null && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+            {
+                // Wave-off legacy: pre-Wave18_8 entered the resolution branch even for empty ItemSpecs,
+                // adding the empty value to assembliesConsideredAndRejected (fileExists("") returned false,
+                // so it fell through to the "considered and rejected" reporting). Preserve that diagnostic
+                // output here. Under Wave18_8, empty ItemSpecs are a silent no-op (handled by the if above).
+                if (assembliesConsideredAndRejected != null)
+                {
+                    var considered = new ResolutionSearchLocation
+                    {
+                        FileNameAttempted = rawFileNameCandidate,
                         SearchPath = searchPathElement,
                         Reason = NoMatchReason.NotAFileNameOnDisk
                     };

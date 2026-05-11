@@ -36,6 +36,9 @@ Change wave checks around features will be removed in the release that accompani
   - `ReferenceTable` resolved reference `FullPath` uses canonical form (`GetCanonicalForm`) instead of `NormalizePath`.
   - `SystemState` precomputed-cache deserialization absolutizes state file paths via `TaskEnvironment` instead of using raw `ItemSpec` strings.
   - Empty-string `AppConfigFile` is silently ignored (no error) instead of triggering a legacy error path.
+  - Empty-string `<Reference Include=""/>` (or any item that resolves to `{RawFileName}` with an empty value) is silently skipped instead of being added to the considered-and-rejected diagnostic list.
+  - `AssemblyFoldersResolver` (`{AssemblyFolders}` search path) skips empty registry assembly-folder entries instead of resolving them relative to the process current directory.
+  - `AssemblyFoldersExResolver` (`{Registry:...}` search path) skips empty `DirectoryPath` registry entries instead of resolving them relative to the process current directory.
 
 ### 18.7
 - [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.

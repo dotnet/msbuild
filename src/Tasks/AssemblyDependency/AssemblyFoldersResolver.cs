@@ -54,8 +54,32 @@ namespace Microsoft.Build.Tasks
                 // {AssemblyFolders} was passed in.
                 foreach (string assemblyFolder in AssemblyFolder.GetAssemblyFolders(assemblyFolderKey))
                 {
-                    string fullAssemblyFolder = taskEnvironment.GetAbsolutePath(assemblyFolder).Value;
-                    string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, fullAssemblyFolder, assembliesConsideredAndRejected);
+                    // Null is a silent no-op: ResolveFromDirectory short-circuits when fullPathToDirectory is null.
+                    if (assemblyFolder is null)
+                    {
+                        continue;
+                    }
+
+                    AbsolutePath folderForResolution;
+                    if (assemblyFolder.Length == 0)
+                    {
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+                        {
+                            // Skip empty registry entries silently. A malformed AssemblyFolders registry entry should be treated as no match.
+                            continue;
+                        }
+
+                        // Pre-Wave18_8: pass the empty string through to ResolveFromDirectory,
+                        // which Path.Combines it with the assembly name and resolves the resulting
+                        // relative path against the project directory.
+                        folderForResolution = taskEnvironment.ProjectDirectory;
+                    }
+                    else
+                    {
+                        folderForResolution = taskEnvironment.GetAbsolutePath(assemblyFolder);
+                    }
+
+                    string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, folderForResolution, assembliesConsideredAndRejected);
                     if (resolvedPath != null)
                     {
                         foundPath = resolvedPath;
