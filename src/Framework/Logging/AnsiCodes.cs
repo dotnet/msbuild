@@ -141,4 +141,13 @@ internal static class AnsiCodes
 
         return $"{CSI}{SetBold}{s}{SetDefaultColor}";
     }
+
+    public static string MoveCursorBackward(int count) => $"{CSI}{count}{MoveBackward}";
+
+    /// <summary>
+    /// Moves cursor to the specified column, or the rightmost column if <paramref name="column"/> is greater than the width of the terminal.
+    /// </summary>
+    /// <param name="column">Column index.</param>
+    /// <returns>Control codes to set the desired position.</returns>
+    public static string SetCursorHorizontal(int column) => $"{CSI}{column}G";
 }

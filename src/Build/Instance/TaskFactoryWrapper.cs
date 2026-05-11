@@ -68,7 +68,7 @@ namespace Microsoft.Build.Execution
         private string _taskName;
 
         /// <summary>
-        /// The set of special parameters that, along with the name, contribute to the identity of 
+        /// The set of special parameters that, along with the name, contribute to the identity of
         /// this factory.
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
@@ -153,8 +153,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// The set of task identity parameters that were set on 
-        /// this particular factory's UsingTask statement. 
+        /// The set of task identity parameters that were set on
+        /// this particular factory's UsingTask statement.
         /// </summary>
         public IDictionary<string, string> FactoryIdentityParameters
         {

@@ -133,13 +133,13 @@ namespace Microsoft.Build.UnitTests
             Parser p = new Parser();
             GenericExpressionNode tree;
             tree = p.Parse("SimpleFunctionCall()", null, ParserOptions.AllowAll);
-            
+
             tree = p.Parse("SimpleFunctionCall( 1234 )", null, ParserOptions.AllowAll);
             tree = p.Parse("SimpleFunctionCall( true )", null, ParserOptions.AllowAll);
             tree = p.Parse("SimpleFunctionCall( $(property) )", null, ParserOptions.AllowAll);
-            
+
             tree = p.Parse("SimpleFunctionCall( $(property), 1234, abcd, 'abcd efgh' )", null, ParserOptions.AllowAll);
-            
+
         }
 
         /// <owner>DavidLe</owner>
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
                 ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
 
             // Make sure the log contains the correct strings.
-            Assertion.Assert("Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3.", 
+            Assertion.Assert("Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3.",
                 ml.FullLog.Contains("MSB4130:"));
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(String.Format(@"

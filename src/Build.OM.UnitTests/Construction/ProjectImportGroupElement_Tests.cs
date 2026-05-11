@@ -31,7 +31,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             project.AddImport("b.proj");
 
@@ -70,7 +71,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             project.AddImport("e.proj");
 
@@ -115,7 +117,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             project.AddImport("d.proj");
 
@@ -158,7 +161,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             ProjectImportGroupElement importGroup = (ProjectImportGroupElement)Helpers.GetFirst(project.ImportGroups);
 
@@ -257,7 +261,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
             List<ProjectImportGroupElement> importGroups = Helpers.MakeList(project.ImportGroups);
@@ -288,7 +293,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
             List<ProjectImportGroupElement> importGroups = Helpers.MakeList(project.ImportGroups);
@@ -319,7 +325,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             ProjectImportGroupElement importGroup = (ProjectImportGroupElement)Helpers.GetFirst(project.Children);
 

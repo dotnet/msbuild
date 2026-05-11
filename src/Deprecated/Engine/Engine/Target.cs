@@ -19,8 +19,23 @@ using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// This class represents a single target in its parent project.
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     [DebuggerDisplay("Target (Name = { Name }, Condition = { Condition })")]
     public class Target : IEnumerable
     {
@@ -46,11 +61,11 @@ namespace Microsoft.Build.BuildEngine
             CompletedSuccessfully,
 
             // We have attempted to build this target and all its dependent
-            // targets.  However, something failed during that process, and 
+            // targets.  However, something failed during that process, and
             // we consider ourselves done with this target.
             CompletedUnsuccessfully,
 
-            // This target is to be skipped.  This state is the result of a target 
+            // This target is to be skipped.  This state is the result of a target
             // having a condition attribute and that condition evaluating to false.
             Skipped
         }
@@ -146,7 +161,7 @@ namespace Microsoft.Build.BuildEngine
             this.buildState = BuildState.NotStarted;
             this.id = project.ParentEngine.GetNextTargetId();
 
-            // The target name and target dependendencies (dependencies on other 
+            // The target name and target dependendencies (dependencies on other
             // targets) are specified as attributes of the <target> element.
 
             XmlAttribute returnsAttribute = null;
@@ -164,7 +179,7 @@ namespace Microsoft.Build.BuildEngine
                     case XMakeAttributes.name:
                         this.targetName = EscapingUtilities.UnescapeAll(targetAttribute.Value);
 
-                        // Target names cannot contain MSBuild special characters, embedded properties, 
+                        // Target names cannot contain MSBuild special characters, embedded properties,
                         // or item lists.
                         int indexOfSpecialCharacter = this.targetName.IndexOfAny(XMakeElements.illegalTargetNameCharacters);
                         if (indexOfSpecialCharacter >= 0)
@@ -204,7 +219,7 @@ namespace Microsoft.Build.BuildEngine
                         break;
 
                     // These are only recognized by the new OM:
-                    // while the solution wrapper generator is using 
+                    // while the solution wrapper generator is using
                     // the old OM to parse projects for dependencies,
                     // we must make sure to not fail for these
                     case XMakeAttributes.beforeTargets:
@@ -217,9 +232,9 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            // Hack to help the 3.5 engine at least pretend to still be able to build on top of 
-            // the 4.0 targets.  In cases where there is no Outputs attribute, just a Returns attribute, 
-            // we can approximate the correct behaviour by making the Returns attribute our "outputs" attribute. 
+            // Hack to help the 3.5 engine at least pretend to still be able to build on top of
+            // the 4.0 targets.  In cases where there is no Outputs attribute, just a Returns attribute,
+            // we can approximate the correct behaviour by making the Returns attribute our "outputs" attribute.
             if (this.outputsAttribute == null && returnsAttribute != null)
             {
                 this.outputsAttribute = returnsAttribute;
@@ -274,9 +289,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the target's name as specified in the "Name" attribute. The value of this attribute is never evaluated.
         /// </summary>
         /// <value>The target name string.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string Name
         {
             get
@@ -286,10 +316,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the target's unevaluated "DependsOnTargets" string.
         /// Returns unevaluated.
         /// </summary>
         /// <value>The raw "DependsOnTargets" string.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string DependsOnTargets
         {
             get
@@ -304,10 +349,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the target's unevaluated "Inputs" string.
         /// Returns unevaluated.
         /// </summary>
         /// <value>The raw "Inputs" string.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string Inputs
         {
             get
@@ -322,10 +382,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the target's unevaluated "Outputs" string.
         /// Returns unevaluated.
         /// </summary>
         /// <value>The raw "Outputs" string.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string Outputs
         {
             get
@@ -340,10 +415,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Accessor for the item's "condition". Returned unevaluated.
         /// </summary>
         /// <returns>Condition string.</returns>
         /// <value>The raw condition string.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string Condition
         {
             get
@@ -472,11 +562,26 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This returns a boolean telling you whether this particular target
         /// was imported from another project, or whether it was defined
         /// in the main project.
         /// </summary>
         /// <value></value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public bool IsImported
         {
             get
@@ -506,10 +611,25 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// Allows the caller to use a foreach loop to enumerate through the individual 
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
+        /// Allows the caller to use a foreach loop to enumerate through the individual
         /// BuildTask objects contained within this Target.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public IEnumerator GetEnumerator
             (
             )
@@ -559,8 +679,8 @@ namespace Microsoft.Build.BuildEngine
             switch (buildState)
             {
                 case BuildState.InProgress:
-                    // In single proc mode if the build state was already "in progress" 
-                    // and somebody just told us to build ourselves, it means that there is 
+                    // In single proc mode if the build state was already "in progress"
+                    // and somebody just told us to build ourselves, it means that there is
                     // a loop (circular dependency) in the target dependency graph. In multi
                     // proc mode we need to analyze the dependency graph before we can
                     // tell if there a circular dependency or if two independent chains
@@ -593,7 +713,7 @@ namespace Microsoft.Build.BuildEngine
                         (buildState == BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
                         this.targetName);
 
-                    // Only contexts which are generated from an MSBuild task could need 
+                    // Only contexts which are generated from an MSBuild task could need
                     // the outputs of this target, such contexts have a non-null evaluation
                     // request
                     if ((buildState == BuildState.CompletedSuccessfully) &&
@@ -746,7 +866,7 @@ namespace Microsoft.Build.BuildEngine
             string attributeValue
             )
         {
-            // If this Target object is not actually represented by a 
+            // If this Target object is not actually represented by a
             // <Target> element in the parentProject.file, then do not allow
             // the caller to set the condition.
             error.VerifyThrowInvalidOperation(this.targetElement != null, "CannotSetCondition");
@@ -763,10 +883,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Adds a task with the specified name to the end of this target.  This method
         /// does all of the work to manipulate the project's XML content.
         /// </summary>
         /// <param name="taskName"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildTask AddNewTask
             (
             string taskName
@@ -792,11 +927,26 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Removes the specified BuildTask from the target.  This method correctly updates
         /// the project's XML content, so the task will no longer show up when the project
         /// is saved out.
         /// </summary>
         /// <param name="taskElement"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void RemoveTask
             (
             BuildTask taskElement

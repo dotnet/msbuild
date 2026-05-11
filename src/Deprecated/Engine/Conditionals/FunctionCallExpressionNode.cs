@@ -57,8 +57,8 @@ namespace Microsoft.Build.BuildEngine
 
                         // Ignore invalid characters or path related exceptions
 
-                        // We will ignore the PathTooLong exception caused by GetFullPath becasue in single proc this code 
-                        // is not executed and the condition is just evaluated to false as File.Exists and Directory.Exists does not throw in this situation. 
+                        // We will ignore the PathTooLong exception caused by GetFullPath becasue in single proc this code
+                        // is not executed and the condition is just evaluated to false as File.Exists and Directory.Exists does not throw in this situation.
                         // To be consistant with that we will return a false in this case also.
                         // DevDiv Bugs: 46035
 

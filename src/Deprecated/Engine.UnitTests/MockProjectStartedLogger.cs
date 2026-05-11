@@ -23,12 +23,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public LoggerVerbosity Verbosity
         {
-            get 
-            { 
-                return LoggerVerbosity.Diagnostic; 
+            get
+            {
+                return LoggerVerbosity.Diagnostic;
             }
-            set 
-            { 
+            set
+            {
             }
         }
 
@@ -37,15 +37,15 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public string Parameters
         {
-            get 
-            { 
-                return null; 
+            get
+            {
+                return null;
             }
             set
             {
             }
         }
-        
+
         /// <summary>
         /// Subscribing to the events
         /// </summary>
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Handler for the ProjectStarted event. 
+        /// Handler for the ProjectStarted event.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

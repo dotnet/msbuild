@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
             FileLogger fileLogger = new FileLogger();
             string logFile = Path.GetTempFileName();
             fileLogger.Parameters = "verbosity=Normal;logfile=" + logFile;
-            
+
             Project project = ObjectModelHelpers.CreateInMemoryProject(@"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <Target Name=`Build`>
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
                 if (null != log) File.Delete(log);
             }
         }
-        
+
         /// <summary>
         /// Invalid file should error nicely
         /// </summary>
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (null != log) File.Delete(log);
             }
-        }        
+        }
 
         /// <summary>
         /// Specific verbosity overrides global verbosity

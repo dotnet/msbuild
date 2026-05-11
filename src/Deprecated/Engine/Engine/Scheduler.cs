@@ -112,7 +112,7 @@ namespace Microsoft.Build.BuildEngine
 
                         for (int i = 0; i < nodes.Length; i++)
                         {
-                            //postBlockCount indicates the number of projects which should be sent to a node to unblock it due to the 
+                            //postBlockCount indicates the number of projects which should be sent to a node to unblock it due to the
                             //node running out of work.
                             if (postBlockCount[i] != 0 && postBlockCount[i] < blockedNodeRemainingProjectCount)
                             {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
                     }
                     else
                     {
-                        // round robin schedule the build request 
+                        // round robin schedule the build request
                         nodeUsed = (lastUsedNode % nodes.Length);
 
                         // Running total of the number of times this round robin scheduler has been called
@@ -269,7 +269,7 @@ namespace Microsoft.Build.BuildEngine
                         // Remove this build request from the list of requests the parent request is waiting on. This may unblock the parent request
                         parentRecord.ReportChildCompleted(recordKey);
 
-                        // If completing the child request has unblocked the parent request due to all of the the Child requests being completed 
+                        // If completing the child request has unblocked the parent request due to all of the the Child requests being completed
                         // decrement the number of blocked requests.
                         if (!parentRecord.Blocked)
                         {
@@ -305,7 +305,7 @@ namespace Microsoft.Build.BuildEngine
                     bool useBreadthFirstTraversal = false;
                     for (int i = 0; i < totalRequestsPerNode.Length; i++)
                     {
-                        // Continue using breadth-first traversal as long as the non-blocked work load for this node is below 
+                        // Continue using breadth-first traversal as long as the non-blocked work load for this node is below
                         // the nodeWorkloadProjectCount or its postBlockCount is non-zero
                         if ((totalRequestsPerNode[i] - blockedRequestsPerNode[i]) < nodeWorkLoadProjectCount || postBlockCount[i] != 0)
                         {

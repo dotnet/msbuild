@@ -646,7 +646,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ProjectItemGroupElement itemgroup = projectElement.AddItemGroup();
                 itemgroup.AddItem("ProjectFile", projectName);
 
-                Project project = new Project(projectElement, null, null, new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(projectElement, null, null, collection);
                 ProjectInstance projectInstance = project.CreateProjectInstance();
 
                 IEnumerable<ProjectItemInstance> items = projectInstance.GetItems("ProjectFile");
@@ -828,7 +829,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         </None>
                     </ItemGroup>
                 </Project>";
-            System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
             ProjectItem item = project.GetItems("None").Single();
 
@@ -874,7 +875,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-            System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
@@ -906,7 +907,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-            System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
+            using System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 

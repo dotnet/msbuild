@@ -49,8 +49,7 @@ public class KnownTelemetry_Tests
         buildTelemetry.Target.ShouldBeNull();
         buildTelemetry.Version.ShouldBeNull();
 
-        buildTelemetry.UpdateEventProperties();
-        buildTelemetry.Properties.ShouldBeEmpty();
+        buildTelemetry.GetProperties().ShouldBeEmpty();
     }
 
     [Fact]
@@ -75,22 +74,23 @@ public class KnownTelemetry_Tests
         buildTelemetry.Target = "clean";
         buildTelemetry.Version = new Version(1, 2, 3, 4);
 
-        buildTelemetry.UpdateEventProperties();
-        buildTelemetry.Properties.Count.ShouldBe(11);
+        var properties = buildTelemetry.GetProperties();
 
-        buildTelemetry.Properties["BuildEngineDisplayVersion"].ShouldBe("Some Display Version");
-        buildTelemetry.Properties["BuildEngineFrameworkName"].ShouldBe("new .NET");
-        buildTelemetry.Properties["BuildEngineHost"].ShouldBe("Host description");
-        buildTelemetry.Properties["InitialMSBuildServerState"].ShouldBe("hot");
-        buildTelemetry.Properties["ProjectPath"].ShouldBe(@"C:\\dev\\theProject");
-        buildTelemetry.Properties["ServerFallbackReason"].ShouldBe("busy");
-        buildTelemetry.Properties["BuildSuccess"].ShouldBe("True");
-        buildTelemetry.Properties["BuildTarget"].ShouldBe("clean");
-        buildTelemetry.Properties["BuildEngineVersion"].ShouldBe("1.2.3.4");
+        properties.Count.ShouldBe(11);
+
+        properties["BuildEngineDisplayVersion"].ShouldBe("Some Display Version");
+        properties["BuildEngineFrameworkName"].ShouldBe("new .NET");
+        properties["BuildEngineHost"].ShouldBe("Host description");
+        properties["InitialMSBuildServerState"].ShouldBe("hot");
+        properties["ProjectPath"].ShouldBe(@"C:\\dev\\theProject");
+        properties["ServerFallbackReason"].ShouldBe("busy");
+        properties["BuildSuccess"].ShouldBe("True");
+        properties["BuildTarget"].ShouldBe("clean");
+        properties["BuildEngineVersion"].ShouldBe("1.2.3.4");
 
         // verify computed
-        buildTelemetry.Properties["BuildDurationInMilliseconds"] = (finishedAt - startAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
-        buildTelemetry.Properties["InnerBuildDurationInMilliseconds"] = (finishedAt - innerStartAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+        properties["BuildDurationInMilliseconds"] = (finishedAt - startAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+        properties["InnerBuildDurationInMilliseconds"] = (finishedAt - innerStartAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
     }
 
     [Fact]
@@ -100,22 +100,18 @@ public class KnownTelemetry_Tests
 
         buildTelemetry.StartAt = DateTime.MinValue;
         buildTelemetry.FinishedAt = null;
-        buildTelemetry.UpdateEventProperties();
-        buildTelemetry.Properties.ShouldBeEmpty();
+        buildTelemetry.GetProperties().ShouldBeEmpty();
 
         buildTelemetry.StartAt = null;
         buildTelemetry.FinishedAt = DateTime.MaxValue;
-        buildTelemetry.UpdateEventProperties();
-        buildTelemetry.Properties.ShouldBeEmpty();
+        buildTelemetry.GetProperties().ShouldBeEmpty();
 
         buildTelemetry.InnerStartAt = DateTime.MinValue;
         buildTelemetry.FinishedAt = null;
-        buildTelemetry.UpdateEventProperties();
-        buildTelemetry.Properties.ShouldBeEmpty();
+        buildTelemetry.GetProperties().ShouldBeEmpty();
 
         buildTelemetry.InnerStartAt = null;
         buildTelemetry.FinishedAt = DateTime.MaxValue;
-        buildTelemetry.UpdateEventProperties();
-        buildTelemetry.Properties.ShouldBeEmpty();
+        buildTelemetry.GetProperties().ShouldBeEmpty();
     }
 }

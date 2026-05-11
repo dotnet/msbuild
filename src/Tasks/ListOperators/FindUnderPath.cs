@@ -94,7 +94,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // If we should use the absolute path, update the item contents
                     // Since ItemSpec, which fullPath comes from, is unescaped, re-escape when setting
-                    // item.ItemSpec, since the setter for ItemSpec expects an escaped value. 
+                    // item.ItemSpec, since the setter for ItemSpec expects an escaped value.
                     if (UpdateToAbsolutePaths)
                     {
                         item.ItemSpec = EscapingUtilities.Escape(fullPath);

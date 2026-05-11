@@ -1,5 +1,6 @@
 trigger:
 - exp/*
+- perf/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
@@ -20,6 +21,10 @@ parameters:
   displayName: Sign Type
   type: string
   default: 'test'
+- name: enableOptProf
+  displayName: Enable OptProf data collection for this build
+  type: boolean
+  default: false
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -76,6 +81,7 @@ extends:
           isExperimental: true
           enableComponentGovernance: false
           signTypeParameter: ${{ parameters.signTypeParameter }}
+          enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates/post-build/post-build.yml@self
       parameters:

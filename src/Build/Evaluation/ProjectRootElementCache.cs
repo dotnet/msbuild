@@ -273,7 +273,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
                 // We are about to load. Take a per-file lock to prevent multiple threads from duplicating the work multiple times.
-                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, () => new object());
+                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, static _ => new object());
                 lock (perFileLock)
                 {
                     // Call GetOrLoad again, this time with the OpenProjectRootElement callback.

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Execution
         private string _name;
 
         /// <summary>
-        /// Evaluated value: stored escaped. 
+        /// Evaluated value: stored escaped.
         /// </summary>
         private string _escapedValue;
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Execution
         /// Name of the property
         /// </summary>
         /// <remarks>
-        /// This cannot be set, as it is used as the key into 
+        /// This cannot be set, as it is used as the key into
         /// the project's properties table.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -163,7 +163,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Called before the build when virtual properties are added, 
+        /// Called before the build when virtual properties are added,
         /// and during the build when tasks emit properties.
         /// If name is invalid or reserved, throws ArgumentException.
         /// Creates mutable object.
@@ -177,7 +177,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Called before the build when virtual properties are added, 
+        /// Called before the build when virtual properties are added,
         /// and during the build when tasks emit properties.
         /// If name is invalid or reserved, throws ArgumentException.
         /// Creates mutable object.

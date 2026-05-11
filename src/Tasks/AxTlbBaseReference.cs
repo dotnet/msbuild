@@ -16,12 +16,12 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Common abstract base for aximp and tlbimp COM reference wrapper classes. 
+    /// Common abstract base for aximp and tlbimp COM reference wrapper classes.
     /// They share the resolution method and only differ in constructing the wrapper file name.
     /// </summary>
     internal abstract class AxTlbBaseReference : ComReference
     {
-        #region Constructors	
+        #region Constructors
         /// <summary>
         /// internal constructor
         /// </summary>
@@ -85,9 +85,9 @@ namespace Microsoft.Build.Tasks
         protected bool DelaySign { get; set; }
 
         /// <summary>
-        /// Property to allow multitargeting of ResolveComReferences:  If true, tlbimp.exe and 
+        /// Property to allow multitargeting of ResolveComReferences:  If true, tlbimp.exe and
         /// aximp.exe from the appropriate target framework will be run out-of-proc to generate
-        /// the necessary wrapper assemblies.  
+        /// the necessary wrapper assemblies.
         /// </summary>
         protected bool ExecuteAsTool { get; set; }
 
@@ -100,12 +100,12 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Environment variables to pass to the tool.
-        /// </summary>        
+        /// </summary>
         protected string[] EnvironmentVariables { get; set; }
 
         /// <summary>
-        /// If ExecuteAsTool is true, this must be set to the SDK 
-        /// tools path for the framework version being targeted. 
+        /// If ExecuteAsTool is true, this must be set to the SDK
+        /// tools path for the framework version being targeted.
         /// </summary>
         protected string ToolPath { get; set; }
 
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Tasks
         #region Methods
 
         /// <summary>
-        /// Checks if there's a preexisting wrapper for this reference. 
+        /// Checks if there's a preexisting wrapper for this reference.
         /// </summary>
         internal override bool FindExistingWrapper(out ComReferenceWrapperInfo wrapperInfo, DateTime componentTimestamp)
         {
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // Compare our the existing wrapper's strong name state to the one we are requesting. 
+            // Compare our the existing wrapper's strong name state to the one we are requesting.
             if (!SigningRequirementsMatchExistingWrapper(wrapperInfo))
             {
                 return false;
@@ -185,7 +185,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Constructs the wrapper file path. 
+        /// Constructs the wrapper file path.
         /// </summary>
         internal string GetWrapperPath()
         {
@@ -203,11 +203,11 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  GetWrapperFileName
-         * 
-         * 
+         *
+         *
          */
         /// <summary>
-        /// Constructs the wrapper file name from a type library name. Specialized wrappers must override it if 
+        /// Constructs the wrapper file name from a type library name. Specialized wrappers must override it if
         /// they want to use the Resolve method from this class.
         /// </summary>
         protected abstract string GetWrapperFileNameInternal(string typeLibName);
@@ -245,8 +245,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given our KeyFile, KeyContainer, and DelaySign parameters, generate the public / private 
-        /// key pair and validate that it exists to the extent needed.  
+        /// Given our KeyFile, KeyContainer, and DelaySign parameters, generate the public / private
+        /// key pair and validate that it exists to the extent needed.
         /// </summary>
         internal void GetAndValidateStrongNameKey(out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
@@ -254,7 +254,7 @@ namespace Microsoft.Build.Tasks
             // get key pair/public key
             StrongNameUtils.GetStrongNameKey(Log, KeyFile, KeyContainer, out keyPair, out publicKey);
 
-            // make sure we give as much data to the typelib converter as necessary but not more, or we might end up 
+            // make sure we give as much data to the typelib converter as necessary but not more, or we might end up
             // with something we didn't want
             if (DelaySign)
             {
@@ -290,7 +290,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Compare the strong name signing state of the existing wrapper to the signing 
+        /// Compare the strong name signing state of the existing wrapper to the signing
         /// state we are requesting in this run of the task. Return true if they match (e.g.
         /// from a signing perspective, the wrapper is up-to-date) or false otherwise.
         /// </summary>

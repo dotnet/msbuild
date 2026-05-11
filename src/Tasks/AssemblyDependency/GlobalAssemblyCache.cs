@@ -138,7 +138,7 @@ namespace Microsoft.Build.Tasks
                         // Get the runtime version from the found assembly.
                         string runtimeVersionRaw = getRuntimeVersion(assemblyPath);
 
-                        // Convert the runtime string to a version so we can properly compare them as per version object comparison rules. 
+                        // Convert the runtime string to a version so we can properly compare them as per version object comparison rules.
                         // We will accept version which are less than or equal to the targeted runtime.
                         Version runtimeVersion = VersionUtilities.ConvertToVersion(runtimeVersionRaw);
 
@@ -212,7 +212,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// If we know we have a full fusion name we can skip enumerating the gac and just query for the path. This will 
+        /// If we know we have a full fusion name we can skip enumerating the gac and just query for the path. This will
         /// not check the runtime version of the assembly.
         /// </summary>
         private static string CheckForFullFusionNameInGac(AssemblyNameExtension assemblyName, string targetProcessorArchitecture, GetPathFromFusionName getPathFromFusionName)

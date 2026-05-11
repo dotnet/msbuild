@@ -18,17 +18,17 @@ namespace Microsoft.Build.Shared
     ///
     /// This is the normal schema:
     ///
-    ///  [HKLM | HKCU]\SOFTWARE\MICROSOFT\.NetFramework\ 
-    ///    v1.0.3705 
-    ///      AssemblyFoldersEx 
-    ///          Infragistics.GridControl.1.0:  
-    ///              @Default = c:\program files\infragistics\grid control\1.0\bin 
-    ///              @Description = Infragistics Grid Control for .NET version 1.0 
-    ///              9466 
-    ///                  @Default = c:\program files\infragistics\grid control\1.0sp1\bin 
-    ///                  @Description = SP1 for Infragistics Grid Control for .NET version 1.0 
+    ///  [HKLM | HKCU]\SOFTWARE\MICROSOFT\.NetFramework\
+    ///    v1.0.3705
+    ///      AssemblyFoldersEx
+    ///          Infragistics.GridControl.1.0:
+    ///              @Default = c:\program files\infragistics\grid control\1.0\bin
+    ///              @Description = Infragistics Grid Control for .NET version 1.0
+    ///              9466
+    ///                  @Default = c:\program files\infragistics\grid control\1.0sp1\bin
+    ///                  @Description = SP1 for Infragistics Grid Control for .NET version 1.0
     ///
-    /// 
+    ///
     /// The root registry path is the following:
     ///
     ///     [HKLM | HKCU]\{AssemblyFoldersBase}\{RuntimeVersion}\{AssemblyFoldersSuffix}
@@ -91,10 +91,10 @@ namespace Microsoft.Build.Shared
             *                First, look in 64 bit registry location
             *                Second, look in 32 bit registry location
             *            Targeting X86 or MSIL:
-            *                First,  look in the 32 bit hive 
+            *                First,  look in the 32 bit hive
             *                Second, look in 64 bit hive
             *
-            *  32 bit OS:           
+            *  32 bit OS:
             *        32 bit process:
             *            Targeting 64 bit, or X86, or MSIL:
             *                Look in the default registry which is the 32 bit hive
@@ -317,29 +317,29 @@ namespace Microsoft.Build.Shared
         /// <summary>
         ///  The algorithm for gathering versions from the registry is as follows:
         ///     1) targetRuntimeVersion is the target framework version you are targeting
-        ///     2) versions is a string list from reading the registry, this list is in what ever order the registry returns 
+        ///     2) versions is a string list from reading the registry, this list is in what ever order the registry returns
         ///        the keys to us in, this is usually alphabetical.
-        ///     
+        ///
         ///     We will go through each version string and do the following:
         ///         1) Check to see if the string is a version
         ///             If the string is not a version we will check to see if the string starts with the framework we are targeting,
-        ///             if it does we will add it to a list which will be added at the end 
+        ///             if it does we will add it to a list which will be added at the end
         ///             of the versions list, if not it gets ignored. We do this to stay compatible to what we have been doing since whidbey.
-        ///             
+        ///
         ///             If the string is a version
-        ///                 We check to see if the version is a valid target framework version. Meaning.  It has a Maj.Minor version and may have 
+        ///                 We check to see if the version is a valid target framework version. Meaning.  It has a Maj.Minor version and may have
         ///                 build, Build is less than or equal to 255 and there is no revision. The reason the build number needs to be less than 255 is because
-        ///                 255 is the largest build number for a target framework version that visual studio 2010 supports. The build number is supposed to 
+        ///                 255 is the largest build number for a target framework version that visual studio 2010 supports. The build number is supposed to
         ///                 represent a service pack on the 4.0 framework.
-        ///                 
-        ///                 If the string is a valid target framework version we check to see we already have a dictionary entry and if not we 
-        ///                 add one. 
+        ///
+        ///                 If the string is a valid target framework version we check to see we already have a dictionary entry and if not we
+        ///                 add one.
         ///                 If the string is not a valid target framework then we will ignore the part of the version which makes it invalid
         ///                 (either the build or the revision, or both) and see where that version would fit in the dictionary as a key and
         ///                 then put the original version string into the list for that entry.
-        ///                 
+        ///
         ///         Since the dictionary is sorted in reverse order to generate the list to return we do the following:
-        ///         Go through the list of dictionary entries 
+        ///         Go through the list of dictionary entries
         ///             For each entry sort the list in reverse alphabetical order and add the entries in their internal list to the listToreturn.
         ///
         ///         This way we have a reverse sorted list of all of the version keys.
@@ -350,17 +350,17 @@ namespace Microsoft.Build.Shared
             Version targetVersion = VersionUtilities.ConvertToVersion(targetRuntimeVersion);
             List<ExtensionFoldersRegistryKey> versionStrings = new List<ExtensionFoldersRegistryKey>();
 
-            // This dictionary will contain a set of target framework versions and a list of strings read from the registry which are supposed to be treated like the 
-            // target framework version stored as the key. 
+            // This dictionary will contain a set of target framework versions and a list of strings read from the registry which are supposed to be treated like the
+            // target framework version stored as the key.
             // For example:
-            //  If the target framework version is 4.0  but the registry string is v4.0.2116 then we want to treat v4.0.2116 as if it was v4.0 during the sort, 
+            //  If the target framework version is 4.0  but the registry string is v4.0.2116 then we want to treat v4.0.2116 as if it was v4.0 during the sort,
             // but when reading out of the registry
             //  we need to know the original value so we can open the correct key.
             //
-            //  The reason there needs to be a list for each target framework version is that there could be multiple keys in the registry which should be treated 
+            //  The reason there needs to be a list for each target framework version is that there could be multiple keys in the registry which should be treated
             // like v4.0 for sorting.
             //  for example lets say we had the following entries in the registry:
-            //       4.0.2116  and 4.0.2116.87  both of these are supposed to be treated like v4.0 because they are not valid target framework versions but 
+            //       4.0.2116  and 4.0.2116.87  both of these are supposed to be treated like v4.0 because they are not valid target framework versions but
             // are valid version numbers and should be searched when we are targeting 4.0.
             SortedDictionary<Version, List<string>> targetFrameworkVersionToRegistryVersions = new SortedDictionary<Version, List<string>>(ReverseVersionGenericComparer.Comparer);
 
@@ -382,7 +382,7 @@ namespace Microsoft.Build.Shared
                     }
                     else
                     {
-                        // To be added to our dictionary our candidate version from the registry must be a valid target framework version which is less than or equal 
+                        // To be added to our dictionary our candidate version from the registry must be a valid target framework version which is less than or equal
                         // to the target version. Therefore if the candidate version is not a valid target framework version we will pretend it is and sort it in its correct form.
 
                         Version replacementVersion;
@@ -402,7 +402,7 @@ namespace Microsoft.Build.Shared
                             replacementVersion = candidateVersion;
                         }
 
-                        // If the target version is null then we need to do a partial version match 
+                        // If the target version is null then we need to do a partial version match
                         bool addToListDueToPartialNameMatch = false;
                         if (targetVersion == null)
                         {
@@ -439,7 +439,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            // The additional tolerated keys are added onto the end of the versions list in what ever order they came from the 
+            // The additional tolerated keys are added onto the end of the versions list in what ever order they came from the
             // registry in.
             foreach (string key in additionalToleratedKeys)
             {

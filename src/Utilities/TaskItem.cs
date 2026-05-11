@@ -21,9 +21,9 @@ namespace Microsoft.Build.Utilities
     /// This class represents a single item of the project, as it is passed into a task. TaskItems do not exactly correspond to
     /// item elements in project files, because then tasks would have access to data that wasn't explicitly passed into the task
     /// via the project file. It's not a security issue, but more just an issue with project file clarity and transparency.
-    /// 
+    ///
     /// Note: This class has to be sealed.  It has to be sealed because the engine instantiates it's own copy of this type and
-    /// thus if someone were to extend it, they would not get the desired behavior from the engine.  
+    /// thus if someone were to extend it, they would not get the desired behavior from the engine.
     /// </summary>
     /// <comment>
     /// Surprisingly few of these Utilities TaskItems are created: typically several orders of magnitude fewer than the number of engine TaskItems.
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Utilities
     {
         #region Member Data
 
-        // This is the final evaluated item specification.  Stored in escaped form. 
+        // This is the final evaluated item specification.  Stored in escaped form.
         private string _itemSpec;
 
         // These are the user-defined metadata on the item, specified in the
@@ -50,8 +50,8 @@ namespace Microsoft.Build.Utilities
         private string _fullPath;
 
         /// <summary>
-        /// May be defined if we're copying this item from a pre-existing one.  Otherwise, 
-        /// we simply don't know enough to set it properly, so it will stay null. 
+        /// May be defined if we're copying this item from a pre-existing one.  Otherwise,
+        /// we simply don't know enough to set it properly, so it will stay null.
         /// </summary>
         private readonly string _definingProject;
 
@@ -144,9 +144,9 @@ namespace Microsoft.Build.Utilities
         /// Gets or sets the item-spec.
         /// </summary>
         /// <comments>
-        /// This one is a bit tricky.  Orcas assumed that the value being set was escaped, but 
+        /// This one is a bit tricky.  Orcas assumed that the value being set was escaped, but
         /// that the value being returned was unescaped.  Maintain that behaviour here.  To get
-        /// the escaped value, use ITaskItem2.EvaluatedIncludeEscaped. 
+        /// the escaped value, use ITaskItem2.EvaluatedIncludeEscaped.
         /// </comments>
         /// <value>The item-spec string.</value>
         public string ItemSpec
@@ -212,9 +212,9 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Gets the metadata dictionary
-        /// Property is required so that we can access the metadata dictionary in an item from 
-        /// another appdomain, as the CLR has implemented remoting policies that disallow accessing 
-        /// private fields in remoted items. 
+        /// Property is required so that we can access the metadata dictionary in an item from
+        /// another appdomain, as the CLR has implemented remoting policies that disallow accessing
+        /// private fields in remoted items.
         /// </summary>
         private CopyOnWriteDictionary<string> Metadata
         {
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Utilities
         /// Sets one of the arbitrary metadata on the item.
         /// </summary>
         /// <comments>
-        /// Assumes that the value being passed in is in its escaped form. 
+        /// Assumes that the value being passed in is in its escaped form.
         /// </comments>
         /// <param name="metadataName">Name of metadata to set or change.</param>
         /// <param name="metadataValue">Value of metadata.</param>
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Utilities
         /// If not found, returns empty string.
         /// </summary>
         /// <comments>
-        /// Returns the unescaped value of the metadata requested. 
+        /// Returns the unescaped value of the metadata requested.
         /// </comments>
         /// <param name="metadataName">The name of the metadata to retrieve.</param>
         /// <returns>The metadata value.</returns>
@@ -370,8 +370,8 @@ namespace Microsoft.Build.Utilities
         /// 2) writing to this dictionary should not be reflected in the underlying item.
         /// </remarks>
         /// <comments>
-        /// Returns an UNESCAPED version of the custom metadata. For the escaped version (which 
-        /// is how it is stored internally), call ITaskItem2.CloneCustomMetadataEscaped. 
+        /// Returns an UNESCAPED version of the custom metadata. For the escaped version (which
+        /// is how it is stored internally), call ITaskItem2.CloneCustomMetadataEscaped.
         /// </comments>
         public IDictionary CloneCustomMetadata()
         {
@@ -449,13 +449,13 @@ namespace Microsoft.Build.Utilities
         /// Sets the escaped value of the metadata with the specified name.
         /// </summary>
         /// <comments>
-        /// Assumes the value is passed in unescaped. 
+        /// Assumes the value is passed in unescaped.
         /// </comments>
         void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue) => SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
 
         /// <summary>
         /// ITaskItem2 implementation which returns a clone of the metadata on this object.
-        /// Values returned are in their original escaped form. 
+        /// Values returned are in their original escaped form.
         /// </summary>
         /// <returns>The cloned metadata.</returns>
         IDictionary ITaskItem2.CloneCustomMetadataEscaped() => _metadata == null

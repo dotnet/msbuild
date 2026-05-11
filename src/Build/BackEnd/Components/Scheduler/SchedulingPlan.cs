@@ -462,7 +462,7 @@ namespace Microsoft.Build.BackEnd
         {
             double accumulatedTime;
 
-            // NOTE: Do we want to count it each time the config appears in the hierarchy?  This will inflate the 
+            // NOTE: Do we want to count it each time the config appears in the hierarchy?  This will inflate the
             // cost of frequently referenced configurations.
             accumulatedTimeByConfiguration.TryGetValue(request.BuildRequest.ConfigurationId, out accumulatedTime);
             accumulatedTimeByConfiguration[request.BuildRequest.ConfigurationId] = accumulatedTime + request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalMilliseconds;

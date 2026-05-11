@@ -421,7 +421,7 @@
                         break;
                     }
                 }
-                
+
                 //this should throw because the property comes from another property group
                 second.RemoveProperty(property);
             }

@@ -20,7 +20,6 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-#if !MONO
     /// <summary>
     /// These tests run. The temporary output folder for this test is Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString())
     /// 1. When combination of (xml, xmlfile) x (xsl, xslfile).
@@ -1259,5 +1258,4 @@ namespace Microsoft.Build.UnitTests
 #endif
         #endregion
     }
-#endif
 }

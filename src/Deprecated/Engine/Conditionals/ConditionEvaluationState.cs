@@ -11,7 +11,7 @@ using System.Xml;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
-    /// All the state necessary for the evaluation of conditionals so that the expression tree 
+    /// All the state necessary for the evaluation of conditionals so that the expression tree
     /// is stateless and reusable
     /// </summary>
     internal struct ConditionEvaluationState

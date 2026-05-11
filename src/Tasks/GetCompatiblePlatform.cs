@@ -11,7 +11,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Performs SetPlatform negotiation for all project references when opted
     /// in via the EnableDynamicPlatformResolution property.
-    /// 
+    ///
     /// See ProjectReference-Protocol.md for details.
     /// </summary>
     public class GetCompatiblePlatform : TaskExtension
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] AnnotatedProjects { get; set; }
 
         /// <summary>
-        /// The platform the current project is building as. 
+        /// The platform the current project is building as.
         /// </summary>
         [Required]
         public string CurrentProjectPlatform { get; set; }

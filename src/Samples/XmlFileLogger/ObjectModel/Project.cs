@@ -23,7 +23,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         private string _projectFile;
 
         /// <summary>
-        /// A lookup table mapping of target names to targets. 
+        /// A lookup table mapping of target names to targets.
         /// Target names are unique to a project and the id is not always specified in the log.
         /// </summary>
         private readonly ConcurrentDictionary<string, Target> _targetNameToTargetMap = new ConcurrentDictionary<string, Target>(StringComparer.OrdinalIgnoreCase);

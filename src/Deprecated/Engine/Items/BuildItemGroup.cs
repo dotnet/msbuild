@@ -16,10 +16,25 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// This class represents a collection of items.  It may be represented
     /// physically by an &lt;ItemGroup&gt; element persisted in the project file,
     /// or it may just be a virtual BuildItemGroup (e.g., the evaluated items).
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     [DebuggerDisplay("BuildItemGroup (Count = { Count }, Condition = { Condition })")]
     public class BuildItemGroup : IItemPropertyGrouping, IEnumerable
     {
@@ -56,8 +71,23 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Default constructor, which initializes a virtual (non-persisted) BuildItemGroup.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItemGroup()
         {
             this.items = new List<BuildItem>();
@@ -102,19 +132,49 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This returns a boolean telling you whether this particular item
         /// group was imported from another project, or whether it was defined
         /// in the main project.  For virtual item groups which have no
         /// persistence, this is false.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public bool IsImported
         {
             get { return importedFromAnotherProject; }
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Accessor for the condition on the item group.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string Condition
         {
             get
@@ -157,16 +217,46 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Number of items in this group.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public int Count
         {
             get { return items.Count; }
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the item at the specified index.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItem this[int index]
         {
             get { return items[index]; }
@@ -202,19 +292,49 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Copies the items in this group into a new array.
         /// NOTE: the copies are NOT clones i.e. only the references are copied
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItem[] ToArray()
         {
             return items.ToArray();
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This IEnumerable method returns an IEnumerator object, which allows
         /// the caller to enumerate through the BuildItem objects contained in
         /// this BuildItemGroup.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public IEnumerator GetEnumerator()
         {
             return items.GetEnumerator();
@@ -350,7 +470,7 @@ namespace Microsoft.Build.BuildEngine
                 itemToAdd.ItemDefinitionLibrary = parentProject.ItemDefinitionLibrary;
             }
 
-            // If this BuildItemGroup is a persisted <ItemGroup>, then we need the 
+            // If this BuildItemGroup is a persisted <ItemGroup>, then we need the
             // items to have a reference back to their parent BuildItemGroup.  This
             // makes it *much* easier to delete items through the object model.
             if (IsPersisted)
@@ -383,11 +503,11 @@ namespace Microsoft.Build.BuildEngine
                 ErrorUtilities.VerifyThrow(itemToAdd.ItemElement.OwnerDocument == xml.OwnerDocument, "Cannot add an Item with a different XML owner document.");
 
                 // Generally, the desired behavior is to keep items of the same Type physically
-                // contiguous within the BuildItemGroup.  (It's just easier to read that way.)  So we 
+                // contiguous within the BuildItemGroup.  (It's just easier to read that way.)  So we
                 // scan through the existing items in our BuildItemGroup, and try to find the spot where
-                // the new item would fit in alphabetically.  This is nice because it helps 
-                // source code control scenarios where multiple clients are adding items to 
-                // the same list.  By putting them in alphabetical order, there's less of a 
+                // the new item would fit in alphabetically.  This is nice because it helps
+                // source code control scenarios where multiple clients are adding items to
+                // the same list.  By putting them in alphabetical order, there's less of a
                 // chance of merge conflicts.
                 int insertionIndex = items.Count;
                 for (int i = 0; i < items.Count; i++)
@@ -439,10 +559,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Creates a new BuildItem defined by the given "Type" and "Include", and
         /// adds it to the end of this BuildItemGroup.
         /// If the group is persisted, the item is persisted; otherwise it is virtual
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItem AddNewItem(string itemName, string itemInclude)
         {
             BuildItem newItem;
@@ -463,9 +598,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Adds a new item to the ItemGroup, optional treating the item Include as literal so that
         /// any special characters will be escaped before persisting it.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItem AddNewItem(string itemName, string itemInclude, bool treatItemIncludeAsLiteral)
         {
             return AddNewItem(itemName, treatItemIncludeAsLiteral ? EscapingUtilities.Escape(itemInclude) : itemInclude);
@@ -488,7 +638,7 @@ namespace Microsoft.Build.BuildEngine
                 BackupPersistedItems();
             }
 
-            // Don't remove the XML node, or mark the itemgroup as dirty; this is 
+            // Don't remove the XML node, or mark the itemgroup as dirty; this is
             // strictly an operation on temporary items, because we'll be un-backing up the
             // persisted items at the end of the build
 
@@ -499,6 +649,16 @@ namespace Microsoft.Build.BuildEngine
         /// Removes the given BuildItem from this BuildItemGroup.
         /// If item is not in this group, does nothing.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void RemoveItem(BuildItem itemToRemove)
         {
             MustBeInitialized();
@@ -508,9 +668,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Removes the item at the specified index.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">If index is out of bounds</exception>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void RemoveItemAt(int index)
         {
             MustBeInitialized();
@@ -537,12 +712,27 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Clones the BuildItemGroup.  A shallow clone here is one that references
         /// the same BuildItem objects as the original, whereas a deep clone actually
         /// clones the BuildItem objects as well.  If this is a persisted BuildItemGroup,
         /// only deep clones are allowed, because you can't have the same XML
         /// element belonging to two parents.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildItemGroup Clone(bool deepClone)
         {
             BuildItemGroup clone;
@@ -590,9 +780,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Removes all Items from this BuildItemGroup, and also deletes the Condition
         /// and Name.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void Clear()
         {
             MustBeInitialized();
@@ -859,7 +1064,7 @@ namespace Microsoft.Build.BuildEngine
                 BuildItemGroup itemizedGroup = expander.ExpandSingleItemListExpressionIntoItemsLeaveEscaped(itemIncludePieces[i], originalItem.IncludeAttribute);
                 if (itemizedGroup == null)
                 {
-                    // The expression did not represent a single @(...) item list reference. 
+                    // The expression did not represent a single @(...) item list reference.
                     if (expandMetadata)
                     {
                         // We're inside a target: metadata expressions like %(foo) are legal, so expand them now

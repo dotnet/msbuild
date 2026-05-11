@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it. 
+        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         /// <param name="lookup">The lookup used for expansion and to receive created items and properties.</param>
         internal abstract void ExecuteTask(Lookup lookup);

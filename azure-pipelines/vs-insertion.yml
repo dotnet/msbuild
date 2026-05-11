@@ -204,7 +204,6 @@ extends:
               $MicrosoftNETStringToolsPackageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
               Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$MicrosoftNETStringToolsPackageVersion'"
               Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($MicrosoftNETStringToolsPackageVersion)"
-
               $props = @(
                       "VS.ExternalAPIs.MSBuild=$MSBuild_ExtApisPackageVersion",
                       "Microsoft.Build=$MicrosoftNETStringToolsPackageVersion",

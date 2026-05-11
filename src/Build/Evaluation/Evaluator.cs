@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -92,7 +93,7 @@ namespace Microsoft.Build.Evaluation
         /// Key is the directory of the file importing the usingTask, which is needed
         /// to handle any relative paths in the usingTask.
         /// </summary>
-        private readonly List<Pair<string, ProjectUsingTaskElement>> _usingTaskElements;
+        private readonly List<KeyValuePair<string, ProjectUsingTaskElement>> _usingTaskElements;
 
         /// <summary>
         /// List of ProjectTargetElement's traversing into imports.
@@ -115,7 +116,7 @@ namespace Microsoft.Build.Evaluation
         /// Dictionary of project full paths and a boolean that indicates whether at least one
         /// of their targets has the "Returns" attribute set.
         /// </summary>
-        private readonly Dictionary<ProjectRootElement, NGen<bool>> _projectSupportsReturnsAttribute;
+        private readonly Dictionary<ProjectRootElement, bool> _projectSupportsReturnsAttribute;
 
         /// <summary>
         /// The Project Xml to be evaluated.
@@ -163,7 +164,7 @@ namespace Microsoft.Build.Evaluation
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
 
         /// <summary>
-        /// The logging context to be used and piped down throughout evaluation
+        /// The logging context to be used and piped down throughout evaluation.
         /// </summary>
         private EvaluationLoggingContext _evaluationLoggingContext;
 
@@ -223,12 +224,8 @@ namespace Microsoft.Build.Evaluation
                 buildEventContext,
                 string.IsNullOrEmpty(projectRootElement.ProjectFileLocation.File) ? "(null)" : projectRootElement.ProjectFileLocation.File);
 
-            // If someone sets the 'MsBuildLogPropertyTracking' environment variable to a non-zero value, wrap property accesses for event reporting.
-            if (Traits.Instance.LogPropertyTracking > 0)
-            {
-                // Wrap the IEvaluatorData<> object passed in.
-                data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
-            }
+            // Wrap the IEvaluatorData<> object passed in.
+            data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
 
             // If the host wishes to provide a directory cache for this evaluation, create a new EvaluationContext with the right file system.
             _evaluationContext = evaluationContext;
@@ -240,20 +237,18 @@ namespace Microsoft.Build.Evaluation
             }
 
             // Create containers for the evaluation results
-            data.InitializeForEvaluation(toolsetProvider, _evaluationContext);
+            data.InitializeForEvaluation(toolsetProvider, _evaluationContext, _evaluationLoggingContext);
 
-            _expander = new Expander<P, I>(data, data, _evaluationContext);
+            _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext);
 
-            // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
-            _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
             _data = data;
             _itemGroupElements = new List<ProjectItemGroupElement>();
             _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
-            _usingTaskElements = new List<Pair<string, ProjectUsingTaskElement>>();
+            _usingTaskElements = new List<KeyValuePair<string, ProjectUsingTaskElement>>();
             _targetElements = new List<ProjectTargetElement>();
             _importsSeen = new Dictionary<string, ProjectImportElement>(StringComparer.OrdinalIgnoreCase);
             _initialTargetsList = new List<string>();
-            _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, NGen<bool>>();
+            _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
             _projectRootElement = projectRootElement;
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
@@ -713,8 +708,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Evaluate the usingtask and add the result into the data passed in
                     TaskRegistry.InitializeTaskRegistryFromUsingTaskElements<P, I>(
-                        _evaluationLoggingContext.LoggingService,
-                        _evaluationLoggingContext.BuildEventContext,
+                        _evaluationLoggingContext,
                         _usingTaskElements.Select(p => (p.Value, p.Key)),
                         _data.TaskRegistry,
                         _expander,
@@ -860,12 +854,12 @@ namespace Microsoft.Build.Evaluation
             using (_evaluationProfiler.TrackFile(currentProjectOrImport.FullPath))
             {
                 // We accumulate InitialTargets from the project and each import
-                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation, _evaluationLoggingContext);
+                var initialTargets = _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.InitialTargets, ExpanderOptions.ExpandProperties, currentProjectOrImport.InitialTargetsLocation);
                 _initialTargetsList.AddRange(initialTargets);
 
                 if (!Traits.Instance.EscapeHatches.IgnoreTreatAsLocalProperty)
                 {
-                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation, _evaluationLoggingContext))
+                    foreach (string propertyName in _expander.ExpandIntoStringListLeaveEscaped(currentProjectOrImport.TreatAsLocalProperty, ExpanderOptions.ExpandProperties, currentProjectOrImport.TreatAsLocalPropertyLocation))
                     {
                         XmlUtilities.VerifyThrowProjectValidElementName(propertyName, currentProjectOrImport.Location);
                         _data.GlobalPropertiesToTreatAsLocal.Add(propertyName);
@@ -901,7 +895,7 @@ namespace Microsoft.Build.Evaluation
                             break;
                         case ProjectTargetElement target:
                             // Defaults to false
-                            _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out NGen<bool> projectSupportsReturnsAttribute);
+                            _projectSupportsReturnsAttribute.TryGetValue(currentProjectOrImport, out bool projectSupportsReturnsAttribute);
 
                             _projectSupportsReturnsAttribute[currentProjectOrImport] = projectSupportsReturnsAttribute || (target.Returns != null);
                             _targetElements.Add(target);
@@ -913,7 +907,7 @@ namespace Microsoft.Build.Evaluation
                             EvaluateImportGroupElement(currentProjectOrImport.DirectoryPath, importGroup);
                             break;
                         case ProjectUsingTaskElement usingTask:
-                            _usingTaskElements.Add(new Pair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
+                            _usingTaskElements.Add(new KeyValuePair<string, ProjectUsingTaskElement>(currentProjectOrImport.DirectoryPath, usingTask));
                             break;
                         case ProjectChooseElement choose:
                             EvaluateChooseElement(choose);
@@ -1051,8 +1045,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void AddBeforeAndAfterTargetMappings(ProjectTargetElement targetElement, Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets, Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget, Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget)
         {
-            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation, _evaluationLoggingContext);
-            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation, _evaluationLoggingContext);
+            var beforeTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.BeforeTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.BeforeTargetsLocation);
+            var afterTargets = _expander.ExpandIntoStringListLeaveEscaped(targetElement.AfterTargets, ExpanderOptions.ExpandPropertiesAndItems, targetElement.AfterTargetsLocation);
 
             foreach (string beforeTarget in beforeTargets)
             {
@@ -1150,9 +1144,6 @@ namespace Microsoft.Build.Evaluation
 #if RUNTIME_TYPE_NETCORE
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
                 Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core");
-#elif MONO
-            SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType,
-                                                        NativeMethodsShared.IsMono ? "Mono" : "Full");
 #else
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Full");
 #endif
@@ -1288,73 +1279,23 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
+                _expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
                 if (!EvaluateConditionCollectingConditionedProperties(propertyElement, ExpanderOptions.ExpandProperties, ParserOptions.AllowProperties))
                 {
                     return;
                 }
 
+                _expander.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.PropertyEvaluation;
+
                 // Set the name of the property we are currently evaluating so when we are checking to see if we want to add the property to the list of usedUninitialized properties we can not add the property if
                 // it is the same as what we are setting the value on. Note: This needs to be set before we expand the property we are currently setting.
-                _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
+                _expander.PropertiesUseTracker.CurrentlyEvaluatingPropertyElementName = propertyElement.Name;
 
-                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location, _evaluationLoggingContext);
+                string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(propertyElement.Value, ExpanderOptions.ExpandProperties, propertyElement.Location);
 
-                // If we are going to set a property to a value other than null or empty we need to check to see if it has been used
-                // during evaluation.
-                if (evaluatedValue.Length > 0 && _expander.WarnForUninitializedProperties)
-                {
-                    // Is the property we are currently setting in the list of properties which have been used but not initialized
-                    IElementLocation elementWhichUsedProperty;
-                    bool isPropertyInList = _expander.UsedUninitializedProperties.TryGetPropertyElementLocation(propertyElement.Name, out elementWhichUsedProperty);
+                _expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
 
-                    if (isPropertyInList)
-                    {
-                        // Once we are going to warn for a property once, remove it from the list so we do not add it again.
-                        _expander.UsedUninitializedProperties.RemoveProperty(propertyElement.Name);
-                        _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(propertyElement.Location), "UsedUninitializedProperty", propertyElement.Name, elementWhichUsedProperty.LocationString);
-                    }
-                }
-
-                _expander.UsedUninitializedProperties.CurrentlyEvaluatingPropertyElementName = null;
-
-                if (Traits.Instance.LogPropertyTracking == 0)
-                {
-                    P predecessor = _data.GetProperty(propertyElement.Name);
-                    P property = _data.SetProperty(propertyElement, evaluatedValue);
-
-                    if (predecessor != null)
-                    {
-                        LogPropertyReassignment(predecessor, property, propertyElement.Location.LocationString);
-                    }
-                }
-                else
-                {
-                    _data.SetProperty(propertyElement, evaluatedValue);
-                }
-            }
-        }
-
-        private void LogPropertyReassignment(P predecessor, P property, string location)
-        {
-            string newValue = property.EvaluatedValue;
-            string oldValue = predecessor?.EvaluatedValue;
-
-            if (string.Equals(property.Name, "MSBuildAllProjects", StringComparison.OrdinalIgnoreCase))
-            {
-                // There's a huge perf cost to logging this and it increases the binlog size significantly.
-                // Meanwhile the usefulness of logging this is very low.
-                return;
-            }
-
-            if (newValue != oldValue)
-            {
-                _evaluationLoggingContext.LogComment(
-                    MessageImportance.Low,
-                    "PropertyReassignment",
-                    property.Name,
-                    newValue,
-                    oldValue,
-                    location);
+                _data.SetProperty(propertyElement, evaluatedValue);
             }
         }
 
@@ -2021,7 +1962,7 @@ namespace Microsoft.Build.Evaluation
         {
             imports = null;
 
-            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation, _evaluationLoggingContext);
+            string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
 
             if (String.IsNullOrWhiteSpace(importExpressionEscaped))
@@ -2287,6 +2228,8 @@ namespace Microsoft.Build.Evaluation
                                 continue;
                             }
 
+                            VerifyVSDistributionPath(importElement.Project, importLocationInProject);
+
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
                                                                       importFileUnescaped, importExpressionEscaped);
                         }
@@ -2443,8 +2386,6 @@ namespace Microsoft.Build.Evaluation
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element),
                     element.ConditionLocation,
-                    _evaluationLoggingContext.LoggingService,
-                    _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
                     loggingContext: _evaluationLoggingContext);
 
@@ -2482,9 +2423,8 @@ namespace Microsoft.Build.Evaluation
                     _data.ConditionedProperties,
                     GetCurrentDirectoryForConditionEvaluation(element),
                     element.ConditionLocation,
-                    _evaluationLoggingContext.LoggingService,
-                    _evaluationLoggingContext.BuildEventContext,
                     _evaluationContext.FileSystem,
+                    _evaluationLoggingContext,
                     projectRootElementCache);
 
                 return result;
@@ -2536,7 +2476,16 @@ namespace Microsoft.Build.Evaluation
                         importElement.Project.Replace(searchPathMatch.MsBuildPropertyFormat, extensionsPathPropValue),
                         ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
 
-                relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
+                try
+                {
+                    relativeProjectPath = FileUtilities.MakeRelative(extensionsPathPropValue, importExpandedWithDefaultPath);
+                }
+                catch (ArgumentException ex)
+                {
+                    // https://github.com/dotnet/msbuild/issues/8762 .Catch the exceptions when extensionsPathPropValue is null or importExpandedWithDefaultPath is empty. In NET Framework, Path.* function also throws exceptions if the path contains invalid characters.
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.Location, "InvalidAttributeValueWithException", importExpandedWithDefaultPath, XMakeAttributes.project, XMakeElements.import, ex.Message);
+                    return;
+                }
             }
             else
             {
@@ -2550,6 +2499,8 @@ namespace Microsoft.Build.Evaluation
             var onlyFallbackSearchPaths = searchPathMatch.SearchPaths.Select(s => _data.ExpandString(s)).ToList();
 
             string stringifiedListOfSearchPaths = StringifyList(onlyFallbackSearchPaths);
+
+            VerifyVSDistributionPath(importElement.Project, importElement.ProjectLocation);
 
 #if FEATURE_SYSTEM_CONFIGURATION
             string configLocation = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
@@ -2612,6 +2563,16 @@ namespace Microsoft.Build.Evaluation
                         : $"{_lastModifiedProject.FullPath}{streamImports};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
                     mayBeReserved: false);
+            }
+        }
+
+        [Conditional("FEATURE_GUIDE_TO_VS_ON_UNSUPPORTED_PROJECTS")]
+        private void VerifyVSDistributionPath(string path, ElementLocation importLocationInProject)
+        {
+            if (path.IndexOf("Microsoft\\VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0
+                || path.IndexOf("Microsoft/VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectFromVSDistribution", path);
             }
         }
     }

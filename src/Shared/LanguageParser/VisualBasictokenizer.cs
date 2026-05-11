@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  VisualBasicTokenizer
-         * 
+         *
          * Construct
          */
         internal VisualBasicTokenizer(Stream binaryStream, bool forceANSI)
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  GetEnumerator
-         * 
+         *
          * Return a new token enumerator.
          */
         public IEnumerator GetEnumerator()

@@ -579,7 +579,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Provides unique identifers for the caching system so we can retrieve this set of targets 
+        /// Provides unique identifers for the caching system so we can retrieve this set of targets
         /// at a later time. This list should be either a null array or a list of strings which are not null.
         /// </summary>
         /// <returns></returns>

@@ -4,7 +4,9 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -87,7 +89,11 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         {
             var itemDictionary = ToItemDictionary(items);
 
-            return new ProjectInstanceExpander(new PropertyDictionary<ProjectPropertyInstance>(), itemDictionary, (IFileSystem)FileSystems.Default);
+            return new ProjectInstanceExpander(
+                new PropertyDictionary<ProjectPropertyInstance>(),
+                itemDictionary,
+                (IFileSystem)FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
         }
 
         private static ItemDictionary<ProjectItemInstance> ToItemDictionary(Dictionary<string, string[]> itemTypes)

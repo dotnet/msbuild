@@ -32,7 +32,7 @@ namespace Microsoft.Build.BuildEngine
         internal abstract string GetUnexpandedValue(ConditionEvaluationState state);
 
         /// <summary>
-        /// If any expression nodes cache any state for the duration of evaluation, 
+        /// If any expression nodes cache any state for the duration of evaluation,
         /// now's the time to clean it up
         /// </summary>
         internal abstract void ResetState();
@@ -70,7 +70,7 @@ namespace Microsoft.Build.BuildEngine
         internal bool PotentialAndOrConflict()
         {
             // The values of the functions are assigned to boolean locals
-            // in order to force evaluation of the functions even when the 
+            // in order to force evaluation of the functions even when the
             // first one returns false
             bool detectOr = DetectOr();
             bool detectAnd = DetectAnd();

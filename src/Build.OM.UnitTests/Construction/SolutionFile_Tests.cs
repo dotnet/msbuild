@@ -56,8 +56,8 @@ namespace Microsoft.Build.UnitTests.Construction
             });
         }
         /// <summary>
-        /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid -- 
-        /// we assume that all C++ projects except .vcproj are MSBuild format. 
+        /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid --
+        /// we assume that all C++ projects except .vcproj are MSBuild format.
         /// </summary>
         [Fact]
         public void ParseSolution_VC2()
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests.Construction
             });
         }
         /// <summary>
-        /// Test to parse a very basic .sln file to validate that description property in a solution file 
+        /// Test to parse a very basic .sln file to validate that description property in a solution file
         /// is properly handled.
         /// </summary>
         [Fact]
@@ -496,8 +496,8 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Tests situation where there's a nonexistent project listed in the solution folders.  We should 
-        /// error with a useful message. 
+        /// Tests situation where there's a nonexistent project listed in the solution folders.  We should
+        /// error with a useful message.
         /// </summary>
         [Fact]
         public void MissingNestedProject()
@@ -840,7 +840,7 @@ namespace Microsoft.Build.UnitTests.Construction
             });
         }
         /// <summary>
-        /// Make sure the project configurations in solution configurations get parsed correctly 
+        /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a simple mixed C#/VC solution
         /// </summary>
         [Fact]
@@ -938,7 +938,7 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Make sure the project configurations in solution configurations get parsed correctly 
+        /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a more tricky solution
         /// </summary>
         [Fact]

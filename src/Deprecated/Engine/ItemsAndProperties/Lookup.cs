@@ -19,45 +19,45 @@ namespace Microsoft.Build.BuildEngine
     ///     - quick lookups
     ///     - scoping down of item subsets in nested scopes (useful for batches)
     ///     - isolation of adds, removes, modifies, and property sets inside nested scopes
-    ///     
+    ///
     /// When retrieving the item group for an item type, each table is consulted in turn,
     /// starting with the primary table (the "top" or "innermost" table), until a table is found that has an entry for that type.
     /// When an entry is found, it is returned without looking deeper.
     /// This makes it possible to let callers see only a subset of items without affecting or cloning the original item groups,
     /// by populating a scope with item groups that are empty or contain subsets of items in lower scopes.
-    /// 
+    ///
     /// Instances of this class can be cloned with Clone() to share between batches.
-    /// 
+    ///
     /// When EnterScope() is called, a fresh primary table is inserted, and all adds and removes will be invisible to
     /// any clones made before the scope was entered and anyone who has access to item groups in lower tables.
-    /// 
+    ///
     /// When LeaveScope() is called, the primary tables are merged into the secondary tables, and the primary tables are discarded.
     /// This makes the adds and removes in the primary tables visible to clones made during the previous scope.
-    /// 
+    ///
     /// Scopes can be populated (before Adds, Removes, and Lookups) using PopulateWithItem(). This reduces the set of items of a particular
     /// type that are visible in a scope, because lookups of items of this type will stop at this level and see the subset, rather than the
     /// larger set in a scope below.
-    /// 
+    ///
     /// Items can be added or removed by calling AddNewItem() and RemoveItem(). Only the primary level is modified.
     /// When items are added or removed they enter into a primary table exclusively for adds or removes, instead of the main primary table.
     /// This allows the adds and removes to be applied to the scope below on LeaveScope(). Even when LeaveScope() is called, the adds and removes
     /// stay in their separate add and remove tables: if they were applied to a main table, they could truncate the downward traversal performed by lookups
     /// and hide items in a lower main table. Only on the final call of LeaveScope() can all adds and removes be applied to the outermost table, i.e., the project.
-    /// 
+    ///
     /// Much the same applies to properties.
-    /// 
+    ///
     /// For sensible semantics, only the current primary scope can be modified at any point.
     /// </summary>
     /// <remarks>
     /// THREAD SAFETY:
-    ///     - BuildItemGroups are currently unsafe for concurrent reading and writing (they have a List field). So a Lookup cannot be read and written to 
+    ///     - BuildItemGroups are currently unsafe for concurrent reading and writing (they have a List field). So a Lookup cannot be read and written to
     ///       concurrently.
-    ///     - To avoid this problem, the lookup can be populated with a clone of an item group, and lookup can be Truncate()'d at the level of that clone 
+    ///     - To avoid this problem, the lookup can be populated with a clone of an item group, and lookup can be Truncate()'d at the level of that clone
     ///       until control of the lookup goes back to the safe thread.
-    /// 
+    ///
     /// FUTURE:
-    ///     - We could eliminate all the code performing resetting of project build state (currently implemented using special tables for Output properties and 
-    ///       backups of persisted item groups and metadata before modification) by using a Lookup, entering scope at the start of a build, 
+    ///     - We could eliminate all the code performing resetting of project build state (currently implemented using special tables for Output properties and
+    ///       backups of persisted item groups and metadata before modification) by using a Lookup, entering scope at the start of a build,
     ///       then when build state needs to be reset, throwing away the Lookup (rather than leaving scope).
     /// </remarks>
     internal class Lookup
@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Projects store their items in a hashtable of item groups by name (which we handle in our lookup table)
-        /// but also in a single item group. When we leave scope the last time, we have to update this item group as 
+        /// but also in a single item group. When we leave scope the last time, we have to update this item group as
         /// well. This is only used when we leave scope the last time.
         /// </summary>
         private BuildItemGroup projectItems;
@@ -299,8 +299,8 @@ namespace Microsoft.Build.BuildEngine
             MustBeOwningThread();
             ErrorUtilities.VerifyThrowNoAssert(lookupEntries.Count >= 2, "Too many calls to Leave().");
 
-            // Our lookup works by stopping the first time it finds an item group of the appropriate type. 
-            // So we can't apply an add directly into the table below because that could create a new group 
+            // Our lookup works by stopping the first time it finds an item group of the appropriate type.
+            // So we can't apply an add directly into the table below because that could create a new group
             // of that type, which would cause the next lookup to stop there and miss any existing items in a table below.
             // Instead we keep adds stored separately until we're leaving the very last scope. Until then
             // we only move adds down into the next add table below, and when we lookup we consider both tables.
@@ -316,7 +316,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Let go of our pointer into the clone table; we assume we won't need it after leaving scope and want to save memory.
             // This is an assumption on IntrinsicTask, that it won't ask to remove or modify a clone in a higher scope than it was handed out in.
-            // We mustn't call cloneTable.Clear() because other clones of this lookup may still be using it. When the last lookup clone leaves scope, 
+            // We mustn't call cloneTable.Clear() because other clones of this lookup may still be using it. When the last lookup clone leaves scope,
             // the table will be collected.
             cloneTable = null;
 
@@ -458,7 +458,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal BuildProperty GetProperty(string name)
         {
-            // Walk down the tables and stop when the first 
+            // Walk down the tables and stop when the first
             // property with this name is found
             foreach (LookupEntry entry in lookupEntries)
             {
@@ -746,8 +746,8 @@ namespace Microsoft.Build.BuildEngine
             PrimaryRemoveTable = Utilities.CreateTableIfNecessary(PrimaryRemoveTable);
             ImportItemIntoTable(PrimaryRemoveTable, item);
 
-            // No need to remove this item from the primary add table if it's 
-            // already there -- we always apply removes after adds, so that add 
+            // No need to remove this item from the primary add table if it's
+            // already there -- we always apply removes after adds, so that add
             // will be reversed anyway.
         }
 
@@ -763,7 +763,7 @@ namespace Microsoft.Build.BuildEngine
             MustNotBeOuterScope();
 
 #if DEBUG
-            // This item should not already be in any remove table; there is no way a project can 
+            // This item should not already be in any remove table; there is no way a project can
             // modify items that were already removed
             // Obviously, do this only in debug, as it's a slow check for bugs.
             LinkedListNode<LookupEntry> node = lookupEntries.First;
@@ -1043,7 +1043,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Verify item is not in any table in any scope
-        /// </summary>        
+        /// </summary>
         private void MustNotBeInAnyTables(BuildItem item)
         {
             // This item should not already be in any table; there is no way a project can
@@ -1088,7 +1088,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// Read-only wrapper around a lookup.
     /// Passed to Expander and ItemExpander, which only need to
-    /// use a lookup in a read-only fashion, thus increasing 
+    /// use a lookup in a read-only fashion, thus increasing
     /// encapsulation of the data in the Lookup.
     /// </summary>
     internal class ReadOnlyLookup
@@ -1150,8 +1150,8 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// The main table, populated with items that
-        /// are initially visible in this scope. Does not 
-        /// include adds or removes unless it's the table in 
+        /// are initially visible in this scope. Does not
+        /// include adds or removes unless it's the table in
         /// the outermost scope.
         /// </summary>
         internal Hashtable Items

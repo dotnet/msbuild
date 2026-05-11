@@ -119,8 +119,8 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// string array of all Reserved Names for BuildItem name
         /// </summary>
-        private string[] reservedNames = new string[] 
-                { 
+        private string[] reservedNames = new string[]
+                {
                     "VisualStudioProject",
                     "Target",
                     "PropertyGroup",
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void ConditionGetFromImportedProject()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <nImported Include='iImported' Condition=""'a' == 'b'"" />
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests BuildItem.Include attempt Set for an Imported BuildItem 
+        /// Tests BuildItem.Include attempt Set for an Imported BuildItem
         /// </summary>
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
@@ -957,7 +957,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CustomMetadataCountNamesWhenComingOnlyFromImportedProject()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <nImported Include='iImported'>
@@ -988,7 +988,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CustomMetadataCountNamesWhenComingOnlyFromParentProjectNoneFromImport()
         {
-            string parentProjectContents = @" 
+            string parentProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nMain Include='iMain'>
@@ -1020,7 +1020,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CustomMetadataCountNamesWhenComingFromBothParentAndImportedProject()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nImported Include='iImported'>
@@ -1030,7 +1030,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                             </Project>
                         ";
 
-            string parentProjectContents = @" 
+            string parentProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nMain Include='iMain'>
@@ -1146,7 +1146,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void MetadataCountNamesFromImportedProjectWithCustomMetadata()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <nImported Include='iImported'>
@@ -1228,7 +1228,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CopyCustomMetadataToAnotherBuildItemWithNoCustomMetadataInSameProject()
         {
-            string projectContents = @" 
+            string projectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <n1 Include='i1'>
@@ -1258,7 +1258,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CopyCustomMetadataToAntherBuildItemWithAllOtherDifferentCustomMetadata()
         {
-            string projectContents = @" 
+            string projectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <n1 Include='i1'>
@@ -1293,7 +1293,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CopyCustomMetadataToAnotherBuildItemWithAllOtherSameCustomMetadata()
         {
-            string projectContents = @" 
+            string projectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <n1 Include='i1'>
@@ -1328,7 +1328,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CopyCustomMetadataToAnotherBuildItemWithSomeOtherSameCustomMetadata()
         {
-            string projectContents = @" 
+            string projectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <n1 Include='i1'>
@@ -1369,7 +1369,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CopyCustomMetadataToNonImportedBuildItemFromAnImportedBuildItem()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nImported Include='iImported'>
@@ -1379,7 +1379,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                             </Project>
                         ";
 
-            string parentProjectContents = @" 
+            string parentProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nMain Include='iMain'>
@@ -1408,7 +1408,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [ExpectedException(typeof(InvalidOperationException))]
         public void CopyCustomMetadataToImportedBuildItem()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nImported Include='iImported'>
@@ -1418,7 +1418,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                             </Project>
                         ";
 
-            string parentProjectContents = @" 
+            string parentProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nMain Include='iMain'>
@@ -1437,12 +1437,12 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests BuildItem.CopyCustomMetadataTo 
+        /// Tests BuildItem.CopyCustomMetadataTo
         /// </summary>
         [Test]
         public void CopyCustomMetadataToAnotherBuildItemThenSaveToDisk()
         {
-            string projectContents = @" 
+            string projectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <n1 Include='i1'>
@@ -1488,7 +1488,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void GetEvaluatedMetadataSimple()
         {
-            string projectContents = @" 
+            string projectContents = @"
                         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <n Include='i' >
@@ -1518,7 +1518,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void GetEvaluatedMetadataFromImportedProject()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <nImported Include='iImported'>
@@ -1529,7 +1529,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                         </Project>
                     ";
 
-            string parentProjectContents = @" 
+            string parentProjectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <nMain Include='iMain' />
@@ -1554,7 +1554,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void GetEvaluatedMetadataNoPropertyToEvaluateAgainst()
         {
-            string projectContents = @" 
+            string projectContents = @"
                         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <n Include='i' >
@@ -1656,7 +1656,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void GetMetadataWhenMetadataImportedProject()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nImported Include='iImported'>
@@ -1837,7 +1837,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [ExpectedException(typeof(InvalidOperationException))]
         public void RemoveMetadataFromImportedMetadata()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nImported Include='iImported'>
@@ -1974,7 +1974,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [ExpectedException(typeof(InvalidOperationException))]
         public void SetMetadataOnImportedProject()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <ItemGroup>
                                     <nImported Include='iImported'>
@@ -2081,7 +2081,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CloneBackedByXml()
         {
-            string projectContents = @" 
+            string projectContents = @"
                         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <n Include='i' Exclude='e' Condition=""'a' == 'b'"" >
@@ -2136,7 +2136,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CloneImportedBuildItem()
         {
-            string importProjectContents = @" 
+            string importProjectContents = @"
                         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <nImported Include='iImported'>
@@ -2202,7 +2202,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         {
             if (String.IsNullOrEmpty(importProjectContents))
             {
-                importProjectContents = @" 
+                importProjectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <nImported Include='iImported' />
@@ -2213,7 +2213,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
             if (String.IsNullOrEmpty(parentProjectContents))
             {
-                parentProjectContents = @" 
+                parentProjectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <nMain Include='iMain' />
@@ -2383,7 +2383,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         /// <summary>
         /// Un-registers the existing logger and registers a new copy.
-        /// We will use this when we do multiple builds so that we can safely 
+        /// We will use this when we do multiple builds so that we can safely
         /// assert on log messages for that particular build.
         /// </summary>
         private void ResetLogger()

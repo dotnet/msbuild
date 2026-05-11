@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests
             postTaskOutputsInputs.Add("taskExecutedSuccessfully", taskExecutedSuccessfully);
             postTaskOutputsInputs.Add("thrownException", thrownException);
         }
- 
+
         /// <summary>
         /// Override to BuildProject file to return true so we can test that
         /// </summary>
@@ -89,6 +89,6 @@ namespace Microsoft.Build.UnitTests
             lineNumber = 0;
             columnNumber = 0;
         }
-        
+
     }
 }

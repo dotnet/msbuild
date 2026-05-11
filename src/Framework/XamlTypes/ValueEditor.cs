@@ -12,7 +12,7 @@ using System.Windows.Markup;
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// Represents a value editor 
+    /// Represents a value editor
     /// </summary>
     [ContentProperty("Metadata")]
     public sealed class ValueEditor : ISupportInitialize

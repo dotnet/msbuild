@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     [TestFixture]
     public sealed class Engine_Tests
     {
-        //// Note to CTI - http://msdn2.microsoft.com/en-us/library/microsoft.build.buildengine.engine.aspx is the 
+        //// Note to CTI - http://msdn2.microsoft.com/en-us/library/microsoft.build.buildengine.engine.aspx is the
         ////    MSDN of the Engine Class.
         #region Common Helpers
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
             if (binPath20 == null)
             {
-                // if 2.0 can't be found in the registry, it's still the default, 
+                // if 2.0 can't be found in the registry, it's still the default,
                 // but we need to get it another way.
                 binPath20 = FrameworkLocationHelper.PathToDotNetFrameworkV20;
             }
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests the Engine Constructor - Engine(string binPath) with binpath 
+        /// Tests the Engine Constructor - Engine(string binPath) with binpath
         ///     set to the system root drive
         /// </summary>
         [Test]
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         /// <summary>
         /// Tests the Engine Constructor - Engine(string binPath) with a simple path
-        ///     that contains a trailing backslash.  Verify trailing backslash is 
+        ///     that contains a trailing backslash.  Verify trailing backslash is
         ///     removed.
         /// </summary>
         [Test]
@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         #region BuildProjectFile(string projectFile, string targetName)
         /* This overload calls BuildProjectFile(projectFile, new string[] {targetName}, this.GlobalProperties,
-         *      null, BuildSettings.None) as such, passing on the projectFile and your targetName.  Because the 
+         *      null, BuildSettings.None) as such, passing on the projectFile and your targetName.  Because the
          *      null targetName is already covered in the BuildProjectFile(projectFile) overload, we don't
          *      need to test it again.
          */
@@ -1093,7 +1093,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         #region BuildProjectFile(string projectFile, string[] targetNames)
         /* This overload calls BuildProjectFile(projectFile, targetNames, this.GlobalProperties,
-                null, BuildSettings.None) as such, passing on the projectFile and your targetNames.  Because the 
+                null, BuildSettings.None) as such, passing on the projectFile and your targetNames.  Because the
          *      null targetNames is already covered in the BuildProjectFile(projectFile) overload, we don't
          *      need to test it again.
          */
@@ -1159,7 +1159,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
          */
 
         /// <summary>
-        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties) 
+        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties)
         ///     where globalProperties are null
         /// </summary>
         [Test]
@@ -1169,7 +1169,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties) 
+        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties)
         ///     where globalProperties are valid, different
         /// </summary>
         [Test]
@@ -1179,7 +1179,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties) 
+        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties)
         ///     where globalProperties are valid, same
         /// </summary>
         [Test]
@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
          */
 
         /// <summary>
-        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs) 
+        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs)
         ///     where targetOutputs are null
         /// </summary>
         [Test]
@@ -1206,7 +1206,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs) 
+        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs)
         ///     where targetOutputs String.Empty
         /// </summary>
         [Test]
@@ -1216,7 +1216,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs) 
+        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs)
         ///     where targetOutputs simple valid
         /// </summary>
         [Test]
@@ -1226,7 +1226,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs) 
+        /// Tests Engine.BuildProjectFile(projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs)
         ///     where targetOutputs invalid
         /// </summary>
         [Test]
@@ -1280,7 +1280,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         #endregion
 
         #region BuildProjectFile(string projectFile, string[] targetNames, BuildPropertyGroup globalProperties, IDictionary targetOutputs, BuildSettings buildFlags, string toolsVersion)
-        /* This is the method that all of the other BuildProjectFile overloads call (with null toolsVersion).  Therefore, 
+        /* This is the method that all of the other BuildProjectFile overloads call (with null toolsVersion).  Therefore,
          *  we don't need to re-test setting toolsVersion to null.
          */
 
@@ -1337,7 +1337,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
          *  the example Dev Unit test.
          */
         #region Example Dev Unit Test For BuildProjectFiles()
-        //// Also, note in this example, there are examples of other Engine.Objects that should be 
+        //// Also, note in this example, there are examples of other Engine.Objects that should be
         //// useful for you.  RegisterDistributedLogger() tests below, you'll need to look at this
         //// ***************START: Example Dev Unit test***************
         ////[Test]
@@ -1406,7 +1406,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         /// <summary>
         /// Tests Engine.BuildProjectFiles(string[] projectFiles, string[][] targetNamesPerProject,
-        ///                                 BuildPropertyGroup[] globalPropertiesPerProject, 
+        ///                                 BuildPropertyGroup[] globalPropertiesPerProject,
         ///                                 IDictionary[] targetOutputsPerProject, BuildSettings buildFlags,
         ///                                 string [] toolsVersions) with several project files (no traversal projects)
         ///                                 with no Project to Project (P2P) references between set of projects
@@ -1419,7 +1419,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         /// <summary>
         /// Tests Engine.BuildProjectFiles(string[] projectFiles, string[][] targetNamesPerProject,
-        ///                                 BuildPropertyGroup[] globalPropertiesPerProject, 
+        ///                                 BuildPropertyGroup[] globalPropertiesPerProject,
         ///                                 IDictionary[] targetOutputsPerProject, BuildSettings buildFlags,
         ///                                 string [] toolsVersions) with a single traversal project that
         ///                                 points to several projects (no P2P references)
@@ -1432,9 +1432,9 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         /// <summary>
         /// Tests Engine.BuildProjectFiles(string[] projectFiles, string[][] targetNamesPerProject,
-        ///                                 BuildPropertyGroup[] globalPropertiesPerProject, 
+        ///                                 BuildPropertyGroup[] globalPropertiesPerProject,
         ///                                 IDictionary[] targetOutputsPerProject, BuildSettings buildFlags,
-        ///                                 string [] toolsVersions) with a single traversal project that points to 
+        ///                                 string [] toolsVersions) with a single traversal project that points to
         ///                                 4 projects (projects A, B, C and D) where A has a P2P to C, and B has
         ///                                 a P2P to D.
         /// </summary>
@@ -1446,7 +1446,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         /// <summary>
         /// Tests Engine.BuildProjectFiles(string[] projectFiles, string[][] targetNamesPerProject,
-        ///                                 BuildPropertyGroup[] globalPropertiesPerProject, 
+        ///                                 BuildPropertyGroup[] globalPropertiesPerProject,
         ///                                 IDictionary[] targetOutputsPerProject, BuildSettings buildFlags,
         ///                                 string [] toolsVersions) with a traversal project, which in turn
         ///                                 points to several other traversal projects, each of which have their
@@ -1510,7 +1510,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests Engine.GetLoadedProject(string projectFullFileName) with projectFullFileName set to an non-existing 
+        /// Tests Engine.GetLoadedProject(string projectFullFileName) with projectFullFileName set to an non-existing
         /// project file name, yet path exist
         /// </summary>
         [Test]
@@ -1614,7 +1614,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
         #region RegisterLogger Tests
         /// <summary>
-        /// Tests Engine.RegisterLogger(ILogger logger) with 
+        /// Tests Engine.RegisterLogger(ILogger logger) with
         /// </summary>
         [Test]
         [Ignore("nyi")]
@@ -1689,7 +1689,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Tests Engine.Shutdown() when you've loaded a project, loggers, etc, built, then only unloaded the loggers, 
+        /// Tests Engine.Shutdown() when you've loaded a project, loggers, etc, built, then only unloaded the loggers,
         ///     project still loaded
         /// </summary>
         [Test]

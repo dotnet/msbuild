@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
@@ -101,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             bool foundDoNotModify = false;
             foreach (string line in File.ReadLines(outputFile.Path))
             {
-                line.ShouldNotContain("<!---->", "This is what it will look like if we're loading read/only");
+                line.ShouldNotContain("<!---->", customMessage: "This is what it will look like if we're loading read/only");
 
                 if (line.Contains("DO NOT MODIFY")) // this is in a comment in our targets
                 {
@@ -170,7 +167,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <ProjectExtensions/>
                     <Import Project=`$(MSBuildBinPath)\\Microsoft.CSharp.Targets` />
                     <ProjectExtensions/>
@@ -314,30 +311,15 @@ namespace Microsoft.Build.UnitTests
         public void CreateToolsVersionString()
         {
             List<Toolset> toolsets = new List<Toolset>();
-            toolsets.Add(new Toolset("66", "x", new ProjectCollection(), null));
-            toolsets.Add(new Toolset("44", "y", new ProjectCollection(), null));
+
+            using var colletionX = new ProjectCollection();
+            using var colletionY = new ProjectCollection();
+            toolsets.Add(new Toolset("66", "x", colletionX, null));
+            toolsets.Add(new Toolset("44", "y", colletionY, null));
 
             string result = InternalUtilities.CreateToolsVersionListString(toolsets);
 
             Assert.Equal("\"66\", \"44\"", result);
-        }
-
-        /// <summary>
-        /// Verify our custom way of getting env vars gives the same results as the BCL.
-        /// </summary>
-        [Fact]
-        public void GetEnvVars()
-        {
-            IDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
-            IDictionary referenceVars = Environment.GetEnvironmentVariables();
-            IDictionary<string, string> referenceVars2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (DictionaryEntry item in referenceVars)
-            {
-                referenceVars2.Add((string)item.Key, (string)item.Value);
-            }
-
-            Helpers.AssertCollectionsValueEqual(envVars, referenceVars2);
         }
 
         protected string GetXmlContents(string xmlText)

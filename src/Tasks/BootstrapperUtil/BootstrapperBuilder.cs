@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private const string ENGINE_PATH = "Engine"; // relative to bootstrapper path
         private const string SCHEMA_PATH = "Schemas"; // relative to bootstrapper path
-        private const string PACKAGE_PATH = "Packages"; // relative to bootstrapper path 
+        private const string PACKAGE_PATH = "Packages"; // relative to bootstrapper path
         private const string RESOURCES_PATH = "";
 
         private const string BOOTSTRAPPER_NAMESPACE = "http://schemas.microsoft.com/developer/2004/01/bootstrapper";
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     configElement.AppendChild(applicationElement);
                 }
 
-                // Key: File hash, Value: A DictionaryEntry whose Key is "EULAx" and value is a 
+                // Key: File hash, Value: A DictionaryEntry whose Key is "EULAx" and value is a
                 // fully qualified path to a eula. It can be any eula that matches the hash.
                 var eulas = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.Ordinal);
 
@@ -225,7 +225,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     var fi = new FileInfo(de.Value);
                     using (FileStream fs = fi.OpenRead())
                     {
-                        data = new StreamReader(fs).ReadToEnd();
+                        using var sr = new StreamReader(fs);
+                        data = sr.ReadToEnd();
                     }
 
                     resourceUpdater.AddStringResource(44, de.Key, data);
@@ -760,7 +761,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
 
                 // If we could not remove any products and there are still products in the queue
-                // there must be a loop in it. We'll break the loop by removing the dependencies 
+                // there must be a loop in it. We'll break the loop by removing the dependencies
                 // of the first project in the queue;
                 if (buildQueue.Count > 0 && productsToRemove.Count == 0)
                 {
@@ -828,81 +829,44 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 if (fileExists)
                 {
-                    var xmlTextReader = new XmlTextReader(filePath) { DtdProcessing = DtdProcessing.Ignore };
-
-                    XmlReader xmlReader = xmlTextReader;
-
+                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                    xmlReaderSettings.DtdProcessing = DtdProcessing.Ignore;
                     if (validate)
                     {
-#pragma warning disable 618 // Using XmlValidatingReader. TODO: We need to switch to using XmlReader.Create() with validation.
-                        var validatingReader = new XmlValidatingReader(xmlReader);
-#pragma warning restore 618
-                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
-                        FileStream fs = File.OpenRead(schemaPath);
-                        using (XmlReader xr = XmlReader.Create(fs, xrSettings))
+                        xmlReaderSettings.ValidationType = ValidationType.Schema;
+                        xmlReaderSettings.XmlResolver = null;
+                        xmlReaderSettings.ValidationEventHandler += results.SchemaValidationEventHandler; ;
+                        xmlReaderSettings.Schemas.Add(null, schemaPath);
+                    }
+
+                    using (StreamReader streamReader = new StreamReader(filePath))
+                    {
+                        using (XmlReader xmlReader = XmlReader.Create(streamReader, xmlReaderSettings, filePath))
                         {
                             try
                             {
-                                // first, add our schema to the validating reader's collection of schemas
-                                var xmlSchema = validatingReader.Schemas.Add(null, xr);
-
-                                // if our schema namespace gets out of sync,
-                                //   then all of our calls to SelectNodes and SelectSingleNode will fail
-                                Debug.Assert((xmlSchema != null) &&
-                                    string.Equals(schemaNamespace, xmlSchema.TargetNamespace, StringComparison.Ordinal),
-                                    System.IO.Path.GetFileName(schemaPath) + " and BootstrapperBuilder.vb have mismatched namespaces, so the BootstrapperBuilder will fail to work.");
-
-                                // if we're supposed to be validating, then hook up our handler
-                                validatingReader.ValidationEventHandler += results.SchemaValidationEventHandler;
-
-                                // switch readers so the doc does the actual read over the validating
-                                //   reader so we get validation events as we load the document
-                                xmlReader = validatingReader;
+                                Debug.Assert(_document != null, "our document should have been created by now!");
+                                xmlDocument = new XmlDocument(_document.NameTable);
+                                xmlDocument.Load(xmlReader);
                             }
                             catch (XmlException ex)
                             {
-                                Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
-                                validate = false;
+                                Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
+                                return null;
                             }
                             catch (System.Xml.Schema.XmlSchemaException ex)
                             {
-                                Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
-                                validate = false;
+                                Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
+                                return null;
                             }
                         }
-                    }
-
-                    try
-                    {
-                        Debug.Assert(_document != null, "our document should have been created by now!");
-                        xmlDocument = new XmlDocument(_document.NameTable);
-                        xmlDocument.Load(xmlReader);
-                    }
-                    catch (XmlException ex)
-                    {
-                        Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
-                        return null;
-                    }
-                    catch (System.Xml.Schema.XmlSchemaException ex)
-                    {
-                        Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
-                        return null;
-                    }
-                    finally
-                    {
-                        xmlReader.Close();
                     }
 
                     // Note that the xml document's default namespace must match the schema namespace
                     //   or none of our SelectNodes/SelectSingleNode calls will succeed
                     Debug.Assert(xmlDocument.DocumentElement != null &&
-                        string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal),
-                        "'" + xmlDocument.DocumentElement.NamespaceURI + "' is not '" + schemaNamespace + "'...");
-
-                    if ((xmlDocument.DocumentElement == null) ||
-                       (!string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal)))
-                    {
-                    }
+                                string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal),
+                                "'" + xmlDocument.DocumentElement.NamespaceURI + "' is not '" + schemaNamespace + "'...");
                 }
             }
 
@@ -1018,7 +982,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                             ReplacePackageFileAttributes(langElement, EULA_ATTRIBUTE, packageFilesNode, "PackageFile", "OldName", "SourcePath");
                                         }
 
-                                        // in general, we prefer the attributes of the language document over the 
+                                        // in general, we prefer the attributes of the language document over the
                                         //  attributes of the base document.  Copy attributes from the lang to the merged,
                                         //  and then merge all unique elements into merge
                                         foreach (XmlAttribute attribute in langElement.Attributes)
@@ -1240,12 +1204,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             XmlNode baseNode = baseElement.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":" + strNodeName, _xmlNamespaceManager);
 
             // There are 4 basic cases to be dealt with:
-            // Case #    1       2       3       4      
+            // Case #    1       2       3       4
             // base      null    null    present present
             // lang      null    present null    present
             // Result    null    lang    base    combine
             //
-            // Cases 1 - 3 are pretty trivial.  
+            // Cases 1 - 3 are pretty trivial.
             if (baseNode == null)
             {
                 if (langNode != null)
@@ -1657,7 +1621,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             // pre-signed anwyay; this is a fallback in case we ever encounter a bootstrapper that is
             // not signed.
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create(
+            using System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                 "System.Security.Cryptography.SHA256CryptoServiceProvider"
 #endif
@@ -2033,32 +1997,33 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     {
                         xmlwriter.Formatting = Formatting.Indented;
                         xmlwriter.Indentation = 4;
-                        xmlwriter.WriteNode(new XmlNodeReader(node), true);
+                        using var xmlReader = new XmlNodeReader(node);
+                        xmlwriter.WriteNode(xmlReader, true);
                     }
                 }
                 catch (IOException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (ArgumentException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (NotSupportedException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (XmlException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
             }
@@ -2077,22 +2042,22 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
                 catch (IOException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (ArgumentException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (NotSupportedException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
             }
@@ -2194,7 +2159,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 try
                 {
-                    var cert = new X509Certificate(fileSource);
+                    using var cert = new X509Certificate(fileSource);
                     string publicKey = cert.GetPublicKeyString();
                     return publicKey;
                 }
@@ -2242,12 +2207,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             var includedProducts = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase)
             {
-                // Add in this product in case there is a circular includes: 
+                // Add in this product in case there is a circular includes:
                 // we won't continue to explore this product.  It will be removed later.
                 { product.ProductCode, product }
             };
 
-            // Recursively add included products 
+            // Recursively add included products
             foreach (Product p in product.Includes)
             {
                 AddIncludedProducts(p, includedProducts);

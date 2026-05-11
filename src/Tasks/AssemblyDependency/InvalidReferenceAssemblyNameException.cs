@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// There reference is not a well-formed fusion name *and* its not a file 
+    /// There reference is not a well-formed fusion name *and* its not a file
     /// that exists on disk.
     /// </summary>
     [Serializable]

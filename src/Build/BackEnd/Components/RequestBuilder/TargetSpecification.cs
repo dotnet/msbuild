@@ -37,7 +37,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets or sets the target name            
+        /// Gets or sets the target name
         /// </summary>
         public string TargetName => _targetName;
 

@@ -6,4 +6,4 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <summary>
 /// Enumerates the supported message severities.
 /// </summary>
-internal enum MessageSeverity { Warning, Error }
+internal enum MessageSeverity { Message, Warning, Error }

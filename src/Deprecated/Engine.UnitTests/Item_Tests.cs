@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
                 Assertion.Assert(") should exclude both from );%29", i9Items.Count == 0);
                 Assertion.Assert("%2a should exclude %2a", i10Items.Count == 0);
                 Assertion.Assert("* matching foo should exclude foo", i11Items.Count == 0);
-                Assertion.Assert("* should exclude *", i12Items.Count == 0); 
+                Assertion.Assert("* should exclude *", i12Items.Count == 0);
             }
             finally
             {
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests
                         </Compile>
                         <CultureItem Include=`french`/>
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -145,20 +145,20 @@ namespace Microsoft.Build.UnitTests
             BuildItemGroup iItems = project.GetEvaluatedItemsByName("i");
             // I believe it is safe to assume ordering as ItemGroup is backed up by an ArrayList
             Assertion.Assert(iItems[0].FinalItemSpecEscaped == "i1");
-            Assertion.Assert(!iItems[0].HasMetadata("Culture")); // Does not have it 
+            Assertion.Assert(!iItems[0].HasMetadata("Culture")); // Does not have it
             Assertion.Assert(iItems[1].FinalItemSpecEscaped == "i2");
             Assertion.Assert(iItems[1].HasMetadata("Culture"));
             Assertion.Assert(iItems[1].HasMetadata("CuLtUrE"));
             Assertion.Assert(iItems[1].GetMetadata("CuLtUrE") == "klingon");
             Assertion.Assert(iItems[2].FinalItemSpecEscaped == "i3");
             Assertion.Assert(iItems[2].HasMetadata("Culture"));
-            Assertion.Assert(iItems[2].GetMetadata("Culture") == ""); 
+            Assertion.Assert(iItems[2].GetMetadata("Culture") == "");
             Assertion.Assert(iItems[3].FinalItemSpecEscaped == "i4");
             Assertion.Assert(iItems[3].HasMetadata("Culture"));
-            Assertion.Assert(iItems[3].GetMetadata("Culture") == ""); 
+            Assertion.Assert(iItems[3].GetMetadata("Culture") == "");
             Assertion.Assert(iItems[4].FinalItemSpecEscaped == "i1");
-            Assertion.Assert(iItems[4].HasMetadata("Culture")); 
-            Assertion.Assert(iItems[4].GetMetadata("Culture") == "vulcan"); 
+            Assertion.Assert(iItems[4].HasMetadata("Culture"));
+            Assertion.Assert(iItems[4].GetMetadata("Culture") == "vulcan");
         }
 
         [Test]

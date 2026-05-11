@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Retrieves the build event context
         /// UNDONE: (Refactor) We eventually want to remove this because all logging should go
-        /// through a context object.  This exists only so we can make certain 
+        /// through a context object.  This exists only so we can make certain
         /// logging calls in code which has not yet been fully refactored.
         /// </summary>
         public BuildEventContext BuildEventContext

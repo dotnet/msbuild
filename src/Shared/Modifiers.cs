@@ -27,11 +27,11 @@ namespace Microsoft.Build.Shared
 #if DEBUG
             /// <summary>
             /// Whether to dump when a modifier is in the "wrong" (slow) casing
-            /// </summary>       
+            /// </summary>
             private static readonly bool s_traceModifierCasing = (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTRACEMODIFIERCASING")));
 #endif
 
-            // NOTE: If you add an item here that starts with a new letter, you need to update the case 
+            // NOTE: If you add an item here that starts with a new letter, you need to update the case
             // statements in IsItemSpecModifier and IsDerivableItemSpecModifier.
             internal const string FullPath = "FullPath";
             internal const string RootDir = "RootDir";
@@ -83,21 +83,21 @@ namespace Microsoft.Build.Shared
                 }
 
 
-                /* 
+                /*
                  * What follows requires some explanation.
-                 * 
-                 * This function is called many times and slowness here will be amplified 
+                 *
+                 * This function is called many times and slowness here will be amplified
                  * in critical performance scenarios.
-                 * 
+                 *
                  * The following switch statement attempts to identify item spec modifiers that
-                 * have the exact case that our constants in ItemSpecModifiers have. This is the 
+                 * have the exact case that our constants in ItemSpecModifiers have. This is the
                  * 99% case.
-                 * 
+                 *
                  * Further, the switch statement can identify certain cases in which there is
                  * definitely no chance that 'name' is an item spec modifier. For example, a
                  * 7 letter 'name' that doesn't start with 'r' or 'R' can't be RootDir and
                  * therefore is not an item spec modifier.
-                 * 
+                 *
                  */
                 switch (name.Length)
                 {
@@ -245,8 +245,8 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// Indicates if the given name is reserved for one of the specific subset of itemspec 
-            /// modifiers to do with the defining project of the item. 
+            /// Indicates if the given name is reserved for one of the specific subset of itemspec
+            /// modifiers to do with the defining project of the item.
             /// </summary>
             internal static bool IsDefiningProjectModifier(string name)
             {
@@ -321,7 +321,7 @@ namespace Microsoft.Build.Shared
                     {
                         if (name[0] == 'R' || name[0] == 'r')
                         {
-                            // The only 12 letter ItemSpecModifier that starts with 'R' is 'RecursiveDir' 
+                            // The only 12 letter ItemSpecModifier that starts with 'R' is 'RecursiveDir'
                             return false;
                         }
                     }
@@ -342,7 +342,7 @@ namespace Microsoft.Build.Shared
 
             /// <summary>
             /// Performs path manipulations on the given item-spec as directed.
-            /// 
+            ///
             /// Supported modifiers:
             ///     %(FullPath)         = full path of item
             ///     %(RootDir)          = root directory of item
@@ -355,7 +355,7 @@ namespace Microsoft.Build.Shared
             ///     %(ModifiedTime)     = last write time of item
             ///     %(CreatedTime)      = creation time of item
             ///     %(AccessedTime)     = last access time of item
-            /// 
+            ///
             /// NOTES:
             /// 1) This method always returns an empty string for the %(RecursiveDir) modifier because it does not have enough
             ///    information to compute it -- only the BuildItem class can compute this modifier.
@@ -366,10 +366,10 @@ namespace Microsoft.Build.Shared
             /// 1) successive slashes are combined into 1 slash
             /// 2) trailing periods are discarded
             /// 3) forward slashes are changed to back-slashes
-            /// 
+            ///
             /// As a result, we cannot rely on any file-spec that has passed through a Path method to remain the same. We will
             /// therefore not bother preserving slashes and periods when file-specs are transformed.
-            /// 
+            ///
             /// Never returns null.
             /// </remarks>
             /// <param name="currentDirectory">The root directory for relative item-specs. When called on the Engine thread, this is the project directory. When called as part of building a task, it is null, indicating that the current directory should be used.</param>
@@ -531,7 +531,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            // File does not exist, or path is a directory                        
+                            // File does not exist, or path is a directory
                             modifiedItemSpec = String.Empty;
                         }
                     }
@@ -547,7 +547,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            // File does not exist, or path is a directory                        
+                            // File does not exist, or path is a directory
                             modifiedItemSpec = String.Empty;
                         }
                     }

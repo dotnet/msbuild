@@ -8,6 +8,7 @@
 
   <!-- NOTE: Using the fully qualified class name in a <UsingTask> tag is faster than using a partially qualified name. -->
 
+  <UsingTask TaskName="Microsoft.Build.Tasks.AddToWin32Manifest"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.AL"                                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.AspNetCompiler"                        AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.AssignCulture"                         AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -48,6 +49,7 @@
 
   <UsingTask TaskName="Microsoft.Build.Tasks.GenerateTrustInfo"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.GetAssemblyIdentity"                   AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.GetAssembliesMetadata"                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildRuntimeType)' == 'Full'"/>
   <UsingTask TaskName="Microsoft.Build.Tasks.GetCompatiblePlatform"                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.GetFileHash"                           AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.GetFrameworkPath"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -61,9 +63,10 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.Message"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Move"                                  AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.MSBuild"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.MSBuildInternalMessage"                AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ReadLinesFromFile"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
 
-  <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(DisableOutOfProcTaskHost)' != ''" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(DisableOutOfProcTaskHost)' != ''" />
   <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"                      AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR4" Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' != 'Core'" />
   <UsingTask TaskName="Microsoft.Build.Tasks.RegisterAssembly"                      AssemblyName="Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR2" Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' != 'Core'" />
 
@@ -84,7 +87,7 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.Telemetry"                             AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.Touch"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
 
-  <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(DisableOutOfProcTaskHost)' != ''" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(DisableOutOfProcTaskHost)' != ''" />
   <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR4" Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' != 'Core'" />
   <UsingTask TaskName="Microsoft.Build.Tasks.UnregisterAssembly"                    AssemblyName="Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="CLR2" Condition="'$(DisableOutOfProcTaskHost)' == '' and '$(MSBuildRuntimeType)' != 'Core'" />
 

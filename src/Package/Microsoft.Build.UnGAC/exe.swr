@@ -17,3 +17,8 @@ vs.installSize
 
 vs.payloads
     vs.payload source=$(BinDir)Microsoft.Build.UnGAC.exe
+
+vs.returnCodes
+  vs.returnCode type=success
+    exitCode=259
+    details="Suppress return-code 259 since this is a best-effort ."

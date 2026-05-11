@@ -35,22 +35,22 @@ namespace Microsoft.Build.CommandLine
         /// This is an appDomain instance if any is created for running this task
         /// </summary>
         /// <comments>
-        /// TaskAppDomain's non-serializability should never be an issue since even if we start running the wrapper 
+        /// TaskAppDomain's non-serializability should never be an issue since even if we start running the wrapper
         /// in a separate appdomain, we will not be trying to load the task on one side of the serialization
-        /// boundary and run it on the other.  
+        /// boundary and run it on the other.
         /// </comments>
         [NonSerialized]
         private AppDomain _taskAppDomain;
 #endif
 
         /// <summary>
-        /// Need to keep the build engine around in order to log from the task loader. 
+        /// Need to keep the build engine around in order to log from the task loader.
         /// </summary>
         private IBuildEngine buildEngine;
 
         /// <summary>
         /// Need to keep track of the task name also so that we can log valid information
-        /// from the task loader. 
+        /// from the task loader.
         /// </summary>
         private string taskName;
 
@@ -117,7 +117,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                // If it's a TargetInvocationException, we only care about the contents of the inner exception, 
+                // If it's a TargetInvocationException, we only care about the contents of the inner exception,
                 // so just save that instead.
                 Exception exceptionToReturn = e is TargetInvocationException ? e.InnerException : e;
 
@@ -177,11 +177,11 @@ namespace Microsoft.Build.CommandLine
 
 #if FEATURE_APARTMENT_STATE
         /// <summary>
-        /// Execute a task on the STA thread. 
+        /// Execute a task on the STA thread.
         /// </summary>
         /// <comment>
-        /// STA thread launching code lifted from XMakeBuildEngine\BackEnd\Components\RequestBuilder\TaskBuilder.cs, ExecuteTaskInSTAThread method.  
-        /// Any bug fixes made to this code, please ensure that you also fix that code.  
+        /// STA thread launching code lifted from XMakeBuildEngine\BackEnd\Components\RequestBuilder\TaskBuilder.cs, ExecuteTaskInSTAThread method.
+        /// Any bug fixes made to this code, please ensure that you also fix that code.
         /// </comment>
         private OutOfProcTaskHostTaskResult InstantiateAndExecuteTaskInSTAThread(
                 IBuildEngine oopTaskHostNode,
@@ -260,7 +260,7 @@ namespace Microsoft.Build.CommandLine
 #endif
 
         /// <summary>
-        /// Do the work of actually instantiating and running the task. 
+        /// Do the work of actually instantiating and running the task.
         /// </summary>
         private OutOfProcTaskHostTaskResult InstantiateAndExecuteTask(
                 IBuildEngine oopTaskHostNode,
@@ -307,8 +307,8 @@ namespace Microsoft.Build.CommandLine
             {
                 Exception exceptionToReturn = e;
 
-                // If it's a TargetInvocationException, we only care about the contents of the inner exception, 
-                // so just save that instead. 
+                // If it's a TargetInvocationException, we only care about the contents of the inner exception,
+                // so just save that instead.
                 if (e is TargetInvocationException)
                 {
                     exceptionToReturn = e.InnerException;
@@ -347,7 +347,7 @@ namespace Microsoft.Build.CommandLine
                     return new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
                 }
 
-                // If it didn't crash and return before now, we're clear to go ahead and execute here. 
+                // If it didn't crash and return before now, we're clear to go ahead and execute here.
                 success = wrappedTask.Execute();
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -369,9 +369,9 @@ namespace Microsoft.Build.CommandLine
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        // If it's not a critical exception, we assume there's some sort of problem in the parameter getter -- 
-                        // so save the exception, and we'll re-throw once we're back on the main node side of the 
-                        // communications pipe.  
+                        // If it's not a critical exception, we assume there's some sort of problem in the parameter getter --
+                        // so save the exception, and we'll re-throw once we're back on the main node side of the
+                        // communications pipe.
                         finalParameterValues[value.Name] = e;
                     }
                 }

@@ -54,7 +54,7 @@ namespace Microsoft.Build.BackEnd
         BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata);
 
         /// <summary>
-        /// Gets a matching configuration.  If no such configration exists, one is created and optionally loaded.
+        /// Gets a matching configuration. If no such configuration exists, one is created and optionally loaded.
         /// </summary>
         /// <param name="configMetadata">The configuration metadata to match.</param>
         /// <param name="callback">Callback to be invoked if the configuration does not exist.</param>
@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd
         void ClearConfigurations();
 
         /// <summary>
-        /// Clear non explicltly loaded configurations. 
+        /// Clear non explicltly loaded configurations.
         /// </summary>
         /// <returns>The configuration ids which have been cleared.</returns>
         List<int> ClearNonExplicitlyLoadedConfigurations();

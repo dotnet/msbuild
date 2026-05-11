@@ -47,7 +47,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Get or set the content of the first sub-element 
+        /// Get or set the content of the first sub-element
         /// with the provided name.
         /// </summary>
         public string this[string name]

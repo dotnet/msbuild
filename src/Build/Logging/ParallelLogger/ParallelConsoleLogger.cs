@@ -181,7 +181,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Reset the states of per-build member variables
-        /// VSW#516376 
+        /// VSW#516376
         /// </summary>
         internal override void ResetConsoleLoggerState()
         {
@@ -339,7 +339,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// At the end of the build, repeats the errors and warnings that occurred 
+        /// At the end of the build, repeats the errors and warnings that occurred
         /// during the build, and displays the error count and warning count.
         /// Does this in a "flat" style, without context.
         /// </summary>
@@ -351,7 +351,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // If we're showing only warnings and/or errors, don't summarize.
-            // This is the buildc.err case. There's no point summarizing since we'd just 
+            // This is the buildc.err case. There's no point summarizing since we'd just
             // repeat the entire log content again.
             if (showOnlyErrors || showOnlyWarnings)
             {
@@ -384,7 +384,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// At the end of the build, repeats the errors and warnings that occurred 
+        /// At the end of the build, repeats the errors and warnings that occurred
         /// during the build, and displays the error count and warning count.
         /// Does this in a "nested" style.
         /// </summary>
@@ -396,7 +396,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // If we're showing only warnings and/or errors, don't summarize.
-            // This is the buildc.err case. There's no point summarizing since we'd just 
+            // This is the buildc.err case. There's no point summarizing since we'd just
             // repeat the entire log content again.
             if (showOnlyErrors || showOnlyWarnings)
             {
@@ -427,13 +427,13 @@ namespace Microsoft.Build.BackEnd.Logging
             foreach (BuildEventArgs errorWarningEventArgs in listToProcess)
             {
                 // Target event may be null for a couple of reasons:
-                // 1) If the event was from a project load, or engine 
+                // 1) If the event was from a project load, or engine
                 // 2) If the flushing of the event queue for each request and result is turned off
                 // as this could cause errors and warnings to be seen by the logger after the target finished event
                 // which would cause the error or warning to have no matching target started event as they are removed
                 // when a target finished event is logged.
-                // 3) On NORMAL verbosity if the error or warning occurs in a project load then the error or warning and the target started event will be forwarded to 
-                // different forwarding loggers which cannot communicate to each other, meaning there will be no matching target started event logged 
+                // 3) On NORMAL verbosity if the error or warning occurs in a project load then the error or warning and the target started event will be forwarded to
+                // different forwarding loggers which cannot communicate to each other, meaning there will be no matching target started event logged
                 // as the forwarding logger did not know to forward the target started event
                 string targetName = null;
                 TargetStartedEventMinimumFields targetEvent = _buildEventManager.GetTargetStartedEvent(errorWarningEventArgs.BuildEventContext);
@@ -705,7 +705,7 @@ namespace Microsoft.Build.BackEnd.Logging
                             }
                         }
 
-                        // In single proc only make a space between the project done event and the next line, this 
+                        // In single proc only make a space between the project done event and the next line, this
                         // is to increase the readability on the single proc log when there are a number of done events
                         // or a mix of done events and project started events. Also only do this on the console and not any log file.
                         if (NumberOfProcessors == 1 && runningWithCharacterFileType)
@@ -725,7 +725,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Writes out the list of property names and their values.
         /// This could be done at any time during the build to show the latest
-        /// property values, using the cached reference to the list from the 
+        /// property values, using the cached reference to the list from the
         /// appropriate ProjectStarted event.
         /// </summary>
         /// <param name="e">A <see cref="BuildEventArgs"/> object containing information about the build event.</param>
@@ -792,7 +792,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Writes out the list of item specs and their metadata.
         /// This could be done at any time during the build to show the latest
-        /// items, using the cached reference to the list from the 
+        /// items, using the cached reference to the list from the
         /// appropriate ProjectStarted event.
         /// </summary>
         /// <param name="e">A <see cref="BuildEventArgs"/> object containing information about the build event.</param>
@@ -1026,10 +1026,10 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void ErrorHandler(object sender, BuildErrorEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
-            // Keep track of the number of error events raised 
+            // Keep track of the number of error events raised
             errorCount++;
 
-            // If there is an error we need to walk up the call stack and make sure that 
+            // If there is an error we need to walk up the call stack and make sure that
             // the project started events back to the root project know an error has occurred
             // and are not removed when they finish
             _buildEventManager.SetErrorWarningFlagOnCallStack(e.BuildEventContext);
@@ -1075,7 +1075,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Keep track of the number of warning events raised during the build
             warningCount++;
 
-            // If there is a warning we need to walk up the call stack and make sure that 
+            // If there is a warning we need to walk up the call stack and make sure that
             // the project started events back to the root project know a warning has occurred
             // and are not removed when they finish
             _buildEventManager.SetErrorWarningFlagOnCallStack(e.BuildEventContext);
@@ -1149,7 +1149,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (print)
             {
-                // If the event has a valid Project contextId but the project started event has not been fired, the message needs to be 
+                // If the event has a valid Project contextId but the project started event has not been fired, the message needs to be
                 // buffered until the project started event is fired
                 if (
                        _hasBuildStarted
@@ -1221,14 +1221,14 @@ namespace Microsoft.Build.BackEnd.Logging
                 return;
             }
 
-            // Display any project started events which were deferred until a visible 
+            // Display any project started events which were deferred until a visible
             // message from their project is displayed
             if (IsVerbosityAtLeast(LoggerVerbosity.Normal))
             {
                 DisplayDeferredProjectStartedEvent(e);
             }
 
-            // Display any target started events which were deferred until a visible 
+            // Display any target started events which were deferred until a visible
             // message from their target is displayed
             if (IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
@@ -1554,7 +1554,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         resetColor();
                     }
 
-                    // Make the last shown build event context to be null so that the next message will always print out the target name. If this is not null 
+                    // Make the last shown build event context to be null so that the next message will always print out the target name. If this is not null
                     // then the first message after the project started event will not have the target name printed out which was causing some confusion.
                     ShownBuildEventContext(null);
                 }

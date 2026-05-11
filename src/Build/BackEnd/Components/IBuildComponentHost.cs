@@ -142,6 +142,11 @@ namespace Microsoft.Build.BackEnd
         /// The component which launches new MSBuild nodes.
         /// </summary>
         NodeLauncher,
+
+        /// <summary>
+        /// The Build Analyzer Manager.
+        /// </summary>
+        BuildCheckManagerProvider,
     }
 
     /// <summary>

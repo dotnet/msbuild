@@ -218,7 +218,7 @@ namespace Microsoft.Build.Construction
                     uniqueEntries.Add(entry);
                     ErrorUtilities.VerifyThrow(entry.RefCount > 0, "extra deref");
 
-                    // We only ever create one StringCacheEntry instance per unique string, and that instance should be 
+                    // We only ever create one StringCacheEntry instance per unique string, and that instance should be
                     // the same in both collections.
                     ErrorUtilities.VerifyThrow(Object.ReferenceEquals(entry, _strings[entry.CachedString]), "bad state");
                 }
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Handle event that is fired when an entry in the project root element cache is removed 
+        /// Handle event that is fired when an entry in the project root element cache is removed
         /// from its strong cache.
         /// </summary>
         /// <remarks>

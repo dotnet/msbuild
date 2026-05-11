@@ -1,0 +1,5 @@
+# .git-blame-ignore-revs
+# Removed trailing whitespace from *.cs,*.props,*.targets
+9a0cef6f75bf13ffbbde956b8f7d7ad7d6e0d996
+# Remove trailing whitespace from many *.cs files
+629447b151dc49cf4d9a57719beff12983cf1907

@@ -15,7 +15,7 @@ namespace Microsoft.Build.Evaluation
     internal class StringMetadataTable : IMetadataTable
     {
         /// <summary>
-        /// Table of metadata values. 
+        /// Table of metadata values.
         /// Each key may be qualified ("itemtype.name") or unqualified ("name").
         /// Unqualified are considered to apply to all item types.
         /// May be null, if empty.

@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests
             var metadatam = projectItem.GetMetadata("m");
             if (context)
             {
-                // Go to when 
+                // Go to when
                 Assert.Equal("m1", metadatam.EvaluatedValue);
             }
             else

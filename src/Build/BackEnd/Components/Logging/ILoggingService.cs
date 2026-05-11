@@ -100,7 +100,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
-        /// This is used by the node provider to get a list of registered descriptions so that 
+        /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
         /// </summary>
         ICollection<LoggerDescription> LoggerDescriptions
@@ -570,7 +570,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file which is being built</param>
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
-        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode);
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
+        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyLocation);
 
         /// <summary>
         /// Log that a task is about to start
@@ -581,8 +582,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
         /// <param name="line">The line number in the file where the task invocation is located.</param>
         /// <param name="column">The column number in the file where the task invocation is located.</param>
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
         /// <returns>The task build event context</returns>
-        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column);
+        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyLocation);
 
         /// <summary>
         /// Log that a task has just completed
@@ -616,13 +618,13 @@ namespace Microsoft.Build.BackEnd.Logging
     }
 
     /// <summary>
-    /// Acts as an endpoint for a buildEventArg. The objects which implement this interface are intended to consume the BuildEventArg. 
+    /// Acts as an endpoint for a buildEventArg. The objects which implement this interface are intended to consume the BuildEventArg.
     /// </summary>
     internal interface IBuildEventSink
     {
         #region Properties
         /// <summary>
-        /// Provide a the sink a friendly name which can be used to distinguish sinks in memory 
+        /// Provide a the sink a friendly name which can be used to distinguish sinks in memory
         /// and for display
         /// </summary>
         string Name

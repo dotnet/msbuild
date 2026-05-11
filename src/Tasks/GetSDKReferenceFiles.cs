@@ -247,7 +247,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                // Filter out all references tagged as RuntimeReferenceOnly 
+                // Filter out all references tagged as RuntimeReferenceOnly
                 IEnumerable<ITaskItem> filteredResolvedSDKReferences = ResolvedSDKReferences.Where(
                     sdkReference => !MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly"));
 
@@ -791,7 +791,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // We only care about the file name and not the path because if they have the same file name but different paths then they will likely contain
-                // the same namespaces and the compiler does not like to have two references with the same namespace passed at once without aliasing and 
+                // the same namespaces and the compiler does not like to have two references with the same namespace passed at once without aliasing and
                 // we have no way to do aliasing per assembly since we are grabbing a bunch of files at once.)
                 return String.Equals(FileName, other.FileName, StringComparison.OrdinalIgnoreCase);
             }

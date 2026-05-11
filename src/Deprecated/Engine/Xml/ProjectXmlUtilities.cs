@@ -154,8 +154,8 @@ namespace Microsoft.Build.BuildEngine
                         condition = attribute;
                         break;
 
-                    // Label  is only recognized by the new OM.  
-                    // Ignore BUT ONLY if the caller of this function is a 
+                    // Label  is only recognized by the new OM.
+                    // Ignore BUT ONLY if the caller of this function is a
                     // PropertyGroup, ItemDefinitionGroup, or ItemGroup: the "Label"
                     // attribute is only legal on those element types.
                     case XMakeAttributes.label:
@@ -200,7 +200,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Returns the value of the attribute. 
+        /// Returns the value of the attribute.
         /// If the attribute is null, returns an empty string.
         /// </summary>
         internal static string GetAttributeValue(XmlAttribute attribute)

@@ -150,6 +150,11 @@ namespace Microsoft.Build.Utilities
         private string _temporaryBatchFile;
 
         /// <summary>
+        /// The encoding set to the console code page.
+        /// </summary>
+        private Encoding _encoding;
+
+        /// <summary>
         /// Implemented by the derived class. Returns a string which is the name of the underlying .EXE to run e.g. "resgen.exe"
         /// Only used by the ToolExe getter.
         /// </summary>
@@ -229,7 +234,21 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        protected virtual Encoding StandardOutputEncoding => EncodingUtilities.CurrentSystemOemEncoding;
+        protected virtual Encoding StandardOutputEncoding
+        {
+            get
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                {
+                    if (_encoding != null)
+                    {
+                        // Keep the encoding of standard output & error consistent with the console code page.
+                        return _encoding;
+                    }
+                }
+                return EncodingUtilities.CurrentSystemOemEncoding;
+            }
+        }
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard error stream
@@ -239,7 +258,21 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        protected virtual Encoding StandardErrorEncoding => EncodingUtilities.CurrentSystemOemEncoding;
+        protected virtual Encoding StandardErrorEncoding
+        {
+            get
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                {
+                    if (_encoding != null)
+                    {
+                        // Keep the encoding of standard output & error consistent with the console code page.
+                        return _encoding;
+                    }
+                }
+                return EncodingUtilities.CurrentSystemOemEncoding;
+            }
+        }
 
         /// <summary>
         /// Gets the Path override value.
@@ -659,6 +692,19 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// We expect tasks to override this method if they need information about the tool process or its process events during task execution.
+        /// Implementation should make sure that the task is started in this method.
+        /// Starts the process during task execution. 
+        /// </summary>
+        /// <param name="proc">Fully populated <see cref="Process"/> instance representing the tool process to be started.</param>
+        /// <returns>A started process. This could be <paramref name="proc"/> or another <see cref="Process"/> instance.</returns>
+        protected virtual Process StartToolProcess(Process proc)
+        {
+            proc.Start();
+            return proc;
+        }
+
+        /// <summary>
         /// Writes out a temporary response file and shell-executes the tool requested.  Enables concurrent
         /// logging of the output of the tool.
         /// </summary>
@@ -714,7 +760,7 @@ namespace Microsoft.Build.Utilities
                 ExitCode = -1;
 
                 // Start the process
-                proc.Start();
+                proc = StartToolProcess(proc);
 
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.
@@ -1126,7 +1172,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.EventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveExitNotification(object sender, EventArgs e)
+        protected void ReceiveExitNotification(object sender, EventArgs e)
         {
             ErrorUtilities.VerifyThrow(_toolExited != null,
                 "The signalling event for tool exit must be available.");
@@ -1149,7 +1195,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
+        protected void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
 
         /// <summary>
         /// Queues up the output from the stdout stream of the process executing
@@ -1160,7 +1206,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
+        protected void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
 
         /// <summary>
         /// Queues up the output from either the stderr or stdout stream of the
@@ -1404,6 +1450,10 @@ namespace Microsoft.Build.Utilities
                         }
 
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                        {
+                            _encoding = encoding;
+                        }
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 

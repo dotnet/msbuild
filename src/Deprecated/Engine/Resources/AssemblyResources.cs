@@ -23,7 +23,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         private static ResourceManager msbuildExeResourceManager;
 
         /// <summary>
-        /// The internals of the Engine are exposed to MSBuild.exe, so they must share the same AssemblyResources class and 
+        /// The internals of the Engine are exposed to MSBuild.exe, so they must share the same AssemblyResources class and
         /// ResourceUtilities class that uses it. To make this possible, MSBuild.exe registers its resources here and they are
         /// normally consulted last. This assumes that there are no duplicated resource ID's between the Engine and MSBuild.exe.
         /// (Actually there are currently two: LoggerCreationError and LoggerNotFoundError.

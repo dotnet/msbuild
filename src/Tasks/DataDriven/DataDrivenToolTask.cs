@@ -80,7 +80,7 @@ namespace Microsoft.Build.Tasks.DataDriven
                 return activeToolSwitches;
             }
         }
-        
+
         /// <summary>
         /// The additional options that have been set. These are raw switches that
         /// go last on the command line.
@@ -98,13 +98,13 @@ namespace Microsoft.Build.Tasks.DataDriven
         }
 
         /// <summary>
-        /// Overridden to use UTF16, which works better than UTF8 for older versions of CL, LIB, etc. 
+        /// Overridden to use UTF16, which works better than UTF8 for older versions of CL, LIB, etc.
         /// </summary>
         protected override Encoding ResponseFileEncoding
         {
-            get 
-            { 
-                return Encoding.Unicode; 
+            get
+            {
+                return Encoding.Unicode;
             }
         }
 
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// <returns></returns>
         override protected bool ValidateParameters()
         {
-            return !logPrivate.HasLoggedErrors && !Log.HasLoggedErrors; 
+            return !logPrivate.HasLoggedErrors && !Log.HasLoggedErrors;
         }
 
 #if WHIDBEY_BUILD
@@ -174,7 +174,7 @@ namespace Microsoft.Build.Tasks.DataDriven
             {
                 if (ExceptionHandling.NotExpectedException(e))
                     throw;
-                // Warn only -- occasionally temp files fail to delete because of virus checkers; we 
+                // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
                 Log.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message);
             }
@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// Returns the generated command line
         /// </summary>
         /// <returns></returns>
-        internal string GetCommandLine_ForUnitTestsOnly() 
+        internal string GetCommandLine_ForUnitTestsOnly()
         {
             return GenerateResponseFileCommands();
         }
@@ -209,7 +209,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// Creates the command line and returns it as a string by:
         /// 1. Adding all switches with the default set to the active switch list
         /// 2. Customizing the active switch list (overridden in derived classes)
-        /// 3. Iterating through the list and appending switches 
+        /// 3. Iterating through the list and appending switches
         /// </summary>
         /// <returns></returns>
         protected override string GenerateResponseFileCommands()
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// <returns></returns>
         protected virtual bool VerifyDependenciesArePresent(ToolSwitch property)
         {
-            // check the dependency 
+            // check the dependency
             if (property.Parents.Count > 0)
             {
                 // has a dependency, now check to see whether at least one parent is set
@@ -435,11 +435,11 @@ namespace Microsoft.Build.Tasks.DataDriven
         }
 
         /// <summary>
-        /// Checks to see if the argument is required and whether an argument exists, and returns the 
+        /// Checks to see if the argument is required and whether an argument exists, and returns the
         /// argument or else fallback argument if it exists.
-        /// 
+        ///
         /// These are the conditions to look at:
-        /// 
+        ///
         /// ArgumentRequired    ArgumentParameter   FallbackArgumentParameter   Result
         /// true                isSet               NA                          The value in ArgumentParameter gets returned
         /// true                isNotSet            isSet                       The value in FallbackArgumentParamter gets returned
@@ -452,7 +452,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// <returns></returns>
         protected virtual string GetEffectiveArgumentsValues(ToolSwitch toolSwitch)
         {
-            //if (!toolSwitch.ArgumentRequired && !IsPropertySet(toolSwitch.ArgumentParameter) && 
+            //if (!toolSwitch.ArgumentRequired && !IsPropertySet(toolSwitch.ArgumentParameter) &&
             //    !IsPropertySet(toolSwitch.FallbackArgumentParameter))
             //{
             //    return String.Empty;
@@ -519,7 +519,7 @@ namespace Microsoft.Build.Tasks.DataDriven
                         str += "\"";
                 }
 
-                //we want quotes always, AppendSwitchIfNotNull will add them on as needed bases 
+                //we want quotes always, AppendSwitchIfNotNull will add them on as needed bases
                 clb.AppendSwitchUnquotedIfNotNull(toolSwitch.SwitchValue + toolSwitch.Separator, str);
             }
         }
@@ -552,10 +552,10 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// The switch may be empty.
         /// </summary>
         /// <remarks>For stringarray switches (e.g., Sources), the toolSwitchName (if it exists) is emitted
-        /// along with each and every one of the file names separately (if no separator is included), or with all of the 
+        /// along with each and every one of the file names separately (if no separator is included), or with all of the
         /// file names separated by the separator.
         /// e.g., AdditionalIncludeDirectores = "@(Files)" where Files has File1, File2, and File3, the switch
-        /// /IFile1 /IFile2 /IFile3 or the switch /IFile1;File2;File3 is emitted (the latter case has a separator 
+        /// /IFile1 /IFile2 /IFile3 or the switch /IFile1;File2;File3 is emitted (the latter case has a separator
         /// ";" specified)</remarks>
         /// <param name="clb"></param>
         /// <param name="toolSwitch"></param>
@@ -564,7 +564,7 @@ namespace Microsoft.Build.Tasks.DataDriven
             string[] ArrTrimStringList = new string [toolSwitch.StringList.Length];
             for (int i=0; i<toolSwitch.StringList.Length; ++i)
             {
-                //Make sure the file doesn't contain escaped " (\") 
+                //Make sure the file doesn't contain escaped " (\")
                 if (toolSwitch.StringList[i].StartsWith("\"") && toolSwitch.StringList[i].EndsWith("\""))
                 {
                     ArrTrimStringList[i] = toolSwitch.StringList[i].Substring(1, toolSwitch.StringList[i].Length - 2);
@@ -589,7 +589,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         }
 
         /// <summary>
-        /// Generates the switches for switches that either have literal strings appended, or have 
+        /// Generates the switches for switches that either have literal strings appended, or have
         /// different switches based on what the property is set to.
         /// </summary>
         /// <remarks>The string switch emits a switch that depends on what the parameter is set to, with and
@@ -601,7 +601,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         {
             String strSwitch = String.Empty;
             strSwitch += toolSwitch.SwitchValue + toolSwitch.Separator;
-            
+
             StringBuilder val = new StringBuilder(GetEffectiveArgumentsValues(toolSwitch));
             String str = toolSwitch.Value;
 
@@ -625,7 +625,7 @@ namespace Microsoft.Build.Tasks.DataDriven
                 return;
 
             clb.AppendSwitchUnquotedIfNotNull(strSwitch, val.ToString());
-            
+
         }
 
         /// <summary>
@@ -655,7 +655,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// <summary>
         /// Generates the command line for switches that are reversible
         /// </summary>
-        /// <remarks>A reversible boolean switch will emit a certain switch if set to true, but emit that 
+        /// <remarks>A reversible boolean switch will emit a certain switch if set to true, but emit that
         /// exact same switch with a flag appended on the end if set to false.
         /// e.g., GlobalOptimizations = "true" will emit /Og, and GlobalOptimizations = "false" will emit /Og-</remarks>
         /// <param name="clb"></param>
@@ -710,9 +710,9 @@ namespace Microsoft.Build.Tasks.DataDriven
                 logPrivate.LogErrorFromResources("ArgumentOutOfRange", switchName, value);
                 return false;
             }
-           
+
             return true;
-            
+
         }
 
         /// <summary>
@@ -785,7 +785,7 @@ namespace Microsoft.Build.Tasks.DataDriven
                 return false;
             }
         }
-        
+
         /// <summary>
         /// Checks to see if the switch name is empty
         /// </summary>

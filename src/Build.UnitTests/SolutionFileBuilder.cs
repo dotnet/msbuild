@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 // --------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
+//
 // --------------------------------------------------------------------
 
 using System;

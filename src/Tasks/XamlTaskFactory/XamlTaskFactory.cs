@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks
             // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
-            // create the code generator options    
+            // create the code generator options
             // Since we are running msbuild 12.0 these had better load.
             var compilerParameters = new CompilerParameters(
                 new[]
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Tasks
             };
 
             // create the code provider
-            var codegenerator = CodeDomProvider.CreateProvider("cs");
+            using var codegenerator = CodeDomProvider.CreateProvider("cs");
             CompilerResults results;
             bool debugXamlTask = Environment.GetEnvironmentVariable("MSBUILDWRITEXAMLTASK") == "1";
             if (debugXamlTask)

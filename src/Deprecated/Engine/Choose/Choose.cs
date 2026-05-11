@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
             ProjectXmlUtilities.VerifyThrowElementName(chooseElement, XMakeElements.choose);
 
             // Stack overflow guard. The only way in the MSBuild file format that MSBuild elements can be
-            // legitimately nested without limit is the <Choose> construct. So, enforce a nesting limit 
+            // legitimately nested without limit is the <Choose> construct. So, enforce a nesting limit
             // to avoid blowing our stack.
             nestingDepth++;
             ProjectErrorUtilities.VerifyThrowInvalidProject(nestingDepth <= maximumChooseNesting, chooseElement, "ChooseOverflow", maximumChooseNesting);

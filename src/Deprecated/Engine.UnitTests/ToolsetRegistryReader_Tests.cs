@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
         public void ReadRegistry_DeletedKey()
         {
             DeleteTestRegistryKey();
-            
+
             ToolsetReader reader = new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath));
             ToolsetCollection values = new ToolsetCollection(new Engine(ToolsetDefinitionLocations.None));
 
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests
         public void ReadRegistry_Basic()
         {
             RegistryKey key1 = toolsVersionsRegistryKey.CreateSubKey("tv1");
-            key1.SetValue("msbuildtoolspath", "c:\\xxx");            
+            key1.SetValue("msbuildtoolspath", "c:\\xxx");
             key1.SetValue("name1", "value1");
             RegistryKey key2 = toolsVersionsRegistryKey.CreateSubKey("tv2");
             key2.SetValue("name2", "value2");
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests
             Assertion.Assert(0 == String.Compare("c:\\yyy", values["tv2"].ToolsPath, StringComparison.OrdinalIgnoreCase));
             Assertion.Assert(0 == String.Compare("value2", values["tv2"].BuildProperties["name2"].Value, StringComparison.OrdinalIgnoreCase));
         }
-        
+
         /// <summary>
         /// Regular case of getting default tools version
         /// </summary>

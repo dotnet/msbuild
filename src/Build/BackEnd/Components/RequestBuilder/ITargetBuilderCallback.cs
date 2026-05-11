@@ -15,14 +15,14 @@ namespace Microsoft.Build.BackEnd
     internal interface ITargetBuilderCallback : IRequestBuilderCallback
     {
         /// <summary>
-        /// Invokes the specified targets using Dev9 behavior.  
+        /// Invokes the specified targets using Dev9 behavior.
         /// </summary>
         /// <param name="targets">The targets to build.</param>
         /// <param name="continueOnError">True to continue building the remaining targets if one fails.</param>
         /// <param name="referenceLocation">The <see cref="ElementLocation"/> of the reference.</param>
         /// <returns>The results for each target.</returns>
         /// <remarks>
-        /// The target is run using the data context of the Project, rather than the data context 
+        /// The target is run using the data context of the Project, rather than the data context
         /// of the current target.  This has the following effects:
         /// 1. Data visible to the CALLING target at the time it was first invoked is the only
         ///    data which the CALLED target can see.  No changes made between the time the CALLING

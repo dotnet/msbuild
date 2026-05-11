@@ -43,6 +43,6 @@ namespace Microsoft.Build.Framework.XamlTypes
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Concrete collection types required for XAML deserialization")]
         public List<NameValuePair> ProviderSettings { get; set; }
 
-        #endregion 
+        #endregion
     }
 }

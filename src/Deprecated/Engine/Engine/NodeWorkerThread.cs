@@ -86,7 +86,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This a base loop of a worker thread. The worker thread is asleep waiting for either an
-        /// event indicating that it should shut down or that it should become active and take 
+        /// event indicating that it should shut down or that it should become active and take
         /// ownership of the work item queue
         /// </summary>
         private void MainThreadLoop()
@@ -283,7 +283,7 @@ namespace Microsoft.Build.BuildEngine
                 else if (eventType == 1 && executionMode == NodeLoopExecutionMode.WaitingPassiveThread ||
                          eventType == 2 && executionMode == NodeLoopExecutionMode.WaitingActiveThread)
                 {
-                    // There maybe multiple results in the list so we need to loop over it 
+                    // There maybe multiple results in the list so we need to loop over it
                     // and store the results
                     int originalResultCount = resultCount;
                     lock (targetEvaluationResults)
@@ -291,7 +291,7 @@ namespace Microsoft.Build.BuildEngine
                         //Console.WriteLine("Worker thread for: " + nodeProxyId + " Got results");
                         LinkedListNode<BuildResult> currentNode = targetEvaluationResults.First;
                         while (currentNode != null)
-                        {   
+                        {
                             BuildResult buildResult = currentNode.Value;
                             ErrorUtilities.VerifyThrow(
                                             buildResult.RequestId < requestResults.Length,
@@ -315,7 +315,7 @@ namespace Microsoft.Build.BuildEngine
                     }
                 }
                 // Check if we need to update the state
-                if (executionMode == NodeLoopExecutionMode.BaseActiveThread && !threadActive) 
+                if (executionMode == NodeLoopExecutionMode.BaseActiveThread && !threadActive)
                 {
                     continueExecution = false;
                 }
@@ -364,7 +364,7 @@ namespace Microsoft.Build.BuildEngine
         internal static void WaitForResults(int nodeProxyId, BuildResult[] requestResults)
         {
             TaskWorkerThread workerThread = TaskWorkerThread.GetWorkerThreadForProxyId(nodeProxyId);
-            workerThread.NodeActionLoop(workerThread.threadActive ? NodeLoopExecutionMode.WaitingActiveThread : 
+            workerThread.NodeActionLoop(workerThread.threadActive ? NodeLoopExecutionMode.WaitingActiveThread :
                                         NodeLoopExecutionMode.WaitingPassiveThread,
                                         nodeProxyId, requestResults);
         }

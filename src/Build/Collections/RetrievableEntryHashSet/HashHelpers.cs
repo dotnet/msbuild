@@ -18,9 +18,9 @@ namespace Microsoft.Build.Collections
     /// </summary>
     internal static class HashHelpers
     {
-        // Table of prime numbers to use as hash table sizes. 
+        // Table of prime numbers to use as hash table sizes.
         // The entry used for capacity is the smallest prime number in this array
-        // that is larger than twice the previous capacity. 
+        // that is larger than twice the previous capacity.
 
         internal static readonly int[] primes = {
             3, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761, 919,
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Collections
                 }
             }
 
-            // Outside of our predefined table. Compute the hard way. 
+            // Outside of our predefined table. Compute the hard way.
             for (int i = (min | 1); i < Int32.MaxValue; i += 2)
             {
                 if (IsPrime(i))

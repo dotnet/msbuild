@@ -12,7 +12,7 @@ namespace Microsoft.Build.Framework.Profiler
     /// Evaluation main phases used by the profiler
     /// </summary>
     /// <remarks>
-    /// Order matters since the profiler pretty printer orders profiled items from top to bottom using 
+    /// Order matters since the profiler pretty printer orders profiled items from top to bottom using
     /// the pass they belong to
     /// </remarks>
     public enum EvaluationPass : byte

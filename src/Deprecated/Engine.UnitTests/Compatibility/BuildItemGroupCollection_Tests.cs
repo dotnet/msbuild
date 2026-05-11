@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void CountImportedOnly()
         {
-            string parentProjectContents = @" 
+            string parentProjectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <Import Project='import.proj' />
                     </Project>
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         {
             if (String.IsNullOrEmpty(importProjectContents))
             {
-                importProjectContents = @" 
+                importProjectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <n1ImportedItem1 Include='n1iImportedItem1' />
@@ -280,7 +280,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
             if (String.IsNullOrEmpty(parentProjectContents))
             {
-                parentProjectContents = @" 
+                parentProjectContents = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <ItemGroup>
                             <nMainItem1 Include='nMainItem1' />

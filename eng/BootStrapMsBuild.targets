@@ -1,0 +1,257 @@
+<Project>
+
+  <!--
+  Copies the binaries of MSBuild to a bootstrap folder so we can rebuild msbuild with itself.
+  On netcore it performs a directory copy.
+  On full framework it performs a more involved deployment.
+   -->
+
+  <PropertyGroup>
+    <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
+    <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
+
+    <!-- Needed to ensure that RuntimeTargetsCopyLocalItems is populated for full framework -->
+    <DisableRuntimeTargets>false</DisableRuntimeTargets>
+
+    <!-- Disable build acceleration for this non-standard project. The Bootstrap target must run after any of the dependencies changes.  -->
+    <AccelerateBuildsInVisualStudio>false</AccelerateBuildsInVisualStudio>
+  </PropertyGroup>
+
+  <Target Name="Bootstrap" DependsOnTargets="$(BootstrapDependsOn)"
+          AfterTargets="AfterBuild"
+          Condition="'$(CreateBootstrap)' != 'false'"/>
+
+  <Target Name="CleanBootstrapFolder">
+    <!-- This sometimes fails so it might need be retried. -->
+    <RemoveDir
+            Directories="$(BootstrapDestination)"
+            ContinueOnError="true"/>
+
+  </Target>
+  <Target Name="GatherNuGetDependencies" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+        <!-- Collect known NuGet dependencies after resolving packages -->
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'true'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'true'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'true'" />
+        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.Extensions.'))' == 'true'" />
+
+        <!-- NuGet.targets and NuGet.RestoreEx.targets will be in the RuntimeTargetsCopyLocalItems ItemGroup -->
+        <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'true'" />
+
+        <!-- NuGet.Build.Tasks.Console.exe will be in the None ItemGroup -->
+        <_NuGetRuntimeDependencies Include="%(None.Identity)" Condition="'@(None->Contains('NuGet.'))' == 'true'" />
+
+        <_NuGetRuntimeDependencies Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RemoveExtraAssemblyReferences" BeforeTargets="ResolveAssemblyReferences">
+    <!-- This is really hacky, but these references will cause issues when trying to 'build' this project.
+         To acquire the NuGet binaries we depend on for local run-time ('bootstrap'), we we are using a PackageReference (to
+         'NuGet.Build.Tasks' and 'Microsoft.Build.NuGetSdkResolver'). This has the advantage of using NuGets compatibility
+         check to ensure we choose the right version of those assemblies. But, at 'bootstrap' time these runtime dependencies
+         need to be in a specific location that does not mesh with NuGet. To resolve this, we include the default
+         PackageReference assets but will remove them from the Reference ItemGroup before RAR runs and avoid the warnings -->
+    <ItemGroup>
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'true'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
+    <ItemGroup>
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.dll" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.exe" />
+      <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
+      <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
+      <NuGetSdkResolverManifest Include="$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
+      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
+
+      <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
+
+      <ShimTargets Include="Microsoft.Data.Entity.targets" />
+      <ShimTargets Include="Microsoft.ServiceModel.targets" />
+      <ShimTargets Include="Microsoft.WinFx.targets" />
+      <ShimTargets Include="Microsoft.WorkflowBuildExtensions.targets" />
+      <ShimTargets Include="Microsoft.Xaml.targets" />
+      <ShimTargets Include="Workflow.Targets" />
+      <ShimTargets Include="Workflow.VisualBasic.Targets" />
+
+      <InstalledMicrosoftExtensions Include="$(MSBuildExtensionsPath)\Microsoft\**\*.*"
+                                    Exclude="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\NodeJs\**" />
+
+      <InstalledNuGetFiles Include="$(MSBuildExtensionsPath)\Microsoft\NuGet\*" />
+
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.tlb" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.pdb" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe.config" />
+      <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll.config" />
+
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.tlb" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.pdb" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.pdb" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe.config" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
+      <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
+
+      <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
+      <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.tlb" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe.config" />
+      <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.dll.config" />
+
+      <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.Common.props" />
+      <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.VisualStudioVersion.*.Common.props" />
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*props" Exclude="@(FreshlyBuiltRootProjects)" />
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*targets" />
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*tasks" />
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*xml" />
+      <RoslynBinaries Include="$(OutputPath)\..\..\15.0\Bin\Roslyn\**\*.*" />
+    </ItemGroup>
+
+    <!-- Copy in props and targets from the machine-installed MSBuildExtensionsPath -->
+    <Copy SourceFiles="@(InstalledVersionedExtensions)"
+          DestinationFiles="@(InstalledVersionedExtensions->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SdkResolverFiles)"
+          DestinationFiles="@(SdkResolverFiles->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(InstalledMicrosoftExtensions)"
+          DestinationFiles="@(InstalledMicrosoftExtensions->'$(BootstrapDestination)Microsoft\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(InstalledSdks)"
+          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(InstalledStaticAnalysisTools)"
+          DestinationFiles="@(InstalledStaticAnalysisTools -> '$(BootstrapDestination)..\Team Tools\Static Analysis Tools\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(InstalledNuGetFiles)"
+          DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
+          DestinationFolder="$(BootstrapDestination)..\Common7\IDE\CommonExtensions\Microsoft\NuGet\"
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(NuGetSdkResolverManifest)"
+          DestinationFolder="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver"
+          SkipUnchangedFiles="true" />
+
+    <!-- Delete shim projects, because they point where we can't follow. -->
+    <!-- It would be better to just not copy these. -->
+    <Delete Files="@(ShimTargets->'$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(FileName)%(Extension)')" />
+
+    <!-- Copy our binaries -->
+    <Copy SourceFiles="@(FreshlyBuiltBinaries)"
+          DestinationFiles="@(FreshlyBuiltBinaries -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="@(RoslynBinaries)"
+          DestinationFiles="@(RoslynBinaries -> '$(BootstrapDestination)15.0\Bin\Roslyn\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <!-- Copy our binaries to the x64 location. -->
+    <Copy SourceFiles="@(FreshlyBuiltBinariesx64)"
+          DestinationFiles="@(FreshlyBuiltBinariesx64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <!-- Copy our binaries to the arm64 location. -->
+    <Copy SourceFiles="@(FreshlyBuiltBinariesArm64)"
+          DestinationFiles="@(FreshlyBuiltBinariesArm64 -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
+    <Copy SourceFiles="@(FreshlyBuiltRootProjects)"
+          DestinationFiles="@(FreshlyBuiltRootProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FreshlyBuiltProjects)"
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FreshlyBuiltProjects)"
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FreshlyBuiltProjects)"
+          DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\arm64\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+
+    <!-- Disable workload resolver until we can figure out whether it can work in the bootstrap
+         https://github.com/dotnet/msbuild/issues/6566 -->
+    <MakeDir Directories="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver" />
+    <Touch Files="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel"
+           AlwaysCreate="true" />
+
+    <MakeDir Directories="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver" />
+    <Touch Files="$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\amd64\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\DisableWorkloadResolver.sentinel"
+           AlwaysCreate="true" />
+  </Target>
+
+  <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
+
+    <!-- Publish the project first.  The more obvious way to do this would be to depend on the Publish target,
+         but that causes a target dependency cycle, even though it seems like AfterTargets="AfterBuild" should
+         probably not count as a link in the cycle. -->
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="Publish" BuildInParallel="$(BuildInParallel)" />
+
+    <ItemGroup>
+      <!-- Copy all items from the publish folder to the bootstrap folder.  We might be able to just use the published
+            version as the bootstrapped version, but the extra separation here seems like it could be valuable. -->
+      <DeployedItems Include="$(PublishDir)\**\*.*" />
+
+      <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\Standalone\Microsoft.Build.NuGetSdkResolver.xml" />
+      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
+      <InstalledExtensions Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Current\**\*.*" Exclude="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Current\Microsoft.Common.props" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployedItems)"
+          DestinationFolder="$(BootstrapDestination)%(RecursiveDir)" />
+
+    <Copy SourceFiles="@(NuGetSdkResolverManifest)"
+          DestinationFolder="$(BootstrapDestination)SdkResolvers\Microsoft.Build.NuGetSdkResolver" />
+
+    <Copy SourceFiles="$(RuntimeIdentifierGraphPath)"
+          DestinationFolder="$(BootstrapDestination)" />
+
+    <Copy SourceFiles="@(InstalledSdks)"
+          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <!-- The .NET SDK has a dependency on DependencyModel, but relies on having it in the final
+         MSBuild.deps.json, which differs from ours because it's generated in the SDK repo.
+
+         Copy it from "next to MSBuild" in the pre-bootstrap SDK to our little weirdo bootstrap
+         layout next to the SDK tasks, so it can get loaded by the SDK tasks that need it. -->
+    <Copy SourceFiles="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Microsoft.Extensions.DependencyModel.dll"
+          DestinationFolder="$(BootstrapDestination)Sdks\Microsoft.NET.Sdk\tools\$(LatestDotNetCoreForMSBuild)" />
+
+    <Copy SourceFiles="@(InstalledExtensions)"
+          DestinationFolder="$(BootstrapDestination)Current\%(RecursiveDir)" />
+
+    <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
+          DestinationFolder="$(BootstrapDestination)" />
+
+    <Copy SourceFiles="$(RepoRoot)src\MSBuild.Bootstrap\RedirectNuGetConsoleProcess.After.Microsoft.Common.targets"
+          DestinationFolder="$(BootstrapDestination)\Current\Microsoft.Common.targets\ImportAfter" />
+
+    <Copy SourceFiles="$(RepoRoot)src\MSBuild.Bootstrap\RedirectNuGetConsoleProcess.After.Microsoft.Common.targets"
+          DestinationFolder="$(BootstrapDestination)\Current\SolutionFile\ImportAfter" />
+
+    <!-- Disable workload resolver until we can figure out whether it can work in the bootstrap
+         https://github.com/dotnet/msbuild/issues/6566 -->
+    <Touch Files="$(BootstrapDestination)\DisableWorkloadResolver.sentinel" AlwaysCreate="true" />
+  </Target>
+</Project>

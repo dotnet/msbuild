@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         public ImportCollection_Tests()
         {
             InvokeAddNewImportMethod = new AddNewImportDelegate(AddNewImportOverload);
-        } 
+        }
 
         /// <summary>
         /// Count Test. Increment Count on Import Add
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             {
                 importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("import.proj", TestData.Content3SimpleTargetsDefaultSpecified);
                 projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("project.proj", TestData.Content3SimpleTargetsDefaultSpecified);
-                Project p = new Project(); 
+                Project p = new Project();
                 p.Imports.AddNewImport(importPath, "true");
                 object o = p.EvaluatedItems;
                 Import import = CompatibilityTestHelpers.FindFirstMatchingImportByPath(p.Imports, importPath);
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             finally
             {
                 CompatibilityTestHelpers.RemoveFile(importPath);
-                CompatibilityTestHelpers.RemoveFile(projectPath); 
+                CompatibilityTestHelpers.RemoveFile(projectPath);
             }
         }
 
@@ -359,7 +359,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// SyncRoot Test, Take a lock on SyncRoot then iterate over it. 
+        /// SyncRoot Test, Take a lock on SyncRoot then iterate over it.
         /// </summary>
         [Test]
         public void SyncRoot()
@@ -376,10 +376,10 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 object o = p.EvaluatedItems;
                 Import[] importArray = new Import[p.Imports.Count];
                 p.Imports.CopyTo(importArray, 0);
-                lock (p.Imports.SyncRoot) 
+                lock (p.Imports.SyncRoot)
                 {
                     int i = 0;
-                    foreach (Import import in p.Imports) 
+                    foreach (Import import in p.Imports)
                     {
                         Assertion.AssertEquals(importArray[i].ProjectPath, import.ProjectPath);
                        i++;
@@ -394,7 +394,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
          /// <summary>
-        /// isSynchronized, is false : returned collection is not threadsafe.  
+        /// isSynchronized, is false : returned collection is not threadsafe.
         /// </summary>
         [Test]
         public void IsSynchronized()
@@ -420,6 +420,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         private void AddNewImportOverload(Project p, string path, string condition)
         {
             p.Imports.AddNewImport(path, condition);
-        } 
+        }
     }
 }

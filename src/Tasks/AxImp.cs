@@ -13,7 +13,7 @@ namespace Microsoft.Build.Tasks
     public sealed partial class ResolveComReference
     {
         /// <summary>
-        /// Defines the "AxImp" MSBuild task, which enables using AxImp.exe 
+        /// Defines the "AxImp" MSBuild task, which enables using AxImp.exe
         /// to generate Windows Forms wrappers for ActiveX controls.
         /// </summary>
         internal class AxImp : AxTlbBaseTask

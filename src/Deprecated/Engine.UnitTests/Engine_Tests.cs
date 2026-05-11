@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
             string[] propertiesToSerialize = childEngine.PropertyListToSerialize;
             Assert.IsNull(propertiesToSerialize, "Expected propertiesToSerialize to be null");
 	    childEngine.Shutdown();
-            
+
 	    Environment.SetEnvironmentVariable("MSBuildForwardPropertiesFromChild", string.Empty);
             childEngine = new Engine(new BuildPropertyGroup(), new ToolsetDefinitionLocations(), 3, true, 3, string.Empty, string.Empty);
             propertiesToSerialize = childEngine.PropertyListToSerialize;
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
              Assert.IsTrue(string.Compare(propertiesToSerialize[0], "Platform") == 0);
              Assert.IsTrue(propertiesToSerialize.Length == 1);
              childEngine.Shutdown();
-             
+
             Environment.SetEnvironmentVariable("MSBuildForwardPropertiesFromChild", ";Platform");
              childEngine = new Engine(new BuildPropertyGroup(), new ToolsetDefinitionLocations(), 3, true, 3, string.Empty, string.Empty);
              propertiesToSerialize = childEngine.PropertyListToSerialize;
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests
         public void SettingDefaultToolsVersionThrowsIfProjectsAlreadyLoaded()
         {
             Engine e = new Engine(ToolsetDefinitionLocations.None);
-            
+
             try
             {
                 e.AddToolset(new Toolset("1.0", "someToolsPath"));
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests
             catch(InvalidOperationException)
             {
                 // Make sure the first one doesn't throw
-                Assertion.Assert(false); 
+                Assertion.Assert(false);
             }
 
             try
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
             // Check the contents after adding two more tools versions
             e.Toolsets.Add(new Toolset("Whidbey", @"C:\WhidbeyPath"));
             e.Toolsets.Add(new Toolset("orcas", @"C:\OrcasBinPath"));
-            
+
             Dictionary<string, object> toolsVersionNamesDictionary = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             foreach (string name in e.Toolsets.ToolsVersions)
             {
@@ -367,11 +367,11 @@ namespace Microsoft.Build.UnitTests
                 // Get a little extra code coverage
                 myEngine.UnregisterAllLoggers();
                 myEngine.UnloadAllProjects();
-                
+
                 File.Delete(projectFile);
             }
         }
-        
+
         /// <summary>
         /// Engine.BuildProjectFile method with project file specified does not honor global properties set in the engine object
         /// Bug VSWhidbey 570988.
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectFile);
             }
         }
-        
+
         /// <summary>
         /// Engine.BuildProjectFile method with project file and target specified does not honor global properties set in the engine object
         /// Bug VSWhidbey 570988.
@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectFile);
             }
         }
-        
+
         /// <summary>
         /// Engine.BuildProjectFile method with project file and target list specified does not honor global properties set in the engine object
         /// Bug VSWhidbey 570988.
@@ -512,10 +512,10 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // Test building a traversal
-              
+
                 engine.BuildProjectFile(traversalProject);
                 engine.Shutdown();
-                
+
                 // Test building the same set of files in parallel
                 Console.Out.WriteLine("1:"+Process.GetCurrentProcess().MainModule.FileName);
                 Console.Out.WriteLine("2:" + AppDomain.CurrentDomain.BaseDirectory);
@@ -565,7 +565,7 @@ namespace Microsoft.Build.UnitTests
             string[][] targetNamesPerProject = new string[fileNames.Length][];
             IDictionary[] targetOutPutsPerProject = new IDictionary[fileNames.Length];
             BuildPropertyGroup[] globalPropertiesPerProject = new BuildPropertyGroup[fileNames.Length];
-            
+
             string[] tempfilesToDelete = new string[fileNames.Length];
             string[] tempfilesToDelete2 = new string[fileNames.Length];
             string[] tempfilesToDelete3 = new string[fileNames.Length];
@@ -584,7 +584,7 @@ namespace Microsoft.Build.UnitTests
                     fileNames2[i] = ProjectFiles2[0];
                     fileNamesLeafs[i] = FileNamesLeafs[0];
                     childTraversals[i] = ChildTraversals[0];
-                    
+
                     tempfilesToDelete[i] = ProjectFiles1[1];
                     tempfilesToDelete2[i] = ProjectFiles2[1];
                     tempfilesToDelete3[i] = FileNamesLeafs[1];
@@ -594,7 +594,7 @@ namespace Microsoft.Build.UnitTests
 
 
                 // Try building a traversal project that had other traversals
-                
+
                 engine.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
                 engine.BuildProjectFile(parentTraversal, new string[] { "Build" }, new BuildPropertyGroup(), null, BuildSettings.None, "3.5");
                 engine.Shutdown();
@@ -742,11 +742,11 @@ namespace Microsoft.Build.UnitTests
                 fileStream.Write(projectFileContents);
             }
             return new string[] { projectFile, tempFile };
-        } 
+        }
 
         private string TraversalProjectFile(string extensionForChildProjects)
         {
-            
+
             string projectFileContents = @"
                 <Project ToolsVersion=""3.5"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
                     <ItemGroup>";
@@ -832,7 +832,7 @@ namespace Microsoft.Build.UnitTests
                          </Prj>
                        </ItemGroup>
                     <Target Name=`1`>
-                        <MSBuild Projects=`@(Prj)` />            
+                        <MSBuild Projects=`@(Prj)` />
                     </Target>
                  </Project>
                  ", childProject);
@@ -953,7 +953,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        
+
         /// <summary>
         /// Project built using MSBuild task should use the default tools version if one is not specified.
         /// </summary>
@@ -1083,7 +1083,7 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger();
                 Engine e = new Engine();
                 e.RegisterLogger(logger);
-        
+
                 string p1Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("p1.proj", projectContent);
                 string p2Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("p2.proj", projectContent2);
 

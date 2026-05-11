@@ -23,7 +23,7 @@ using Microsoft.Build.UnitTests;
 namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 {
     /// <summary>
-    /// STUB Fixture Class for the v9 OM Public Interface Compatibility Tests. RemoteErrorException class 
+    /// STUB Fixture Class for the v9 OM Public Interface Compatibility Tests. RemoteErrorException class
     /// Also see Toolset tests in the Project test class.
     /// </summary>
     [TestFixture]
@@ -40,12 +40,12 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Ctor Test, set a null message. We do not guard against this. 
+        /// Ctor Test, set a null message. We do not guard against this.
         /// </summary>
         [Test]
         public void CtorMessage_Null()
         {
-            InvalidToolsetDefinitionException toolSetException = new InvalidToolsetDefinitionException(null); 
+            InvalidToolsetDefinitionException toolSetException = new InvalidToolsetDefinitionException(null);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// XML Serialization Test, not supported, throws invalid operation Exception. 
+        /// XML Serialization Test, not supported, throws invalid operation Exception.
         /// </summary>
         [Test]
         [ExpectedException(typeof(InvalidOperationException))]
@@ -111,9 +111,9 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             }
             finally
             {
-                memoryStream.Close(); 
+                memoryStream.Close();
             }
-        }       
+        }
 
         /// <summary>
         /// Binary Serialization Test, serialize the exception out and back in from a stream. This uses the protected constructor
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Binary Serialization Test, serialize a inherited exception out and back in from a stream. 
+        /// Binary Serialization Test, serialize a inherited exception out and back in from a stream.
         /// </summary>
         [Test]
         public void ProtectedConstructorTest()
@@ -175,15 +175,15 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             /// </summary>
             public ExtendsInvalidToolsetDefinitionException(string message, string errorCode)
                 : base(message, errorCode)
-            { 
+            {
             }
 
             /// <summary>
             /// Basic Constructor Override
             /// </summary>
             public ExtendsInvalidToolsetDefinitionException(SerializationInfo info, StreamingContext context)
-                : base(info, context) 
-            { 
+                : base(info, context)
+            {
             }
         }
     }

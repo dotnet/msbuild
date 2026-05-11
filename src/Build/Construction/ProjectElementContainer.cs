@@ -42,7 +42,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <comment>
         /// Should ideally be protected+internal.
-        /// </comment> 
+        /// </comment>
         internal ProjectElementContainer()
         {
         }
@@ -379,7 +379,7 @@ namespace Microsoft.Build.Construction
         /// Appends the provided child.
         /// Does not dirty the project, does not add an element, does not set the child's parent,
         /// and does not check the parent's future siblings and parent are acceptable.
-        /// Called during project load, when the child can be expected to 
+        /// Called during project load, when the child can be expected to
         /// already have a parent and its element is already connected to the
         /// parent's element.
         /// All that remains is to set FirstChild/LastChild and fix up the linked list.

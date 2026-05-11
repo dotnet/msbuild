@@ -10,12 +10,12 @@ using System.Collections;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
-    /// An enumerable wrapper for a BuildPropertyGroup that allows read-only 
+    /// An enumerable wrapper for a BuildPropertyGroup that allows read-only
     /// access to the properties.
     /// </summary>
     /// <remarks>
     /// This class is designed to be passed to loggers.
-    /// The expense of copying properties is only incurred if and when 
+    /// The expense of copying properties is only incurred if and when
     /// a logger chooses to enumerate over it.
     /// </remarks>
     /// <owner>danmose</owner>

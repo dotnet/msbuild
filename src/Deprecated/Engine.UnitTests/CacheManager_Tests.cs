@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         public void Initialize()
         {
             // Create some items and place them in a dictionary
-            // Add some include information so that when we check the final 
+            // Add some include information so that when we check the final
             // item spec we can verify that the item was recreated properly
             BuildItem buildItem1 = new BuildItem("BuildItem1", "Item1");
             buildItem1.Include = "TestInclude1";
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
             buildItems[0] = buildItem1;
             Dictionary<object, object> dictionary = new Dictionary<object, object>();
             dictionary.Add("TaskItems", buildItems);
-            
+
             Hashtable resultByTargetSuccess = new Hashtable(StringComparer.OrdinalIgnoreCase);
             resultByTargetSuccess.Add("TaskItems", Target.BuildState.CompletedSuccessfully);
             Hashtable resultByTargetFailure = new Hashtable(StringComparer.OrdinalIgnoreCase);
@@ -111,21 +111,21 @@ namespace Microsoft.Build.UnitTests
             string[] targets = new string[1]; targets[0] = "Target1";
             BuildRequest length1Request = new BuildRequest(1, "test.proj", targets, new BuildPropertyGroup(), null, 1, true, false);
             Assert.IsNull(cacheManager.GetCachedBuildResult(length1Request, out actuallyBuiltTargets), "Expect a null return value if no scope");
-            
+
             // Test the case when the scope exists but is empty
             CacheScope cacheScope = cacheManager.GetCacheScope("test.proj", new BuildPropertyGroup(), "3.5", CacheContentType.BuildResults);
             Assert.IsNull(cacheManager.GetCachedBuildResult(length1Request, out actuallyBuiltTargets), "Expect a null return value if scope is empty");
-            
+
             // Test the case when the scope exists but contains wrong data
             CacheEntry cacheEntry = new BuildResultCacheEntry("Target2", null, true);
             cacheManager.SetCacheEntries(new CacheEntry[] { cacheEntry }, "test.proj", new BuildPropertyGroup(), "3.5", CacheContentType.BuildResults);
             Assert.IsNull(cacheManager.GetCachedBuildResult(length1Request, out actuallyBuiltTargets), "Expect a null return value if scope contains wrong data");
-            
+
             // Test the case when everything is correct
             cacheScope.AddCacheEntry(new PropertyCacheEntry(Constants.defaultTargetCacheName, string.Empty));
             cacheScope.AddCacheEntry(new PropertyCacheEntry(Constants.initialTargetCacheName, string.Empty));
             cacheScope.AddCacheEntry(new PropertyCacheEntry(Constants.projectIdCacheName, "1"));
-            
+
             cacheEntry = new BuildResultCacheEntry("Target1", null, true);
             cacheManager.SetCacheEntries(new CacheEntry[] { cacheEntry }, "test.proj", new BuildPropertyGroup(), "3.5", CacheContentType.BuildResults);
             BuildResult buildResult = cacheManager.GetCachedBuildResult(length1Request, out actuallyBuiltTargets);
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
             targets = new string[2]; targets[0] = "Target2"; targets[1] = "Target3";
             BuildRequest length2Request = new BuildRequest(1, "test.proj", targets, new BuildPropertyGroup(), null, 1, true, false);
             Assert.IsNull(cacheManager.GetCachedBuildResult(length2Request, out actuallyBuiltTargets), "Expect a null return value if partial data in the scope");
-            
+
             // Test the correctness case for multiple targets
             cacheEntry = new BuildResultCacheEntry("Target3", null, true);
             cacheManager.SetCacheEntries(new CacheEntry[] { cacheEntry }, "test.proj", new BuildPropertyGroup(), "3.5", CacheContentType.BuildResults);
@@ -168,7 +168,7 @@ namespace Microsoft.Build.UnitTests
             cacheScope.AddCacheEntry(new PropertyCacheEntry(Constants.defaultTargetCacheName, "Target1;Target2"));
             cacheScope.AddCacheEntry(new PropertyCacheEntry(Constants.initialTargetCacheName, "Initial1"));
             cacheScope.AddCacheEntry(new PropertyCacheEntry(Constants.projectIdCacheName, "5"));
-            
+
             CacheEntry cacheEntry = new BuildResultCacheEntry("Initial1", null, true);
             cacheManager.SetCacheEntries(new CacheEntry[] { cacheEntry }, "test.proj", new BuildPropertyGroup(), "3.5", CacheContentType.BuildResults);
             cacheEntry = new BuildResultCacheEntry("Target1", null, true);

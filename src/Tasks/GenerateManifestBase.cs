@@ -619,7 +619,9 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(OutputManifest.ItemSpec);
+                Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message, lockedFileMessage);
+
                 return false;
             }
 

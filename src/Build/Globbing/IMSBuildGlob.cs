@@ -16,7 +16,7 @@ namespace Microsoft.Build.Globbing
         ///     - slashes are normalized
         ///     - arguments representing relative paths are normalized against the glob's root.
         ///     For example, the glob **/*.cs does not match ../a.cs, since ../a.cs points outside of the glob root.
-        /// 
+        ///
         ///     Returns false if <paramref name="stringToMatch" /> contains invalid path or file characters.
         /// </summary>
         /// <param name="stringToMatch">The string to match. If the string represents a relative path, it will get normalized against the glob's root. Cannot be null.</param>

@@ -18,8 +18,23 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     /// <owner>RGoel</owner>
     public static class Utilities
     {
@@ -30,7 +45,7 @@ namespace Microsoft.Build.BuildEngine
         /// inside of a condition and the string values that they are being tested against.
         /// So, for example, if the condition was " '$(Configuration)' == 'Debug' ", we
         /// would get passed in leftValue="$(Configuration)" and rightValueExpanded="Debug".
-        /// This call would add the string "Debug" to the list of possible values for the 
+        /// This call would add the string "Debug" to the list of possible values for the
         /// "Configuration" property.
         ///
         /// This method also handles the case when two or more properties are being
@@ -73,7 +88,7 @@ namespace Microsoft.Build.BuildEngine
                         string rightValueExpandedPiece;
 
                         // If there was no vertical bar, then just use the remainder of the right-hand-side
-                        // expression as the value of the property, and terminate the loop after this iteration.  
+                        // expression as the value of the property, and terminate the loop after this iteration.
                         // Also, if we're on the last segment of the left-hand-side, then use the remainder
                         // of the right-hand-side expression as the value of the property.
                         if ((indexOfVerticalBar == -1) || (i == (leftValuePieces.Length - 1)))
@@ -84,7 +99,7 @@ namespace Microsoft.Build.BuildEngine
                         else
                         {
                             // If we found a vertical bar, then the portion before the vertical bar is the
-                            // property value which we will store in our table.  Then remove that portion 
+                            // property value which we will store in our table.  Then remove that portion
                             // from the original string so that the next iteration of the loop can easily search
                             // for the first vertical bar again.
                             rightValueExpandedPiece = rightValueExpanded.Substring(0, indexOfVerticalBar);
@@ -120,7 +135,7 @@ namespace Microsoft.Build.BuildEngine
         /*
          * Method:  GatherReferencedPropertyNames
          * Owner:   DavidLe
-         * 
+         *
          * Find and record all of the properties that are referenced in the given
          * condition.
          *
@@ -137,7 +152,7 @@ namespace Microsoft.Build.BuildEngine
             EvaluateCondition(condition, conditionAttribute, expander, conditionedPropertiesTable, ParserOptions.AllowProperties | ParserOptions.AllowItemLists, null, null);
         }
 
-        // An array of hashtables with cached expression trees for all the combinations of condition strings 
+        // An array of hashtables with cached expression trees for all the combinations of condition strings
         // and parser options
         private static volatile Hashtable[] cachedExpressionTrees = new Hashtable[8 /* == ParserOptions.AllowAll*/]
             {
@@ -258,7 +273,7 @@ namespace Microsoft.Build.BuildEngine
 
                 parsedExpression = conditionParser.Parse(condition, conditionAttribute, itemListOptions);
 
-                // It's possible two threads will add a different tree to the same entry in the hashtable, 
+                // It's possible two threads will add a different tree to the same entry in the hashtable,
                 // but it should be rare and it's not a problem - the previous entry will be thrown away.
                 // We could ensure no dupes with double check locking but it's not really necessary here.
                 // Also, we don't want to lock on every read.
@@ -308,7 +323,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            // The value does not contain valid XML markup.  Store it as text, so it gets 
+            // The value does not contain valid XML markup.  Store it as text, so it gets
             // escaped properly.
             node.InnerText = s;
         }
@@ -323,10 +338,10 @@ namespace Microsoft.Build.BuildEngine
         {
             // XmlNode.InnerXml gives back a string that consists of the set of characters
             // in between the opening and closing elements of the XML node, without doing any
-            // unescaping.  Any "strange" character sequences (like "<![CDATA[...]]>" will remain 
+            // unescaping.  Any "strange" character sequences (like "<![CDATA[...]]>" will remain
             // exactly so and will not be translated or interpreted.  The only modification that
             // .InnerXml will do is that it will normalize any Xml contained within.  This means
-            // normalizing whitespace between XML attributes and quote characters that surround XML 
+            // normalizing whitespace between XML attributes and quote characters that surround XML
             // attributes.  If PreserveWhitespace is false, then it will also normalize whitespace
             // between elements.
             //
@@ -353,19 +368,19 @@ namespace Microsoft.Build.BuildEngine
             // use ... InnerXml or InnerText.  There are two basic scenarios we care about.
             //
             // 1.)  The first scenario is that the user is trying to create a property whose
-            //      contents are actually XML.  That is to say that the contents may be written 
+            //      contents are actually XML.  That is to say that the contents may be written
             //      to a XML file, or may be passed in as a string to XmlDocument.LoadXml.
-            //      In this case, we would want to use XmlNode.InnerXml, because we DO NOT want 
-            //      character sequences to be unescaped.  If we did unescape them, then whatever 
+            //      In this case, we would want to use XmlNode.InnerXml, because we DO NOT want
+            //      character sequences to be unescaped.  If we did unescape them, then whatever
             //      XML parser tried to read in the stream as XML later on would totally barf.
             //
             // 2.)  The second scenario is the the user is trying to create a property that
             //      is just intended to be treated as a string.  That string may be very large
             //      and could contain all sorts of whitespace, carriage returns, special characters,
-            //      etc.  But in the end, it's just a big string.  In this case, whatever 
+            //      etc.  But in the end, it's just a big string.  In this case, whatever
             //      task is actually processing this string ... it's not going to know anything
             //      about character sequences such as &amp; and &lt;.  These character sequences
-            //      are specific to XML markup.  So, here we want to use XmlNode.InnerText so that 
+            //      are specific to XML markup.  So, here we want to use XmlNode.InnerText so that
             //      the character sequences get unescaped into their actual character before
             //      the string is passed to the task (or wherever else the property is used).
             //      Of course, if the string value of the property needs to contain characters
@@ -521,11 +536,26 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Escapes given string, that is replaces special characters with escape sequences that allow MSBuild hosts
         /// to treat MSBuild-interpreted characters literally (';' becomes "%3b" and so on).
         /// </summary>
         /// <param name="unescapedExpression">string to escape</param>
         /// <returns>escaped string</returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public static string Escape(string unescapedExpression)
         {
             return EscapingUtilities.Escape(unescapedExpression);

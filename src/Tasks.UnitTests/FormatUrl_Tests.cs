@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is a local absolute file path.
-        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem. 
+        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem.
         /// </summary>
         [Fact]
         public void LocalAbsolutePathTest()
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is a local relative file path.
-        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem. 
+        /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem.
         /// </summary>
         [Fact]
         public void LocalRelativePathTest()

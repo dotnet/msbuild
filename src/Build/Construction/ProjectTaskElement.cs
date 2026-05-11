@@ -449,7 +449,7 @@ namespace Microsoft.Build.Construction
                     {
                         // By pulling off and caching the Location early here, it becomes frozen for the life of this object.
                         // That means that if the name of the file is changed after first load (possibly from null) it will
-                        // remain the old value here. Correctly, this should cache the attribute not the location. Fixing 
+                        // remain the old value here. Correctly, this should cache the attribute not the location. Fixing
                         // that will need profiling, though, as this cache was added for performance.
                         _parameters[attribute.Name] = (attribute.Value, attribute.Location);
                     }

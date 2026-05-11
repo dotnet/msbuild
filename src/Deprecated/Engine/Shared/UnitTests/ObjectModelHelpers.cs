@@ -20,7 +20,7 @@ using NUnit.Framework;
 using Microsoft.Build.BuildEngine;
 using Microsoft.Build.Framework;
 using Microsoft.VisualStudio.Internal;
-    
+
 namespace Microsoft.Build.UnitTests
 {
     /*
@@ -30,14 +30,14 @@ namespace Microsoft.Build.UnitTests
      * Utility methods for unit tests that work through the object model.
      *
      */
-    public static class ObjectModelHelpers        
+    public static class ObjectModelHelpers
     {
         private const string msbuildNamespace = "http://schemas.microsoft.com/developer/msbuild/2003";
         private const string msbuildDefaultToolsVersion = BrandNames.VSGeneralVersion;
         private const string msbuildAssemblyVersion = BrandNames.VSGeneralAssemblyVersion;
 
         /// <summary>
-        /// Return the default tools version 
+        /// Return the default tools version
         /// </summary>
         internal static string MSBuildDefaultToolsVersion
         {
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Return the current assembly version 
+        /// Return the current assembly version
         /// </summary>
         internal static string MSBuildAssemblyVersion
         {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Given a hash table of ITaskItems, make sure there is exactly one
-        /// item and that the key is 'key' and the Value is an ITaskItem with 
+        /// item and that the key is 'key' and the Value is an ITaskItem with
         /// an item spec of 'itemSpec'
         /// </summary>
         /// <param name="d"></param>
@@ -151,19 +151,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
+        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        /// 
+        ///
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        /// 
+        ///
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        /// 
+        ///
         /// (Each item needs to be on its own line.)
-        /// 
+        ///
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <param name="actualItems"></param>
@@ -174,19 +174,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from 
+        /// Amazingly sophisticated :) helper function to determine if the set of ITaskItems returned from
         /// a task match the expected set of ITaskItems.  It can also check that the ITaskItems have the expected
         /// metadata, and that the ITaskItems are returned in the correct order.
-        /// 
+        ///
         /// The "expectedItemsString" is a formatted way of easily specifying which items you expect to see.
         /// The format is:
-        /// 
+        ///
         ///         itemspec1 :   metadataname1=metadatavalue1 ; metadataname2=metadatavalue2 ; ...
         ///         itemspec2 :   metadataname3=metadatavalue3 ; metadataname4=metadatavalue4 ; ...
         ///         itemspec3 :   metadataname5=metadatavalue5 ; metadataname6=metadatavalue6 ; ...
-        /// 
+        ///
         /// (Each item needs to be on its own line.)
-        /// 
+        ///
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <param name="actualItems"></param>
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests
             for (int actualItemIndex = 0 ; actualItemIndex < actualItems.Length ; actualItemIndex++)
             {
                 ITaskItem actualItem = actualItems[actualItemIndex];
-                
+
                 // Loop through all the expected items to find one with the same item spec.
                 ITaskItem expectedItem = null;
                 int expectedItemIndex;
@@ -260,13 +260,13 @@ namespace Microsoft.Build.UnitTests
                         string expectedMetadataValue = expectedItem.GetMetadata(metadataName);
                         string actualMetadataValue = actualItem.GetMetadata(metadataName);
 
-                        Assertion.Assert(string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName), 
+                        Assertion.Assert(string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName),
                             actualMetadataValue.Length > 0 || expectedMetadataValue.Length == 0);
 
-                        Assertion.Assert(string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue), 
+                        Assertion.Assert(string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue),
                             actualMetadataValue.Length == 0 || expectedMetadataValue.Length > 0);
 
-                        Assertion.Assert(string.Format("Item '{0}' has metadata {1}={2} instead of expected {1}={3}.", 
+                        Assertion.Assert(string.Format("Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
                             actualItem.ItemSpec, metadataName, actualMetadataValue, expectedMetadataValue),
                             actualMetadataValue == expectedMetadataValue);
                     }
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests
         /// <owner>RGoel</owner>
         static private string NormalizeXmlWhitespace(XmlDocument xmldoc)
         {
-            // Normalize all the whitespace by writing the Xml document out to a 
+            // Normalize all the whitespace by writing the Xml document out to a
             // string, with PreserveWhitespace=false.
             xmldoc.PreserveWhitespace = false;
             StringWriter stringWriter = new StringWriter();
@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests
         {
             return CreateInMemoryProject(xml, new ConsoleLogger());
         }
-        
+
         /// <summary>
         /// Create a project in memory. Load up the given XML.
         /// </summary>
@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests
             // Return to the original directory.
             Directory.SetCurrentDirectory(originalDir);
 
-            return p;   
+            return p;
         }
 
         /// <summary>
@@ -591,10 +591,10 @@ namespace Microsoft.Build.UnitTests
             // For some reason sometimes get "directory is not empty"
             // Try to be as robust as possible using retries and catching all exceptions.
             for (int retries = 0; retries < 5; retries++)
-            {          
+            {
                 try
                 {
-                    // Manually deleting all children, but intentionally leaving the 
+                    // Manually deleting all children, but intentionally leaving the
                     // Temp project directory behind due to locking issues which were causing
                     // failures in main on Amd64-WOW runs.
                     if (Directory.Exists(TempProjectDir))
@@ -630,7 +630,7 @@ namespace Microsoft.Build.UnitTests
 
             // retries to deal with occasional locking issues where the file can't be written to initially
             for (int retries = 0; retries < 5; retries++)
-            {          
+            {
                 try
                 {
                     File.WriteAllText(fullFilePath, CleanupFileContents(fileContents));
@@ -642,11 +642,11 @@ namespace Microsoft.Build.UnitTests
                     {
                         Console.WriteLine(ex.ToString());
                     }
-                    else 
+                    else
                     {
-                        // All the retries have failed, so we're pretty much screwed. Might as well fail with the 
-                        // actual problem now instead of with some more difficult-to-understand 
-                        // issue later. 
+                        // All the retries have failed, so we're pretty much screwed. Might as well fail with the
+                        // actual problem now instead of with some more difficult-to-understand
+                        // issue later.
                         throw ex;
                     }
                 }

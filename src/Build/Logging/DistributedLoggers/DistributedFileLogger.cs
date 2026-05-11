@@ -68,7 +68,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ApplyFileLoggerParameter(string parameterName, string parameterValue)
         {
-            if (String.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
             {
                 if (string.IsNullOrEmpty(parameterValue))
                 {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Logging
                 _nodeFileLogger = new FileLogger();
                 string extension = Path.GetExtension(_logFile);
                 // If there is no extension add a default of .log to it
-                if (String.IsNullOrEmpty(extension))
+                if (string.IsNullOrEmpty(extension))
                 {
                     _logFile += ".log";
                     extension = ".log";
@@ -215,7 +215,7 @@ namespace Microsoft.Build.Logging
         #region Data
         // The file logger which will do the actual logging of the node's build output
         private FileLogger _nodeFileLogger;
-        // Reference for the central logger 
+        // Reference for the central logger
         private IEventRedirector _buildEventRedirector;
         // The Id of the node the forwardingLogger is attached to
         private int _nodeId;

@@ -93,22 +93,22 @@ namespace Microsoft.Build.Tasks.Xaml
 
         /// <summary>
         /// The max integer value an integer typed switch can have
-        /// An exception should be thrown in the number the user specifies is 
+        /// An exception should be thrown in the number the user specifies is
         /// larger than the max
         /// </summary>
         public string Max { get; set; } = String.Empty;
 
         /// <summary>
         /// The minimum integer value an integer typed switch can have
-        /// An exception should be thrown in the number the user specifies is 
+        /// An exception should be thrown in the number the user specifies is
         /// less than the minimum
         /// </summary>
         public string Min { get; set; } = String.Empty;
 
         /// <summary>
         /// The separator indicates the characters that go between the switch and the string
-        /// in the string typed case, the characters that go between each name for the 
-        /// string array case, or the characters that go between the switch and the 
+        /// in the string typed case, the characters that go between each name for the
+        /// string array case, or the characters that go between the switch and the
         /// appendage for the boolean case.
         /// </summary>
         public string Separator { get; set; } = String.Empty;
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Tasks.Xaml
 
         /// <summary>
         /// The Fallback attribute is used to specify which property to look at in the
-        /// case that the argument property is not set, or if the file that the 
+        /// case that the argument property is not set, or if the file that the
         /// argument property indicates is nonexistent.
         /// </summary>
         public string Fallback { get; set; } = String.Empty;

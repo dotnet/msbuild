@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="baseKey">The base registry key.</param>
         /// <param name="subkey">The subkey</param>
-        /// <returns>An enumeration of strings.</returns>        
+        /// <returns>An enumeration of strings.</returns>
         internal static IEnumerable<string>? GetSubKeyNames(RegistryKey baseKey, string subkey)
         {
             IEnumerable<string>? subKeys = null;

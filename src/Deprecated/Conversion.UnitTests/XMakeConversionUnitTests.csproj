@@ -33,8 +33,8 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\..\shared\unittests\MockLogger.cs" />
-    <Compile Include="..\..\shared\unittests\ObjectModelHelpers.cs" />
+    <Compile Include="..\..\UnitTests.Shared\MockLogger.cs" />
+    <Compile Include="..\..\UnitTests.Shared\ObjectModelHelpers.cs" />
     <Compile Include="OldVSProjectFileReader_Tests.cs" />
     <Compile Include="ProjectFileConverter_Tests.cs" />
     <!-- Assemblies Files we depend on -->

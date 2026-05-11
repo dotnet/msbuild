@@ -12,7 +12,7 @@ using System.Windows.Markup;
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// Used to deserialize the content type information 
+    /// Used to deserialize the content type information
     /// </summary>
     [ContentProperty("Metadata")]
     public sealed class ContentType : ISupportInitialize, IProjectSchemaNode

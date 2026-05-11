@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
         #region "Invalid cases (exception is expected to be thrown)"
 
         /// <summary>
-        /// name attribute is missing from toolset element 
+        /// name attribute is missing from toolset element
         /// </summary>
         [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// empty toolset element 
+        /// empty toolset element
         /// </summary>
         [Test]
         [ExpectedException(typeof(ConfigurationErrorsException))]
@@ -422,7 +422,7 @@ namespace Microsoft.Build.UnitTests
             Assertion.AssertEquals(msbuildToolsetSection.Default, "2.0");
             Assertion.AssertEquals(1, msbuildToolsetSection.Toolsets.Count);
             Assertion.AssertEquals(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
-            Assertion.AssertEquals(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\", 
+            Assertion.AssertEquals(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
                                    msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value);
             Assertion.AssertEquals(@"SomeOtherPropertyValue",
                                    msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("SomeOtherPropertyName").Value);

@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
 
 #if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
-        /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the 
+        /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the
         /// partial name matching still work.
         /// </summary>
         [Fact]
@@ -245,7 +245,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the 
+        /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the
         /// partial name matching still work.
         /// </summary>
         [Fact]

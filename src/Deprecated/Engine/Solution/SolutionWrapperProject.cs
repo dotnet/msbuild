@@ -19,8 +19,23 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// This class is used to generate an MSBuild wrapper project for a solution file or standalone VC project.
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     /// <owner>LukaszG, RGoel</owner>
     public static class SolutionWrapperProject
     {
@@ -31,6 +46,11 @@ namespace Microsoft.Build.BuildEngine
         private const string cacheVersionNumber = "_SolutionProjectCacheVersion";
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Given the full path to a solution, returns a string containing the v3.5 MSBuild-format
         /// wrapper project for that solution.
         /// </summary>
@@ -38,6 +58,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="toolsVersionOverride">May be null.  If non-null, contains the ToolsVersion passed in on the command line</param>\
         /// <param name="projectBuildEventContext">An event context for logging purposes.</param>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public static string Generate(string solutionPath, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
         {
             Project msbuildProject = new Project();
@@ -213,7 +243,7 @@ namespace Microsoft.Build.BuildEngine
                 return false;
             }
 
-            // We also store the version of MSBuild that wrote the file and verify it's the same as ours: that ensures that we 
+            // We also store the version of MSBuild that wrote the file and verify it's the same as ours: that ensures that we
             // don't read possibly incompatible caches.
             string thisVersion = Constants.AssemblyVersion;
             if (!String.Equals(cacheVersion, thisVersion, StringComparison.OrdinalIgnoreCase))
@@ -238,11 +268,11 @@ namespace Microsoft.Build.BuildEngine
                 return false;
             }
 
-            // If there are inputs to check, we should also add the solution file, as we need to make sure the 
+            // If there are inputs to check, we should also add the solution file, as we need to make sure the
             // solution file is up to date with respect to the cache file
 
             // Get the solution file name because the solution file may be something like myDirectory\mysolution.sln
-            // and since we have already calculated the directory for the solution file, we just need the filename name to 
+            // and since we have already calculated the directory for the solution file, we just need the filename name to
             // combine with the directory to get the full path to the solution file without having to call GetFullPath again.
             string solutionFileName = Path.GetFileName(solutionFile);
             string solutionFileLocation = Path.Combine(solutionFileDirectory, solutionFileName);
@@ -297,8 +327,8 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private static void CreateSolutionProject(SolutionParser solution, Project msbuildProject, BuildEventContext projectBuildEventContext, string wrapperProjectToolsVersion, Engine parentEngine, string solutionProjectCache)
         {
-            // We have to figure out what tools version the children will be built with, because we will 
-            // have to load and scan them to construct the solution wrapper project, and we should use the 
+            // We have to figure out what tools version the children will be built with, because we will
+            // have to load and scan them to construct the solution wrapper project, and we should use the
             // same tools version they'll build with.
             string childProjectToolsVersion = DetermineChildProjectToolsVersion(parentEngine, wrapperProjectToolsVersion);
 
@@ -676,7 +706,7 @@ namespace Microsoft.Build.BuildEngine
             newTask.SetParameterValue("SolutionFile", solutionPath, true /* treat as literal */);
 
             // If the user passed in an override stylesheet for this .VCPROJ (by specifying a global
-            // property called VCBuildOverride), we need to use it to resolve the output path.  Override 
+            // property called VCBuildOverride), we need to use it to resolve the output path.  Override
             // stylesheets can be used to change the directory that VC projects get built to.
             newTask.SetParameterValue("Override", "$(VCBuildOverride)");
 
@@ -783,7 +813,7 @@ namespace Microsoft.Build.BuildEngine
                         addCreateItem = true;
                     }
 
-                    // Add create item if either of the conditions above was true. 
+                    // Add create item if either of the conditions above was true.
                     // This merges the one-item item list into the main list, adding the appropriate guid metadata
                     if (addCreateItem)
                     {
@@ -914,8 +944,8 @@ namespace Microsoft.Build.BuildEngine
 
             if (subTargetName == "Publish")
             {
-                // Well, hmmm.  The VCBuild doesn't support any kind of 
-                // a "Publish" operation.  The best we can really do is offer up a 
+                // Well, hmmm.  The VCBuild doesn't support any kind of
+                // a "Publish" operation.  The best we can really do is offer up a
                 // message saying so.
                 AddErrorWarningMessageElement(newTarget, XMakeElements.warning, true, "SolutionVCProjectNoPublish");
 
@@ -1113,10 +1143,10 @@ namespace Microsoft.Build.BuildEngine
             string destinationFolder = String.Format(CultureInfo.InvariantCulture,
                 @"$({0})\Bin\", GenerateSafePropertyName(proj, "AspNetPhysicalPath"));
 
-            // This is a bit of a hack.  We're actually calling the "Copy" task on all of 
-            // the *non-existent* files.  Why?  Because we want to emit a warning in the 
+            // This is a bit of a hack.  We're actually calling the "Copy" task on all of
+            // the *non-existent* files.  Why?  Because we want to emit a warning in the
             // log for each non-existent file, and the Copy task does that nicely for us.
-            // I would have used the <Warning> task except for the fact that we are in 
+            // I would have used the <Warning> task except for the fact that we are in
             // string-resource lockdown.
             BuildTask copyNonExistentReferencesTask = target.AddNewTask("Copy");
             copyNonExistentReferencesTask.SetParameterValue("SourceFiles", "@(" + referenceItemName + "->'%(FullPath)')", false /* Do not treat as literal */);
@@ -1124,7 +1154,7 @@ namespace Microsoft.Build.BuildEngine
             copyNonExistentReferencesTask.Condition = String.Format(CultureInfo.InvariantCulture, "!Exists('%({0}.Identity)')", referenceItemName);
             copyNonExistentReferencesTask.ContinueOnError = true;
 
-            // Call ResolveAssemblyReference on each of the .DLL files that were found on 
+            // Call ResolveAssemblyReference on each of the .DLL files that were found on
             // disk from the .REFRESH files as well as the P2P references.  RAR will crack
             // the dependencies, find PDBs, satellite assemblies, etc., and determine which
             // files need to be copy-localed.
@@ -1222,7 +1252,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (!String.IsNullOrEmpty(lastFolderInPhysicalPath))
                 {
-                    // If there is a global property called "OutDir" set, that means the caller is trying to 
+                    // If there is a global property called "OutDir" set, that means the caller is trying to
                     // override the AspNetTargetPath.  What we want to do in this case is concatenate:
                     //  $(OutDir) + "\_PublishedWebsites" + (the last portion of the folder in the AspNetPhysicalPath).
                     BuildProperty targetPathOverrideProperty = newPropertyGroup.AddNewProperty(GenerateSafePropertyName(proj, "AspNetTargetPath"),
@@ -1360,15 +1390,15 @@ namespace Microsoft.Build.BuildEngine
 
             if (subTargetName == "Clean")
             {
-                // Well, hmmm.  The AspNetCompiler task doesn't support any kind of 
-                // a "Clean" operation.  The best we can really do is offer up a 
+                // Well, hmmm.  The AspNetCompiler task doesn't support any kind of
+                // a "Clean" operation.  The best we can really do is offer up a
                 // message saying so.
                 AddErrorWarningMessageElement(newTarget, XMakeElements.message, true, "SolutionVenusProjectNoClean");
             }
             else if (subTargetName == "Publish")
             {
-                // Well, hmmm.  The AspNetCompiler task doesn't support any kind of 
-                // a "Publish" operation.  The best we can really do is offer up a 
+                // Well, hmmm.  The AspNetCompiler task doesn't support any kind of
+                // a "Publish" operation.  The best we can really do is offer up a
                 // message saying so.
                 AddErrorWarningMessageElement(newTarget, XMakeElements.message, true, "SolutionVenusProjectNoPublish");
             }
@@ -1384,7 +1414,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // We're going to build up an MSBuild condition string that represents the valid Configurations.
                 // We do this by OR'ing together individual conditions, each of which compares $(Configuration)
-                // with a valid configuration name.  We init our condition string to "false", so we can easily 
+                // with a valid configuration name.  We init our condition string to "false", so we can easily
                 // OR together more stuff as we go, and also easily take the negation of the condition by putting
                 // a ! around the whole thing.
                 StringBuilder conditionDescribingValidConfigurations = new StringBuilder("(false)");
@@ -1396,7 +1426,7 @@ namespace Microsoft.Build.BuildEngine
                     AspNetCompilerParameters aspNetCompilerParameters = (AspNetCompilerParameters)aspNetConfiguration.Value;
 
                     // We only add the PropertyGroup once per Venus project.  Without the following "if", we would add
-                    // the same identical PropertyGroup twice, once when AddTargetForWebProject is called with 
+                    // the same identical PropertyGroup twice, once when AddTargetForWebProject is called with
                     // subTargetName=null and once when subTargetName="Rebuild".
                     if (subTargetName == null)
                     {
@@ -1434,7 +1464,7 @@ namespace Microsoft.Build.BuildEngine
                 // Add tasks to capture the auto-refreshed file references (those .REFRESH files).
                 AddTasksToResolveAutoRefreshFileReferences(newTarget, proj, referenceItemName.ToString());
 
-                // Add a call to RAR (ResolveAssemblyReference) and the Copy task to put the referenced 
+                // Add a call to RAR (ResolveAssemblyReference) and the Copy task to put the referenced
                 // project outputs in the right place
                 AddTasksToCopyAllDependenciesIntoBinDir(newTarget, proj, referenceItemName.ToString(), conditionDescribingValidConfigurations.ToString());
 
@@ -2045,7 +2075,7 @@ namespace Microsoft.Build.BuildEngine
                         // the one containing the solution file, and we'd get the relative path wrong
                         msbuildProject.Load(project.AbsolutePath);
 
-                        // Project references for MSBuild projects could be affected by the active configuration, 
+                        // Project references for MSBuild projects could be affected by the active configuration,
                         // so set it before retrieving references.
                         msbuildProject.GlobalProperties.SetProperty("Configuration",
                             project.ProjectConfigurations[fullSolutionConfigurationName].ConfigurationName, true /* treat as literal */);
@@ -2061,7 +2091,7 @@ namespace Microsoft.Build.BuildEngine
                         }
 
                         //
-                        // ProjectDependency items work exactly like ProjectReference items from the point of 
+                        // ProjectDependency items work exactly like ProjectReference items from the point of
                         // view of determining that project B depends on project A.  This item must cause
                         // project A to be built prior to project B.
                         //

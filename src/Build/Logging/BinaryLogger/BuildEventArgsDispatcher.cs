@@ -85,6 +85,22 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public event BuildMessageEventHandler MessageRaised;
 
+        internal bool HasStructuredEventsSubscribers =>
+            AnyEventRaised != null ||
+            StatusEventRaised != null ||
+            CustomEventRaised != null ||
+            BuildStarted != null ||
+            BuildFinished != null ||
+            ProjectStarted != null ||
+            ProjectFinished != null ||
+            TargetStarted != null ||
+            TargetFinished != null ||
+            TaskStarted != null ||
+            TaskFinished != null ||
+            ErrorRaised != null ||
+            WarningRaised != null ||
+            MessageRaised != null;
+
         /// <summary>
         /// Raise one of the events that is appropriate for the type of the BuildEventArgs
         /// </summary>

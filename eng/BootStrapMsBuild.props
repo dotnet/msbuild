@@ -1,0 +1,21 @@
+<Project>
+
+  <!--
+  Construct a location of MSBuild bootstrap folder - to be used for deployment and for tests
+   relying on bootstrapped MSBuild
+   -->
+
+  <PropertyGroup>
+    <BootstrapDestination>$(ArtifactsBinDir)bootstrap\</BootstrapDestination>
+    <BootstrapDestination Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
+    <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <BootstrapBinaryDestination>$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin</BootstrapBinaryDestination>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <BootstrapBinaryDestination>$(BootstrapDestination)</BootstrapBinaryDestination>
+  </PropertyGroup>
+</Project>

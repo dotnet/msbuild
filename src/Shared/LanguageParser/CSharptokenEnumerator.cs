@@ -22,7 +22,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  TokenEnumerator
-        * 
+        *
         * Construct
         */
         internal CSharpTokenEnumerator(Stream binaryStream, bool forceANSI)
@@ -32,7 +32,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  FindNextToken
-        * 
+        *
         * Find the next token. Return 'true' if one was found. False, otherwise.
         */
         internal override bool FindNextToken()
@@ -77,14 +77,14 @@ namespace Microsoft.Build.Shared.LanguageParser
                 {
                     if (_reader.Sink("\\"))
                     {
-                        /* reader.Skip the escape sequence. 
+                        /* reader.Skip the escape sequence.
                             This isn't exactly right. We should detect:
-                            
-                            simple-escape-sequence: one of 
-                            \' \" \\ \0 \a \b \f \n \r \t \v 
-                            
-                            hexadecimal-escape-sequence: 
-                            \x   hex-digit   hex-digit[opt]   hex-digit[opt]  hex-digit[opt]                                
+
+                            simple-escape-sequence: one of
+                            \' \" \\ \0 \a \b \f \n \r \t \v
+
+                            hexadecimal-escape-sequence:
+                            \x   hex-digit   hex-digit[opt]   hex-digit[opt]  hex-digit[opt]
                         */
                     }
 
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 }
                 while (!_reader.EndOfLines && _reader.SinkCharacter() != '\"');
 
-                // Can't end a file inside a string 
+                // Can't end a file inside a string
                 if (_reader.EndOfLines)
                 {
                     current = new EndOfFileInsideStringToken();
@@ -134,12 +134,12 @@ namespace Microsoft.Build.Shared.LanguageParser
                         if (_reader.SinkStringEscape())
                         {
                             // This isn't nearly right. We just do barely enough to make a string
-                            // with an embedded escape sequence return _some_ string whose start and 
+                            // with an embedded escape sequence return _some_ string whose start and
                             // end match the real bounds of the string.
                         }
                         else
                         {
-                            // This is a compiler error. 
+                            // This is a compiler error.
                             _reader.SinkCharacter();
                             current = new CSharpTokenizer.UnrecognizedStringEscapeToken();
                             return true;
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     return true;
                 }
 
-                // Sink the rest of the identifier.                     
+                // Sink the rest of the identifier.
                 while (_reader.SinkIdentifierPart())
                 {
                 }
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     return true;
                 }
 
-                // Skip the L, U, l, u, ul, etc.                    
+                // Skip the L, U, l, u, ul, etc.
                 _reader.SinkLongIntegerSuffix();
 
                 current = new HexIntegerLiteralToken();
@@ -250,7 +250,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // Decimal integer literal
             else if (_reader.SinkMultipleDecimalDigits())
             {
-                // reader.Skip the L, U, l, u, ul, etc.                    
+                // reader.Skip the L, U, l, u, ul, etc.
                 _reader.SinkLongIntegerSuffix();
 
                 current = new DecimalIntegerLiteralToken();
@@ -283,7 +283,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 return true;
             }
 
-            // We didn't recognize the token, so this is a syntax error. 
+            // We didn't recognize the token, so this is a syntax error.
             _reader.SinkCharacter();
             current = new UnrecognizedToken();
             return true;
@@ -310,7 +310,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  Reader
-        * 
+        *
         * Return the token char reader.
         */
         internal override TokenCharReader Reader

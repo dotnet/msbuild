@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed."); 
+                Assert.Ignore(".NET Framework 3.5 is required for this test, but is not installed.");
             }
         }
 
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests
             SolutionParser solution = SolutionParser_Tests.ParseSolutionHelper(solutionFileContents);
             BuildEventContext buildEventContext = new BuildEventContext(0, 0, 0, 0);
             SolutionWrapperProject.Generate(solution, project, "3.5", buildEventContext);
-            
+
             foreach (Target target in project.Targets)
             {
                 foreach (XmlNode childNode in target.TargetElement)
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests
 
                         Assertion.Assert(0 == String.Compare(
                                                             toolsVersionAttribute.Value,
-                                                            "$(ProjectToolsVersion)", 
+                                                            "$(ProjectToolsVersion)",
                                                             StringComparison.OrdinalIgnoreCase)
                                             );
                     }
@@ -300,15 +300,15 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                // We want to avoid using the solution cache -- it could lead to circumstances where detritus left 
-                // on the disk leads us down paths we didn't mean to go.  
+                // We want to avoid using the solution cache -- it could lead to circumstances where detritus left
+                // on the disk leads us down paths we didn't mean to go.
                 Environment.SetEnvironmentVariable("MSBuildUseNoSolutionCache", "1");
 
                 // We're not passing in a /tv:xx switch, so the solution project will have tools version 3.5
                 Project project = new Project();
                 SolutionParser solution = SolutionParser_Tests.ParseSolutionHelper(solutionFileContents);
                 BuildEventContext buildEventContext = new BuildEventContext(0, 0, 0, 0);
-            
+
                 SolutionWrapperProject.Generate(solution, project, "invalid", buildEventContext);
 
                 Assertion.AssertEquals("4.0", project.DefaultToolsVersion);
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBuildUseNoSolutionCache", oldUseNoCacheValue);
             }
         }
-            
+
         /// <summary>
         /// Test the SolutionWrapperProject.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests
             // NOTE: ValidateSolutionConfiguration and ValidateToolsVersions are always added, so we need to add two extras
             Assertion.AssertEquals(ProjectInSolution.projectNamesToDisambiguate.Length + 2, countOfStandardTargets);
         }
-        
+
         /// <summary>
         /// Tests the algorithm for choosing default configuration/platform values for solutions
         /// </summary>
@@ -410,7 +410,7 @@ namespace Microsoft.Build.UnitTests
 
             Project msbuildProject = new Project();
             SolutionWrapperProject.Generate(solution, msbuildProject, null, null);
-            
+
             // Default for Configuration is "Debug", if present
             Assertion.AssertEquals("Debug", msbuildProject.GetEvaluatedProperty("Configuration"));
 
@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests
 
             // v3.5 by default
             Assertion.AssertEquals("v4.0", msbuildProject.EvaluatedProperties["TargetFrameworkVersion"].Value);
-            // may be user defined 
+            // may be user defined
             msbuildProject.SetProperty("TargetFrameworkVersion", "userdefined");
             Assertion.AssertEquals("userdefined", msbuildProject.EvaluatedProperties["TargetFrameworkVersion"].Value);
             // v2.0 if MSBuildToolsVersion is 2.0
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests
             msbuildProject.SetProperty("TargetFrameworkVersion", "v3.5");
             bool success = msbuildProject.Build("GetFrameworkPathAndRedistList");
             Assertion.AssertEquals(true, success);
-            
+
             AssertProjectContainsItem(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", FrameworkLocationHelper.PathToDotNetFrameworkV20);
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 != null && FrameworkLocationHelper.PathToDotNetFrameworkV30 != null)
             {
@@ -620,7 +620,7 @@ namespace Microsoft.Build.UnitTests
             SolutionWrapperProject.Generate(solution, msbuildProject, toolsVersion, null);
             return msbuildProject;
         }
-  
+
         private void AssertProjectContainsItem(Project msbuildProject, string itemName, string itemSpec)
         {
             BuildItemGroup itemGroup = (BuildItemGroup)msbuildProject.EvaluatedItemsByName[itemName];
@@ -718,7 +718,7 @@ namespace Microsoft.Build.UnitTests
             Engine engine = new Engine();
             Project project = new Project(engine, null);
 
-            // This project considers itself loaded-by-host. Setting a file name on it, causes it to 
+            // This project considers itself loaded-by-host. Setting a file name on it, causes it to
             // ensure the engine believes it is loaded-by-host...
             project.FullFileName = "my project";
 

@@ -20,8 +20,8 @@ namespace Microsoft.Build.Tasks
     internal static class PropertyParser
     {
         /// <summary>
-        /// Given a string of semi-colon delimited name=value pairs, this method parses it and creates 
-        /// a hash table containing the property names as keys and the property values as values.  
+        /// Given a string of semi-colon delimited name=value pairs, this method parses it and creates
+        /// a hash table containing the property names as keys and the property values as values.
         /// </summary>
         /// <returns>true on success, false on failure.</returns>
         internal static bool GetTable(TaskLoggingHelper log, string parameterName, string[] propertyList, out Dictionary<string, string> propertiesTable)
@@ -43,9 +43,9 @@ namespace Microsoft.Build.Tasks
                     int indexOfEqualsSign = propertyNameValuePair.IndexOf('=');
 
                     // If we found one, then grab the stuff before it and put it into "propertyName",
-                    // and grab the stuff after it and put it into "propertyValue".  But trim the 
-                    // whitespace from beginning and end of both name and value.  (When authoring a 
-                    // project/targets file, people like to use whitespace and newlines to pretty up 
+                    // and grab the stuff after it and put it into "propertyValue".  But trim the
+                    // whitespace from beginning and end of both name and value.  (When authoring a
+                    // project/targets file, people like to use whitespace and newlines to pretty up
                     // the file format.)
                     if (indexOfEqualsSign != -1)
                     {
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Bag the property and its value.  Trim whitespace from beginning and end of
-                    // both name and value.  (When authoring a project/targets file, people like to 
+                    // both name and value.  (When authoring a project/targets file, people like to
                     // use whitespace and newlines to pretty up the file format.)
                     propertiesTable[propertyName] = propertyValue;
                 }
@@ -73,9 +73,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given a string of semi-colon delimited name=value pairs, this method parses it and creates 
-        /// a hash table containing the property names as keys and the property values as values.  
-        /// This method escapes any special characters found in the property values, in case they 
+        /// Given a string of semi-colon delimited name=value pairs, this method parses it and creates
+        /// a hash table containing the property names as keys and the property values as values.
+        /// This method escapes any special characters found in the property values, in case they
         /// are going to be passed to a method (such as that expects the appropriate escaping to have happened
         /// already.
         /// </summary>
@@ -99,9 +99,9 @@ namespace Microsoft.Build.Tasks
                     if (indexOfEqualsSign != -1)
                     {
                         // If we found one, then grab the stuff before it and put it into "propertyName",
-                        // and grab the stuff after it and put it into "propertyValue".  But trim the 
-                        // whitespace from beginning and end of both name and value.  (When authoring a 
-                        // project/targets file, people like to use whitespace and newlines to pretty up 
+                        // and grab the stuff after it and put it into "propertyValue".  But trim the
+                        // whitespace from beginning and end of both name and value.  (When authoring a
+                        // project/targets file, people like to use whitespace and newlines to pretty up
                         // the file format.)
                         string propertyName = propertyNameValueString.Substring(0, indexOfEqualsSign).Trim();
                         string propertyValue = EscapingUtilities.Escape(propertyNameValueString.Substring(indexOfEqualsSign + 1).Trim());

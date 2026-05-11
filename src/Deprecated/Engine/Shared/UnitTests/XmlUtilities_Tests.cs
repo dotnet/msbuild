@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Helper for invalid name error location test 
+        /// Helper for invalid name error location test
         /// </summary>
         /// <param name="name"></param>
         /// <param name="badChar"></param>

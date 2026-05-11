@@ -102,7 +102,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This method process a single BuildEvent argument, it will raise the event to registered loggers and 
+        /// This method process a single BuildEvent argument, it will raise the event to registered loggers and
         /// check to see if the there are forwarding loggers who need to see the event also, if so the message will
         /// be posted to another logger
         /// </summary>

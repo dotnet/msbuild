@@ -25,6 +25,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             nsmgr.AddNamespace("dsig", dsig);
             nsmgr.AddNamespace("xrml", xrml);
             nsmgr.AddNamespace("xsi", xsi);
+
             return nsmgr;
         }
     }

@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 @"<Project>
                       <Target Name='foo'/>
                   </Project>"));
-            XmlReader noLineInfoReader = new XmlReaderNoIXmlLineInfo(reader);
+            using XmlReader noLineInfoReader = new XmlReaderNoIXmlLineInfo(reader);
             Project project = new Project(noLineInfoReader);
             Assert.Single(project.Targets);
         }

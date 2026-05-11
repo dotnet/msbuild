@@ -17,7 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
-    
+
 namespace Microsoft.Build.UnitTests
 {
     /*
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         private List<BuildWarningEventArgs> warnings = new List<BuildWarningEventArgs>();
         private List<ExternalProjectStartedEventArgs> externalProjectStartedEvents = new List<ExternalProjectStartedEventArgs>();
         private List<ExternalProjectFinishedEventArgs> externalProjectFinishedEvents = new List<ExternalProjectFinishedEventArgs>();
-        
+
         /*
          * Method:  ErrorCount
          * Owner:   jomof
@@ -49,8 +49,8 @@ namespace Microsoft.Build.UnitTests
         internal int ErrorCount
         {
             get { return this.errorCount; }
-        }          
-        
+        }
+
         /*
          * Method:  WarningCount
          * Owner:   jomof
@@ -113,9 +113,9 @@ namespace Microsoft.Build.UnitTests
         internal string FullLog
         {
             get { return this.fullLog.ToString(); }
-        }      
-#endregion                    
-        
+        }
+#endregion
+
 #region Minimal ILogger implementation
 
         /*
@@ -129,14 +129,14 @@ namespace Microsoft.Build.UnitTests
         {
             get  {return LoggerVerbosity.Normal;}
             set  {/* do nothing */}
-        }  
-        
+        }
+
         /*
          * Property:    Parameters
          * Owner:       SumedhK
-         * 
+         *
          * The mock logger does not take parameters.
-         * 
+         *
          */
         public string Parameters
         {
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests
                 // do nothing
             }
         }
-        
+
         /*
          * Method:  Initialize
          * Owner:   jomof
@@ -175,9 +175,9 @@ namespace Microsoft.Build.UnitTests
         /*
          * Method:  Shutdown
          * Owner:   SumedhK
-         * 
+         *
          * The mock logger does not need to release any resources.
-         * 
+         *
          */
         public void Shutdown()
         {
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests
                 if (w.Code != "MSB4056" && !w.Message.Contains("MSB4056"))
                 {
                     fullLog.AppendFormat("{0}({1},{2}): {3} warning {4}: {5}\r\n",
-                        w.File, 
+                        w.File,
                         w.LineNumber,
                         w.ColumnNumber,
                         w.Subcategory,
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests
                 BuildErrorEventArgs e = (BuildErrorEventArgs) eventArgs;
 
                 fullLog.AppendFormat("{0}({1},{2}): {3} error {4}: {5}\r\n",
-                    e.File, 
+                    e.File,
                     e.LineNumber,
                     e.ColumnNumber,
                     e.Subcategory,

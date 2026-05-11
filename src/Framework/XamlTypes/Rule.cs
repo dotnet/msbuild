@@ -35,9 +35,9 @@ namespace Microsoft.Build.Framework.XamlTypes
     }
 
     /// <summary>
-    /// Used to represent the schema information for a Tool, a Custom Build Rule, a PropertyPage, etc. 
-    /// </summary> 
-    /// <remarks> 
+    /// Used to represent the schema information for a Tool, a Custom Build Rule, a PropertyPage, etc.
+    /// </summary>
+    /// <remarks>
     /// <para>
     /// Normally represented on disk as XAML, only one instance of this class is maintained per XAML
     /// file per project engine (solution).
@@ -90,10 +90,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// The name of this <see cref="Rule"/>. 
+        /// The name of this <see cref="Rule"/>.
         /// </summary>
         /// <remarks>
-        /// This field is mandatory and culture invariant. The value of this field cannot be set to the empty string. 
+        /// This field is mandatory and culture invariant. The value of this field cannot be set to the empty string.
         /// </remarks>
         public string Name
         {
@@ -102,10 +102,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The name that could be used by a prospective UI client to display this <see cref="BaseProperty"/>. 
+        /// The name that could be used by a prospective UI client to display this <see cref="BaseProperty"/>.
         /// </summary>
         /// <remarks>
-        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same 
+        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same
         /// value as the <see cref="Name"/> property (and hence, would not be localized).
         /// </remarks>
         [Localizable(true)]
@@ -132,9 +132,9 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Description of this <see cref="Rule"/> for use by a prospective UI client. 
+        /// Description of this <see cref="Rule"/> for use by a prospective UI client.
         /// </summary>
-        /// <remarks> 
+        /// <remarks>
         /// This field is optional and is culture sensitive.
         /// </remarks>
         [Localizable(true)]
@@ -145,7 +145,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Help information for this <see cref="Rule"/>. 
+        /// Help information for this <see cref="Rule"/>.
         /// </summary>
         /// <remarks>
         /// Maybe used to specify a help URL. This field
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// This field is optional and culture invariant.
         /// </remarks>
         /// <example>
-        /// Example: Consider <c>/D:WIN32</c>. In this switch and value representation, ":" is the separator since its separates the switch <c>D</c> 
+        /// Example: Consider <c>/D:WIN32</c>. In this switch and value representation, ":" is the separator since its separates the switch <c>D</c>
         /// from its value <c>WIN32</c>.
         /// </example>
         public string Separator
@@ -194,7 +194,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The UI renderer template used to display this Rule. 
+        /// The UI renderer template used to display this Rule.
         /// </summary>
         /// <remarks>
         /// The value used to set
@@ -209,7 +209,7 @@ namespace Microsoft.Build.Framework.XamlTypes
 
         /// <summary>
         /// The <see cref="DataSource"/> for all the properties in this <see cref="Rule"/>. This is overriden by any
-        /// data source defined locally for a property. 
+        /// data source defined locally for a property.
         /// </summary>
         /// <remarks>
         /// This field need not be specified only if all individual properties have data source defined locally.
@@ -230,7 +230,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// This is used to specify whether multiple files need to be batched on one command line invocation. 
+        /// This is used to specify whether multiple files need to be batched on one command line invocation.
         /// </summary>
         /// <remarks>
         /// This field is optional.
@@ -337,7 +337,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The list of <see cref="Category"/>s that properties in this <see cref="Rule"/> belong to. 
+        /// The list of <see cref="Category"/>s that properties in this <see cref="Rule"/> belong to.
         /// </summary>
         /// <remarks>
         /// This field is optional. Note that this field returns only the categories that were explicitly defined and do
@@ -368,9 +368,9 @@ namespace Microsoft.Build.Framework.XamlTypes
     }
 
     /// <summary>
-    /// Used to represent the schema information for a Tool, a Custom Build Rule, a PropertyPage, etc. 
-    /// </summary> 
-    /// <remarks> 
+    /// Used to represent the schema information for a Tool, a Custom Build Rule, a PropertyPage, etc.
+    /// </summary>
+    /// <remarks>
     /// <para>
     /// Normally represented on disk as XAML, only one instance of this class is maintained per XAML
     /// file per project engine (solution).
@@ -413,8 +413,8 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// This property returns the union of XAML specified <see cref="Category"/>s and auto-generated 
-        /// <see cref="Category"/>s. The latter are created from the missing categories that are being referred to by the 
+        /// This property returns the union of XAML specified <see cref="Category"/>s and auto-generated
+        /// <see cref="Category"/>s. The latter are created from the missing categories that are being referred to by the
         /// properties in this Rule. The auto-generated <see cref="Category"/>s only have their name set.
         /// </summary>
         public List<Category> EvaluatedCategories
@@ -440,7 +440,7 @@ namespace Microsoft.Build.Framework.XamlTypes
 
         /// <summary>
         /// Returns all properties partitioned into categories. The return value is never
-        /// null. 
+        /// null.
         /// The returned list may contain auto-generated categories. Note that if a <see cref="BaseProperty"/>
         /// (or its derived classes) refer to a property that is not specified, then an new
         /// Category is generated for the same. If not category is specified for the property, then
@@ -448,7 +448,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// The list of categories is exactly as specified in the Xaml file. The auto-generated
         /// categories come (in no strict order) after the specified categories.
         /// </summary>
-        /// <returns> A dictionary whose keys are the <see cref="Category"/> names and 
+        /// <returns> A dictionary whose keys are the <see cref="Category"/> names and
         /// the value is the list of properties in that category. </returns>
         public OrderedDictionary GetPropertiesByCategory()
         {

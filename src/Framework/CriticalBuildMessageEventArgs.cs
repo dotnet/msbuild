@@ -107,7 +107,7 @@ namespace Microsoft.Build.Framework
             string senderName,
             DateTime eventTimestamp,
             params object[] messageArgs)
-            //// Force importance to High. 
+            //// Force importance to High.
             : base(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, MessageImportance.High, eventTimestamp, messageArgs)
         {
             // do nothing

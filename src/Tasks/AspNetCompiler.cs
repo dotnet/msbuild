@@ -1,16 +1,20 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using Microsoft.Build.Utilities;
+#endif
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// The AspNetCompiler task, which is a wrapper around aspnet_compiler.exe
     /// </summary>
-    public class AspNetCompiler : ToolTaskExtension
+    public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract
     {
         /*
             C:\WINDOWS\Microsoft.NET\Framework\v2.0.x86dbg>aspnet_compiler /?
@@ -48,7 +52,7 @@ namespace Microsoft.Build.Tasks
             -keycontainer Specifies a strong name key container.
             -aptca        If specified, the strong-name assembly will allow partially
                           trusted callers.
-            -delaysign    If specified, the assemblly is not fully signed when created. 
+            -delaysign    If specified, the assemblly is not fully signed when created.
             -fixednames   If specified, the compiled assemblies will be given fixed names.
             -nologo       Suppress compiler copyright message.
 
@@ -75,7 +79,7 @@ namespace Microsoft.Build.Tasks
         public bool AllowPartiallyTrustedCallers { get; set; }
 
         /// <summary>
-        /// If specified, the assemblly is not fully signed when created. 
+        /// If specified, the assemblly is not fully signed when created.
         /// </summary>
         public bool DelaySign { get; set; }
 
@@ -103,7 +107,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The full IIS metabase path of the application. This switch 
+        /// The full IIS metabase path of the application. This switch
         /// cannot be combined with the virtualPath or PhysicalDir option.
         /// </summary>
         public string MetabasePath
@@ -124,7 +128,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// The physical path to which the application is compiled. If not
-        /// specified, the application is precompiled in-place. 
+        /// specified, the application is precompiled in-place.
         /// </summary>
         public string TargetPath
         {
@@ -169,8 +173,8 @@ namespace Microsoft.Build.Tasks
         public bool Clean { get; set; }
 
         /// <summary>
-        /// The TargetFrameworkMoniker indicating which .NET Framework version of 
-        /// aspnet_compiler.exe should be used.  Only accepts .NET Framework monikers. 
+        /// The TargetFrameworkMoniker indicating which .NET Framework version of
+        /// aspnet_compiler.exe should be used.  Only accepts .NET Framework monikers.
         /// </summary>
         public string TargetFrameworkMoniker
         {
@@ -337,5 +341,71 @@ namespace Microsoft.Build.Tasks
 
             return true;
         }
+    }
+
+#else
+
+    public sealed class AspNetCompiler : TaskRequiresFramework, IAspNetCompilerTaskContract
+    {
+        public AspNetCompiler()
+            : base(nameof(AspNetCompiler))
+        {
+        }
+
+        #region Properties
+
+        public bool AllowPartiallyTrustedCallers { get; set; }
+
+        public bool DelaySign { get; set; }
+
+        public bool FixedNames { get; set; }
+
+        public string KeyContainer { get; set; }
+
+        public string KeyFile { get; set; }
+
+        public string MetabasePath { get; set; }
+
+        public string PhysicalPath { get; set; }
+
+        public string TargetPath { get; set; }
+
+        public string VirtualPath { get; set; }
+
+        public bool Updateable { get; set; }
+
+        public bool Force { get; set; }
+
+        public bool Debug { get; set; }
+
+        public bool Clean { get; set; }
+
+        public string TargetFrameworkMoniker { get; set; }
+
+        #endregion
+    }
+
+#endif
+
+    internal interface IAspNetCompilerTaskContract
+    {
+        #region Properties
+
+        bool AllowPartiallyTrustedCallers { get; set; }
+        bool DelaySign { get; set; }
+        bool FixedNames { get; set; }
+        string KeyContainer { get; set; }
+        string KeyFile { get; set; }
+        string MetabasePath { get; set; }
+        string PhysicalPath { get; set; }
+        string TargetPath { get; set; }
+        string VirtualPath { get; set; }
+        bool Updateable { get; set; }
+        bool Force { get; set; }
+        bool Debug { get; set; }
+        bool Clean { get; set; }
+        string TargetFrameworkMoniker { get; set; }
+
+        #endregion
     }
 }

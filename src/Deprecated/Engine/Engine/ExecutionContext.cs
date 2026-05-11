@@ -41,7 +41,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// The node on which this context is being executed 
+        /// The node on which this context is being executed
         /// </summary>
         internal int NodeIndex
         {

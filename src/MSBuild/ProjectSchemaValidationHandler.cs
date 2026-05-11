@@ -25,12 +25,12 @@ namespace Microsoft.Build.CommandLine
         #region Methods
 
         /// <summary>
-        /// Validates a project file against the given schema.  If no schema is given, validates 
+        /// Validates a project file against the given schema.  If no schema is given, validates
         /// against the default schema
         /// </summary>
         /// <param name="projectFile">Path of the file to validate.</param>
         /// <param name="schemaFile">Can be null.</param>
-        /// <param name="binPath">Path to the framework directory where the default schema for 
+        /// <param name="binPath">Path to the framework directory where the default schema for
         /// this ToolsVersion can be found.</param>
         /// <returns>True if the project was successfully validated against the given schema, false otherwise</returns>
         internal static void VerifyProjectSchema(
@@ -48,13 +48,13 @@ namespace Microsoft.Build.CommandLine
 
             if (FileSystems.Default.FileExists(schemaFile))
             {
-                // Print the schema file we're using, particularly since it can vary 
+                // Print the schema file we're using, particularly since it can vary
                 // according to the toolset being used
                 Console.WriteLine(AssemblyResources.GetString("SchemaFileLocation"), schemaFile);
             }
             else
             {
-                // If we've gotten to this point, there is no schema to validate against -- just exit. 
+                // If we've gotten to this point, there is no schema to validate against -- just exit.
                 InitializationException.Throw(
                     ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SchemaNotFoundErrorWithFile", schemaFile),
                     null); /* No associated command line switch */
@@ -159,8 +159,8 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Given the parameters passed in, if the condition is false, builds an 
-        /// error message and throws an InitializationException with that message. 
+        /// Given the parameters passed in, if the condition is false, builds an
+        /// error message and throws an InitializationException with that message.
         /// </summary>
         private static void VerifyThrowInitializationExceptionWithResource(
                  bool condition,
@@ -186,8 +186,8 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Given the parameters passed in, builds an error message and throws an 
-        /// InitializationException with that message. 
+        /// Given the parameters passed in, builds an error message and throws an
+        /// InitializationException with that message.
         /// </summary>
         private static void ThrowInitializationExceptionWithResource(
                  string projectFile,

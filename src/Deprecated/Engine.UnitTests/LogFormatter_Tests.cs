@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:  TimeSpanMediumDuration
         * Owner:   jomof
-        * 
+        *
         * Tests the mainline: a medium length duration
         */
         [Test]
@@ -30,14 +30,14 @@ namespace Microsoft.Build.UnitTests
         {
             TimeSpan t = new TimeSpan(1254544900);
             string result = LogFormatter.FormatTimeSpan(t);
-            Assertion.AssertEquals("00:02:05.45", result);            
+            Assertion.AssertEquals("00:02:05.45", result);
         }
 
 
         /*
         * Method:  TimeSpanZeroDuration
         * Owner:   jomof
-        * 
+        *
         * Format a TimeSpan where the duration is zero.
         */
         [Test]
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
         {
             TimeSpan t = new TimeSpan(0);
             string result = LogFormatter.FormatTimeSpan(t);
-            Assertion.AssertEquals("00:00:00", result);            
+            Assertion.AssertEquals("00:00:00", result);
         }
 
         [Test]
