@@ -50,8 +50,7 @@ namespace Microsoft.Build.Tasks
                 new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
                 GlobalAssemblyCache.pathFromFusionName,
                 GlobalAssemblyCache.gacEnumerator,
-                false,
-                TaskEnvironment.Fallback);
+                false);
 
             return !string.IsNullOrEmpty(path);
         }, LazyThreadSafetyMode.PublicationOnly);
