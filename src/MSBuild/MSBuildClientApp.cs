@@ -79,7 +79,7 @@ namespace Microsoft.Build.CommandLine
                 if (exitResult.MSBuildClientExitType != MSBuildClientExitType.ServerBusy)
                 {
                     string detail = GetServerFallbackDetail(exitResult);
-                    Console.Error.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("MSBuildServerUnavailable", detail));
+                    Console.Error.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerUnavailable", detail));
                 }
 
                 // Server is busy / unavailable, fallback to old behavior.
@@ -100,20 +100,25 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Picks the most specific localized "why MSBuild server was unavailable" sub-message for
         /// the user-visible fallback notice. Prefers the "server crashed immediately on launch"
-        /// detail over a generic timeout when the launched server's exit code is known.
+        /// detail over a generic connect-failure message when the launched server's exit code is
+        /// known.
         /// </summary>
         private static string GetServerFallbackDetail(MSBuildClientExitResult exitResult)
         {
             return exitResult.MSBuildClientExitType switch
             {
-                MSBuildClientExitType.LaunchError => AssemblyResources.GetString("MSBuildServerLaunchError"),
-                MSBuildClientExitType.UnknownServerState => AssemblyResources.GetString("MSBuildServerStateUnknown"),
+                MSBuildClientExitType.LaunchError =>
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerLaunchError"),
+                MSBuildClientExitType.UnknownServerState =>
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerStateUnknown"),
                 MSBuildClientExitType.UnableToConnect when exitResult.ServerProcessExitCode is int code =>
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
                         "MSBuildServerCrashedOnLaunch",
                         code.ToString(CultureInfo.InvariantCulture)),
-                MSBuildClientExitType.UnableToConnect => AssemblyResources.GetString("MSBuildServerLaunchTimeout"),
-                _ => AssemblyResources.GetString("MSBuildServerConnectFailed"),
+                // Default: UnableToConnect without a known exit code, or any future MSBuildClientExitType
+                // value the caller forwards here. Wording is deliberately neutral about whether the
+                // underlying failure was a timeout or a non-timeout connect error.
+                _ => ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerConnectFailed"),
             };
         }
     }

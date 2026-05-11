@@ -472,6 +472,13 @@ namespace Microsoft.Build.Experimental
                 // needs DOTNET_ROOT to locate the runtime. Without these overrides the server
                 // process fails to start, the named pipe is never opened, and the client times
                 // out after 20s (the DOTNET_CLI_USE_MSBUILD_SERVER=true regression in 10.0.300).
+                // The `!` is a type-variance suppression: CreateDotnetRootEnvironmentOverrides()
+                // returns IDictionary<string, string?>?, but NodeLaunchData.EnvironmentOverrides
+                // is typed IDictionary<string, string>?. NodeProviderOutOfProc.cs:102 hides the
+                // same mismatch via #nullable disable on that file; this file has nullable
+                // enabled so the suppression is required to compile. The dictionary's null
+                // values are intentional sentinels (clear architecture-specific DOTNET_ROOT_*
+                // overrides) and are honoured by ApplyEnvironmentOverrides.
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
                     CommandLineArgs: string.Join(" ", msBuildServerOptions),
