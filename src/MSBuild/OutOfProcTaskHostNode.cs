@@ -514,9 +514,7 @@ namespace Microsoft.Build.CommandLine
 
             ErrorUtilities.VerifyThrow(
                 targetOutputsPerProject is null || projectFileNames.Length == targetOutputsPerProject.Length,
-                "projectFileNames has {0} entries but targetOutputsPerProject has {1} -- lengths must match.",
-                projectFileNames.Length,
-                targetOutputsPerProject?.Length ?? 0);
+                $"projectFileNames has {projectFileNames.Length} entries but targetOutputsPerProject has {targetOutputsPerProject?.Length ?? 0} -- lengths must match.");
 
             bool includeTargetOutputs = targetOutputsPerProject is not null;
 
@@ -943,7 +941,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (packet is not ITaskHostCallbackPacket callbackPacket)
             {
-                ErrorUtilities.ThrowInternalError("HandleCallbackResponse called with non-callback packet type: {0}", packet.GetType().Name);
+                ErrorUtilities.ThrowInternalError($"HandleCallbackResponse called with non-callback packet type: {packet.GetType().Name}");
                 return;
             }
 
@@ -965,8 +963,7 @@ namespace Microsoft.Build.CommandLine
 
             // No pending request matched -- this is a protocol bug (duplicate response,
             // corrupted request ID, or race with shutdown). Crash to surface the issue.
-            ErrorUtilities.ThrowInternalError("TaskHost received callback response with no pending request. RequestId={0}, Type={1}",
-                callbackPacket.RequestId, packet.Type);
+            ErrorUtilities.ThrowInternalError($"TaskHost received callback response with no pending request. RequestId={callbackPacket.RequestId}, Type={packet.Type}");
         }
 
         /// <summary>
@@ -1103,7 +1100,7 @@ namespace Microsoft.Build.CommandLine
             if (!_taskContexts.TryAdd(taskId, context))
             {
                 context.Dispose();
-                ErrorUtilities.ThrowInternalError("Task ID {0} already exists in TaskHost.", taskId);
+                ErrorUtilities.ThrowInternalError($"Task ID {taskId} already exists in TaskHost.");
             }
 
             return context;
@@ -1172,8 +1169,7 @@ namespace Microsoft.Build.CommandLine
             // Only _activeTaskCount must be zero — blocked tasks (waiting on BuildProjectFile
             // callbacks) don't prevent accepting a new nested task configuration.
             ErrorUtilities.VerifyThrow(_activeTaskCount == 0,
-                "Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={0}",
-                _activeTaskCount);
+                $"Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={_activeTaskCount}");
 
             if (_blockedTaskCount > 0)
             {

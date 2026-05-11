@@ -3139,6 +3139,42 @@ EndGlobal
             MSBuildApp.Execute([@"c:\bin\msbuild.exe", project, "/m:257 /mt"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
         }
 
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableEnablesMultiThreadedMode()
+        {
+            // When MSBUILDFORCEMULTITHREADED=1 is set, IsMultiThreadedEnabled should return true
+            // even when the -multiThreaded / -mt switch is not passed on the command line.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded).ShouldBeFalse();
+
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()
+        {
+            // When the env var is not set and the switch is not passed, IsMultiThreadedEnabled should return false.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableNonOneValueDoesNotEnableMultiThreadedMode()
+        {
+            // The env var is only honored when set to exactly "1", matching other MSBUILDFORCE* flags.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "true");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;
