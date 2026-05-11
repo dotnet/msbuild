@@ -139,7 +139,15 @@ namespace Microsoft.Build.Tasks
                 using PEReader peReader = new PEReader(stream);
                 CorHeader corHeader = peReader.PEHeaders.CorHeader;
 
-                if (corHeader is null || corHeader.StrongNameSignatureDirectory.Size == 0)
+                // No COR20 header means this isn't a managed PE; preserve the historical
+                // "we don't know" answer rather than claiming the image is unsigned.
+                if (corHeader is null)
+                {
+                    return StrongNameLevel.Unknown;
+                }
+
+                DirectoryEntry signature = corHeader.StrongNameSignatureDirectory;
+                if (signature.RelativeVirtualAddress == 0 || signature.Size == 0)
                 {
                     return StrongNameLevel.None;
                 }
