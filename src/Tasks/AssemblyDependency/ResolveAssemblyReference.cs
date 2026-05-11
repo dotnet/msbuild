@@ -295,7 +295,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _latestTargetFrameworkDirectories?.Select(path => path.OriginalValue).ToArray();
+                return _latestTargetFrameworkDirectories.ToOriginalValueArray();
             }
 
             set
@@ -404,7 +404,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _candidateAssemblyFiles.Select(path => path.OriginalValue).ToArray();
+                return _candidateAssemblyFiles.ToOriginalValueArray();
             }
             set
             {
@@ -432,7 +432,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _targetFrameworkDirectories?.Select(path => path.OriginalValue).ToArray();
+                return _targetFrameworkDirectories.ToOriginalValueArray();
             }
             set
             {
@@ -954,7 +954,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _fullFrameworkFolders?.Select(path => path.OriginalValue).ToArray();
+                return _fullFrameworkFolders.ToOriginalValueArray();
             }
 
             set
@@ -1160,7 +1160,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private AbsolutePath[] MakeAbsolutePaths(string[] paths)
         {
-            return paths?.Select(path => MakeAbsolutePath(path)).ToArray() ?? [];
+            if (paths is null)
+            {
+                return [];
+            }
+            AbsolutePath[] result = new AbsolutePath[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+            {
+                result[i] = MakeAbsolutePath(paths[i]);
+            }
+            return result;
         }
 
         /// <summary>
@@ -1187,7 +1196,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private AbsolutePath[] MakeCanonicalPaths(string[] paths)
         {
-            return paths?.Select(path => MakeCanonicalPath(path)).ToArray() ?? [];
+            if (paths is null)
+            {
+                return [];
+            }
+            AbsolutePath[] result = new AbsolutePath[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+            {
+                result[i] = MakeCanonicalPath(paths[i]);
+            }
+            return result;
         }
 
         #endregion
@@ -2553,9 +2571,9 @@ namespace Microsoft.Build.Tasks
                         _searchPaths,
                         _allowedAssemblyExtensions,
                         _relatedFileExtensions,
-                        _candidateAssemblyFiles?.Select(path => path.Value).ToArray(),
+                        _candidateAssemblyFiles.ToStringArray(),
                         _resolvedSDKReferences,
-                        _targetFrameworkDirectories?.Select(path => path.Value).ToArray(),
+                        _targetFrameworkDirectories.ToStringArray(),
                         installedAssemblies,
                         processorArchitecture,
                         fileExists,
@@ -2573,7 +2591,7 @@ namespace Microsoft.Build.Tasks
                         _projectTargetFramework,
                         frameworkMoniker,
                         Log,
-                        _latestTargetFrameworkDirectories?.Select(path => path.Value).ToArray(),
+                        _latestTargetFrameworkDirectories.ToStringArray(),
                         _copyLocalDependenciesWhenParentReferenceInGac,
                         DoNotCopyLocalIfInGac,
                         getAssemblyPathInGac,
@@ -2939,7 +2957,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            fullRedistAssemblyTableInfo = GetInstalledAssemblyTableInfo(false, FullFrameworkAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), _fullFrameworkFolders?.Select(path => path.Value).ToArray());
+            fullRedistAssemblyTableInfo = GetInstalledAssemblyTableInfo(false, FullFrameworkAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), _fullFrameworkFolders.ToStringArray());
             if (fullRedistAssemblyTableInfo.Length > 0)
             {
                 // Get the redist list which represents the Full framework, we need this so that we can generate the exclusion list

@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Converts an array of <see cref="AbsolutePath"/> to a string array.
+        /// Converts an array of <see cref="AbsolutePath"/> to a string array of <see cref="AbsolutePath.Value"/>s.
         /// Returns <see langword="null"/> if <paramref name="paths"/> is <see langword="null"/>.
         /// </summary>
         internal static string[]? ToStringArray(this AbsolutePath[]? paths)
@@ -72,6 +72,27 @@ namespace Microsoft.Build.Tasks
             for (int i = 0; i < paths.Length; i++)
             {
                 result[i] = paths[i].Value;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Converts an array of <see cref="AbsolutePath"/> to a string array of <see cref="AbsolutePath.OriginalValue"/>s
+        /// (the user-supplied path before any absolutization/canonicalization).
+        /// Returns <see langword="null"/> if <paramref name="paths"/> is <see langword="null"/>.
+        /// </summary>
+        internal static string[]? ToOriginalValueArray(this AbsolutePath[]? paths)
+        {
+            if (paths is null)
+            {
+                return null;
+            }
+
+            var result = new string[paths.Length];
+            for (int i = 0; i < paths.Length; i++)
+            {
+                result[i] = paths[i].OriginalValue;
             }
 
             return result;
