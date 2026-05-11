@@ -33,7 +33,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("DependsOnFoo4Framework"),
             };
 
-    
             ResolveAssemblyReference t = new ResolveAssemblyReference();
             t.BuildEngine = e;
             t.Assemblies = items;

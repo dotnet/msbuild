@@ -180,6 +180,11 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     {
                         foreach (AssemblyFoldersFromConfigInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersFromConfig)
                         {
+                            // Pre-MT, an empty <DirectoryPath/> in the config file silently resolved to
+                            // the project directory because the process CWD was set per-project. Under
+                            // multithreading the CWD is no longer per-project, so we either skip empty
+                            // entries (new, wave-on) or explicitly resolve them against the project
+                            // directory via TaskEnvironment (legacy, wave-off).
                             string directoryPath;
                             if (string.IsNullOrEmpty(assemblyFolder.DirectoryPath))
                             {
@@ -188,12 +193,12 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                                     continue;
                                 }
 
-                                // Pre-Wave18_8: empty DirectoryPath was passed through and resolved from CWD (project directory).
                                 directoryPath = taskEnvironment.ProjectDirectory.Value;
                             }
                             else
                             {
-                                // Absolutize defensively — config paths may not be absolute.
+                                // Absolutize via TaskEnvironment: config paths may be relative, and the
+                                // process CWD is no longer guaranteed to be the project directory under MT.
                                 directoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
                             }
 

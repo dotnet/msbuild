@@ -699,15 +699,25 @@ namespace Microsoft.Build.Tasks
         public string AppConfigFile
         {
             get => _appConfigFile.OriginalValue;
-            set 
-            { 
+            set
+            {
+                // Keep _appConfigFile and _appConfigValueIsEmptyString consistent on every assignment
+                // so a previous non-empty value isn't left behind when the user reassigns to "" or null.
+                //
+                //   non-empty -> absolutize into _appConfigFile, clear the empty-string flag.
+                //   empty ""  -> clear _appConfigFile; set the empty-string flag only when Wave18_8 is
+                //                disabled, so the legacy "path cannot be empty" error path can fire.
+                //   null      -> clear _appConfigFile and the flag. Null means "not set".
                 if (!string.IsNullOrEmpty(value))
                 {
                     _appConfigFile = MakeAbsolutePath(value);
+                    _appConfigValueIsEmptyString = false;
                 }
-                else if (value == string.Empty && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+                else
                 {
-                    _appConfigValueIsEmptyString = true;
+                    _appConfigFile = default;
+                    _appConfigValueIsEmptyString = value == string.Empty
+                        && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8);
                 }
             }
         }
@@ -1167,7 +1177,7 @@ namespace Microsoft.Build.Tasks
             }
 
             return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
-                ? TaskEnvironment.GetAbsolutePath(path).TryGetCanonicalForm(Log)
+                ? TaskEnvironment.GetAbsolutePath(path).GetCanonicalFormNoThrow(Log)
                 : new AbsolutePath(path, ignoreRootedCheck: true);
         }
 

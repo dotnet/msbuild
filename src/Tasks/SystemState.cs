@@ -592,14 +592,16 @@ namespace Microsoft.Build.Tasks
                 {
                     continue;
                 }
+
+                string stateFileDirectory = Path.GetDirectoryName(stateFilePath);
                 foreach (KeyValuePair<string, FileState> kvp in sysState.instanceLocalFileStateCache)
                 {
                     string relativePath = kvp.Key;
                     if (!assembliesFound.Contains(relativePath))
                     {
                         FileState fileState = kvp.Value;
-                        string fullPath  = taskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(stateFilePath), relativePath)).GetCanonicalForm().Value;
-                        
+                        AbsolutePath fullPath = taskEnvironment.GetAbsolutePath(Path.Combine(stateFileDirectory, relativePath)).GetCanonicalForm();
+
                         if (fileExists(fullPath))
                         {
                             // Correct file path

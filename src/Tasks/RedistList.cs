@@ -988,7 +988,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">Logger for diagnostic messages when canonicalization fails.</param>
         internal static AssemblyTableInfo CreateFromRelativePath(string path, string frameworkDirectory, TaskEnvironment taskEnvironment, TaskLoggingHelper log)
         {
-            AbsolutePath canonicalPath = taskEnvironment.GetAbsolutePath(FileUtilities.NormalizeForPathComparison(path)).TryGetCanonicalForm(log);
+            AbsolutePath canonicalPath = taskEnvironment.GetAbsolutePath(FileUtilities.NormalizeForPathComparison(path)).GetCanonicalFormNoThrow(log);
             return new AssemblyTableInfo(canonicalPath, FileUtilities.NormalizeForPathComparison(frameworkDirectory));
         }
 
