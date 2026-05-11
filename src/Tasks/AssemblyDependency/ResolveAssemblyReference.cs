@@ -115,7 +115,8 @@ namespace Microsoft.Build.Tasks
             public static string UnifiedDependency;
             public static string UnifiedPrimaryReference;
 
-            private static bool initialized = false;
+            private static volatile bool initialized;
+            private static readonly object s_initializeLock = new object();
 
             internal static void Initialize(TaskLoggingHelper log)
             {
@@ -124,48 +125,56 @@ namespace Microsoft.Build.Tasks
                     return;
                 }
 
-                initialized = true;
+                lock (s_initializeLock)
+                {
+                    if (initialized)
+                    {
+                        return;
+                    }
 
-                string GetResource(string name) => log.GetResourceMessage(name);
-                string GetResourceFourSpaces(string name) => FourSpaces + log.GetResourceMessage(name);
-                string GetResourceEightSpaces(string name) => EightSpaces + log.GetResourceMessage(name);
+                    string GetResource(string name) => log.GetResourceMessage(name);
+                    string GetResourceFourSpaces(string name) => FourSpaces + log.GetResourceMessage(name);
+                    string GetResourceEightSpaces(string name) => EightSpaces + log.GetResourceMessage(name);
 
-                ConsideredAndRejectedBecauseFusionNamesDidntMatch = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch");
-                ConsideredAndRejectedBecauseNoFile = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile");
-                ConsideredAndRejectedBecauseNotAFileNameOnDisk = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk");
-                ConsideredAndRejectedBecauseNotInGac = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac");
-                ConsideredAndRejectedBecauseTargetDidntHaveFusionName = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName");
-                Dependency = GetResource("ResolveAssemblyReference.Dependency");
-                FormattedAssemblyInfo = GetResourceFourSpaces("ResolveAssemblyReference.FormattedAssemblyInfo");
-                FoundRelatedFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundRelatedFile");
-                FoundSatelliteFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundSatelliteFile");
-                FoundScatterFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundScatterFile");
-                ImageRuntimeVersion = GetResourceFourSpaces("ResolveAssemblyReference.ImageRuntimeVersion");
-                IsAWinMdFile = GetResourceFourSpaces("ResolveAssemblyReference.IsAWinMdFile");
-                LogAttributeFormat = GetResourceEightSpaces("ResolveAssemblyReference.LogAttributeFormat");
-                LogTaskPropertyFormat = GetResource("ResolveAssemblyReference.LogTaskPropertyFormat");
-                NoBecauseBadImage = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseBadImage");
-                NoBecauseParentReferencesFoundInGac = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac");
-                NotCopyLocalBecauseConflictVictim = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim");
-                NotCopyLocalBecauseEmbedded = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseEmbedded");
-                NotCopyLocalBecauseFrameworksFiles = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseFrameworksFiles");
-                NotCopyLocalBecauseIncomingItemAttributeOverrode = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseIncomingItemAttributeOverrode");
-                NotCopyLocalBecausePrerequisite = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecausePrerequisite");
-                NotCopyLocalBecauseReferenceFoundInGAC = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseReferenceFoundInGAC");
-                PrimaryReference = GetResource("ResolveAssemblyReference.PrimaryReference");
-                RemappedReference = GetResourceFourSpaces("ResolveAssemblyReference.RemappedReference");
-                RequiredBy = GetResourceFourSpaces("ResolveAssemblyReference.RequiredBy");
-                Resolved = GetResourceFourSpaces("ResolveAssemblyReference.Resolved");
-                ResolvedFrom = GetResourceFourSpaces("ResolveAssemblyReference.ResolvedFrom");
-                SearchedAssemblyFoldersEx = GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx");
-                SearchPath = GetResourceEightSpaces("ResolveAssemblyReference.SearchPath");
-                SearchPathAddedByParentAssembly = GetResourceEightSpaces("ResolveAssemblyReference.SearchPathAddedByParentAssembly");
-                TargetedProcessorArchitectureDoesNotMatch = GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch");
-                UnificationByAppConfig = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAppConfig");
-                UnificationByAutoUnify = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAutoUnify");
-                UnificationByFrameworkRetarget = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByFrameworkRetarget");
-                UnifiedDependency = GetResource("ResolveAssemblyReference.UnifiedDependency");
-                UnifiedPrimaryReference = GetResource("ResolveAssemblyReference.UnifiedPrimaryReference");
+                    ConsideredAndRejectedBecauseFusionNamesDidntMatch = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch");
+                    ConsideredAndRejectedBecauseNoFile = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile");
+                    ConsideredAndRejectedBecauseNotAFileNameOnDisk = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk");
+                    ConsideredAndRejectedBecauseNotInGac = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac");
+                    ConsideredAndRejectedBecauseTargetDidntHaveFusionName = GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName");
+                    Dependency = GetResource("ResolveAssemblyReference.Dependency");
+                    FormattedAssemblyInfo = GetResourceFourSpaces("ResolveAssemblyReference.FormattedAssemblyInfo");
+                    FoundRelatedFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundRelatedFile");
+                    FoundSatelliteFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundSatelliteFile");
+                    FoundScatterFile = GetResourceFourSpaces("ResolveAssemblyReference.FoundScatterFile");
+                    ImageRuntimeVersion = GetResourceFourSpaces("ResolveAssemblyReference.ImageRuntimeVersion");
+                    IsAWinMdFile = GetResourceFourSpaces("ResolveAssemblyReference.IsAWinMdFile");
+                    LogAttributeFormat = GetResourceEightSpaces("ResolveAssemblyReference.LogAttributeFormat");
+                    LogTaskPropertyFormat = GetResource("ResolveAssemblyReference.LogTaskPropertyFormat");
+                    NoBecauseBadImage = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseBadImage");
+                    NoBecauseParentReferencesFoundInGac = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac");
+                    NotCopyLocalBecauseConflictVictim = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim");
+                    NotCopyLocalBecauseEmbedded = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseEmbedded");
+                    NotCopyLocalBecauseFrameworksFiles = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseFrameworksFiles");
+                    NotCopyLocalBecauseIncomingItemAttributeOverrode = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseIncomingItemAttributeOverrode");
+                    NotCopyLocalBecausePrerequisite = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecausePrerequisite");
+                    NotCopyLocalBecauseReferenceFoundInGAC = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseReferenceFoundInGAC");
+                    PrimaryReference = GetResource("ResolveAssemblyReference.PrimaryReference");
+                    RemappedReference = GetResourceFourSpaces("ResolveAssemblyReference.RemappedReference");
+                    RequiredBy = GetResourceFourSpaces("ResolveAssemblyReference.RequiredBy");
+                    Resolved = GetResourceFourSpaces("ResolveAssemblyReference.Resolved");
+                    ResolvedFrom = GetResourceFourSpaces("ResolveAssemblyReference.ResolvedFrom");
+                    SearchedAssemblyFoldersEx = GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx");
+                    SearchPath = GetResourceEightSpaces("ResolveAssemblyReference.SearchPath");
+                    SearchPathAddedByParentAssembly = GetResourceEightSpaces("ResolveAssemblyReference.SearchPathAddedByParentAssembly");
+                    TargetedProcessorArchitectureDoesNotMatch = GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch");
+                    UnificationByAppConfig = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAppConfig");
+                    UnificationByAutoUnify = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAutoUnify");
+                    UnificationByFrameworkRetarget = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByFrameworkRetarget");
+                    UnifiedDependency = GetResource("ResolveAssemblyReference.UnifiedDependency");
+                    UnifiedPrimaryReference = GetResource("ResolveAssemblyReference.UnifiedPrimaryReference");
+
+                    initialized = true;
+                }
             }
         }
 
