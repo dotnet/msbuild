@@ -21,125 +21,79 @@ namespace Microsoft.Build.Graph.UnitTests
     /// Microsoft.Common.CurrentVersion.targets, Microsoft.Common.CrossTargeting.targets,
     /// and Microsoft.Managed.After.targets correctly propagates targets through the graph.
     ///
-    /// These tests use synthetic project XML that mirrors the real targets files to ensure
-    /// the protocol is correct regardless of which project types import the targets.
+    /// These tests import the real targets files via $(MSBuildToolsPath) so the assertions
+    /// run against the production protocol, not a copy-pasted snapshot. Changes to the
+    /// real ProjectReferenceTargets sections in those files will exercise these tests directly.
     /// </summary>
     public class ProjectReferenceTargetsProtocolTests : IDisposable
     {
         private readonly TestEnvironment _env;
 
+        /// <summary>
+        /// Microsoft.Common.CrossTargeting.targets unconditionally imports $(NuGetRestoreTargets),
+        /// which defaults to $(MSBuildToolsPath)\NuGet.targets — a file not present in the
+        /// unit-test bin directory. The cross-targeting tests override the property to point at
+        /// this empty stub so the import resolves to a no-op. (Microsoft.Common.CurrentVersion.targets
+        /// guards its NuGet import with Exists(), so the non-cross-targeting tests don't need this.)
+        /// </summary>
+        private readonly TransientTestFile _emptyNuGetTargets;
+
         public ProjectReferenceTargetsProtocolTests(ITestOutputHelper output)
         {
             _env = TestEnvironment.Create(output);
+            _emptyNuGetTargets = _env.CreateFile("NuGet.targets", "<Project/>");
         }
 
         /// <summary>
-        /// The core ProjectReferenceTargets protocol as defined in Microsoft.Common.CurrentVersion.targets
-        /// (the "ProjectReferenceTargets for Static Graph" section, around line 5183).
-        /// Keep in sync with the real file — if the protocol changes there, update this constant.
-        /// This applies to all project types that import the Common targets.
+        /// Synthetic project content for a non-managed, non-cross-targeting project that imports
+        /// Microsoft.Common.targets (which in turn imports Microsoft.Common.CurrentVersion.targets).
+        /// This gives the test the real core Build/Clean/Rebuild ProjectReferenceTargets protocol.
         /// </summary>
-        private const string CommonCurrentVersionTargetsProtocol = """
+        private const string CommonImports = """
             <PropertyGroup>
-              <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
+              <Configuration>Debug</Configuration>
+              <Platform>AnyCPU</Platform>
+              <OutputPath>bin\Debug\</OutputPath>
             </PropertyGroup>
-
-            <PropertyGroup Condition="'$(IsGraphBuild)' == 'true' and '$(IsCrossTargetingBuild)' != 'true'">
-              <_MainReferenceTargetForBuild Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTargetForBuild>
-              <_MainReferenceTargetForBuild Condition="'$(_MainReferenceTargetForBuild)' == ''">GetTargetPath</_MainReferenceTargetForBuild>
-
-              <ProjectReferenceTargetsForBuild>$(_MainReferenceTargetForBuild);GetNativeManifest;$(_RecursiveTargetForContentCopying);$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
-            </PropertyGroup>
-            <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-              <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
-              <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
-            </PropertyGroup>
-
-            <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
-              <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true" />
-              <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
-              <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
-
-              <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForCleanInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForCleanInOuterBuild)' != '' " OuterBuild="true" />
-              <ProjectReferenceTargets Include="Clean" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
-              <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
-
-              <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
-              <ProjectReferenceTargets Include="Clean" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
-              <ProjectReferenceTargets Include="Rebuild" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
-
-              <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
-            </ItemGroup>
+            <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
             """;
 
         /// <summary>
-        /// The cross-targeting protocol as defined in Microsoft.Common.CrossTargeting.targets
-        /// (the "ProjectReferenceTargets for Static Graph (Cross-Targeting)" section).
-        /// Keep in sync with the real file.
+        /// Synthetic project content for a managed project. Imports Microsoft.Common.targets plus
+        /// Microsoft.Managed.After.targets (which adds the managed-specific Publish / DeployOnBuild
+        /// extensions). Mirrors the shape of a real C#/VB project's import chain for the purpose
+        /// of these protocol tests, without pulling in the language-specific compile targets.
         /// </summary>
-        private const string CrossTargetingProtocol = """
-            <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
-              <ProjectReferenceTargetsForBuild>.default;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
-              <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
-              <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
+        private const string ManagedImports = """
+            <PropertyGroup>
+              <Configuration>Debug</Configuration>
+              <Platform>AnyCPU</Platform>
+              <OutputPath>bin\Debug\</OutputPath>
             </PropertyGroup>
-            <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
-              <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
-              <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
-              <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
-            </ItemGroup>
+            <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+            <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.After.targets" />
             """;
 
         /// <summary>
-        /// The managed-specific extensions from Microsoft.Managed.After.targets for Publish and DeployOnBuild.
-        /// Keep in sync with the real file.
+        /// Synthetic content for a multitargeting (cross-targeting) managed project. The same XML
+        /// is evaluated multiple times by ProjectGraph: once for the outer build (no TargetFramework
+        /// global property, IsCrossTargetingBuild=true) and once per inner build (TargetFramework
+        /// set, IsCrossTargetingBuild=false). The conditional imports route each evaluation to
+        /// the right targets file, matching the production SDK pattern.
         /// </summary>
-        private const string ManagedAfterTargetsProtocol = """
-            <PropertyGroup Condition="'$(IsGraphBuild)' == 'true' and '$(IsCrossTargetingBuild)' != 'true'">
-              <_MainReferenceTargetForPublish Condition="'$(NoBuild)' == 'true'">GetTargetPath</_MainReferenceTargetForPublish>
-              <_MainReferenceTargetForPublish Condition="'$(NoBuild)' != 'true'">$(_MainReferenceTargetForBuild)</_MainReferenceTargetForPublish>
-              <ProjectReferenceTargetsForPublish>GetTargetFrameworks;$(_MainReferenceTargetForPublish);GetNativeManifest;GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForPublish)</ProjectReferenceTargetsForPublish>
-
-              <ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>GetCopyToPublishDirectoryItems;$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)</ProjectReferenceTargetsForGetCopyToPublishDirectoryItems>
-            </PropertyGroup>
-
-            <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
-              <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForPublish)" Condition="'$(DeployOnBuild)' == 'true' and '$(IsCrossTargetingBuild)' != 'true' and '$(ProjectReferenceTargetsForPublish)' != ''" />
-              <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForPublish)" Condition="'$(DeployOnBuild)' == 'true' and '$(IsCrossTargetingBuild)' != 'true' and '$(ProjectReferenceTargetsForPublish)' != ''" />
-
-              <ProjectReferenceTargets Include="Publish" Targets="$(ProjectReferenceTargetsForPublish)" Condition=" '$(ProjectReferenceTargetsForPublish)' != '' " />
-
-              <ProjectReferenceTargets Include="GetCopyToPublishDirectoryItems" Targets="$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)" Condition=" '$(ProjectReferenceTargetsForGetCopyToPublishDirectoryItems)' != '' " />
-            </ItemGroup>
-            """;
-
-        /// <summary>
-        /// Multitargeting specification using TargetFramework / TargetFrameworks, as in real managed projects.
-        /// </summary>
-        private const string MultitargetingSpec = """
+        private const string MultitargetingManagedImports = """
             <PropertyGroup>
               <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
-            </PropertyGroup>
-            <PropertyGroup Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">
-              <IsCrossTargetingBuild>true</IsCrossTargetingBuild>
-            </PropertyGroup>
-            <PropertyGroup>
               <InnerBuildProperty>TargetFramework</InnerBuildProperty>
               <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+              <Configuration>Debug</Configuration>
+              <Platform>AnyCPU</Platform>
+              <OutputPath>bin\Debug\</OutputPath>
+              <IsCrossTargetingBuild Condition="'$(TargetFrameworks)' != '' and '$(TargetFramework)' == ''">true</IsCrossTargetingBuild>
             </PropertyGroup>
-            """;
-
-        private string AllDummyTargets => """
-            <Target Name="Build" />
-            <Target Name="Clean" />
-            <Target Name="Rebuild" />
-            <Target Name="Publish" />
-            <Target Name="GetTargetPath" />
-            <Target Name="GetNativeManifest" />
-            <Target Name="GetCopyToOutputDirectoryItems" />
-            <Target Name="GetCopyToPublishDirectoryItems" />
-            <Target Name="GetTargetFrameworks" />
-            <Target Name="GetTargetFrameworksWithPlatformForSingleTargetFramework" />
+            <Import Project="$(MSBuildToolsPath)\Microsoft.Common.CrossTargeting.targets" Condition="'$(IsCrossTargetingBuild)' == 'true'" />
+            <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+            <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.After.targets" />
             """;
 
         /// <summary>
@@ -149,16 +103,14 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void NonManagedProject_GetsCoreBuildCleanRebuild_InGraphBuild()
         {
-            // Project 1 → Project 2, both only importing the Common protocol
-            string commonProtocol = CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-
+            // Project 1 → Project 2, both only importing the Common targets
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
                 {
                     { 1, new[] { 2 } },
                 },
-                extraContentForAllNodes: commonProtocol);
+                extraContentForAllNodes: CommonImports);
 
             graph.ProjectNodes.Count.ShouldBe(2);
 
@@ -202,16 +154,13 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void ManagedProject_GraphBuildTargets_MatchExpectedProtocol()
         {
-            // Managed project: Common protocol + Managed extensions
-            string managedProtocol = CommonCurrentVersionTargetsProtocol + ManagedAfterTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
                 {
                     { 1, new[] { 2 } },
                 },
-                extraContentForAllNodes: managedProtocol);
+                extraContentForAllNodes: ManagedImports);
 
             graph.ProjectNodes.Count.ShouldBe(2);
 
@@ -244,8 +193,6 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void DeployOnBuild_GraphBuild_IncludesPublishTargetsForBuildAndRebuild()
         {
-            string managedProtocol = CommonCurrentVersionTargetsProtocol + ManagedAfterTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
@@ -253,7 +200,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     { 1, new[] { 2 } },
                 },
                 globalProperties: new Dictionary<string, string> { { "DeployOnBuild", "true" } },
-                extraContentForAllNodes: managedProtocol);
+                extraContentForAllNodes: ManagedImports);
 
             graph.ProjectNodes.Count.ShouldBe(2);
 
@@ -285,8 +232,6 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void BuildProjectReferencesFalse_UsesGetTargetPath()
         {
-            string managedProtocol = CommonCurrentVersionTargetsProtocol + ManagedAfterTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
@@ -294,7 +239,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     { 1, new[] { 2 } },
                 },
                 globalProperties: new Dictionary<string, string> { { "BuildProjectReferences", "false" } },
-                extraContentForAllNodes: managedProtocol);
+                extraContentForAllNodes: ManagedImports);
 
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> buildTargets =
                 graph.GetTargetLists(new[] { "Build" });
@@ -313,25 +258,19 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void CrossTargetingProject_UsesDefaultTargetDispatch()
         {
-            // Project 1 is multitargeting (outer build dispatches to inner builds)
-            // Project 2 is a single-targeting reference
-            string innerBuildContent = CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-
-            // The outer build uses CrossTargeting protocol + CommonCurrentVersion protocol.
-            // Both are needed because the same project file serves as outer and inner builds;
-            // IsCrossTargetingBuild conditions determine which protocol items activate.
-            string outerBuildContent = MultitargetingSpec + CrossTargetingProtocol + CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-
+            // Project 1 is multitargeting (outer build dispatches to inner builds via cross-targeting imports).
+            // Project 2 is a single-targeting reference using the Common imports.
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
                 {
                     { 1, new[] { 2 } },
                 },
+                globalProperties: new Dictionary<string, string> { { "NuGetRestoreTargets", _emptyNuGetTargets.Path } },
                 extraContentPerProjectNumber: new Dictionary<int, string>
                 {
-                    { 1, outerBuildContent },
-                    { 2, innerBuildContent },
+                    { 1, MultitargetingManagedImports },
+                    { 2, CommonImports },
                 });
 
             // Should have: 1 outer build + 2 inner builds (net8.0, net9.0) for project 1, + project 2
@@ -369,20 +308,21 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void CrossTargetingProject_BuildProjectReferencesFalse_UsesGetTargetPath()
         {
-            string innerBuildContent = CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-            string outerBuildContent = MultitargetingSpec + CrossTargetingProtocol + CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
                 {
                     { 1, new[] { 2 } },
                 },
-                globalProperties: new Dictionary<string, string> { { "BuildProjectReferences", "false" } },
+                globalProperties: new Dictionary<string, string>
+                {
+                    { "BuildProjectReferences", "false" },
+                    { "NuGetRestoreTargets", _emptyNuGetTargets.Path },
+                },
                 extraContentPerProjectNumber: new Dictionary<int, string>
                 {
-                    { 1, outerBuildContent },
-                    { 2, innerBuildContent },
+                    { 1, MultitargetingManagedImports },
+                    { 2, CommonImports },
                 });
 
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> buildTargets =
@@ -401,19 +341,17 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void CrossTargetingProject_CleanPropagatesCorrectly()
         {
-            string innerBuildContent = CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-            string outerBuildContent = MultitargetingSpec + CrossTargetingProtocol + CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
                 {
                     { 1, new[] { 2 } },
                 },
+                globalProperties: new Dictionary<string, string> { { "NuGetRestoreTargets", _emptyNuGetTargets.Path } },
                 extraContentPerProjectNumber: new Dictionary<int, string>
                 {
-                    { 1, outerBuildContent },
-                    { 2, innerBuildContent },
+                    { 1, MultitargetingManagedImports },
+                    { 2, CommonImports },
                 });
 
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> cleanTargets =
@@ -442,15 +380,13 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void NoDeployOnBuild_BuildDoesNotIncludePublishTargets()
         {
-            string managedProtocol = CommonCurrentVersionTargetsProtocol + ManagedAfterTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
                 {
                     { 1, new[] { 2 } },
                 },
-                extraContentForAllNodes: managedProtocol);
+                extraContentForAllNodes: ManagedImports);
 
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> buildTargets =
                 graph.GetTargetLists(new[] { "Build" });
@@ -466,15 +402,13 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void ManagedProject_PublishTarget_CallsPublishProtocol()
         {
-            string managedProtocol = CommonCurrentVersionTargetsProtocol + ManagedAfterTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
                 {
                     { 1, new[] { 2 } },
                 },
-                extraContentForAllNodes: managedProtocol);
+                extraContentForAllNodes: ManagedImports);
 
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> publishTargets =
                 graph.GetTargetLists(new[] { "Publish" });
@@ -492,8 +426,6 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void NonManagedProjectChain_PropagatesTargetsThroughGraph()
         {
-            string commonProtocol = CommonCurrentVersionTargetsProtocol + AllDummyTargets;
-
             // 1 → 2 → 3
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
@@ -502,7 +434,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     { 1, new[] { 2 } },
                     { 2, new[] { 3 } },
                 },
-                extraContentForAllNodes: commonProtocol);
+                extraContentForAllNodes: CommonImports);
 
             graph.ProjectNodes.Count.ShouldBe(3);
 
@@ -527,8 +459,6 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void NoBuild_PublishUsesGetTargetPath()
         {
-            string managedProtocol = CommonCurrentVersionTargetsProtocol + ManagedAfterTargetsProtocol + AllDummyTargets;
-
             ProjectGraph graph = Helpers.CreateProjectGraph(
                 env: _env,
                 dependencyEdges: new Dictionary<int, int[]>
@@ -536,7 +466,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     { 1, new[] { 2 } },
                 },
                 globalProperties: new Dictionary<string, string> { { "NoBuild", "true" } },
-                extraContentForAllNodes: managedProtocol);
+                extraContentForAllNodes: ManagedImports);
 
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> publishTargets =
                 graph.GetTargetLists(new[] { "Publish" });
