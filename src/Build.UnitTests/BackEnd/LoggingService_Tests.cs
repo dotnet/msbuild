@@ -1153,10 +1153,25 @@ namespace Microsoft.Build.UnitTests.Logging
 
             LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
             ((IBuildComponent)loggingService).InitializeComponent(mockHost);
-            loggingService.RegisterLogger(new ConsoleLogger());
+
+            // Use MockLogger instead of ConsoleLogger: the intent of this test is to harden
+            // ProcessLoggingEvent against shutdown races, not to exercise console rendering.
+            // MockLogger does not validate BuildEventContext and does not write to real stdout.
+            loggingService.RegisterLogger(new MockLogger());
+
+            // Subscribe to OnLoggingThreadException so an exception on the async pump thread
+            // surfaces as a clean test failure rather than tearing down the process. This
+            // matches the production wire-up done by BuildManager.
+            Exception loggingThreadException = null;
+            loggingService.OnLoggingThreadException += ex =>
+                Interlocked.CompareExchange(ref loggingThreadException, ex, null);
 
             using ManualResetEvent startSignal = new ManualResetEvent(false);
             Exception caughtException = null;
+
+            // Provide a non-null BuildEventContext on each event so loggers that validate
+            // it (e.g. ParallelConsoleLogger) do not throw on the async pump thread.
+            BuildEventContext context = new BuildEventContext(0, 0, 0, 0);
 
             // Start a thread that will log events repeatedly.
             Thread logThread = new Thread(() =>
@@ -1166,7 +1181,10 @@ namespace Microsoft.Build.UnitTests.Logging
                 {
                     try
                     {
-                        BuildMessageEventArgs msg = new BuildMessageEventArgs($"Message {i}", null, null, MessageImportance.Low);
+                        BuildMessageEventArgs msg = new BuildMessageEventArgs($"Message {i}", null, null, MessageImportance.Low)
+                        {
+                            BuildEventContext = context,
+                        };
                         loggingService.ProcessLoggingEvent(msg);
                     }
                     catch (Exception ex)
@@ -1186,6 +1204,7 @@ namespace Microsoft.Build.UnitTests.Logging
             bool joined = logThread.Join(TimeSpan.FromSeconds(10));
             joined.ShouldBeTrue("Logging thread did not terminate within the allotted time.");
             caughtException.ShouldBeNull();
+            loggingThreadException.ShouldBeNull();
         }
 
         #endregion
