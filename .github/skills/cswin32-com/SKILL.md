@@ -99,13 +99,14 @@ See `src/Tasks/AssemblyDependency/Fusion/` for the full pattern.
 
 Manual COM structs and their `[DllImport]`s must be effectively blittable so the runtime does no marshalling work:
 
-- **Return `HRESULT`, not `int`**, from COM vtable methods and `[DllImport]`s that return an HRESULT. `HRESULT` is blittable (single `int` field) and exposes `.Succeeded` / `.Failed` / `.Value`. Use `HRESULT.S_OK` instead of `0`; cast `e.HResult` to `(HRESULT)` when wrapping. `AddRef` / `Release` return `uint` (IUnknown contract).
+- **Return `HRESULT`, not `int`**, from COM vtable methods and `[DllImport]`s that return an HRESULT. `HRESULT` is blittable (single `int` field) and exposes `.Succeeded` / `.Failed` / `.Value` / `.ThrowOnFailure()`. Use `HRESULT.S_OK` instead of `0`; cast `e.HResult` to `(HRESULT)` when wrapping. `AddRef` / `Release` return `uint` (IUnknown contract).
+- **Throwing on failure: use `hr.ThrowOnFailure()`** instead of `if (hr.Failed) Marshal.ThrowExceptionForHR(hr)`. It is the idiomatic CsWin32 helper, produces the same exception (with proper IErrorInfo enrichment), and reads cleanly at call sites: `someInterface->SomeMethod(...).ThrowOnFailure();`. Reserve manual `.Failed` checks for cases where you need to handle specific HRESULTs (e.g. `ERROR_INSUFFICIENT_BUFFER`) before throwing.
 - **No `out T*` on signatures** — use `T**`. `out` triggers marshaling + a `fixed` round-trip at every call site.
 - **No `IntPtr` for opaque/reserved params** — use `void*` and pass `null`. Inside `unsafe` there is no reason to round-trip through `IntPtr.Zero`.
 - **Prefer `nint` / `nuint` over `IntPtr` / `UIntPtr`** for native-sized integers — better cast semantics, no boxing surprises.
 - **Use `PCWSTR` / `PWSTR` (CsWin32) for wide strings**, never managed `string`. The caller side pins with `fixed (char* p = managedString) ... new PCWSTR(p)` (implicit on most overloads).
 - **No managed reference types** (`string`, `StringBuilder`, arrays) in COM vtable signatures.
-- **Do not specify `PreserveSig = true` on `[DllImport]`** — it is the default. Only specify `PreserveSig = false` if you want the marshaller to throw on failure HRESULTs (rare; prefer manual `.Failed` checks). Note `PreserveSig` defaults the opposite way for `[ComImport]` interfaces (where it defaults to `false`), but struct-based COM here uses raw `delegate*` invocations and isn't affected.
+- **Do not specify `PreserveSig = true` on `[DllImport]`** — it is the default. Only specify `PreserveSig = false` if you want the marshaller to throw on failure HRESULTs (rare; prefer returning `HRESULT` and calling `.ThrowOnFailure()` at the call site). Note `PreserveSig` defaults the opposite way for `[ComImport]` interfaces (where it defaults to `false`), but struct-based COM here uses raw `delegate*` invocations and isn't affected.
 
 ## Activation
 

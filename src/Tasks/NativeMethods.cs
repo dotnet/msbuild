@@ -676,7 +676,9 @@ namespace Microsoft.Build.Tasks
             {
                 if (NativeMethodsShared.IsWindows)
                 {
-#if FEATURE_WINDOWSINTEROP
+#if !FEATURE_WINDOWSINTEROP
+                    throw new PlatformNotSupportedException();
+#else
                     using ComScope<IAssemblyName> fusionName = new(null);
                     using ComScope<IAssemblyEnum> assemblyEnum = new(null);
 
@@ -711,8 +713,6 @@ namespace Microsoft.Build.Tasks
                         // when this method returns.
                         _agileAssemblyEnum = new AgileComPointer<IAssemblyEnum>(assemblyEnum.Pointer, takeOwnership: false);
                     }
-#else
-                    throw new PlatformNotSupportedException();
 #endif
                 }
                 else
@@ -740,7 +740,9 @@ namespace Microsoft.Build.Tasks
             {
                 if (NativeMethodsShared.IsWindows)
                 {
-#if FEATURE_WINDOWSINTEROP
+#if !FEATURE_WINDOWSINTEROP
+                    yield break;
+#else
                     if (_agileAssemblyEnum is null)
                     {
                         yield break;
@@ -761,10 +763,9 @@ namespace Microsoft.Build.Tasks
                     }
                     finally
                     {
-                        ReleaseAssemblyEnum();
+                        _agileAssemblyEnum?.Dispose();
+                        _agileAssemblyEnum = null;
                     }
-#else
-                    yield break;
 #endif
                 }
                 else
@@ -827,11 +828,7 @@ namespace Microsoft.Build.Tasks
                 using ComScope<IAssemblyEnum> assemblyEnum = _agileAssemblyEnum.GetInterface();
                 using ComScope<IAssemblyName> fusionName = new(null);
 
-                HRESULT hr = assemblyEnum.Pointer->GetNextAssembly(null, fusionName, 0);
-                if (hr.Failed)
-                {
-                    Marshal.ThrowExceptionForHR(hr);
-                }
+                assemblyEnum.Pointer->GetNextAssembly(null, fusionName, 0).ThrowOnFailure();
 
                 if (fusionName.IsNull)
                 {
@@ -844,28 +841,36 @@ namespace Microsoft.Build.Tasks
 #endif
             }
 
-            [SupportedOSPlatform("windows5.0")]
-            private void ReleaseAssemblyEnum()
-            {
-#if FEATURE_WINDOWSINTEROP
-                _agileAssemblyEnum?.Dispose();
-                _agileAssemblyEnum = null;
-#endif
-            }
-
 #if FEATURE_WINDOWSINTEROP
             private static unsafe string GetFullName(IAssemblyName* fusionAsmName)
             {
-                int ilen = 1024;
-                char[] buffer = new char[ilen];
+#if DEBUG
+                // Small initial buffer in DEBUG so the insufficient-buffer retry path is exercised by tests.
+                const int InitialBufferSize = 16;
+#else
+                const int InitialBufferSize = 256;
+#endif
+
+                using BufferScope<char> buffer = new(stackalloc char[InitialBufferSize]);
+                int ilen = buffer.Length;
+                HRESULT hr;
                 fixed (char* pBuffer = buffer)
                 {
-                    HRESULT hr = fusionAsmName->GetDisplayName(pBuffer, &ilen, AssemblyNameDisplayFlags.ALL);
-                    if (hr.Failed)
+                    hr = fusionAsmName->GetDisplayName(pBuffer, &ilen, AssemblyNameDisplayFlags.ALL);
+                }
+
+                // Fusion writes the required size (wide chars including null terminator) to *pccDisplayName
+                // and returns HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) when the buffer is too small.
+                if (hr == (HRESULT)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
+                {
+                    buffer.EnsureCapacity(ilen);
+                    fixed (char* pBuffer = buffer)
                     {
-                        Marshal.ThrowExceptionForHR(hr);
+                        hr = fusionAsmName->GetDisplayName(pBuffer, &ilen, AssemblyNameDisplayFlags.ALL);
                     }
                 }
+
+                hr.ThrowOnFailure();
 
                 // ilen now holds the actual char count including null terminator.
                 int length = ilen;
@@ -874,7 +879,7 @@ namespace Microsoft.Build.Tasks
                     length--;
                 }
 
-                return new string(buffer, 0, length);
+                return buffer.Slice(0, length).ToString();
             }
 #endif
 
