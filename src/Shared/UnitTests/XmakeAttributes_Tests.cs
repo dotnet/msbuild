@@ -178,16 +178,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetExplicitMSBuildArchitecture_NetRuntimeUnspecifiedArchitecture()
         {
+            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
 #if NETFRAMEWORK
             XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.any);
-            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.any);
             XMakeAttributes.GetExplicitMSBuildArchitecture(null, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.any);
 #else
-            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
             XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(currentArchitecture);
-            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(currentArchitecture);
             XMakeAttributes.GetExplicitMSBuildArchitecture(null, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(currentArchitecture);
 #endif
+            // Architecture="CurrentArchitecture" is an explicit user request to pin to the current process
+            // architecture; it is honored on every TFM, including .NET Framework with Runtime="NET".
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(currentArchitecture);
         }
 
         /// <summary>
