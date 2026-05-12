@@ -278,6 +278,20 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Removes any metadata matching the given names.
+        /// </summary>
+        /// <param name="metadataNames">The metadata names to remove.</param>
+        void IMetadataContainer.RemoveMetadataRange(IEnumerable<string> metadataNames)
+        {
+            if (_metadata == null || _metadata.IsEmpty)
+            {
+                return;
+            }
+
+            _metadata = _metadata.RemoveRange(metadataNames);
+        }
+
+        /// <summary>
         /// Sets one of the arbitrary metadata on the item.
         /// </summary>
         /// <comments>

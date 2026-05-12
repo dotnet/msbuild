@@ -6,6 +6,7 @@
 #if NET
 using System.Diagnostics.CodeAnalysis;
 #endif
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks
 {
@@ -13,6 +14,7 @@ namespace Microsoft.Build.Tasks
     /// Task that simply emits an error. Engine will add project file path and line/column
     /// information.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public sealed class Error : TaskExtension
     {
         /// <summary>

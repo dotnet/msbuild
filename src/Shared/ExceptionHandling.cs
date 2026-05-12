@@ -73,10 +73,32 @@ namespace Microsoft.Build.Shared
                     : FileUtilities.TempFileDirectory;
         }
 
+        private static string s_debugDumpPathInRunningTests = GetDebugDumpPath();
+        internal static bool ResetDebugDumpPathInRunningTests = false;
+
         /// <summary>
         /// The directory used for diagnostic log files.
         /// </summary>
-        internal static string DebugDumpPath => s_debugDumpPath;
+        internal static string DebugDumpPath
+        {
+            get
+            {
+                if (BuildEnvironmentHelper.Instance.RunningTests)
+                {
+                    if (ResetDebugDumpPathInRunningTests)
+                    {
+                        s_debugDumpPathInRunningTests = GetDebugDumpPath();
+                        // reset dump file name so new one is created in new path
+                        s_dumpFileName = null;
+                        ResetDebugDumpPathInRunningTests = false;
+                    }
+
+                    return s_debugDumpPathInRunningTests;
+                }
+
+                return s_debugDumpPath;
+            }
+        }
 
         /// <summary>
         /// The file used for diagnostic log files.
@@ -391,13 +413,13 @@ namespace Microsoft.Build.Shared
 
             foreach (string file in files)
             {
-                if (File.GetLastWriteTimeUtc(file) >= fromTimeUtc)
+                if (FileSystems.Default.GetLastWriteTimeUtc(file) >= fromTimeUtc)
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
                     builder.Append(':');
                     builder.Append(Environment.NewLine);
-                    builder.Append(File.ReadAllText(file));
+                    builder.Append(FileSystems.Default.ReadFileAllText(file));
                     builder.Append(Environment.NewLine);
                 }
             }

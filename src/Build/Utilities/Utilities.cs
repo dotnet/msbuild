@@ -194,7 +194,7 @@ namespace Microsoft.Build.Internal
 
             // XmlNode.InnerXml is much more expensive than InnerText. Don't use it for trivial cases.
             // (single child node with a trivial value or no child nodes)
-            if (!node.HasChildNodes)
+            if (!node.HasChildNodes || (node.ChildNodes.Count == 1 && node.FirstChild.NodeType == XmlNodeType.Whitespace))
             {
                 return String.Empty;
             }

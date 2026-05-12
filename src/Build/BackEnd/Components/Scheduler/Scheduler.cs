@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Shared.FileSystem;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -2703,7 +2704,7 @@ namespace Microsoft.Build.BackEnd
                         bool shouldWriteHeader = _debugDumpIsFirstWrite;
                         if (shouldWriteHeader)
                         {
-                            shouldWriteHeader = !File.Exists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
+                            shouldWriteHeader = !FileSystems.Default.FileExists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
                             _debugDumpIsFirstWrite = false;
                         }
                         using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);

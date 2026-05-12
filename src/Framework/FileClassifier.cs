@@ -65,6 +65,8 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <remarks>
         ///     TODO: Replace RuntimeInformation.IsOSPlatform(OSPlatform.Linux) by NativeMethodsShared.OSUsesCaseSensitivePaths once it is moved out from Shared
+        ///     FIXME: shared code should be consolidated to Framework https://github.com/dotnet/msbuild/issues/6984 
+        ///     this is a subtle bug, MacOS may have both case-insensitive and sensitive file system depending on configuration
         /// </remarks>
         private static readonly StringComparison PathComparison = RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 

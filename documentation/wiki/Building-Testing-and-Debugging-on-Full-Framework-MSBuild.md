@@ -81,7 +81,10 @@ Sometimes it's useful to patch your copy of Visual Studio in order to test or de
 ### Debugging MSBuild
 
 #### Breakpoints
-To break into the [main method](https://github.com/dotnet/msbuild/blob/bd00d6cba24d41efd6f54699c3fdbefb9f5034a1/src/MSBuild/XMake.cs#L493-L506) of MSBuild.exe: set the environment variable `MSBUILDDEBUGONSTART` to 1 (uses `Debugger.Launch()`) or 2 (waits until debugger is attached).
+To break into the [main method](https://github.com/dotnet/msbuild/blob/bd00d6cba24d41efd6f54699c3fdbefb9f5034a1/src/MSBuild/XMake.cs#L493-L506) of MSBuild.exe: set the environment variable `MSBUILDDEBUGONSTART` to:
+- `1`: Launch debugger for all processes (main MSBuild and TaskHost child processes) using `Debugger.Launch()`
+- `2`: Wait for manual debugger attach for all processes
+- `3`: Launch debugger for main MSBuild process only using `Debugger.Launch()`, skip TaskHost child processes
 
 To break into MSBuild's [BuildManager.BeginBuild](https://github.com/dotnet/msbuild/blob/bd00d6cba24d41efd6f54699c3fdbefb9f5034a1/src/Build/BackEnd/BuildManager/BuildManager.cs#L414) set the environment variable `MSBuildDebugBuildManagerOnStart` to 1 (uses `Debugger.Launch()`) or 2 (waits until debugger is attached).
 This is useful for debugging MSBuild when it is called from other apps that use its APIs instead of its executable (for example Visual Studio). You can also filter which processes trigger the breakpoint by setting `MSBuildDebugProcessName` to a substring of the process name. For example, to trigger the breakpoint only under Visual Studio's top level process you would set `MSBuildDebugProcessName` to the value `devenv`.

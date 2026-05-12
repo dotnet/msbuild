@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -16,40 +17,58 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
-        // For the current user, these correspond to read, write, and execute permissions.
-        // Lower order bits correspond to the same for "group" or "other" users.
-        private static string tempFileDirectory = null;
+        private static Lazy<string> tempFileDirectory = CreateTempFileDirectoryLazy();
+
         private const string msbuildTempFolderPrefix = "MSBuildTemp";
 
-        internal static string TempFileDirectory
+        internal static string TempFileDirectory => tempFileDirectory.Value;
+
+        private static Lazy<string> CreateTempFileDirectoryLazy()
         {
-            get
+            return new Lazy<string>(
+                () =>
+                {
+                    string path = CreateFolderUnderTemp();
+                    RegisterCleanupOnExit(path);
+                    return path;
+                },
+                LazyThreadSafetyMode.ExecutionAndPublication);
+        }
+
+        private static void RegisterCleanupOnExit(string pathToCleanup)
+        {
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
-                return tempFileDirectory ??= CreateFolderUnderTemp();
-            }
+                try
+                {
+                    if (Directory.Exists(pathToCleanup))
+                    {
+                        Directory.Delete(pathToCleanup, recursive: true);
+                    }
+                }
+                catch
+                {
+                    // Best effort - ignore failures during cleanup
+                }
+            };
         }
 
         internal static void ClearTempFileDirectory()
         {
-            tempFileDirectory = null;
+            tempFileDirectory = CreateTempFileDirectoryLazy();
         }
 
-        // For all native calls, directly check their return values to prevent bad actors from getting in between checking if a directory exists and returning it.
         private static string CreateFolderUnderTemp()
         {
-            string path = null;
+            string path;
 
-            if (NativeMethodsShared.IsLinux)
-            {
-#if NET // always true, Linux implies NET
-                path = Directory.CreateTempSubdirectory(msbuildTempFolderPrefix).FullName;
+#if NET
+            path = Directory.CreateTempSubdirectory(msbuildTempFolderPrefix).FullName;
+#else
+            // CreateTempSubdirectory API is not available in .NET Framework
+            path = Path.Combine(Path.GetTempPath(), $"{msbuildTempFolderPrefix}{Guid.NewGuid():N}");
+            Directory.CreateDirectory(path);
 #endif
-            }
-            else
-            {
-                path = Path.Combine(Path.GetTempPath(), msbuildTempFolderPrefix);
-                Directory.CreateDirectory(path);
-            }
 
             return FileUtilities.EnsureTrailingSlash(path);
         }

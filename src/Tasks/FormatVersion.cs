@@ -17,6 +17,7 @@ namespace Microsoft.Build.Tasks
     ///  Case #2: Input: Version="1.0.0.*"    Revision="5"            Output: OutputVersion="1.0.0.5"
     ///  Case #3: Input: Version="1.0.0.0"    Revision=&lt;don't care&gt;   Output: OutputVersion="1.0.0.0"
     /// </comment>
+    [MSBuildMultiThreadableTask]
     public sealed class FormatVersion : TaskExtension
     {
         private enum _FormatType

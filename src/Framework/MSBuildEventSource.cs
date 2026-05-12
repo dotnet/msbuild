@@ -12,7 +12,7 @@ namespace Microsoft.Build.Eventing
     /// Changes to existing event method signatures will not be reflected unless you update the <see cref="EventAttribute.Version" /> property or assign a new event ID.
     /// </remarks>
     [EventSource(Name = "Microsoft-Build")]
-    internal sealed class MSBuildEventSource : EventSource
+    internal sealed partial class MSBuildEventSource : EventSource
     {
         public static class Keywords
         {
@@ -39,8 +39,6 @@ namespace Microsoft.Build.Eventing
         /// define the singleton instance of the event source
         /// </summary>
         public static MSBuildEventSource Log = new MSBuildEventSource();
-
-        private MSBuildEventSource() { }
 
         #region Events
 
@@ -696,6 +694,18 @@ namespace Microsoft.Build.Eventing
         public void OutOfProcNodeShutDownStop(string shutdownReason)
         {
             WriteEvent(96, shutdownReason);
+        }
+
+        [Event(97, Keywords = Keywords.All)]
+        public void FallbackAssemblyLoadStart(string assemblyName)
+        {
+            WriteEvent(97);
+        }
+
+        [Event(98, Keywords = Keywords.All)]
+        public void FallbackAssemblyLoadStop(string assemblyName)
+        {
+            WriteEvent(98);
         }
         #endregion
     }
