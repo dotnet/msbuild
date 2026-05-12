@@ -136,18 +136,6 @@ namespace Microsoft.Build.Framework
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
 
         /// <summary>
-        /// Name of an internal environment variable that captures the original value of
-        /// <see cref="UseMSBuildServerEnvVarName"/> before <c>NodeLauncher.DisableMSBuildServer</c>
-        /// zeroes it for the spawned MSBuild Server / TaskHost child processes.
-        /// Allows code running inside those child processes to detect that they were launched
-        /// in server mode.
-        /// We need it for restore task workaround https://github.com/dotnet/msbuild/issues/13315.
-        /// </summary>
-        internal const string OriginalUseMSBuildServerEnvVarName = "_MSBUILDORIGINALUSESERVER";
-
-        internal readonly bool WasLaunchedInMSBuildServerMode = Environment.GetEnvironmentVariable(OriginalUseMSBuildServerEnvVarName) == "1";
-
-        /// <summary>
         /// Name of environment variable for logging arguments (e.g., -bl, -check).
         /// </summary>
         public const string MSBuildLoggingArgsEnvVarName = "MSBUILD_LOGGING_ARGS";

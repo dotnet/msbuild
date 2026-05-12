@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -107,6 +108,11 @@ namespace Microsoft.Build.Experimental
                 shutdownException = new InvalidOperationException("MSBuild server is already running!");
                 return NodeEngineShutdownReason.Error;
             }
+
+            // Mark the engine as running in a long-lived host
+            ((IBuildComponentHost)BuildManager.DefaultBuildManager).RegisterFactory(
+                BuildComponentType.HostInfo,
+                LongLivedServerHostInfo.CreateComponent);
 
             while (true)
             {
@@ -380,15 +386,7 @@ namespace Microsoft.Build.Experimental
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
-            // Preserve our sidecar across SetEnvironment, which would otherwise wipe it. https://github.com/dotnet/msbuild/issues/13315
-            string? originalUseServer = Environment.GetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName);
-
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
-
-            if (originalUseServer is not null)
-            {
-                Environment.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, originalUseServer);
-            }
 
             Traits.UpdateFromEnvironment();
 

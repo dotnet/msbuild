@@ -8,6 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -32,6 +33,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
         private readonly string _testProjectsDir;
+        private bool _registeredLongLivedHost;
 
         public TaskRouter_IntegrationTests(ITestOutputHelper output)
         {
@@ -44,7 +46,27 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         public void Dispose()
         {
+            if (_registeredLongLivedHost)
+            {
+                ((IBuildComponentHost)BuildManager.DefaultBuildManager).RegisterFactory(
+                    BuildComponentType.HostInfo,
+                    TransientHostInfo.CreateComponent);
+            }
+
             _env.Dispose();
+        }
+
+        /// <summary>
+        /// Simulates running under the MSBuild Server by registering
+        /// <see cref="LongLivedServerHostInfo"/> on the shared BuildManager.
+        /// Replaces the previous env-var hack ("_MSBUILDORIGINALUSESERVER=1").
+        /// </summary>
+        private void SimulateLongLivedHost()
+        {
+            ((IBuildComponentHost)BuildManager.DefaultBuildManager).RegisterFactory(
+                BuildComponentType.HostInfo,
+                LongLivedServerHostInfo.CreateComponent);
+            _registeredLongLivedHost = true;
         }
 
         /// <summary>
@@ -439,8 +461,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void ProblematicTask_RoutedToTaskHost_InServerMode()
         {
-            // Production: NodeLauncher.DisableMSBuildServer captures "1" before zeroing MSBUILDUSESERVER.
-            _env.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, "1");
+            // Mark the engine as running in a long-lived host (the production trigger
+            // is the MSBuild Server registering LongLivedServerHostInfo at startup).
+            SimulateLongLivedHost();
 
             string projectContent = $@"
 <Project>
@@ -532,7 +555,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void ProblematicTask_GetsFreshProcess_OnEachInvocation_InServerMode()
         {
-            _env.SetEnvironmentVariable(Traits.OriginalUseMSBuildServerEnvVarName, "1");
+            SimulateLongLivedHost();
 
             string projectContent = $@"
 <Project>

@@ -152,6 +152,12 @@ namespace Microsoft.Build.BackEnd
         /// The component which collects telemetry data in worker node and forwards it to the main node.
         /// </summary>
         TelemetryCollector,
+
+        /// <summary>
+        /// Describes the kind of process hosting the build engine (for example,
+        /// long-lived MSBuild Server vs. a regular short-lived host).
+        /// </summary>
+        HostInfo,
     }
 
     /// <summary>

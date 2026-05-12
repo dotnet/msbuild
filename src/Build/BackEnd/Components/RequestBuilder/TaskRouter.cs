@@ -85,17 +85,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Known task full names that have problematic static singleton state and must not
+        /// Known task full name that have problematic static singleton state and must not
         /// run in a sidecar TaskHost (which persists across invocations). Instead, these tasks
         /// should run in an explicit (transient) TaskHost that terminates after execution,
         /// ensuring static state is cleaned up.
         /// This is a temporary workaround until the task authors fix their static state issues.
         /// See https://github.com/dotnet/msbuild/issues/13315
         /// </summary>
-        private static readonly string[] s_knownProblematicTaskNames =
-        [
-            "NuGet.Build.Tasks.RestoreTask",
-        ];
+        private const string KnownProblematicTaskName = "NuGet.Build.Tasks.RestoreTask";
 
         /// <summary>
         /// Determines if a task is known to have problematic static singleton state that
@@ -115,15 +112,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            foreach (string name in s_knownProblematicTaskNames)
-            {
-                if (string.Equals(fullName, name, StringComparison.Ordinal))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return string.Equals(fullName, KnownProblematicTaskName, StringComparison.Ordinal);
         }
 
         /// <summary>

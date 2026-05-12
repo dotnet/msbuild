@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
 
+using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -356,9 +357,9 @@ namespace Microsoft.Build.BackEnd
             if (_loadedType?.Type != null && TaskRouter.IsKnownProblematicTask(_loadedType.Type))
             {
                 bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
-                bool isServerMode = Traits.Instance.WasLaunchedInMSBuildServerMode;
+                bool isLongLivedHost = buildComponentHost?.GetComponent(BuildComponentType.HostInfo) is IHostInfo hostInfo && hostInfo.IsLongLivedHost;
 
-                if (isMultiThreaded || isServerMode)
+                if (isMultiThreaded || isLongLivedHost)
                 {
                     useTaskFactory = true;
                     forceTransientTaskHost = true;
