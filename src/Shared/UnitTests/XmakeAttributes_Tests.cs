@@ -165,12 +165,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// When Runtime="NET" is specified and architecture is unspecified ("*", "CurrentArchitecture", or null)
-        /// under .NET Framework MSBuild, the explicit architecture should remain "*" (any) rather than being
-        /// pinned to the current process architecture. The actual concrete architecture is resolved later
-        /// (at handshake time) to the OS architecture, which matches the dotnet host that will be launched.
-        /// This avoids attempting to launch e.g. an x86 .NET task host from an x86 .NET Framework MSBuild
-        /// process, which would fail because the .NET SDK ships only x64/arm64 binaries (MSB4216).
+        /// When Runtime="NET" is specified and architecture is unspecified (null or "*"/"any") under
+        /// .NET Framework MSBuild, the explicit architecture should remain "*" (any) rather than being
+        /// pinned to the current process architecture. This avoids attempting to launch e.g. an x86
+        /// .NET task host from an x86 .NET Framework MSBuild process, which would fail because the
+        /// .NET SDK ships only x64/arm64 binaries (MSB4216). Bitness compatibility with the spawned
+        /// dotnet task host is handled by the existing IsAllowedBitnessMismatch tolerance on the
+        /// task host server side.
         ///
         /// Under .NET MSBuild the existing behavior is preserved: Runtime="NET" runs in-process so the
         /// architecture resolves to the current process architecture, like any other runtime.
