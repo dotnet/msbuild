@@ -62,7 +62,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The startup directory.
         /// </summary>
-        private static string s_startupDirectory = NativeMethodsShared.GetCurrentDirectory();
+        private static string s_startupDirectory = Environment.CurrentDirectory;
 
         /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.

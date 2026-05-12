@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
 
-            context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+            context.SavedCurrentDirectory = Environment.CurrentDirectory;
             context.SavedEnvironment = new Dictionary<string, string>(
                 CommunicationsUtilities.GetEnvironmentVariables(),
                 StringComparer.OrdinalIgnoreCase);

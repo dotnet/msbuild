@@ -1168,34 +1168,6 @@ internal static class NativeMethods
     }
 #endif
 
-    /// <summary>
-    /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
-    /// </summary>
-    internal static string GetCurrentDirectory()
-    {
-#if FEATURE_LEGACY_GETCURRENTDIRECTORY
-        if (IsWindows)
-        {
-            using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-            int pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-
-            if (pathLength > buffer.Length)
-            {
-                buffer.EnsureCapacity(pathLength);
-                pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-            }
-
-            if (pathLength != 0)
-            {
-                return buffer.Slice(0, pathLength).ToString();
-            }
-
-            HRESULT.FromLastError().ThrowOnFailure();
-        }
-#endif
-        return Directory.GetCurrentDirectory();
-    }
-
     internal static bool SetCurrentDirectory(string path)
     {
 #if FEATURE_WINDOWSINTEROP
