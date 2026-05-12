@@ -3,7 +3,7 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.3.6</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind> <!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
+    <VersionPrefix>18.3.7</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind> <!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
@@ -73,7 +73,7 @@
   <PropertyGroup>
     <!-- These are manually updated since they are text-only source packages and can't be
        overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
-       When updating the version make sure to add the new version to source-build-reference-packages first. -->
+       When updating the version make sure to add the new version to source-build-assets first. -->
     <MicrosoftCodeAnalysisCollectionsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
