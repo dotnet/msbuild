@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -11,6 +11,10 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -35,7 +39,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             AddToWin32Manifest task = new AddToWin32Manifest()
             {
-                BuildEngine = new MockEngine(_testOutput)
+                BuildEngine = new MockEngine(_testOutput),
             };
 
             using (TestEnvironment env = TestEnvironment.Create())
@@ -60,8 +64,15 @@ namespace Microsoft.Build.Tasks.UnitTests
                     XmlDocument expectedDoc = new XmlDocument();
                     XmlDocument actualDoc = new XmlDocument();
 
-                    expectedDoc.Load(expectedManifest);
-                    actualDoc.Load(generatedManifest);
+                    using (var reader = XmlReader.Create(expectedManifest))
+                    {
+                        expectedDoc.Load(reader);
+                    }
+
+                    using (var reader = XmlReader.Create(generatedManifest))
+                    {
+                        actualDoc.Load(reader);
+                    }
 
                     expectedDoc.OuterXml.ShouldBe(actualDoc.OuterXml);
                     expectedDoc.InnerXml.ShouldBe(actualDoc.InnerXml);
@@ -69,7 +80,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         [WindowsOnlyTheory]
         [InlineData(null, true)]
         [InlineData("buildIn.manifest", true)]
@@ -124,10 +135,15 @@ namespace Microsoft.Build.Tasks.UnitTests
                     XmlDocument expectedDoc = new XmlDocument();
                     XmlDocument actualDoc = new XmlDocument();
 
-                    expectedDoc.Load(expectedManifest);
-                    using (MemoryStream stream = new MemoryStream(actualManifestBytes))
+                    using (var reader = XmlReader.Create(expectedManifest))
                     {
-                        actualDoc.Load(stream);
+                        expectedDoc.Load(reader);
+                    }
+
+                    using (MemoryStream stream = new MemoryStream(actualManifestBytes))
+                    using (var reader = XmlReader.Create(stream))
+                    {
+                        actualDoc.Load(reader);
                     }
 
                     NormalizeLineEndings(expectedDoc.OuterXml).ShouldBe(NormalizeLineEndings(actualDoc.OuterXml));
@@ -138,7 +154,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             static string NormalizeLineEndings(string input) => input.Replace("\r\n", "\n").Replace("\r", "\n");
         }
 
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         internal sealed class AssemblyNativeResourceManager
         {
             public enum LoadLibraryFlags : uint { LOAD_LIBRARY_AS_DATAFILE = 2 };
@@ -183,7 +199,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
                 finally
                 {
-                    NativeMethodsShared.FreeLibrary(hModule);
+                    PInvoke.FreeLibrary((HMODULE)hModule);
                 }
 
                 return null;

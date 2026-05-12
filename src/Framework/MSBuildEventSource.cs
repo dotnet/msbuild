@@ -778,7 +778,49 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(108, projectFiles, success);
         }
+        #endregion
 
+        #region TaskHost events
+
+        /// <summary>
+        /// Signals that a task is being dispatched to the task host.
+        /// Pair with <see cref="TaskHostDispatchStop"/> to compute total task host wall-clock time.
+        /// </summary>
+        [Event(109, Keywords = Keywords.All)]
+        public void TaskHostDispatchStart(string taskName)
+        {
+            WriteEvent(109, taskName);
+        }
+
+        /// <summary>
+        /// Signals that a task dispatched to the task host has completed and the result has been received.
+        /// Measures the full round-trip: serialization, IPC, remote execution, and result retrieval.
+        /// </summary>
+        [Event(110, Keywords = Keywords.All)]
+        public void TaskHostDispatchStop(string taskName, bool succeeded)
+        {
+            WriteEvent(110, taskName, succeeded);
+        }
+
+        /// <summary>
+        /// Signals that the actual task.Execute() call has started inside the task host process.
+        /// The duration between this and <see cref="TaskExecuteInHostStop"/> is the task execution work.
+        /// </summary>
+        [Event(111, Keywords = Keywords.All)]
+        public void TaskExecuteInHostStart(string taskName)
+        {
+            WriteEvent(111, taskName);
+        }
+
+
+        /// <summary>
+        /// Signals that the actual task.Execute() call has completed inside the task host process.
+        /// </summary>
+        [Event(112, Keywords = Keywords.All)]
+        public void TaskExecuteInHostStop(string taskName, bool succeeded)
+        {
+            WriteEvent(112, taskName, succeeded);
+        }
         #endregion
     }
 }
