@@ -80,6 +80,20 @@ jobs:
             echo "name=PerfStar-Branch-Trigger" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Validate inputs
+        env:
+          RUN_ID: ${{ inputs.run_id || '' }}
+          COUNT: ${{ inputs.count || '10' }}
+        run: |
+          if [ -n "${RUN_ID}" ] && ! [[ "${RUN_ID}" =~ ^[0-9]+$ ]]; then
+            echo "::error::run_id must be a positive integer, got: '${RUN_ID}'"
+            exit 1
+          fi
+          if ! [[ "${COUNT}" =~ ^[0-9]+$ ]] || [ "${COUNT}" -lt 1 ] || [ "${COUNT}" -gt 100 ]; then
+            echo "::error::count must be an integer between 1 and 100, got: '${COUNT}'"
+            exit 1
+          fi
+
       - name: Fetch Pipeline Runs
         id: runs
         env:
@@ -92,16 +106,15 @@ jobs:
 
           if [ -n "${RUN_ID}" ]; then
             echo "## Fetching run ${RUN_ID} from ${{ steps.pipeline.outputs.name }}" >> "$GITHUB_STEP_SUMMARY"
-            RUN_DATA=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+            RUN_DATA=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
               "${BASE_URL}/pipelines/${PIPELINE_ID}/runs/${RUN_ID}?api-version=7.1")
-            echo "${RUN_DATA}" | jq .
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
             echo "${RUN_DATA}" | jq '{id, name, state, result, createdDate, finishedDate}' >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             echo "target_run_id=${RUN_ID}" >> "$GITHUB_OUTPUT"
           else
             echo "## Latest ${COUNT} runs from ${{ steps.pipeline.outputs.name }}" >> "$GITHUB_STEP_SUMMARY"
-            RUNS=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+            RUNS=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
               "${BASE_URL}/pipelines/${PIPELINE_ID}/runs?api-version=7.1")
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             echo "${RUNS}" | jq -r ".value[:${COUNT}][] | \"\(.id) | \(.state) | \(.result) | \(.createdDate) | \(.name)\"" >> "$GITHUB_STEP_SUMMARY"
@@ -127,7 +140,7 @@ jobs:
           BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
 
           echo "## Artifacts for build ${BUILD_ID}" >> "$GITHUB_STEP_SUMMARY"
-          ARTIFACTS=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+          ARTIFACTS=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
             "${BASE_URL}/build/builds/${BUILD_ID}/artifacts?api-version=7.1")
 
           echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -155,7 +168,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "## Build Timeline Summary" >> "$GITHUB_STEP_SUMMARY"
 
-          TIMELINE=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+          TIMELINE=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
             "${BASE_URL}/build/builds/${BUILD_ID}/timeline?api-version=7.1")
 
           echo '```' >> "$GITHUB_STEP_SUMMARY"
