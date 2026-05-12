@@ -37,8 +37,7 @@ namespace Microsoft.Build.Internal
         private static MSBuildAssemblyFileVersion GetMSBuildAssemblyFileVersion()
         {
             string versionString = typeof(MSBuildAssemblyFileVersion)
-                
-                ?.Assembly
+                .Assembly
                 .GetCustomAttribute<AssemblyFileVersionAttribute>()
                 ?.Version;
 
