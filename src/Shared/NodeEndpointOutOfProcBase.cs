@@ -16,10 +16,10 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 
-#if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
@@ -233,7 +233,7 @@ namespace Microsoft.Build.BackEnd
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
