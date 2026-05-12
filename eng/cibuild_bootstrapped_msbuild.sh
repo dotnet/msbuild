@@ -69,8 +69,19 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 if [ $host_type = "core" ]
 then
   script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  props_file="$script_dir/Versions.props"
-  sdk_version=$(grep -A1 "BootstrapSdkVersion" "$props_file" | grep -o ">.*<" | sed 's/[><]//g')
+  global_json="$script_dir/../global.json"
+  # Prefer jq for proper JSON parsing; fall back to grep/sed on environments where jq is not installed.
+  # The grep/sed fallback matches the first "dotnet": "..." value in global.json, which in practice
+  # is always tools.dotnet since that is the only top-level "dotnet" key in the file.
+  if command -v jq &> /dev/null; then
+    sdk_version=$(jq -r '.tools.dotnet' "$global_json")
+  else
+    sdk_version=$(grep -o '"dotnet"[[:space:]]*:[[:space:]]*"[^"]*"' "$global_json" | head -1 | sed 's/.*"dotnet"[[:space:]]*:[[:space:]]*"\([^"]*\)"/\1/')
+  fi
+  if [ -z "$sdk_version" ] || [ "$sdk_version" = "null" ]; then
+    echo "ERROR: Could not read tools.dotnet from $global_json." >&2
+    exit 1
+  fi
 
   _InitializeBuildTool="${bootstrapRoot}/core/dotnet"
   _InitializeBuildToolCommand="${bootstrapRoot}/core/sdk/${sdk_version}/MSBuild.dll"
