@@ -171,10 +171,6 @@ namespace Microsoft.Build.Tasks
                     Transform = ResolveComReference.TlbImpTransformFlags.TransformDispRetVals
                 };
 
-                // Propagate TaskEnvironment so the nested ToolTask resolves relative paths against the
-                // project directory when ResolveComReference itself runs under multithreaded execution.
-                tlbImp.TaskEnvironment = TaskEnvironment;
-
                 if (_referenceFiles != null)
                 {
                     // Issue is that there may be reference dependencies that need to be passed in. It is possible

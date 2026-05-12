@@ -197,13 +197,10 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Main class for the COM reference resolution task
     /// </summary>
-    public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IResolveComReferenceTaskContract, IComReferenceResolver, IMultiThreadableTask
+    public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IResolveComReferenceTaskContract, IComReferenceResolver
     {
 #pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
-
-        /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         public ITaskItem[] TypeLibNames { get; set; }
 
@@ -1359,7 +1356,6 @@ namespace Microsoft.Build.Tasks
                     outputDirectory, isTemporary, DelaySign, KeyFile, KeyContainer, NoClassMembers,
                     TargetProcessorArchitecture, IncludeVersionInInteropName, ExecuteAsTool, _tlbimpPath,
                     BuildEngine, EnvironmentVariables);
-                reference.TaskEnvironment = TaskEnvironment;
 
                 // wrapper doesn't exist or needs regeneration? generate it then
                 if (!reference.FindExistingWrapper(out wrapperInfo, _timestampCache[referenceInfo.strippedTypeLibPath]))
@@ -1404,7 +1400,6 @@ namespace Microsoft.Build.Tasks
                 // not in the cache? see if anyone was kind enough to generate it for us
 
                 var reference = new AxReference(Log, Silent, this, referenceInfo, refName, outputDirectory, DelaySign, KeyFile, KeyContainer, IncludeVersionInInteropName, _aximpPath, BuildEngine, EnvironmentVariables);
-                reference.TaskEnvironment = TaskEnvironment;
 
                 // wrapper doesn't exist or needs regeneration? generate it then
                 if (!reference.FindExistingWrapper(out wrapperInfo, _timestampCache[referenceInfo.strippedTypeLibPath]))
