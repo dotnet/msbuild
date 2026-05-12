@@ -64,10 +64,9 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            string launcherPath = string.IsNullOrEmpty(LauncherPath) ? LauncherPath : TaskEnvironment.GetAbsolutePath(LauncherPath);
             string outputPath = string.IsNullOrEmpty(OutputPath) ? OutputPath : TaskEnvironment.GetAbsolutePath(OutputPath);
 
-            var launcherBuilder = new LauncherBuilder(launcherPath, LauncherPath);
+            var launcherBuilder = new LauncherBuilder(LauncherPath);
             string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
 
             // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
