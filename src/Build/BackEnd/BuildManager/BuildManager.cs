@@ -35,6 +35,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
@@ -1067,6 +1068,8 @@ namespace Microsoft.Build.Execution
                 {
                     _resultsCache!.ClearResults();
                 }
+
+                TaskRouter.ClearCache();
             }
             catch (Exception e)
             {
@@ -3282,9 +3285,9 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                if (inputCacheFiles.Any(f => !File.Exists(f)))
+                if (inputCacheFiles.Any(f => !FileSystems.Default.FileExists(f)))
                 {
-                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !File.Exists(f)))));
+                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !FileSystems.Default.FileExists(f)))));
                     return false;
                 }
 

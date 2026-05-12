@@ -919,6 +919,14 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            public void RemoveMetadataRange(IEnumerable<string> metadataNames)
+            {
+                foreach (string metadataName in metadataNames)
+                {
+                    RemoveMetadata(metadataName);
+                }
+            }
+
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref _escapedItemSpec);

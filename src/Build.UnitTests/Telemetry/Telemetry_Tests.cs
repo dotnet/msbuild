@@ -183,15 +183,7 @@ namespace Microsoft.Build.Engine.UnitTests
             env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", null);
 
             // Reset the OpenTelemetryManager state to ensure clean test
-            var instance = OpenTelemetryManager.Instance;
-            typeof(OpenTelemetryManager)
-                .GetField("_telemetryState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.SetValue(instance, OpenTelemetryManager.TelemetryState.Uninitialized);
-
-            typeof(OpenTelemetryManager)
-                .GetProperty("DefaultActivitySource",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.SetValue(instance, null);
+            ResetManagerState();
 
             // track activities through an ActivityListener
             var capturedActivities = new List<Activity>();
@@ -312,8 +304,22 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Allowing 0 for TotalMemoryBytes as it is possible for tasks to allocate no memory in certain scenarios.
                 tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThanOrEqualTo(0);
             }
+            // Reset the OpenTelemetryManager state to ensure it doesn't affect other tests
+            ResetManagerState();
         }
 
+        private void ResetManagerState()
+        {
+            var instance = OpenTelemetryManager.Instance;
+            typeof(OpenTelemetryManager)
+                .GetField("_telemetryState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(instance, OpenTelemetryManager.TelemetryState.Uninitialized);
+
+            typeof(OpenTelemetryManager)
+                .GetProperty("DefaultActivitySource",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(instance, null);
+        }
 #endif
     }
 }

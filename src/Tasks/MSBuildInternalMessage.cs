@@ -10,6 +10,7 @@ namespace Microsoft.Build.Tasks
     /// Represents a task that produces localized messages based on the specified resource name.
     /// This task is intended to be called from internal targets only.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public sealed class MSBuildInternalMessage : TaskExtension
     {
         private enum BuildMessageSeverity

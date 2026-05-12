@@ -17,13 +17,14 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     {
         private readonly int _endpointId;
         private readonly NodePipeServer _pipeServer;
-        private readonly RarNodeBuildEngine _buildEngine = new();
+        private readonly RarNodeBuildEngine _buildEngine;
 
         internal OutOfProcRarNodeEndpoint(int endpointId, SharedConfig config)
         {
             _endpointId = endpointId;
             _pipeServer = new NodePipeServer(config.PipeName, config.Handshake, config.MaxNumberOfServerInstances);
             _pipeServer.RegisterPacketFactory(config.PacketFactory);
+            _buildEngine = new RarNodeBuildEngine(_pipeServer);
         }
 
         public void Dispose() => _pipeServer.Dispose();
@@ -60,6 +61,12 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         private async Task RunInternalAsync(CancellationToken cancellationToken)
         {
+            // Send log events asynchronously to avoid sending back a single large response packet. Since RAR is often
+            // the largest producer of log events in MSBuild, serialization can inflate the overall runtime.
+            Task logEventTask = Task.Run(
+                () => _buildEngine.ProcessEventsAsync(cancellationToken),
+                cancellationToken);
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 if (!_pipeServer.IsConnected)
@@ -93,6 +100,8 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
                             bool success = rarTask.Execute();
 
+                            // Send any remaining log events before returning the final result packet.
+                            await _buildEngine.FlushEventsAsync(cancellationToken).ConfigureAwait(false);
                             await _pipeServer.WritePacketAsync(new RarNodeExecuteResponse(rarTask, success), cancellationToken).ConfigureAwait(false);
 
                             CommunicationsUtilities.Trace("({0}) Completed RAR request.", _endpointId);

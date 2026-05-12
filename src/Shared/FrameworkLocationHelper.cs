@@ -1422,7 +1422,7 @@ namespace Microsoft.Build.Shared
                                 FindDotNetFrameworkPath(
                                     Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
                                     this.DotNetFrameworkFolderPrefix,
-                                    Directory.Exists,
+                                    FileSystems.Default.DirectoryExists,
                                     Directory.GetDirectories,
                                     architecture);
 
@@ -1432,8 +1432,8 @@ namespace Microsoft.Build.Shared
                 // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132 
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
-                    (!File.Exists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
-                     !File.Exists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))))
+                    (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
+                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))))
                 {
                     return null;
                 }

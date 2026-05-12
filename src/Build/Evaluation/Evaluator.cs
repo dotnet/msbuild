@@ -1902,7 +1902,7 @@ namespace Microsoft.Build.Evaluation
                     // "S:\sdk\.dotnet\sdk\10.0.100-preview.6.25315.102\Sdks\Microsoft.NET.Sdk\Sdk"
                     //                  ^5              ^4               ^3          ^2        ^1
                     string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5), Constants.DotnetProcessName);
-                    if (File.Exists(dotnetExe))
+                    if (FileSystems.Default.FileExists(dotnetExe))
                     {
                         _data.AddSdkResolvedEnvironmentVariable(Constants.DotnetHostPathEnvVarName, dotnetExe);
                     }

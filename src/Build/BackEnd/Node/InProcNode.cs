@@ -103,11 +103,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly ResourceRequestDelegate _resourceRequestHandler;
 
+        private readonly int _nodeId;
+
         /// <summary>
         /// Constructor.
         /// </summary>
-        public InProcNode(IBuildComponentHost componentHost, INodeEndpoint inProcNodeEndpoint)
+        public InProcNode(int nodeId, IBuildComponentHost componentHost, INodeEndpoint inProcNodeEndpoint)
         {
+            _nodeId = nodeId;
             _componentHost = componentHost;
             _nodeEndpoint = inProcNodeEndpoint;
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -437,6 +440,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleBuildRequest(BuildRequest request)
         {
+            if (_componentHost.BuildParameters.MultiThreaded)
+            {
+                request.ScheduledNodeId = _nodeId;
+            }
             _buildRequestEngine.SubmitBuildRequest(request);
         }
 

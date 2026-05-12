@@ -18,6 +18,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 
 #nullable disable

@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -9,9 +10,11 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
+    [UseInvariantCulture]
     public class IntrinsicFunctionOverload_Tests
     {
         [Fact]
@@ -566,6 +569,27 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             using ProjectFromString projectFromString = new(projectContent.Cleanup());
             Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
+            actualProperty.EvaluatedValue.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void SystemUriEscapeDataString()
+        {
+            const string projectContent = @"
+                    <Project>
+                        <PropertyGroup>
+                            <TestInput>hello world &amp; friends</TestInput>
+                            <Escaped>$([System.Uri]::EscapeDataString($(TestInput)))</Escaped>
+                        </PropertyGroup>
+                    </Project>";
+
+            string expected = Uri.EscapeDataString("hello world & friends");
+
+            using TestEnvironment env = TestEnvironment.Create();
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+            ProjectProperty? actualProperty = project.GetProperty("Escaped");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
     }
