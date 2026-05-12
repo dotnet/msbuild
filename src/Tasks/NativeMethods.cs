@@ -6,9 +6,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_WINDOWSINTEROP
 using Microsoft.Build.Tasks.Fusion;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
+#endif
 
 #if !NET
 using System.Text;
@@ -646,7 +648,9 @@ namespace Microsoft.Build.Tasks
             /// Agile wrapper around the IAssemblyEnum COM pointer from fusion.dll. Provides
             /// thread-agile access and finalizer-driven release if the enum is never iterated.
             /// </summary>
+#if FEATURE_WINDOWSINTEROP
             private AgileComPointer<IAssemblyEnum> _agileAssemblyEnum;
+#endif
 
             /// <summary>
             /// For non-Windows implementation, we need assembly name
@@ -672,6 +676,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (NativeMethodsShared.IsWindows)
                 {
+#if FEATURE_WINDOWSINTEROP
                     using ComScope<IAssemblyName> fusionName = new(null);
                     using ComScope<IAssemblyEnum> assemblyEnum = new(null);
 
@@ -706,6 +711,9 @@ namespace Microsoft.Build.Tasks
                         // when this method returns.
                         _agileAssemblyEnum = new AgileComPointer<IAssemblyEnum>(assemblyEnum.Pointer, takeOwnership: false);
                     }
+#else
+                    throw new PlatformNotSupportedException();
+#endif
                 }
                 else
                 {
@@ -732,6 +740,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (NativeMethodsShared.IsWindows)
                 {
+#if FEATURE_WINDOWSINTEROP
                     if (_agileAssemblyEnum is null)
                     {
                         yield break;
@@ -754,6 +763,9 @@ namespace Microsoft.Build.Tasks
                     {
                         ReleaseAssemblyEnum();
                     }
+#else
+                    yield break;
+#endif
                 }
                 else
                 {
@@ -811,6 +823,7 @@ namespace Microsoft.Build.Tasks
             [SupportedOSPlatform("windows5.0")]
             private unsafe string GetNextAssemblyFusionName()
             {
+#if FEATURE_WINDOWSINTEROP
                 using ComScope<IAssemblyEnum> assemblyEnum = _agileAssemblyEnum.GetInterface();
                 using ComScope<IAssemblyName> fusionName = new(null);
 
@@ -826,15 +839,21 @@ namespace Microsoft.Build.Tasks
                 }
 
                 return GetFullName(fusionName.Pointer);
+#else
+                throw new PlatformNotSupportedException();
+#endif
             }
 
             [SupportedOSPlatform("windows5.0")]
             private void ReleaseAssemblyEnum()
             {
+#if FEATURE_WINDOWSINTEROP
                 _agileAssemblyEnum?.Dispose();
                 _agileAssemblyEnum = null;
+#endif
             }
 
+#if FEATURE_WINDOWSINTEROP
             private static unsafe string GetFullName(IAssemblyName* fusionAsmName)
             {
                 int ilen = 1024;
@@ -857,6 +876,7 @@ namespace Microsoft.Build.Tasks
 
                 return new string(buffer, 0, length);
             }
+#endif
 
             IEnumerator IEnumerable.GetEnumerator()
             {

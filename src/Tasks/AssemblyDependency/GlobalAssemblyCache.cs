@@ -10,9 +10,11 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if FEATURE_WINDOWSINTEROP
 using Microsoft.Build.Tasks.Fusion;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
+#endif
 
 #nullable disable
 
@@ -177,6 +179,7 @@ namespace Microsoft.Build.Tasks
         /// Given a fusion name get the path to the assembly on disk.
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.Build.Tasks.IAssemblyCache.QueryAssemblyInfo(System.UInt32,System.String,Microsoft.Build.Tasks.ASSEMBLY_INFO@)", Justification = "We use the out parameters to determine if we got a good assembly back or not")]
+#if FEATURE_WINDOWSINTEROP
         internal static unsafe string RetrievePathFromFusionName(string strongName)
         {
             // Extra checks for PInvoke-destined data.
@@ -216,6 +219,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
+#endif
 
         /// <summary>
         /// If we know we have a full fusion name we can skip enumerating the gac and just query for the path. This will
@@ -385,6 +389,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Return the root path of the GAC.
         /// </summary>
+#if FEATURE_WINDOWSINTEROP
         internal static string GetGacPath()
         {
             uint gacPathLength = 0;
@@ -396,5 +401,12 @@ namespace Microsoft.Build.Tasks
                 return new string(gacPath, 0, (int)gacPathLength - 1);
             }
         }
+#else
+        internal static string RetrievePathFromFusionName(string strongName)
+            => throw new PlatformNotSupportedException();
+
+        internal static string GetGacPath()
+            => throw new PlatformNotSupportedException();
+#endif
     }
 }
