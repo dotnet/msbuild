@@ -357,7 +357,7 @@ namespace Microsoft.Build.BackEnd
             if (_loadedType?.Type != null && TaskRouter.IsKnownProblematicTask(_loadedType.Type))
             {
                 bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
-                bool isLongLivedHost = buildComponentHost?.GetComponent(BuildComponentType.HostInfo) is IHostInfo hostInfo && hostInfo.IsLongLivedHost;
+                bool isLongLivedHost = IsLongLivedHost(buildComponentHost);
 
                 if (isMultiThreaded || isLongLivedHost)
                 {
@@ -440,6 +440,27 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 return taskInstance;
+            }
+        }
+
+        /// <summary>
+        /// Returns true when the engine is hosted in a long-lived process (MSBuild Server)/
+        /// </summary>
+        private static bool IsLongLivedHost(IBuildComponentHost buildComponentHost)
+        {
+            if (buildComponentHost is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return buildComponentHost.GetComponent(BuildComponentType.HostInfo) is IHostInfo hostInfo
+                       && hostInfo.IsLongLivedHost;
+            }
+            catch (InternalErrorException)
+            {
+                return false;
             }
         }
 
