@@ -1,11 +1,6 @@
 name: Read AzDO PerfStar Results
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/read-azdo-perfstar.yml'
   workflow_dispatch:
     inputs:
       pipeline:
