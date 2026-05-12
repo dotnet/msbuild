@@ -590,7 +590,8 @@ internal static class CommunicationsUtilities
                 // so resolve to the OS architecture here so the handshake flags match what the spawned
                 // task host will compute on its side. Without this, an x86 .NET Framework MSBuild host
                 // would send a handshake without the X64/Arm64 flag, which would mismatch the x64/arm64
-                // dotnet task host that is actually launched (see https://github.com/dotnet/msbuild/issues for MSB4216).
+                // dotnet task host that is actually launched (this addresses MSB4216 when an x86 .NET Framework
+                // MSBuild host hosts a UsingTask with Runtime="NET").
                 if (clrVersion == 5 &&
                     (string.IsNullOrEmpty(architectureFlagToSet) ||
                      architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase) ||
