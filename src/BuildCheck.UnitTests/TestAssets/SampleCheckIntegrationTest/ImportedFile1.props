@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+    <PropertyGroup Condition="$(TestImported) == true">
+        <TestProperty>TestImported</TestProperty>
+    </PropertyGroup>
+
+</Project>

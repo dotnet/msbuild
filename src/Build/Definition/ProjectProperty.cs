@@ -33,6 +33,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private string _evaluatedValueEscaped;
 
+        /// <summary>
+        /// Property location in xml file. Can be empty.
+        /// </summary>
+        private (string File, int Line, int Column) _location;
+
         internal ProjectProperty(Project project)
         {
             ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
@@ -100,7 +105,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
                 {
-                    EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal);
+                    EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal, string.Empty, 0, 0);
                     args.BuildEventContext = loggingContext.BuildEventContext;
                     loggingContext.LogBuildEvent(args);
                     environmentProperty._loggedEnvProperty = true;
@@ -108,6 +113,27 @@ namespace Microsoft.Build.Evaluation
 
                 return EvaluatedValueEscapedInternal;
             }
+        }
+
+        /// <summary>
+        /// Gets object's location in xml file.
+        /// </summary>
+        public (string File, int Line, int Column) Location { get => _location; }
+
+        string IProperty.GetEvaluatedValueEscaped(IElementLocation location)
+        {
+            if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
+            {
+                EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal, location.File, location.Line, location.Column);
+                args.BuildEventContext = loggingContext.BuildEventContext;
+                loggingContext.LogBuildEvent(args);
+                environmentProperty._loggedEnvProperty = true;
+            }
+
+            // the location is handy in BuildCheck messages.
+            _location = (location.File, location.Line, location.Column);
+
+            return EvaluatedValueEscapedInternal;
         }
 
         /// <summary>

@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.MetadataCount.ShouldBe(s_builtInMetadataNames.Length + 2);
             item.DirectMetadataCount.ShouldBe(1);
 
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
+            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
             metadata.Count.ShouldBe(2);
             metadata["a"].EvaluatedValue.ShouldBe("override");
             metadata["b"].EvaluatedValue.ShouldBe("base");

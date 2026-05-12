@@ -36,6 +36,30 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal class FileClassifier
     {
+        private bool _isImmutablePathsInitialized;
+
+        /// <summary>
+        /// This event notifies subscribers when the immutable paths have been initialized.
+        /// </summary>
+        public event Action? OnImmutablePathsInitialized;
+
+        /// <summary>
+        ///  Tracks whether the immutable paths have been initialized.
+        /// </summary>
+        public bool IsImmutablePathsInitialized
+        {
+            get => _isImmutablePathsInitialized;
+            private set
+            {
+                if (!_isImmutablePathsInitialized && value)
+                {
+                    OnImmutablePathsInitialized?.Invoke();
+                }
+
+                _isImmutablePathsInitialized = value;
+            }
+        }
+
         /// <summary>
         ///     StringComparison used for comparing paths on current OS.
         /// </summary>
@@ -193,15 +217,98 @@ namespace Microsoft.Build.Framework
             }
         }
 
+        public void RegisterFrameworkLocations(Func<string, string?> getPropertyValue)
+        {
+            // Register toolset paths into list of immutable directories
+            // example: C:\Windows\Microsoft.NET\Framework
+            string? frameworksPathPrefix32 = GetExistingRootOrNull(getPropertyValue("MSBuildFrameworkToolsPath32")?.Trim());
+            RegisterImmutableDirectory(frameworksPathPrefix32);
+            // example: C:\Windows\Microsoft.NET\Framework64
+            string? frameworksPathPrefix64 = GetExistingRootOrNull(getPropertyValue("MSBuildFrameworkToolsPath64")?.Trim());
+            RegisterImmutableDirectory(frameworksPathPrefix64);
+            // example: C:\Windows\Microsoft.NET\FrameworkArm64
+            string? frameworksPathPrefixArm64 = GetExistingRootOrNull(getPropertyValue("MSBuildFrameworkToolsPathArm64")?.Trim());
+            RegisterImmutableDirectory(frameworksPathPrefixArm64);
+        }
+
+        public void RegisterKnownImmutableLocations(Func<string, string?> getPropertyValue)
+        {
+            // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
+            RegisterImmutableDirectory(getPropertyValue("FrameworkPathOverride")?.Trim());
+            // example: C:\Program Files\dotnet\
+            RegisterImmutableDirectory(getPropertyValue("NetCoreRoot")?.Trim());
+            // example: C:\Users\<username>\.nuget\packages\
+            RegisterImmutableDirectory(getPropertyValue("NuGetPackageFolders")?.Trim());
+
+            IsImmutablePathsInitialized = true;
+        }
+
+        private static string? GetExistingRootOrNull(string? path)
+        {
+            if (!string.IsNullOrEmpty(path))
+            {
+                try
+                {
+                    path = Directory.GetParent(EnsureNoTrailingSlash(path!))?.FullName;
+
+                    if (!Directory.Exists(path))
+                    {
+                        path = null;
+                    }
+                }
+                catch
+                {
+                    path = null;
+                }
+            }
+
+            return path;
+        }
+
+        /// <summary>
+        /// Ensures the path does not have a trailing slash.
+        /// </summary>
+        private static string EnsureNoTrailingSlash(string path)
+        {
+            path = FixFilePath(path);
+            if (EndsWithSlash(path))
+            {
+                path = path.Substring(0, path.Length - 1);
+            }
+
+            return path;
+        }
+
+        private static string FixFilePath(string path)
+        {
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
+        }
+
+        /// <summary>
+        /// Indicates if the given file-spec ends with a slash.
+        /// </summary>
+        /// <param name="fileSpec">The file spec.</param>
+        /// <returns>true, if file-spec has trailing slash</returns>
+        private static bool EndsWithSlash(string fileSpec)
+        {
+            return (fileSpec.Length > 0) && IsSlash(fileSpec[fileSpec.Length - 1]);
+        }
+
+        /// <summary>
+        /// Indicates if the given character is a slash.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>true, if slash</returns>
+        private static bool IsSlash(char c)
+        {
+            return (c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar);
+        }
+
         private static string EnsureTrailingSlash(string fileSpec)
         {
-            if (fileSpec.Length >= 1)
+            if (fileSpec.Length >= 1 && !EndsWithSlash(fileSpec))
             {
-                char lastChar = fileSpec[fileSpec.Length - 1];
-                if (lastChar != Path.DirectorySeparatorChar && lastChar != Path.AltDirectorySeparatorChar)
-                {
-                    fileSpec += Path.DirectorySeparatorChar;
-                }
+                fileSpec += Path.DirectorySeparatorChar;
             }
 
             return fileSpec;

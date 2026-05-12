@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck.Acquisition;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -29,26 +30,29 @@ public class BuildCheckManagerTests
         _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
         _logger = new MockLogger();
         _loggingService.RegisterLogger(_logger);
-        _testedInstance = new BuildCheckManager(_loggingService);
+        _testedInstance = new BuildCheckManager();
     }
 
     [Theory]
-    [InlineData(true, new[] { "Custom analyzer rule: Rule1 has been registered successfully.", "Custom analyzer rule: Rule2 has been registered successfully." })]
-    [InlineData(false, new[] { "Failed to register the custom analyzer: DummyPath." })]
-    public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string[] expectedMessages)
+    [InlineData(true, new[] { "Custom check rule: 'Rule1' has been registered successfully.", "Custom check rule: 'Rule2' has been registered successfully." })]
+    [InlineData(false, new[] { "Failed to register the custom check: 'DummyPath'." })]
+    public void ProcessCheckAcquisitionTest(bool isCheckRuleExist, string[] expectedMessages)
     {
-        MockBuildCheckAcquisition(isAnalyzerRuleExist);
+        MockConfigurationProvider();
+        MockBuildCheckAcquisition(isCheckRuleExist);
         MockEnabledDataSourcesDefinition();
 
-        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new BuildEventContext(1, 2, 3, 4, 5, 6, 7));
+        _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData("DummyPath", "ProjectPath"), new CheckLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
 
         _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
             .ShouldBeEquivalentTo(expectedMessages);
     }
 
-    private void MockBuildCheckAcquisition(bool isAnalyzerRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isAnalyzerRuleExist));
+    private void MockBuildCheckAcquisition(bool isCheckRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isCheckRuleExist));
 
     private void MockEnabledDataSourcesDefinition() => MockField("_enabledDataSources", new[] { true, true });
+
+    private void MockConfigurationProvider() => MockField("_configurationProvider", new ConfigurationProviderMock());
 
     private void MockField(string fieldName, object mockedValue)
     {
@@ -60,39 +64,52 @@ public class BuildCheckManagerTests
     }
 }
 
-internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
+internal sealed class ConfigurationProviderMock : IConfigurationProvider
 {
-    private readonly bool _isAnalyzerRuleExistForTest = true;
+    public void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId) { }
 
-    internal BuildCheckAcquisitionModuleMock(bool isAnalyzerRuleExistForTest) => _isAnalyzerRuleExistForTest = isAnalyzerRuleExistForTest;
+    public CustomConfigurationData[] GetCustomConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
 
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
-        => _isAnalyzerRuleExistForTest
-        ? new List<BuildAnalyzerFactory>() { () => new BuildAnalyzerRuleMock("Rule1"), () => new BuildAnalyzerRuleMock("Rule2") }
-        : new List<BuildAnalyzerFactory>();
+    public CheckConfigurationEffective[] GetMergedConfigurations(string projectFullPath, Check check) => [];
+
+    public CheckConfigurationEffective[] GetMergedConfigurations(CheckConfiguration[] userConfigs, Check check) => [];
+
+    public CheckConfiguration[] GetUserConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
 }
 
-internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer
+internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
 {
-    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+    private readonly bool _isCheckRuleExistForTest = true;
+
+    internal BuildCheckAcquisitionModuleMock(bool isCheckRuleExistForTest) => _isCheckRuleExistForTest = isCheckRuleExistForTest;
+
+    public List<CheckFactory> CreateCheckFactories(CheckAcquisitionData checkAcquisitionData, ICheckContext checkContext)
+        => _isCheckRuleExistForTest
+        ? new List<CheckFactory>() { () => new CheckRuleMock("Rule1"), () => new CheckRuleMock("Rule2") }
+        : new List<CheckFactory>();
+}
+
+internal sealed class CheckRuleMock : Check
+{
+    public static CheckRule SupportedRule = new CheckRule(
         "X01234",
         "Title",
         "Description",
         "Message format: {0}",
-        new BuildAnalyzerConfiguration());
+        new CheckConfiguration());
 
-    internal BuildAnalyzerRuleMock(string friendlyName)
+    internal CheckRuleMock(string friendlyName)
     {
         FriendlyName = friendlyName;
     }
 
     public override string FriendlyName { get; }
 
-    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = new List<BuildAnalyzerRule>() { SupportedRule };
+    public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
-        // configurationContext to be used only if analyzer needs external configuration data.
+        // configurationContext to be used only if check needs external configuration data.
     }
 
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
@@ -100,7 +117,7 @@ internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer
         registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
     }
 
-    private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
+    private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
         context.ReportResult(BuildCheckResult.Create(
             SupportedRule,

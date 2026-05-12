@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
                 else
                 {
-                    Assert.True(false, $"Sub-toolset {key} was lost in translation.");
+                    Assert.Fail($"Sub-toolset {key} was lost in translation.");
                 }
             }
 

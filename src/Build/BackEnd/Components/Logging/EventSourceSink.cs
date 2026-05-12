@@ -255,6 +255,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     HaveLoggedBuildFinishedEvent = true;
                     RaiseBuildFinishedEvent(null, buildFinishedEvent);
                     break;
+                case BuildCanceledEventArgs buildCanceledEvent:
+                    RaiseStatusEvent(null, buildCanceledEvent);
+                    break;
                 case CustomBuildEventArgs customBuildEvent:
                     RaiseCustomEvent(null, customBuildEvent);
                     break;

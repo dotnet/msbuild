@@ -629,13 +629,10 @@ namespace Microsoft.Build.Construction
                         {
                             ProjectErrorUtilities.ThrowInvalidProject(onError.Location, "NodeMustBeLastUnderElement", XMakeElements.onError, XMakeElements.target, childElement.Name);
                         }
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+                        if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType == XmlNodeType.Text)
                         {
-                            if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType == XmlNodeType.Text)
-                            {
-                                // If the element has inner text and no other child elements except text, then this should be a property and throw invalid child element of <Target>
-                                ProjectErrorUtilities.ThrowInvalidProject(childElement.Location, "PropertyOutsidePropertyGroupInTarget", childElement.Name, childElement.ParentNode.Name);
-                            }
+                            // If the element has inner text and no other child elements except text, then this should be a property and throw invalid child element of <Target>
+                            ProjectErrorUtilities.ThrowInvalidProject(childElement.Location, "PropertyOutsidePropertyGroupInTarget", childElement.Name, childElement.ParentNode.Name);
                         }
 
                         child = ParseProjectTaskElement(childElement, target);

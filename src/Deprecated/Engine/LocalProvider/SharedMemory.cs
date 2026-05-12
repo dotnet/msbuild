@@ -812,6 +812,7 @@ namespace Microsoft.Build.BuildEngine
             switch ((ObjectType)objectId)
             {
                 case ObjectType.NetSerialization:
+                    // codeql[cs/dangerous-binary-deserialization] BinaryFormatter is still present due to the skip-release deprecation requirement of Visual Studio. Removal has been scheduled for Oct 2024 in conjunction with VS 17.3 branching.
                     objectRead = binaryFormatter.Deserialize(readStream);
                     break;
                 case ObjectType.FrameMarker:

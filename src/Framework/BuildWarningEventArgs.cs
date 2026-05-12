@@ -163,6 +163,20 @@ namespace Microsoft.Build.Framework
             this.helpLink = helpLink;
         }
 
+        /// <summary>
+        /// This constructor allows event data without ends to be initialized.
+        /// </summary>
+        /// <param name="code">event code</param>
+        /// <param name="file">file associated with the event</param>
+        /// <param name="lineNumber">line number (0 if not applicable)</param>
+        /// <param name="columnNumber">column number (0 if not applicable)</param>
+        /// <param name="message">text message</param>
+        public BuildWarningEventArgs(string code, string file, int lineNumber, int columnNumber, string message)
+            : this(subcategory: null, code: code, file: file, lineNumber: lineNumber, columnNumber: columnNumber, endLineNumber: 0, endColumnNumber: 0, message: message, helpKeyword: null, senderName: null)
+        {
+            // do nothing
+        }
+
         private string subcategory;
         private string code;
         private string file;

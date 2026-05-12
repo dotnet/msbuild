@@ -162,23 +162,26 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             _ = Should.NotThrow(() => Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)long.MaxValue, out _));
         }
 
-        [Fact]
-        public void TryConvertToLongGivenDoubleWithLongMaxValue()
+        [WindowsFullFrameworkOnlyFact]
+        public void TryConvertToLongGivenDoubleWithLongMaxValueFramework()
         {
             const long longMaxValue = long.MaxValue;
             bool result = Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)longMaxValue, out long actual);
-            if (RuntimeInformation.OSArchitecture != Architecture.Arm64)
-            {
-                // Because of loss of precision, long.MaxValue will not 'round trip' from long to double to long.
-                result.ShouldBeFalse();
-                actual.ShouldBe(0);
-            }
-            else
-            {
-                // Testing on macOS 12 on Apple Silicon M1 Pro produces different result.
-                result.ShouldBeTrue();
-                actual.ShouldBe(longMaxValue);
-            }
+            
+            // Because of loss of precision, long.MaxValue will not 'round trip' from long to double to long.
+            result.ShouldBeFalse();
+            actual.ShouldBe(0);
+        }
+
+        [DotNetOnlyFact]
+        public void TryConvertToLongGivenDoubleWithLongMaxValueDotNet()
+        {
+            const long longMaxValue = long.MaxValue;
+            bool result = Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)longMaxValue, out long actual);
+
+            // Testing on macOS 12 on Apple Silicon M1 Pro produces different result.
+            result.ShouldBeTrue();
+            actual.ShouldBe(longMaxValue);
         }
 
         [Fact]

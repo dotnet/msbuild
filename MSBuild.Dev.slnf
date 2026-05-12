@@ -4,6 +4,7 @@
     "projects": [
       "src\\Build.OM.UnitTests\\Microsoft.Build.Engine.OM.UnitTests.csproj",
       "src\\Build.UnitTests\\Microsoft.Build.Engine.UnitTests.csproj",
+      "src\\BuildCheck.UnitTests\\Microsoft.Build.BuildCheck.UnitTests.csproj",
       "src\\Build\\Microsoft.Build.csproj",
       "src\\Framework.UnitTests\\Microsoft.Build.Framework.UnitTests.csproj",
       "src\\Framework\\Microsoft.Build.Framework.csproj",

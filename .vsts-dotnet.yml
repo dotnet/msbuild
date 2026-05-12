@@ -47,7 +47,7 @@ variables:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
-    value: false # disable loc for vs17.11
+    value: false # Disable loc for vs17.12
   - name: Codeql.Enabled
     value: true
   # ensures we don't build and push experimental versions to official feeds as release versions
@@ -80,6 +80,12 @@ extends:
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
+      codeSignValidation:
+        enabled: true
+        break: true
+        additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
     - ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:

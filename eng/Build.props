@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- Static graph restores projects from the parent sln file that are excluded by the slnf file: https://github.com/NuGet/Home/issues/13097. -->
-    <RestoreUseStaticGraphEvaluation Condition="'$(DotNetBuildFromSource)' != 'true'">true</RestoreUseStaticGraphEvaluation>
+    <RestoreUseStaticGraphEvaluation Condition="'$(DotNetBuildSourceOnly)' != 'true'">true</RestoreUseStaticGraphEvaluation>
   </PropertyGroup>
 
   <ItemGroup>

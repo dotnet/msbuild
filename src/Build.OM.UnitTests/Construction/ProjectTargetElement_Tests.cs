@@ -340,19 +340,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Parse invalid property under target
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ReadInvalidPropertyUnderTarget(bool enableNewBehavior)
+        [Fact]
+        public void ReadInvalidPropertyUnderTarget()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                if (!enableNewBehavior)
-                {
-                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
-                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                }
 
                 string projectFile = @"
                     <Project>
@@ -369,14 +362,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 error.ErrorCode.ShouldMatch("MSB4067");
                 var expectedString = "<PropertyGroup>";
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
-                {
-                    error.Message.ShouldMatch(expectedString);
-                }
-                else
-                {
-                    error.Message.ShouldNotMatch(expectedString);
-                }
+                error.Message.ShouldMatch(expectedString);
             }
         }
 

@@ -1,6 +1,7 @@
-parameters:
-  # Optional: dependencies of the job
-  dependsOn: ''
+jobs:
+- template: /eng/common/core-templates/job/onelocbuild.yml
+  parameters:
+    is1ESPipeline: false
 
   # Optional: A defined YAML pool - https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=vsts&tabs=schema#pool
   pool: ''
@@ -54,7 +55,7 @@ jobs:
       # If it's not devdiv, it's dnceng
       ${{ if ne(variables['System.TeamProject'], 'DevDiv') }}:
         name: $(DncEngInternalBuildPool)
-        demands: ImageOverride -equals windows.vs2022.amd64
+        demands: ImageOverride -equals windows.vs2019.amd64
 
   steps:
     - ${{ if ne(parameters.SkipLocProjectJsonGeneration, 'true') }}:

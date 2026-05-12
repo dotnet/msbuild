@@ -22,7 +22,7 @@ namespace Microsoft.Build.Collections
     /// <typeparam name="K">Type of key</typeparam>
     /// <typeparam name="V">Type of value</typeparam>
     [DebuggerDisplay("#Keys={KeyCount} #Values={ValueCount}")]
-    internal class MultiDictionary<K, V>
+    internal class MultiDictionary<K, V> : IMultiDictionary<K, V>
         where K : class
         where V : class
     {
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Enumerator over values that have the specified key.
         /// </summary>
-        internal IEnumerable<V> this[K key]
+        public IEnumerable<V> this[K key]
         {
             get
             {

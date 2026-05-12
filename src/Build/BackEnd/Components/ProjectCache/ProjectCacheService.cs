@@ -454,7 +454,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
-                    cacheRequest.Submission.BuildRequestData.TargetNames.ToArray());
+                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? Array.Empty<string>());
                 BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
                     cacheRequest.Submission.SubmissionId,
                     evaluationId: cacheRequest.Configuration.Project.EvaluationId,
@@ -477,13 +477,16 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             void EvaluateProjectIfNecessary(BuildSubmission submission, BuildRequestConfiguration configuration)
             {
+                ErrorUtilities.VerifyThrow(submission.BuildRequestData != null,
+                    "Submission BuildRequestData is not populated.");
+
                 lock (configuration)
                 {
                     if (!configuration.IsLoaded)
                     {
                         configuration.LoadProjectIntoConfiguration(
                             _buildManager,
-                            submission.BuildRequestData.Flags,
+                            submission.BuildRequestData!.Flags,
                             submission.SubmissionId,
                             Scheduler.InProcNodeId);
 
@@ -519,7 +522,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             HashSet<ProjectCacheDescriptor> queriedCaches = new(ProjectCacheDescriptorEqualityComparer.Instance);
             CacheResult? cacheResult = null;
-            foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(buildRequest.ProjectInstance))
+            foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(buildRequest.ProjectInstance!))
             {
                 // Ensure each unique plugin is only queried once
                 if (!queriedCaches.Add(projectCacheDescriptor))
@@ -583,7 +586,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     // TODO: This should be indented by the console logger. That requires making these log events structured.
                     if (!buildRequestConfiguration.IsTraversal)
                     {
-                        _loggingService.LogComment(buildEventContext, MessageImportance.High, "ProjectCacheHitWithOutputs", buildRequest.ProjectInstance.GetPropertyValue(ReservedPropertyNames.projectName));
+                        _loggingService.LogComment(buildEventContext, MessageImportance.High, "ProjectCacheHitWithOutputs", buildRequest.ProjectInstance!.GetPropertyValue(ReservedPropertyNames.projectName));
                     }
 
                     break;
@@ -734,7 +737,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             IReadOnlyDictionary<string, string> globalProperties = GetGlobalProperties(requestConfiguration);
 
-            List<string> targets = buildResult.ResultsByTarget.Keys.ToList();
+            List<string> targets = buildResult.ResultsByTarget?.Keys.ToList() ?? new();
             string? targetNames = string.Join(", ", targets);
 
             FileAccessContext fileAccessContext = new(requestConfiguration.ProjectFullPath, globalProperties, targets);

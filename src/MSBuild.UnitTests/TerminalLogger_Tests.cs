@@ -38,6 +38,7 @@ namespace Microsoft.Build.UnitTests
 
         private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
         private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
+        private readonly string _projectFileWithNonAnsiSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/㐇𠁠𪨰𫠊𫦠𮚮⿕.proj" : @"C:\src\проектТерминал\㐇𠁠𪨰𫠊𫦠𮚮⿕.proj";
 
         private StringWriter _outputWriter = new();
 
@@ -186,6 +187,16 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
+        private BuildWarningEventArgs MakeCopyRetryWarning(int retryCount)
+        {
+            return new BuildWarningEventArgs("", "MSB3026", "directory/file", 1, 2, 3, 4,
+                $"MSB3026: Could not copy \"sourcePath\" to \"destinationPath\". Beginning retry {retryCount} in x ms.",
+                null, null)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+        }
+
         private BuildMessageEventArgs MakeMessageEventArgs(string message, MessageImportance importance)
         {
             return new BuildMessageEventArgs(message, "keyword", null, importance)
@@ -223,20 +234,22 @@ namespace Microsoft.Build.UnitTests
 
         #region Build summary tests
 
-        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks)
+        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks, string? projectFile = null)
         {
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
+            projectFile ??= _projectFile;
 
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile));
+
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFile, "Build"));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFile, "Task"));
 
             additionalCallbacks();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build", succeeded));
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(projectFile, "Task", succeeded));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "Build", succeeded));
 
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(projectFile, succeeded));
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
 
@@ -315,6 +328,19 @@ namespace Microsoft.Build.UnitTests
                     "**********************************************************************" +
                     "To sign in, use a web browser to open the page https://devicelogin and enter the code XXXXXX to authenticate." +
                     "**********************************************************************"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintCopyTaskRetryWarningAsImmediateMessage_Failed()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(1));
+                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(2));
+                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(3));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -426,6 +452,22 @@ namespace Microsoft.Build.UnitTests
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [Fact]
+        public Task PrintProjectOutputDirectoryLink()
+        {
+            // Send message in order to set project output path
+            BuildMessageEventArgs e = MakeMessageEventArgs(
+                    $"㐇𠁠𪨰𫠊𫦠𮚮⿕ -> {_projectFileWithNonAnsiSymbols.Replace("proj", "dll")}",
+                    MessageImportance.High);
+            e.ProjectFile = _projectFileWithNonAnsiSymbols;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, e);
+            }, _projectFileWithNonAnsiSymbols);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
 
         #endregion
 

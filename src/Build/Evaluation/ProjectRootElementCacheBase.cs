@@ -28,11 +28,6 @@ namespace Microsoft.Build.Evaluation
         internal delegate ProjectRootElement OpenProjectRootElement(string path, ProjectRootElementCacheBase cache);
 
         /// <summary>
-        /// Event that is fired when an entry in the Strong Cache is removed.
-        /// </summary>
-        internal static event StrongCacheEntryRemovedDelegate StrongCacheEntryRemoved;
-
-        /// <summary>
         /// Event which is fired when a project root element is added to this cache.
         /// </summary>
         internal event ProjectRootElementCacheAddEntryHandler ProjectRootElementAddedHandler;
@@ -95,15 +90,6 @@ namespace Microsoft.Build.Evaluation
         protected void RaiseProjectRootElementAddedToCacheEvent(ProjectRootElement rootElement)
         {
             ProjectRootElementAddedHandler?.Invoke(this, new ProjectRootElementCacheAddEntryEventArgs(rootElement));
-        }
-
-        /// <summary>
-        /// Raises an event which is raised when a project root element is removed from the strong cache.
-        /// </summary>
-        protected virtual void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
-        {
-            StrongCacheEntryRemovedDelegate removedEvent = StrongCacheEntryRemoved;
-            removedEvent?.Invoke(this, projectRootElement);
         }
     }
 

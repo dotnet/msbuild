@@ -1,0 +1,5 @@
+root = true
+
+[*.csproj]
+build_check.X01234.Severity=X01234Severity
+build_check.X01234.CustomConfig=dummy

@@ -231,7 +231,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public BuildParameters()
         {
-            Initialize(Utilities.GetEnvironmentProperties(), new ProjectRootElementCache(false), null);
+            Initialize(Utilities.GetEnvironmentProperties(makeReadOnly: false), new ProjectRootElementCache(false), null);
         }
 
         /// <summary>
@@ -840,7 +840,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets an indication of build analysis enablement.
+        /// Gets or sets an indication of build check enablement.
         /// </summary>
         public bool IsBuildCheckEnabled
         {

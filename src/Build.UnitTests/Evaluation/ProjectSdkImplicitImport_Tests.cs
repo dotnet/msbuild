@@ -631,7 +631,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         internal void SdkPropertiesAreExpanded(SdkPropertiesAreExpandedCase data)
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
-            _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode.ToString());
+            _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode?.ToString());
             _env.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
 
             Build.BackEnd.SdkResolution.CachingSdkResolverLoader.ResetStateForTests();

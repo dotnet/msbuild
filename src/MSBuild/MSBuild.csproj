@@ -17,7 +17,7 @@
     <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
          versions of this project -->
-    <RuntimeIdentifiers Condition="'$(DotNetBuildFromSource)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers Condition="'$(DotNetBuildSourceOnly)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
     <UseRidGraph>true</UseRidGraph>
 
     <EnableDefaultItems>false</EnableDefaultItems>
@@ -176,8 +176,6 @@
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <!-- Explicitly reference STJ in .NET 8 to bump to a patched version for the deps file -->
-    <PackageReference Include="System.Text.Json" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND '$(DotNetBuildFromSource)' != 'true'" />
   </ItemGroup>
   <!-- Manually download this library for RoslynCodeTaskFactory.
            See target AddRefAssemblies below. -->
@@ -193,7 +191,7 @@
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' AND '$(DotNetBuildFromSource)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' AND '$(DotNetBuildSourceOnly)' != 'true'">
     <!-- Bump these to the latest version despite transitive references to older -->
     <PackageReference Include="System.Private.Uri" PrivateAssets="all" />
   </ItemGroup>

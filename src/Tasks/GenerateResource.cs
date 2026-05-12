@@ -2008,6 +2008,8 @@ namespace Microsoft.Build.Tasks
 
             using (MemoryStream memoryStream = new MemoryStream(serializedData))
             {
+                // CodeQL [SM03722] required trust of BinaryFormatter-serialized resources documented at https://learn.microsoft.com/visualstudio/msbuild/generateresource-task
+                // CodeQL [SM04191] required trust of BinaryFormatter-serialized resources documented at https://learn.microsoft.com/visualstudio/msbuild/generateresource-task
                 object result = binaryFormatter.Deserialize(memoryStream);
 
                 return result != null;

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common\CommonTest.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="CustomCheck.props" Pack="true" PackagePath="build\CustomCheck.props" />
+    <Content Include="README.md" />
+  </ItemGroup>
+
+  <Import Project="..\Common\CommonTest.targets" />
+
+</Project>

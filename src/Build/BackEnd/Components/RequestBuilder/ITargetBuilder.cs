@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
 #nullable disable
@@ -25,6 +26,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="baseLookup">The Lookup containing all current items and properties for this target.</param>
         /// <param name="cancellationToken">The cancellation token used to cancel processing of targets.</param>
         /// <returns>A Task representing the work to be done.</returns>
-        Task<BuildResult> BuildTargets(ProjectLoggingContext projectLoggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targets, Lookup baseLookup, CancellationToken cancellationToken);
+        Task<BuildResult> BuildTargets(ProjectLoggingContext projectLoggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targets, Lookup baseLookup, CancellationToken cancellationToken);
     }
 }

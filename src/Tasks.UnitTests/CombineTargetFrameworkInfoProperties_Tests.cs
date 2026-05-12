@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(null, false, "MSB3991")]
         [InlineData("", false, "MSB3991")]
         [InlineData(null, true, "MSB3992")]
-        public void RootElementNameNotValid(string rootElementName, bool UseAttributeForTargetFrameworkInfoPropertyNames, string errorCode)
+        public void RootElementNameNotValid(string? rootElementName, bool UseAttributeForTargetFrameworkInfoPropertyNames, string errorCode)
         {
             MockEngine e = new MockEngine();
             var task = new CombineTargetFrameworkInfoProperties();

@@ -780,7 +780,7 @@ namespace ClassLibrary3
             {
                 return StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }");
             }
-            Assert.True(false, String.Format("Encountered a new path {0}, needs unittesting support", path));
+            Assert.Fail(String.Format("Encountered a new path {0}, needs unittesting support", path));
             return null;
         }
 
