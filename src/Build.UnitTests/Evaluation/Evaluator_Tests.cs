@@ -4412,6 +4412,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+#if FEATURE_THREAD_ABORT
         private Exception _httpListenerThreadException = null;
 
         /// <summary>
@@ -4472,6 +4473,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 _httpListenerThreadException.ShouldBeNull();
             }
         }
+#endif
 
         /// <summary>
         /// Verify that Condition Evaluator does reset the cached state when the evaluation throws an exception.
@@ -5098,6 +5100,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+#if FEATURE_THREAD_ABORT
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
         /// The test "VerifyDTDProcessingIsDisabled" creates a project with a url reference to this server from a DTD tag
@@ -5123,6 +5126,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 _httpListenerThreadException = e;
             }
         }
+#endif
 
         /// <summary>
         /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:
