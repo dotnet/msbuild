@@ -584,26 +584,6 @@ internal static class CommunicationsUtilities
                 }
 
                 architectureFlagToSet = taskHostParameters.Architecture;
-
-#if NETFRAMEWORK
-                // Under .NET Framework MSBuild, a UsingTask with Runtime="NET" launches an out-of-proc
-                // .NET task host. When the architecture is unspecified ("*" / "CurrentArchitecture"),
-                // resolve to the OS architecture so the handshake flags match what the spawned dotnet
-                // task host will compute on its side. Without this, an x86 .NET Framework MSBuild host
-                // would send a handshake without the X64/Arm64 flag, which would mismatch the x64/arm64
-                // dotnet task host that is actually launched (this addresses MSB4216).
-                //
-                // This is gated to .NET Framework only -- under .NET MSBuild, Runtime="NET" tasks run
-                // in-process, so this code path is irrelevant and the existing architecture handling
-                // is preserved.
-                if (clrVersion == 5 &&
-                    (string.IsNullOrEmpty(architectureFlagToSet) ||
-                     architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase) ||
-                     architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, StringComparison.OrdinalIgnoreCase)))
-                {
-                    architectureFlagToSet = XMakeAttributes.GetOSArchitectureForNetTaskHost();
-                }
-#endif
             }
         }
 

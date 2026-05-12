@@ -506,21 +506,5 @@ namespace Microsoft.Build.Shared
 
             return GetExplicitMSBuildArchitecture(architecture);
         }
-
-        /// <summary>
-        /// Returns the OS architecture as an <see cref="MSBuildArchitectureValues"/> string. Used as the
-        /// concrete architecture for a .NET task host launch when the requested architecture is "any",
-        /// since the dotnet host installed on the machine generally matches the OS architecture.
-        /// </summary>
-        internal static string GetOSArchitectureForNetTaskHost()
-        {
-            return RuntimeInformation.OSArchitecture switch
-            {
-                Architecture.X86 => MSBuildArchitectureValues.x86,
-                Architecture.X64 => MSBuildArchitectureValues.x64,
-                Architecture.Arm64 => MSBuildArchitectureValues.arm64,
-                _ => GetCurrentMSBuildArchitecture(),
-            };
-        }
     }
 }
