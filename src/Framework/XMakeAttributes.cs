@@ -475,5 +475,41 @@ namespace Microsoft.Build.Shared
                 return architecture;
             }
         }
+
+        /// <summary>
+        /// Given an MSBuildArchitecture value that may be non-explicit -- e.g. "CurrentArchitecture" or "Any" --
+        /// return the specific MSBuildArchitecture value that it would map to in this case, taking the requested
+        /// runtime into account. When the runtime is "NET" and the architecture is unspecified ("*", "CurrentArchitecture",
+        /// or null), the OS architecture is returned (which matches the architecture of the dotnet host that will be
+        /// launched), rather than the current process architecture. This avoids attempting to launch e.g. an x86 .NET
+        /// task host from an x86 .NET Framework MSBuild process when the .NET SDK ships only x64/arm64 binaries.
+        /// </summary>
+        internal static string GetExplicitMSBuildArchitecture(string architecture, string runtime)
+        {
+            if (MSBuildRuntimeValues.net.Equals(runtime, StringComparison.OrdinalIgnoreCase) &&
+                (architecture == null ||
+                 MSBuildArchitectureValues.any.Equals(architecture, StringComparison.OrdinalIgnoreCase) ||
+                 MSBuildArchitectureValues.currentArchitecture.Equals(architecture, StringComparison.OrdinalIgnoreCase)))
+            {
+                return GetOSArchitectureForNetTaskHost();
+            }
+
+            return GetExplicitMSBuildArchitecture(architecture);
+        }
+
+        /// <summary>
+        /// Returns the OS architecture as an MSBuildArchitectureValues string. Used as the implicit architecture
+        /// for .NET task hosts since the dotnet host installed on the machine generally matches the OS architecture.
+        /// </summary>
+        private static string GetOSArchitectureForNetTaskHost()
+        {
+            return RuntimeInformation.OSArchitecture switch
+            {
+                Architecture.X86 => MSBuildArchitectureValues.x86,
+                Architecture.X64 => MSBuildArchitectureValues.x64,
+                Architecture.Arm64 => MSBuildArchitectureValues.arm64,
+                _ => GetCurrentMSBuildArchitecture(),
+            };
+        }
     }
 }

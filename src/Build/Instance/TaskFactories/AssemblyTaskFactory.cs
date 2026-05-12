@@ -590,7 +590,7 @@ namespace Microsoft.Build.BackEnd
             if (taskIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(factoryIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == factoryIdentityParameters.Runtime && normalizedArch == factoryIdentityParameters.Architecture
                     ? factoryIdentityParameters
@@ -600,7 +600,7 @@ namespace Microsoft.Build.BackEnd
             if (factoryIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(taskIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == taskIdentityParameters.Runtime && normalizedArch == taskIdentityParameters.Architecture
                     ? taskIdentityParameters
@@ -693,7 +693,7 @@ namespace Microsoft.Build.BackEnd
             {
                 string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
 
-                if (!currentArchitecture.Equals(XMakeAttributes.GetExplicitMSBuildArchitecture(mergedParameters.Architecture), StringComparison.OrdinalIgnoreCase))
+                if (!currentArchitecture.Equals(XMakeAttributes.GetExplicitMSBuildArchitecture(mergedParameters.Architecture, mergedParameters.Runtime), StringComparison.OrdinalIgnoreCase))
                 {
                     // architecture doesn't match
                     return false;
