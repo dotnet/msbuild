@@ -1,0 +1,143 @@
+name: Read AzDO PerfStar Results
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: 'PerfStar pipeline to query'
+        required: true
+        type: choice
+        options:
+          - 'scheduled'
+          - 'branch-trigger'
+      run_id:
+        description: 'Specific run ID (leave empty for latest successful)'
+        required: false
+        default: ''
+      count:
+        description: 'Number of recent runs to list (when no run_id specified)'
+        required: false
+        default: '10'
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZDO_ORG: DevDiv
+  AZDO_PROJECT: DevDiv
+  PIPELINE_SCHEDULED: '25429'
+  PIPELINE_BRANCH_TRIGGER: '25430'
+
+jobs:
+  read-perfstar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZDO_READER_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZDO_READER_TENANT_ID }}
+          subscription-id: ${{ secrets.AZDO_READER_SUBSCRIPTION_ID }}
+
+      - name: Get AzDO Bearer Token
+        id: token
+        run: |
+          AZDO_TOKEN=$(az account get-access-token \
+            --resource "499b84ac-1321-427f-aa17-267ca6975798" \
+            --query accessToken -o tsv)
+          echo "::add-mask::${AZDO_TOKEN}"
+          echo "azdo_token=${AZDO_TOKEN}" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve Pipeline ID
+        id: pipeline
+        run: |
+          if [ "${{ inputs.pipeline }}" = "scheduled" ]; then
+            echo "id=${PIPELINE_SCHEDULED}" >> "$GITHUB_OUTPUT"
+            echo "name=PerfStar-Scheduled" >> "$GITHUB_OUTPUT"
+          else
+            echo "id=${PIPELINE_BRANCH_TRIGGER}" >> "$GITHUB_OUTPUT"
+            echo "name=PerfStar-Branch-Trigger" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch Pipeline Runs
+        id: runs
+        env:
+          AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
+          PIPELINE_ID: ${{ steps.pipeline.outputs.id }}
+          RUN_ID: ${{ inputs.run_id }}
+          COUNT: ${{ inputs.count }}
+        run: |
+          BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
+
+          if [ -n "${RUN_ID}" ]; then
+            echo "## Fetching run ${RUN_ID} from ${{ steps.pipeline.outputs.name }}" >> "$GITHUB_STEP_SUMMARY"
+            RUN_DATA=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+              "${BASE_URL}/pipelines/${PIPELINE_ID}/runs/${RUN_ID}?api-version=7.1")
+            echo "${RUN_DATA}" | jq .
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            echo "${RUN_DATA}" | jq '{id, name, state, result, createdDate, finishedDate}' >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "target_run_id=${RUN_ID}" >> "$GITHUB_OUTPUT"
+          else
+            echo "## Latest ${COUNT} runs from ${{ steps.pipeline.outputs.name }}" >> "$GITHUB_STEP_SUMMARY"
+            RUNS=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+              "${BASE_URL}/pipelines/${PIPELINE_ID}/runs?api-version=7.1")
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "${RUNS}" | jq -r ".value[:${COUNT}][] | \"\(.id) | \(.state) | \(.result) | \(.createdDate) | \(.name)\"" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+            # Find latest successful run
+            LATEST_SUCCESS=$(echo "${RUNS}" | jq -r '[.value[] | select(.result == "succeeded")][0].id // empty')
+            if [ -n "${LATEST_SUCCESS}" ]; then
+              echo "Latest successful run: ${LATEST_SUCCESS}"
+              echo "target_run_id=${LATEST_SUCCESS}" >> "$GITHUB_OUTPUT"
+            else
+              echo "::warning::No successful runs found in recent history"
+              echo "target_run_id=" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: List Artifacts
+        if: steps.runs.outputs.target_run_id != ''
+        env:
+          AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
+          BUILD_ID: ${{ steps.runs.outputs.target_run_id }}
+        run: |
+          BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
+
+          echo "## Artifacts for build ${BUILD_ID}" >> "$GITHUB_STEP_SUMMARY"
+          ARTIFACTS=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+            "${BASE_URL}/build/builds/${BUILD_ID}/artifacts?api-version=7.1")
+
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${ARTIFACTS}" | jq -r '.value[] | "\(.name) (\(.resource.type))"' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+          # Show Crank artifacts specifically (performance results)
+          CRANK_ARTIFACTS=$(echo "${ARTIFACTS}" | jq -r '.value[] | select(.name | startswith("CrankAssets")) | .name')
+          if [ -n "${CRANK_ARTIFACTS}" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Performance result artifacts:" >> "$GITHUB_STEP_SUMMARY"
+            echo "${CRANK_ARTIFACTS}" | while read -r artifact_name; do
+              echo "- ${artifact_name}" >> "$GITHUB_STEP_SUMMARY"
+            done
+          fi
+
+      - name: Fetch Build Timeline (Stage/Job Status)
+        if: steps.runs.outputs.target_run_id != ''
+        env:
+          AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
+          BUILD_ID: ${{ steps.runs.outputs.target_run_id }}
+        run: |
+          BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "## Build Timeline Summary" >> "$GITHUB_STEP_SUMMARY"
+
+          TIMELINE=$(curl -sf -H "Authorization: Bearer ${AZDO_TOKEN}" \
+            "${BASE_URL}/build/builds/${BUILD_ID}/timeline?api-version=7.1")
+
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${TIMELINE}" | jq -r '.records[] | select(.type == "Stage") | "\(.name) | \(.state) | \(.result)"' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
