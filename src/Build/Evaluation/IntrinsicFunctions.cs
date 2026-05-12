@@ -499,11 +499,8 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.ThrowArgument("InvalidTaskHostFactoryParameter", architecture, "Architecture", XMakeAttributes.MSBuildArchitectureValues.x86, XMakeAttributes.MSBuildArchitectureValues.x64, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, XMakeAttributes.MSBuildArchitectureValues.any);
             }
 
-            string originalRuntime = runtime;
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
-            // Pass original (un-normalized) runtime so the architecture default of "any" only applies when the
-            // caller explicitly requested Runtime="NET", not when "any" was resolved to NET.
-            architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture, originalRuntime);
+            architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture, runtime);
 
             TaskHostParameters parameters = new(runtime, architecture);
 

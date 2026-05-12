@@ -590,9 +590,7 @@ namespace Microsoft.Build.BackEnd
             if (taskIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(factoryIdentityParameters.Runtime);
-                // Pass the original (un-normalized) runtime so the architecture resolver only treats Architecture
-                // as "any" when the user explicitly wrote Runtime="NET" -- not when "any" was resolved to NET.
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture, factoryIdentityParameters.Runtime);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == factoryIdentityParameters.Runtime && normalizedArch == factoryIdentityParameters.Architecture
                     ? factoryIdentityParameters
@@ -602,8 +600,7 @@ namespace Microsoft.Build.BackEnd
             if (factoryIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(taskIdentityParameters.Runtime);
-                // Pass the original (un-normalized) runtime; see comment above.
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture, taskIdentityParameters.Runtime);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == taskIdentityParameters.Runtime && normalizedArch == taskIdentityParameters.Architecture
                     ? taskIdentityParameters
