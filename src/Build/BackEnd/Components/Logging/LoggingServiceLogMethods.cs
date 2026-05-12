@@ -365,8 +365,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Register Loggers and print out all the enabled loggers.
             if (!OnlyLogCriticalEvents)
             {
-                LogEnabledLoggers();
-                RegisterLoggers();
+                LogAndRegisterLoggers();
             }
         }
 
@@ -400,37 +399,21 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Logs the names of enabled logs (except for Forwarding logs).
+        /// In a single pass over the registered loggers, emits a message listing the enabled logger
+        /// type names and a <see cref="LoggersRegisteredEventArgs"/> describing each logger (including
+        /// any output file paths for <see cref="IFileOutputLogger"/> implementations).
         /// </summary>
-        private void LogEnabledLoggers()
+        private void LogAndRegisterLoggers()
         {
             List<string> listOfLoggers = new();
-            foreach (ILogger logger in Loggers)
-            {
-                ILogger actualLogger = UnwrapLogger(logger);
-                Type loggerType = actualLogger.GetType();
-                listOfLoggers.Add(loggerType.FullName ?? loggerType.Name);
-            }
-            if (listOfLoggers.Count != 0)
-            {
-                var msgEvent = new BuildMessageEventArgs(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", listOfLoggers)),
-                    null, null, MessageImportance.Low);
-                msgEvent.BuildEventContext = BuildEventContext.Invalid;
-                ProcessLoggingEvent(msgEvent);
-            }
-        }
-
-        /// <summary>
-        /// Logs the file paths of enabled logs. 
-        /// </summary>
-        private void RegisterLoggers()
-        {
             var loggerDescriptions = new List<RegisteredLoggerInfo>();
+
             foreach (ILogger logger in Loggers)
             {
                 ILogger actualLogger = UnwrapLogger(logger);
                 Type loggerType = actualLogger.GetType();
+
+                listOfLoggers.Add(loggerType.FullName ?? loggerType.Name);
 
                 var outputFilePaths = new List<string>();
                 if (actualLogger is IFileOutputLogger fileLogger)
@@ -450,6 +433,15 @@ namespace Microsoft.Build.BackEnd.Logging
                     verbosity: actualLogger.Verbosity,
                     loggerTypeFullName: loggerType.FullName,
                     parameters: actualLogger.Parameters));
+            }
+
+            if (listOfLoggers.Count != 0)
+            {
+                var msgEvent = new BuildMessageEventArgs(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", listOfLoggers)),
+                    null, null, MessageImportance.Low);
+                msgEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(msgEvent);
             }
 
             if (loggerDescriptions.Count > 0)
