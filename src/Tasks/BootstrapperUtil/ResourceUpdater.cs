@@ -17,9 +17,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal class ResourceUpdater
     {
-#if FEATURE_WINDOWSINTEROP
-        private const int ERROR_SHARING_VIOLATION = -2147024864;
-#endif
         private readonly List<StringResource> _stringResources = new List<StringResource>();
         private readonly List<FileResource> _fileResources = new List<FileResource>();
 
@@ -54,7 +51,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             try
             {
                 hUpdate = PInvoke.BeginUpdateResource(filePath, false);
-                while (hUpdate == HANDLE.Null && Marshal.GetHRForLastWin32Error() == ERROR_SHARING_VIOLATION && beginUpdateRetries > 0) // If it equals 0x80070020 (ERROR_SHARING_VIOLATION), sleep & retry
+                while (hUpdate == HANDLE.Null && Marshal.GetHRForLastWin32Error() == (int)(HRESULT)WIN32_ERROR.ERROR_SHARING_VIOLATION && beginUpdateRetries > 0) // If it equals 0x80070020 (ERROR_SHARING_VIOLATION), sleep & retry
                 {
                     // This warning can be useful for debugging, but shouldn't be displayed to an actual user
                     // results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.General", String.Format("Unable to begin updating resource for {0} with error {1:X}, trying again after short sleep", filename, Marshal.GetHRForLastWin32Error())));

@@ -225,6 +225,10 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="AssemblyDependency\Fusion\Fusion.cs" />
+    <Compile Include="AssemblyDependency\Fusion\IAssemblyCache.cs" />
+    <Compile Include="AssemblyDependency\Fusion\IAssemblyEnum.cs" />
+    <Compile Include="AssemblyDependency\Fusion\IAssemblyName.cs" />
     <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="AddToWin32Manifest.cs" />

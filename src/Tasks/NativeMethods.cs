@@ -6,8 +6,13 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.Fusion;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
 
+#if !NET
 using System.Text;
+#endif
 using System.Reflection;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
@@ -255,15 +260,6 @@ namespace Microsoft.Build.Tasks
         void FindAssembliesByName();
     }
 
-    [ComImport]
-    [Guid("00000001-0000-0000-c000-000000000046")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IClassFactory
-    {
-        void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown), Out] out object ppvObject);
-        void LockServer(bool fLock);
-    }
-
     // Subset of CorAssemblyFlags from corhdr.h
     internal enum CorAssemblyFlags : uint
     {
@@ -301,157 +297,6 @@ namespace Microsoft.Build.Tasks
         public UInt32 cProcessors;
         public IntPtr rOses;
         public UInt32 cOses;
-    }
-
-    internal enum ASSEMBLYINFO_FLAG
-    {
-        VALIDATE = 1,
-        GETSIZE = 2
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct ASSEMBLY_INFO
-    {
-        public uint cbAssemblyInfo;
-        public uint dwAssemblyFlags;
-        public ulong uliAssemblySizeInKB;
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszCurrentAssemblyPathBuf;
-        public uint cchBuf;
-    }
-
-    [ComImport]
-    [Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IAssemblyCache
-    {
-        /* Unused.
-        [PreserveSig]
-        int UninstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, IntPtr pvReserved, int pulDisposition);
-         */
-        int UninstallAssembly();
-
-        [PreserveSig]
-        uint QueryAssemblyInfo(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, ref ASSEMBLY_INFO pAsmInfo);
-
-        /* Unused.
-        [PreserveSig]
-        int CreateAssemblyCacheItem(uint dwFlags, IntPtr pvReserved, out object ppAsmItem, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName);
-         */
-        int CreateAssemblyCacheItem();
-
-        /* Unused.
-        [PreserveSig]
-        int CreateAssemblyScavenger(out object ppAsmScavenger);
-         */
-        int CreateAssemblyScavenger();
-
-        /* Unused.
-        [PreserveSig]
-        int InstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszManifestFilePath, IntPtr pvReserved);
-         */
-        int InstallAssembly();
-    }
-
-    [Flags]
-    internal enum AssemblyCacheFlags
-    {
-        ZAP = 1,
-        GAC = 2,
-        DOWNLOAD = 4
-    }
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
-    internal interface IAssemblyName
-    {
-        [PreserveSig]
-        int SetProperty(
-                int PropertyId,
-                IntPtr pvProperty,
-                int cbProperty);
-
-        [PreserveSig]
-        int GetProperty(
-                int PropertyId,
-                IntPtr pvProperty,
-                ref int pcbProperty);
-
-        [PreserveSig]
-        int Finalize();
-
-        [PreserveSig]
-        int GetDisplayName(
-                StringBuilder pDisplayName,
-                ref int pccDisplayName,
-                int displayFlags);
-
-        [PreserveSig]
-        int Reserved(ref Guid guid,
-            Object obj1,
-            Object obj2,
-            String string1,
-            Int64 llFlags,
-            IntPtr pvReserved,
-            int cbReserved,
-            out IntPtr ppv);
-
-        [PreserveSig]
-        int GetName(
-                ref int pccBuffer,
-                StringBuilder pwzName);
-
-        [PreserveSig]
-        int GetVersion(
-                out int versionHi,
-                out int versionLow);
-        [PreserveSig]
-        int IsEqual(
-                IAssemblyName pAsmName,
-                int cmpFlags);
-
-        [PreserveSig]
-        int Clone(out IAssemblyName pAsmName);
-    }// IAssemblyName
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
-    internal interface IAssemblyEnum
-    {
-        [PreserveSig]
-        int GetNextAssembly(
-                IntPtr pvReserved,
-                out IAssemblyName ppName,
-                int flags);
-        [PreserveSig]
-        int Reset();
-        [PreserveSig]
-        int Clone(out IAssemblyEnum ppEnum);
-    }// IAssemblyEnum
-
-    internal enum CreateAssemblyNameObjectFlags
-    {
-        CANOF_DEFAULT = 0,
-        CANOF_PARSE_DISPLAY_NAME = 1,
-    }
-
-    [Flags]
-    internal enum AssemblyNameDisplayFlags
-    {
-        VERSION = 0x01,
-        CULTURE = 0x02,
-        PUBLIC_KEY_TOKEN = 0x04,
-        PROCESSORARCHITECTURE = 0x20,
-        RETARGETABLE = 0x80,
-        // This enum will change in the future to include
-        // more attributes.
-        ALL = VERSION
-                                    | CULTURE
-                                    | PUBLIC_KEY_TOKEN
-                                    | PROCESSORARCHITECTURE
-                                    | RETARGETABLE
     }
 
     /// <summary>
@@ -649,43 +494,6 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
-        //------------------------------------------------------------------------------
-        // CreateAssemblyCache
-        //------------------------------------------------------------------------------
-        [DllImport("fusion.dll")]
-        [SupportedOSPlatform("windows")]
-        internal static extern uint CreateAssemblyCache(out IAssemblyCache ppAsmCache, uint dwReserved);
-
-        [DllImport("fusion.dll")]
-        internal static extern int CreateAssemblyEnum(
-                out IAssemblyEnum ppEnum,
-                IntPtr pUnkReserved,
-                IAssemblyName pName,
-                AssemblyCacheFlags flags,
-                IntPtr pvReserved);
-
-        [DllImport("fusion.dll")]
-        [SupportedOSPlatform("windows")]
-        internal static extern int CreateAssemblyNameObject(
-                out IAssemblyName ppAssemblyNameObj,
-                [MarshalAs(UnmanagedType.LPWStr)]
-                String szAssemblyName,
-                CreateAssemblyNameObjectFlags flags,
-                IntPtr pvReserved);
-
-        /// <summary>
-        /// GetCachePath from fusion.dll.
-        /// A common design pattern in unmanaged C++ is calling a function twice, once to determine the length of the string
-        /// and then again to pass the client-allocated character buffer.
-        /// </summary>
-        /// <param name="cacheFlags">Value that indicates the source of the cached assembly.</param>
-        /// <param name="cachePath">The returned pointer to the path.</param>
-        /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
-        ///
-        [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        [SupportedOSPlatform("windows")]
-        internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
-
         #endregion
 
         #region Methods
@@ -835,9 +643,10 @@ namespace Microsoft.Build.Tasks
 #endif
 
             /// <summary>
-            /// The IAssemblyEnum interface which allows us to ask for the next assembly from the GAC enumeration.
+            /// Agile wrapper around the IAssemblyEnum COM pointer from fusion.dll. Provides
+            /// thread-agile access and finalizer-driven release if the enum is never iterated.
             /// </summary>
-            private IAssemblyEnum _assemblyEnum;
+            private AgileComPointer<IAssemblyEnum> _agileAssemblyEnum;
 
             /// <summary>
             /// For non-Windows implementation, we need assembly name
@@ -849,11 +658,6 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private IEnumerable<string> _gacDirectories;
 
-            /// <summary>
-            /// Are we done going through the enumeration.
-            /// </summary>
-            private bool _done;
-
             // null means enumerate all the assemblies
             internal AssemblyCacheEnum(String assemblyName)
             {
@@ -864,43 +668,43 @@ namespace Microsoft.Build.Tasks
             /// Initialize the GAC Enum
             /// </summary>
             /// <param name="assemblyName"></param>
-            private void InitializeEnum(String assemblyName)
+            private unsafe void InitializeEnum(String assemblyName)
             {
                 if (NativeMethodsShared.IsWindows)
                 {
-                    IAssemblyName fusionName = null;
+                    using ComScope<IAssemblyName> fusionName = new(null);
+                    using ComScope<IAssemblyEnum> assemblyEnum = new(null);
 
-                    int hr = 0;
-                    try
+                    HRESULT hr = HRESULT.S_OK;
+                    if (assemblyName != null)
                     {
-                        if (assemblyName != null)
+                        fixed (char* pAssemblyName = assemblyName)
                         {
-                            hr = CreateAssemblyNameObject(
-                                out fusionName,
-                                assemblyName,
+                            hr = Fusion.NativeMethods.CreateAssemblyNameObject(
+                                fusionName,
+                                pAssemblyName,
                                 CreateAssemblyNameObjectFlags.CANOF_PARSE_DISPLAY_NAME
                                 /* parse components assuming the assemblyName is a fusion name, this does not have to be a full fusion name*/,
-                                IntPtr.Zero);
-                        }
-
-                        if (hr >= 0)
-                        {
-                            hr = CreateAssemblyEnum(
-                                out _assemblyEnum,
-                                IntPtr.Zero,
-                                fusionName,
-                                AssemblyCacheFlags.GAC,
-                                IntPtr.Zero);
+                                null);
                         }
                     }
-                    catch (Exception e)
+
+                    if (hr.Succeeded)
                     {
-                        hr = e.HResult;
+                        hr = Fusion.NativeMethods.CreateAssemblyEnum(
+                            assemblyEnum,
+                            null,
+                            fusionName.Pointer,
+                            AssemblyCacheFlags.GAC,
+                            null);
                     }
 
-                    if (hr < 0)
+                    if (hr.Succeeded && !assemblyEnum.IsNull)
                     {
-                        _assemblyEnum = null;
+                        // AgileComPointer registers in the GIT (which AddRefs). takeOwnership: false
+                        // because the ComScope owns our reference and will Release deterministically
+                        // when this method returns.
+                        _agileAssemblyEnum = new AgileComPointer<IAssemblyEnum>(assemblyEnum.Pointer, takeOwnership: false);
                     }
                 }
                 else
@@ -928,36 +732,27 @@ namespace Microsoft.Build.Tasks
             {
                 if (NativeMethodsShared.IsWindows)
                 {
-                    if (_assemblyEnum == null)
+                    if (_agileAssemblyEnum is null)
                     {
                         yield break;
                     }
 
-                    if (_done)
+                    try
                     {
-                        yield break;
-                    }
-
-                    while (!_done)
-                    {
-                        // Now get next IAssemblyName from m_AssemblyEnum
-                        int hr = _assemblyEnum.GetNextAssembly((IntPtr)0, out IAssemblyName fusionName, 0);
-
-                        if (hr < 0)
+                        while (true)
                         {
-                            Marshal.ThrowExceptionForHR(hr);
-                        }
+                            string assemblyFusionName = GetNextAssemblyFusionName();
+                            if (assemblyFusionName is null)
+                            {
+                                yield break;
+                            }
 
-                        if (fusionName != null)
-                        {
-                            string assemblyFusionName = GetFullName(fusionName);
                             yield return new AssemblyNameExtension(assemblyFusionName);
                         }
-                        else
-                        {
-                            _done = true;
-                            yield break;
-                        }
+                    }
+                    finally
+                    {
+                        ReleaseAssemblyEnum();
                     }
                 }
                 else
@@ -1013,17 +808,54 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            private static string GetFullName(IAssemblyName fusionAsmName)
+            [SupportedOSPlatform("windows5.0")]
+            private unsafe string GetNextAssemblyFusionName()
             {
-                int ilen = 1024;
-                StringBuilder sDisplayName = new StringBuilder(ilen);
-                int hr = fusionAsmName.GetDisplayName(sDisplayName, ref ilen, (int)AssemblyNameDisplayFlags.ALL);
-                if (hr < 0)
+                using ComScope<IAssemblyEnum> assemblyEnum = _agileAssemblyEnum.GetInterface();
+                using ComScope<IAssemblyName> fusionName = new(null);
+
+                HRESULT hr = assemblyEnum.Pointer->GetNextAssembly(null, fusionName, 0);
+                if (hr.Failed)
                 {
                     Marshal.ThrowExceptionForHR(hr);
                 }
 
-                return sDisplayName.ToString();
+                if (fusionName.IsNull)
+                {
+                    return null;
+                }
+
+                return GetFullName(fusionName.Pointer);
+            }
+
+            [SupportedOSPlatform("windows5.0")]
+            private void ReleaseAssemblyEnum()
+            {
+                _agileAssemblyEnum?.Dispose();
+                _agileAssemblyEnum = null;
+            }
+
+            private static unsafe string GetFullName(IAssemblyName* fusionAsmName)
+            {
+                int ilen = 1024;
+                char[] buffer = new char[ilen];
+                fixed (char* pBuffer = buffer)
+                {
+                    HRESULT hr = fusionAsmName->GetDisplayName(pBuffer, &ilen, AssemblyNameDisplayFlags.ALL);
+                    if (hr.Failed)
+                    {
+                        Marshal.ThrowExceptionForHR(hr);
+                    }
+                }
+
+                // ilen now holds the actual char count including null terminator.
+                int length = ilen;
+                if (length > 0 && buffer[length - 1] == '\0')
+                {
+                    length--;
+                }
+
+                return new string(buffer, 0, length);
             }
 
             IEnumerator IEnumerable.GetEnumerator()
