@@ -1,6 +1,9 @@
 name: Read AzDO PerfStar Results
 
 on:
+  push:
+    branches:
+      - feature/azdo-pipeline-reader
   workflow_dispatch:
     inputs:
       pipeline:
@@ -52,7 +55,8 @@ jobs:
       - name: Resolve Pipeline ID
         id: pipeline
         run: |
-          if [ "${{ inputs.pipeline }}" = "scheduled" ]; then
+          PIPELINE_INPUT="${{ inputs.pipeline || 'scheduled' }}"
+          if [ "${PIPELINE_INPUT}" = "scheduled" ]; then
             echo "id=${PIPELINE_SCHEDULED}" >> "$GITHUB_OUTPUT"
             echo "name=PerfStar-Scheduled" >> "$GITHUB_OUTPUT"
           else
@@ -65,8 +69,8 @@ jobs:
         env:
           AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
           PIPELINE_ID: ${{ steps.pipeline.outputs.id }}
-          RUN_ID: ${{ inputs.run_id }}
-          COUNT: ${{ inputs.count }}
+          RUN_ID: ${{ inputs.run_id || '' }}
+          COUNT: ${{ inputs.count || '10' }}
         run: |
           BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
 
