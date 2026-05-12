@@ -5,10 +5,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
 using Microsoft.Build.BackEnd.Logging;
@@ -56,11 +58,6 @@ namespace Microsoft.Build.Experimental
         private readonly MSBuildClientExitResult _exitResult;
 
         /// <summary>
-        /// Whether MSBuild server finished the build.
-        /// </summary>
-        private bool _buildFinished = false;
-
-        /// <summary>
         /// Handshake between server and client.
         /// </summary>
         private readonly ServerNodeHandshake _handshake;
@@ -73,7 +70,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// The named pipe stream for client-server communication.
         /// </summary>
-        private NamedPipeClientStream _nodeStream = null!;
+        private NamedPipeClientStream _nodeStream;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets
@@ -99,7 +96,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Incoming packet pump and redirection.
         /// </summary>
-        private MSBuildClientPacketPump _packetPump = null!;
+        private MSBuildClientPacketPump _packetPump;
 
         /// <summary>
         /// Public constructor with parameters.
@@ -126,6 +123,9 @@ namespace Microsoft.Build.Experimental
             CreateNodePipeStream();
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [MemberNotNull(nameof(_nodeStream), nameof(_packetPump))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         private void CreateNodePipeStream()
         {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -150,6 +150,17 @@ namespace Microsoft.Build.Experimental
         /// <returns>A value of type <see cref="MSBuildClientExitResult"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
         public MSBuildClientExitResult Execute(CancellationToken cancellationToken)
+        {
+            return ExecuteAsync(cancellationToken).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// Orchestrates the execution of the build on the server, responsible for client-server communication.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>A <see cref="Task{TResult}"/> that will complete with a value of type <see cref="MSBuildClientExitResult"/>
+        /// that indicates whether the build succeeded, or the manner in which it failed.</returns>
+        internal async Task<MSBuildClientExitResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             // Command line in one string used only in human readable content.
             string descriptiveCommandLine = string.Join(" ", _commandLine);
@@ -203,12 +214,12 @@ namespace Microsoft.Build.Experimental
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
-            if (TrySendBuildCommand())
+            if (await TrySendBuildCommandAsync().ConfigureAwait(false))
             {
                 _numConsoleWritePackets = 0;
                 _sizeOfConsoleWritePackets = 0;
 
-                ReadPacketsLoop(cancellationToken);
+                await ReadPacketsLoop(cancellationToken).ConfigureAwait(false);
 
                 MSBuildEventSource.Log.MSBuildServerBuildStop(descriptiveCommandLine, _numConsoleWritePackets, _sizeOfConsoleWritePackets, _exitResult.MSBuildClientExitType.ToString(), _exitResult.MSBuildAppExitTypeString ?? string.Empty);
                 CommunicationsUtilities.Trace("Build finished.");
@@ -232,10 +243,10 @@ namespace Microsoft.Build.Experimental
             // Neither commandLine nor msbuildlocation is involved in node shutdown
             var client = new MSBuildClient(commandLine: null!, msbuildLocation: null!);
 
-            return client.TryShutdownServer(cancellationToken);
+            return client.TryShutdownServerAsync(cancellationToken).GetAwaiter().GetResult();
         }
 
-        private bool TryShutdownServer(CancellationToken cancellationToken)
+        private async Task<bool> TryShutdownServerAsync(CancellationToken cancellationToken)
         {
             CommunicationsUtilities.Trace("Trying shutdown server node.");
 
@@ -262,13 +273,13 @@ namespace Microsoft.Build.Experimental
                 return false;
             }
 
-            if (!TrySendShutdownCommand())
+            if (!await TrySendShutdownCommandAsync().ConfigureAwait(false))
             {
                 CommunicationsUtilities.Trace("Failed to send shutdown command to the server.");
                 return false;
             }
 
-            ReadPacketsLoop(cancellationToken);
+            await ReadPacketsLoop(cancellationToken).ConfigureAwait(false);
 
             return _exitResult.MSBuildClientExitType == MSBuildClientExitType.Success;
         }
@@ -301,51 +312,42 @@ namespace Microsoft.Build.Experimental
             return serverWasBusy;
         }
 
-        private void ReadPacketsLoop(CancellationToken cancellationToken)
+        private async Task ReadPacketsLoop(CancellationToken cancellationToken)
         {
             try
             {
                 // Start packet pump
-                using MSBuildClientPacketPump packetPump = _packetPump;
+                await using MSBuildClientPacketPump packetPump = _packetPump;
 
-                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, packetPump);
-                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization, packetPump);
+                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization);
+                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization);
                 packetPump.Start();
 
-                WaitHandle[] waitHandles =
+                while (true)
                 {
-                    cancellationToken.WaitHandle,
-                    packetPump.PacketPumpCompleted,
-                    packetPump.PacketReceivedEvent
-                };
-
-                while (!_buildFinished)
-                {
-                    int index = WaitHandle.WaitAny(waitHandles);
-                    switch (index)
+                    bool hasPackets;
+                    try
                     {
-                        case 0:
-                            HandleCancellation();
-                            // After the cancelation, we want to wait to server gracefuly finish the build.
-                            // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
-                            waitHandles[0] = CancellationToken.None.WaitHandle;
-                            break;
+                        hasPackets = await packetPump.ReceivedPackets.WaitToReadAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
+                    {
+                        await HandleCancellationAsync().ConfigureAwait(false);
 
-                        case 1:
-                            HandlePacketPumpCompleted(packetPump);
-                            break;
+                        // After the cancelation, we want to wait to server gracefuly finish the build.
+                        // We have to replace the cancelation token, because WaitAny would cause to repeatedly hit this branch of code.
+                        cancellationToken = CancellationToken.None;
+                        continue;
+                    }
 
-                        case 2:
-                            while (packetPump.ReceivedPacketsQueue.TryDequeue(out INodePacket? packet) &&
-                                   !_buildFinished)
-                            {
-                                if (packet != null)
-                                {
-                                    HandlePacket(packet);
-                                }
-                            }
+                    if (!hasPackets)
+                    {
+                        break;
+                    }
 
-                            break;
+                    while (packetPump.ReceivedPackets.TryRead(out INodePacket? packet))
+                    {
+                        HandlePacket(packet);
                     }
                 }
             }
@@ -402,13 +404,13 @@ namespace Microsoft.Build.Experimental
             return consoleBackgroundColor;
         }
 
-        private bool TrySendPacket(Func<INodePacket> packetResolver)
+        private async ValueTask<bool> TrySendPacketAsync(Func<INodePacket> packetResolver)
         {
             INodePacket? packet = null;
             try
             {
                 packet = packetResolver();
-                WritePacket(_nodeStream, packet);
+                await WritePacketAsync(_nodeStream, packet).ConfigureAwait(false);
                 CommunicationsUtilities.Trace($"Command packet of type '{packet.Type}' sent...");
             }
             catch (Exception ex)
@@ -472,15 +474,15 @@ namespace Microsoft.Build.Experimental
             return true;
         }
 
-        private bool TrySendBuildCommand() => TrySendPacket(() => GetServerNodeBuildCommand());
+        private ValueTask<bool> TrySendBuildCommandAsync() => TrySendPacketAsync(() => GetServerNodeBuildCommand());
 
-        private bool TrySendCancelCommand() => TrySendPacket(() => new ServerNodeBuildCancel());
+        private ValueTask<bool> TrySendCancelCommandAsync() => TrySendPacketAsync(() => new ServerNodeBuildCancel());
 
-        private bool TrySendShutdownCommand()
+        private ValueTask<bool> TrySendShutdownCommandAsync()
         {
             CommunicationsUtilities.Trace("Sending shutdown command to server.");
             _packetPump.ServerWillDisconnect();
-            return TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
+            return TrySendPacketAsync(() => new NodeBuildComplete(false /* no node reuse */));
         }
 
         private ServerNodeBuildCommand GetServerNodeBuildCommand()
@@ -527,25 +529,11 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Handle cancellation.
         /// </summary>
-        private void HandleCancellation()
+        private async ValueTask HandleCancellationAsync()
         {
-            TrySendCancelCommand();
+            _ = await TrySendCancelCommandAsync().ConfigureAwait(false);
 
             CommunicationsUtilities.Trace("MSBuild client sent cancellation command.");
-        }
-
-        /// <summary>
-        /// Handle when packet pump is completed both successfully or with error.
-        /// </summary>
-        private void HandlePacketPumpCompleted(MSBuildClientPacketPump packetPump)
-        {
-            if (packetPump.PacketPumpException != null)
-            {
-                CommunicationsUtilities.Trace($"MSBuild client error: packet pump unexpectedly shut down: {packetPump.PacketPumpException}");
-                throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
-            }
-
-            _buildFinished = true;
         }
 
         /// <summary>
@@ -589,7 +577,6 @@ namespace Microsoft.Build.Experimental
             CommunicationsUtilities.Trace($"Build response received: exit code '{response.ExitCode}', exit type '{response.ExitType}'");
             _exitResult.MSBuildClientExitType = MSBuildClientExitType.Success;
             _exitResult.MSBuildAppExitTypeString = response.ExitType;
-            _buildFinished = true;
         }
 
         /// <summary>
@@ -598,14 +585,10 @@ namespace Microsoft.Build.Experimental
         /// <returns> Whether the client connected to MSBuild server successfully.</returns>
         private bool TryConnectToServer(int timeoutMilliseconds)
         {
-            bool tryAgain = true;
             Stopwatch sw = Stopwatch.StartNew();
 
-            while (tryAgain && sw.ElapsedMilliseconds < timeoutMilliseconds)
+            while (sw.ElapsedMilliseconds < timeoutMilliseconds)
             {
-                tryAgain = false;
-
-
                 if (NodeProviderOutOfProcBase.TryConnectToPipeStream(
                     _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds), out HandshakeResult result))
                 {
@@ -618,7 +601,6 @@ namespace Microsoft.Build.Experimental
                         CommunicationsUtilities.Trace($"Retrying to connect to server after {sw.ElapsedMilliseconds} ms");
                         // This solves race condition for time in which server started but have not yet listen on pipe or
                         // when it just finished build request and is recycling pipe.
-                        tryAgain = true;
                         CreateNodePipeStream();
                     }
                     else
@@ -633,7 +615,7 @@ namespace Microsoft.Build.Experimental
             return false;
         }
 
-        private void WritePacket(Stream nodeStream, INodePacket packet)
+        private async ValueTask WritePacketAsync(Stream nodeStream, INodePacket packet)
         {
             MemoryStream memoryStream = _packetMemoryStream;
             memoryStream.SetLength(0);
@@ -655,7 +637,11 @@ namespace Microsoft.Build.Experimental
             memoryStream.Position = 1;
             _binaryWriter.Write(packetStreamLength - 5);
 
-            nodeStream.Write(memoryStream.GetBuffer(), 0, packetStreamLength);
+#if NET
+            await nodeStream.WriteAsync(memoryStream.GetBuffer().AsMemory(0, packetStreamLength)).ConfigureAwait(false);
+#else
+            await nodeStream.WriteAsync(memoryStream.GetBuffer(), 0, packetStreamLength).ConfigureAwait(false);
+#endif
         }
     }
 }
