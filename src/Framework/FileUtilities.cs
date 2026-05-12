@@ -358,6 +358,53 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// If <see cref="CurrentThreadWorkingDirectory"/> is set and <paramref name="path"/> is relative,
+        /// resolves it to an <see cref="AbsolutePath"/> using the thread-local working directory as base.
+        /// Returns <c>null</c> when the path does not need resolution (no thread working directory,
+        /// empty path, or already fully qualified).
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Callers are responsible for calling <see cref="FixFilePath(string)"/>
+        /// BEFORE passing the path to this method. On Linux, backslash is a valid filename character
+        /// and Path.Combine/GetFullPath won't recognize ..\segments unless backslashes are first
+        /// normalized to forward slashes.
+        /// </para>
+        /// <para>
+        /// GetFullPath can throw for inputs with illegal path characters (e.g., wildcards).
+        /// In that case we fall back to a simple Path.Combine, which preserves the non-throwing
+        /// behavior of APIs like File.Exists and Directory.Exists.
+        /// </para>
+        /// </remarks>
+        internal static AbsolutePath? MakeFullPathFromThreadWorkingDirectory(string path)
+        {
+            string? workingDir = CurrentThreadWorkingDirectory;
+            if (string.IsNullOrEmpty(workingDir) || string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
+            if (NewPath.IsPathFullyQualified(path))
+            {
+                return null;
+            }
+
+            // Use the 2-argument GetFullPath overload — it correctly handles drive-relative
+            // ("\foo") and current-directory-relative ("C:foo") paths on Windows by resolving
+            // them against the specified base directory, not the process CWD.
+            try
+            {
+                return new AbsolutePath(NewPath.GetFullPath(path, workingDir!));
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                // For invalid paths (e.g., wildcards) fall back to a simple combination,
+                // preserving the non-throwing behavior of File.Exists/Directory.Exists.
+                return new AbsolutePath(path, new AbsolutePath(workingDir!));
+            }
+        }
+
+        /// <summary>
         /// Get the hex hash string for the string
         /// </summary>
         internal static string GetHexHash(string stringToHash)
@@ -829,6 +876,13 @@ namespace Microsoft.Build.Framework
                 return false;
             }
 
+            // In MT mode the process CWD should not be used when resolving the first relative path segment. Use the
+            // thread-local working directory so the directory existence heuristic runs against the correct project directory.
+            if (string.IsNullOrEmpty(baseDirectory))
+            {
+                baseDirectory = CurrentThreadWorkingDirectory ?? "";
+            }
+
             // The first slash will either be at the beginning of the string or after the first directory name
             int directoryLength = value.Slice(1).IndexOf('/') + 1;
             bool shouldCheckDirectory = directoryLength != 0;
@@ -1286,7 +1340,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns true if the specified filename is a metaproject file (.metaproj), otherwise false.
         /// </summary>
-        internal static bool IsMetaprojectFilename(string filename)
+        internal static bool IsMetaprojectFilename(string? filename)
         {
             return HasExtension(filename, ".metaproj");
         }
@@ -1296,14 +1350,14 @@ namespace Microsoft.Build.Framework
             return HasExtension(filename, ".binlog");
         }
 
-        private static bool HasExtension(string filename, string extension)
+        private static bool HasExtension(string? filename, string extension)
         {
             if (String.IsNullOrEmpty(filename))
             {
                 return false;
             }
 
-            return filename.EndsWith(extension, PathComparison);
+            return filename!.EndsWith(extension, PathComparison);
         }
 
         /// <summary>
@@ -1339,7 +1393,7 @@ namespace Microsoft.Build.Framework
             {
                 indexOfFirstNonSlashChar++;
             }
-            if (path.IndexOf(splitPath[0]) != indexOfFirstNonSlashChar)
+            if (path.IndexOf(splitPath[0], PathComparison) != indexOfFirstNonSlashChar)
             {
                 // path was already relative so just return it
                 return FixFilePath(path);

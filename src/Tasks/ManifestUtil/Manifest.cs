@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -207,6 +207,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// The location of each referenced assembly and file is required for hash computation and assembly identity resolution.
         /// Any resulting errors or warnings are reported in the OutputMessages collection.
         /// </summary>
+        /// <remarks>
+        /// WARNING: This overload uses <see cref="System.IO.Directory.GetCurrentDirectory()"/> to resolve relative paths,
+        /// which is not safe in multithreaded (-mt) MSBuild mode. Use the <see cref="ResolveFiles(string[])"/> overload
+        /// with explicit search paths (e.g., from <c>TaskEnvironment.ProjectDirectory</c>) instead.
+        /// </remarks>
         public void ResolveFiles()
         {
             string defaultDir = String.Empty;
@@ -782,7 +787,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         return 0;
                     }
 
-                    return xRef.SortName.CompareTo(yRef.SortName);
+                    return string.Compare(xRef.SortName, yRef.SortName, StringComparison.Ordinal);
                 }
 
                 Debug.Fail("Comparing objects that are not BaseReferences");

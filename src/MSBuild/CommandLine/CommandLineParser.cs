@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -62,7 +62,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// </exception>
         public CommandLineSwitchesAccessor Parse(IEnumerable<string> commandLineArgs)
         {
-            List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, ..commandLineArgs];
+            List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. commandLineArgs];
             List<DeferredBuildMessage> deferredBuildMessages = [];
 
             GatherAllSwitches(
@@ -117,7 +117,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             switchesFromAutoResponseFile = new CommandLineSwitches();
             if (!switchesNotFromAutoResponseFile[ParameterlessSwitch.NoAutoResponse])
             {
-                string exePath = Path.GetDirectoryName(BuildEnvironmentHelper.ExecutingAssemblyPath); // Copied from XMake
+                string exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath()); // Copied from XMake
                 GatherAutoResponseFileSwitches(exePath, switchesFromAutoResponseFile, fullCommandLine);
             }
 
@@ -532,7 +532,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
 
                 // Don't look for more response files if it's only in the same place we already looked (next to the exe)
-                string exePath = Path.GetDirectoryName(BuildEnvironmentHelper.ExecutingAssemblyPath); // Copied from XMake
+                string exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath()); // Copied from XMake
                 if (!string.Equals(projectDirectory, exePath, StringComparison.OrdinalIgnoreCase))
                 {
                     // this combines any found, with higher precedence, with the switches from the original auto response file switches
@@ -643,7 +643,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// <returns>Whether envVar is an environment variable</returns>
         private static bool IsEnvironmentVariable(string envVar)
         {
-            return envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1;
+            return envVar.StartsWith("%", StringComparison.Ordinal) && envVar.EndsWith("%", StringComparison.Ordinal) && envVar.Length > 1;
         }
 
         /// <summary>

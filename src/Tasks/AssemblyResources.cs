@@ -23,7 +23,7 @@ namespace Microsoft.Build.Shared
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resource = PrimaryResources.GetString(name, CultureInfo.CurrentUICulture) ?? SharedResources.GetString(name, CultureInfo.CurrentUICulture);
 
-            ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
+            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
 
             return resource;
         }
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Shared
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resource = PrimaryResources.GetString(name, CultureInfo.InvariantCulture) ?? SharedResources.GetString(name, CultureInfo.InvariantCulture);
 
-            ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
+            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
 
             return resource;
         }

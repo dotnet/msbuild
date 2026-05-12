@@ -176,7 +176,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskHostNodeManager, "Cannot create component of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskHostNodeManager, $"Cannot create component of type {type}");
             return new TaskHostNodeManager();
         }
 

@@ -817,9 +817,9 @@ namespace Microsoft.Build.Execution
             private IReadOnlyDictionary<string, string> _directMetadata;
 
             /// <summary>
-            /// Cached value of the fullpath metadata. All other metadata are computed on demand.
+            /// Cached values of derivable item-spec modifiers. All time-based metadata are computed on demand.
             /// </summary>
-            private string _fullPath;
+            private ItemSpecModifiers.Cache _cachedModifiers;
 
             /// <summary>
             /// All the item definitions that apply to this item, in order of
@@ -893,7 +893,7 @@ namespace Microsoft.Build.Execution
                 _includeEscaped = source._includeEscaped;
                 _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
                 source.CopyMetadataTo(this, addOriginalItemSpec);
-                _fullPath = source._fullPath;
+                _cachedModifiers = source._cachedModifiers;
                 _definingFileEscaped = source._definingFileEscaped;
             }
 
@@ -936,7 +936,7 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
 
                     _includeEscaped = value;
-                    _fullPath = null; // Clear cached value
+                    _cachedModifiers.Clear(); // Clear cached values
                 }
             }
 
@@ -981,7 +981,10 @@ namespace Microsoft.Build.Execution
                         names.Add(metadatum.Key);
                     }
 
-                    names.AddRange(ItemSpecModifiers.All);
+                    foreach (string name in ItemSpecModifiers.All)
+                    {
+                        names.Add(name);
+                    }
 
                     return names;
                 }
@@ -1054,7 +1057,7 @@ namespace Microsoft.Build.Execution
 
                     ErrorUtilities.VerifyThrowArgumentLength(value, "IncludeEscaped");
                     _includeEscaped = value;
-                    _fullPath = null; // Clear cached value
+                    _cachedModifiers.Clear(); // Clear cached values
                 }
             }
 
@@ -1252,18 +1255,28 @@ namespace Microsoft.Build.Execution
 
                     // Otherwise, merge remaining inherited item definitions. Front of the list is highest priority,
                     // so walk backwards. Skip the last entry since we've already used it as the base.
+                    // Use a builder to merge all definitions at once instead of creating N-1 intermediate
+                    // immutable trees from chained SetItems calls.
+                    var builder = lastItemDefinition.ToBuilder();
+
                     for (int i = _itemDefinitions.Count - 2; i >= 0; i--)
                     {
-                        lastItemDefinition = lastItemDefinition.SetItems(_itemDefinitions[i].BackingMetadata);
+                        foreach (var kvp in _itemDefinitions[i].BackingMetadata)
+                        {
+                            builder[kvp.Key] = kvp.Value;
+                        }
                     }
 
                     // Finally any direct metadata win.
                     if (_directMetadata != null)
                     {
-                        lastItemDefinition = lastItemDefinition.SetItems(_directMetadata);
+                        foreach (var kvp in _directMetadata)
+                        {
+                            builder[kvp.Key] = kvp.Value;
+                        }
                     }
 
-                    return lastItemDefinition;
+                    return builder.ToImmutable();
                 }
             }
 
@@ -1914,14 +1927,17 @@ namespace Microsoft.Build.Execution
                         int count = translator.Reader.ReadInt32();
                         if (count > 0)
                         {
-                            IEnumerable<KeyValuePair<string, string>> metaData =
-                                Enumerable.Range(0, count).Select(_ =>
-                                {
-                                    int key = translator.Reader.ReadInt32();
-                                    int value = translator.Reader.ReadInt32();
-                                    return new KeyValuePair<string, string>(interner.GetString(key), interner.GetString(value));
-                                });
-                            _directMetadata = ImmutableDictionaryExtensions.EmptyMetadata.SetItems(metaData);
+                            // Use a builder to avoid intermediate immutable dictionary allocations
+                            // from feeding a lazy enumerable into SetItems.
+                            var builder = ImmutableDictionaryExtensions.EmptyMetadata.ToBuilder();
+                            for (int i = 0; i < count; i++)
+                            {
+                                int key = translator.Reader.ReadInt32();
+                                int value = translator.Reader.ReadInt32();
+                                builder[interner.GetString(key)] = interner.GetString(value);
+                            }
+
+                            _directMetadata = builder.ToImmutable();
                         }
                         else
                         {
@@ -2081,16 +2097,9 @@ namespace Microsoft.Build.Execution
             /// If value is not available, returns empty string.
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
-            {
-                string value = String.Empty;
-
-                if (ItemSpecModifiers.IsItemSpecModifier(name))
-                {
-                    value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
-                }
-
-                return value;
-            }
+                => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
+                    ? BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, modifierKind, ref _cachedModifiers)
+                    : string.Empty;
 
             /// <summary>
             /// Retrieves the named metadata from the item definition, if any.

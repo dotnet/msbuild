@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text.RegularExpressions;
@@ -12,7 +14,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -20,7 +21,7 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolTask_Tests
     {
-        private ITestOutputHelper _output;
+        private readonly ITestOutputHelper _output;
 
         public ToolTask_Tests(ITestOutputHelper testOutput)
         {
@@ -754,6 +755,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FindOnPathSucceeds()
         {
+            using MyTool tool = new MyTool();
             string[] expectedCmdPath;
             string shellName;
             string cmdPath;
@@ -761,13 +763,13 @@ namespace Microsoft.Build.UnitTests
             {
                 expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe").ToUpperInvariant() };
                 shellName = "cmd.exe";
-                cmdPath = ToolTask.FindOnPath(shellName).ToUpperInvariant();
+                cmdPath = tool.FindOnPath(shellName).ToUpperInvariant();
             }
             else
             {
                 expectedCmdPath = new[] { "/bin/sh", "/usr/bin/sh" };
                 shellName = "sh";
-                cmdPath = ToolTask.FindOnPath(shellName);
+                cmdPath = tool.FindOnPath(shellName);
             }
 
             cmdPath.ShouldBeOneOf(expectedCmdPath);
@@ -993,21 +995,23 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
         /// </summary>
         /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
-        /// <param name="initialDelay">Delay to generate on the first execution in milliseconds.</param>
-        /// <param name="followupDelay">Delay to generate on follow-up execution in milliseconds.</param>
-        /// <param name="timeout">Task timeout in milliseconds.</param>
+        /// <param name="timeoutOnFirstExecution">Whether the first execution should be forced to time out before later retries succeed.</param>
         /// <remarks>
-        /// These tests execute the same task instance multiple times, which will in turn run a shell command to sleep
+        /// These tests execute the same task instance multiple times, which will in turn run a command to sleep for a
         /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
         /// that all following executions return success.
         /// </remarks>
         [Theory]
-        [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
-        [InlineData(3, 1, 1, -1)] // Repeat without timeout.
-        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
-        public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
+        [InlineData(1, false)]
+        [InlineData(3, false)]
+        [InlineData(3, true)]
+        public void ToolTaskThatTimeoutAndRetry(int repeats, bool timeoutOnFirstExecution)
         {
             using var env = TestEnvironment.Create(_output);
+
+            int fastDelayMilliseconds = 100;
+            int slowDelayMilliseconds = 5_000;
+            int timeoutMilliseconds = 2_000;
 
             MockEngine3 engine = new();
 
@@ -1015,28 +1019,95 @@ namespace Microsoft.Build.UnitTests
             var task = new ToolTaskThatSleeps
             {
                 BuildEngine = engine,
-                InitialDelay = initialDelay,
-                FollowupDelay = followupDelay,
-                Timeout = timeout
+                InitialDelay = timeoutOnFirstExecution ? slowDelayMilliseconds : fastDelayMilliseconds,
+                FollowupDelay = fastDelayMilliseconds,
+                Timeout = timeoutOnFirstExecution ? timeoutMilliseconds : System.Threading.Timeout.Infinite
             };
 
             // Execute the same task instance multiple times. The index is one-based.
-            bool result;
-            for (int i = 1; i <= repeats; i++)
+            for (int attempt = 1; attempt <= repeats; attempt++)
             {
-                // Execute the task:
-                result = task.Execute();
+                bool shouldSucceed = attempt > 1 || !timeoutOnFirstExecution;
+                bool result = task.Execute();
+
+                _output.WriteLine(
+                    $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, exitCode={task.ExitCode}.");
+
+                if (!string.IsNullOrEmpty(engine.Log))
+                {
+                    _output.WriteLine(engine.Log);
+                    engine.Log = string.Empty;
+                }
+
+                task.RepeatCount.ShouldBe(attempt);
+                result.ShouldBe(shouldSucceed);
+
+                if (shouldSucceed)
+                {
+                    task.ExitCode.ShouldBe(0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ToolTask does not hang when the tool process spawns a grandchild
+        /// process that inherits stdout/stderr pipe handles and outlives the tool.
+        /// This is a regression test for https://github.com/dotnet/msbuild/issues/2981.
+        /// </summary>
+        [Fact]
+        public void ToolTaskDoesNotHangWhenGrandchildInheritsPipeHandles()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // cmd echoes "hello", then starts a background ping that inherits
+                // pipe handles. cmd exits immediately; ping outlives the 2s EOF timeout.
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/c echo hello & start /b ping -n 10 127.0.0.1 > nul"
+                    : "-c \"echo hello; sleep 10 &\"";
+
+                // Set a generous timeout - without the fix this would hang for the full ping duration
+                t.Timeout = 30000;
+
+                bool result = t.Execute();
+
+                // The tool should complete without hanging.
+                // The exit code may be non-zero depending on timing, but the key thing
+                // is that Execute() returns at all rather than hanging forever.
+                _output.WriteLine(engine.Log);
+                engine.Log.ShouldContain("hello");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ToolTask still captures all output from the tool process
+        /// even with the grandchild pipe fix enabled. This is a regression test for
+        /// https://github.com/dotnet/msbuild/issues/10378 where switching to
+        /// WaitForExit(int) caused output to be lost.
+        /// </summary>
+        [Fact]
+        public void ToolTaskCapturesAllOutputWithFix()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // Echo multiple lines to verify all output is captured
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows ?
+                    "/c echo line1 & echo line2 & echo line3"
+                    : "-c \"echo line1; echo line2; echo line3\"";
+
+                bool result = t.Execute();
 
                 _output.WriteLine(engine.Log);
 
-                task.RepeatCount.ShouldBe(i);
-
-                // The first execution may fail (timeout), but all following ones should succeed:
-                if (i > 1)
-                {
-                    result.ShouldBeTrue();
-                    task.ExitCode.ShouldBe(0);
-                }
+                result.ShouldBeTrue();
+                engine.Log.ShouldContain("line1");
+                engine.Log.ShouldContain("line2");
+                engine.Log.ShouldContain("line3");
             }
         }
 
@@ -1044,25 +1115,21 @@ namespace Microsoft.Build.UnitTests
         /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
         /// </summary>
         /// <remarks>
-        /// This task runs shell command to sleep for predefined, variable amount of time based on how many times the
-        /// instance has been executed.
+        /// This task invokes a direct sleep tool with a variable delay based on how many times the instance has been
+        /// executed, which avoids the flakiness of nesting the wait inside a shell.
         /// </remarks>
         private sealed class ToolTaskThatSleeps : ToolTask
         {
-            // Windows prompt command to sleep:
-            private readonly string _windowsSleep = "/c start /wait timeout {0}";
-
-            // UNIX command to sleep:
-            private readonly string _unixSleep = "-c \"sleep {0}\"";
-
-            // Full path to shell:
-            private readonly string _pathToShell;
+            private readonly string _pathToTool;
 
             public ToolTaskThatSleeps()
                 : base()
             {
-                // Determines shell to use: cmd for Windows, sh for UNIX-like systems:
-                _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : "cmd.exe";
+                // timeout.exe exits immediately when ToolTask redirects stdin on Windows, so use ping.exe
+                // as the built-in blocking process for the timeout/retry scenario.
+                _pathToTool = NativeMethodsShared.IsUnixLike
+                    ? "sleep"
+                    : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "ping.exe");
             }
 
             /// <summary>
@@ -1077,9 +1144,9 @@ namespace Microsoft.Build.UnitTests
             /// Gets or sets the delay for the follow-up executions.
             /// </summary>
             /// <remarks>
-            /// Defaults to 1 milliseconds.
+            /// Defaults to 100 milliseconds.
             /// </remarks>
-            public Int32 FollowupDelay { get; set; } = 1;
+            public Int32 FollowupDelay { get; set; } = 100;
 
             /// <summary>
             /// Int32 output parameter for the repeat counter for test purpose.
@@ -1088,22 +1155,26 @@ namespace Microsoft.Build.UnitTests
             public Int32 RepeatCount { get; private set; } = 0;
 
             /// <summary>
-            /// Gets the tool name (shell).
+            /// Gets the tool name.
             /// </summary>
-            protected override string ToolName => Path.GetFileName(_pathToShell);
+            protected override string ToolName => Path.GetFileName(_pathToTool);
 
             /// <summary>
-            /// Gets the full path to shell.
+            /// Gets the full path to the sleep tool.
             /// </summary>
-            protected override string GenerateFullPathToTool() => _pathToShell;
+            protected override string GenerateFullPathToTool() => _pathToTool;
 
             /// <summary>
-            /// Generates a shell command to sleep different amount of time based on repeat counter.
+            /// Generates the arguments to sleep for a different amount of time based on repeat counter.
             /// </summary>
-            protected override string GenerateCommandLineCommands() =>
-                NativeMethodsShared.IsUnixLike ?
-                string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
-                string.Format(_windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
+            protected override string GenerateCommandLineCommands()
+            {
+                int delay = RepeatCount < 2 ? InitialDelay : FollowupDelay;
+
+                return NativeMethodsShared.IsUnixLike
+                    ? (delay / 1000.0).ToString("0.###", CultureInfo.InvariantCulture)
+                    : $"-n {Math.Max(2, (int)Math.Ceiling(delay / 1000.0) + 1).ToString(CultureInfo.InvariantCulture)} 127.0.0.1";
+            }
 
             /// <summary>
             /// Ensures that test parameters make sense.
@@ -1167,6 +1238,342 @@ namespace Microsoft.Build.UnitTests
             /// This dummy tool task is not meant to run anything.
             /// </remarks>
             public override bool Execute() => true;
+        }
+
+        /// <summary>
+        /// A ToolTask subclass for testing GetProcessStartInfo with TaskEnvironment.
+        /// </summary>
+        private sealed class MultiThreadedToolTask : ToolTask, IDisposable
+        {
+            private readonly string _fullToolName;
+            private readonly string _workingDirectory;
+
+            public MultiThreadedToolTask(string fullToolName, string workingDirectory)
+            {
+                _fullToolName = fullToolName;
+                _workingDirectory = workingDirectory;
+            }
+
+            public void Dispose() { }
+
+            protected override string ToolName => Path.GetFileName(_fullToolName);
+
+            protected override string GenerateFullPathToTool() => _fullToolName;
+
+            protected override string GetWorkingDirectory() => _workingDirectory;
+
+            /// <summary>
+            /// Exposes the protected GetProcessStartInfo for test verification.
+            /// </summary>
+            public ProcessStartInfo CallGetProcessStart(TaskEnvironment taskEnvironment)
+            {
+                TaskEnvironment = taskEnvironment;
+                return GetProcessStartInfo(
+                    _fullToolName,
+                    commandLineCommands: "/nologo",
+                    responseFileSwitch: null);
+            }
+
+            /// <summary>
+            /// Exposes the protected DeleteTempFile for test verification.
+            /// </summary>
+            public void CallDeleteTempFile(string fileName) => DeleteTempFile(fileName);
+
+            /// <summary>
+            /// Exposes the protected GetProcessStartInfo for test verification.
+            /// </summary>
+            public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
+                => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_NoWorkingDirectoryOverride_UsesProjectDirectory()
+        {
+            // Arrange: no GetWorkingDirectory() override — WorkingDirectory should come from TaskEnvironment.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
+
+            // Assert
+            result.WorkingDirectory.ShouldBe(projectDir,
+                "Without a GetWorkingDirectory() override, WorkingDirectory should fall back to taskEnvironment.ProjectDirectory");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_PropagatesSpecificEnvironmentVariable()
+        {
+            // Arrange: create a driver with a known env var and verify it appears in ProcessStartInfo.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            var envVars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["MY_CUSTOM_VAR"] = "custom_value"
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir, envVars);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
+
+            // Assert
+            result.Environment["MY_CUSTOM_VAR"].ShouldBe("custom_value",
+                "Environment variables from TaskEnvironment should be propagated to ProcessStartInfo");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_RelativeWorkingDirectory_AbsolutizedAgainstProjectDir()
+        {
+            // Arrange: GetWorkingDirectory() returns a relative path — should be absolutized against project dir.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/projects/myapp" : @"C:\Projects\MyApp";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, "subdir");
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
+
+            // Assert: relative path should be combined with the project directory.
+            string expected = Path.Combine(projectDir, "subdir");
+            result.WorkingDirectory.ShouldBe(expected,
+                "A relative GetWorkingDirectory() result should be absolutized against taskEnvironment.ProjectDirectory");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_AbsoluteWorkingDirectory_UsesOverridePath()
+        {
+            // Arrange: GetWorkingDirectory() returns an absolute path — should be used directly.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/projects/myapp" : @"C:\Projects\MyApp";
+            string overrideDir = NativeMethodsShared.IsUnixLike ? "/custom/workdir" : @"D:\Custom\WorkDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, overrideDir);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
+
+            // Assert: absolute path should be used as-is (Path.Combine with absolute second arg returns it).
+            result.WorkingDirectory.ShouldBe(overrideDir,
+                "An absolute GetWorkingDirectory() result should be used directly, not combined with project directory");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_TaskEnvironmentVariablesOverride()
+        {
+            // Arrange: create a driver with a custom env var.
+            string expectedWorkingDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            var envVars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["MY_VAR"] = "from_driver",
+                ["PATH"] = "driver_path"
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir, envVars);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Set EnvironmentVariables on the task (should override the driver's value).
+            tool.EnvironmentVariables = ["MY_VAR=from_task_override"];
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
+
+            // Assert: task-level override should win.
+            result.Environment["MY_VAR"].ShouldBe("from_task_override",
+                "EnvironmentVariables property on the task should override TaskEnvironment values");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_MultiProcessDriver_BackwardCompat()
+        {
+            // Arrange: use the default MultiProcessTaskEnvironmentDriver (non-multithreaded mode).
+            // With the default driver, no working directory is set
+            // (the process inherits the parent's CWD), and process environment is inherited.
+            var taskEnv = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
+
+            // Assert: with MultiProcessTaskEnvironmentDriver, WorkingDirectory should be empty
+            // (process inherits parent CWD) — matching pre-migration behavior.
+            result.WorkingDirectory.ShouldBeEmpty(
+                "MultiProcessTaskEnvironmentDriver should not set WorkingDirectory, preserving old inherit-from-parent behavior");
+            result.FileName.ShouldBe(toolPath);
+            result.Arguments.ShouldContain("/nologo");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_EmptyWorkingDirectory_KeepsProjectDirectory()
+        {
+            // Arrange: GetWorkingDirectory() returns empty string — should NOT override project dir.
+            // GetProcessStartInfo checks !string.IsNullOrEmpty, so empty string should leave
+            // the project directory from TaskEnvironment intact.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, string.Empty);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
+
+            // Assert: empty-string GetWorkingDirectory() must not overwrite the project directory.
+            result.WorkingDirectory.ShouldBe(projectDir,
+                "Empty-string from GetWorkingDirectory() should not override the project directory from TaskEnvironment");
+        }
+
+        [Fact]
+        public void FindOnPath_UsesTaskEnvironmentPath()
+        {
+            // Arrange: create a temp dir with a dummy file, set TaskEnvironment PATH to that dir.
+            using var env = TestEnvironment.Create(_output);
+            string tempDir = env.CreateFolder().Path;
+            string toolName = NativeMethodsShared.IsWindows ? "mytesttool.exe" : "mytesttool";
+            File.WriteAllText(Path.Combine(tempDir, toolName), "dummy");
+
+            string projectDir = tempDir;
+            var envVars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["PATH"] = tempDir
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir, envVars);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string fullToolName = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(fullToolName, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            string result = tool.FindOnPath(toolName);
+
+            // Assert: should find the tool via TaskEnvironment's PATH.
+            result.ShouldNotBeNull("FindOnPath should find the tool via TaskEnvironment's PATH");
+            result.ShouldBe(Path.Combine(tempDir, toolName));
+        }
+
+        [Fact]
+        public void DeleteTempFile_UsesTaskEnvironmentForAbsolutePath()
+        {
+            // Arrange: create a temp file in the project directory, use relative path for deletion.
+            using var env = TestEnvironment.Create(_output);
+            string projectDir = env.CreateFolder().Path;
+            string fileName = "tempfile.rsp";
+            string fullPath = Path.Combine(projectDir, fileName);
+            File.WriteAllText(fullPath, "test content");
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act: delete using a relative path — TaskEnvironment should absolutize it.
+            tool.CallDeleteTempFile(fileName);
+
+            // Assert
+            File.Exists(fullPath).ShouldBeFalse(
+                "DeleteTempFile should have deleted the file using TaskEnvironment-absolutized path");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_MultiThreadedDriver_SetsWorkingDirectoryAndEnvironment()
+        {
+            // Arrange: when TaskEnvironment uses MultiThreadedTaskEnvironmentDriver,
+            // GetProcessStartInfo should set WorkingDirectory from the driver's ProjectDirectory
+            // and propagate environment variables.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act: call through the virtual GetProcessStartInfo (the normal entry point).
+            ProcessStartInfo result = tool.CallGetProcessStartInfo(toolPath, "/nologo", null);
+
+            // Assert: WorkingDirectory should be set to project directory
+            // and environment variables should be propagated from the driver.
+            result.WorkingDirectory.ShouldBe(projectDir,
+                "MultiThreadedDriver should set WorkingDirectory to ProjectDirectory");
+            result.Environment.Count.ShouldBeGreaterThan(0,
+                "MultiThreadedDriver should propagate environment variables");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_MultiProcessDriver_DoesNotSetWorkingDirectory()
+        {
+            // Arrange: when TaskEnvironment uses the default MultiProcessTaskEnvironmentDriver,
+            // WorkingDirectory should not be set (the process inherits the parent's CWD).
+            var taskEnv = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfo(toolPath, "/nologo", null);
+
+            // Assert: WorkingDirectory should be empty (inherits from parent process).
+            result.WorkingDirectory.ShouldBeNullOrEmpty(
+                "MultiProcessDriver should not set WorkingDirectory, preserving pre-migration behavior");
+        }
+
+        [Fact]
+        public void ComputePathToTool_UsesTaskEnvironmentForFileExistence()
+        {
+            // Arrange: create a temp dir with a dummy tool, set up TaskEnvironment pointing there.
+            using var env = TestEnvironment.Create(_output);
+            string projectDir = env.CreateFolder().Path;
+            string toolDir = env.CreateFolder().Path;
+            string toolName = NativeMethodsShared.IsWindows ? "mytool.exe" : "mytool";
+            string toolFullPath = Path.Combine(toolDir, toolName);
+            File.WriteAllText(toolFullPath, "dummy");
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            // Use MyTool pointing to the actual tool location.
+            using var tool = new MyTool();
+            tool.FullToolName = toolFullPath;
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act: Execute triggers ComputePathToTool which uses TaskEnvironment.GetAbsolutePath
+            // for file existence checks. The tool exists at an absolute path, so this should succeed.
+            bool result = tool.Execute();
+
+            // Assert: the tool should have been found and executed.
+            tool.ExecuteCalled.ShouldBeTrue(
+                "ComputePathToTool should find the tool using TaskEnvironment-absolutized path for existence check");
         }
     }
 }

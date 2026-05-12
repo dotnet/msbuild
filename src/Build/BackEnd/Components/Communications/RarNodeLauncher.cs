@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd
             }
             catch (NodeFailedToLaunchException ex)
             {
-                CommunicationsUtilities.Trace("Failed to launch RAR node: {0}", ex);
+                CommunicationsUtilities.Trace($"Failed to launch RAR node: {ex}");
                 return false;
             }
 

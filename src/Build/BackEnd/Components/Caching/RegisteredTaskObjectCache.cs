@@ -57,7 +57,7 @@ namespace Microsoft.Build.BackEnd.Components.Caching
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.RegisteredTaskObjectCache, "Cannot create components of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.RegisteredTaskObjectCache, $"Cannot create components of type {type}");
             return new RegisteredTaskObjectCache();
         }
 
