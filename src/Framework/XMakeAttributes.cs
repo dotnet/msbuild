@@ -479,14 +479,22 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Given an MSBuildArchitecture value that may be non-explicit -- e.g. "CurrentArchitecture" or "Any" --
         /// return the value that it would map to in this case, taking the requested runtime into account.
-        /// When <paramref name="runtime"/> is "NET" and <paramref name="architecture"/> is unspecified
-        /// ("*", "CurrentArchitecture", or null), the value remains <see cref="MSBuildArchitectureValues.any"/>
-        /// ("*"). This means: do not pin the .NET task host to the current process architecture; allow any
-        /// architecture (the actual launch picks the architecture of the dotnet host that is available).
+        /// When running under .NET Framework MSBuild, <paramref name="runtime"/> is "NET", and
+        /// <paramref name="architecture"/> is unspecified ("*", "CurrentArchitecture", or null), the value
+        /// remains <see cref="MSBuildArchitectureValues.any"/> ("*"). This means: do not pin the .NET task
+        /// host to the current process architecture; allow any architecture (the actual launch picks the
+        /// architecture of the dotnet host that is available).
+        ///
+        /// This special-casing only applies under .NET Framework MSBuild, since that is the only host that
+        /// actually launches an out-of-proc .NET task host for <c>Runtime="NET"</c>. Under .NET MSBuild,
+        /// <c>Runtime="NET"</c> tasks run in-process and the existing current-process-architecture default
+        /// is preserved.
+        ///
         /// An explicitly specified <paramref name="architecture"/> always wins.
         /// </summary>
         internal static string GetExplicitMSBuildArchitecture(string architecture, string runtime)
         {
+#if NETFRAMEWORK
             if (MSBuildRuntimeValues.net.Equals(runtime, StringComparison.OrdinalIgnoreCase) &&
                 (architecture == null ||
                  MSBuildArchitectureValues.any.Equals(architecture, StringComparison.OrdinalIgnoreCase) ||
@@ -494,6 +502,7 @@ namespace Microsoft.Build.Shared
             {
                 return MSBuildArchitectureValues.any;
             }
+#endif
 
             return GetExplicitMSBuildArchitecture(architecture);
         }

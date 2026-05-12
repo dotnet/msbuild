@@ -585,13 +585,17 @@ internal static class CommunicationsUtilities
 
                 architectureFlagToSet = taskHostParameters.Architecture;
 
-                // For .NET task hosts, an unspecified architecture ("*" / "CurrentArchitecture") means
-                // "any architecture". The actual launched dotnet host generally matches the OS architecture,
-                // so resolve to the OS architecture here so the handshake flags match what the spawned
+#if NETFRAMEWORK
+                // Under .NET Framework MSBuild, a UsingTask with Runtime="NET" launches an out-of-proc
+                // .NET task host. When the architecture is unspecified ("*" / "CurrentArchitecture"),
+                // resolve to the OS architecture so the handshake flags match what the spawned dotnet
                 // task host will compute on its side. Without this, an x86 .NET Framework MSBuild host
                 // would send a handshake without the X64/Arm64 flag, which would mismatch the x64/arm64
-                // dotnet task host that is actually launched (this addresses MSB4216 when an x86 .NET Framework
-                // MSBuild host hosts a UsingTask with Runtime="NET").
+                // dotnet task host that is actually launched (this addresses MSB4216).
+                //
+                // This is gated to .NET Framework only -- under .NET MSBuild, Runtime="NET" tasks run
+                // in-process, so this code path is irrelevant and the existing architecture handling
+                // is preserved.
                 if (clrVersion == 5 &&
                     (string.IsNullOrEmpty(architectureFlagToSet) ||
                      architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase) ||
@@ -599,6 +603,7 @@ internal static class CommunicationsUtilities
                 {
                     architectureFlagToSet = XMakeAttributes.GetOSArchitectureForNetTaskHost();
                 }
+#endif
             }
         }
 
