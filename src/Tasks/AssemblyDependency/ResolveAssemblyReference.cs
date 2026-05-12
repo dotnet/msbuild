@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks
             public static string UnifiedPrimaryReference;
 
             private static volatile bool initialized;
-            private static readonly object s_initializeLock = new object();
+            private static readonly LockType s_initializeLock = new();
 
             internal static void Initialize(TaskLoggingHelper log)
             {
