@@ -107,9 +107,9 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
-                f => string.IsNullOrEmpty(f)
-                    ? SdkToolsPathUtility.FileInfoExists(f)
-                    : SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f)),
+                f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
                 Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolName,
@@ -157,14 +157,16 @@ namespace Microsoft.Build.Tasks
             // throw an error.
             //
             // So use /publickey if that's all our KeyFile contains, but KeyFile otherwise.
-            string absoluteKeyFile = string.IsNullOrEmpty(KeyFile) ? KeyFile : TaskEnvironment.GetAbsolutePath(KeyFile).Value;
+            // The KeyFile path is passed verbatim to the spawned tool; ToolTask sets the child
+            // process's WorkingDirectory to the project directory (via TaskEnvironment), so the
+            // tool resolves relative paths correctly without us absolutizing here.
             if (_delaySigningAndKeyFileOnlyContainsPublicKey)
             {
-                commandLine.AppendSwitchIfNotNull("/publickey:", absoluteKeyFile);
+                commandLine.AppendSwitchIfNotNull("/publickey:", KeyFile);
             }
             else
             {
-                commandLine.AppendSwitchIfNotNull("/keyfile:", absoluteKeyFile);
+                commandLine.AppendSwitchIfNotNull("/keyfile:", KeyFile);
             }
 
             commandLine.AppendSwitchIfNotNull("/keycontainer:", KeyContainer);

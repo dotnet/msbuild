@@ -114,6 +114,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected bool IncludeTypeLibVersionInName { get; set; }
 
+        /// <summary>
+        /// The <see cref="TaskEnvironment"/> propagated from the parent <c>ResolveComReference</c> task so that nested
+        /// <c>TlbImp</c>/<c>AxImp</c> ToolTask invocations resolve relative paths against the project directory
+        /// (rather than the process current directory) when running under multithreaded execution.
+        /// </summary>
+        internal TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         #endregion
 
         #region Methods

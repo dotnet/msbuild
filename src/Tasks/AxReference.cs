@@ -70,6 +70,10 @@ namespace Microsoft.Build.Tasks
 
             var axImp = new ResolveComReference.AxImp();
 
+            // Propagate TaskEnvironment so the nested ToolTask resolves relative paths against the
+            // project directory when ResolveComReference itself runs under multithreaded execution.
+            axImp.TaskEnvironment = TaskEnvironment;
+
             if (ReferenceInfo != null)
             {
                 axImp.ActiveXControlName = ReferenceInfo.strippedTypeLibPath;
