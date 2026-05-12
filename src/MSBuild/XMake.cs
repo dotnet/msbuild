@@ -1506,7 +1506,7 @@ namespace Microsoft.Build.CommandLine
 
                     parameters.EnableNodeReuse = enableNodeReuse;
                     parameters.LowPriority = lowPriority;
-                    parameters.NodeExeLocation = Assembly.GetExecutingAssembly().Location;
+                    parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
                     parameters.MaxNodeCount = cpuCount;
                     parameters.MultiThreaded = multiThreaded;
                     parameters.Loggers = projectCollection.Loggers;
