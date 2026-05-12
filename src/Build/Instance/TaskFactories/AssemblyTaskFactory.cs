@@ -590,7 +590,9 @@ namespace Microsoft.Build.BackEnd
             if (taskIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(factoryIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture, normalizedRuntime);
+                // Pass the original (un-normalized) runtime so the architecture resolver only treats Architecture
+                // as "any" when the user explicitly wrote Runtime="NET" -- not when "any" was resolved to NET.
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture, factoryIdentityParameters.Runtime);
 
                 return normalizedRuntime == factoryIdentityParameters.Runtime && normalizedArch == factoryIdentityParameters.Architecture
                     ? factoryIdentityParameters
@@ -600,7 +602,8 @@ namespace Microsoft.Build.BackEnd
             if (factoryIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(taskIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture, normalizedRuntime);
+                // Pass the original (un-normalized) runtime; see comment above.
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture, taskIdentityParameters.Runtime);
 
                 return normalizedRuntime == taskIdentityParameters.Runtime && normalizedArch == taskIdentityParameters.Architecture
                     ? taskIdentityParameters
@@ -693,7 +696,7 @@ namespace Microsoft.Build.BackEnd
             {
                 string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
 
-                if (!currentArchitecture.Equals(XMakeAttributes.GetExplicitMSBuildArchitecture(mergedParameters.Architecture, mergedParameters.Runtime), StringComparison.OrdinalIgnoreCase))
+                if (!currentArchitecture.Equals(XMakeAttributes.GetExplicitMSBuildArchitecture(mergedParameters.Architecture), StringComparison.OrdinalIgnoreCase))
                 {
                     // architecture doesn't match
                     return false;

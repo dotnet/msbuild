@@ -478,11 +478,12 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Given an MSBuildArchitecture value that may be non-explicit -- e.g. "CurrentArchitecture" or "Any" --
-        /// return the specific MSBuildArchitecture value that it would map to in this case, taking the requested
-        /// runtime into account. When the runtime is "NET" and the architecture is unspecified ("*", "CurrentArchitecture",
-        /// or null), the OS architecture is returned (which matches the architecture of the dotnet host that will be
-        /// launched), rather than the current process architecture. This avoids attempting to launch e.g. an x86 .NET
-        /// task host from an x86 .NET Framework MSBuild process when the .NET SDK ships only x64/arm64 binaries.
+        /// return the value that it would map to in this case, taking the requested runtime into account.
+        /// When <paramref name="runtime"/> is "NET" and <paramref name="architecture"/> is unspecified
+        /// ("*", "CurrentArchitecture", or null), the value remains <see cref="MSBuildArchitectureValues.any"/>
+        /// ("*"). This means: do not pin the .NET task host to the current process architecture; allow any
+        /// architecture (the actual launch picks the architecture of the dotnet host that is available).
+        /// An explicitly specified <paramref name="architecture"/> always wins.
         /// </summary>
         internal static string GetExplicitMSBuildArchitecture(string architecture, string runtime)
         {
@@ -491,17 +492,18 @@ namespace Microsoft.Build.Shared
                  MSBuildArchitectureValues.any.Equals(architecture, StringComparison.OrdinalIgnoreCase) ||
                  MSBuildArchitectureValues.currentArchitecture.Equals(architecture, StringComparison.OrdinalIgnoreCase)))
             {
-                return GetOSArchitectureForNetTaskHost();
+                return MSBuildArchitectureValues.any;
             }
 
             return GetExplicitMSBuildArchitecture(architecture);
         }
 
         /// <summary>
-        /// Returns the OS architecture as an MSBuildArchitectureValues string. Used as the implicit architecture
-        /// for .NET task hosts since the dotnet host installed on the machine generally matches the OS architecture.
+        /// Returns the OS architecture as an <see cref="MSBuildArchitectureValues"/> string. Used as the
+        /// concrete architecture for a .NET task host launch when the requested architecture is "any",
+        /// since the dotnet host installed on the machine generally matches the OS architecture.
         /// </summary>
-        private static string GetOSArchitectureForNetTaskHost()
+        internal static string GetOSArchitectureForNetTaskHost()
         {
             return RuntimeInformation.OSArchitecture switch
             {
