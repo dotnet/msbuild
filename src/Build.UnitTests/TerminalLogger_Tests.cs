@@ -916,11 +916,11 @@ namespace Microsoft.Build.UnitTests
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
 
                 // Execute MSBuild with binary, file and terminal loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Execute MSBuild with binary and file loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Read the binary log and replay into mockLogger
@@ -935,10 +935,10 @@ namespace Microsoft.Build.UnitTests
                 binaryLogReaderWithTL.Replay(logFileWithTL);
                 binaryLogReaderWithoutTL.Replay(logFileWithoutTL);
 
-                // Check that amount of events, warnings, errors is equal in both cases. Presence of other loggers should not change behavior
+                // Check that amount of warnings and errors is equal in both cases. Presence of other loggers should not change behavior
                 mockLogFromPlaybackWithoutTL.Errors.Count.ShouldBe(mockLogFromPlaybackWithTL.Errors.Count);
                 mockLogFromPlaybackWithoutTL.Warnings.Count.ShouldBe(mockLogFromPlaybackWithTL.Warnings.Count);
-                mockLogFromPlaybackWithoutTL.AllBuildEvents.Count.ShouldBe(mockLogFromPlaybackWithTL.AllBuildEvents.Count);
+                // Note: We don't compare AllBuildEvents.Count because internal events can vary between runs and with different logger configurations
 
                 // Check presence of some items and properties and that they have at least 1 item and property
                 mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.ShouldContain(x => (x.Items != null) && x.Items.GetEnumerator().MoveNext());

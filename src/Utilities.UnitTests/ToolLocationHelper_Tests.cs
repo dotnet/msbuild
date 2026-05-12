@@ -2204,7 +2204,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x86");
-            string dotNet40Path = FileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
+            string dotNet40Path = FrameworkFileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
             pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x64");
@@ -2287,7 +2287,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x86");
-            string dotNet40Path = FileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
+            string dotNet40Path = FrameworkFileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
             pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x64");

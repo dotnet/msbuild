@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -119,7 +120,7 @@ namespace Microsoft.Build.Evaluation
             // Fix path before expansion
             if (isFilePath)
             {
-                argument = FileUtilities.FixFilePath(argument);
+                argument = FrameworkFileUtilities.FixFilePath(argument);
             }
 
             IList<TaskItem> items = state.ExpandIntoTaskItems(argument);
@@ -153,7 +154,7 @@ namespace Microsoft.Build.Evaluation
             // Fix path before expansion
             if (isFilePath)
             {
-                argument = FileUtilities.FixFilePath(argument);
+                argument = FrameworkFileUtilities.FixFilePath(argument);
             }
 
             IList<TaskItem> expanded = state.ExpandIntoTaskItems(argument);

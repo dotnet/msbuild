@@ -22,9 +22,14 @@ namespace Microsoft.Build.Engine.UnitTests
     /// </summary>
     public class TaskHostFactoryLifecycle_E2E_Tests
     {
-        private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(TaskHostFactoryLifecycle_E2E_Tests).Assembly.Location) ?? System.AppContext.BaseDirectory);
+        private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(TaskHostFactoryLifecycle_E2E_Tests).Assembly.Location) ?? AppContext.BaseDirectory);
 
         private static string TestAssetsRootPath { get; } = Path.Combine(AssemblyLocation, "TestAssets", "TaskHostLifecycle");
+
+        private const string TaskHostFactory = "TaskHostFactory";
+        private const string AssemblyTaskFactory = "AssemblyTaskFactory";
+        private const string CurrentRuntime = "CurrentRuntime";
+        private const string NetRuntime = "NET";
 
         private readonly ITestOutputHelper _output;
 
@@ -46,74 +51,71 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <param name="taskFactoryToUse">The task factory to use (TaskHostFactory or AssemblyTaskFactory)</param>
         [Theory]
 #if NET
-        [InlineData("CurrentRuntime", "AssemblyTaskFactory")] // Match + No Explicit → in-proc
-        [InlineData("CurrentRuntime", "TaskHostFactory")]     // Match + Explicit → short-lived out-of-proc
+        [InlineData(CurrentRuntime, AssemblyTaskFactory)] // Match + No Explicit → in-proc
+        [InlineData(CurrentRuntime, TaskHostFactory)] // Match + Explicit → short-lived out-of-proc
 #endif
-        [InlineData("NET", "AssemblyTaskFactory")]            // No Match + No Explicit → long-lived sidecar out-of-proc
-        [InlineData("NET", "TaskHostFactory")]                // No Match + Explicit → short-lived out-of-proc
+        [InlineData(NetRuntime, AssemblyTaskFactory)] // No Match + No Explicit → long-lived sidecar out-of-proc
+        [InlineData(NetRuntime, TaskHostFactory)] // No Match + Explicit → short-lived out-of-proc
         public void TaskHostLifecycle_ValidatesAllScenarios(
             string runtimeToUse,
             string taskFactoryToUse)
         {
-            bool? expectedNodeReuse;
-
-            // TaskHostFactory is always short lived and out-of-proc
-            if (taskFactoryToUse == "TaskHostFactory")
-            {
-                expectedNodeReuse = false;
-            }
-            // AssemblyTaskFactory behavior depends on runtime
-            else if (taskFactoryToUse == "AssemblyTaskFactory")
-            {
-                if (runtimeToUse == "CurrentRuntime")
-                {
-                    // in-proc
-                    expectedNodeReuse = null;
-                }
-                else if (runtimeToUse == "NET")
-                {
-                    // When running on .NET Framework: out-of-proc, otherwise on .NET in-proc.
-                    expectedNodeReuse = RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase) ? true : null;
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(nameof(runtimeToUse), "Unknown runtime to use: " + runtimeToUse);
-                }
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(taskFactoryToUse), "Unknown task factory to use: " + taskFactoryToUse);
-            }
+            bool? expectedNodeReuse = DetermineExpectedNodeReuse(runtimeToUse, taskFactoryToUse);
 
             using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string buildOutput = ExecuteBuildWithTaskHost(runtimeToUse, taskFactoryToUse);
+
+            ValidateTaskHostBehavior(buildOutput, expectedNodeReuse);
+        }
+
+        private static bool? DetermineExpectedNodeReuse(string runtimeToUse, string taskFactoryToUse)
+            => (taskFactoryToUse, runtimeToUse) switch
+            {
+                // TaskHostFactory is always short-lived and out-of-proc (nodereuse:False)
+                (TaskHostFactory, _) => false,
+
+                // AssemblyTaskFactory with CurrentRuntime runs in-proc
+                (AssemblyTaskFactory, CurrentRuntime) => null,
+
+                // AssemblyTaskFactory with NET runtime:
+                // - On .NET Framework host: out-of-proc with long-lived sidecar (nodereuse:True)
+                // - On .NET host: in-proc
+                (AssemblyTaskFactory, NetRuntime) =>
+#if NET
+    null,  // On .NET host: in-proc execution
+#else
+    true,  // On .NET Framework host: out-of-proc with long-lived sidecar
+#endif
+                _ => throw new ArgumentException($"Unknown combination: runtime={runtimeToUse}, factory={taskFactoryToUse}")
+            };
+
+        private string ExecuteBuildWithTaskHost(string runtimeToUse, string taskFactoryToUse)
+        {
             string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse}", 
-                out bool successTestTask,
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse}",
+                out bool success,
                 outputHelper: _output);
 
-            successTestTask.ShouldBeTrue();
+            success.ShouldBeTrue("Build should succeed");
 
-            // Verify execution mode (out-of-proc vs in-proc) and node reuse behavior
+            return output;
+        }
+
+        private static void ValidateTaskHostBehavior(string buildOutput, bool? expectedNodeReuse)
+        {
             if (expectedNodeReuse.HasValue)
             {
-                // For out-of-proc scenarios, validate the task runs in a separate process
-                // by checking for the presence of command-line arguments that indicate task host execution
-                testTaskOutput.ShouldContain("/nodemode:", 
-                    customMessage: "Task should run out-of-proc and have /nodemode: in its command-line arguments");
+                buildOutput.ShouldContain("/nodemode:", customMessage: "Task should run out-of-proc and have /nodemode: in its command-line arguments");
 
-                // Validate the nodereuse flag in the task's command-line arguments
                 string expectedFlag = expectedNodeReuse.Value ? "/nodereuse:True" : "/nodereuse:False";
-                testTaskOutput.ShouldContain(expectedFlag, 
-                    customMessage: $"Task should have {expectedFlag} in its command-line arguments");
+                buildOutput.ShouldContain(expectedFlag, customMessage: $"Task should have {expectedFlag} in its command-line arguments");
             }
             else
             {
-                // For in-proc scenarios, validate the task does NOT run in a task host
-                // by ensuring task host specific command-line flags are not present
-                testTaskOutput.ShouldNotContain("/nodemode:", 
-                    customMessage: "Task should run in-proc and not have task host command-line arguments like /nodemode:");
+                buildOutput.ShouldNotContain("/nodemode:", customMessage: "Task should run in-proc and not have task host command-line arguments like /nodemode:");
             }
         }
     }

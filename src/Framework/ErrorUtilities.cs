@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework
     //       because some of the errors there will use localized resources from different assemblies,
     //       which won't be referenceable in Framework.
 
-    internal class FrameworkErrorUtilities
+    internal static class FrameworkErrorUtilities
     {
         /// <summary>
         /// This method should be used in places where one would normally put

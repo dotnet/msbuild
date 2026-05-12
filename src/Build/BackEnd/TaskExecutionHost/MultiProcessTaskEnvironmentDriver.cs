@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
@@ -41,7 +40,7 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
-            return new AbsolutePath(Path.GetFullPath(path), ignoreRootedCheck: true);
+            return new AbsolutePath(path, ProjectDirectory);
         }
 
         /// <inheritdoc/>

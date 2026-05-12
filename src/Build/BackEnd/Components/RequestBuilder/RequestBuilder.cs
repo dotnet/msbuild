@@ -1267,9 +1267,9 @@ namespace Microsoft.Build.BackEnd
         {
             ITelemetryForwarder telemetryForwarder =
                 ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
-                .Instance;
+                ?.Instance;
 
-            if (!telemetryForwarder.IsTelemetryCollected)
+            if (telemetryForwarder == null || !telemetryForwarder.IsTelemetryCollected)
             {
                 return;
             }
@@ -1279,6 +1279,11 @@ namespace Microsoft.Build.BackEnd
             // Hence we need to fetch the original result from the cache - to get the data for all executed targets.
             BuildResult unfilteredResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
 
+            if (unfilteredResult?.ResultsByTarget == null || _requestEntry.RequestConfiguration.Project?.Targets == null)
+            {
+                return;
+            }
+
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
                 bool wasExecuted =
@@ -1286,6 +1291,11 @@ namespace Microsoft.Build.BackEnd
                     // We need to match on location of target as well - as multiple targets with same name can be defined.
                     // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
                     projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
+
+                // Get skip reason from TargetResult - it's set when targets are skipped for various reasons:
+                // - ConditionWasFalse: target's condition evaluated to false
+                // - PreviouslyBuiltSuccessfully/Unsuccessfully: target was already built in this session
+                TargetSkipReason skipReason = targetResult?.SkipReason ?? TargetSkipReason.None;
 
                 bool isFromNuget, isMetaprojTarget, isCustom;
 
@@ -1311,7 +1321,8 @@ namespace Microsoft.Build.BackEnd
                     wasExecuted,
                     isCustom,
                     isMetaprojTarget,
-                    isFromNuget);
+                    isFromNuget,
+                    skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
@@ -1326,12 +1337,15 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                    telemetryForwarder.AddTask(
+                        registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
                         registeredTaskRecord.ComputeIfCustom(),
-                        registeredTaskRecord.IsFromNugetCache);
+                        registeredTaskRecord.IsFromNugetCache,
+                        registeredTaskRecord.TaskFactoryAttributeName,
+                        registeredTaskRecord.TaskFactoryParameters.Runtime);
 
                     registeredTaskRecord.Statistics.Reset();
                 }
@@ -1340,8 +1354,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static bool IsMetaprojTargetPath(string targetPath)
-            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment (working directory and environment variables)

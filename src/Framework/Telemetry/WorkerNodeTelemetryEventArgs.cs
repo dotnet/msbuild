@@ -27,13 +27,16 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             writer.Write(entry.Value.CumulativeExecutionTime.Ticks);
             writer.Write(entry.Value.ExecutionsCount);
             writer.Write(entry.Value.TotalMemoryBytes);
+            writer.Write(entry.Value.TaskFactoryName ?? string.Empty);
+            writer.Write(entry.Value.TaskHostRuntime ?? string.Empty);
         }
 
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TargetsExecutionData.Count);
-        foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> entry in WorkerNodeTelemetryData.TargetsExecutionData)
+        foreach (KeyValuePair<TaskOrTargetTelemetryKey, TargetExecutionStats> entry in WorkerNodeTelemetryData.TargetsExecutionData)
         {
             WriteToStream(writer, entry.Key);
-            writer.Write(entry.Value);
+            writer.Write(entry.Value.WasExecuted);
+            writer.Write((int)entry.Value.SkipReason);
         }
     }
 
@@ -43,18 +46,31 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
         Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData = new();
         for (int i = 0; i < count; i++)
         {
-            tasksExecutionData.Add(ReadFromStream(reader),
+            var key = ReadFromStream(reader);
+            var cumulativeExecutionTime = TimeSpan.FromTicks(reader.ReadInt64());
+            var executionsCount = reader.ReadInt32();
+            var totalMemoryBytes = reader.ReadInt64();
+            var taskFactoryName = reader.ReadString();
+            var taskHostRuntime = reader.ReadString();
+
+            tasksExecutionData.Add(
+                key,
                 new TaskExecutionStats(
-                    TimeSpan.FromTicks(reader.ReadInt64()),
-                    reader.ReadInt32(),
-                    reader.ReadInt64()));
+                    cumulativeExecutionTime,
+                    executionsCount,
+                    totalMemoryBytes,
+                    string.IsNullOrEmpty(taskFactoryName) ? null : taskFactoryName,
+                    string.IsNullOrEmpty(taskHostRuntime) ? null : taskHostRuntime));
         }
 
         count = reader.Read7BitEncodedInt();
-        Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData = new();
+        Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData = new();
         for (int i = 0; i < count; i++)
         {
-            targetsExecutionData.Add(ReadFromStream(reader), reader.ReadBoolean());
+            var key = ReadFromStream(reader);
+            var wasExecuted = reader.ReadBoolean();
+            var skipReason = (TargetSkipReason)reader.ReadInt32();
+            targetsExecutionData.Add(key, new TargetExecutionStats(wasExecuted, skipReason));
         }
 
         WorkerNodeTelemetryData = new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData);

@@ -1576,16 +1576,6 @@
         <target state="translated">MSB3191: Das Verzeichnis "{0}" kann nicht erstellt werden. {1}</target>
         <note>{StrBegin="MSB3191: "}</note>
       </trans-unit>
-      <trans-unit id="Message.InvalidImportance">
-        <source>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</source>
-        <target state="translated">MSB3511: "{0}" ist ein ungültiger Wert für den "Importance"-Parameter. Gültige Werte sind: High, Normal und Low.</target>
-        <note>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
-            The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-            LOCALIZATION: "Importance" should not be localized.
-            High should not be localized.
-            Normal should not be localized.
-            Low should not be localized.</note>
-      </trans-unit>
       <trans-unit id="Move.CreatesDirectory">
         <source>Creating directory "{0}".</source>
         <target state="translated">Das Verzeichnis "{0}" wird erstellt.</target>

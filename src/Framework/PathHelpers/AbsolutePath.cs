@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if NETFRAMEWORK
-using Microsoft.IO;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif
@@ -19,7 +20,7 @@ namespace Microsoft.Build.Framework
     /// file system conventions (case-sensitive on Linux, case-insensitive on Windows and macOS).
     /// Does not perform any normalization beyond validating the path is fully qualified.
     /// A default instance (created via <c>default(AbsolutePath)</c>) has a null Value 
-    /// and should not be used. Two default instances are considered equal.
+    /// and represents an issue in path handling. Two default instances are considered equal.
     /// </remarks>
     public readonly struct AbsolutePath : IEquatable<AbsolutePath>
     {
@@ -32,15 +33,22 @@ namespace Microsoft.Build.Framework
         /// The normalized string representation of this path.
         /// </summary>
         public string Value { get; }
+        
+        /// <summary>
+        /// The original string used to create this path.
+        /// </summary>
+        public string OriginalValue { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
         /// </summary>
         /// <param name="path">The absolute path string.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
         public AbsolutePath(string path)
         {
             ValidatePath(path);
             Value = path;
+            OriginalValue = path;
         }
 
         /// <summary>
@@ -50,12 +58,24 @@ namespace Microsoft.Build.Framework
         /// <param name="ignoreRootedCheck">If true, skips checking whether the path is rooted.</param>
         /// <remarks>For internal and testing use, when we want to force bypassing the rooted check.</remarks>
         internal AbsolutePath(string path, bool ignoreRootedCheck)
+            : this(path, path, ignoreRootedCheck)
         {
-            if (!ignoreRootedCheck) 
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
+        /// </summary>
+        /// <param name="path">The absolute path string.</param>
+        /// <param name="original">The original string used to create this path.</param>
+        /// <param name="ignoreRootedCheck">If true, skips checking whether the path is rooted.</param>
+        internal AbsolutePath(string path, string original, bool ignoreRootedCheck)
+        {
+            if (!ignoreRootedCheck)
             {
                 ValidatePath(path);
             }
             Value = path;
+            OriginalValue = original;
         }
 
         /// <summary>
@@ -85,7 +105,20 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
-        public AbsolutePath(string path, AbsolutePath basePath) => Value = Path.Combine(basePath.Value, path);
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
+        public AbsolutePath(string path, AbsolutePath basePath)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException("Path must not be null or empty.", nameof(path));
+            }
+
+            // This function should not throw when path has illegal characters.
+            // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
+            // For .NET Core, System.IO.Path.Combine already does not throw in this case.
+            Value = Path.Combine(basePath.Value, path);
+            OriginalValue = path;
+        } 
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.

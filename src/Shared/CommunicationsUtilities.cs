@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.BackEnd;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
@@ -107,16 +108,46 @@ namespace Microsoft.Build.Internal
     /// </summary>
     internal enum HandshakeStatus
     {
+        /// <summary>
+        /// The handshake operation completed successfully.
+        /// </summary>
         Success = 0,
-        // Other node resurned different value than we expected.
-        // This can happen either by attempting to connect to a wrong node type. (e.g. transient TaskHost trying to connect to a long-running TaskHost)
-        // Or by trying to connect to a node that has a different MSBuild version.
+
+        /// <summary>
+        /// The other node returned a different value than expected.
+        /// This can happen either by attempting to connect to a wrong node type 
+        /// (e.g., transient TaskHost trying to connect to a long-running TaskHost)
+        /// or by trying to connect to a node that has a different MSBuild version.
+        /// </summary>
         VersionMismatch = 1,
-        // TryReadInt -> Abort due to old MSBuild version
+
+        /// <summary>
+        /// The handshake was aborted due to connection from an old MSBuild version.
+        /// Occurs in TryReadInt when detecting legacy MSBuild.exe connections.
+        /// </summary>
         OldMSBuild = 2,
+
+        /// <summary>
+        /// The handshake operation timed out before completion.
+        /// </summary>
         Timeout = 3,
+
+        /// <summary>
+        /// The stream ended unexpectedly during the handshake operation.
+        /// Indicates an incomplete or corrupted handshake sequence.
+        /// </summary>
         UnexpectedEndOfStream = 4,
+
+        /// <summary>
+        /// The endianness (byte order) of the communicating nodes does not match.
+        /// Indicates an architecture compatibility issue.
+        /// </summary>
         EndiannessMismatch = 5,
+
+        /// <summary>
+        /// The handshake status is undefined or uninitialized.
+        /// </summary>
+        Undefined,
     }
 
     /// <summary>
@@ -142,24 +173,33 @@ namespace Microsoft.Build.Internal
         public string ErrorMessage { get; }
 
         /// <summary>
+        /// The negotiated packet version with the child node.
+        /// It's needed to ensure both sides of the communication can read/write data in pipe.
+        /// </summary>
+        public byte NegotiatedPacketVersion { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HandshakeResult"/> class.
         /// </summary>
         /// <param name="status">The status of the handshake operation.</param>
         /// <param name="value">The value returned from the handshake.</param>
         /// <param name="errorMessage">The error message if the handshake failed.</param>
-        private HandshakeResult(HandshakeStatus status, int value, string errorMessage)
+        /// <param name="negotiatedPacketVersion">The packet version from the child node.</param>
+        private HandshakeResult(HandshakeStatus status, int value, string errorMessage, byte negotiatedPacketVersion = 1)
         {
             Status = status;
             Value = value;
             ErrorMessage = errorMessage;
+            NegotiatedPacketVersion = negotiatedPacketVersion;
         }
 
         /// <summary>
         /// Creates a successful handshake result with the specified value.
         /// </summary>
         /// <param name="value">The value returned from the handshake operation.</param>
+        /// <param name="negotiatedPacketVersion">The packet version received from the child node.</param>
         /// <returns>A new <see cref="HandshakeResult"/> instance representing a successful operation.</returns>
-        public static HandshakeResult Success(int value = 0) => new(HandshakeStatus.Success, value, null);
+        public static HandshakeResult Success(int value = 0, byte negotiatedPacketVersion = 1) => new(HandshakeStatus.Success, value, null, negotiatedPacketVersion);
 
         /// <summary>
         /// Creates a failed handshake result with the specified status and error message.
@@ -172,10 +212,13 @@ namespace Microsoft.Build.Internal
 
     internal class Handshake
     {
+        /// <summary>
+        /// Marker indicating that the next integer in the child handshake response is the PacketVersion.
+        /// </summary>
+        public const int PacketVersionFromChildMarker = -1;
+
         // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
         public const int NetTaskHostHandshakeVersion = 99;
-
-        public const HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
 
         protected readonly HandshakeComponents _handshakeComponents;
 
@@ -214,7 +257,7 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             // Calculate salt from environment and tools directory
-            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
+            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, HandshakeOptions.NET | HandshakeOptions.TaskHost);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
             string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
@@ -731,24 +774,53 @@ namespace Microsoft.Build.Internal
 #endif
                 out HandshakeResult innerResult))
             {
+                byte negotiatedPacketVersion = 1;
+
                 if (innerResult.Value != EndOfHandshakeSignal)
                 {
-                    if (isProvider)
+                    // If the received handshake part is not PacketVersionFromChildMarker it means we communicate with the host that does not support packet version negotiation.
+                    // Fallback to the old communication validation pattern.
+                    if (innerResult.Value != Handshake.PacketVersionFromChildMarker)
                     {
-                        var errorMessage = $"Handshake failed on part {innerResult.Value}. Probably the client is a different MSBuild build.";
-                        Trace(errorMessage);
-                        result = HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+                        result = CreateVersionMismatchResult(isProvider, innerResult.Value);
                         return false;
                     }
-                    else
+
+                    // We detected packet version marker, now let's read actual PacketVersion
+                    if (!stream.TryReadIntForHandshake(
+                            byteToAccept: null,
+#if NETCOREAPP2_1_OR_GREATER
+                            timeout,
+#endif
+                            out HandshakeResult versionResult))
                     {
-                        var errorMessage = $"Expected end of handshake signal but received {innerResult.Value}. Probably the host is a different MSBuild build.";
-                        Trace(errorMessage);
-                        result = HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+                        result = versionResult;
+                        return false;
+                    }
+
+                    byte childVersion = (byte)versionResult.Value;
+                    negotiatedPacketVersion = NodePacketTypeExtensions.GetNegotiatedPacketVersion(childVersion);
+                    Trace("Node PacketVersion: {0}, Local: {1}, Negotiated: {2}", childVersion, NodePacketTypeExtensions.PacketVersion, negotiatedPacketVersion);
+
+                    if (!stream.TryReadIntForHandshake(
+                            byteToAccept: null,
+#if NETCOREAPP2_1_OR_GREATER
+                            timeout,
+#endif
+                            out innerResult))
+                    {
+                        result = innerResult;
+                        return false;
+                    }
+
+                    if (innerResult.Value != EndOfHandshakeSignal)
+                    {
+                        result = CreateVersionMismatchResult(isProvider, innerResult.Value);
                         return false;
                     }
                 }
-                result = HandshakeResult.Success(0);
+
+                result = HandshakeResult.Success(0, negotiatedPacketVersion);
                 return true;
             }
             else
@@ -758,12 +830,24 @@ namespace Microsoft.Build.Internal
             }
         }
 
+        private static HandshakeResult CreateVersionMismatchResult(bool isProvider, int receivedValue)
+        {
+            var errorMessage = isProvider
+                ? $"Handshake failed on part {receivedValue}. Probably the client is a different MSBuild build."
+                : $"Expected end of handshake signal but received {receivedValue}. Probably the host is a different MSBuild build.";
+            Trace(errorMessage);
+
+            return HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+        }
+
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static bool TryReadIntForHandshake(this PipeStream stream, byte? byteToAccept,
+        internal static bool TryReadIntForHandshake(
+            this PipeStream stream,
+            byte? byteToAccept,
 #if NETCOREAPP2_1_OR_GREATER
             int timeout,
 #endif

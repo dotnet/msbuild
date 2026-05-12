@@ -353,7 +353,7 @@ namespace Microsoft.Build.Execution
             // don't want paths from imported projects being interpreted relative to the main project file.
             try
             {
-                assemblyFile = FileUtilities.FixFilePath(assemblyFile);
+                assemblyFile = FrameworkFileUtilities.FixFilePath(assemblyFile);
 
                 if (assemblyFile != null && !Path.IsPathRooted(assemblyFile))
                 {

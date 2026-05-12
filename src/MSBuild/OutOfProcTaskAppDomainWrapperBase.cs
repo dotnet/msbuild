@@ -11,6 +11,9 @@ using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if !NET35
+using Microsoft.Build.Execution;
+#endif
 
 #nullable disable
 
@@ -29,6 +32,7 @@ namespace Microsoft.Build.CommandLine
         /// This is the actual user task whose instance we will create and invoke Execute
         /// </summary>
         private ITask wrappedTask;
+
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -53,6 +57,10 @@ namespace Microsoft.Build.CommandLine
         /// from the task loader.
         /// </summary>
         private string taskName;
+
+#if !NET35
+        private HostServices _hostServices;
+#endif
 
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
@@ -86,6 +94,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="taskFile">The path to the project file in which the task invocation is located.</param>
         /// <param name="taskLine">The line in the project file where the task invocation is located.</param>
         /// <param name="taskColumn">The column in the project file where the task invocation is located.</param>
+        /// <param name="targetName">The target name that invokes this task.</param>
         /// <param name="appDomainSetup">The AppDomainSetup that we want to use to launch our AppDomainIsolated tasks</param>
         /// <param name="taskParams">Parameters that will be passed to the task when created</param>
         /// <returns>Task completion result showing success, failure or if there was a crash</returns>
@@ -96,8 +105,13 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
+                string targetName,
+                string projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
+#endif
+#if !NET35
+                HostServices hostServices,
 #endif
                 IDictionary<string, TaskParameter> taskParams)
         {
@@ -106,6 +120,9 @@ namespace Microsoft.Build.CommandLine
 
 #if FEATURE_APPDOMAIN
             _taskAppDomain = null;
+#endif
+#if !NET35
+            _hostServices = hostServices;
 #endif
             wrappedTask = null;
 
@@ -137,7 +154,16 @@ namespace Microsoft.Build.CommandLine
             if (taskType.HasSTAThreadAttribute)
             {
 #if FEATURE_APARTMENT_STATE
-                taskResult = InstantiateAndExecuteTaskInSTAThread(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,
+                taskResult = InstantiateAndExecuteTaskInSTAThread(
+                    oopTaskHostNode,
+                    taskType,
+                    taskName,
+                    taskLocation,
+                    taskFile,
+                    taskLine,
+                    taskColumn,
+                    targetName,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
@@ -152,7 +178,16 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                taskResult = InstantiateAndExecuteTask(oopTaskHostNode, taskType, taskName, taskLocation, taskFile, taskLine, taskColumn,
+                taskResult = InstantiateAndExecuteTask(
+                    oopTaskHostNode,
+                    taskType,
+                    taskName,
+                    taskLocation,
+                    taskFile,
+                    taskLine,
+                    taskColumn,
+                    targetName,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
@@ -196,6 +231,8 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
+                string targetName,
+                string projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
@@ -219,6 +256,8 @@ namespace Microsoft.Build.CommandLine
                                                 taskFile,
                                                 taskLine,
                                                 taskColumn,
+                                                targetName,
+                                                projectFile,
 #if FEATURE_APPDOMAIN
                                                 appDomainSetup,
 #endif
@@ -275,6 +314,8 @@ namespace Microsoft.Build.CommandLine
                 string taskFile,
                 int taskLine,
                 int taskColumn,
+                string targetName,
+                string projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
@@ -306,6 +347,14 @@ namespace Microsoft.Build.CommandLine
 #endif
                     );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+
+#if !NET35
+                if (projectFile != null && _hostServices != null)
+                {
+                    wrappedTask.HostObject = _hostServices.GetHostObject(projectFile, targetName, taskName);
+                }
+#endif
+
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))

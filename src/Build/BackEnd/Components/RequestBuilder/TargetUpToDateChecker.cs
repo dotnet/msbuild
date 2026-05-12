@@ -978,7 +978,7 @@ namespace Microsoft.Build.BackEnd
             //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
             //         in the cases I've seen, and adding this optimization would make the code hard to read.
 
-            string oldestOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[0].ToString()));
+            string oldestOutput = EscapingUtilities.UnescapeAll(FrameworkFileUtilities.FixFilePath(outputs[0].ToString()));
             ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[0]);
 
             DateTime oldestOutputFileTime = DateTime.MinValue;
@@ -996,7 +996,7 @@ namespace Microsoft.Build.BackEnd
             if (oldestOutputFileTime == DateTime.MinValue)
             {
                 // First output is missing: we must build the target
-                string arbitraryInput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(inputs[0].ToString()));
+                string arbitraryInput = EscapingUtilities.UnescapeAll(FrameworkFileUtilities.FixFilePath(inputs[0].ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(inputs[0]);
                 dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(arbitraryInput, oldestOutput, null, null, OutofdateReason.MissingOutput);
                 return true;
@@ -1004,7 +1004,7 @@ namespace Microsoft.Build.BackEnd
 
             for (int i = 1; i < outputs.Count; i++)
             {
-                string candidateOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[i].ToString()));
+                string candidateOutput = EscapingUtilities.UnescapeAll(FrameworkFileUtilities.FixFilePath(outputs[i].ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[i]);
                 DateTime candidateOutputFileTime = DateTime.MinValue;
                 try
@@ -1022,7 +1022,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // An output is missing: we must build the target
                     string arbitraryInput =
-                        EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(inputs[0].ToString()));
+                        EscapingUtilities.UnescapeAll(FrameworkFileUtilities.FixFilePath(inputs[0].ToString()));
                     ErrorUtilities.ThrowIfTypeDoesNotImplementToString(inputs[0]);
                     dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(arbitraryInput, candidateOutput, null, null, OutofdateReason.MissingOutput);
                     return true;
@@ -1039,7 +1039,7 @@ namespace Microsoft.Build.BackEnd
             // Now compare the oldest output with each input and break out if we find one newer.
             foreach (T input in inputs)
             {
-                string unescapedInput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input.ToString()));
+                string unescapedInput = EscapingUtilities.UnescapeAll(FrameworkFileUtilities.FixFilePath(input.ToString()));
                 ErrorUtilities.ThrowIfTypeDoesNotImplementToString(input);
                 DateTime inputFileTime = DateTime.MaxValue;
                 try
@@ -1127,8 +1127,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if "input" is newer than "output"</returns>
         private bool IsOutOfDate(string input, string output, string inputItemName, string outputItemName)
         {
-            input = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input));
-            output = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(output));
+            input = EscapingUtilities.UnescapeAll(FrameworkFileUtilities.FixFilePath(input));
+            output = EscapingUtilities.UnescapeAll(FrameworkFileUtilities.FixFilePath(output));
             ProjectErrorUtilities.VerifyThrowInvalidProject(input.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) < 0, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", input, inputItemName);
             ProjectErrorUtilities.VerifyThrowInvalidProject(output.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) < 0, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", output, outputItemName);
             bool outOfDate = (CompareLastWriteTimes(input, output, out bool inputDoesNotExist, out bool outputDoesNotExist) == 1) || inputDoesNotExist;

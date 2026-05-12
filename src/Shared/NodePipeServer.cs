@@ -204,7 +204,6 @@ namespace Microsoft.Build.Internal
             foreach (var component in HandshakeComponents.EnumerateComponents())
             {
                 // This will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard.
-
                 if (
 
                     _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null,

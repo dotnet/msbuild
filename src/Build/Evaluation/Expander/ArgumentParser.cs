@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 
-#if NETFRAMEWORK
+#if FEATURE_MSIOREDIST
 using Microsoft.IO;
 #endif
 

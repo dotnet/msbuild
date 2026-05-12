@@ -9,6 +9,7 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -44,7 +45,7 @@ namespace Microsoft.Build.FileAccesses
         {
             _scheduler = host.GetComponent(BuildComponentType.Scheduler) as IScheduler;
             _configCache = host.GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
-            _tempDirectory = FileUtilities.EnsureNoTrailingSlash(FileUtilities.TempFileDirectory);
+            _tempDirectory = FrameworkFileUtilities.EnsureNoTrailingSlash(FileUtilities.TempFileDirectory);
         }
 
         public void ShutdownComponent()

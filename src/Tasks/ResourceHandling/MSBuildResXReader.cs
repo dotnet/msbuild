@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -228,7 +229,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             string[] fileRefInfo = ParseResxFileRefString(value);
 
-            string fileName = FileUtilities.FixFilePath(fileRefInfo[0]);
+            string fileName = FrameworkFileUtilities.FixFilePath(fileRefInfo[0]);
             string fileRefType = fileRefInfo[1];
 
             if (pathsRelativeToBasePath)

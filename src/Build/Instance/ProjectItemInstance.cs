@@ -743,7 +743,8 @@ namespace Microsoft.Build.Execution
             if (itemDefinitions == null || !useItemDefinitionsWithoutModification)
             {
                 // TaskItems don't have an item type. So for their benefit, we have to lookup and add the regular item definition.
-                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions);
+                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions.Count + 1);
+                ((List<ProjectItemDefinitionInstance>)inheritedItemDefinitions)?.AddRange(itemDefinitions);
 
                 ProjectItemDefinitionInstance itemDefinition;
                 if (projectToUse.ItemDefinitions.TryGetValue(itemTypeToUse, out itemDefinition))
@@ -865,8 +866,8 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrowArgumentLength(includeEscaped);
                 ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped);
 
-                _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
-                _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
+                _includeEscaped = FrameworkFileUtilities.FixFilePath(includeEscaped);
+                _includeBeforeWildcardExpansionEscaped = FrameworkFileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
                 _directMetadata = (directMetadata == null || directMetadata.Count == 0) ? null : directMetadata; // If the metadata was all removed, toss the dictionary
                 _itemDefinitions = itemDefinitions;
                 _projectDirectory = projectDirectory;

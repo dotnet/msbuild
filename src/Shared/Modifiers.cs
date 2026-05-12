@@ -9,6 +9,7 @@ using System.Collections.Generic;
 #endif
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -213,7 +214,7 @@ namespace Microsoft.Build.Shared
 
                         modifiedItemSpec = Path.GetPathRoot(fullPath);
 
-                        if (!EndsWithSlash(modifiedItemSpec))
+                        if (!FrameworkFileUtilities.EndsWithSlash(modifiedItemSpec))
                         {
                             ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern(modifiedItemSpec),
                                 "Only UNC shares should be missing trailing slashes.");
@@ -235,7 +236,7 @@ namespace Microsoft.Build.Shared
                         else
                         {
                             // Fix path to avoid problem with Path.GetFileNameWithoutExtension when backslashes in itemSpec on Unix
-                            modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
+                            modifiedItemSpec = Path.GetFileNameWithoutExtension(FrameworkFileUtilities.FixFilePath(itemSpec));
                         }
                     }
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))
@@ -276,7 +277,7 @@ namespace Microsoft.Build.Shared
 
                             if (length != -1)
                             {
-                                ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && IsSlash(modifiedItemSpec[length]),
+                                ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[length]),
                                                            "Root directory must have a trailing slash.");
 
                                 modifiedItemSpec = modifiedItemSpec.Substring(length + 1);
@@ -284,7 +285,7 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(modifiedItemSpec) && IsSlash(modifiedItemSpec[0]),
+                            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(modifiedItemSpec) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[0]),
                                                        "Expected a full non-windows path rooted at '/'.");
 
                             // A full unix path is always rooted at

@@ -567,7 +567,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void GatherReferenceAssemblies(HashSet<ResolvedReferenceAssembly> resolvedFiles, ITaskItem sdkReference, string path, SDKInfo info)
         {
-            if (info.DirectoryToFileList != null && info.DirectoryToFileList.TryGetValue(FileUtilities.EnsureNoTrailingSlash(path), out List<string> referenceFiles) && referenceFiles != null)
+            if (info.DirectoryToFileList != null && info.DirectoryToFileList.TryGetValue(FrameworkFileUtilities.EnsureNoTrailingSlash(path), out List<string> referenceFiles) && referenceFiles != null)
             {
                 foreach (string file in referenceFiles)
                 {
@@ -619,7 +619,7 @@ namespace Microsoft.Build.Tasks
                 foreach (KeyValuePair<string, List<string>> directoryToFileList in info.DirectoryToFileList)
                 {
                     // Add a trailing slash to ensure we don't match the start of a platform (e.g. ...\ARM matching ...\ARM64)
-                    if (FileUtilities.EnsureTrailingSlash(directoryToFileList.Key).StartsWith(FileUtilities.EnsureTrailingSlash(redistFilePath), StringComparison.OrdinalIgnoreCase))
+                    if (FrameworkFileUtilities.EnsureTrailingSlash(directoryToFileList.Key).StartsWith(FrameworkFileUtilities.EnsureTrailingSlash(redistFilePath), StringComparison.OrdinalIgnoreCase))
                     {
                         List<string> redistFiles = directoryToFileList.Value;
                         string targetPathRoot = sdkReference.GetMetadata("CopyRedistToSubDirectory");

@@ -110,7 +110,7 @@ namespace Microsoft.Build.Utilities
 
             // Record the current directory (which under normal circumstances will be the project directory)
             // so that we can compare tracked paths against it for inclusion in the dependency graph
-            string currentProjectDirectory = FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory());
+            string currentProjectDirectory = FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory());
 
             if (!_tlogAvailable)
             {

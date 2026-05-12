@@ -6,12 +6,13 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if !NETFRAMEWORK
-using System.IO;
-#else
-using Microsoft.IO;
-#endif
 using System.Linq;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#else
+using System.IO;
+#endif
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ namespace Microsoft.Build.Shared
 #endif
 
         // on OSX both System.IO.Path separators are '/', so we have to use the literals
-        internal static readonly char[] directorySeparatorCharacters = FileUtilities.Slashes;
+        internal static readonly char[] directorySeparatorCharacters = FrameworkFileUtilities.Slashes;
 
         // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
         private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>>(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase));
@@ -233,7 +234,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
-            path = FileUtilities.FixFilePath(path);
+            path = FrameworkFileUtilities.FixFilePath(path);
             switch (entityType)
             {
                 case FileSystemEntity.Files: return GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory);
@@ -592,7 +593,7 @@ namespace Microsoft.Build.Shared
             out string wildcardDirectoryPart,
             out string filenamePart)
         {
-            filespec = FileUtilities.FixFilePath(filespec);
+            filespec = FrameworkFileUtilities.FixFilePath(filespec);
             int indexOfLastDirectorySeparator = filespec.LastIndexOfAny(directorySeparatorCharacters);
             if (-1 == indexOfLastDirectorySeparator)
             {
@@ -2145,7 +2146,7 @@ namespace Microsoft.Build.Shared
                     wildcard[wildcardLength - 1] == '*')
                 {
                     // Check that there are no other slashes in the wildcard.
-                    if (wildcard.IndexOfAny(FileUtilities.Slashes, 3, wildcardLength - 6) == -1)
+                    if (wildcard.IndexOfAny(FrameworkFileUtilities.Slashes, 3, wildcardLength - 6) == -1)
                     {
                         directoryPattern = wildcard.Substring(3, wildcardLength - 6);
                     }
@@ -2679,7 +2680,7 @@ namespace Microsoft.Build.Shared
         /// <returns>True in case of a match (e.g. directoryPath = "dir/subdir" and pattern = "s*"), false otherwise.</returns>
         private static bool DirectoryEndsWithPattern(string directoryPath, string pattern)
         {
-            int index = directoryPath.LastIndexOfAny(FileUtilities.Slashes);
+            int index = directoryPath.LastIndexOfAny(FrameworkFileUtilities.Slashes);
             return (index != -1 && IsMatch(directoryPath.AsSpan(index + 1), pattern));
         }
 

@@ -44,6 +44,7 @@ parameters:
     values:
       - auto
       - main
+      - rel/d18.4
       - rel/d18.3
       - rel/d18.0
       - rel/d17.14
@@ -67,7 +68,9 @@ parameters:
 variables:
   # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
   - name: AutoInsertTargetBranch
-    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.3') }}:
+    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.4') }}:
+      value: 'rel/d18.4'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs18.3') }}:
       value: 'rel/d18.3'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'vs18.0') }}:
       value: 'rel/d18.0'

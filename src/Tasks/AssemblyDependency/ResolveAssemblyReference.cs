@@ -2246,7 +2246,7 @@ namespace Microsoft.Build.Tasks
                     {
                         for (int i = 0; i < _targetFrameworkDirectories.Length; i++)
                         {
-                            _targetFrameworkDirectories[i] = FileUtilities.EnsureTrailingSlash(_targetFrameworkDirectories[i]);
+                            _targetFrameworkDirectories[i] = FrameworkFileUtilities.EnsureTrailingSlash(_targetFrameworkDirectories[i]);
                         }
                     }
 

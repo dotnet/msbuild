@@ -55,7 +55,7 @@ namespace Microsoft.Build.Tasks
                 string fullRootPath = Path.GetFullPath(RootFolder);
 
                 // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
-                fullRootPath = FileUtilities.EnsureTrailingSlash(fullRootPath);
+                fullRootPath = FrameworkFileUtilities.EnsureTrailingSlash(fullRootPath);
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 

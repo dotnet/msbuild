@@ -24,6 +24,8 @@ parameters:
     displayName: 'Insertion Target Branch (select for manual insertion)'
     values:
       - main
+      - rel/d18.4
+      - rel/d18.3
       - rel/d18.0
       - rel/d17.14
       - rel/d17.13

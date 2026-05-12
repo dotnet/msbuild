@@ -677,6 +677,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return false;
         }
 
+        public void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry)
+        {
+            // Mock implementation does nothing
+        }
+
         public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
         {
             throw new NotImplementedException();

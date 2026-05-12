@@ -11,7 +11,7 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.CommandLine.Experimental
 {
     /// <summary>
     /// This class encapsulates the switches gathered from the application command line. It helps with switch detection, parameter
@@ -120,6 +120,7 @@ namespace Microsoft.Build.CommandLine
             GetResultOutputFile,
             FeatureAvailability,
             MultiThreaded,
+            ParentPacketVersion,
             // This has to be kept as last enum value
             NumberOfParameterizedSwitches,
         }
@@ -277,7 +278,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  ["warnnotaserror", "noerr"],          ParameterizedSwitch.WarningsNotAsErrors,        null,                           true,           "MissingWarnNotAsErrorParameterError", true,   false,   "HelpMessage_40_WarnNotAsErrorSwitch"),
             new ParameterizedSwitchInfo(  ["warnasmessage", "nowarn"],          ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false,   "HelpMessage_29_WarnAsMessageSwitch"),
             new ParameterizedSwitchInfo(  ["binarylogger", "bl"],               ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false,   "HelpMessage_30_BinaryLoggerSwitch"),
-            new ParameterizedSwitchInfo(  ["check"],                             ParameterizedSwitch.Check,                      null,                           false,          null,                                  true,   false,   "HelpMessage_52_BuildCheckSwitch"),
+            new ParameterizedSwitchInfo(  ["check"],                            ParameterizedSwitch.Check,                      null,                           false,          null,                                  true,   false,   "HelpMessage_52_BuildCheckSwitch"),
             new ParameterizedSwitchInfo(  ["restore", "r"],                     ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false,   "HelpMessage_31_RestoreSwitch"),
             new ParameterizedSwitchInfo(  ["profileevaluation", "prof"],        ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false,   "HelpMessage_32_ProfilerSwitch"),
             new ParameterizedSwitchInfo(  ["restoreproperty", "rp"],            ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingPropertyError",                true,   false,   "HelpMessage_33_RestorePropertySwitch"),
@@ -297,7 +298,9 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  ["getTargetResult"],                  ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false,   "HelpMessage_45_GetTargetResultSwitch"),
             new ParameterizedSwitchInfo(  ["getResultOutputFile"],              ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false,   "HelpMessage_51_GetResultOutputFileSwitch"),
             new ParameterizedSwitchInfo(  ["featureAvailability", "fa"],        ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch"),
-            new ParameterizedSwitchInfo(  ["multithreaded", "mt"],              ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false,   "HelpMessage_49_MultiThreadedSwitch")
+            new ParameterizedSwitchInfo(  ["multithreaded", "mt"],              ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false,   "HelpMessage_49_MultiThreadedSwitch"),
+            new ParameterizedSwitchInfo(  ["parentpacketversion"],              ParameterizedSwitch.ParentPacketVersion,        null,                           false,          null,                                  false,  false,   null),
+            // Add to ParameterizedSwitch enum (before NumberOfParameterizedSwitches):
         };
 
         /// <summary>
@@ -423,6 +426,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// This struct stores the details of a switch that takes parameters that is detected on the command line.
         /// </summary>
+        [DebuggerDisplay("{commandLineArg} | {parameters}")]
         private struct DetectedParameterizedSwitch
         {
             // the actual text of the switch
@@ -432,8 +436,8 @@ namespace Microsoft.Build.CommandLine
             internal ArrayList parameters;
         }
 
-        // for each recognized switch that doesn't take parameters, this array indicates if the switch has been detected on the
-        // command line
+        // for each recognized switch that doesn't take parameters, this array indicates if the switch has been detected on the command
+        // line
         private DetectedParameterlessSwitch[] _parameterlessSwitches;
         // for each recognized switch that takes parameters, this array indicates if the switch has been detected on the command
         // line, and it provides a store for the switch parameters
@@ -467,8 +471,11 @@ namespace Microsoft.Build.CommandLine
             {
                 Debug.Assert(i == (int)(s_parameterizedSwitchesMap[i].parameterizedSwitch),
                     "The map of parameterized switches must be ordered the same way as the ParameterizedSwitch enumeration.");
-                if (s_parameterizedSwitchesMap[i].parameterizedSwitch is not ParameterizedSwitch.Project and
-                    not ParameterizedSwitch.NodeMode and not ParameterizedSwitch.Check)
+                if (s_parameterizedSwitchesMap[i].parameterizedSwitch
+                    is not ParameterizedSwitch.Project
+                    and not ParameterizedSwitch.NodeMode
+                    and not ParameterizedSwitch.Check
+                    and not ParameterizedSwitch.ParentPacketVersion)
                 {
                     Debug.Assert(!string.IsNullOrEmpty(s_parameterizedSwitchesMap[i].resourceId), "All parameterized switches should be cross-checked against the help message strings except from project switch");
                 }
@@ -498,6 +505,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="switchParameters"></param>
         /// <param name="multipleParametersAllowed"></param>
         /// <param name="unquoteParameters"></param>
+        /// <param name="emptyParametersAllowed"></param>
         /// <returns>true, if the given parameters were successfully stored</returns>
         internal bool SetParameterizedSwitch(
             ParameterizedSwitch parameterizedSwitch,

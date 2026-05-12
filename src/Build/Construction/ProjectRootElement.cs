@@ -1256,7 +1256,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskElement AddUsingTask(string name, string assemblyFile, string assemblyName)
         {
-            ProjectUsingTaskElement usingTask = CreateUsingTaskElement(name, FileUtilities.FixFilePath(assemblyFile), assemblyName);
+            ProjectUsingTaskElement usingTask = CreateUsingTaskElement(name, FrameworkFileUtilities.FixFilePath(assemblyFile), assemblyName);
             AppendChild(usingTask);
 
             return usingTask;

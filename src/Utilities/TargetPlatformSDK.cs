@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -104,7 +105,7 @@ namespace Microsoft.Build.Utilities
         public string Path
         {
             get => _path;
-            set => _path = value != null ? FileUtilities.EnsureTrailingSlash(value) : null;
+            set => _path = value != null ? FrameworkFileUtilities.EnsureTrailingSlash(value) : null;
         }
 
         /// <summary>

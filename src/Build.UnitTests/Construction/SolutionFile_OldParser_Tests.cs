@@ -2555,7 +2555,7 @@ EndGlobal
         
         /// <summary>
         /// Test to verify that the fix for issue #1769 works by directly testing
-        /// FileUtilities.FixFilePath integration in AbsolutePath.
+        /// FrameworkFileUtilities.FixFilePath integration in AbsolutePath.
         /// This test simulates scenarios where intermediate path processing might
         /// leave backslashes in the AbsolutePath on Unix systems.
         /// </summary>
