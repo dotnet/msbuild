@@ -39,11 +39,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZDO_READER_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZDO_READER_TENANT_ID }}
-          subscription-id: ${{ secrets.AZDO_READER_SUBSCRIPTION_ID }}
+        run: |
+          az login --service-principal \
+            --username "${{ secrets.AZDO_READER_CLIENT_ID }}" \
+            --tenant "${{ secrets.AZDO_READER_TENANT_ID }}" \
+            --federated-token "$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r '.value')" \
+            --output none
 
       - name: Get AzDO Bearer Token
         id: token
