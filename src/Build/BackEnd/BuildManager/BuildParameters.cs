@@ -812,7 +812,6 @@ namespace Microsoft.Build.Execution
         /// singleton state would leak across invocations out of sidecar TaskHost reuse.
         /// See https://github.com/dotnet/msbuild/issues/13315.
         /// </summary>
-        /// </summary>
         internal bool IsLongLivedHost { get; set; } = s_isLongLivedHost;
 
         /// <summary>
