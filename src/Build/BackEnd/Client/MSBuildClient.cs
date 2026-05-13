@@ -692,12 +692,8 @@ namespace Microsoft.Build.Experimental
             {
                 try
                 {
-                    using Process? launched = Process.GetProcessById(pid);
-                    if (launched is null)
-                    {
-                        serverState = $"PID {pid} (no longer present)";
-                    }
-                    else if (launched.HasExited)
+                    using Process launched = Process.GetProcessById(pid);
+                    if (launched.HasExited)
                     {
                         _exitResult.ServerProcessExitCode = launched.ExitCode;
                         serverState = $"PID {pid} (already exited with code {launched.ExitCode})";
