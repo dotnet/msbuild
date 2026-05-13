@@ -209,24 +209,31 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "netcore-linux-failing")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
-            using (MyTool t = new MyTool())
-            {
-                MockEngine3 engine = new MockEngine3();
-                t.BuildEngine = engine;
-                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
-                                                : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
+            using MyTool t = new MyTool();
+            MockEngine engine = new MockEngine(_output);
+            t.BuildEngine = engine;
+            t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                            ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
+                                            : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
 
-                t.Execute().ShouldBeFalse();
+            bool result = t.Execute();
 
-                // The above command logged a canonical error message.  Therefore ToolTask should
-                // not log its own error beyond that.
-                engine.AssertLogDoesntContain("MSB6006");
-                engine.AssertLogContains("CS0168");
-                engine.AssertLogContains("The variable 'foo' is declared but never used");
-                t.ExitCode.ShouldBe(-1);
-                engine.Errors.ShouldBe(1);
-            }
+            // Capture diagnostic state so any future flaky failure has actionable context
+            // in the test output (engine log, exit code, error/warning/message counts).
+            string diagnostics =
+                $"Execute returned {result}; ExitCode={t.ExitCode}; Errors={engine.Errors}; Warnings={engine.Warnings}; Messages={engine.Messages}.{Environment.NewLine}" +
+                $"--- Engine log begin ---{Environment.NewLine}{engine.Log}{Environment.NewLine}--- Engine log end ---";
+            _output.WriteLine(diagnostics);
+
+            result.ShouldBeFalse(diagnostics);
+
+            // The above command logged a canonical error message.  Therefore ToolTask should
+            // not log its own error beyond that.
+            engine.AssertLogDoesntContain("MSB6006");
+            engine.AssertLogContains("CS0168");
+            engine.AssertLogContains("The variable 'foo' is declared but never used");
+            t.ExitCode.ShouldBe(-1, diagnostics);
+            engine.Errors.ShouldBe(1, diagnostics);
         }
 
         /// <summary>
