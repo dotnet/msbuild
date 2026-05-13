@@ -27,7 +27,9 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 #endif
 using System.Text.RegularExpressions;
+#if FEATURE_WINDOWSINTEROP
 using System.Runtime.Versioning;
+#endif
 using Microsoft.Build.Utilities;
 
 #nullable disable
