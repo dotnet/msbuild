@@ -462,7 +462,6 @@ namespace Microsoft.Build.Tasks
         #region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
-        internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
 
         internal const int ERROR_SUCCESS = 0;
 
@@ -507,14 +506,6 @@ namespace Microsoft.Build.Tasks
         internal const UInt16 IMAGE_FILE_MACHINE_ARM64 = 0xAA64; // ARM64 Little-Endian
         internal const UInt16 IMAGE_FILE_MACHINE_R4000 = 0x166; // Used to test a architecture we do not expect to reference
 
-        internal const uint GENERIC_READ = 0x80000000;
-
-        internal const uint PAGE_READONLY = 0x02;
-
-        internal const uint FILE_MAP_READ = 0x04;
-
-        internal const uint FILE_TYPE_DISK = 0x01;
-
         internal const int SE_ERR_ACCESSDENIED = 5;
 
         [Flags]
@@ -526,152 +517,6 @@ namespace Microsoft.Build.Tasks
             MOVEFILE_WRITE_THROUGH = 0x00000008,
             MOVEFILE_CREATE_HARDLINK = 0x00000010,
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
-        }
-
-        #endregion
-
-        #region NT header stuff
-
-        internal const uint IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
-        internal const uint IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
-
-        internal const uint IMAGE_DIRECTORY_ENTRY_COMHEADER = 14;
-
-        internal const uint COMIMAGE_FLAGS_STRONGNAMESIGNED = 0x08;
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_FILE_HEADER
-        {
-            internal ushort Machine;
-            internal ushort NumberOfSections;
-            internal uint TimeDateStamp;
-            internal uint PointerToSymbolTable;
-            internal uint NumberOfSymbols;
-            internal ushort SizeOfOptionalHeader;
-            internal ushort Characteristics;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_DATA_DIRECTORY
-        {
-            internal uint VirtualAddress;
-            internal uint Size;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_OPTIONAL_HEADER32
-        {
-            internal ushort Magic;
-            internal byte MajorLinkerVersion;
-            internal byte MinorLinkerVersion;
-            internal uint SizeOfCode;
-            internal uint SizeOfInitializedData;
-            internal uint SizeOfUninitializedData;
-            internal uint AddressOfEntryPoint;
-            internal uint BaseOfCode;
-            internal uint BaseOfData;
-            internal uint ImageBase;
-            internal uint SectionAlignment;
-            internal uint FileAlignment;
-            internal ushort MajorOperatingSystemVersion;
-            internal ushort MinorOperatingSystemVersion;
-            internal ushort MajorImageVersion;
-            internal ushort MinorImageVersion;
-            internal ushort MajorSubsystemVersion;
-            internal ushort MinorSubsystemVersion;
-            internal uint Win32VersionValue;
-            internal uint SizeOfImage;
-            internal uint SizeOfHeaders;
-            internal uint CheckSum;
-            internal ushort Subsystem;
-            internal ushort DllCharacteristics;
-            internal uint SizeOfStackReserve;
-            internal uint SizeOfStackCommit;
-            internal uint SizeOfHeapReserve;
-            internal uint SizeOfHeapCommit;
-            internal uint LoaderFlags;
-            internal uint NumberOfRvaAndSizes;
-
-            // should be:
-            // [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] internal IMAGE_DATA_DIRECTORY[] DataDirectory;
-            // but fixed size arrays only work with simple types, so I have to use ulongs and convert them to IMAGE_DATA_DIRECTORY structs
-            // Fortunately, IMAGE_DATA_DIRECTORY is only 8 bytes long... (whew)
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            internal ulong[] DataDirectory;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_OPTIONAL_HEADER64
-        {
-            internal ushort Magic;
-            internal byte MajorLinkerVersion;
-            internal byte MinorLinkerVersion;
-            internal uint SizeOfCode;
-            internal uint SizeOfInitializedData;
-            internal uint SizeOfUninitializedData;
-            internal uint AddressOfEntryPoint;
-            internal uint BaseOfCode;
-            internal ulong ImageBase;
-            internal uint SectionAlignment;
-            internal uint FileAlignment;
-            internal ushort MajorOperatingSystemVersion;
-            internal ushort MinorOperatingSystemVersion;
-            internal ushort MajorImageVersion;
-            internal ushort MinorImageVersion;
-            internal ushort MajorSubsystemVersion;
-            internal ushort MinorSubsystemVersion;
-            internal uint Win32VersionValue;
-            internal uint SizeOfImage;
-            internal uint SizeOfHeaders;
-            internal uint CheckSum;
-            internal ushort Subsystem;
-            internal ushort DllCharacteristics;
-            internal ulong SizeOfStackReserve;
-            internal ulong SizeOfStackCommit;
-            internal ulong SizeOfHeapReserve;
-            internal ulong SizeOfHeapCommit;
-            internal uint LoaderFlags;
-            internal uint NumberOfRvaAndSizes;
-
-            // should be:
-            // [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] internal IMAGE_DATA_DIRECTORY[] DataDirectory;
-            // but fixed size arrays only work with simple types, so I have to use ulongs and convert them to IMAGE_DATA_DIRECTORY structs
-            // Fortunately, IMAGE_DATA_DIRECTORY is only 8 bytes long... (whew)
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            internal ulong[] DataDirectory;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_NT_HEADERS32
-        {
-            internal uint signature;
-            internal IMAGE_FILE_HEADER fileHeader;
-            internal IMAGE_OPTIONAL_HEADER32 optionalHeader;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_NT_HEADERS64
-        {
-            internal uint signature;
-            internal IMAGE_FILE_HEADER fileHeader;
-            internal IMAGE_OPTIONAL_HEADER64 optionalHeader;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_COR20_HEADER
-        {
-            internal uint cb;
-            internal ushort MajorRuntimeVersion;
-            internal ushort MinorRuntimeVersion;
-            internal IMAGE_DATA_DIRECTORY MetaData;
-            internal uint Flags;
-            internal uint EntryPointTokenOrEntryPointRVA;
-            internal IMAGE_DATA_DIRECTORY Resources;
-            internal IMAGE_DATA_DIRECTORY StrongNameSignature;
-            internal IMAGE_DATA_DIRECTORY CodeManagerTable;
-            internal IMAGE_DATA_DIRECTORY VTableFixups;
-            internal IMAGE_DATA_DIRECTORY ExportAddressTableJumps;
-            internal IMAGE_DATA_DIRECTORY ManagedNativeHeader;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -808,58 +653,6 @@ namespace Microsoft.Build.Tasks
         [DllImport("oleaut32", PreserveSig = false)]
         [return: MarshalAs(UnmanagedType.BStr)]
         internal static extern string QueryPathOfRegTypeLib([In] ref Guid clsid, [In] short majorVersion, [In] short minorVersion, [In] int lcid);
-
-        //------------------------------------------------------------------------------
-        // CreateFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, FileShare dwShareMode,
-            IntPtr lpSecurityAttributes, FileMode dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
-
-        //------------------------------------------------------------------------------
-        // GetFileType
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern uint GetFileType(IntPtr hFile);
-
-        //------------------------------------------------------------------------------
-        // CloseHandle
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CloseHandle(IntPtr hObject);
-
-        //------------------------------------------------------------------------------
-        // CreateFileMapping
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CreateFileMapping(IntPtr hFile, IntPtr lpFileMappingAttributes, uint flProtect,
-            uint dwMaximumSizeHigh, uint dwMaximumSizeLow, string lpName);
-
-        //------------------------------------------------------------------------------
-        // MapViewOfFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr MapViewOfFile(IntPtr hFileMapping, uint dwDesiredAccess, uint dwFileOffsetHigh, uint dwFileOffsetLow, IntPtr dwNumberOfBytesToMap);
-
-        //------------------------------------------------------------------------------
-        // UnmapViewOfFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool UnmapViewOfFile(IntPtr lpBaseAddress);
-
-        //------------------------------------------------------------------------------
-        // ImageNtHeader
-        //------------------------------------------------------------------------------
-        [DllImport("dbghelp.dll", SetLastError = true)]
-        internal static extern IntPtr ImageNtHeader(IntPtr imageBase);
-
-        //------------------------------------------------------------------------------
-        // ImageRvaToVa
-        //------------------------------------------------------------------------------
-        [DllImport("dbghelp.dll", SetLastError = true)]
-        internal static extern IntPtr ImageRvaToVa(IntPtr ntHeaders, IntPtr imageBase, uint Rva, out IntPtr LastRvaSection);
 
         internal static bool AllDrivesMapped()
         {
