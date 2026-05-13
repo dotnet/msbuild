@@ -73,8 +73,10 @@ Use `--configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}` on every c
   `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}`
   - [ ] **1.2d** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE1_DARC_PR}}
   - [ ] **1.2e** Ping internal "First Responders" Teams channel to get the new `VS {{NEXT_VERSION}}` channel available as a promotion target: {{URL_OF_CHANNEL_PROMOTION_PR}}
-- [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`: \
-Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
+- [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`:
+  - [ ] **1.3a** Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
+  - [ ] **1.3b** **Retire any predecessor VS preview branches that are no longer supported.** Identify intermediate `vsX.Y` branches between the previously-shipped LTSC/STS and `vs{{THIS_RELEASE_VERSION}}` whose content has already been merged forward and that will not receive further patches. Remove their `MergeToBranch` entries and rewire the chain to skip them so automation does not open stale forward-merge PRs against retired branches. The branches stay in the repo (for history); they just exit the auto-merge-forward flow. See [#13750](https://github.com/dotnet/msbuild/pull/13750) for an example (vs18.4 and vs18.5 retired when vs18.6 opened).
+  - [ ] **1.3c** Verify the resulting chain is well-formed: every key still has a single `MergeToBranch` value, the chain has no cycles, and it still terminates at `main`.
 
 ---
 
