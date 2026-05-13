@@ -6,13 +6,13 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Win32;
 #if FEATURE_WINDOWSINTEROP
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Windows.Win32;
