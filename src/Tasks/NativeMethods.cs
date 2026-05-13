@@ -426,11 +426,11 @@ namespace Microsoft.Build.Tasks
 
             if (targetExists && (File.GetAttributes(newFileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
             {
-#if FEATURE_WINDOWSINTEROP
-            /// <summary>
-            /// Agile wrapper around the IAssemblyEnum COM pointer from fusion.dll. Provides
-            /// thread-agile access and finalizer-driven release if the enum is never iterated.
-            /// </summary>
+                throw new IOException("Moving target is read-only");
+            }
+
+            if (existingFileName == newFileName)
+            {
                 return true;
             }
 
@@ -603,23 +603,25 @@ namespace Microsoft.Build.Tasks
             if ((*bytes & 0x80) == 0x00)       // 0??? ????
             {
                 uncompressedDataLength = *bytes;
-#if FEATURE_WINDOWSINTEROP
-            [SupportedOSPlatform("windows5.0")]
-            private unsafe string GetNextAssemblyFusionName()
-            {
-                using ComScope<IAssemblyEnum> assemblyEnum = _agileAssemblyEnum.GetInterface();
-                using ComScope<IAssemblyName> fusionName = new(null);
-
-                assemblyEnum.Pointer->GetNextAssembly(null, fusionName, 0).ThrowOnFailure();
-
-                if (fusionName.IsNull)
-                {
-                    return null;
-                }
-
-                return GetFullName(fusionName.Pointer);
+                count = 1;
             }
-#endifsummary>
+            // Medium.
+            else if ((*bytes & 0xC0) == 0x80)  // 10?? ????
+            {
+                uncompressedDataLength = (int)((*bytes & 0x3f) << 8 | *(bytes + 1));
+                count = 2;
+            }
+            else if ((*bytes & 0xE0) == 0xC0)      // 110? ????
+            {
+                uncompressedDataLength = (int)((*bytes & 0x1f) << 24 | *(bytes + 1) << 16 | *(bytes + 2) << 8 | *(bytes + 3));
+                count = 4;
+            }
+
+            return count;
+        }
+        #endregion
+        #region InternalClass
+        /// <summary>
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
         [ComVisible(false)]
@@ -642,11 +644,11 @@ namespace Microsoft.Build.Tasks
             private static Regex AssemblyVersionRegex { get; } = new Regex(AssemblyVersionPattern, RegexOptions.CultureInvariant | RegexOptions.Compiled);
 #endif
 
+#if FEATURE_WINDOWSINTEROP
             /// <summary>
             /// Agile wrapper around the IAssemblyEnum COM pointer from fusion.dll. Provides
             /// thread-agile access and finalizer-driven release if the enum is never iterated.
             /// </summary>
-#if FEATURE_WINDOWSINTEROP
             private AgileComPointer<IAssemblyEnum> _agileAssemblyEnum;
 #endif
 
@@ -819,10 +821,10 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+#if FEATURE_WINDOWSINTEROP
             [SupportedOSPlatform("windows5.0")]
             private unsafe string GetNextAssemblyFusionName()
             {
-#if FEATURE_WINDOWSINTEROP
                 using ComScope<IAssemblyEnum> assemblyEnum = _agileAssemblyEnum.GetInterface();
                 using ComScope<IAssemblyName> fusionName = new(null);
 
@@ -834,10 +836,8 @@ namespace Microsoft.Build.Tasks
                 }
 
                 return GetFullName(fusionName.Pointer);
-#else
-                throw new PlatformNotSupportedException();
-#endif
             }
+#endif
 
 #if FEATURE_WINDOWSINTEROP
             private static unsafe string GetFullName(IAssemblyName* fusionAsmName)
