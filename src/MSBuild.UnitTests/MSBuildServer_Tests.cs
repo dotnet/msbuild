@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -55,6 +56,18 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class CultureInfoTask : Microsoft.Build.Utilities.Task
+    {
+        [Required]
+        public string OutputFile { get; set; } = string.Empty;
+
+        public override bool Execute()
+        {
+            File.WriteAllText(OutputFile, string.Join("|", Process.GetCurrentProcess().Id, CultureInfo.CurrentCulture.Name, CultureInfo.CurrentUICulture.Name));
+            return true;
+        }
+    }
+
     public class MSBuildServer_Tests : IDisposable
     {
         private readonly ITestOutputHelper _output;
@@ -76,6 +89,13 @@ namespace Microsoft.Build.Engine.UnitTests
         <!-- create a marker file that represents the build is started. -->
         <WriteLinesToFile File=""{{0}}"" />
         <SleepingTask SleepTime=""100000"" />
+    </Target>
+</Project>";
+        private static string cultureInfoTaskContents = @$"
+<Project>
+<UsingTask TaskName=""CultureInfoTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <Target Name='RecordCulture'>
+        <CultureInfoTask OutputFile=""$(CultureOutputFile)"" />
     </Target>
 </Project>";
 
@@ -134,6 +154,43 @@ namespace Microsoft.Build.Engine.UnitTests
             newPidOfInitialProcess.ShouldNotBe(pidOfInitialProcess, "Process started by two MSBuild executions should be different.");
             newPidOfInitialProcess.ShouldNotBe(newServerProcessId, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
+        }
+
+        [Fact]
+        public void ServerBuildsUseCultureFromEachRequest()
+        {
+            TransientTestFile project = _env.CreateFile("cultureProject.proj", cultureInfoTaskContents);
+            TransientTestFile firstCultureOutput = _env.ExpectFile();
+            TransientTestFile secondCultureOutput = _env.ExpectFile();
+            CultureInfo originalCulture = CultureInfo.CurrentCulture;
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+
+            try
+            {
+                MSBuildClient.ShutdownServer(CancellationToken.None).ShouldBeTrue();
+
+                MSBuildClientExitResult firstResult = ExecuteServerBuildWithCulture(project.Path, firstCultureOutput.Path, new CultureInfo("en-US"));
+                firstResult.MSBuildClientExitType.ShouldBe(MSBuildClientExitType.Success);
+                firstResult.MSBuildAppExitTypeString.ShouldBe("Success");
+                CultureRecord firstCultureRecord = ReadCultureRecord(firstCultureOutput.Path);
+                _env.WithTransientProcess(firstCultureRecord.ProcessId);
+                firstCultureRecord.Culture.ShouldBe("en-US");
+                firstCultureRecord.UICulture.ShouldBe("en-US");
+
+                MSBuildClientExitResult secondResult = ExecuteServerBuildWithCulture(project.Path, secondCultureOutput.Path, new CultureInfo("fr-FR"));
+                secondResult.MSBuildClientExitType.ShouldBe(MSBuildClientExitType.Success);
+                secondResult.MSBuildAppExitTypeString.ShouldBe("Success");
+                CultureRecord secondCultureRecord = ReadCultureRecord(secondCultureOutput.Path);
+                secondCultureRecord.ProcessId.ShouldBe(firstCultureRecord.ProcessId, "The second build should reuse the same server process.");
+                secondCultureRecord.Culture.ShouldBe("fr-FR");
+                secondCultureRecord.UICulture.ShouldBe("fr-FR");
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = originalCulture;
+                Thread.CurrentThread.CurrentUICulture = originalUICulture;
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            }
         }
 
         [Fact]
@@ -348,6 +405,35 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfNewServerProcess.ShouldBe(pidOfServerProcess);
             output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
         }
+
+        private static MSBuildClientExitResult ExecuteServerBuildWithCulture(string projectPath, string outputFile, CultureInfo culture)
+        {
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
+
+            MSBuildClient client = new(
+                [
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    projectPath,
+                    "/t:RecordCulture",
+                    $"/p:CultureOutputFile={outputFile}",
+                    "/nologo",
+                    "/v:m",
+                ],
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+
+            return client.Execute(CancellationToken.None);
+        }
+
+        private static CultureRecord ReadCultureRecord(string path)
+        {
+            string[] parts = File.ReadAllText(path).Split('|');
+            parts.Length.ShouldBe(3);
+
+            return new CultureRecord(int.Parse(parts[0], CultureInfo.InvariantCulture), parts[1], parts[2]);
+        }
+
+        private readonly record struct CultureRecord(int ProcessId, string Culture, string UICulture);
 
         private int ParseNumber(string searchString, string toFind)
         {

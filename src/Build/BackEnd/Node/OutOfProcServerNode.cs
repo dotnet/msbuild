@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -69,6 +70,8 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
+        private CultureInfo _originalCulture = default!;
+        private CultureInfo _originalUICulture = default!;
 
         public OutOfProcServerNode(BuildCallback buildFunction)
         {
@@ -93,6 +96,9 @@ namespace Microsoft.Build.Experimental
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
+            _originalCulture = CultureInfo.CurrentCulture;
+            _originalUICulture = CultureInfo.CurrentUICulture;
+
             ServerNodeHandshake handshake = new(
                 CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
@@ -363,6 +369,19 @@ namespace Microsoft.Build.Experimental
         }
 
         private void HandleServerNodeBuildCommand(ServerNodeBuildCommand command)
+        {
+            try
+            {
+                HandleServerNodeBuildCommandCore(command);
+            }
+            finally
+            {
+                Thread.CurrentThread.CurrentCulture = _originalCulture;
+                Thread.CurrentThread.CurrentUICulture = _originalUICulture;
+            }
+        }
+
+        private void HandleServerNodeBuildCommandCore(ServerNodeBuildCommand command)
         {
             CommunicationsUtilities.Trace($"Building with MSBuild server with command line {command.CommandLine}");
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
