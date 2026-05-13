@@ -70,6 +70,17 @@ namespace Microsoft.Build.Experimental
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
+        // Snapshot of process-global Console state captured once at server startup.
+        // Restored at the end of each request to prevent loggers (e.g. BaseConsoleLogger
+        // which sets ForegroundColor in SetColor() but only sometimes restores via ResetColor)
+        // or per-request ConsoleConfiguration application from leaking visible state into the
+        // next request or into the idle server's state.
+        private ConsoleColor _originalForegroundColor;
+        private ConsoleColor _originalBackgroundColor;
+        private bool _originalConsoleColorsCaptured;
+        private System.Text.Encoding _originalOutputEncoding = default!;
+        private bool _originalOutputEncodingCaptured;
+
         public OutOfProcServerNode(BuildCallback buildFunction)
         {
             _buildFunction = buildFunction;
@@ -93,6 +104,31 @@ namespace Microsoft.Build.Experimental
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
+            // Capture process-global Console state once. Restoring per-request keeps reused
+            // server requests from observing each other's color/encoding mutations.
+            // Wrapped in try/catch because Console.ForegroundColor/BackgroundColor throw on
+            // some redirected/headless setups (e.g. CI without a TTY).
+            try
+            {
+                _originalForegroundColor = Console.ForegroundColor;
+                _originalBackgroundColor = Console.BackgroundColor;
+                _originalConsoleColorsCaptured = true;
+            }
+            catch
+            {
+                _originalConsoleColorsCaptured = false;
+            }
+
+            try
+            {
+                _originalOutputEncoding = Console.OutputEncoding;
+                _originalOutputEncodingCaptured = true;
+            }
+            catch
+            {
+                _originalOutputEncodingCaptured = false;
+            }
+
             ServerNodeHandshake handshake = new(
                 CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
@@ -363,6 +399,53 @@ namespace Microsoft.Build.Experimental
         }
 
         private void HandleServerNodeBuildCommand(ServerNodeBuildCommand command)
+        {
+            try
+            {
+                HandleServerNodeBuildCommandCore(command);
+            }
+            finally
+            {
+                RestoreConsoleStateAfterRequest();
+            }
+        }
+
+        /// <summary>
+        /// Restore process-global Console state to the snapshot captured at server startup.
+        /// Called from a finally block in <see cref="HandleServerNodeBuildCommand"/> so that
+        /// per-request mutations (loggers writing to Console.ForegroundColor, the per-request
+        /// application of ConsoleConfiguration.BackgroundColor, etc.) do not leak across
+        /// requests in a reused server. See investigation #9379 (LOG-2 / W1c).
+        /// </summary>
+        private void RestoreConsoleStateAfterRequest()
+        {
+            if (_originalConsoleColorsCaptured)
+            {
+                try
+                {
+                    Console.ForegroundColor = _originalForegroundColor;
+                    Console.BackgroundColor = _originalBackgroundColor;
+                }
+                catch
+                {
+                    // Console color mutation can throw on redirected stdout in CI; safe to ignore.
+                }
+            }
+
+            if (_originalOutputEncodingCaptured)
+            {
+                try
+                {
+                    Console.OutputEncoding = _originalOutputEncoding;
+                }
+                catch
+                {
+                    // Some hosts disallow OutputEncoding mutation after Console initialization.
+                }
+            }
+        }
+
+        private void HandleServerNodeBuildCommandCore(ServerNodeBuildCommand command)
         {
             CommunicationsUtilities.Trace($"Building with MSBuild server with command line {command.CommandLine}");
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
