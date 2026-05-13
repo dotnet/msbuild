@@ -75,7 +75,10 @@ Use `--configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}` on every c
   - [ ] **1.2e** Ping internal "First Responders" Teams channel to get the new `VS {{NEXT_VERSION}}` channel available as a promotion target: {{URL_OF_CHANNEL_PROMOTION_PR}}
 - [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`:
   - [ ] **1.3a** Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
-  - [ ] **1.3b** **Retire predecessor branches that will no longer be supported.** Remove their `MergeToBranch` entries and rewire the chain to skip them so automation does not open stale forward-merge PRs.
+  - [ ] **1.3b** **Retire predecessor branches that will no longer be supported.** Remove their `MergeToBranch` entries and rewire the chain to skip them so automation does not open stale forward-merge PRs. \
+  How to identify a retired branch:
+    - **SDK releases** — check the lifecycle table at https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle; any branch tied to an SDK band that is past its support end date is retired.
+    - **VS releases** — the retired branch is always the version directly preceding the one being released (i.e. `vs{{THIS_RELEASE_VERSION}} - 1`).
 
 ---
 
