@@ -548,6 +548,7 @@ public class FileUtilities_Tests
         }
     }
 
+#if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
     [Fact]
     public void FileOrDirectoryExistsNoThrowTooLongWithDots()
     {
@@ -760,6 +761,7 @@ public class FileUtilities_Tests
             Directory.SetCurrentDirectory(currentDirectory);
         }
     }
+#endif
 
     /// <summary>
     /// Simple test, neither the base file nor retry files exist
