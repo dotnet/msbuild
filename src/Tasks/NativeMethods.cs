@@ -426,11 +426,11 @@ namespace Microsoft.Build.Tasks
 
             if (targetExists && (File.GetAttributes(newFileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
             {
-                throw new IOException("Moving target is read-only");
-            }
-
-            if (existingFileName == newFileName)
-            {
+#if FEATURE_WINDOWSINTEROP
+            /// <summary>
+            /// Agile wrapper around the IAssemblyEnum COM pointer from fusion.dll. Provides
+            /// thread-agile access and finalizer-driven release if the enum is never iterated.
+            /// </summary>
                 return true;
             }
 
@@ -603,25 +603,23 @@ namespace Microsoft.Build.Tasks
             if ((*bytes & 0x80) == 0x00)       // 0??? ????
             {
                 uncompressedDataLength = *bytes;
-                count = 1;
-            }
-            // Medium.
-            else if ((*bytes & 0xC0) == 0x80)  // 10?? ????
+#if FEATURE_WINDOWSINTEROP
+            [SupportedOSPlatform("windows5.0")]
+            private unsafe string GetNextAssemblyFusionName()
             {
-                uncompressedDataLength = (int)((*bytes & 0x3f) << 8 | *(bytes + 1));
-                count = 2;
-            }
-            else if ((*bytes & 0xE0) == 0xC0)      // 110? ????
-            {
-                uncompressedDataLength = (int)((*bytes & 0x1f) << 24 | *(bytes + 1) << 16 | *(bytes + 2) << 8 | *(bytes + 3));
-                count = 4;
-            }
+                using ComScope<IAssemblyEnum> assemblyEnum = _agileAssemblyEnum.GetInterface();
+                using ComScope<IAssemblyName> fusionName = new(null);
 
-            return count;
-        }
-        #endregion
-        #region InternalClass
-        /// <summary>
+                assemblyEnum.Pointer->GetNextAssembly(null, fusionName, 0).ThrowOnFailure();
+
+                if (fusionName.IsNull)
+                {
+                    return null;
+                }
+
+                return GetFullName(fusionName.Pointer);
+            }
+#endifsummary>
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
         [ComVisible(false)]
