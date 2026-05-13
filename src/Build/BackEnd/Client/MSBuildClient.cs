@@ -476,7 +476,7 @@ namespace Microsoft.Build.Experimental
                     EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides()!);
 
                 using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
-                _launchedServerPid = msbuildProcess?.Id;
+                _launchedServerPid = msbuildProcess.Id;
                 CommunicationsUtilities.Trace($"Server started with PID: {_launchedServerPid}");
             }
             catch (Exception ex)
