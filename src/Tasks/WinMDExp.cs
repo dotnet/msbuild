@@ -288,6 +288,7 @@ namespace Microsoft.Build.Tasks
                 var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputWindowsMetadataFile);
                 var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(winMDModule);
 
+                // If the last write time of the input file is less than the last write time of the output file
                 if (outputWriteTime > winMDModuleWriteTime)
                 {
                     return true;
