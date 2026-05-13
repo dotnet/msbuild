@@ -148,6 +148,11 @@ namespace Microsoft.Build.Tasks
             internal string runtimeVersion;
 
             /// <summary>
+            /// Per-instance lock that serializes concurrent lazy initialization and read of the fields.
+            /// </summary>
+            internal readonly LockType _lock = new();
+
+            /// <summary>
             /// Default construct.
             /// </summary>
             internal FileState(DateTime lastModified)
@@ -472,29 +477,35 @@ namespace Microsoft.Build.Tasks
 
             // Not a well-known FX assembly so now check the cache.
             FileState fileState = GetFileState(path);
-            if (fileState.Assembly == null)
-            {
-                fileState.Assembly = getAssemblyName(path);
 
-                // Certain assemblies, like mscorlib may not have metadata.
-                // Avoid continuously calling getAssemblyName on these files by
-                // recording these as having an empty name.
+            // Concurrent RAR tasks can share the same FileState reference via s_processWideFileStateCache.
+            // Lock to safely publish writes to the shared FileState.Assembly field. 
+            lock (fileState._lock)
+            {
                 if (fileState.Assembly == null)
                 {
-                    fileState.Assembly = AssemblyNameExtension.UnnamedAssembly;
+                    fileState.Assembly = getAssemblyName(path);
+
+                    // Certain assemblies, like mscorlib may not have metadata.
+                    // Avoid continuously calling getAssemblyName on these files by
+                    // recording these as having an empty name.
+                    if (fileState.Assembly == null)
+                    {
+                        fileState.Assembly = AssemblyNameExtension.UnnamedAssembly;
+                    }
+                    if (fileState.IsWorthPersisting)
+                    {
+                        isDirty = true;
+                    }
                 }
-                if (fileState.IsWorthPersisting)
+
+                if (fileState.Assembly.IsUnnamedAssembly)
                 {
-                    isDirty = true;
+                    return null;
                 }
-            }
 
-            if (fileState.Assembly.IsUnnamedAssembly)
-            {
-                return null;
+                return fileState.Assembly;
             }
-
-            return fileState.Assembly;
         }
 
         /// <summary>
@@ -504,16 +515,20 @@ namespace Microsoft.Build.Tasks
         private string GetRuntimeVersion(string path)
         {
             FileState fileState = GetFileState(path);
-            if (String.IsNullOrEmpty(fileState.RuntimeVersion))
+            // Lock to serialize concurrent populate-and-read of the shared RuntimeVersion field.
+            lock (fileState._lock)
             {
-                fileState.RuntimeVersion = getAssemblyRuntimeVersion(path);
-                if (fileState.IsWorthPersisting)
+                if (String.IsNullOrEmpty(fileState.RuntimeVersion))
                 {
-                    isDirty = true;
+                    fileState.RuntimeVersion = getAssemblyRuntimeVersion(path);
+                    if (fileState.IsWorthPersisting)
+                    {
+                        isDirty = true;
+                    }
                 }
-            }
 
-            return fileState.RuntimeVersion;
+                return fileState.RuntimeVersion;
+            }
         }
 
         /// <summary>
@@ -533,24 +548,28 @@ namespace Microsoft.Build.Tasks
             out FrameworkName frameworkName)
         {
             FileState fileState = GetFileState(path);
-            if (fileState.dependencies == null)
+            // Lock to atomically populate-and-read the three metadata fields. 
+            lock (fileState._lock)
             {
-                getAssemblyMetadata(
-                    path,
-                    assemblyMetadataCache,
-                    out fileState.dependencies,
-                    out fileState.scatterFiles,
-                    out fileState.frameworkName);
-
-                if (fileState.IsWorthPersisting)
+                if (fileState.dependencies == null)
                 {
-                    isDirty = true;
-                }
-            }
+                    getAssemblyMetadata(
+                        path,
+                        assemblyMetadataCache,
+                        out fileState.dependencies,
+                        out fileState.scatterFiles,
+                        out fileState.frameworkName);
 
-            dependencies = fileState.dependencies;
-            scatterFiles = fileState.scatterFiles;
-            frameworkName = fileState.frameworkName;
+                    if (fileState.IsWorthPersisting)
+                    {
+                        isDirty = true;
+                    }
+                }
+
+                dependencies = fileState.dependencies;
+                scatterFiles = fileState.scatterFiles;
+                frameworkName = fileState.frameworkName;
+            }
         }
 
         /// <summary>
