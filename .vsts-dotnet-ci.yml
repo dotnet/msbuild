@@ -385,6 +385,16 @@ jobs:
       ArtifactName: 'FullOnWindows Release test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+  - script: .dotnet\dotnet.exe exec artifacts\bin\MSBuild.Benchmarks\Release\net10.0\MSBuild.Benchmarks.dll --ci
+    displayName: Run benchmarks in dry mode
+    condition: eq(variables.onlyDocChanged, 0)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: BenchmarkDotNet results'
+    inputs:
+      PathtoPublish: 'BenchmarkDotNet.Artifacts'
+      ArtifactName: 'BenchmarksDryRunWindows'
+    continueOnError: true
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
@@ -479,6 +489,16 @@ jobs:
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
       ArtifactName: 'Linux Verify $(System.JobAttempt)'
+  - bash: .dotnet/dotnet exec artifacts/bin/MSBuild.Benchmarks/Debug/net10.0/MSBuild.Benchmarks.dll --ci
+    displayName: Run benchmarks in dry mode
+    condition: eq(variables.onlyDocChanged, 0)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: BenchmarkDotNet results'
+    inputs:
+      PathtoPublish: 'BenchmarkDotNet.Artifacts'
+      ArtifactName: 'BenchmarksDryRunLinux'
+    continueOnError: true
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
 
 - job: CoreOnMac
   displayName: "macOS Core"
@@ -639,79 +659,4 @@ jobs:
       summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       pathToSources: $(Build.SourcesDirectory)
     condition: eq(variables.onlyDocChanged, 0)
-- job: BenchmarksDryRunWindows
-  displayName: "Benchmarks Dry Run (Windows)"
-  pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEng-MicroBuildVSStable
-      demands: agent.os -equals Windows_NT
-  timeoutInMinutes: 60
-  steps:
-  - template: azure-pipelines/check-documentation-only-change.yml
-  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-    - task: PowerShell@2
-      displayName: Setup Private Feeds Credentials
-      inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-      env:
-        Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - script: eng\common\build.cmd -restore -configuration Release
-    displayName: Install .NET SDK and restore packages
-    condition: eq(variables.onlyDocChanged, 0)
-  - script: .dotnet\dotnet.exe build --no-restore -c Release -f net10.0 src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj
-    displayName: Build benchmarks project
-    condition: eq(variables.onlyDocChanged, 0)
-  - script: .dotnet\dotnet.exe run -c Release -f net10.0 --no-build --no-restore --project src\MSBuild.Benchmarks\MSBuild.Benchmarks.csproj -- --ci
-    displayName: Run benchmarks in dry mode
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: BenchmarkDotNet results'
-    inputs:
-      PathtoPublish: 'BenchmarkDotNet.Artifacts'
-      ArtifactName: 'BenchmarksDryRunWindows'
-    continueOnError: true
-    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
-
-- job: BenchmarksDryRunLinux
-  displayName: "Benchmarks Dry Run (Linux)"
-  pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      vmImage: 'ubuntu-latest'
-  timeoutInMinutes: 60
-  steps:
-  - template: azure-pipelines/check-documentation-only-change.yml
-  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-    - task: Bash@3
-      displayName: Setup Private Feeds Credentials
-      inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
-        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
-      env:
-        Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - bash: sudo apt-get update && sudo apt-get install -y libxml2
-    displayName: Install dependencies
-  - bash: ./eng/common/build.sh --restore --configuration Release
-    displayName: Install .NET SDK and restore packages
-    condition: eq(variables.onlyDocChanged, 0)
-  - bash: .dotnet/dotnet build -c Release -f net10.0 src/MSBuild.Benchmarks/MSBuild.Benchmarks.csproj
-    displayName: Build benchmarks project
-    condition: eq(variables.onlyDocChanged, 0)
-  - bash: .dotnet/dotnet run -c Release -f net10.0 --no-build --project src/MSBuild.Benchmarks/MSBuild.Benchmarks.csproj -- --ci
-    displayName: Run benchmarks in dry mode
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: BenchmarkDotNet results'
-    inputs:
-      PathtoPublish: 'BenchmarkDotNet.Artifacts'
-      ArtifactName: 'BenchmarksDryRunLinux'
-    continueOnError: true
-    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
-
 - template: /eng/common/templates/jobs/source-build.yml

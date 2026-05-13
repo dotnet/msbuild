@@ -17,7 +17,8 @@ ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJi
 ParseAndRemoveBooleanParameter(argList, "--ci", out bool ci);
 
 // In CI mode, run all benchmarks unless the caller already specified a filter.
-if (ci && !argList.Any(a => a == "--filter" || a.StartsWith("--filter=")))
+// BenchmarkDotNet accepts both --filter and its short alias -f.
+if (ci && !argList.Any(a => a == "--filter" || a == "-f" || a.StartsWith("--filter=") || a.StartsWith("-f=")))
 {
     argList.Add("--filter");
     argList.Add("*");
@@ -39,7 +40,9 @@ static IConfig GetConfig(bool collectEtw, bool disableNGen, bool disableJitInlin
     if (ci)
     {
         return ManualConfig.Create(DefaultConfig.Instance)
-            .AddJob(Job.Dry.WithToolchain(InProcessEmitToolchain.Instance))
+            .AddJob(Job.Dry
+                .DontEnforcePowerPlan()
+                .WithToolchain(InProcessEmitToolchain.Instance))
             .WithOption(ConfigOptions.DisableOptimizationsValidator, true);
     }
 
