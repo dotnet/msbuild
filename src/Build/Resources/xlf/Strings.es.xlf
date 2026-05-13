@@ -1023,6 +1023,11 @@ Errores: {3}</target>
         <target state="translated">El ensamblado de tarea se cargó desde "{0}" mientras que la ubicación deseada era "{1}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</source>
+        <target state="new">TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</target>
+        <note>LOCALIZATION: Do NOT localize the property names "ProcessId", "ParentProcessId", "NewNodeContext", "IsSidecar", "TaskHost" and "NodeReuseEffective".</note>
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">La tarea "{0}" liberó {1} núcleos y ahora retiene un total de {2} núcleos.</target>

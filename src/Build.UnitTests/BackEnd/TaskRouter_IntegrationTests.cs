@@ -8,7 +8,6 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -33,7 +32,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
         private readonly string _testProjectsDir;
-        private bool _registeredLongLivedHost;
 
         public TaskRouter_IntegrationTests(ITestOutputHelper output)
         {
@@ -46,27 +44,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         public void Dispose()
         {
-            if (_registeredLongLivedHost)
-            {
-                ((IBuildComponentHost)BuildManager.DefaultBuildManager).RegisterFactory(
-                    BuildComponentType.HostInfo,
-                    TransientHostInfo.CreateComponent);
-            }
-
             _env.Dispose();
-        }
-
-        /// <summary>
-        /// Simulates running under the MSBuild Server by registering
-        /// <see cref="LongLivedServerHostInfo"/> on the shared BuildManager.
-        /// Replaces the previous env-var hack ("_MSBUILDORIGINALUSESERVER=1").
-        /// </summary>
-        private void SimulateLongLivedHost()
-        {
-            ((IBuildComponentHost)BuildManager.DefaultBuildManager).RegisterFactory(
-                BuildComponentType.HostInfo,
-                LongLivedServerHostInfo.CreateComponent);
-            _registeredLongLivedHost = true;
         }
 
         /// <summary>
@@ -407,20 +385,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void IsKnownProblematicTask_ReturnsTrueForRestoreTask()
+        public void RequiresTransientTaskHost_ReturnsTrueForRestoreTask()
         {
-            TaskRouter.IsKnownProblematicTask(typeof(global::NuGet.Build.Tasks.RestoreTask)).ShouldBeTrue();
+            TaskRouter.RequiresTransientTaskHost(typeof(NuGet.Build.Tasks.RestoreTask)).ShouldBeTrue();
         }
 
         [Fact]
-        public void IsKnownProblematicTask_ReturnsFalseForRegularTask()
+        public void RequiresTransientTaskHost_ReturnsFalseForRegularTask()
         {
-            TaskRouter.IsKnownProblematicTask(typeof(NonEnlightenedTestTask)).ShouldBeFalse();
-            TaskRouter.IsKnownProblematicTask(typeof(AttributeTestTask)).ShouldBeFalse();
+            TaskRouter.RequiresTransientTaskHost(typeof(NonEnlightenedTestTask)).ShouldBeFalse();
+            TaskRouter.RequiresTransientTaskHost(typeof(AttributeTestTask)).ShouldBeFalse();
         }
 
         [Fact]
-        public void ProblematicTask_RoutedToTaskHost_InMultiThreadedMode()
+        public void RequiresTransientTaskHost_RoutedToTaskHost_InMultiThreadedMode()
         {
             string projectContent = $@"
 <Project>
@@ -438,7 +416,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var buildParameters = new BuildParameters
             {
                 MultiThreaded = true,
-                Loggers = new[] { logger },
+                Loggers = [logger],
                 DisableInProcNode = false,
                 EnableNodeReuse = false,
             };
@@ -447,11 +425,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 projectFile,
                 new Dictionary<string, string>(),
                 null,
-                new[] { "TestTarget" },
+                ["TestTarget"],
                 null);
 
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult result = buildManager.Build(buildParameters, buildRequestData);
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
@@ -459,12 +437,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void ProblematicTask_RoutedToTaskHost_InServerMode()
+        public void RequiresTransientTaskHost_RoutedToTaskHost_InServerMode()
         {
-            // Mark the engine as running in a long-lived host (the production trigger
-            // is the MSBuild Server registering LongLivedServerHostInfo at startup).
-            SimulateLongLivedHost();
-
             string projectContent = $@"
 <Project>
     <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
@@ -481,20 +455,24 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var buildParameters = new BuildParameters
             {
                 MultiThreaded = false,
-                Loggers = new[] { logger },
+                Loggers = [logger],
                 DisableInProcNode = false,
                 EnableNodeReuse = false,
+
+                // Simulate running under the MSBuild Server. In production this flag is
+                // set process-wide by OutOfProcServerNode via BuildParameters.MarkProcessAsLongLivedHost.
+                IsLongLivedHost = true,
             };
 
             var buildRequestData = new BuildRequestData(
                 projectFile,
                 new Dictionary<string, string>(),
                 null,
-                new[] { "TestTarget" },
+                ["TestTarget"],
                 null);
 
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult result = buildManager.Build(buildParameters, buildRequestData);
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "RestoreTask");
@@ -502,7 +480,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void ProblematicTask_GetsFreshProcess_OnEachInvocation_InMultiThreadedMode()
+        public void RequiresTransientTaskHost_GetsFreshProcess_OnEachInvocation_InMultiThreadedMode()
         {
             string projectContent = $@"
 <Project>
@@ -520,11 +498,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var buildParameters = new BuildParameters
             {
                 MultiThreaded = true,
-                Loggers = new[] { logger },
+                Loggers = [logger],
                 DisableInProcNode = false,
 
-                // Load-bearing: with reuse off the test cannot distinguish "transient TaskHost
-                // (workaround)" from "sidecar TaskHost that happened to die between builds".
+                // Reuse must stay ON so we test the workaround, not natural process death.
+                // With reuse off the test cannot distinguish "transient TaskHost (workaround)"
+                // from "sidecar TaskHost that happened to die between builds".
                 EnableNodeReuse = true,
             };
 
@@ -532,14 +511,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 projectFile,
                 new Dictionary<string, string>(),
                 null,
-                new[] { "TestTarget" },
+                ["TestTarget"],
                 null);
 
-            // Two separate Build cycles. The workaround fires per build; nodeReuse=false on the
-            // spawned TaskHost ensures it dies at EndBuild so the next Build gets a fresh process.
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result1 = buildManager.Build(buildParameters, buildRequestData);
-            var result2 = buildManager.Build(buildParameters, buildRequestData);
+            // Two separate Build cycles. The workaround forces nodeReuse=false on the spawned
+            // TaskHost so it dies at EndBuild, giving the next Build a fresh process.
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult result1 = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result2 = buildManager.Build(buildParameters, buildRequestData);
 
             result1.OverallResult.ShouldBe(BuildResultCode.Success);
             result2.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -553,10 +532,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void ProblematicTask_GetsFreshProcess_OnEachInvocation_InServerMode()
+        public void RequiresTransientTaskHost_GetsFreshProcess_OnEachInvocation_InServerMode()
         {
-            SimulateLongLivedHost();
-
             string projectContent = $@"
 <Project>
     <UsingTask TaskName=""RestoreTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
@@ -573,26 +550,28 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var buildParameters = new BuildParameters
             {
                 MultiThreaded = false,
-                Loggers = new[] { logger },
+                Loggers = [logger],
                 DisableInProcNode = false,
 
-                // Load-bearing: with reuse off the test cannot distinguish "transient TaskHost
-                // (workaround)" from "sidecar TaskHost that happened to die between builds".
+                // Reuse must stay ON so we test the workaround, not natural process death.
                 EnableNodeReuse = true,
+
+                // Simulate running under the MSBuild Server.
+                IsLongLivedHost = true,
             };
 
             var buildRequestData = new BuildRequestData(
                 projectFile,
                 new Dictionary<string, string>(),
                 null,
-                new[] { "TestTarget" },
+                ["TestTarget"],
                 null);
 
-            // Two separate Build cycles. The workaround fires per build; nodeReuse=false on the
-            // spawned TaskHost ensures it dies at EndBuild so the next Build gets a fresh process.
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result1 = buildManager.Build(buildParameters, buildRequestData);
-            var result2 = buildManager.Build(buildParameters, buildRequestData);
+            // Two separate Build cycles. The workaround forces nodeReuse=false on the spawned
+            // TaskHost so it dies at EndBuild, giving the next Build a fresh process.
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult result1 = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result2 = buildManager.Build(buildParameters, buildRequestData);
 
             result1.OverallResult.ShouldBe(BuildResultCode.Success);
             result2.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -617,7 +596,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void ProblematicTask_RunsInProcess_WhenNoMTOrServer()
+        public void RequiresTransientTaskHost_RunsInProcess_WhenNoMTOrServer()
         {
             string projectContent = $@"
 <Project>
@@ -635,7 +614,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var buildParameters = new BuildParameters
             {
                 MultiThreaded = false,
-                Loggers = new[] { logger },
+                Loggers = [logger],
                 DisableInProcNode = false,
                 EnableNodeReuse = false,
             };
@@ -644,11 +623,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 projectFile,
                 new Dictionary<string, string>(),
                 null,
-                new[] { "TestTarget" },
+                ["TestTarget"],
                 null);
 
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult result = buildManager.Build(buildParameters, buildRequestData);
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
@@ -757,20 +736,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 }
 
 // Test task in the NuGet.Build.Tasks namespace to simulate the real RestoreTask for routing tests.
-// TaskRouter identifies problematic tasks by full type name.
 namespace NuGet.Build.Tasks
 {
     /// <summary>
     /// Simulates the NuGet RestoreTask for testing task routing workaround.
     /// Has the same full name (NuGet.Build.Tasks.RestoreTask) that TaskRouter checks.
     /// </summary>
-    public class RestoreTask : Microsoft.Build.Utilities.Task
+    public class RestoreTask : Task
     {
         public override bool Execute()
         {
             // Include the OS PID so tests can verify each invocation runs in a fresh
-            // TaskHost process (the core behavioural guarantee of the workaround for
-            // https://github.com/dotnet/msbuild/issues/13315).
+            // TaskHost process
             Log.LogMessage(MessageImportance.High, $"RestoreTask executed in PID={Process.GetCurrentProcess().Id}");
             return true;
         }

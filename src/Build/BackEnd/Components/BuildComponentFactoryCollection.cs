@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Components.Caching;
-using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 #if FEATURE_REPORTFILEACCESSES
@@ -90,10 +89,6 @@ namespace Microsoft.Build.BackEnd
 
             // SDK resolution
             _componentEntriesByType[BuildComponentType.SdkResolverService] = new BuildComponentEntry(BuildComponentType.SdkResolverService, MainNodeSdkResolverService.CreateComponent, CreationPattern.Singleton);
-
-            // Host info: defaults to a transient host. The MSBuild Server replaces this
-            // with LongLivedServerHostInfo at startup.
-            _componentEntriesByType[BuildComponentType.HostInfo] = new BuildComponentEntry(BuildComponentType.HostInfo, TransientHostInfo.CreateComponent, CreationPattern.Singleton);
 
 #if FEATURE_REPORTFILEACCESSES
             _componentEntriesByType[BuildComponentType.FileAccessManager] = new BuildComponentEntry(BuildComponentType.FileAccessManager, FileAccessManager.CreateComponent, CreationPattern.Singleton);

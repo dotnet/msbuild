@@ -383,9 +383,9 @@ namespace Microsoft.Build.BackEnd
 
                     if (_connectedToTaskHost)
                     {
-                        _taskLoggingContext.LogCommentFromText(
+                        _taskLoggingContext.LogComment(
                             MessageImportance.Low,
-                            "TaskHost details for task \"{0}\": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.",
+                            "TaskHostDetails",
                             _taskType.Type.Name,
                             hostProcessId,
                             Process.GetCurrentProcess().Id,

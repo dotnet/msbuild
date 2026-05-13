@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -109,10 +108,12 @@ namespace Microsoft.Build.Experimental
                 return NodeEngineShutdownReason.Error;
             }
 
-            // Mark the engine as running in a long-lived host
-            ((IBuildComponentHost)BuildManager.DefaultBuildManager).RegisterFactory(
-                BuildComponentType.HostInfo,
-                LongLivedServerHostInfo.CreateComponent);
+            // Mark the process as a long-lived host so per-build BuildParameters instances
+            // inherit IsLongLivedHost = true. This drives the workaround that routes tasks
+            // whose static state would leak across invocations (e.g., NuGet RestoreTask) to
+            // a transient TaskHost instead of a reusable sidecar.
+            // See https://github.com/dotnet/msbuild/issues/13315.
+            BuildParameters.MarkProcessAsLongLivedHost();
 
             while (true)
             {

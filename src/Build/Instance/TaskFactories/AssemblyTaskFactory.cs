@@ -9,7 +9,6 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
 
-using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -349,15 +348,15 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // Workaround for tasks with problematic static singleton state (e.g., NuGet RestoreTask).
-            // In MT mode or when MSBuild server is active, these tasks must run in a transient (non-sidecar)
-            // TaskHost to ensure static state is cleaned up after each invocation.
-            // See https://github.com/dotnet/msbuild/issues/13315
+            // Workaround for tasks whose static singleton state would leak across invocations
+            // (e.g., NuGet RestoreTask). In MT mode or when MSBuild server is active, these tasks
+            // must run in a transient (non-sidecar) TaskHost so static state is cleaned up after
+            // each invocation. See https://github.com/dotnet/msbuild/issues/13315
             bool forceTransientTaskHost = false;
-            if (_loadedType?.Type != null && TaskRouter.IsKnownProblematicTask(_loadedType.Type))
+            if (_loadedType?.Type != null && TaskRouter.RequiresTransientTaskHost(_loadedType.Type))
             {
                 bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
-                bool isLongLivedHost = IsLongLivedHost(buildComponentHost);
+                bool isLongLivedHost = buildComponentHost?.BuildParameters?.IsLongLivedHost == true;
 
                 if (isMultiThreaded || isLongLivedHost)
                 {
@@ -380,7 +379,8 @@ namespace Microsoft.Build.BackEnd
                 // If the task host factory is explicitly requested, do not act as a sidecar task host.
                 // This is important as customers use task host factories for short lived tasks to release
                 // potential locks.
-                // Also disable sidecar for known problematic tasks to ensure static state cleanup.
+                // Also disable sidecar for tasks that require a transient TaskHost so their
+                // static state is cleaned up between invocations.
                 bool useSidecarTaskHost = !forceTransientTaskHost && !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
@@ -440,27 +440,6 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 return taskInstance;
-            }
-        }
-
-        /// <summary>
-        /// Returns true when the engine is hosted in a long-lived process (MSBuild Server)/
-        /// </summary>
-        private static bool IsLongLivedHost(IBuildComponentHost buildComponentHost)
-        {
-            if (buildComponentHost is null)
-            {
-                return false;
-            }
-
-            try
-            {
-                return buildComponentHost.GetComponent(BuildComponentType.HostInfo) is IHostInfo hostInfo
-                       && hostInfo.IsLongLivedHost;
-            }
-            catch (InternalErrorException)
-            {
-                return false;
             }
         }
 

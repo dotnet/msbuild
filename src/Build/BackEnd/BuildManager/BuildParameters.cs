@@ -65,6 +65,12 @@ namespace Microsoft.Build.Execution
         private static string s_startupDirectory = NativeMethodsShared.GetCurrentDirectory();
 
         /// <summary>
+        /// Process-wide flag indicating that the engine is hosted in a long-lived process
+        /// (e.g., the MSBuild Server) that persists across multiple build invocations.
+        /// </summary>
+        private static bool s_isLongLivedHost;
+
+        /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
         /// </summary>
         private static bool? s_warnOnUninitializedProperty;
@@ -328,6 +334,7 @@ namespace Microsoft.Build.Execution
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
+            IsLongLivedHost = other.IsLongLivedHost;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
         }
@@ -798,6 +805,20 @@ namespace Microsoft.Build.Execution
         ///  (for diagnostic use) Whether or not this is out of proc
         /// </summary>
         internal bool IsOutOfProc { get; set; }
+
+        /// <summary>
+        /// True when the engine is hosted in a long-lived process (e.g., MSBuild Server)
+        /// that persists across multiple build invocations. Used to opt tasks whose static
+        /// singleton state would leak across invocations out of sidecar TaskHost reuse.
+        /// See https://github.com/dotnet/msbuild/issues/13315.
+        /// </summary>
+        /// </summary>
+        internal bool IsLongLivedHost { get; set; } = s_isLongLivedHost;
+
+        /// <summary>
+        /// Marks the current process as a long-lived host.
+        /// </summary>
+        internal static void MarkProcessAsLongLivedHost() => s_isLongLivedHost = true;
 
         /// <nodoc/>
         public ProjectLoadSettings ProjectLoadSettings

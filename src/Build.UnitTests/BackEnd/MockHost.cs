@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.Host;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
@@ -209,7 +208,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
                 BuildComponentType.BuildCheckManagerProvider => (IBuildComponent)_buildCheckManagerProvider,
                 BuildComponentType.TelemetryCollector => (IBuildComponent)_telemetryCollector,
-                BuildComponentType.HostInfo => (IBuildComponent)new TransientHostInfo(),
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }

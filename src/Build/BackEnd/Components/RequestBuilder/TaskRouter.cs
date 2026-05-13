@@ -85,24 +85,24 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Known task full name that have problematic static singleton state and must not
-        /// run in a sidecar TaskHost (which persists across invocations). Instead, these tasks
-        /// should run in an explicit (transient) TaskHost that terminates after execution,
+        /// Full name of a task whose static singleton state makes it unsafe to run in a
+        /// long-lived sidecar TaskHost (which persists across invocations). Such tasks must
+        /// instead run in an explicit (transient) TaskHost that terminates after execution,
         /// ensuring static state is cleaned up.
         /// This is a temporary workaround until the task authors fix their static state issues.
         /// See https://github.com/dotnet/msbuild/issues/13315
         /// </summary>
-        private const string KnownProblematicTaskName = "NuGet.Build.Tasks.RestoreTask";
+        private const string TaskRequiringTransientTaskHostFullName = "NuGet.Build.Tasks.RestoreTask";
 
         /// <summary>
-        /// Determines if a task is known to have problematic static singleton state that
-        /// makes it unsafe to run in a long-lived sidecar TaskHost process.
-        /// Such tasks should be routed to an explicit (transient) TaskHost that terminates
-        /// after execution, ensuring all static state is cleaned up.
+        /// Determines if a task must be routed to an explicit (transient) TaskHost rather than
+        /// a reusable sidecar, because its static singleton state would leak across invocations.
+        /// Such tasks should run in a TaskHost that terminates after execution so all static
+        /// state is cleaned up.
         /// </summary>
         /// <param name="taskType">The type of the task to evaluate.</param>
-        /// <returns>True if the task is known to be problematic; false otherwise.</returns>
-        public static bool IsKnownProblematicTask(Type taskType)
+        /// <returns>True if the task requires a transient TaskHost; false otherwise.</returns>
+        public static bool RequiresTransientTaskHost(Type taskType)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
 
@@ -112,7 +112,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            return string.Equals(fullName, KnownProblematicTaskName, StringComparison.Ordinal);
+            return string.Equals(fullName, TaskRequiringTransientTaskHostFullName, StringComparison.Ordinal);
         }
 
         /// <summary>

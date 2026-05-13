@@ -1023,6 +1023,11 @@ Errors: {3}</source>
         <target state="translated">已从“{0}”加载任务程序集，但所需位置为“{1}”。</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</source>
+        <target state="new">TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</target>
+        <note>LOCALIZATION: Do NOT localize the property names "ProcessId", "ParentProcessId", "NewNodeContext", "IsSidecar", "TaskHost" and "NodeReuseEffective".</note>
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">任务“{0}”发布了 {1} 个核心，现总共包含 {2} 个核心。</target>

@@ -222,7 +222,6 @@
     <Compile Include="BackEnd\Components\Caching\IRegisteredTaskObjectCache.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs" />
     <Compile Include="BackEnd\Components\Caching\RegisteredTaskObjectCache.cs" />
-    <Compile Include="BackEnd\Components\Host\IHostInfo.cs" />
     <Compile Include="BackEnd\Components\Logging\EvaluationLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\BuildLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\LoggingContext.cs" />

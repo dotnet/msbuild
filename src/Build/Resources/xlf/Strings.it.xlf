@@ -1023,6 +1023,11 @@ Errori: {3}</target>
         <target state="translated">L'assembly attività è stato caricato da "{0}" mentre era "{1}" il percorso desiderato.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</source>
+        <target state="new">TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</target>
+        <note>LOCALIZATION: Do NOT localize the property names "ProcessId", "ParentProcessId", "NewNodeContext", "IsSidecar", "TaskHost" and "NodeReuseEffective".</note>
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">L'attività "{0}" ha rilasciato {1} core e ora contiene {2} core in totale.</target>

@@ -1023,6 +1023,11 @@ Errors: {3}</source>
         <target state="translated">원하는 위치가 '{1}'인 동안 '{0}'에서 작업 어셈블리를 로드했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</source>
+        <target state="new">TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</target>
+        <note>LOCALIZATION: Do NOT localize the property names "ProcessId", "ParentProcessId", "NewNodeContext", "IsSidecar", "TaskHost" and "NodeReuseEffective".</note>
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">"{0}" 작업에서 코어 {1}개를 해제했고 지금 총 {2}개의 코어를 보유하고 있습니다.</target>

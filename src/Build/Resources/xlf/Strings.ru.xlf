@@ -1023,6 +1023,11 @@ Errors: {3}</source>
         <target state="translated">Сборка задачи была загружена из "{0}", а нужное расположение — "{1}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</source>
+        <target state="new">TaskHost details for task "{0}": ProcessId={1}, ParentProcessId={2}, NewNodeContext={3}, IsSidecar={4}, NodeReuseEffective={5}.</target>
+        <note>LOCALIZATION: Do NOT localize the property names "ProcessId", "ParentProcessId", "NewNodeContext", "IsSidecar", "TaskHost" and "NodeReuseEffective".</note>
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Задача "{0}" освободила указанное число ядер ({1}). Теперь общее число ядер, которыми располагает задача, равно {2}.</target>
