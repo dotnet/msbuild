@@ -311,12 +311,16 @@ namespace Microsoft.Build.CommandLine
 
             int exitCode;
             if (
-                Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
+                ShouldUseMSBuildServer(args, out string serverEnableReason) &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
                 CanRunServerBasedOnCommandLineSwitches(args))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
+                if (KnownTelemetry.PartialBuildTelemetry != null)
+                {
+                    KnownTelemetry.PartialBuildTelemetry.ServerEnableReason = serverEnableReason;
+                }
 
                 // Use the client app to execute build in msbuild server. Opt-in feature.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
@@ -335,6 +339,109 @@ namespace Microsoft.Build.CommandLine
             TelemetryManager.Instance?.Dispose();
 
             return exitCode;
+        }
+
+        /// <summary>
+        /// Returns true if MSBuild Server should be used for this invocation.
+        /// </summary>
+        /// <remarks>
+        /// Decision tree:
+        /// <list type="bullet">
+        ///   <item><c>MSBUILDUSESERVER=1</c> → use server (existing explicit opt-in).</item>
+        ///   <item><c>MSBUILDUSESERVER=0</c> → do NOT use server (explicit opt-out, takes precedence over -mt).</item>
+        ///   <item><c>MSBUILDUSESERVER</c> unset AND command line contains <c>-mt</c>/<c>-multithreaded</c> → use server.
+        ///         Rationale: <c>-mt</c> users already accept process-shared state (in-proc thread workers
+        ///         instead of multi-process worker nodes), so server reuse barely adds risk and recovers the
+        ///         per-invocation JIT/SDK-resolution warm-up cost that <c>-mt</c> would otherwise pay every
+        ///         build (because <c>-mt</c> shares the entry process with the build instead of the workers).
+        ///         See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
+        ///   <item>Otherwise → no server (existing default).</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="args">Raw command-line arguments.</param>
+        /// <param name="serverEnableReason">Telemetry-friendly reason: "EnvVar", "ImpliedByMt", or empty when not enabled.</param>
+        /// <returns>True if server should be used.</returns>
+        private static bool ShouldUseMSBuildServer(string[] args, out string serverEnableReason)
+        {
+            serverEnableReason = string.Empty;
+            string envVar = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
+
+            if (envVar == "1")
+            {
+                serverEnableReason = "EnvVar";
+                return true;
+            }
+
+            // Explicit opt-out: MSBUILDUSESERVER=0 always wins, even if -mt is on the command line.
+            if (envVar == "0")
+            {
+                return false;
+            }
+
+            // Implicit opt-in via -mt. Best-effort detection that does not throw — if argument
+            // parsing fails for any reason we conservatively decline the implicit opt-in (the
+            // explicit MSBUILDUSESERVER=1 path is unaffected).
+            if (CommandLineContainsMultiThreadedSwitch(args))
+            {
+                serverEnableReason = "ImpliedByMt";
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Lightweight check for the presence of <c>-mt</c>/<c>-multithreaded</c> on the command
+        /// line, suitable for the early routing decision in <see cref="ShouldUseMSBuildServer"/>.
+        /// </summary>
+        /// <remarks>
+        /// Does NOT do full command-line parsing (which is expensive and runs again later).
+        /// Intentionally conservative: returns false on any parse problem.
+        /// </remarks>
+        private static bool CommandLineContainsMultiThreadedSwitch(string[] args)
+        {
+            if (args is null || args.Length == 0)
+            {
+                return false;
+            }
+
+            foreach (string arg in args)
+            {
+                if (string.IsNullOrEmpty(arg) || arg.Length < 2)
+                {
+                    continue;
+                }
+
+                // Switches start with - or / (and on Unix, - is the only convention).
+                char prefix = arg[0];
+                if (prefix != '-' && prefix != '/')
+                {
+                    continue;
+                }
+
+                // Strip leading - or /, then split on : to get the switch name (ignore any value/parameters).
+                string body = arg.Substring(1);
+                int colonIndex = body.IndexOf(':');
+                string switchName = colonIndex >= 0 ? body.Substring(0, colonIndex) : body;
+
+                if (switchName.Equals("mt", StringComparison.OrdinalIgnoreCase) ||
+                    switchName.Equals("multithreaded", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Honor an explicit ":false" value if present (matches ProcessBooleanSwitch semantics).
+                    if (colonIndex >= 0)
+                    {
+                        string value = body.Substring(colonIndex + 1);
+                        if (value.Equals("false", StringComparison.OrdinalIgnoreCase) ||
+                            value.Equals("0", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
