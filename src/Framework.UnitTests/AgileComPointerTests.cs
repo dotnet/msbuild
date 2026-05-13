@@ -104,18 +104,30 @@ public unsafe class AgileComPointerTests
         IRunningObjectTable* rot = CreateRot();
         try
         {
+            // Capture the baseline refcount via an AddRef/Release pair. ROT is a process
+            // singleton and may report a fixed count regardless of actual references, so
+            // we use the AddRef return as the reference value rather than asserting a
+            // hard-coded number.
+            uint baseline = ((IUnknown*)rot)->AddRef();
+            ((IUnknown*)rot)->Release();
+
             using (AgileComPointer<IRunningObjectTable> agile = new(rot, takeOwnership: false))
             {
                 using ComScope<IRunningObjectTable> scope = agile.GetInterface();
                 scope.IsNull.ShouldBeFalse();
             }
 
-            // Caller's ref is still held; releasing it should not throw.
+            // After AgileComPointer disposes (revoking its GIT entry and releasing its
+            // own ref), the caller's reference must still be intact. AddRef/Release
+            // round-trip should report the same baseline — anything else means the ref
+            // was double-released (AV / underflow) or AgileComPointer leaked a ref.
+            uint afterAdd = ((IUnknown*)rot)->AddRef();
             uint remaining = ((IUnknown*)rot)->Release();
-            // Last release returns 0; previous releases > 0. Either is acceptable; we just
-            // care that the call did not AV — which would happen if AgileComPointer had
-            // double-released our reference.
-            remaining.ShouldBeLessThanOrEqualTo(uint.MaxValue);
+            afterAdd.ShouldBe(baseline);
+            remaining.ShouldBe(baseline);
+
+            // Release the caller's outstanding reference.
+            ((IUnknown*)rot)->Release();
         }
         catch
         {
