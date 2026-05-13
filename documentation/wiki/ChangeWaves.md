@@ -33,6 +33,7 @@ Change wave checks around features will be removed in the release that accompani
 - [RAR task: across multiple input properties and resolvers, resolve relative paths against the project directory (not the process current directory) and skip empty path inputs instead of resolving them against the process current directory](https://github.com/dotnet/msbuild/pull/13319)
 
 ### 18.7
+- [Copy task retries on ERROR_ACCESS_DENIED on non-Windows platforms to handle transient lock conflicts (e.g. macOS CoW filesystems)](https://github.com/dotnet/msbuild/issues/13463)
 - [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.
 
 ### 18.6

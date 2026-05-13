@@ -1255,18 +1255,28 @@ namespace Microsoft.Build.Execution
 
                     // Otherwise, merge remaining inherited item definitions. Front of the list is highest priority,
                     // so walk backwards. Skip the last entry since we've already used it as the base.
+                    // Use a builder to merge all definitions at once instead of creating N-1 intermediate
+                    // immutable trees from chained SetItems calls.
+                    var builder = lastItemDefinition.ToBuilder();
+
                     for (int i = _itemDefinitions.Count - 2; i >= 0; i--)
                     {
-                        lastItemDefinition = lastItemDefinition.SetItems(_itemDefinitions[i].BackingMetadata);
+                        foreach (var kvp in _itemDefinitions[i].BackingMetadata)
+                        {
+                            builder[kvp.Key] = kvp.Value;
+                        }
                     }
 
                     // Finally any direct metadata win.
                     if (_directMetadata != null)
                     {
-                        lastItemDefinition = lastItemDefinition.SetItems(_directMetadata);
+                        foreach (var kvp in _directMetadata)
+                        {
+                            builder[kvp.Key] = kvp.Value;
+                        }
                     }
 
-                    return lastItemDefinition;
+                    return builder.ToImmutable();
                 }
             }
 
@@ -1917,14 +1927,17 @@ namespace Microsoft.Build.Execution
                         int count = translator.Reader.ReadInt32();
                         if (count > 0)
                         {
-                            IEnumerable<KeyValuePair<string, string>> metaData =
-                                Enumerable.Range(0, count).Select(_ =>
-                                {
-                                    int key = translator.Reader.ReadInt32();
-                                    int value = translator.Reader.ReadInt32();
-                                    return new KeyValuePair<string, string>(interner.GetString(key), interner.GetString(value));
-                                });
-                            _directMetadata = ImmutableDictionaryExtensions.EmptyMetadata.SetItems(metaData);
+                            // Use a builder to avoid intermediate immutable dictionary allocations
+                            // from feeding a lazy enumerable into SetItems.
+                            var builder = ImmutableDictionaryExtensions.EmptyMetadata.ToBuilder();
+                            for (int i = 0; i < count; i++)
+                            {
+                                int key = translator.Reader.ReadInt32();
+                                int value = translator.Reader.ReadInt32();
+                                builder[interner.GetString(key)] = interner.GetString(value);
+                            }
+
+                            _directMetadata = builder.ToImmutable();
                         }
                         else
                         {
