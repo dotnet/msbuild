@@ -544,7 +544,7 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_locker.EnterDisposableReadLock())
                 {
-                    ErrorUtilities.VerifyThrow(_defaultToolsVersion != null, "Should have a default");
+                    Assumed.NotNull(_defaultToolsVersion, "Should have a default");
                     return _defaultToolsVersion;
                 }
             }

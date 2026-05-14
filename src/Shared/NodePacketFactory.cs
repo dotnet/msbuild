@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -49,9 +48,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(
-                _packetFactories.TryGetValue(packetType, out PacketFactoryRecord record),
-                $"No packet handler for type {packetType}");
+            Assumed.True(_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record), $"No packet handler for type {packetType}");
 
             INodePacket packet = record.DeserializePacket(translator);
             record.RoutePacket(nodeId, packet);
@@ -62,9 +59,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(
-                _packetFactories.TryGetValue(packetType, out PacketFactoryRecord record),
-                $"No packet handler for type {packetType}");
+            Assumed.True(_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record), $"No packet handler for type {packetType}");
 
             return record.DeserializePacket(translator);
         }
@@ -74,9 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(
-                _packetFactories.TryGetValue(packet.Type, out PacketFactoryRecord record),
-                $"No packet handler for type {packet.Type}");
+            Assumed.True(_packetFactories.TryGetValue(packet.Type, out PacketFactoryRecord record), $"No packet handler for type {packet.Type}");
 
             record.RoutePacket(nodeId, packet);
         }

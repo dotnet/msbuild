@@ -164,7 +164,7 @@ namespace Microsoft.Build.Construction
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {
-                ErrorUtilities.VerifyThrow(parentUsingTask.Link == null, "TaskFactory");
+                Assumed.Null(parentUsingTask.Link, "TaskFactory");
                 ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(parent.XmlElement, "TaskFactory");
             }
 

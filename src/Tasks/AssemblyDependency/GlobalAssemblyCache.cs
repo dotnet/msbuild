@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks
         {
             // Extra checks for PInvoke-destined data.
             ArgumentNullException.ThrowIfNull(assemblyName);
-            ErrorUtilities.VerifyThrow(assemblyName.FullName != null, "Got a null assembly name fullname.");
+            Assumed.NotNull(assemblyName.FullName, "Got a null assembly name fullname.");
 
             string strongName = assemblyName.FullName;
 
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Tasks
             // net472-only = inherently Windows. CsWin32 types used directly.
             uint hr = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
 
-            ErrorUtilities.VerifyThrow(hr == HRESULT.S_OK, $"CreateAssemblyCache failed, hr {hr}");
+            Assumed.Equal(hr, HRESULT.S_OK, $"CreateAssemblyCache failed, hr {hr}");
 
             var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>() };
 

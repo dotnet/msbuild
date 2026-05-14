@@ -159,7 +159,7 @@ namespace Microsoft.Build.BackEnd
 
             bool nodeExists = _nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext);
 
-            ErrorUtilities.VerifyThrow(nodeExists, $"InProc node {nodeId} does not exist.");
+            Assumed.True(nodeExists, $"InProc node {nodeId} does not exist.");
 
             nodeContext._inProcNodeEndpoint.SendData(packet);
         }
@@ -335,7 +335,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.InProcNodeProvider, $"Cannot create component of type {type}");
+            Assumed.Equal(type, BuildComponentType.InProcNodeProvider, $"Cannot create component of type {type}");
             return new NodeProviderInProc();
         }
 
@@ -346,7 +346,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool InstantiateNode(int nodeId, INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeId), $"In Proc node {nodeId} already instantiated.");
+            Assumed.False(_nodeContexts.ContainsKey(nodeId), $"In Proc node {nodeId} already instantiated.");
 
             NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost, nodeId);
 
@@ -381,7 +381,7 @@ namespace Microsoft.Build.BackEnd
 
             int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
             bool connected = nodeContext._endpointConnectedEvent.WaitOne(connectionTimeout);
-            ErrorUtilities.VerifyThrow(connected, $"In-proc node failed to start up within {connectionTimeout}ms");
+            Assumed.True(connected, $"In-proc node failed to start up within {connectionTimeout}ms");
             return true;
         }
 
@@ -418,7 +418,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We don't verify this outside of the 'if' because we don't care about the link going down, which will occur
                     // after we have cleared the inProcNodeEndpoint due to shutting down the node.
-                    ErrorUtilities.VerifyThrow(foundEndpoint, "Received link status event for a node other than our peer.");
+                    Assumed.True(foundEndpoint, "Received link status event for a node other than our peer.");
                 }
             }
         }

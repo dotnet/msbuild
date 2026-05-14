@@ -308,8 +308,8 @@ namespace Microsoft.Build.BackEnd
             ElementLocation elementLocation,
             LoggingContext loggingContext)
         {
-            ErrorUtilities.VerifyThrow(itemListsToBeBatched.Count > 0, "Need item types consumed by the batchable object.");
-            ErrorUtilities.VerifyThrow(consumedMetadataReferences.Count > 0, "Need item metadata consumed by the batchable object.");
+            Assumed.Positive(itemListsToBeBatched.Count, "Need item types consumed by the batchable object.");
+            Assumed.Positive(consumedMetadataReferences.Count, "Need item metadata consumed by the batchable object.");
 
             var buckets = new List<ItemBucket>();
             FrozenSet<string> itemNames = itemListsToBeBatched.Keys.ToFrozenSet(MSBuildNameIgnoreCaseComparer.Default);

@@ -1800,7 +1800,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void VerifyThrowInvalidOperationNotZombie()
         {
-            ErrorUtilities.VerifyThrow(!implementationInternal.IsZombified, "OM_ProjectIsNoLongerActive");
+            Assumed.False(implementationInternal.IsZombified, "OM_ProjectIsNoLongerActive");
         }
 
         /// <summary>
@@ -3563,7 +3563,7 @@ namespace Microsoft.Build.Evaluation
             /// </remarks>
             public string ExpandMetadataValueBestEffortLeaveEscaped(IMetadataTable metadataTable, string unevaluatedValue, ElementLocation metadataLocation)
             {
-                ErrorUtilities.VerifyThrow(_data.Expander.Metadata == null, "Should be null");
+                Assumed.Null(_data.Expander.Metadata, "Should be null");
 
                 _data.Expander.Metadata = metadataTable;
                 string evaluatedValueEscaped = _data.Expander.ExpandIntoStringLeaveEscaped(unevaluatedValue, ExpanderOptions.ExpandAll, metadataLocation);
@@ -3742,7 +3742,7 @@ namespace Microsoft.Build.Evaluation
                     evaluationContext,
                     _interactive);
 
-                ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
+                Assumed.NotEqual(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
                 // We have to do this after evaluation, because evaluation might have changed
                 // the imports being pulled in.
@@ -3763,7 +3763,7 @@ namespace Microsoft.Build.Evaluation
                 _evaluatedToolsetCollectionVersion = ProjectCollection.ToolsetsVersion;
                 _data.HasUnsavedChanges = false;
 
-                ErrorUtilities.VerifyThrow(!IsDirty, "Should not be dirty now");
+                Assumed.False(IsDirty, "Should not be dirty now");
             }
 
             /// <summary>
@@ -3810,11 +3810,11 @@ namespace Microsoft.Build.Evaluation
                 _loadSettings = loadSettings;
                 _interactive = interactive;
 
-                ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
+                Assumed.Equal(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 
                 ReevaluateIfNecessary(evaluationContext);
 
-                ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");
+                Assumed.NotEqual(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");
 
                 // Cause the project to be actually loaded into the collection, and register for
                 // rename notifications so we can subsequently update the collection.

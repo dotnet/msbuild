@@ -112,7 +112,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The build results for the specified request.</returns>
         public BuildResult GetResultForRequest(BuildRequest request)
         {
-            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
 
             lock (_resultsByConfiguration)
             {
@@ -120,7 +120,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     foreach (string target in request.Targets)
                     {
-                        ErrorUtilities.VerifyThrow(result.HasResultsForTarget(target), "No results in cache for target " + target);
+                        Assumed.True(result.HasResultsForTarget(target), "No results in cache for target " + target);
                     }
 
                     return result;
@@ -165,7 +165,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
         {
-            ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
+            Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
 
             lock (_resultsByConfiguration)
@@ -299,7 +299,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
+            Assumed.Equal(componentType, BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
             return new ResultsCache();
         }
 

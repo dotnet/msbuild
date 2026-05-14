@@ -3021,7 +3021,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private static void GatherPlatformsForSdk(TargetPlatformSDK sdk)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(sdk.Path), "SDK path must be set");
+            Assumed.NotNullOrEmpty(sdk.Path, "SDK path must be set");
 
             try
             {

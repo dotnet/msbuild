@@ -362,7 +362,7 @@ namespace Microsoft.Build.Internal
                     }
 
 
-                    ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
+                    Assumed.NotNull(fileList, "We must have a list of files here, even if it's empty.");
 
                     // Before actually returning the file list, we sort them alphabetically.  This
                     // provides a certain amount of extra determinism and reproducability.  That is,

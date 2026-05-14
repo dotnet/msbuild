@@ -82,16 +82,6 @@ internal static class ErrorUtilities
     internal static void VerifyThrowInternalRooted(string value)
         => FrameworkErrorUtilities.VerifyThrowInternalRooted(value);
 
-    /// <inheritdoc cref="Assumed.True(bool, string?, string?)"/>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string message)
-        => Assumed.True(condition, message);
-
-    /// <inheritdoc cref="Assumed.True(bool, ref Assumed.TrueInterpolatedStringHandler)"/>
-    internal static void VerifyThrow(
-        [DoesNotReturnIf(false)] bool condition,
-        [InterpolatedStringHandlerArgument(nameof(condition))] ref Assumed.TrueInterpolatedStringHandler handler)
-        => Assumed.True(condition, ref handler);
-
     /// <summary>
     /// Throws an InvalidOperationException with the specified resource string
     /// </summary>

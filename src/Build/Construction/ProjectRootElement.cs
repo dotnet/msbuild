@@ -1782,7 +1782,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ProjectRootElement Open(XmlDocumentWithLocation document)
         {
-            ErrorUtilities.VerifyThrow(document.FullPath == null, "Only virtual documents supported");
+            Assumed.Null(document.FullPath, "Only virtual documents supported");
 
             return new ProjectRootElement(document, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
         }
@@ -1821,7 +1821,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal XmlElementWithLocation CreateElement(string name, ElementLocation location = null)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
             return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace, location);
         }
 
@@ -1883,7 +1883,7 @@ namespace Microsoft.Build.Construction
         internal void MarkProjectDirty(Project project)
         {
             ArgumentNullException.ThrowIfNull(project);
-            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Only bubble this event up if the cache knows about this PRE, which is equivalent to
             // whether this PRE has a path.

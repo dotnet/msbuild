@@ -555,8 +555,7 @@ namespace Microsoft.Build.ProjectCache
 
             void EvaluateProjectIfNecessary(BuildSubmission submission, BuildRequestConfiguration configuration)
             {
-                ErrorUtilities.VerifyThrow(submission.BuildRequestData != null,
-                    "Submission BuildRequestData is not populated.");
+                Assumed.NotNull(submission.BuildRequestData, "Submission BuildRequestData is not populated.");
 
                 lock (configuration)
                 {
@@ -620,7 +619,7 @@ namespace Microsoft.Build.ProjectCache
                     plugin.InitializationException?.Throw();
 
 
-                    ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, $"Plugin '{plugin.Name}' instance is null");
+                    Assumed.NotNull(plugin.PluginInstance, $"Plugin '{plugin.Name}' instance is null");
 
                     MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(plugin.Name, buildRequest.ProjectFullPath, targetNames ?? MSBuildConstants.DefaultTargetsMarker);
                     if (plugin.PluginInstance is ProjectCachePluginBase currentPlugin)
@@ -777,7 +776,7 @@ namespace Microsoft.Build.ProjectCache
                     }
 
                     XmlAttribute? projectPathAttribute = projectConfiguration.Attributes![SolutionConfiguration.AbsolutePathAttribute];
-                    ErrorUtilities.VerifyThrow(projectPathAttribute is not null, "Expected VS to set the project path on each ProjectConfiguration element.");
+                    Assumed.NotNull(projectPathAttribute, "Expected VS to set the project path on each ProjectConfiguration element.");
 
                     string projectPath = projectPathAttribute!.Value;
 
@@ -898,7 +897,7 @@ namespace Microsoft.Build.ProjectCache
                         // Rethrow any initialization exception.
                         plugin.InitializationException?.Throw();
 
-                        ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, $"Plugin '{plugin.Name}' instance is null");
+                        Assumed.NotNull(plugin.PluginInstance, $"Plugin '{plugin.Name}' instance is null");
 
                         MSBuildEventSource.Log.ProjectCacheHandleBuildResultStart(plugin.Name, fileAccessContext.ProjectFullPath, targetNames);
                         try

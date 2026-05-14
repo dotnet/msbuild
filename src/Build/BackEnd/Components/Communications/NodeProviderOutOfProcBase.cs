@@ -463,7 +463,7 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation,
                 _componentHost?.BuildParameters?.NodeExeLocation);
 
-            ErrorUtilities.VerifyThrow(processNamesToSearch.Length > 0, "Expected at least one process name to search for.");
+            Assumed.Positive(processNamesToSearch.Length, "Expected at least one process name to search for.");
             string expectedProcessName = processNamesToSearch.Length == 1
                 ? processNamesToSearch[0]
                 : string.Join(", ", processNamesToSearch);

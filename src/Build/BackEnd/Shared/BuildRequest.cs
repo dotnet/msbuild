@@ -264,7 +264,7 @@ namespace Microsoft.Build.BackEnd
 
             set
             {
-                ErrorUtilities.VerifyThrow(_globalRequestId == InvalidGlobalRequestId, "Global Request ID cannot be set twice.");
+                Assumed.Equal(_globalRequestId, InvalidGlobalRequestId, "Global Request ID cannot be set twice.");
                 _globalRequestId = value;
             }
         }
@@ -347,7 +347,7 @@ namespace Microsoft.Build.BackEnd
 
             set
             {
-                ErrorUtilities.VerifyThrow(_buildEventContext == BuildEventContext.Invalid, "The build event context is already set.");
+                Assumed.Equal(_buildEventContext, BuildEventContext.Invalid, "The build event context is already set.");
                 _buildEventContext = value;
             }
         }
@@ -410,9 +410,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newConfigId">The new configuration id for this request.</param>
         public void ResolveConfiguration(int newConfigId)
         {
-            ErrorUtilities.VerifyThrow(!IsConfigurationResolved, "Configuration already resolved");
+            Assumed.False(IsConfigurationResolved, "Configuration already resolved");
             _configurationId = newConfigId;
-            ErrorUtilities.VerifyThrow(IsConfigurationResolved, "Configuration not resolved");
+            Assumed.True(IsConfigurationResolved, "Configuration not resolved");
         }
 
         #region INodePacket Members

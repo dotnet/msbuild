@@ -419,7 +419,7 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 VerifyState(_state, TargetEntryState.Execution);
-                ErrorUtilities.VerifyThrow(!_isExecuting, $"Target {_target.Name} is already executing");
+                Assumed.False(_isExecuting, $"Target {_target.Name} is already executing");
                 _cancellationToken = cancellationToken;
                 _isExecuting = true;
 
@@ -697,7 +697,7 @@ namespace Microsoft.Build.BackEnd
         internal List<TargetSpecification> GetErrorTargets(ProjectLoggingContext projectLoggingContext)
         {
             VerifyState(_state, TargetEntryState.ErrorExecution);
-            ErrorUtilities.VerifyThrow(_legacyCallTargetScopes == null, "We should have already left any legacy call target scopes.");
+            Assumed.Null(_legacyCallTargetScopes, "We should have already left any legacy call target scopes.");
 
             List<TargetSpecification> allErrorTargets = new List<TargetSpecification>(_target.OnErrorChildren.Count);
 
@@ -744,7 +744,7 @@ namespace Microsoft.Build.BackEnd
         internal TargetResult GatherResults()
         {
             VerifyState(_state, TargetEntryState.Completed);
-            ErrorUtilities.VerifyThrow(_legacyCallTargetScopes == null, "We should have already left any legacy call target scopes.");
+            Assumed.Null(_legacyCallTargetScopes, "We should have already left any legacy call target scopes.");
 
             // By now all of the bucket lookups have been collapsed into this lookup, which we can return.
             return _targetResult;
@@ -769,7 +769,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void MarkForError()
         {
-            ErrorUtilities.VerifyThrow(_state != TargetEntryState.Completed, $"State must not be Completed. State is {_state}.");
+            Assumed.NotEqual(_state, TargetEntryState.Completed, $"State must not be Completed. State is {_state}.");
             _state = TargetEntryState.ErrorExecution;
         }
 
@@ -780,9 +780,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void MarkForStop()
         {
-            ErrorUtilities.VerifyThrow(_state == TargetEntryState.Completed, $"State must be Completed. State is {_state}.");
-            ErrorUtilities.VerifyThrow(_targetResult.ResultCode == TargetResultCode.Skipped, $"ResultCode must be Skipped. ResultCode is {_targetResult.ResultCode}.");
-            ErrorUtilities.VerifyThrow(_targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Continue, $"ActionCode must be Continue. ActionCode is {_targetResult.WorkUnitResult.ActionCode}.");
+            Assumed.Equal(_state, TargetEntryState.Completed, $"State must be Completed. State is {_state}.");
+            Assumed.Equal(_targetResult.ResultCode, TargetResultCode.Skipped, $"ResultCode must be Skipped. ResultCode is {_targetResult.ResultCode}.");
+            Assumed.Equal(_targetResult.WorkUnitResult.ActionCode, WorkUnitActionCode.Continue, $"ActionCode must be Continue. ActionCode is {_targetResult.WorkUnitResult.ActionCode}.");
 
             _targetResult.WorkUnitResult = new WorkUnitResult(_targetResult.WorkUnitResult.ResultCode, WorkUnitActionCode.Stop, _targetResult.WorkUnitResult.Exception);
         }
@@ -886,7 +886,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="expected">The expected value</param>
         private void VerifyState(TargetEntryState actual, TargetEntryState expected)
         {
-            ErrorUtilities.VerifyThrow(actual == expected, $"Expected state {expected}.  Got {actual}");
+            Assumed.Equal(actual, expected, $"Expected state {expected}.  Got {actual}");
         }
 
         /// <summary>

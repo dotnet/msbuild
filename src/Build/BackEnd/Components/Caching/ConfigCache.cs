@@ -74,7 +74,7 @@ namespace Microsoft.Build.BackEnd
         private void AddConfiguration(BuildRequestConfiguration config, Configurations configurations)
         {
             ArgumentNullException.ThrowIfNull(config);
-            ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
+            Assumed.True(config.ConfigurationId != 0, "Invalid configuration ID");
 
             if (!configurations.ById.TryAdd(config.ConfigurationId, config))
             {
@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd
             // In either case, make sure the project is loaded if it was requested.
             if (loadProject)
             {
-                ErrorUtilities.VerifyThrow(configuration.IsLoaded, "Request to create configuration did not honor request to also load project.");
+                Assumed.True(configuration.IsLoaded, "Request to create configuration did not honor request to also load project.");
             }
 
             return configuration;
@@ -183,7 +183,7 @@ namespace Microsoft.Build.BackEnd
         public int GetSmallestConfigId()
         {
             Configurations configurations = _configurations;
-            ErrorUtilities.VerifyThrow(!configurations.ById.IsEmpty, "No configurations exist from which to obtain the smallest configuration id.");
+            Assumed.False(configurations.ById.IsEmpty, "No configurations exist from which to obtain the smallest configuration id.");
 
             int smallestId = int.MaxValue;
             foreach (KeyValuePair<int, BuildRequestConfiguration> kvp in configurations.ById)
@@ -338,7 +338,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ConfigCache, $"Cannot create components of type {componentType}");
+            Assumed.Equal(componentType, BuildComponentType.ConfigCache, $"Cannot create components of type {componentType}");
             return new ConfigCache();
         }
 

@@ -171,7 +171,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         void ITranslatable.Translate(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
+            Assumed.Equal(translator.Mode, TranslationDirection.WriteToStream, "write only");
 
             translator.Translate(ref _name);
             translator.Translate(ref _escapedValue);
@@ -270,7 +270,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectPropertyInstance FactoryForDeserialization(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.ReadFromStream, "read only");
+            Assumed.Equal(translator.Mode, TranslationDirection.ReadFromStream, "read only");
 
             string name = null;
             string escapedValue = null;

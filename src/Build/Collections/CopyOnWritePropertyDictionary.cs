@@ -104,7 +104,7 @@ namespace Microsoft.Build.Collections
             set
             {
                 Assumed.NotNull(value, "Properties can't have null value");
-                ErrorUtilities.VerifyThrow(String.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
+                Assumed.Equal(name, value.Key, StringComparison.OrdinalIgnoreCase, "Key must match value's key");
                 Set(value);
             }
         }
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Collections
         void IDictionary<string, T>.Add(string key, T value)
         {
             Assumed.NotNull(value, "Properties can't have null value");
-            ErrorUtilities.VerifyThrow(key == value.Key, "Key must match value's key");
+            Assumed.Equal(key, value.Key, "Key must match value's key");
             Set(value);
         }
 
@@ -307,7 +307,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Remove(KeyValuePair<string, T> item)
         {
-            ErrorUtilities.VerifyThrow(item.Key == item.Value.Key, "Key must match value's key");
+            Assumed.Equal(item.Key, item.Value.Key, "Key must match value's key");
             return Remove(item.Key);
         }
 

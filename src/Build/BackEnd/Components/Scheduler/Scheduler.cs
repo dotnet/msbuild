@@ -371,12 +371,12 @@ namespace Microsoft.Build.BackEnd
                 if (blocker.YieldAction != YieldAction.None)
                 {
                     TraceScheduler($"Request {blocker.BlockedRequestId} on node {nodeId} is performing yield action {blocker.YieldAction}.");
-                    ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
+                    Assumed.True(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     HandleYieldAction(parentRequest, blocker);
                 }
                 else if ((blocker.BlockingRequestId == blocker.BlockedRequestId) && blocker.BlockingRequestId != BuildRequest.InvalidGlobalRequestId)
                 {
-                    ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
+                    Assumed.True(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked waiting for a transfer of results.
                     HandleRequestBlockedOnResultsTransfer(parentRequest, responses);
                 }
@@ -385,7 +385,7 @@ namespace Microsoft.Build.BackEnd
                     // We are blocked by a request executing a target for which we need results.
                     try
                     {
-                        ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should exist");
+                        Assumed.NotNullOrEmpty(blocker.BlockingTarget, "Blocking target should exist");
 
                         HandleRequestBlockedOnInProgressTarget(parentRequest, blocker);
                     }
@@ -397,7 +397,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
+                    Assumed.True(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked by new requests, either top-level or MSBuild task.
                     HandleRequestBlockedByNewRequests(parentRequest, blocker, responses);
                 }
@@ -443,7 +443,7 @@ namespace Microsoft.Build.BackEnd
                 if (request.Parent != null)
                 {
                     // responses.Add(new ScheduleResponse(request.Parent.AssignedNode, new BuildRequestUnblocker(request.Parent.BuildRequest.GlobalRequestId, result)));
-                    ErrorUtilities.VerifyThrow(result.ParentGlobalRequestId == request.Parent.BuildRequest.GlobalRequestId, "Result's parent doesn't match request's parent.");
+                    Assumed.Equal(result.ParentGlobalRequestId, request.Parent.BuildRequest.GlobalRequestId, "Result's parent doesn't match request's parent.");
 
                     // When adding the result to the cache we merge the result with what ever is already in the cache this may cause
                     // the result to have more target outputs in it than was was requested.  To fix this we can ask the cache itself for the result we just added.
@@ -707,7 +707,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.Scheduler, $"Cannot create components of type {componentType}");
+            Assumed.Equal(componentType, BuildComponentType.Scheduler, $"Cannot create components of type {componentType}");
             return new Scheduler();
         }
 
@@ -837,7 +837,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                ErrorUtilities.VerifyThrow(responses.Count > 0, "We failed to request a node to be created.");
+                Assumed.Positive(responses.Count, "We failed to request a node to be created.");
             }
 
             TraceScheduler($"Requests scheduled: {nodesFreeToDoWorkPriorToScheduling - idleNodes.Count} Unassigned Requests: {_schedulingData.UnscheduledRequestsCount} Blocked Requests: {_schedulingData.BlockedRequestsCount} Unblockable Requests: {_schedulingData.ReadyRequestsCount} Free Nodes: {idleNodes.Count}/{_availableNodes.Count} Responses: {responses.Count}");
@@ -1423,7 +1423,7 @@ namespace Microsoft.Build.BackEnd
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(responses);
-            ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
+            Assumed.NotEqual(nodeId, InvalidNodeId, "Invalid node id specified.");
 
             request.VerifyState(SchedulableRequestState.Unscheduled);
 
@@ -1438,7 +1438,7 @@ namespace Microsoft.Build.BackEnd
                 config.ResultsNodeId = nodeId;
             }
 
-            ErrorUtilities.VerifyThrow(config.ResultsNodeId != InvalidNodeId, "Configuration's results node is not set.");
+            Assumed.NotEqual(config.ResultsNodeId, InvalidNodeId, "Configuration's results node is not set.");
 
             responses.Add(ScheduleResponse.CreateScheduleResponse(nodeId, request.BuildRequest, mustSendConfigurationToNode));
             TraceScheduler($"Executing request {request.BuildRequest.GlobalRequestId} on node {nodeId} with parent {(request.Parent == null ? -1 : request.Parent.BuildRequest.GlobalRequestId)}");
@@ -1451,9 +1451,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (request.IsProxyBuildRequest() && nodeId != InProcNodeId && _schedulingData.CanScheduleRequestToNode(request, InProcNodeId))
                 {
-                    ErrorUtilities.VerifyThrow(
-                        _componentHost.BuildParameters.DisableInProcNode || ForceAffinityOutOfProc,
-                        "Proxy requests should only get scheduled to out of proc nodes when the inproc node is disabled");
+                    Assumed.True(_componentHost.BuildParameters.DisableInProcNode || ForceAffinityOutOfProc, "Proxy requests should only get scheduled to out of proc nodes when the inproc node is disabled");
 
                     var loggedWarnings = Interlocked.CompareExchange(ref _loggedWarningsForProxyBuildsOnOutOfProcNodes, 1, 0);
 
@@ -1629,7 +1627,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!_componentHost.BuildParameters.MultiThreaded)
                     {
-                        ErrorUtilities.VerifyThrow(inProcNodesToCreate == 1, "We should not be trying to create more than one inproc node");
+                        Assumed.Equal(inProcNodesToCreate, 1, "We should not be trying to create more than one inproc node");
                     }
 
                     TraceScheduler($"Requesting creation of new node satisfying affinity {NodeAffinity.InProc}");
@@ -1834,9 +1832,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (affinityMismatch)
                         {
-                            ErrorUtilities.VerifyThrow(
-                                _configCache.HasConfiguration(request.ConfigurationId),
-                                "A request should have a configuration if it makes it this far in the build process.");
+                            Assumed.True(_configCache.HasConfiguration(request.ConfigurationId), "A request should have a configuration if it makes it this far in the build process.");
 
                             var config = _configCache[request.ConfigurationId];
                             var globalProperties = string.Join(
@@ -1923,7 +1919,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (response.Action == ScheduleActionType.SubmissionComplete)
                 {
-                    ErrorUtilities.VerifyThrow(request.Parent == null, "Unexpectedly generated a SubmissionComplete response for a request which is not top-level.");
+                    Assumed.Null(request.Parent, "Unexpectedly generated a SubmissionComplete response for a request which is not top-level.");
                     LogRequestHandledFromCache(request.BuildRequest, response.BuildResult);
 
                     // This was root request, we can report submission complete.
@@ -2122,9 +2118,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ErrorUtilities.VerifyThrow(
-                    configCache.HasConfiguration(configurationId),
-                    "All non root requests should have a parent with a loaded configuration");
+                Assumed.True(configCache.HasConfiguration(configurationId), "All non root requests should have a parent with a loaded configuration");
 
                 return configCache[configurationId];
             }
@@ -2197,10 +2191,10 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                ErrorUtilities.VerifyThrow(parentRequestNode != InvalidNodeId, "Invalid parent node provided.");
+                Assumed.NotEqual(parentRequestNode, InvalidNodeId, "Invalid parent node provided.");
 
                 // return new ScheduleResponse(parentRequestNode, new BuildRequestUnblocker(requestWhichGeneratedResult.ParentGlobalRequestId, result));
-                ErrorUtilities.VerifyThrow(result.ParentGlobalRequestId == requestWhichGeneratedResult.ParentGlobalRequestId, "Result's parent doesn't match request's parent.");
+                Assumed.Equal(result.ParentGlobalRequestId, requestWhichGeneratedResult.ParentGlobalRequestId, "Result's parent doesn't match request's parent.");
                 return ScheduleResponse.CreateReportResultResponse(parentRequestNode, result);
             }
         }
@@ -2255,7 +2249,7 @@ namespace Microsoft.Build.BackEnd
                 return NodeAffinity.InProc;
             }
 
-            ErrorUtilities.VerifyThrow(request.ConfigurationId != BuildRequestConfiguration.InvalidConfigurationId, "Requests should have a valid configuration id at this point");
+            Assumed.NotEqual(request.ConfigurationId, BuildRequestConfiguration.InvalidConfigurationId, "Requests should have a valid configuration id at this point");
             // If this configuration has been previously built on an out of proc node, scheduling it on the inproc node can cause either an affinity mismatch error when
             // there are other pending requests for the same configuration or "unscheduled requests remain in the presence of free out of proc nodes" errors if there's no pending requests.
             // So only assign proxy builds to the inproc node if their config hasn't been previously assigned to an out of proc node.

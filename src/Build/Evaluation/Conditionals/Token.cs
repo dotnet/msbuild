@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 #nullable disable
 
@@ -90,13 +89,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal Token(TokenType type, string tokenString, bool expandable)
         {
-            ErrorUtilities.VerifyThrow(
-                type == TokenType.Property ||
-                type == TokenType.String ||
-                type == TokenType.Numeric ||
-                type == TokenType.ItemList ||
-                type == TokenType.ItemMetadata ||
-                type == TokenType.Function,
+            Assumed.True(
+                type is TokenType.Property or
+                        TokenType.String or
+                        TokenType.Numeric or
+                        TokenType.ItemList or
+                        TokenType.ItemMetadata or
+                        TokenType.Function,
                 "Unexpected token type");
 
             Assumed.NotNull(tokenString);

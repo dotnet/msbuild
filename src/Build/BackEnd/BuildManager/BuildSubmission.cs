@@ -196,8 +196,7 @@ namespace Microsoft.Build.Execution
 
             legacyThreadingData.UnregisterSubmissionForLegacyThread(SubmissionId);
 
-            ErrorUtilities.VerifyThrow(BuildResult != null,
-                "BuildResult is not populated after Execute is done.");
+            Assumed.NotNull(BuildResult, "BuildResult is not populated after Execute is done.");
 
             return BuildResult!;
         }
@@ -214,8 +213,7 @@ namespace Microsoft.Build.Execution
 
         protected internal override BuildResult CreateFailedResult(Exception exception)
         {
-            ErrorUtilities.VerifyThrow(BuildRequest != null,
-                "BuildRequest is not populated while reporting failed result.");
+            Assumed.NotNull(BuildRequest, "BuildRequest is not populated while reporting failed result.");
             return new(BuildRequest!, exception);
         }
 

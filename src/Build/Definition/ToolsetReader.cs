@@ -299,9 +299,7 @@ namespace Microsoft.Build.Evaluation
             // There's no tools path already for 2.0, so use the path to the v2.0 .NET Framework.
             // If an old-fashioned caller sets BinPath property, or passed a BinPath to the constructor,
             // that will overwrite what we're setting here.
-            ErrorUtilities.VerifyThrow(
-                Constants.defaultToolsVersion == "2.0",
-                "Getting 2.0 FX path so default should be 2.0");
+            Assumed.Equal(Constants.defaultToolsVersion, "2.0", "Getting 2.0 FX path so default should be 2.0");
             var pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV20;
 
             // We could not find the default toolsversion because it was not installed on the machine. Fallback to the

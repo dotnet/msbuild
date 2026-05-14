@@ -132,10 +132,8 @@ namespace Microsoft.Build.Shared
         {
             var cultureTypesType = s_cultureInfoGetCultureMethod?.GetParameters().FirstOrDefault()?.ParameterType;
 
-            Assumed.True(
-                cultureTypesType?.Name == "CultureTypes" &&
-                Enum.IsDefined(cultureTypesType, "AllCultures"),
-                "GetCulture is expected to accept CultureTypes.AllCultures");
+            Assumed.True(cultureTypesType?.Name == "CultureTypes" &&
+                Enum.IsDefined(cultureTypesType, "AllCultures"), "GetCulture is expected to accept CultureTypes.AllCultures");
 
             var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
 

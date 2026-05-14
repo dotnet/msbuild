@@ -112,8 +112,8 @@ namespace Microsoft.Build.BackEnd
             ArgumentNullException.ThrowIfNull(callback, "requestBuilderCallback");
             ArgumentNullException.ThrowIfNull(targetNames);
             ArgumentNullException.ThrowIfNull(baseLookup);
-            ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
-            ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
+            Assumed.Positive(targetNames.Length, "List of targets must be non-empty");
+            Assumed.NotNull(_componentHost, "InitializeComponent must be called before building targets.");
 
             _requestEntry = entry;
             _requestBuilderCallback = callback;
@@ -283,7 +283,7 @@ namespace Microsoft.Build.BackEnd
 
                         // We push the targets one at a time to emulate the original CallTarget behavior.
                         bool pushed = await PushTargets(targetToPush, currentTargetEntry, callTargetLookup, false, true, TargetBuiltReason.None);
-                        ErrorUtilities.VerifyThrow(pushed, $"Failed to push any targets onto the stack.  Target: {targets[i]} Current Target: {currentTargetEntry.Target.Name}");
+                        Assumed.True(pushed, $"Failed to push any targets onto the stack.  Target: {targets[i]} Current Target: {currentTargetEntry.Target.Name}");
                         await ProcessTargetStack(taskBuilder);
 
                         if (!_cancellationToken.IsCancellationRequested)
@@ -397,7 +397,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.TargetBuilder, $"Cannot create components of type {type}");
+            Assumed.Equal(type, BuildComponentType.TargetBuilder, $"Cannot create components of type {type}");
             return new TargetBuilder();
         }
 
@@ -482,7 +482,7 @@ namespace Microsoft.Build.BackEnd
                         // actually built this target while we were waiting, so that by the time we get here, it's already been finished.  In this case, just blow it away.
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
-                            ErrorUtilities.VerifyThrow(!wasActivelyBuilding, $"Target {currentTargetEntry.Name} was actively building and waited on but we are attempting to build it again.");
+                            Assumed.False(wasActivelyBuilding, $"Target {currentTargetEntry.Name} was actively building and waited on but we are attempting to build it again.");
 
                             // This target is now actively building.
                             _requestEntry.RequestConfiguration.ActivelyBuildingTargets[currentTargetEntry.Name] = _requestEntry.Request.GlobalRequestId;

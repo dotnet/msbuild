@@ -424,7 +424,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="reference">The reference to add.</param>
         internal void AddReference(AssemblyNameExtension assemblyName, Reference reference)
         {
-            ErrorUtilities.VerifyThrow(assemblyName.Name != null, "Got an empty assembly name.");
+            Assumed.NotNull(assemblyName.Name, "Got an empty assembly name.");
             if (References.TryGetValue(assemblyName, out Reference referenceGoingToBeReplaced))
             {
                 foreach (AssemblyRemapping pair in referenceGoingToBeReplaced.RemappedAssemblyNames())
@@ -449,7 +449,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>'null' if no reference existed.</returns>
         internal Reference GetReference(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrow(assemblyName.Name != null, "Got an empty assembly name.");
+            Assumed.NotNull(assemblyName.Name, "Got an empty assembly name.");
             References.TryGetValue(assemblyName, out Reference referenceToReturn);
             return referenceToReturn;
         }
@@ -1674,7 +1674,7 @@ namespace Microsoft.Build.Tasks
                     moreDependencies = FindAssociatedFiles();
 
                     ++dependencyIterations;
-                    ErrorUtilities.VerifyThrow(dependencyIterations < maxIterations, "Maximum iterations exceeded while looking for dependencies.");
+                    Assumed.LessThan(dependencyIterations, maxIterations, "Maximum iterations exceeded while looking for dependencies.");
                 } while (moreDependencies);
 
                 // If everything is either resolved or unresolvable, then we can quit.
@@ -1693,7 +1693,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 ++moreResolvableIterations;
-                ErrorUtilities.VerifyThrow(moreResolvableIterations < maxIterations, "Maximum iterations exceeded while looking for resolvable references.");
+                Assumed.LessThan(moreResolvableIterations, maxIterations, "Maximum iterations exceeded while looking for resolvable references.");
             } while (moreResolvable);
         }
 
@@ -2349,8 +2349,8 @@ namespace Microsoft.Build.Tasks
         private static int ResolveAssemblyNameConflict(AssemblyNameReference assemblyReference0, AssemblyNameReference assemblyReference1)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrow(assemblyReference0.assemblyName.FullName != null, "Got a null assembly name fullname. (0)");
-            ErrorUtilities.VerifyThrow(assemblyReference1.assemblyName.FullName != null, "Got a null assembly name fullname. (1)");
+            Assumed.NotNull(assemblyReference0.assemblyName.FullName, "Got a null assembly name fullname. (0)");
+            Assumed.NotNull(assemblyReference1.assemblyName.FullName, "Got a null assembly name fullname. (1)");
 
             Reference leftConflictReference = assemblyReference0.reference;
             Reference rightConflictReference = assemblyReference1.reference;

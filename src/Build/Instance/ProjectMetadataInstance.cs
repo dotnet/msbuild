@@ -176,7 +176,7 @@ namespace Microsoft.Build.Execution
         void ITranslatable.Translate(ITranslator translator)
         {
             // Read implementation is directly in the constructor so that fields can be read-only
-            ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
+            Assumed.Equal(translator.Mode, TranslationDirection.WriteToStream, "write only");
 
             string mutableName = _name;
             string mutableValue = _escapedValue;

@@ -116,7 +116,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal TypeLoader(Func<Type, object, bool> isDesiredType)
         {
-            ErrorUtilities.VerifyThrow(isDesiredType != null, "need a type filter");
+            Assumed.NotNull(isDesiredType, "need a type filter");
 
             _isDesiredType = isDesiredType;
         }

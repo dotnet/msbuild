@@ -48,7 +48,7 @@ namespace Microsoft.Build.Tasks.Xaml
             // Parse the Xaml file
             var parser = new TaskParser();
             bool success = parser.ParseXamlDocument(rule);
-            ErrorUtilities.VerifyThrow(success, "Unable to parse specified file or contents.");
+            Assumed.True(success, "Unable to parse specified file or contents.");
 
             // Generate the switch order list
             _switchOrderList = parser.SwitchOrderList;

@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
+            Assumed.Equal(_status, LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
             ArgumentNullException.ThrowIfNull(factory);
             _packetFactory = factory;
 
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         protected void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, $"Attempting to change status to existing status {_status}.");
+            Assumed.NotEqual(_status, newStatus, $"Attempting to change status to existing status {_status}.");
             CommunicationsUtilities.Trace($"Changing link status from {_status} to {newStatus}");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
@@ -312,7 +312,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void InternalDisconnect()
         {
-            ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
+            Assumed.NotEqual(_packetPump.ManagedThreadId, Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
             _terminatePacketPump.Dispose();
@@ -330,8 +330,8 @@ namespace Microsoft.Build.BackEnd
         private void EnqueuePacket(INodePacket packet)
         {
             ArgumentNullException.ThrowIfNull(packet);
-            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
+            Assumed.NotNull(_packetQueue, "packetQueue is null");
+            Assumed.NotNull(_packetAvailable, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
         }

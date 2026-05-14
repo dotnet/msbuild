@@ -738,8 +738,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectInstance(ProjectInstance that, bool isImmutable, RequestedProjectState filter = null)
         {
-            ErrorUtilities.VerifyThrow(filter == null || isImmutable,
-                "The result of a filtered ProjectInstance clone must be immutable.");
+            Assumed.True(filter == null || isImmutable, "The result of a filtered ProjectInstance clone must be immutable.");
 
             _directory = that._directory;
             _projectFileLocation = that._projectFileLocation;
@@ -2439,9 +2438,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void LateInitialize(ProjectRootElementCacheBase projectRootElementCache, HostServices hostServices)
         {
-            ErrorUtilities.VerifyThrow(ProjectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
-            ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
-            ErrorUtilities.VerifyThrow(TaskRegistry != null, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
+            Assumed.Null(ProjectRootElementCache, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
+            Assumed.Null(_hostServices, $"{nameof(HostServices)} is already set. Cannot set again");
+            Assumed.NotNull(TaskRegistry, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
 
             ProjectRootElementCache = projectRootElementCache;
             _taskRegistry.RootElementCache = projectRootElementCache;
@@ -2637,7 +2636,7 @@ namespace Microsoft.Build.Execution
             ArgumentNullException.ThrowIfNull(globalPropertiesInstances);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ArgumentNullException.ThrowIfNull(buildParameters);
-            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(projectFile), $"Project file {projectFile} is not a solution.");
+            Assumed.True(FileUtilities.IsSolutionFilename(projectFile), $"Project file {projectFile} is not a solution.");
 
             ProjectInstance[] projectInstances = null;
 
@@ -2915,7 +2914,7 @@ namespace Microsoft.Build.Execution
             VerifyThrowNotImmutable();
 
             Assumed.NotNullOrEmpty(targetName);
-            ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), $"Target {targetName} already exists.");
+            Assumed.False(_actualTargets.ContainsKey(targetName), $"Target {targetName} already exists.");
 
             ProjectTargetInstance target = new ProjectTargetInstance(
                 targetName,
@@ -3270,7 +3269,7 @@ namespace Microsoft.Build.Execution
                 Trace.WriteLine($"MSBUILD: Creating a ProjectInstance from an unevaluated state [{FullPath}]");
             }
 
-            ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
+            Assumed.Equal(EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
             evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
@@ -3293,7 +3292,7 @@ namespace Microsoft.Build.Execution
                 evaluationContext,
                 interactive: buildParameters.Interactive);
 
-            ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
+            Assumed.NotEqual(EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }
 
         /// <summary>

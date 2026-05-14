@@ -103,9 +103,7 @@ namespace Microsoft.Build.Evaluation
             public ReentrancyGuard()
             {
                 s_getEntriesNumber++;
-                ErrorUtilities.VerifyThrow(
-                    s_getEntriesNumber == 1,
-                    "Reentrance to the ProjectRootElementCache.Get function detected.");
+                Assumed.Equal(s_getEntriesNumber, 1, "Reentrance to the ProjectRootElementCache.Get function detected.");
             }
 
             public void Dispose()
@@ -252,9 +250,7 @@ namespace Microsoft.Build.Evaluation
             using var reentrancyGuard = new ReentrancyGuard();
 
             // Verify that we never call this with _locker held, as that would create a lock ordering inversion with the per-file lock.
-            ErrorUtilities.VerifyThrow(
-                !System.Threading.Monitor.IsEntered(_locker),
-                "Detected lock ordering inversion in ProjectRootElementCache.");
+            Assumed.False(System.Threading.Monitor.IsEntered(_locker), "Detected lock ordering inversion in ProjectRootElementCache.");
 #endif
             // Should already have been canonicalized
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
@@ -346,9 +342,7 @@ namespace Microsoft.Build.Evaluation
             {
                 projectRootElement = loadProjectRootElement(projectFile, this);
                 Assumed.NotNull(projectRootElement);
-                ErrorUtilities.VerifyThrow(
-                    projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
-                    $"Got project back with incorrect path. Expected path: {projectFile}, received path: {projectRootElement.FullPath}.");
+                Assumed.Equal(projectRootElement.FullPath, projectFile, StringComparison.OrdinalIgnoreCase, $"Got project back with incorrect path. Expected path: {projectFile}, received path: {projectRootElement.FullPath}.");
 
                 // An implicit load will never reset the explicit flag.
                 if (isExplicitlyLoaded)
@@ -537,7 +531,7 @@ namespace Microsoft.Build.Evaluation
             if (oldFullPathIfAny != null)
             {
                 ErrorUtilities.VerifyThrowInternalRooted(oldFullPathIfAny);
-                ErrorUtilities.VerifyThrow(_weakCache[oldFullPathIfAny] == projectRootElement, "Should already be present");
+                Assumed.Equal(_weakCache[oldFullPathIfAny], projectRootElement, "Should already be present");
                 _weakCache.Remove(oldFullPathIfAny);
             }
 

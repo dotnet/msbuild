@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging;
 
@@ -339,7 +338,7 @@ internal class ReusableLogger : INodeLogger, IEventSource5
         }
         else
         {
-            ErrorUtilities.VerifyThrow(_buildTimeEventSource == null, "Already registered for build-time.");
+            Assumed.Null(_buildTimeEventSource, "Already registered for build-time.");
             _buildTimeEventSource = eventSource;
             UnregisterForEvents(_designTimeEventSource);
             RegisterForEvents(_buildTimeEventSource);
@@ -369,7 +368,7 @@ internal class ReusableLogger : INodeLogger, IEventSource5
         }
         else
         {
-            ErrorUtilities.VerifyThrow(_designTimeEventSource != null, "Already unregistered for design-time.");
+            Assumed.NotNull(_designTimeEventSource, "Already unregistered for design-time.");
             UnregisterForEvents(_designTimeEventSource!);
             _originalLogger.Shutdown();
         }

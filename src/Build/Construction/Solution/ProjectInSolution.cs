@@ -20,7 +20,6 @@ using Microsoft.Build.Framework;
 using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
 using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 
 
@@ -507,7 +506,7 @@ namespace Microsoft.Build.Construction
         /// <returns>string</returns>
         private static string CleanseProjectName(string projectName)
         {
-            ErrorUtilities.VerifyThrow(projectName != null, "Null strings not allowed.");
+            Assumed.NotNull(projectName, "Null strings not allowed.");
 
             // If there are no special chars, just return the original string immediately.
             // Don't even instantiate the StringBuilder.

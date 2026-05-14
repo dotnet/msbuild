@@ -63,14 +63,11 @@ namespace Microsoft.Build.Evaluation
             {
                 ProjectRootElement rootElement = loadFunc(key, this);
                 Assumed.NotNull(rootElement);
-                ErrorUtilities.VerifyThrow(
-                    rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
-                    $"Got project back with incorrect path. Expected path: {key}, received path: {rootElement.FullPath}.");
+                Assumed.Equal(rootElement.FullPath, key, StringComparison.OrdinalIgnoreCase, $"Got project back with incorrect path. Expected path: {key}, received path: {rootElement.FullPath}.");
 
                 AddEntry(rootElement);
 
-                ErrorUtilities.VerifyThrow(_cache.TryGetValue(key, out _),
-                    "Project should have been added into cache and boosted");
+                Assumed.True(_cache.TryGetValue(key, out _), "Project should have been added into cache and boosted");
 
                 return rootElement;
             });

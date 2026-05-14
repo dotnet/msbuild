@@ -39,7 +39,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">Send data delegate is null</exception>
         internal BuildEventArgTransportSink(SendDataDelegate sendData)
         {
-            ErrorUtilities.VerifyThrow(sendData != null, "sendData delegate is null");
+            Assumed.NotNull(sendData, "sendData delegate is null");
             _sendDataDelegate = sendData;
         }
 
@@ -135,7 +135,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void Consume(BuildEventArgs buildEvent, int sinkId)
         {
-            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+            Assumed.NotNull(buildEvent, "buildEvent is null");
             if (buildEvent is BuildStartedEventArgs)
             {
                 HaveLoggedBuildStartedEvent = true;

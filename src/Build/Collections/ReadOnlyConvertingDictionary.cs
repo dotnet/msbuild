@@ -155,7 +155,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void CopyTo(KeyValuePair<K, N>[] array, int arrayIndex)
         {
-            ErrorUtilities.VerifyThrow(array.Length - arrayIndex >= _backing.Count, "Specified array size insufficient to hold the contents of the collection.");
+            Assumed.GreaterThanOrEqual(array.Length - arrayIndex, _backing.Count, "Specified array size insufficient to hold the contents of the collection.");
 
             foreach (KeyValuePair<K, V> pair in _backing)
             {

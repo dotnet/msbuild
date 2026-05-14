@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            ErrorUtilities.VerifyThrow(!_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
+            Assumed.False(_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
 
             if (_nodesShutdown)
             {
@@ -168,8 +168,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrow(_componentHost == null, "NodeManager already initialized.");
-            ErrorUtilities.VerifyThrow(host != null, "We can't create a NodeManager with a null componentHost");
+            Assumed.Null(_componentHost, "NodeManager already initialized.");
+            Assumed.NotNull(host, "We can't create a NodeManager with a null componentHost");
             _componentHost = host!;
 
             _inProcNodeProvider = _componentHost.GetComponent(BuildComponentType.InProcNodeProvider) as INodeProvider;
@@ -287,7 +287,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.NodeManager, $"Cannot create component of type {type}");
+            Assumed.Equal(type, BuildComponentType.NodeManager, $"Cannot create component of type {type}");
             return new NodeManager();
         }
 

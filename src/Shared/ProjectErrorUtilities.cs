@@ -19,8 +19,8 @@ namespace Microsoft.Build.Shared
     {
         /// <summary>
         /// This method is used to flag errors in the project file being processed.
-        /// Do NOT use this method in place of ErrorUtilities.VerifyThrow(), because
-        /// ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
+        /// Do NOT use this method in place of Assumed.True(), because
+        /// Assumed.True() is used to flag internal/programming errors.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
         /// <param name="elementLocation">The <see cref="IElementLocation"/> of the element.</param>
@@ -147,8 +147,8 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// This method is used to flag errors in the project file being processed.
-        /// Do NOT use this method in place of ErrorUtilities.VerifyThrow(), because
-        /// ErrorUtilities.VerifyThrow() is used to flag internal/programming errors.
+        /// Do NOT use this method in place of Assumed.True(), because
+        /// Assumed.True() is used to flag internal/programming errors.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the

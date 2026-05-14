@@ -206,7 +206,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         internal void SendData(TaskHostNodeKey nodeKey, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), $"Invalid host context specified: {nodeKey}.");
+            Assumed.True(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), $"Invalid host context specified: {nodeKey}.");
 
             SendData(context, packet);
         }
@@ -386,7 +386,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
+            Assumed.Equal(componentType, BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProcTaskHost();
         }
 
@@ -714,7 +714,7 @@ namespace Microsoft.Build.BackEnd
         internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
             ArgumentNullException.ThrowIfNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
+            Assumed.False(_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 

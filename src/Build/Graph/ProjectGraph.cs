@@ -584,7 +584,7 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            ErrorUtilities.VerifyThrow(toposort.Count == graphNodes.Count, "sorted node count must be equal to total node count");
+            Assumed.Equal(toposort.Count, graphNodes.Count, "sorted node count must be equal to total node count");
 
             toposort.Reverse();
 

@@ -11,7 +11,6 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Execution
@@ -552,7 +551,7 @@ namespace Microsoft.Build.Execution
 
             if (_resultsByTarget.TryGetValue(target, out TargetResult? targetResult))
             {
-                ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, $"Items already exist for target {target}.");
+                Assumed.Equal(targetResult.ResultCode, TargetResultCode.Skipped, $"Items already exist for target {target}.");
             }
 
             _resultsByTarget[target] = result;
@@ -564,9 +563,7 @@ namespace Microsoft.Build.Execution
         /// <param name="targetsToKeep">The targets whose results to keep.</param>
         internal void KeepSpecificTargetResults(IReadOnlyCollection<string> targetsToKeep)
         {
-            ErrorUtilities.VerifyThrow(
-                targetsToKeep.Count > 0,
-                $"{nameof(targetsToKeep)} should contain at least one target.");
+            Assumed.Positive(targetsToKeep.Count, $"{nameof(targetsToKeep)} should contain at least one target.");
 
             foreach (string target in _resultsByTarget?.Keys ?? [])
             {
@@ -584,7 +581,7 @@ namespace Microsoft.Build.Execution
         public void MergeResults(BuildResult results)
         {
             ArgumentNullException.ThrowIfNull(results);
-            ErrorUtilities.VerifyThrow(results.ConfigurationId == ConfigurationId, "Result configurations don't match");
+            Assumed.Equal(results.ConfigurationId, ConfigurationId, "Result configurations don't match");
 
             // If we are merging with ourself or with a shallow clone, do nothing.
             if (ReferenceEquals(this, results) || ReferenceEquals(_resultsByTarget, results._resultsByTarget))
@@ -600,7 +597,7 @@ namespace Microsoft.Build.Execution
                 // cached results after the first time the target is built.  As such, we can allow "duplicates" to be merged in because there is
                 // no change.  If, however, this turns out not to be the case, we need to re-evaluate this merging and possibly re-enable the
                 // assertion below.
-                // ErrorUtilities.VerifyThrow(!HasResultsForTarget(targetResult.Key), "Results already exist");
+                // Assumed.False(HasResultsForTarget(targetResult.Key), "Results already exist");
 
                 // Copy the new results in.
                 _resultsByTarget![targetResult.Key] = targetResult.Value;

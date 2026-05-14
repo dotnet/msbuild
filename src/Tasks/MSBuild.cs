@@ -336,7 +336,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, $"skipNonexistentProjects has unexpected value {skipNonExistProjects}");
+                        Assumed.Equal(skipNonExistProjects, SkipNonExistentProjectsBehavior.Error, $"skipNonexistentProjects has unexpected value {skipNonExistProjects}");
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
                         success = false;
                     }

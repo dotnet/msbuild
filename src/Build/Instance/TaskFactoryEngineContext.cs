@@ -401,7 +401,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyActiveProxy()
         {
-            ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task factory logging host.");
+            Assumed.True(_activeProxy, "Attempted to use an inactive task factory logging host.");
         }
     }
 }
