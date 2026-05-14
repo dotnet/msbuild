@@ -161,38 +161,27 @@ jobs:
           echo "$UNIQUE_DATES" | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-          # Filter for succeeded runs whose createdDate falls on TARGET_DATE
-          # Prefer scheduled runs (these have no triggering pipeline)
+          # Filter for completed runs whose createdDate falls on TARGET_DATE.
+          # PerfStar runs often report result=failed even when artifacts are produced,
+          # so we accept any completed run and let the artifact download step fail gracefully.
           MATCHING=$(echo "$RUNS" | jq --arg d "$TARGET_DATE" \
-            '[.value[] | select(.result == "succeeded") | select(.createdDate | startswith($d))]' 2>/dev/null || echo "[]")
+            '[.value[] | select(.state == "completed") | select(.createdDate | startswith($d))]' 2>/dev/null || echo "[]")
           MATCH_COUNT=$(echo "$MATCHING" | jq 'length' 2>/dev/null || echo 0)
-          echo "Succeeded runs on $TARGET_DATE: $MATCH_COUNT"
+          echo "Completed runs on $TARGET_DATE: $MATCH_COUNT"
 
           if [ "$MATCH_COUNT" -gt 0 ]; then
-            # The Pipelines API run .id is the same as the Build API buildId
+            # Pick the latest completed run for the date
             BEST_RUN=$(echo "$MATCHING" | jq -r 'last | .id // empty')
-            echo "Selected run: $BEST_RUN"
+            BEST_RESULT=$(echo "$MATCHING" | jq -r 'last | .result // "unknown"')
+            echo "Selected run: $BEST_RUN (result=$BEST_RESULT)"
             echo "run_id=${BEST_RUN}" >> "$GITHUB_OUTPUT"
             echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "**Selected run: $BEST_RUN**" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Selected run: $BEST_RUN** (result=$BEST_RESULT)" >> "$GITHUB_STEP_SUMMARY"
           else
-            # Try finishedDate as well
-            MATCHING_FIN=$(echo "$RUNS" | jq --arg d "$TARGET_DATE" \
-              '[.value[] | select(.result == "succeeded") | select(.finishedDate | startswith($d))]' 2>/dev/null || echo "[]")
-            FIN_COUNT=$(echo "$MATCHING_FIN" | jq 'length' 2>/dev/null || echo 0)
-
-            if [ "$FIN_COUNT" -gt 0 ]; then
-              BEST_RUN=$(echo "$MATCHING_FIN" | jq -r 'last | .id // empty')
-              echo "Selected run (matched by finishedDate): $BEST_RUN"
-              echo "run_id=${BEST_RUN}" >> "$GITHUB_OUTPUT"
-              echo "" >> "$GITHUB_STEP_SUMMARY"
-              echo "**Selected run: $BEST_RUN** (matched by finishedDate)" >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "::warning::No successful builds found for $TARGET_DATE on pipeline ${PIPELINE_ID}"
-              echo "" >> "$GITHUB_STEP_SUMMARY"
-              echo "**No matching build found for $TARGET_DATE**" >> "$GITHUB_STEP_SUMMARY"
-              echo "run_id=" >> "$GITHUB_OUTPUT"
-            fi
+            echo "::warning::No completed builds found for $TARGET_DATE on pipeline ${PIPELINE_ID}"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**No matching build found for $TARGET_DATE**" >> "$GITHUB_STEP_SUMMARY"
+            echo "run_id=" >> "$GITHUB_OUTPUT"
           fi
           exit 0
 
@@ -208,17 +197,19 @@ jobs:
           set -euo pipefail
           BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
 
+          ARTIFACT_COUNT=0
           for SUFFIX in GOLDWIN GOLDLIN; do
             ARTIFACT="CrankAssetsThinned${SUFFIX}"
             echo "::group::Downloading ${ARTIFACT}"
 
-            ARTIFACT_INFO=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
+            ARTIFACT_INFO=$(curl -sS -H "Authorization: Bearer ${AZDO_TOKEN}" \
               "${BASE_URL}/build/builds/${BUILD_ID}/artifacts?artifactName=${ARTIFACT}&api-version=7.1")
 
             DOWNLOAD_URL=$(echo "$ARTIFACT_INFO" | jq -r '.resource.downloadUrl')
             if [ -z "$DOWNLOAD_URL" ] || [ "$DOWNLOAD_URL" = "null" ]; then
-              echo "::error::Artifact ${ARTIFACT} not found in build ${BUILD_ID}"
-              exit 1
+              echo "::warning::Artifact ${ARTIFACT} not found in build ${BUILD_ID} — skipping"
+              echo "::endgroup::"
+              continue
             fi
 
             curl -sS -L -H "Authorization: Bearer ${AZDO_TOKEN}" \
@@ -234,8 +225,14 @@ jobs:
 
             COUNT=$(find "output/data/${TARGET_DATE}/${SUFFIX}" -maxdepth 1 -name '*.json' | wc -l)
             echo "Extracted ${COUNT} JSON files for ${SUFFIX}"
+            ARTIFACT_COUNT=$((ARTIFACT_COUNT + 1))
             echo "::endgroup::"
           done
+
+          if [ "$ARTIFACT_COUNT" -eq 0 ]; then
+            echo "::error::No artifacts found in build ${BUILD_ID} — nothing to store"
+            exit 1
+          fi
 
           echo "downloaded=true" >> "$GITHUB_OUTPUT"
 
