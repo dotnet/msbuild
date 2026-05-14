@@ -335,7 +335,6 @@
     <Compile Include="BackEnd\Node\InProcNode.cs" />
     <Compile Include="BackEnd\Node\NodeConfiguration.cs" />
     <Compile Include="BackEnd\Node\OutOfProcNode.cs" />
-    <Compile Include="BackEnd\Node\NativeMethods.cs" />
     <Compile Include="BackEnd\Shared\BuildAbortedException.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilderCallback.cs" />

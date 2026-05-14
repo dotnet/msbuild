@@ -464,5 +464,5 @@ dotnet_diagnostic.xUnit2013.severity = none
 # anything in the CsWin32 subfolders. Other options are to disable CS3016 entirely in the project, but that would
 # suppress the warning for all code, not just the interop code. Hopefully https://github.com/dotnet/roslyn/issues/68526
 # is addressed so we can remove all of this complication.
-[{**/Windows/**/*.cs}]
+[{**/Windows/**/*.cs,**/Polyfills/IComIIDPolyfills.cs}]
 dotnet_diagnostic.CS3019.severity = none

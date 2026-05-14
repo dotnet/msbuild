@@ -23,10 +23,6 @@ using System.Text.RegularExpressions;
 using System.Runtime.Versioning;
 using Microsoft.Build.Utilities;
 
-#if FEATURE_MSCOREE
-using Windows.Win32.Foundation;
-#endif
-
 #nullable disable
 
 namespace Microsoft.Build.Tasks
@@ -458,38 +454,6 @@ namespace Microsoft.Build.Tasks
                                     | RETARGETABLE
     }
 
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct STARTUPINFO
-    {
-        internal Int32 cb;
-        internal string lpReserved;
-        internal string lpDesktop;
-        internal string lpTitle;
-        internal Int32 dwX;
-        internal Int32 dwY;
-        internal Int32 dwXSize;
-        internal Int32 dwYSize;
-        internal Int32 dwXCountChars;
-        internal Int32 dwYCountChars;
-        internal Int32 dwFillAttribute;
-        internal Int32 dwFlags;
-        internal Int16 wShowWindow;
-        internal Int16 cbReserved2;
-        internal IntPtr lpReserved2;
-        internal IntPtr hStdInput;
-        internal IntPtr hStdOutput;
-        internal IntPtr hStdError;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct PROCESS_INFORMATION
-    {
-        public IntPtr hProcess;
-        public IntPtr hThread;
-        public int dwProcessId;
-        public int dwThreadId;
-    }
-
     /// <summary>
     /// Interop methods.
     /// </summary>
@@ -498,11 +462,7 @@ namespace Microsoft.Build.Tasks
         #region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
-        internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
 
-        internal const uint NORMAL_PRIORITY_CLASS = 0x0020;
-        internal const uint CREATE_NO_WINDOW = 0x08000000;
-        internal const Int32 STARTF_USESTDHANDLES = 0x00000100;
         internal const int ERROR_SUCCESS = 0;
 
         internal const int TYPE_E_REGISTRYACCESS = -2147319780;
@@ -546,49 +506,7 @@ namespace Microsoft.Build.Tasks
         internal const UInt16 IMAGE_FILE_MACHINE_ARM64 = 0xAA64; // ARM64 Little-Endian
         internal const UInt16 IMAGE_FILE_MACHINE_R4000 = 0x166; // Used to test a architecture we do not expect to reference
 
-        internal const uint GENERIC_READ = 0x80000000;
-
-        internal const uint PAGE_READONLY = 0x02;
-
-        internal const uint FILE_MAP_READ = 0x04;
-
-        internal const uint FILE_TYPE_DISK = 0x01;
-
         internal const int SE_ERR_ACCESSDENIED = 5;
-
-        // CryptoApi flags and constants
-        [Flags]
-        internal enum CryptFlags
-        {
-            Exportable = 0x1,
-            UserProtected = 0x2,
-            MachineKeySet = 0x20,
-            UserKeySet = 0x1000
-        }
-
-        internal enum KeySpec
-        {
-            AT_KEYEXCHANGE = 1,
-            AT_SIGNATURE = 2
-        }
-
-        internal enum BlobType
-        {
-            SIMPLEBLOB = 0x1,
-            PUBLICKEYBLOB = 0x6,
-            PRIVATEKEYBLOB = 0x7,
-            PLAINTEXTKEYBLOB = 0x8,
-            OPAQUEKEYBLOB = 0x9,
-            PUBLICKEYBLOBEX = 0xA,
-            SYMMETRICWRAPKEYBLOB = 0xB,
-        }
-
-        [Flags]
-        internal enum CertStoreClose
-        {
-            CERT_CLOSE_STORE_FORCE_FLAG = 0x00000001,
-            CERT_CLOSE_STORE_CHECK_FLAG = 0x00000002,
-        }
 
         [Flags]
         internal enum MoveFileFlags
@@ -601,152 +519,6 @@ namespace Microsoft.Build.Tasks
             MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
         }
 
-        #endregion
-
-        #region NT header stuff
-
-        internal const uint IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
-        internal const uint IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
-
-        internal const uint IMAGE_DIRECTORY_ENTRY_COMHEADER = 14;
-
-        internal const uint COMIMAGE_FLAGS_STRONGNAMESIGNED = 0x08;
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_FILE_HEADER
-        {
-            internal ushort Machine;
-            internal ushort NumberOfSections;
-            internal uint TimeDateStamp;
-            internal uint PointerToSymbolTable;
-            internal uint NumberOfSymbols;
-            internal ushort SizeOfOptionalHeader;
-            internal ushort Characteristics;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_DATA_DIRECTORY
-        {
-            internal uint VirtualAddress;
-            internal uint Size;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_OPTIONAL_HEADER32
-        {
-            internal ushort Magic;
-            internal byte MajorLinkerVersion;
-            internal byte MinorLinkerVersion;
-            internal uint SizeOfCode;
-            internal uint SizeOfInitializedData;
-            internal uint SizeOfUninitializedData;
-            internal uint AddressOfEntryPoint;
-            internal uint BaseOfCode;
-            internal uint BaseOfData;
-            internal uint ImageBase;
-            internal uint SectionAlignment;
-            internal uint FileAlignment;
-            internal ushort MajorOperatingSystemVersion;
-            internal ushort MinorOperatingSystemVersion;
-            internal ushort MajorImageVersion;
-            internal ushort MinorImageVersion;
-            internal ushort MajorSubsystemVersion;
-            internal ushort MinorSubsystemVersion;
-            internal uint Win32VersionValue;
-            internal uint SizeOfImage;
-            internal uint SizeOfHeaders;
-            internal uint CheckSum;
-            internal ushort Subsystem;
-            internal ushort DllCharacteristics;
-            internal uint SizeOfStackReserve;
-            internal uint SizeOfStackCommit;
-            internal uint SizeOfHeapReserve;
-            internal uint SizeOfHeapCommit;
-            internal uint LoaderFlags;
-            internal uint NumberOfRvaAndSizes;
-
-            // should be:
-            // [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] internal IMAGE_DATA_DIRECTORY[] DataDirectory;
-            // but fixed size arrays only work with simple types, so I have to use ulongs and convert them to IMAGE_DATA_DIRECTORY structs
-            // Fortunately, IMAGE_DATA_DIRECTORY is only 8 bytes long... (whew)
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            internal ulong[] DataDirectory;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_OPTIONAL_HEADER64
-        {
-            internal ushort Magic;
-            internal byte MajorLinkerVersion;
-            internal byte MinorLinkerVersion;
-            internal uint SizeOfCode;
-            internal uint SizeOfInitializedData;
-            internal uint SizeOfUninitializedData;
-            internal uint AddressOfEntryPoint;
-            internal uint BaseOfCode;
-            internal ulong ImageBase;
-            internal uint SectionAlignment;
-            internal uint FileAlignment;
-            internal ushort MajorOperatingSystemVersion;
-            internal ushort MinorOperatingSystemVersion;
-            internal ushort MajorImageVersion;
-            internal ushort MinorImageVersion;
-            internal ushort MajorSubsystemVersion;
-            internal ushort MinorSubsystemVersion;
-            internal uint Win32VersionValue;
-            internal uint SizeOfImage;
-            internal uint SizeOfHeaders;
-            internal uint CheckSum;
-            internal ushort Subsystem;
-            internal ushort DllCharacteristics;
-            internal ulong SizeOfStackReserve;
-            internal ulong SizeOfStackCommit;
-            internal ulong SizeOfHeapReserve;
-            internal ulong SizeOfHeapCommit;
-            internal uint LoaderFlags;
-            internal uint NumberOfRvaAndSizes;
-
-            // should be:
-            // [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] internal IMAGE_DATA_DIRECTORY[] DataDirectory;
-            // but fixed size arrays only work with simple types, so I have to use ulongs and convert them to IMAGE_DATA_DIRECTORY structs
-            // Fortunately, IMAGE_DATA_DIRECTORY is only 8 bytes long... (whew)
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            internal ulong[] DataDirectory;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_NT_HEADERS32
-        {
-            internal uint signature;
-            internal IMAGE_FILE_HEADER fileHeader;
-            internal IMAGE_OPTIONAL_HEADER32 optionalHeader;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_NT_HEADERS64
-        {
-            internal uint signature;
-            internal IMAGE_FILE_HEADER fileHeader;
-            internal IMAGE_OPTIONAL_HEADER64 optionalHeader;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_COR20_HEADER
-        {
-            internal uint cb;
-            internal ushort MajorRuntimeVersion;
-            internal ushort MinorRuntimeVersion;
-            internal IMAGE_DATA_DIRECTORY MetaData;
-            internal uint Flags;
-            internal uint EntryPointTokenOrEntryPointRVA;
-            internal IMAGE_DATA_DIRECTORY Resources;
-            internal IMAGE_DATA_DIRECTORY StrongNameSignature;
-            internal IMAGE_DATA_DIRECTORY CodeManagerTable;
-            internal IMAGE_DATA_DIRECTORY VTableFixups;
-            internal IMAGE_DATA_DIRECTORY ExportAddressTableJumps;
-            internal IMAGE_DATA_DIRECTORY ManagedNativeHeader;
-        }
-
         [StructLayout(LayoutKind.Sequential)]
         internal struct CRYPTOAPI_BLOB
         {
@@ -757,18 +529,10 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region PInvoke
-        private const string Crypt32DLL = "crypt32.dll";
-        private const string Advapi32DLL = "advapi32.dll";
-#if !RUNTIME_TYPE_NETCORE
-        private const string MscoreeDLL = "mscoree.dll";
-#endif
 
         //------------------------------------------------------------------------------
         // CreateHardLink
         //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern bool CreateHardLink(string newFileName, string exitingFileName, IntPtr securityAttributes);
-
         [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
@@ -777,8 +541,13 @@ namespace Microsoft.Build.Tasks
             bool hardLinkCreated;
             if (NativeMethodsShared.IsWindows)
             {
-                hardLinkCreated = CreateHardLink(newFileName, exitingFileName, IntPtr.Zero /* reserved, must be NULL */);
+#if FEATURE_WINDOWSINTEROP
+                hardLinkCreated = Windows.Win32.PInvoke.CreateHardLink(newFileName, exitingFileName);
                 errorMessage = hardLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+#else
+                hardLinkCreated = false;
+                errorMessage = "CreateHardLink is not supported in this build (FEATURE_WINDOWSINTEROP is disabled).";
+#endif
             }
             else
             {
@@ -792,11 +561,13 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         // MoveFileEx
         //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "MoveFileEx")]
-        internal static extern bool MoveFileExWindows(
-            [In] string existingFileName,
-            [In] string newFileName,
-            [In] MoveFileFlags flags);
+#if FEATURE_WINDOWSINTEROP
+        [SupportedOSPlatform("windows5.1.2600")]
+        internal static bool MoveFileExWindows(string existingFileName, string newFileName, MoveFileFlags flags)
+            => Windows.Win32.PInvoke.MoveFileEx(existingFileName, newFileName, (Windows.Win32.Storage.FileSystem.MOVE_FILE_FLAGS)flags);
+#else
+        internal static bool MoveFileExWindows(string existingFileName, string newFileName, MoveFileFlags flags) => false;
+#endif
 
         /// <summary>
         /// Add implementation of this function when not running on windows. The implementation is
@@ -883,88 +654,17 @@ namespace Microsoft.Build.Tasks
         [return: MarshalAs(UnmanagedType.BStr)]
         internal static extern string QueryPathOfRegTypeLib([In] ref Guid clsid, [In] short majorVersion, [In] short minorVersion, [In] int lcid);
 
-        //------------------------------------------------------------------------------
-        // CreateFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, FileShare dwShareMode,
-            IntPtr lpSecurityAttributes, FileMode dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
-
-        //------------------------------------------------------------------------------
-        // GetFileType
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern uint GetFileType(IntPtr hFile);
-
-        //------------------------------------------------------------------------------
-        // CloseHandle
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CloseHandle(IntPtr hObject);
-
-        //------------------------------------------------------------------------------
-        // CreateFileMapping
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CreateFileMapping(IntPtr hFile, IntPtr lpFileMappingAttributes, uint flProtect,
-            uint dwMaximumSizeHigh, uint dwMaximumSizeLow, string lpName);
-
-        //------------------------------------------------------------------------------
-        // MapViewOfFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr MapViewOfFile(IntPtr hFileMapping, uint dwDesiredAccess, uint dwFileOffsetHigh, uint dwFileOffsetLow, IntPtr dwNumberOfBytesToMap);
-
-        //------------------------------------------------------------------------------
-        // UnmapViewOfFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool UnmapViewOfFile(IntPtr lpBaseAddress);
-
-        //------------------------------------------------------------------------------
-        // CreateProcess
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess(
-            string lpApplicationName,
-            string lpCommandLine,
-            IntPtr lpProcessAttributes,
-            IntPtr lpThreadAttributes,
-            [In, MarshalAs(UnmanagedType.Bool)]
-            bool bInheritHandles,
-            uint dwCreationFlags,
-            IntPtr lpEnvironment,
-            string lpCurrentDirectory,
-            [In] ref STARTUPINFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation);
-
-        //------------------------------------------------------------------------------
-        // ImageNtHeader
-        //------------------------------------------------------------------------------
-        [DllImport("dbghelp.dll", SetLastError = true)]
-        internal static extern IntPtr ImageNtHeader(IntPtr imageBase);
-
-        //------------------------------------------------------------------------------
-        // ImageRvaToVa
-        //------------------------------------------------------------------------------
-        [DllImport("dbghelp.dll", SetLastError = true)]
-        internal static extern IntPtr ImageRvaToVa(IntPtr ntHeaders, IntPtr imageBase, uint Rva, out IntPtr LastRvaSection);
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern uint GetLogicalDrives();
-
         internal static bool AllDrivesMapped()
         {
+#if FEATURE_WINDOWSINTEROP
             const uint AllDriveMask = 0x0cffffff;
             if (NativeMethodsShared.IsWindows)
             {
-                var driveMask = GetLogicalDrives();
+                var driveMask = Windows.Win32.PInvoke.GetLogicalDrives();
                 // All drives are taken if the value has all 26 bits set
                 return driveMask >= AllDriveMask;
             }
+#endif
 
             return false;
         }
@@ -1009,76 +709,8 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         // PFXImportCertStore
         //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern IntPtr PFXImportCertStore([In] IntPtr blob, [In] string password, [In] CryptFlags flags);
+        // (Removed: dead crypt32/advapi32 P/Invokes had no call sites in the repo.)
 
-        //------------------------------------------------------------------------------
-        // CertCloseStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertCloseStore([In] IntPtr CertStore, CertStoreClose Flags);
-
-        //------------------------------------------------------------------------------
-        // CertEnumCertificatesInStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        internal static extern IntPtr CertEnumCertificatesInStore([In] IntPtr CertStore, [In] IntPtr PrevCertContext);
-
-        //------------------------------------------------------------------------------
-        // CryptAcquireCertificatePrivateKey
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptAcquireCertificatePrivateKey([In] IntPtr CertContext, [In] uint flags, [In] IntPtr reserved, [In, Out] ref IntPtr CryptProv, [In, Out] ref KeySpec KeySpec, [In, Out, MarshalAs(UnmanagedType.Bool)] ref bool CallerFreeProv);
-
-        //------------------------------------------------------------------------------
-        // CryptGetUserKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptGetUserKey([In] IntPtr CryptProv, [In] KeySpec KeySpec, [In, Out] ref IntPtr Key);
-
-        //------------------------------------------------------------------------------
-        // CryptExportKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptExportKey([In] IntPtr Key, [In] IntPtr ExpKey, [In] BlobType type, [In] uint Flags, [In] IntPtr Data, [In, Out] ref uint DataLen);
-
-        //------------------------------------------------------------------------------
-        // CryptDestroyKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptDestroyKey(IntPtr hKey);
-
-        //------------------------------------------------------------------------------
-        // CryptReleaseContext
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptReleaseContext([In] IntPtr Prov, [In] uint Flags);
-
-        //------------------------------------------------------------------------------
-        // CertFreeCertificateContext
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertFreeCertificateContext(IntPtr CertContext);
-
-#if FEATURE_MSCOREE
-        /// <summary>
-        /// Get the runtime version for a given file.
-        /// </summary>
-        /// <param name="szFileName">The path of the file to be examined.</param>
-        /// <param name="szBuffer">The buffer allocated for the version information that is returned.</param>
-        /// <param name="cchBuffer">The size, in wide characters, of szBuffer.</param>
-        /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
-        /// <returns>HResult.</returns>
-        [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern unsafe HRESULT GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
-#endif
         #endregion
 
         #region Methods
