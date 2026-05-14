@@ -47,13 +47,6 @@ namespace Microsoft.Build.CommandLine.Experimental
         internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
         /// <summary>
-        /// Used to keep track of response files automatically discovered by MSBuild.
-        /// </summary>
-        private List<string> autoResponseFiles;
-
-        internal IReadOnlyList<string> AutoResponseFiles => autoResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
-
-        /// <summary>
         /// Parses the provided command-line arguments into a <see cref="CommandLineSwitchesAccessor"/>.
         /// </summary>
         /// <param name="commandLineArgs">
@@ -673,7 +666,6 @@ namespace Microsoft.Build.CommandLine.Experimental
             {
                 found = true;
                 GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile, commandLine);
-                autoResponseFiles.Add(Path.GetFullPath(autoResponseFile));
 
                 // if the "/noautoresponse" switch was set in the auto-response file, flag an error
                 if (switchesFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
@@ -732,7 +724,6 @@ namespace Microsoft.Build.CommandLine.Experimental
         public void ResetGatheringSwitchesState()
         {
             includedResponseFiles = new List<string>();
-            autoResponseFiles = new List<string>();
             CommandLineSwitches.SwitchesFromResponseFiles = new();
         }
     }

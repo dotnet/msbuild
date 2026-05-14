@@ -937,9 +937,9 @@ namespace Microsoft.Build.CommandLine
             // handle switch errors
             catch (CommandLineSwitchException e)
             {
-                if (commandLineParser.AutoResponseFiles.Count > 0)
+                if (commandLineParser.IncludedResponseFiles.Count > 0)
                 {
-                    PrintAutoResponseFileNotices();
+                    PrintResponseFileNotices();
                 }
 
                 Console.WriteLine(e.Message);
@@ -4214,14 +4214,17 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpPrompt"));
         }
 
-        private static void PrintAutoResponseFileNotices()
+        private static void PrintResponseFileNotices()
         {
-            foreach (string responseFilePath in commandLineParser.AutoResponseFiles)
+            Console.WriteLine(
+                AssemblyResources.GetString(
+                    commandLineParser.IncludedResponseFiles.Count == 1
+                        ? "PickedUpSwitchesFromResponseFile"
+                        : "PickedUpSwitchesFromResponseFiles"));
+
+            foreach (string responseFilePath in commandLineParser.IncludedResponseFiles)
             {
-                Console.WriteLine(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "PickedUpSwitchesFromAutoResponse",
-                        responseFilePath));
+                Console.WriteLine($"  {responseFilePath}");
             }
         }
 
