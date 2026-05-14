@@ -155,9 +155,24 @@ jobs:
           echo "Completed runs on $TARGET_DATE: $MATCH_COUNT"
 
           if [ "$MATCH_COUNT" -gt 0 ]; then
-            # Pick the latest completed run for the date (API returns newest first)
-            BEST_RUN=$(echo "$MATCHING" | jq -r 'first | .id // empty')
-            BEST_RESULT=$(echo "$MATCHING" | jq -r 'first | .result // "unknown"')
+            # When multiple runs exist, prefer scheduled runs over manual/CI triggers.
+            # The Pipelines API doesn't expose 'reason', so query the Build API.
+            IDS=$(echo "$MATCHING" | jq -r '[.[].id | tostring] | join(",")')
+            BUILD_DETAILS=$(curl -sS -H "Authorization: Bearer ${AZDO_TOKEN}" \
+              "${BASE_URL}/build/builds?buildIds=${IDS}&api-version=7.1" 2>/dev/null || echo '{}')
+
+            SCHEDULED_ID=$(echo "$BUILD_DETAILS" | jq -r \
+              '[.value[] | select(.reason == "schedule")] | sort_by(.id) | last | .id // empty' 2>/dev/null || echo '')
+
+            if [ -n "$SCHEDULED_ID" ]; then
+              BEST_RUN="$SCHEDULED_ID"
+              BEST_RESULT=$(echo "$MATCHING" | jq -r --argjson id "$SCHEDULED_ID" '.[] | select(.id == $id) | .result // "unknown"')
+              echo "Preferred scheduled run: $BEST_RUN (result=$BEST_RESULT)"
+            else
+              BEST_RUN=$(echo "$MATCHING" | jq -r 'first | .id // empty')
+              BEST_RESULT=$(echo "$MATCHING" | jq -r 'first | .result // "unknown"')
+              echo "No scheduled run found, using latest: $BEST_RUN (result=$BEST_RESULT)"
+            fi
             echo "Selected run: $BEST_RUN (result=$BEST_RESULT)"
             echo "run_id=${BEST_RUN}" >> "$GITHUB_OUTPUT"
             echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -259,13 +274,20 @@ jobs:
 
       # ── 7. Chain to the next date if needed ────────────────────────────
       - name: Trigger next date
-        if: steps.download.outputs.downloaded == 'true'
+        if: steps.date.outputs.skip != 'true' && steps.check.outputs.exists != 'true'
         env:
           TARGET_DATE: ${{ steps.date.outputs.target_date }}
           END_DATE: ${{ steps.date.outputs.end_date }}
           TODAY: ${{ steps.date.outputs.today }}
+          DOWNLOADED: ${{ steps.download.outputs.downloaded }}
           GH_TOKEN: ${{ github.token }}
         run: |
+          # If nothing was downloaded (no builds/artifacts), don't chain
+          if [ "$DOWNLOADED" != "true" ]; then
+            echo "No data downloaded for $TARGET_DATE — not chaining"
+            exit 0
+          fi
+
           # Only chain when we haven't reached today yet
           if [[ "$TARGET_DATE" >= "$TODAY" ]]; then
             echo "Reached today ($TODAY) — stopping chain"
