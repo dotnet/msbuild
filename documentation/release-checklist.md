@@ -200,6 +200,7 @@ Click *Request – Reference Publishing*. Use [existing ticket](https://dev.azur
   ```
   Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate.
 - [ ] **5.4** Update `BootstrapSdkVersion` in [`eng/Versions.props`](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props) if a fresh SDK was released. Check https://dotnet.microsoft.com/download/visual-studio-sdks — always verify the details for the targeted .NET version.
+- [ ] **5.4b** Update `tools.dotnet` in [`global.json`](https://github.com/dotnet/msbuild/blob/main/global.json) to the latest released SDK in the targeted band. `DotNetCliVersion` in `eng/Versions.props` is derived from this and **must** match (see the comment on `DotNetCliVersion`). This bump should happen monthly as new SDKs release.
 - [ ] **5.5** Extend OptProf data expiration for `vs{{THIS_RELEASE_VERSION}}` branch if the release is LTSC:
   - Find the drop at `OptimizationData/DotNet-msbuild-Trusted/vs{{THIS_RELEASE_VERSION}}/...` (in MSBuild CI logs: Build task, or OptProf pipeline: "Publish OptimizationInputs drop" task)
   - Get [drop.exe](https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/azure-artifacts/drop-service/azure-artifacts-drop) CLI
