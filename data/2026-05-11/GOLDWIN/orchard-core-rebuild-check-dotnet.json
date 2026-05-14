@@ -1,0 +1,26 @@
+﻿{
+    "date":  "2026-05-11",
+    "scenario":  "orchard-core-rebuild-check-dotnet",
+    "perfstarCIBuildNumber":  "20260511.3.s",
+    "branch":  "refs/heads/main",
+    "ciRunReason":  "Schedule",
+    "machineID":  "GOLDWIN",
+    "schemaVersion":  "2",
+    "timestamp":  "2026-05-11T11:55:41.9970673Z",
+    "results":  {
+                    "netSdkVersion":  "11.0.100-preview.5.26258.110",
+                    "aspNetCoreVersion":  "10.0.7+b16286c2284f",
+                    "netCoreAppVersion":  "10.0.7+b16286c2284f",
+                    "msbuild-version":  "18.8.0.25701",
+                    "msbuild-display-version":  "18.8.0.25701",
+                    "exit-code":  1.0,
+                    "failure-description":  "First build finished with non zero exit code.",
+                    "info/test-asset":  "OrchardCore",
+                    "info/test-scenario":  "Rebuild",
+                    "info/msbuild-app":  "Dotnet",
+                    "info/test-version":  1.0,
+                    "info/iterations-number":  1.0,
+                    "dotnet-version":  "11.0.100-preview.5.26258.110",
+                    "crank-netSdkVersion":  "10.0.203"
+                }
+}
