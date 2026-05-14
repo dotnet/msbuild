@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
 
             public IXunitTestClass TestClass => _wrapped.TestClass;
 
-            public int TestClassMetadataToken => _wrapped.TestClassMetadataToken;
+            public int? TestClassMetadataToken => _wrapped.TestClassMetadataToken;
 
             public string TestClassName => _wrapped.TestClassName;
 
@@ -107,11 +107,16 @@ namespace Microsoft.Build.UnitTests
 
             public string UniqueID => _wrapped.UniqueID;
 
+            ICoreTestClass ICoreTestCase.TestClass => TestClass;
             ITestClass ITestCase.TestClass => TestClass;
 
+            ICoreTestCollection ICoreTestCase.TestCollection => TestCollection;
             ITestCollection ITestCase.TestCollection => TestCollection;
 
+            ICoreTestMethod ICoreTestCase.TestMethod => TestMethod;
             ITestMethod ITestCase.TestMethod => TestMethod;
+
+            int ICoreTestCase.TestMethodArity => TestMethodArity ?? 0;
 
             int? ITestCaseMetadata.TestClassMetadataToken => TestClassMetadataToken;
 
