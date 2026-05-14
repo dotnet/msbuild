@@ -486,9 +486,8 @@ namespace Microsoft.Build.Shared
         /// picks the architecture of the dotnet host that is available).
         ///
         /// This special-casing only applies under .NET Framework MSBuild, since that is the only host that
-        /// actually launches an out-of-proc .NET task host for <c>Runtime="NET"</c>. Under .NET MSBuild,
-        /// <c>Runtime="NET"</c> tasks run in-process and the existing current-process-architecture default
-        /// is preserved.
+        /// could launch a cross-architecture task host for <c>Runtime="NET"</c>. Under .NET MSBuild,
+        /// <c>Runtime="NET"</c> tasks run in-process or error if another architecture is specified.
         ///
         /// An explicitly specified <paramref name="architecture"/> -- including
         /// <see cref="MSBuildArchitectureValues.currentArchitecture"/>, which is itself an explicit user
