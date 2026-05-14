@@ -146,21 +146,6 @@ jobs:
           RUN_COUNT=$(echo "$RUNS" | jq '.count // 0' 2>/dev/null || echo 0)
           echo "Total pipeline runs returned: $RUN_COUNT"
 
-          echo "## Build Query Debug" >> "$GITHUB_STEP_SUMMARY"
-          echo "Target date: \`$TARGET_DATE\`  Pipeline: \`${PIPELINE_ID}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "Total pipeline runs returned: $RUN_COUNT" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "### Recent runs (up to 30)" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "$RUNS" | jq -r '.value[:30][] | "id=\(.id) state=\(.state) result=\(.result) created=\(.createdDate) finished=\(.finishedDate) name=\(.name)"' 2>/dev/null | tee -a "$GITHUB_STEP_SUMMARY" || echo "(failed to parse)" | tee -a "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "### Unique dates in runs" >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          UNIQUE_DATES=$(echo "$RUNS" | jq -r '[.value[] | .createdDate[:10]] | unique | .[]' 2>/dev/null || echo "(failed)")
-          echo "$UNIQUE_DATES" | tee -a "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-
           # Filter for completed runs whose createdDate falls on TARGET_DATE.
           # PerfStar runs often report result=failed even when artifacts are produced,
           # so we accept any completed run and let the artifact download step fail gracefully.
@@ -170,9 +155,9 @@ jobs:
           echo "Completed runs on $TARGET_DATE: $MATCH_COUNT"
 
           if [ "$MATCH_COUNT" -gt 0 ]; then
-            # Pick the latest completed run for the date
-            BEST_RUN=$(echo "$MATCHING" | jq -r 'last | .id // empty')
-            BEST_RESULT=$(echo "$MATCHING" | jq -r 'last | .result // "unknown"')
+            # Pick the latest completed run for the date (API returns newest first)
+            BEST_RUN=$(echo "$MATCHING" | jq -r 'first | .id // empty')
+            BEST_RESULT=$(echo "$MATCHING" | jq -r 'first | .result // "unknown"')
             echo "Selected run: $BEST_RUN (result=$BEST_RESULT)"
             echo "run_id=${BEST_RUN}" >> "$GITHUB_OUTPUT"
             echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -274,7 +259,7 @@ jobs:
 
       # ── 7. Chain to the next date if needed ────────────────────────────
       - name: Trigger next date
-        if: "false"  # Temporarily disabled for debugging
+        if: steps.download.outputs.downloaded == 'true'
         env:
           TARGET_DATE: ${{ steps.date.outputs.target_date }}
           END_DATE: ${{ steps.date.outputs.end_date }}
