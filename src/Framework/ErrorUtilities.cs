@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework.Utilities;
@@ -74,19 +73,6 @@ internal static class FrameworkErrorUtilities
         if (!Path.IsPathRooted(value))
         {
             InternalError.Throw($"{value} unexpectedly not a rooted path");
-        }
-    }
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// Indicates the code path followed should not have been possible.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
-    public static void VerifyThrowInternalErrorUnreachable([DoesNotReturnIf(false)] bool condition)
-    {
-        if (!condition)
-        {
-            Assumed.Unreachable();
         }
     }
 }

@@ -44,10 +44,6 @@ internal static class ErrorUtilities
     internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception innerException)
         => InternalError.Throw(ref handler, innerException);
 
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalErrorUnreachable(bool)"/>
-    internal static void VerifyThrowInternalErrorUnreachable([DoesNotReturnIf(false)] bool condition)
-        => FrameworkErrorUtilities.VerifyThrowInternalErrorUnreachable(condition);
-
     /// <summary>
     /// Throws InternalErrorException.
     /// Indicates the code path followed should not have been possible.
