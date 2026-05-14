@@ -289,7 +289,7 @@ jobs:
           fi
 
           # Only chain when we haven't reached today yet
-          if [[ "$TARGET_DATE" >= "$TODAY" ]]; then
+          if [[ ! "$TARGET_DATE" < "$TODAY" ]]; then
             echo "Reached today ($TODAY) — stopping chain"
             exit 0
           fi
