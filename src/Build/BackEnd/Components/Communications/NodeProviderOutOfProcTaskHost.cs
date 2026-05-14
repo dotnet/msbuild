@@ -664,9 +664,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     hostProcessId = context.Process?.Id ?? -1;
                 }
-                catch (Exception)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    // Process has already exited; PID is unavailable.
+                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
                     hostProcessId = -1;
                 }
 

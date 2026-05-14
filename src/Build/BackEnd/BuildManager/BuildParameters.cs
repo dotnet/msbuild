@@ -812,7 +812,13 @@ namespace Microsoft.Build.Execution
         /// singleton state would leak across invocations out of sidecar TaskHost reuse.
         /// See https://github.com/dotnet/msbuild/issues/13315.
         /// </summary>
-        internal bool IsLongLivedHost { get; set; } = s_isLongLivedHost;
+        internal bool IsLongLivedHost
+        {
+            get => _isLongLivedHost;
+            set => _isLongLivedHost = value;
+        }
+
+        private bool _isLongLivedHost = s_isLongLivedHost;
 
         /// <summary>
         /// Marks the current process as a long-lived host.
@@ -998,6 +1004,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
+            translator.Translate(ref _isLongLivedHost);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.
