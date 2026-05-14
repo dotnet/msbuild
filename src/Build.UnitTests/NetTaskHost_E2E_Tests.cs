@@ -250,12 +250,9 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("ChildProject: GetOutputs target executed");
         }
 
-        [WindowsFullFrameworkOnlyFact] // This test verifies the fallback behavior with implicit host parameters.
-        public void NetTaskWithImplicitHostParamsTest_FallbackToDotnet()
+        [WindowsFullFrameworkOnlyFact] // This test verifies app host behavior with implicit host parameters.
+        public void NetTaskWithImplicitHostParamsTest_AppHostWithImplicitParams()
         {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-            var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
-
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskWithImplicitParams", "TestNetTaskWithImplicitParams.csproj");
 
             string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
@@ -268,8 +265,8 @@ namespace Microsoft.Build.Engine.UnitTests
             successTestTask.ShouldBeTrue();
 
             // Output from the task where only Runtime was specified
-            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
-            testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
+            testTaskOutput.ShouldContain("The task is executed in process: MSBuild");
+            testTaskOutput.ShouldContain(Constants.MSBuildExecutableName, customMessage: testTaskOutput);
             testTaskOutput.ShouldContain("/nodereuse:True");
 
             // Output from the task where only TaskHost was specified
