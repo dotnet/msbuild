@@ -253,6 +253,8 @@ namespace Microsoft.Build.Engine.UnitTests
         [WindowsFullFrameworkOnlyFact] // This test verifies app host behavior with implicit host parameters.
         public void NetTaskWithImplicitHostParamsTest_AppHostWithImplicitParams()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskWithImplicitParams", "TestNetTaskWithImplicitParams.csproj");
 
             string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
