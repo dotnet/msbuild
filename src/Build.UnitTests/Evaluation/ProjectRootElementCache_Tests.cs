@@ -165,5 +165,223 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 File.Delete(path);
             }
         }
+
+        /// <summary>
+        /// Verifies that concurrent lookups from multiple threads do not corrupt the cache.
+        /// This stress tests the lock-free weak cache lookup and the non-blocking strong cache boost.
+        /// </summary>
+        [Fact]
+        public void ConcurrentGetFromMultipleThreads()
+        {
+            const int threadCount = 8;
+            const int iterationsPerThread = 200;
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(false);
+
+            // Pre-populate cache with entries.
+            ProjectRootElement[] elements = new ProjectRootElement[20];
+            for (int i = 0; i < elements.Length; i++)
+            {
+                string path = NativeMethodsShared.IsUnixLike ? $"/concurrent_test_{i}.proj" : $"c:\\concurrent_test_{i}.proj";
+                elements[i] = ProjectRootElement.Create(path);
+                cache.AddEntry(elements[i]);
+            }
+
+            Exception caughtException = null;
+            using System.Threading.CountdownEvent countdown = new(threadCount);
+            using System.Threading.ManualResetEventSlim startEvent = new(false);
+
+            for (int t = 0; t < threadCount; t++)
+            {
+                System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try
+                    {
+                        startEvent.Wait();
+                        Random random = new Random(System.Threading.Thread.CurrentThread.ManagedThreadId);
+
+                        for (int i = 0; i < iterationsPerThread; i++)
+                        {
+                            int idx = random.Next(elements.Length);
+                            string path = elements[idx].FullPath;
+
+                            // Lookup should return the same PRE we added.
+                            ProjectRootElement result = cache.TryGet(path);
+                            if (result != null && !ReferenceEquals(result, elements[idx]))
+                            {
+                                System.Threading.Interlocked.CompareExchange(
+                                    ref caughtException,
+                                    new Exception($"Cache returned wrong PRE for {path}"),
+                                    null);
+                                return;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Threading.Interlocked.CompareExchange(ref caughtException, ex, null);
+                    }
+                    finally
+                    {
+                        countdown.Signal();
+                    }
+                });
+            }
+
+            // Release all threads at once.
+            startEvent.Set();
+            countdown.Wait(TimeSpan.FromSeconds(30));
+
+            Assert.Null(caughtException);
+        }
+
+        /// <summary>
+        /// Verifies that concurrent AddEntry and TryGet calls do not corrupt the cache.
+        /// </summary>
+        [Fact]
+        public void ConcurrentAddAndGet()
+        {
+            const int threadCount = 8;
+            const int entriesPerThread = 50;
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(false);
+            Exception caughtException = null;
+            using System.Threading.CountdownEvent countdown = new(threadCount);
+            using System.Threading.ManualResetEventSlim startEvent = new(false);
+
+            // Each thread creates and adds its own entries, while also looking up others.
+            ProjectRootElement[][] allElements = new ProjectRootElement[threadCount][];
+            for (int t = 0; t < threadCount; t++)
+            {
+                allElements[t] = new ProjectRootElement[entriesPerThread];
+                for (int i = 0; i < entriesPerThread; i++)
+                {
+                    string path = NativeMethodsShared.IsUnixLike
+                        ? $"/addget_t{t}_{i}.proj"
+                        : $"c:\\addget_t{t}_{i}.proj";
+                    allElements[t][i] = ProjectRootElement.Create(path);
+                }
+            }
+
+            for (int t = 0; t < threadCount; t++)
+            {
+                int threadIdx = t;
+                System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try
+                    {
+                        startEvent.Wait();
+
+                        for (int i = 0; i < entriesPerThread; i++)
+                        {
+                            // Add our entry.
+                            cache.AddEntry(allElements[threadIdx][i]);
+
+                            // Try to get a random entry from any thread.
+                            Random random = new Random(threadIdx * 1000 + i);
+                            int otherThread = random.Next(threadCount);
+                            int otherEntry = random.Next(entriesPerThread);
+                            ProjectRootElement other = allElements[otherThread][otherEntry];
+
+                            ProjectRootElement result = cache.TryGet(other.FullPath);
+
+                            // Result might be null (not yet added) or the correct entry.
+                            if (result != null && !ReferenceEquals(result, other))
+                            {
+                                System.Threading.Interlocked.CompareExchange(
+                                    ref caughtException,
+                                    new Exception($"Cache returned wrong PRE for {other.FullPath}"),
+                                    null);
+                                return;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Threading.Interlocked.CompareExchange(ref caughtException, ex, null);
+                    }
+                    finally
+                    {
+                        countdown.Signal();
+                    }
+                });
+            }
+
+            startEvent.Set();
+            countdown.Wait(TimeSpan.FromSeconds(30));
+
+            Assert.Null(caughtException);
+        }
+
+        /// <summary>
+        /// Verifies that concurrent AddEntry, TryGet, and ForgetEntry (via DiscardAnyWeakReference)
+        /// do not deadlock or corrupt the cache.
+        /// </summary>
+        [Fact]
+        public void ConcurrentAddGetAndDiscard()
+        {
+            const int threadCount = 6;
+            const int iterations = 100;
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(false);
+            Exception caughtException = null;
+            using System.Threading.CountdownEvent countdown = new(threadCount);
+            using System.Threading.ManualResetEventSlim startEvent = new(false);
+
+            // Create a pool of elements shared across threads.
+            ProjectRootElement[] pool = new ProjectRootElement[30];
+            for (int i = 0; i < pool.Length; i++)
+            {
+                string path = NativeMethodsShared.IsUnixLike
+                    ? $"/discard_test_{i}.proj"
+                    : $"c:\\discard_test_{i}.proj";
+                pool[i] = ProjectRootElement.Create(path);
+            }
+
+            for (int t = 0; t < threadCount; t++)
+            {
+                int threadIdx = t;
+                System.Threading.ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    try
+                    {
+                        startEvent.Wait();
+                        Random random = new Random(threadIdx);
+
+                        for (int i = 0; i < iterations; i++)
+                        {
+                            int idx = random.Next(pool.Length);
+                            int op = random.Next(3);
+
+                            switch (op)
+                            {
+                                case 0:
+                                    cache.AddEntry(pool[idx]);
+                                    break;
+                                case 1:
+                                    cache.TryGet(pool[idx].FullPath);
+                                    break;
+                                case 2:
+                                    cache.DiscardAnyWeakReference(pool[idx]);
+                                    break;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Threading.Interlocked.CompareExchange(ref caughtException, ex, null);
+                    }
+                    finally
+                    {
+                        countdown.Signal();
+                    }
+                });
+            }
+
+            startEvent.Set();
+            countdown.Wait(TimeSpan.FromSeconds(30));
+
+            Assert.Null(caughtException);
+        }
     }
 }

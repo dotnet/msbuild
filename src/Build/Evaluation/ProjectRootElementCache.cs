@@ -7,8 +7,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Xml;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -116,35 +117,50 @@ namespace Microsoft.Build.Evaluation
 #endif
 
         /// <summary>
-        /// The map of weakly-held ProjectRootElement's
+        /// The map of weakly-held ProjectRootElement's keyed by full path.
+        /// Uses ConcurrentDictionary for lock-free reads on the hot lookup path.
         /// </summary>
-        /// <remarks>
-        /// Be sure that the string keys are strongly held, or unpredictable bad
-        /// behavior will ensue.
-        /// </remarks>
-        private WeakValueDictionary<string, ProjectRootElement> _weakCache;
+        private readonly ConcurrentDictionary<string, WeakReference<ProjectRootElement>> _weakCache;
 
         /// <summary>
         /// Lock objects keyed by project file path.
         /// </summary>
-        private ConcurrentDictionary<string, object> _fileLoadLocks;
+        private readonly ConcurrentDictionary<string, object> _fileLoadLocks;
 
         /// <summary>
-        /// The list of strongly-held ProjectRootElement's
+        /// The LRU list of strongly-held ProjectRootElement's, preventing GC of commonly used entries.
+        /// Protected by <see cref="_strongCacheLock"/>.
         /// </summary>
-        private LinkedList<ProjectRootElement> _strongCache;
+        private LinkedList<ProjectRootElement> _strongCacheList;
+
+        /// <summary>
+        /// Index from ProjectRootElement to its node in <see cref="_strongCacheList"/> for O(1) lookup/boost.
+        /// Protected by <see cref="_strongCacheLock"/>.
+        /// </summary>
+        private Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>> _strongCacheIndex;
 
         /// <summary>
         /// Whether the cache should check the timestamp of the file on disk
         /// whenever it is requested, and update with the latest content of that
         /// file if it has changed.
         /// </summary>
-        private bool _autoReloadFromDisk;
+        private readonly bool _autoReloadFromDisk;
 
         /// <summary>
-        /// Locking object for this shared cache
+        /// Lock protecting <see cref="_strongCacheList"/> and <see cref="_strongCacheIndex"/>.
+        /// The weak cache (ConcurrentDictionary) does not require this lock for reads.
         /// </summary>
-        private object _locker = new object();
+        private readonly object _strongCacheLock = new object();
+
+        /// <summary>
+        /// Counter for periodic scavenging of dead weak references from the concurrent dictionary.
+        /// </summary>
+        private int _addCountSinceLastScavenge;
+
+        /// <summary>
+        /// Number of AddEntry calls between scavenge passes over the weak cache.
+        /// </summary>
+        private const int ScavengeInterval = 50;
 
         /// <summary>
         /// Creates an empty cache.
@@ -153,8 +169,9 @@ namespace Microsoft.Build.Evaluation
         {
             DebugTraceCache("Constructing with autoreload from disk: ", autoReloadFromDisk);
 
-            _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-            _strongCache = new LinkedList<ProjectRootElement>();
+            _weakCache = new ConcurrentDictionary<string, WeakReference<ProjectRootElement>>(StringComparer.OrdinalIgnoreCase);
+            _strongCacheList = new LinkedList<ProjectRootElement>();
+            _strongCacheIndex = new Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>>(ReferenceComparer.Instance);
             _fileLoadLocks = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             _autoReloadFromDisk = autoReloadFromDisk;
             LoadProjectsReadOnly = loadProjectsReadOnly;
@@ -251,9 +268,9 @@ namespace Microsoft.Build.Evaluation
             // Verify that loadProjectRootElement delegate does not call ProjectRootElementCache.Get().
             using var reentrancyGuard = new ReentrancyGuard();
 
-            // Verify that we never call this with _locker held, as that would create a lock ordering inversion with the per-file lock.
+            // Verify that we never call this with _strongCacheLock held, as that would create a lock ordering inversion with the per-file lock.
             ErrorUtilities.VerifyThrow(
-                !System.Threading.Monitor.IsEntered(_locker),
+                !Monitor.IsEntered(_strongCacheLock),
                 "Detected lock ordering inversion in ProjectRootElementCache.");
 #endif
             // Should already have been canonicalized
@@ -294,31 +311,36 @@ namespace Microsoft.Build.Evaluation
         private ProjectRootElement GetOrLoad(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
-            ProjectRootElement projectRootElement;
-            lock (_locker)
+            ProjectRootElement projectRootElement = null;
+
+            // Lock-free lookup in concurrent dictionary.
+            if (_weakCache.TryGetValue(projectFile, out var weakRef) && weakRef.TryGetTarget(out projectRootElement))
             {
-                _weakCache.TryGetValue(projectFile, out projectRootElement);
+                // Non-blocking boost: skip if contended to avoid serializing readers.
+                TryBoostInStrongCache(projectRootElement);
 
-                if (projectRootElement != null)
+                // An implicit load will never reset the explicit flag.
+                if (isExplicitlyLoaded)
                 {
-                    BoostEntryInStrongCache(projectRootElement);
+                    projectRootElement.MarkAsExplicitlyLoaded();
+                }
 
-                    // An implicit load will never reset the explicit flag.
-                    if (isExplicitlyLoaded)
+                if (preserveFormatting != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                {
+                    // Serialize Reload calls to prevent concurrent mutation of the PRE's XML document.
+                    lock (_strongCacheLock)
                     {
-                        projectRootElement.MarkAsExplicitlyLoaded();
+                        if (projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                        {
+                            projectRootElement.Reload(true, preserveFormatting);
+                        }
                     }
                 }
-                else
-                {
-                    DebugTraceCache("Not found in cache: ", projectFile);
-                }
-
-                if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
-                {
-                    // Cached project doesn't match preserveFormatting setting, so reload it
-                    projectRootElement.Reload(true, preserveFormatting);
-                }
+            }
+            else
+            {
+                DebugTraceCache("Not found in cache: ", projectFile);
+                projectRootElement = null;
             }
 
             bool projectRootElementIsInvalid = IsInvalidEntry(projectFile, projectRootElement);
@@ -375,12 +397,13 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void AddEntry(ProjectRootElement projectRootElement)
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
                 RenameEntryInternal(null, projectRootElement);
-
-                RaiseProjectRootElementAddedToCacheEvent(projectRootElement);
             }
+
+            RaiseProjectRootElementAddedToCacheEvent(projectRootElement);
+            ScavengeIfNeeded();
         }
 
         /// <summary>
@@ -389,7 +412,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void RenameEntry(string oldFullPath, ProjectRootElement projectRootElement)
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
                 ErrorUtilities.VerifyThrowArgumentLength(oldFullPath);
                 RenameEntryInternal(oldFullPath, projectRootElement);
@@ -430,11 +453,12 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal override void DiscardStrongReferences()
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                DebugTraceCache("Clearing strong refs: ", _strongCache.Count);
+                DebugTraceCache("Clearing strong refs: ", _strongCacheList.Count);
 
-                _strongCache = new LinkedList<ProjectRootElement>();
+                _strongCacheList = new LinkedList<ProjectRootElement>();
+                _strongCacheIndex = new Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>>(ReferenceComparer.Instance);
 
                 // A scavenge of the weak cache is probably not worth it as
                 // the GC would have had to run immediately after the line above.
@@ -447,10 +471,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void Clear()
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-                _strongCache = new LinkedList<ProjectRootElement>();
+                _weakCache.Clear();
+                _strongCacheList = new LinkedList<ProjectRootElement>();
+                _strongCacheIndex = new Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>>(ReferenceComparer.Instance);
             }
         }
 
@@ -465,35 +490,41 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely
-                // be many items which were not explicitly loaded (ie p2p references).
-                WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                // Rebuild strong cache keeping only explicitly loaded entries that were previously in the strong cache.
+                Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>> oldStrongCacheIndex = _strongCacheIndex;
+                _strongCacheList = new LinkedList<ProjectRootElement>();
+                _strongCacheIndex = new Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>>(ReferenceComparer.Instance);
 
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                _strongCache = new LinkedList<ProjectRootElement>();
+                var keysToRemove = new List<string>();
 
-                foreach (KeyValuePair<string, ProjectRootElement> kvp in oldWeakCache)
+                foreach (KeyValuePair<string, WeakReference<ProjectRootElement>> kvp in _weakCache)
                 {
-                    if (kvp.Value is null)
+                    if (!kvp.Value.TryGetTarget(out ProjectRootElement pre))
                     {
+                        // Dead weak reference — collect for removal.
+                        keysToRemove.Add(kvp.Key);
                         continue;
                     }
 
-                    if (kvp.Value.IsExplicitlyLoaded)
+                    if (pre.IsExplicitlyLoaded)
                     {
-                        _weakCache[kvp.Key] = kvp.Value;
-                    }
-
-                    if (oldStrongCache.Contains(kvp.Value))
-                    {
-                        if (kvp.Value.IsExplicitlyLoaded)
+                        if (oldStrongCacheIndex.ContainsKey(pre))
                         {
-                            _strongCache.AddFirst(kvp.Value);
+                            LinkedListNode<ProjectRootElement> node = _strongCacheList.AddFirst(pre);
+                            _strongCacheIndex[pre] = node;
                         }
                     }
+                    else
+                    {
+                        keysToRemove.Add(kvp.Key);
+                    }
+                }
+
+                foreach (string key in keysToRemove)
+                {
+                    _weakCache.TryRemove(key, out _);
                 }
             }
         }
@@ -516,10 +547,8 @@ namespace Microsoft.Build.Evaluation
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)
             {
-                lock (_locker)
-                {
-                    _weakCache.Remove(projectRootElement.FullPath);
-                }
+                // ConcurrentDictionary.TryRemove is thread-safe; no lock needed.
+                _weakCache.TryRemove(projectRootElement.FullPath, out _);
             }
         }
 
@@ -528,7 +557,7 @@ namespace Microsoft.Build.Evaluation
         /// Old full path may be null iff it was not already in the cache.
         /// </summary>
         /// <remarks>
-        /// Must be called within the cache lock.
+        /// Must be called within <see cref="_strongCacheLock"/>.
         /// </remarks>
         private void RenameEntryInternal(string oldFullPathIfAny, ProjectRootElement projectRootElement)
         {
@@ -537,8 +566,12 @@ namespace Microsoft.Build.Evaluation
             if (oldFullPathIfAny != null)
             {
                 ErrorUtilities.VerifyThrowInternalRooted(oldFullPathIfAny);
-                ErrorUtilities.VerifyThrow(_weakCache[oldFullPathIfAny] == projectRootElement, "Should already be present");
-                _weakCache.Remove(oldFullPathIfAny);
+                ErrorUtilities.VerifyThrow(
+                    _weakCache.TryGetValue(oldFullPathIfAny, out var oldRef) &&
+                    oldRef.TryGetTarget(out var oldPre) &&
+                    ReferenceEquals(oldPre, projectRootElement),
+                    "Should already be present");
+                _weakCache.TryRemove(oldFullPathIfAny, out _);
             }
 
             // There may already be a ProjectRootElement in the cache with the new name. In this case we cannot throw an exception;
@@ -551,16 +584,15 @@ namespace Microsoft.Build.Evaluation
             // but clients ought not get themselves into such a state - and unless they save them to disk,
             // it may not be a problem. Replacing also doesn't cause a problem for the strong cache,
             // as it is never consulted by us, but it is reasonable for us to remove the old entry in that case.
-            ProjectRootElement existingWeakEntry;
-            _weakCache.TryGetValue(projectRootElement.FullPath, out existingWeakEntry);
-
-            if (existingWeakEntry != null && !object.ReferenceEquals(existingWeakEntry, projectRootElement))
+            if (_weakCache.TryGetValue(projectRootElement.FullPath, out var existingRef) &&
+                existingRef.TryGetTarget(out var existingWeakEntry) &&
+                !ReferenceEquals(existingWeakEntry, projectRootElement))
             {
-                _strongCache.Remove(existingWeakEntry);
+                RemoveFromStrongCache(existingWeakEntry);
             }
 
             DebugTraceCache("Adding: ", projectRootElement.FullPath);
-            _weakCache[projectRootElement.FullPath] = projectRootElement;
+            _weakCache[projectRootElement.FullPath] = new WeakReference<ProjectRootElement>(projectRootElement);
 
             BoostEntryInStrongCache(projectRootElement);
         }
@@ -572,56 +604,46 @@ namespace Microsoft.Build.Evaluation
         /// If the list is too large, remove an entry from the bottom.
         /// </summary>
         /// <remarks>
-        /// Must be called within the cache lock.
-        /// If the size of strong cache gets large, this needs a faster data structure
-        /// than a linked list. It's currently O(n).
+        /// Must be called within <see cref="_strongCacheLock"/>.
+        /// O(1) via the <see cref="_strongCacheIndex"/> dictionary.
         /// </remarks>
         private void BoostEntryInStrongCache(ProjectRootElement projectRootElement)
         {
-            LinkedListNode<ProjectRootElement> node = _strongCache.First;
-
-            while (node != null)
+            if (_strongCacheIndex.TryGetValue(projectRootElement, out LinkedListNode<ProjectRootElement> node))
             {
-                if (Object.ReferenceEquals(node.Value, projectRootElement))
-                {
-                    // DebugTraceCache("Boosting: ", projectRootElement.FullPath);
-                    _strongCache.Remove(node);
-                    _strongCache.AddFirst(node);
-
-                    return;
-                }
-
-                node = node.Next;
+                // Already in strong cache — move to front.
+                _strongCacheList.Remove(node);
+                _strongCacheList.AddFirst(node);
             }
-
-            _strongCache.AddFirst(projectRootElement);
-
-            if (_strongCache.Count > s_maximumStrongCacheSize)
+            else
             {
-                node = _strongCache.Last;
+                // New entry — add to front.
+                LinkedListNode<ProjectRootElement> newNode = _strongCacheList.AddFirst(projectRootElement);
+                _strongCacheIndex[projectRootElement] = newNode;
 
-                DebugTraceCache("Shedding: ", node.Value.FullPath);
-                _strongCache.Remove(node);
+                if (_strongCacheList.Count > s_maximumStrongCacheSize)
+                {
+                    LinkedListNode<ProjectRootElement> last = _strongCacheList.Last;
+
+                    DebugTraceCache("Shedding: ", last.Value.FullPath);
+                    _strongCacheList.RemoveLast();
+                    _strongCacheIndex.Remove(last.Value);
+                }
             }
         }
 
         /// <summary>
-        /// Completely remove an entry from this cache
+        /// Completely remove an entry from this cache.
         /// </summary>
         /// <remarks>
-        /// Must be called within the cache lock.
+        /// Must be called within <see cref="_strongCacheLock"/>.
         /// </remarks>
         private void ForgetEntry(ProjectRootElement projectRootElement)
         {
             DebugTraceCache("Forgetting: ", projectRootElement.FullPath);
 
-            _weakCache.Remove(projectRootElement.FullPath);
-
-            LinkedListNode<ProjectRootElement> strongCacheEntry = _strongCache.Find(projectRootElement);
-            if (strongCacheEntry != null)
-            {
-                _strongCache.Remove(strongCacheEntry);
-            }
+            _weakCache.TryRemove(projectRootElement.FullPath, out _);
+            RemoveFromStrongCache(projectRootElement);
 
             DebugTraceCache("Out of date dropped from XML cache: ", projectRootElement.FullPath);
         }
@@ -631,9 +653,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ForgetEntryIfExists(ProjectRootElement projectRootElement)
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                if (_weakCache.TryGetValue(projectRootElement.FullPath, out var cached) && cached == projectRootElement)
+                if (_weakCache.TryGetValue(projectRootElement.FullPath, out var weakRef) &&
+                    weakRef.TryGetTarget(out var cached) &&
+                    ReferenceEquals(cached, projectRootElement))
                 {
                     ForgetEntry(projectRootElement);
                 }
@@ -672,6 +696,77 @@ namespace Microsoft.Build.Evaluation
                 string prefix = OutOfProcNode.IsOutOfProcNode ? "C" : "P";
                 Trace.WriteLine($"{prefix} {Process.GetCurrentProcess().Id} | {message}{param1}");
             }
+        }
+
+        /// <summary>
+        /// Attempt to boost the entry in the strong cache without blocking.
+        /// If another thread holds the lock, the boost is skipped. This is safe because
+        /// the entry is still reachable via the weak cache and will be boosted on the next
+        /// uncontended access. The LRU is a performance optimization, not a correctness mechanism.
+        /// </summary>
+        private void TryBoostInStrongCache(ProjectRootElement projectRootElement)
+        {
+            if (Monitor.TryEnter(_strongCacheLock))
+            {
+                try
+                {
+                    BoostEntryInStrongCache(projectRootElement);
+                }
+                finally
+                {
+                    Monitor.Exit(_strongCacheLock);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Remove an entry from the strong cache (both list and index).
+        /// </summary>
+        /// <remarks>
+        /// Must be called within <see cref="_strongCacheLock"/>.
+        /// </remarks>
+        private void RemoveFromStrongCache(ProjectRootElement projectRootElement)
+        {
+            if (_strongCacheIndex.TryGetValue(projectRootElement, out LinkedListNode<ProjectRootElement> node))
+            {
+                _strongCacheList.Remove(node);
+                _strongCacheIndex.Remove(projectRootElement);
+            }
+        }
+
+        /// <summary>
+        /// Periodically scavenge dead weak references from the concurrent dictionary.
+        /// Unlike WeakValueDictionary, ConcurrentDictionary does not automatically clean up
+        /// entries whose WeakReference targets have been collected.
+        /// </summary>
+        private void ScavengeIfNeeded()
+        {
+            if (Interlocked.Increment(ref _addCountSinceLastScavenge) >= ScavengeInterval)
+            {
+                Interlocked.Exchange(ref _addCountSinceLastScavenge, 0);
+
+                foreach (KeyValuePair<string, WeakReference<ProjectRootElement>> kvp in _weakCache)
+                {
+                    if (!kvp.Value.TryGetTarget(out _))
+                    {
+                        // Atomically remove only if the value reference matches (another thread may have replaced it).
+                        ((ICollection<KeyValuePair<string, WeakReference<ProjectRootElement>>>)_weakCache).Remove(kvp);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Equality comparer using reference identity for ProjectRootElement.
+        /// Used by <see cref="_strongCacheIndex"/> to match entries by object identity, not value equality.
+        /// </summary>
+        private sealed class ReferenceComparer : IEqualityComparer<ProjectRootElement>
+        {
+            public static readonly ReferenceComparer Instance = new();
+
+            public bool Equals(ProjectRootElement x, ProjectRootElement y) => ReferenceEquals(x, y);
+
+            public int GetHashCode(ProjectRootElement obj) => RuntimeHelpers.GetHashCode(obj);
         }
     }
 }
