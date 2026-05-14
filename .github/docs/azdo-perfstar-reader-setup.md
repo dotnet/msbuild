@@ -1,23 +1,44 @@
-# Reading AzDO PerfStar Pipeline Data from GitHub Actions (No PAT)
+# Syncing PerfStar Performance Data from AzDO to GitHub
 
 This document describes how the `read-azdo-perfstar.yml` workflow authenticates
-to Azure DevOps and reads pipeline run data — without any PAT or stored credentials.
+to Azure DevOps, downloads PerfStar performance results, and commits them to the
+`perf/dashboard` branch — without any PAT or stored credentials.
 
 ## Architecture
 
 ```
 GitHub Actions ──► GitHub OIDC Provider ──► Azure AD (federated credential) ──► AzDO REST API
-                   (JWT id-token)           (exchange for bearer token)          (Read Pipelines)
+                   (JWT id-token)           (exchange for bearer token)          (Download artifacts)
 ```
 
 1. The workflow requests an OIDC JWT from GitHub's token endpoint
 2. The JWT is exchanged with Azure AD via the managed identity's federated credential
 3. Azure AD returns a bearer token scoped to Azure DevOps
-4. The bearer token calls the AzDO REST API to read pipeline runs, logs, and artifacts
+4. The bearer token calls the AzDO REST API to find builds and download artifacts
+5. Artifacts (`CrankAssetsThinnedGOLDWIN`, `CrankAssetsThinnedGOLDLIN`) are
+   extracted and committed to `perf/dashboard` branch under `data/YYYY-MM-DD/`
 
 > **Important:** The `azure/login` GitHub Action is **blocked by org policy**
 > in the `dotnet` org. The workflow uses **manual OIDC token exchange via `curl`**
 > instead — no third-party action dependencies.
+
+## Data Layout
+
+```
+perf/dashboard branch
+└── data/
+    ├── 2026-05-11/
+    │   ├── GOLDWIN/
+    │   │   ├── net8-console-app-rebuild-dotnet.json
+    │   │   └── ...
+    │   └── GOLDLIN/
+    │       ├── net8-console-app-rebuild-dotnet.json
+    │       └── ...
+    ├── 2026-05-12/
+    │   ├── GOLDWIN/
+    │   └── GOLDLIN/
+    └── ...
+```
 
 ## Components
 
@@ -29,7 +50,8 @@ GitHub Actions ──► GitHub OIDC Provider ──► Azure AD (federated cred
 | Subscription | `CodeTestingAgentDev` (`bb947664-5d18-4aaa-8bbe-40dde6075462`) |
 | Resource Group | `CodeTestingAgent` |
 | AzDO Org/Project | `DevDiv` / `DevDiv` |
-| Target Pipelines | 25429 (PerfStar-Scheduled), 25430 (PerfStar-Branch-Trigger) |
+| Target Pipeline | 25429 (PerfStar-Scheduled) |
+| Artifacts | `CrankAssetsThinnedGOLDWIN`, `CrankAssetsThinnedGOLDLIN` |
 | Access Level | Read-only (View builds) |
 
 ## Setup Steps (Already Completed)
@@ -99,11 +121,32 @@ read access to pipelines 25429 and 25430.
 
 ## Usage
 
-Trigger via `workflow_dispatch` from the Actions tab:
+The workflow runs automatically on a daily schedule (6 pm UTC) and can also be
+triggered manually from the Actions tab.
 
-- **pipeline**: `scheduled` (25429) or `branch-trigger` (25430)
-- **run_id**: Specific build ID (leave empty for latest)
-- **count**: Number of recent runs to list (default: 10)
+### Scheduled runs
+
+Every day at 6 pm UTC the workflow:
+
+1. Looks at the `perf/dashboard` branch to find the latest `data/YYYY-MM-DD` folder
+2. Processes the **next** day (latest + 1)
+3. Finds the latest **scheduled** AzDO build for that date on pipeline 25429
+4. Downloads `CrankAssetsThinnedGOLDWIN` and `CrankAssetsThinnedGOLDLIN` (top-level `.json` only)
+5. Commits to `perf/dashboard` under `data/YYYY-MM-DD/GOLDWIN/` and `GOLDLIN/`
+6. If the processed date is not today, dispatches itself for the next date
+
+### Manual dispatch (`workflow_dispatch`)
+
+- **start_date** *(optional)*: Date to process (`YYYY-MM-DD`). Omit to auto-detect.
+- **end_date** *(optional)*: Stop processing after this date. Defaults to today.
+
+When no `start_date` is given the workflow behaves identically to a scheduled run.
+
+### Build selection
+
+When multiple AzDO builds exist for a single day, the workflow prefers the latest
+**scheduled** run. If no scheduled run is found it falls back to the latest run
+of any trigger type.
 
 ## Troubleshooting
 

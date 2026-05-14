@@ -1,39 +1,98 @@
-name: Read AzDO PerfStar Results
+name: Sync PerfStar Data
 
 on:
+  schedule:
+    - cron: '0 18 * * *'   # Daily at 6 pm UTC
   workflow_dispatch:
     inputs:
-      pipeline:
-        description: 'PerfStar pipeline to query'
-        required: true
-        type: choice
-        options:
-          - 'scheduled'
-          - 'branch-trigger'
-      run_id:
-        description: 'Specific run ID (leave empty for latest successful)'
+      start_date:
+        description: 'Start date (YYYY-MM-DD). Defaults to day after latest stored data.'
         required: false
         default: ''
-      count:
-        description: 'Number of recent runs to list (when no run_id specified)'
+      end_date:
+        description: 'End date (YYYY-MM-DD). Defaults to today.'
         required: false
-        default: '10'
+        default: ''
+  pull_request:   # Temporary — remove after testing
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
+  actions: write
 
 env:
   AZDO_ORG: DevDiv
   AZDO_PROJECT: DevDiv
-  PIPELINE_SCHEDULED: '25429'
-  PIPELINE_BRANCH_TRIGGER: '25430'
+  PIPELINE_ID: '25429'
+  DATA_BRANCH: perf/dashboard
 
 jobs:
-  read-perfstar:
+  sync-perfstar-data:
     runs-on: ubuntu-latest
     steps:
+      # ── 1. Determine which date to process ────────────────────────────
+      - name: Determine processing date
+        id: date
+        env:
+          INPUT_START_DATE: ${{ inputs.start_date || '' }}
+          INPUT_END_DATE: ${{ inputs.end_date || '' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TODAY=$(date -u +%Y-%m-%d)
+          END_DATE="${INPUT_END_DATE:-$TODAY}"
+
+          if [ -n "$INPUT_START_DATE" ]; then
+            TARGET_DATE="$INPUT_START_DATE"
+            echo "Using provided start date: $TARGET_DATE"
+          else
+            # Find the latest YYYY-MM-DD folder on the data branch
+            LATEST=$(gh api "repos/${{ github.repository }}/contents/data?ref=${{ env.DATA_BRANCH }}" \
+              --jq '[.[].name | select(test("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"))] | sort | last // empty' \
+              2>/dev/null || echo "")
+
+            if [ -n "$LATEST" ]; then
+              TARGET_DATE=$(date -u -d "$LATEST + 1 day" +%Y-%m-%d)
+              echo "Latest stored data: $LATEST → processing next day: $TARGET_DATE"
+            else
+              TARGET_DATE=$(date -u -d "yesterday" +%Y-%m-%d)
+              echo "No existing data found → starting from: $TARGET_DATE"
+            fi
+          fi
+
+          echo "target_date=${TARGET_DATE}" >> "$GITHUB_OUTPUT"
+          echo "end_date=${END_DATE}" >> "$GITHUB_OUTPUT"
+          echo "today=${TODAY}" >> "$GITHUB_OUTPUT"
+
+          if [[ "$TARGET_DATE" > "$TODAY" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Target date $TARGET_DATE is in the future — nothing to do"
+          elif [[ "$TARGET_DATE" > "$END_DATE" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Target date $TARGET_DATE is past end date $END_DATE — nothing to do"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 2. Skip early if data already stored ──────────────────────────
+      - name: Check if data already exists
+        if: steps.date.outputs.skip != 'true'
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_DATE: ${{ steps.date.outputs.target_date }}
+        run: |
+          if gh api "repos/${{ github.repository }}/contents/data/${TARGET_DATE}?ref=${{ env.DATA_BRANCH }}" \
+               > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Data for ${TARGET_DATE} already exists on ${{ env.DATA_BRANCH }}"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 3. Authenticate to AzDO via OIDC ──────────────────────────────
       - name: Get OIDC Token
+        if: steps.date.outputs.skip != 'true' && steps.check.outputs.exists != 'true'
         id: oidc
         run: |
           OIDC_TOKEN=$(curl -s -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
@@ -47,6 +106,7 @@ jobs:
           echo "oidc_token=${OIDC_TOKEN}" >> "$GITHUB_OUTPUT"
 
       - name: Exchange for AzDO Token
+        if: steps.date.outputs.skip != 'true' && steps.check.outputs.exists != 'true'
         id: token
         env:
           OIDC_TOKEN: ${{ steps.oidc.outputs.oidc_token }}
@@ -68,109 +128,157 @@ jobs:
           echo "::add-mask::${AZDO_TOKEN}"
           echo "azdo_token=${AZDO_TOKEN}" >> "$GITHUB_OUTPUT"
 
-      - name: Resolve Pipeline ID
-        id: pipeline
-        run: |
-          PIPELINE_INPUT="${{ inputs.pipeline || 'scheduled' }}"
-          if [ "${PIPELINE_INPUT}" = "scheduled" ]; then
-            echo "id=${PIPELINE_SCHEDULED}" >> "$GITHUB_OUTPUT"
-            echo "name=PerfStar-Scheduled" >> "$GITHUB_OUTPUT"
-          else
-            echo "id=${PIPELINE_BRANCH_TRIGGER}" >> "$GITHUB_OUTPUT"
-            echo "name=PerfStar-Branch-Trigger" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Validate inputs
-        env:
-          RUN_ID: ${{ inputs.run_id || '' }}
-          COUNT: ${{ inputs.count || '10' }}
-        run: |
-          if [ -n "${RUN_ID}" ] && ! [[ "${RUN_ID}" =~ ^[0-9]+$ ]]; then
-            echo "::error::run_id must be a positive integer, got: '${RUN_ID}'"
-            exit 1
-          fi
-          if ! [[ "${COUNT}" =~ ^[0-9]+$ ]] || [ "${COUNT}" -lt 1 ] || [ "${COUNT}" -gt 100 ]; then
-            echo "::error::count must be an integer between 1 and 100, got: '${COUNT}'"
-            exit 1
-          fi
-
-      - name: Fetch Pipeline Runs
-        id: runs
+      # ── 4. Find the right AzDO build for the target date ──────────────
+      - name: Find AzDO run for target date
+        if: steps.date.outputs.skip != 'true' && steps.check.outputs.exists != 'true'
+        id: find_run
         env:
           AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
-          PIPELINE_ID: ${{ steps.pipeline.outputs.id }}
-          RUN_ID: ${{ inputs.run_id || '' }}
-          COUNT: ${{ inputs.count || '10' }}
+          TARGET_DATE: ${{ steps.date.outputs.target_date }}
         run: |
+          set -euo pipefail
           BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
 
-          if [ -n "${RUN_ID}" ]; then
-            echo "## Fetching run ${RUN_ID} from ${{ steps.pipeline.outputs.name }}" >> "$GITHUB_STEP_SUMMARY"
-            RUN_DATA=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
-              "${BASE_URL}/pipelines/${PIPELINE_ID}/runs/${RUN_ID}?api-version=7.1")
-            echo '```json' >> "$GITHUB_STEP_SUMMARY"
-            echo "${RUN_DATA}" | jq '{id, name, state, result, createdDate, finishedDate}' >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            echo "target_run_id=${RUN_ID}" >> "$GITHUB_OUTPUT"
-          else
-            echo "## Latest ${COUNT} runs from ${{ steps.pipeline.outputs.name }}" >> "$GITHUB_STEP_SUMMARY"
-            RUNS=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
-              "${BASE_URL}/pipelines/${PIPELINE_ID}/runs?api-version=7.1")
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            echo "${RUNS}" | jq -r ".value[:${COUNT}][] | \"\(.id) | \(.state) | \(.result) | \(.createdDate) | \(.name)\"" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          # Fetch recent succeeded builds from PerfStar-Scheduled (25429)
+          BUILDS=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
+            "${BASE_URL}/build/builds?definitions=${PIPELINE_ID}&statusFilter=completed&resultFilter=succeeded&\$top=50&api-version=7.1")
 
-            # Find latest successful run
-            LATEST_SUCCESS=$(echo "${RUNS}" | jq -r '[.value[] | select(.result == "succeeded")][0].id // empty')
-            if [ -n "${LATEST_SUCCESS}" ]; then
-              echo "Latest successful run: ${LATEST_SUCCESS}"
-              echo "target_run_id=${LATEST_SUCCESS}" >> "$GITHUB_OUTPUT"
-            else
-              echo "::warning::No successful runs found in recent history"
-              echo "target_run_id=" >> "$GITHUB_OUTPUT"
+          # Prefer the latest *scheduled* run whose startTime falls on TARGET_DATE
+          SCHEDULED_RUN=$(echo "$BUILDS" | jq -r --arg d "$TARGET_DATE" \
+            '[.value[] | select(.startTime | startswith($d)) | select(.reason == "schedule")]
+             | sort_by(.startTime) | reverse | .[0].id // empty')
+
+          if [ -n "$SCHEDULED_RUN" ]; then
+            echo "Found scheduled run $SCHEDULED_RUN for $TARGET_DATE"
+            echo "run_id=${SCHEDULED_RUN}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Fall back to latest run of any trigger type on that date
+          ANY_RUN=$(echo "$BUILDS" | jq -r --arg d "$TARGET_DATE" \
+            '[.value[] | select(.startTime | startswith($d))]
+             | sort_by(.startTime) | reverse | .[0].id // empty')
+
+          if [ -n "$ANY_RUN" ]; then
+            echo "::warning::No scheduled run for $TARGET_DATE; using run $ANY_RUN"
+            echo "run_id=${ANY_RUN}" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No successful builds found for $TARGET_DATE on pipeline ${PIPELINE_ID}"
+            echo "run_id=" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 5. Download & extract artifacts ────────────────────────────────
+      - name: Download and extract artifacts
+        if: steps.find_run.outputs.run_id != ''
+        id: download
+        env:
+          AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
+          BUILD_ID: ${{ steps.find_run.outputs.run_id }}
+          TARGET_DATE: ${{ steps.date.outputs.target_date }}
+        run: |
+          set -euo pipefail
+          BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
+
+          for SUFFIX in GOLDWIN GOLDLIN; do
+            ARTIFACT="CrankAssetsThinned${SUFFIX}"
+            echo "::group::Downloading ${ARTIFACT}"
+
+            ARTIFACT_INFO=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
+              "${BASE_URL}/build/builds/${BUILD_ID}/artifacts?artifactName=${ARTIFACT}&api-version=7.1")
+
+            DOWNLOAD_URL=$(echo "$ARTIFACT_INFO" | jq -r '.resource.downloadUrl')
+            if [ -z "$DOWNLOAD_URL" ] || [ "$DOWNLOAD_URL" = "null" ]; then
+              echo "::error::Artifact ${ARTIFACT} not found in build ${BUILD_ID}"
+              exit 1
             fi
-          fi
 
-      - name: List Artifacts
-        if: steps.runs.outputs.target_run_id != ''
-        env:
-          AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
-          BUILD_ID: ${{ steps.runs.outputs.target_run_id }}
-        run: |
-          BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
+            curl -sS -L -H "Authorization: Bearer ${AZDO_TOKEN}" \
+              "$DOWNLOAD_URL" -o "${ARTIFACT}.zip"
 
-          echo "## Artifacts for build ${BUILD_ID}" >> "$GITHUB_STEP_SUMMARY"
-          ARTIFACTS=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
-            "${BASE_URL}/build/builds/${BUILD_ID}/artifacts?api-version=7.1")
+            mkdir -p "output/data/${TARGET_DATE}/${SUFFIX}"
 
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "${ARTIFACTS}" | jq -r '.value[] | "\(.name) (\(.resource.type))"' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+            # Extract only top-level .json files — skip _manifest/ and subdirs
+            unzip -j -o "${ARTIFACT}.zip" "${ARTIFACT}/*.json" \
+              -d "output/data/${TARGET_DATE}/${SUFFIX}/"
 
-          # Show Crank artifacts specifically (performance results)
-          CRANK_ARTIFACTS=$(echo "${ARTIFACTS}" | jq -r '.value[] | select(.name | startswith("CrankAssets")) | .name')
-          if [ -n "${CRANK_ARTIFACTS}" ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "### Performance result artifacts:" >> "$GITHUB_STEP_SUMMARY"
-            echo "${CRANK_ARTIFACTS}" | while read -r artifact_name; do
-              echo "- ${artifact_name}" >> "$GITHUB_STEP_SUMMARY"
-            done
-          fi
+            rm -f "${ARTIFACT}.zip"
 
-      - name: Fetch Build Timeline (Stage/Job Status)
-        if: steps.runs.outputs.target_run_id != ''
-        env:
-          AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
-          BUILD_ID: ${{ steps.runs.outputs.target_run_id }}
-        run: |
-          BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
+            COUNT=$(find "output/data/${TARGET_DATE}/${SUFFIX}" -maxdepth 1 -name '*.json' | wc -l)
+            echo "Extracted ${COUNT} JSON files for ${SUFFIX}"
+            echo "::endgroup::"
+          done
 
+          echo "downloaded=true" >> "$GITHUB_OUTPUT"
+
+          # Step summary
+          echo "## PerfStar data for ${TARGET_DATE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "AzDO build: [${BUILD_ID}](https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_build/results?buildId=${BUILD_ID})" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "## Build Timeline Summary" >> "$GITHUB_STEP_SUMMARY"
+          for SUFFIX in GOLDWIN GOLDLIN; do
+            echo "<details><summary>${SUFFIX}</summary>" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            ls "output/data/${TARGET_DATE}/${SUFFIX}/" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "</details>" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          done
 
-          TIMELINE=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
-            "${BASE_URL}/build/builds/${BUILD_ID}/timeline?api-version=7.1")
+      # ── 6. Commit to the perf/dashboard branch ────────────────────────
+      - name: Push to perf/dashboard branch
+        if: steps.download.outputs.downloaded == 'true'
+        env:
+          TARGET_DATE: ${{ steps.date.outputs.target_date }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
 
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "${TIMELINE}" | jq -r '.records[] | select(.type == "Stage") | "\(.name) | \(.state) | \(.result)"' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          git clone --depth 1 --branch "${{ env.DATA_BRANCH }}" \
+            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
+            perf-branch
+
+          cp -r "output/data/${TARGET_DATE}" "perf-branch/data/${TARGET_DATE}"
+
+          cd perf-branch
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "data/${TARGET_DATE}"
+          git commit -m "perf: add ${TARGET_DATE} performance data"
+          git push
+
+      # ── 7. Chain to the next date if needed ────────────────────────────
+      - name: Trigger next date
+        if: "!failure() && !cancelled() && steps.date.outputs.skip != 'true'"
+        env:
+          TARGET_DATE: ${{ steps.date.outputs.target_date }}
+          END_DATE: ${{ steps.date.outputs.end_date }}
+          TODAY: ${{ steps.date.outputs.today }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Only chain when we haven't reached today yet
+          if [[ "$TARGET_DATE" >= "$TODAY" ]]; then
+            echo "Reached today ($TODAY) — stopping chain"
+            exit 0
+          fi
+
+          NEXT_DATE=$(date -u -d "$TARGET_DATE + 1 day" +%Y-%m-%d)
+
+          if [[ "$NEXT_DATE" > "$TODAY" ]]; then
+            echo "Next date $NEXT_DATE is in the future — stopping"
+            exit 0
+          fi
+
+          if [[ "$NEXT_DATE" > "$END_DATE" ]]; then
+            echo "Next date $NEXT_DATE is past end date $END_DATE — stopping"
+            exit 0
+          fi
+
+          echo "Dispatching next run: start_date=$NEXT_DATE  end_date=$END_DATE"
+
+          REF="${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}"
+
+          gh workflow run read-azdo-perfstar.yml \
+            --ref "$REF" \
+            -f "start_date=$NEXT_DATE" \
+            -f "end_date=$END_DATE" \
+          || echo "::warning::Could not dispatch next run — manual re-trigger may be needed"
