@@ -265,8 +265,9 @@ namespace Microsoft.Build.Engine.UnitTests
             successTestTask.ShouldBeTrue();
 
             // Output from the task where only Runtime was specified
+            string expectedAppHostPath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", "sdk", RunnerUtilities.BootstrapSdkVersion, Constants.MSBuildExecutableName);
             testTaskOutput.ShouldContain("The task is executed in process: MSBuild");
-            testTaskOutput.ShouldContain(Constants.MSBuildExecutableName, customMessage: testTaskOutput);
+            testTaskOutput.ShouldContain($"Process path: {expectedAppHostPath}", customMessage: testTaskOutput);
             testTaskOutput.ShouldContain("/nodereuse:True");
 
             // Output from the task where only TaskHost was specified
