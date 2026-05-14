@@ -139,8 +139,9 @@ jobs:
           BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
 
           # Use the Pipelines API (known to work from run #4)
+          # Request more runs to cover several days of history
           RUNS=$(curl -sS -H "Authorization: Bearer ${AZDO_TOKEN}" \
-            "${BASE_URL}/pipelines/${PIPELINE_ID}/runs?api-version=7.1" || true)
+            "${BASE_URL}/pipelines/${PIPELINE_ID}/runs?api-version=7.1&\$top=100" || true)
 
           RUN_COUNT=$(echo "$RUNS" | jq '.count // 0' 2>/dev/null || echo 0)
 
@@ -148,9 +149,14 @@ jobs:
           echo "Target date: \`$TARGET_DATE\`  Pipeline: \`${PIPELINE_ID}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "Total pipeline runs returned: $RUN_COUNT" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "### Recent runs (up to 15)" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Recent runs (up to 30)" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "$RUNS" | jq -r '.value[:15][] | "id=\(.id) state=\(.state) result=\(.result) created=\(.createdDate) finished=\(.finishedDate)"' >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(failed to parse)" >> "$GITHUB_STEP_SUMMARY"
+          echo "$RUNS" | jq -r '.value[:30][] | "id=\(.id) state=\(.state) result=\(.result) created=\(.createdDate) finished=\(.finishedDate) name=\(.name)"' >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(failed to parse)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Unique dates in runs" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "$RUNS" | jq -r '[.value[] | .createdDate[:10]] | unique | .[]' >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(failed)" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
           # Filter for succeeded runs whose createdDate falls on TARGET_DATE
