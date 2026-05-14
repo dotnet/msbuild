@@ -1129,10 +1129,18 @@ namespace Microsoft.Build.Utilities
                 //
                 // Use a bounded timeout as a safety net for the grandchild case where
                 // EOF never arrives because grand child inherited the pipe and keeps it open.
-                const int eofTimeoutSec = 2;
+                const int eofTimeoutSec = 30;
 
                 WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                bool allEOFReceived = WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                if (!allEOFReceived)
+                {
+                    // Timeout: a grandchild process likely still holds the pipe open.
+                    // Drain whatever data has already arrived before returning.
+                    LogMessagesFromStandardError();
+                    LogMessagesFromStandardOutput();
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.PipeEOFTimeout", eofTimeoutSec);
+                }
             }
             else
             {
