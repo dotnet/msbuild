@@ -137,28 +137,33 @@ jobs:
           TARGET_DATE: ${{ steps.date.outputs.target_date }}
         run: |
           BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
-          NEXT_DAY=$(date -u -d "$TARGET_DATE + 1 day" +%Y-%m-%d)
 
-          # Query succeeded builds whose startTime falls on TARGET_DATE
-          QUERY="definitions=${PIPELINE_ID}"
-          QUERY+="&statusFilter=completed&resultFilter=succeeded"
-          QUERY+="&queryOrder=startTimeDescending"
-          QUERY+="&minTime=${TARGET_DATE}T00:00:00Z"
-          QUERY+="&maxTime=${NEXT_DAY}T00:00:00Z"
-          QUERY+="&api-version=7.1"
+          # Query recent succeeded builds (large window to cover the target date)
+          BUILDS=$(curl -sS -H "Authorization: Bearer ${AZDO_TOKEN}" \
+            "${BASE_URL}/build/builds?definitions=${PIPELINE_ID}&statusFilter=completed&resultFilter=succeeded&\$top=200&api-version=7.1")
 
-          BUILDS=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
-            "${BASE_URL}/build/builds?${QUERY}")
+          HTTP_STATUS=$?
+          if [ $HTTP_STATUS -ne 0 ]; then
+            echo "::error::Failed to query AzDO builds API (curl exit $HTTP_STATUS)"
+            echo "$BUILDS" | head -20
+            exit 1
+          fi
 
-          BUILD_COUNT=$(echo "$BUILDS" | jq '.count')
-          echo "Found $BUILD_COUNT succeeded build(s) for $TARGET_DATE"
+          BUILD_COUNT=$(echo "$BUILDS" | jq '.count // 0')
+          echo "Total succeeded builds returned: $BUILD_COUNT"
 
-          # Debug: list all builds found
-          echo "$BUILDS" | jq -r '.value[] | "  id=\(.id) reason=\(.reason) start=\(.startTime) finish=\(.finishTime)"'
+          # Filter to builds whose startTime falls on TARGET_DATE
+          MATCHING=$(echo "$BUILDS" | jq --arg d "$TARGET_DATE" \
+            '[.value[] | select(.startTime | startswith($d))]')
+          MATCH_COUNT=$(echo "$MATCHING" | jq 'length')
+          echo "Builds starting on $TARGET_DATE: $MATCH_COUNT"
+
+          # Debug: show matching builds
+          echo "$MATCHING" | jq -r '.[] | "  id=\(.id) reason=\(.reason) start=\(.startTime)"'
 
           # Prefer the latest *scheduled* run
-          SCHEDULED_RUN=$(echo "$BUILDS" | jq -r \
-            '[.value[] | select(.reason == "schedule")] | first | .id // empty')
+          SCHEDULED_RUN=$(echo "$MATCHING" | jq -r \
+            '[.[] | select(.reason == "schedule")] | first | .id // empty')
 
           if [ -n "$SCHEDULED_RUN" ]; then
             echo "Found scheduled run $SCHEDULED_RUN for $TARGET_DATE"
@@ -167,12 +172,16 @@ jobs:
           fi
 
           # Fall back to latest run of any trigger type
-          ANY_RUN=$(echo "$BUILDS" | jq -r '.value[0].id // empty')
+          ANY_RUN=$(echo "$MATCHING" | jq -r '.[0].id // empty')
 
           if [ -n "$ANY_RUN" ]; then
             echo "::warning::No scheduled run for $TARGET_DATE; using run $ANY_RUN"
             echo "run_id=${ANY_RUN}" >> "$GITHUB_OUTPUT"
           else
+            # Show the dates of the most recent builds for debugging
+            echo "::group::Recent build dates (for debugging)"
+            echo "$BUILDS" | jq -r '.value[:10][] | "  id=\(.id) start=\(.startTime) reason=\(.reason)"'
+            echo "::endgroup::"
             echo "::warning::No successful builds found for $TARGET_DATE on pipeline ${PIPELINE_ID}"
             echo "run_id=" >> "$GITHUB_OUTPUT"
           fi
