@@ -50,6 +50,9 @@ variables:
       value: true
   - name: EnableReleaseOneLocBuild
     value: false
+  - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    - name: EnableReleaseOneLocBuild
+      value: true
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
