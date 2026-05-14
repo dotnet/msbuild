@@ -136,17 +136,29 @@ jobs:
           AZDO_TOKEN: ${{ steps.token.outputs.azdo_token }}
           TARGET_DATE: ${{ steps.date.outputs.target_date }}
         run: |
-          set -euo pipefail
           BASE_URL="https://dev.azure.com/${AZDO_ORG}/${AZDO_PROJECT}/_apis"
+          NEXT_DAY=$(date -u -d "$TARGET_DATE + 1 day" +%Y-%m-%d)
 
-          # Fetch recent succeeded builds from PerfStar-Scheduled (25429)
+          # Query succeeded builds whose startTime falls on TARGET_DATE
+          QUERY="definitions=${PIPELINE_ID}"
+          QUERY+="&statusFilter=completed&resultFilter=succeeded"
+          QUERY+="&queryOrder=startTimeDescending"
+          QUERY+="&minTime=${TARGET_DATE}T00:00:00Z"
+          QUERY+="&maxTime=${NEXT_DAY}T00:00:00Z"
+          QUERY+="&api-version=7.1"
+
           BUILDS=$(curl -sS --fail-with-body -H "Authorization: Bearer ${AZDO_TOKEN}" \
-            "${BASE_URL}/build/builds?definitions=${PIPELINE_ID}&statusFilter=completed&resultFilter=succeeded&\$top=50&api-version=7.1")
+            "${BASE_URL}/build/builds?${QUERY}")
 
-          # Prefer the latest *scheduled* run whose startTime falls on TARGET_DATE
-          SCHEDULED_RUN=$(echo "$BUILDS" | jq -r --arg d "$TARGET_DATE" \
-            '[.value[] | select(.startTime | startswith($d)) | select(.reason == "schedule")]
-             | sort_by(.startTime) | reverse | .[0].id // empty')
+          BUILD_COUNT=$(echo "$BUILDS" | jq '.count')
+          echo "Found $BUILD_COUNT succeeded build(s) for $TARGET_DATE"
+
+          # Debug: list all builds found
+          echo "$BUILDS" | jq -r '.value[] | "  id=\(.id) reason=\(.reason) start=\(.startTime) finish=\(.finishTime)"'
+
+          # Prefer the latest *scheduled* run
+          SCHEDULED_RUN=$(echo "$BUILDS" | jq -r \
+            '[.value[] | select(.reason == "schedule")] | first | .id // empty')
 
           if [ -n "$SCHEDULED_RUN" ]; then
             echo "Found scheduled run $SCHEDULED_RUN for $TARGET_DATE"
@@ -154,10 +166,8 @@ jobs:
             exit 0
           fi
 
-          # Fall back to latest run of any trigger type on that date
-          ANY_RUN=$(echo "$BUILDS" | jq -r --arg d "$TARGET_DATE" \
-            '[.value[] | select(.startTime | startswith($d))]
-             | sort_by(.startTime) | reverse | .[0].id // empty')
+          # Fall back to latest run of any trigger type
+          ANY_RUN=$(echo "$BUILDS" | jq -r '.value[0].id // empty')
 
           if [ -n "$ANY_RUN" ]; then
             echo "::warning::No scheduled run for $TARGET_DATE; using run $ANY_RUN"
@@ -281,4 +291,5 @@ jobs:
             --ref "$REF" \
             -f "start_date=$NEXT_DATE" \
             -f "end_date=$END_DATE" \
-          || echo "::warning::Could not dispatch next run — manual re-trigger may be needed"
+          && echo "Dispatched successfully" \
+          || echo "::warning::Could not dispatch next run (may need manual re-trigger)"
