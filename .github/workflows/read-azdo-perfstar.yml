@@ -159,7 +159,7 @@ jobs:
           for FIELD in startTime queueTime finishTime; do
             MATCH=$(echo "$ALL_BUILDS" | jq -r --arg d "$TARGET_DATE" --arg f "$FIELD" \
               '[.value[] | select(.result == "succeeded") | select(.[$f] | startswith($d))]' 2>/dev/null || echo "[]")
-            MATCH_COUNT=$(echo "$MATCH" | jq 'length')
+            MATCH_COUNT=$(echo "$MATCH" | jq 'length' 2>/dev/null || echo 0)
             echo "Succeeded builds with $FIELD on $TARGET_DATE: $MATCH_COUNT"
 
             if [ "$MATCH_COUNT" -gt 0 ]; then
@@ -190,6 +190,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**No matching build found for $TARGET_DATE**" >> "$GITHUB_STEP_SUMMARY"
           echo "run_id=" >> "$GITHUB_OUTPUT"
+          exit 0
 
       # ── 5. Download & extract artifacts ────────────────────────────────
       - name: Download and extract artifacts
@@ -272,7 +273,7 @@ jobs:
 
       # ── 7. Chain to the next date if needed ────────────────────────────
       - name: Trigger next date
-        if: "!failure() && !cancelled() && steps.date.outputs.skip != 'true'"
+        if: "false"  # Temporarily disabled for debugging
         env:
           TARGET_DATE: ${{ steps.date.outputs.target_date }}
           END_DATE: ${{ steps.date.outputs.end_date }}
