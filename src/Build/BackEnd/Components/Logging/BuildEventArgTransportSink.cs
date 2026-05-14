@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -124,7 +123,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
         {
-            ErrorUtilities.ThrowInternalError("Do not use this method for the transport sink");
+            InternalError.Throw("Do not use this method for the transport sink");
         }
 
         /// <summary>

@@ -120,7 +120,7 @@ namespace Microsoft.Build.Collections
         {
             if (comparer == null)
             {
-                ErrorUtilities.ThrowInternalError("use explicit comparer");
+                InternalError.Throw("use explicit comparer");
             }
 
             _comparer = comparer;

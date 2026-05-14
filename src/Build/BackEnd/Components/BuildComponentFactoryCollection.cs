@@ -8,7 +8,6 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
 #endif
-using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 
 #nullable disable
@@ -160,7 +159,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_componentEntriesByType.TryGetValue(type, out BuildComponentEntry componentEntry))
             {
-                ErrorUtilities.ThrowInternalError($"No factory registered for component type {type}");
+                InternalError.Throw($"No factory registered for component type {type}");
             }
 
             return componentEntry.GetInstance(_host);

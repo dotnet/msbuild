@@ -336,7 +336,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingGlobalBuildRequestId, string blockingTarget, BuildResult partialBuildResult)
         {
-            ErrorUtilities.ThrowInternalError("This method should never be called by anyone except the TargetBuilder.");
+            InternalError.Throw("This method should never be called by anyone except the TargetBuilder.");
             return Task.FromResult(false);
         }
 
@@ -545,7 +545,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError($"Unexpected target state {currentTargetEntry.State}");
+                        InternalError.Throw($"Unexpected target state {currentTargetEntry.State}");
                         break;
                 }
             }

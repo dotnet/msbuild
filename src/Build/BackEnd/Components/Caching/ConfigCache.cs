@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -78,7 +77,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!configurations.ById.TryAdd(config.ConfigurationId, config))
             {
-                ErrorUtilities.ThrowInternalError($"Configuration {config.ConfigurationId} already cached");
+                InternalError.Throw($"Configuration {config.ConfigurationId} already cached");
             }
 
             _ = configurations.ByMetadata[new ConfigurationMetadata(config)] = config;

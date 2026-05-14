@@ -55,7 +55,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                ErrorUtilities.ThrowInternalError("Values is not supported on ReadOnlyConvertingDictionary.");
+                InternalError.Throw("Values is not supported on ReadOnlyConvertingDictionary.");
 
                 // Show the compiler that this always throws:
                 throw new NotImplementedException();

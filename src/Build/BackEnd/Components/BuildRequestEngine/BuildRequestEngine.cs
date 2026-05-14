@@ -337,7 +337,7 @@ namespace Microsoft.Build.BackEnd
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 // If we caught an exception during cleanup, we need to log that
-                ErrorUtilities.ThrowInternalError($"Failure during engine shutdown.  Exception: {e}");
+                InternalError.Throw($"Failure during engine shutdown.  Exception: {e}");
             }
             finally
             {
@@ -813,7 +813,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected BuildRequestEntry state " + currentEntry.State);
+                        InternalError.Throw("Unexpected BuildRequestEntry state " + currentEntry.State);
                         break;
                 }
             }
@@ -1464,7 +1464,7 @@ namespace Microsoft.Build.BackEnd
                                 // Let the critical ones melt down the system.
                                 if (ExceptionHandling.IsCriticalException(e))
                                 {
-                                    ErrorUtilities.ThrowInternalError(e.Message, e);
+                                    InternalError.Throw(e.Message, e);
                                 }
 
                                 // This is fatal to the execution of the ActionBlock.  No more messages will be processed, and the

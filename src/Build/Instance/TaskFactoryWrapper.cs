@@ -238,7 +238,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalError($"Task does not implement IGeneratedTask and we don't have {typeof(ReflectableTaskPropertyInfo)} either.");
+                    InternalError.Throw($"Task does not implement IGeneratedTask and we don't have {typeof(ReflectableTaskPropertyInfo)} either.");
                     throw new InternalErrorException(); // unreachable
                 }
             }

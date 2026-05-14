@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -123,7 +122,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider))
             {
-                ErrorUtilities.ThrowInternalError($"Node {node} does not have a provider.");
+                InternalError.Throw($"Node {node} does not have a provider.");
             }
             else
             {
@@ -316,7 +315,7 @@ namespace Microsoft.Build.BackEnd
             // If no provider was passed in, we obviously can't create a node.
             if (nodeProvider == null)
             {
-                ErrorUtilities.ThrowInternalError("No node provider provided.");
+                InternalError.Throw("No node provider provided.");
                 return new List<NodeInfo>();
             }
 

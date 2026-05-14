@@ -702,7 +702,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                        InternalError.Throw("Unknown event args type.");
                     }
 
                     break;
@@ -761,7 +761,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_buildEngine is not IBuildEngine3 engine3)
                 {
-                    ErrorUtilities.ThrowInternalError($"HandleBuildRequest requires IBuildEngine3 but _buildEngine is {_buildEngine?.GetType().Name ?? "null"}");
+                    InternalError.Throw($"HandleBuildRequest requires IBuildEngine3 but _buildEngine is {_buildEngine?.GetType().Name ?? "null"}");
                     return; // unreachable, but satisfies flow analysis
                 }
 

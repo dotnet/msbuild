@@ -855,7 +855,7 @@ namespace Microsoft.Build.BackEnd
 
                     // This is fatal: process will terminate: make sure the
                     // debugger launches
-                    ErrorUtilities.ThrowInternalError(ex.Message, ex);
+                    InternalError.Throw(ex.Message, ex);
                     throw;
                 }
             }

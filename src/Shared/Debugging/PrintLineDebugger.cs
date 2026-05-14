@@ -80,7 +80,7 @@ namespace Microsoft.Build.Shared.Debugging
 
             if (currentWriter != null)
             {
-                ErrorUtilities.ThrowInternalError("Cannot set a new writer over an old writer. Remove the old one first");
+                InternalError.Throw("Cannot set a new writer over an old writer. Remove the old one first");
             }
 
             // wrap with a lock so multi threaded logging does not break messages apart
@@ -102,7 +102,7 @@ namespace Microsoft.Build.Shared.Debugging
 
             if (currentWriter == null)
             {
-                ErrorUtilities.ThrowInternalError("Cannot unset an already null writer");
+                InternalError.Throw("Cannot unset an already null writer");
             }
 
             CommonWriterProperty.Value.SetValue(null, null);
@@ -166,7 +166,7 @@ namespace Microsoft.Build.Shared.Debugging
 
                 if (staticWriter != _writerSetByThisInstance)
                 {
-                    ErrorUtilities.ThrowInternalError($"The writer from this {nameof(PrintLineDebugger)} instance differs from the static writer.");
+                    InternalError.Throw($"The writer from this {nameof(PrintLineDebugger)} instance differs from the static writer.");
                 }
 
                 UnsetWriter();

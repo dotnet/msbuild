@@ -82,7 +82,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ErrorUtilities.ThrowInternalError("Should not evaluate this");
+                InternalError.Throw("Should not evaluate this");
                 return null;
             }
         }

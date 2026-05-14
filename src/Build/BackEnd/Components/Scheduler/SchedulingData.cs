@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -302,7 +301,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case SchedulableRequestState.Completed:
-                    ErrorUtilities.ThrowInternalError("Should not be updating a request after it has reached the Completed state.");
+                    InternalError.Throw("Should not be updating a request after it has reached the Completed state.");
                     break;
 
                 case SchedulableRequestState.Executing:
@@ -404,7 +403,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case SchedulableRequestState.Unscheduled:
-                    ErrorUtilities.ThrowInternalError($"Request with global id {request.BuildRequest.GlobalRequestId} cannot transition to the Unscheduled state");
+                    InternalError.Throw($"Request with global id {request.BuildRequest.GlobalRequestId} cannot transition to the Unscheduled state");
                     break;
             }
 
@@ -722,7 +721,7 @@ namespace Microsoft.Build.BackEnd
             SchedulableRequest request = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
             if (request == null)
             {
-                ErrorUtilities.ThrowInternalError($"Request {globalRequestId} was expected to be in state {state} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)");
+                InternalError.Throw($"Request {globalRequestId} was expected to be in state {state} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)");
             }
             else
             {

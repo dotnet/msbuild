@@ -263,7 +263,7 @@ namespace Microsoft.Build.Tasks.Xaml
                     break;
                 default:
                     // should never reach this point - if it does, there's a bug somewhere.
-                    ErrorUtilities.ThrowInternalError("InternalError");
+                    InternalError.Throw("InternalError");
                     break;
             }
         }

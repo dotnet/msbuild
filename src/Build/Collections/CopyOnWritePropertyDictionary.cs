@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -299,7 +298,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void ICollection<KeyValuePair<string, T>>.CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
         {
-            ErrorUtilities.ThrowInternalError("CopyTo is not supported on PropertyDictionary.");
+            InternalError.Throw("CopyTo is not supported on PropertyDictionary.");
         }
 
         /// <summary>

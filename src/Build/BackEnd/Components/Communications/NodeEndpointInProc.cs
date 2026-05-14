@@ -7,7 +7,6 @@ using System.Collections.Concurrent;
 using System.Globalization;
 #endif
 using System.Threading;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 
@@ -451,7 +450,7 @@ namespace Microsoft.Build.BackEnd
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError($"waitId {waitId} out of range.");
+                            InternalError.Throw($"waitId {waitId} out of range.");
                             break;
                     }
                 }

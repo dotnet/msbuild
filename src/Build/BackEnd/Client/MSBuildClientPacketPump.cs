@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 #endif
 
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Client
 {
@@ -257,11 +256,11 @@ namespace Microsoft.Build.BackEnd.Client
                                             break;
                                         }
 
-                                        ErrorUtilities.ThrowInternalError("Server disconnected abruptly");
+                                        InternalError.Throw("Server disconnected abruptly");
                                     }
                                     else
                                     {
-                                        ErrorUtilities.ThrowInternalError($"Incomplete header read.  {headerBytesRead} of {headerByte.Length} bytes read");
+                                        InternalError.Throw($"Incomplete header read.  {headerBytesRead} of {headerByte.Length} bytes read");
                                     }
                                 }
 
@@ -285,7 +284,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     if (bytesRead == 0)
                                     {
                                         // Incomplete read.  Abort.
-                                        ErrorUtilities.ThrowInternalError($"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
+                                        InternalError.Throw($"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
                                     }
 
                                     packetBytesRead += bytesRead;
@@ -321,7 +320,7 @@ namespace Microsoft.Build.BackEnd.Client
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError($"WaitId {waitId} out of range.");
+                            InternalError.Throw($"WaitId {waitId} out of range.");
                             break;
                     }
                 }

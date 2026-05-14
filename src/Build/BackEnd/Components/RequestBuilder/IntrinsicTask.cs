@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -77,7 +76,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                ErrorUtilities.ThrowInternalError($"Unhandled intrinsic task type {taskInstance.GetType().GetTypeInfo().BaseType}");
+                InternalError.Throw($"Unhandled intrinsic task type {taskInstance.GetType().GetTypeInfo().BaseType}");
                 return null;
             }
         }

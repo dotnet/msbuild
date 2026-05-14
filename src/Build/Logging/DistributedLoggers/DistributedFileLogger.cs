@@ -186,7 +186,7 @@ namespace Microsoft.Build.Logging
         {
             get
             {
-                ErrorUtilities.ThrowInternalError("Should not be getting verbosity from distributed file logger");
+                InternalError.Throw("Should not be getting verbosity from distributed file logger");
                 return LoggerVerbosity.Detailed;
             }
             set

@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Shared;
 
@@ -24,26 +23,6 @@ internal static class ErrorUtilities
     public static void DebugTraceMessage(string category, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler handler)
         => FrameworkErrorUtilities.DebugTraceMessage(category, ref handler);
 
-    /// <inheritdoc cref="InternalError.Throw(string)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(string message)
-        => InternalError.Throw(message);
-
-    /// <inheritdoc cref="InternalError.Throw(ref UnconditionalInterpolatedStringHandler)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler)
-        => InternalError.Throw(ref handler);
-
-    /// <inheritdoc cref="InternalError.Throw(string, Exception)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(string message, Exception innerException)
-        => InternalError.Throw(message, innerException);
-
-    /// <inheritdoc cref="InternalError.Throw(ref UnconditionalInterpolatedStringHandler, Exception)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception innerException)
-        => InternalError.Throw(ref handler, innerException);
-
     /// <summary>
     /// Throws InternalErrorException.
     /// Indicates the code path followed should not have been possible.
@@ -55,7 +34,7 @@ internal static class ErrorUtilities
         // Check it has a real implementation of ToString()
         if (String.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal))
         {
-            ThrowInternalError($"This type does not implement ToString() properly {param.GetType().FullName!}");
+            InternalError.Throw($"This type does not implement ToString() properly {param.GetType().FullName!}");
         }
 #endif
     }
@@ -70,7 +49,7 @@ internal static class ErrorUtilities
     {
         if (!Monitor.IsEntered(locker))
         {
-            ThrowInternalError("Lock should already have been taken");
+            InternalError.Throw("Lock should already have been taken");
         }
     }
 

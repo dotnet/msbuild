@@ -939,7 +939,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (packet is not ITaskHostCallbackPacket callbackPacket)
             {
-                ErrorUtilities.ThrowInternalError($"HandleCallbackResponse called with non-callback packet type: {packet.GetType().Name}");
+                InternalError.Throw($"HandleCallbackResponse called with non-callback packet type: {packet.GetType().Name}");
                 return;
             }
 
@@ -961,7 +961,7 @@ namespace Microsoft.Build.CommandLine
 
             // No pending request matched -- this is a protocol bug (duplicate response,
             // corrupted request ID, or race with shutdown). Crash to surface the issue.
-            ErrorUtilities.ThrowInternalError($"TaskHost received callback response with no pending request. RequestId={callbackPacket.RequestId}, Type={packet.Type}");
+            InternalError.Throw($"TaskHost received callback response with no pending request. RequestId={callbackPacket.RequestId}, Type={packet.Type}");
         }
 
         /// <summary>
@@ -1098,7 +1098,7 @@ namespace Microsoft.Build.CommandLine
             if (!_taskContexts.TryAdd(taskId, context))
             {
                 context.Dispose();
-                ErrorUtilities.ThrowInternalError($"Task ID {taskId} already exists in TaskHost.");
+                InternalError.Throw($"Task ID {taskId} already exists in TaskHost.");
             }
 
             return context;

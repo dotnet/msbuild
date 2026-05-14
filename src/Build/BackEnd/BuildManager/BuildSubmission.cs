@@ -225,7 +225,7 @@ namespace Microsoft.Build.Execution
             // this one.)
             if (result.ConfigurationId != BuildRequest?.ConfigurationId)
             {
-                ErrorUtilities.ThrowInternalError($"BuildResult configuration ({result.ConfigurationId}) doesn't match BuildRequest configuration ({BuildRequest?.ConfigurationId})");
+                InternalError.Throw($"BuildResult configuration ({result.ConfigurationId}) doesn't match BuildRequest configuration ({BuildRequest?.ConfigurationId})");
             }
         }
 

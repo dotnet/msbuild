@@ -581,7 +581,7 @@ namespace Microsoft.Build.Evaluation
                             targetOnErrorChildren.Add(ReadOnErrorElement(onError));
                             break;
                         default:
-                            ErrorUtilities.ThrowInternalError("Unexpected child");
+                            InternalError.Throw("Unexpected child");
                             break;
                     }
                 }
@@ -937,7 +937,7 @@ namespace Microsoft.Build.Evaluation
                         case ProjectSdkElement sdk: // This case is handled by implicit imports.
                             break;
                         default:
-                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            InternalError.Throw("Unexpected child type");
                             break;
                     }
                 }
@@ -1495,7 +1495,7 @@ namespace Microsoft.Build.Evaluation
                             _itemDefinitionGroupElements.Add(itemDefinition);
                             break;
                         default:
-                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            InternalError.Throw("Unexpected child type");
                             break;
                     }
                 }

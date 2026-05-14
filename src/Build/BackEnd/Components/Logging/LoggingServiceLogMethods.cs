@@ -548,7 +548,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
                     {
-                        ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} was already in the ID-to-project file mapping but the project file {existingProjectFile} did not match the provided one {projectFile}!");
+                        InternalError.Throw($"ContextID {projectContextId} was already in the ID-to-project file mapping but the project file {existingProjectFile} did not match the provided one {projectFile}!");
                     }
                 }
                 else
@@ -558,7 +558,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // So we only need this sanity check for the in-proc node.
                     if (nodeBuildEventContext.NodeId == Scheduler.InProcNodeId)
                     {
-                        ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} should have been in the ID-to-project file mapping but wasn't!");
+                        InternalError.Throw($"ContextID {projectContextId} should have been in the ID-to-project file mapping but wasn't!");
                     }
 
                     _projectFileMap[projectContextId] = projectFile;

@@ -111,12 +111,12 @@ namespace Microsoft.Build.BackEnd
         {
             if (batchableObjectParameters == null)
             {
-                ErrorUtilities.ThrowInternalError("Need the parameters of the batchable object to determine if it can be batched.");
+                InternalError.Throw("Need the parameters of the batchable object to determine if it can be batched.");
             }
 
             if (lookup == null)
             {
-                ErrorUtilities.ThrowInternalError("Need to specify the lookup.");
+                InternalError.Throw("Need to specify the lookup.");
             }
 
             ItemsAndMetadataPair pair = ExpressionShredder.GetReferencedItemNamesAndMetadata(batchableObjectParameters);

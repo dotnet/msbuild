@@ -1594,7 +1594,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
             if (buildEventArgs is null)
             {
-                ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
+                InternalError.Throw("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
             }
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)

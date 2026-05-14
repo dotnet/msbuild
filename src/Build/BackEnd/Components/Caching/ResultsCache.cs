@@ -7,7 +7,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -83,7 +82,7 @@ namespace Microsoft.Build.BackEnd
                     // building them again.
                     if (!_resultsByConfiguration.TryAdd(result.ConfigurationId, result))
                     {
-                        ErrorUtilities.ThrowInternalError($"Failed to add result for configuration {result.ConfigurationId}");
+                        InternalError.Throw($"Failed to add result for configuration {result.ConfigurationId}");
                     }
                 }
             }

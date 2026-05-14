@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -462,7 +461,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            ErrorUtilities.ThrowInternalError($"State {_state} is not one of the expected states.");
+            InternalError.Throw($"State {_state} is not one of the expected states.");
         }
 
         public bool IsProxyBuildRequest() => BuildRequest.IsProxyBuildRequest();

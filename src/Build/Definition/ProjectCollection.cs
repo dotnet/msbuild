@@ -1811,7 +1811,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // According to Framework Guidelines, Dispose methods should never throw except in dire circumstances.
                     // However if we throw at all, its a bug. Throw InternalErrorException to emphasize that.
-                    ErrorUtilities.ThrowInternalError("Throwing from logger shutdown", ex);
+                    InternalError.Throw("Throwing from logger shutdown", ex);
                     throw;
                 }
 

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,7 +10,6 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -192,7 +191,7 @@ namespace Microsoft.Build.BackEnd
 
                 // This is fatal: process will terminate: make sure the
                 // debugger launches
-                ErrorUtilities.ThrowInternalError(e.Message, e);
+                InternalError.Throw(e.Message, e);
                 throw;
             }
 
@@ -225,7 +224,7 @@ namespace Microsoft.Build.BackEnd
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             // The in-proc endpoint shouldn't be serializing, just routing.
-            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
+            InternalError.Throw("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
         }
 
         /// <summary>
@@ -234,7 +233,7 @@ namespace Microsoft.Build.BackEnd
         public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
         {
             // The in-proc endpoint shouldn't be serializing, just routing.
-            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializePacket on the in-proc node.");
+            InternalError.Throw("Unexpected call to DeserializePacket on the in-proc node.");
             return null;
         }
 

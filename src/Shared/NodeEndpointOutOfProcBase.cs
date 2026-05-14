@@ -182,7 +182,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.ThrowInternalError("Connect() not valid on the out of proc endpoint.");
+            InternalError.Throw("Connect() not valid on the out of proc endpoint.");
         }
 
         /// <summary>
@@ -792,7 +792,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError($"waitId {waitId} out of range.");
+                        InternalError.Throw($"waitId {waitId} out of range.");
                         break;
                 }
             }

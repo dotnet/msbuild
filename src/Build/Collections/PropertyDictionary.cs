@@ -115,7 +115,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                ErrorUtilities.ThrowInternalError("Keys is not supported on PropertyDictionary.");
+                InternalError.Throw("Keys is not supported on PropertyDictionary.");
 
                 // Show the compiler that this always throws:
                 throw new NotImplementedException();
@@ -444,7 +444,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void ICollection<KeyValuePair<string, T>>.CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
         {
-            ErrorUtilities.ThrowInternalError("CopyTo is not supported on PropertyDictionary.");
+            InternalError.Throw("CopyTo is not supported on PropertyDictionary.");
         }
 
         /// <summary>
