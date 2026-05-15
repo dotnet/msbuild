@@ -153,6 +153,11 @@ namespace Microsoft.Build.BackEnd.Logging
             this.IsValid = true;
         }
 
+        /// <summary>
+        /// The full path of the project this context was created for.
+        /// </summary>
+        internal override string ProjectFullPath => _projectFullPath;
+
         private static BuildEventContext CreateInitialContext(
             NodeLoggingContext nodeLoggingContext,
             int submissionId,

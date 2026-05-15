@@ -91,7 +91,7 @@ namespace Microsoft.Build.Logging
 
         public void AddFile(string? filePath)
         {
-            AddFileHelper(filePath, AddFileCore, makePathAbsolute: true);
+            AddFileHelper(filePath, AddFileCore);
         }
 
         public void AddFileFromMemory(
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Logging
             bool makePathAbsolute = true)
         {
             AddFileHelper(filePath, path =>
-                AddFileFromMemoryCore(path, data, makePathAbsolute, entryCreationStamp), makePathAbsolute);
+                AddFileFromMemoryCore(path, data, makePathAbsolute, entryCreationStamp));
         }
 
         public void AddFileFromMemory(
@@ -110,41 +110,15 @@ namespace Microsoft.Build.Logging
             DateTimeOffset? entryCreationStamp = null,
             bool makePathAbsolute = true)
         {
-            AddFileHelper(filePath, path => AddFileFromMemoryCore(path, data, makePathAbsolute, entryCreationStamp), makePathAbsolute);
+            AddFileHelper(filePath, path => AddFileFromMemoryCore(path, data, makePathAbsolute, entryCreationStamp));
         }
 
         private void AddFileHelper(
             string? filePath,
-            Action<string> addFileWorker,
-            bool makePathAbsolute)
+            Action<string> addFileWorker)
         {
             if (filePath != null && _fileStream != null)
             {
-                // When the caller wants the path to be absolute, resolve it here on the
-                // calling thread. Otherwise, when _runOnBackground is true the file
-                // existence check / GetFullPath in the worker would run on a TPL background
-                // thread later, where the process current directory is no longer guaranteed
-                // to match the project directory in use when this event was raised. MSBuild
-                // restores the original CWD after the build completes (see
-                // BuildRequestConfiguration / InProcNode), which made relative ItemSpecs
-                // from `EmbedInBinlog` items silently fail to embed.
-                //
-                // The replay path intentionally passes makePathAbsolute=false because the
-                // input "path" is actually an archive entry name (with ':' stripped) that
-                // must not be resolved against the current directory.
-                if (makePathAbsolute && !Path.IsPathRooted(filePath))
-                {
-                    try
-                    {
-                        filePath = Path.GetFullPath(filePath);
-                    }
-                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                    {
-                        // If we can't even canonicalize the path, fall through and let the
-                        // worker report the error via the standard FileIOException path.
-                    }
-                }
-
                 lock (_fileStream)
                 {
                     if (_runOnBackground)
