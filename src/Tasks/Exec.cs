@@ -245,7 +245,7 @@ namespace Microsoft.Build.Tasks
                     // https://support.microsoft.com/en-us/kb/156276
                     if (workingDirectoryIsUNC)
                     {
-                        sw.WriteLine("pushd " + _workingDirectory);
+                        sw.WriteLine("pushd " + _workingDirectory.Value);
                     }
                 }
                 else

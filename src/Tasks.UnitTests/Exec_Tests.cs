@@ -36,7 +36,6 @@ namespace Microsoft.Build.UnitTests
         {
             IBuildEngine2 mockEngine = new MockEngine(_output);
             Exec exec = new Exec();
-            exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             exec.BuildEngine = mockEngine;
             exec.Command = command;
             return exec;
@@ -46,7 +45,6 @@ namespace Microsoft.Build.UnitTests
         {
             IBuildEngine2 mockEngine = new MockEngine(_output);
             ExecWrapper exec = new ExecWrapper();
-            exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             exec.BuildEngine = mockEngine;
             exec.Command = command;
             return exec;
@@ -906,7 +904,6 @@ namespace Microsoft.Build.UnitTests
         public void SetEnvironmentVariableParameter()
         {
             Exec exec = new Exec();
-            exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             exec.BuildEngine = new MockEngine();
             exec.Command = NativeMethodsShared.IsWindows ? "echo [%MYENVVAR%]" : "echo [$myenvvar]";
             exec.EnvironmentVariables = new[] { "myenvvar=myvalue" };
@@ -1161,7 +1158,7 @@ echo line 3"" />
                 {
                     Directory.SetCurrentDirectory(differentCwd.Path);
 
-                    taskEnvironment = TaskEnvironmentHelper.CreateMultithreadedForTest(projectDir.Path);
+                    taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path);
                     ExecuteListCommandInDirectory(
                         taskEnvironment,
                         workingDirectory: null,
@@ -1173,24 +1170,6 @@ echo line 3"" />
                     taskEnvironment?.Dispose();
                     Directory.SetCurrentDirectory(originalDirectory);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Verify that Exec correctly handles absolute WorkingDirectory paths.
-        /// </summary>
-        [Fact]
-        public void ExecHandlesAbsoluteWorkingDirectory()
-        {
-            using (var testEnv = TestEnvironment.Create(_output))
-            {
-                var workDir = testEnv.CreateFolder();
-                File.WriteAllText(Path.Combine(workDir.Path, "absolutedir.txt"), "absolute content");
-
-                ExecuteListCommandInDirectory(
-                    TaskEnvironmentHelper.CreateForTest(),
-                    workingDirectory: workDir.Path,
-                    expectedFile: "absolutedir.txt");
             }
         }
 
@@ -1217,7 +1196,7 @@ echo line 3"" />
                 {
                     Directory.SetCurrentDirectory(differentCwd.Path);
 
-                    taskEnvironment = TaskEnvironmentHelper.CreateMultithreadedForTest(projectDir.Path);
+                    taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path);
                     ExecuteListCommandInDirectory(
                         taskEnvironment,
                         workingDirectory: "builddir",
