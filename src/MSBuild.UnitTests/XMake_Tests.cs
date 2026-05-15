@@ -1584,7 +1584,7 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
 
             successfulExit.ShouldBeFalse();
-            int noticeIndex = output.IndexOf("Some command line switches were read from this response file", StringComparison.OrdinalIgnoreCase);
+            int noticeIndex = output.IndexOf("Some command line switches were read from", StringComparison.OrdinalIgnoreCase);
             int errorIndex = output.IndexOf("MSB1008", StringComparison.OrdinalIgnoreCase);
             noticeIndex.ShouldBeGreaterThanOrEqualTo(0);
             errorIndex.ShouldBeGreaterThanOrEqualTo(0);
@@ -1605,7 +1605,7 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\" @\"{rspPath}\" -noAutoResponse", out var successfulExit, _output);
 
             successfulExit.ShouldBeFalse();
-            int noticeIndex = output.IndexOf("Some command line switches were read from this response file", StringComparison.OrdinalIgnoreCase);
+            int noticeIndex = output.IndexOf("Some command line switches were read from", StringComparison.OrdinalIgnoreCase);
             int errorIndex = output.IndexOf("MSB1008", StringComparison.OrdinalIgnoreCase);
             noticeIndex.ShouldBeGreaterThanOrEqualTo(0);
             errorIndex.ShouldBeGreaterThanOrEqualTo(0);
