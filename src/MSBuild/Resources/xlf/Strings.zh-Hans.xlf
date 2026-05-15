@@ -380,6 +380,31 @@
         <target state="translated">未设置</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildServerConnectFailed">
+        <source>could not connect to the server within the timeout window; the server may have failed to start</source>
+        <target state="new">could not connect to the server within the timeout window; the server may have failed to start</target>
+        <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerCrashedOnLaunch">
+        <source>the server process exited with code {0} immediately after launch</source>
+        <target state="new">the server process exited with code {0} immediately after launch</target>
+        <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerLaunchError">
+        <source>the server process could not be launched</source>
+        <target state="new">the server process could not be launched</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerStateUnknown">
+        <source>the current server state could not be determined</source>
+        <target state="new">the current server state could not be determined</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerUnavailable">
+        <source>MSBuild server unavailable: {0}. Falling back to an in-process build.</source>
+        <target state="new">MSBuild server unavailable: {0}. Falling back to an in-process build.</target>
+        <note>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used. It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</note>
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">适用于 {1} MSBuild 版本 {0}</target>
