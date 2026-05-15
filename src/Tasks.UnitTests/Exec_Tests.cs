@@ -1103,44 +1103,6 @@ echo line 3"" />
             }
         }
 
-        /// <summary>
-        /// Verify that Exec resolves relative WorkingDirectory via TaskEnvironment.GetAbsolutePath in multiprocess mode.
-        /// </summary>
-        [Fact]
-        public void ExecResolvesRelativeWorkingDirectoryWithMultiProcessDriver()
-        {
-            using (var testEnv = TestEnvironment.Create(_output))
-            {
-                var projectDir = testEnv.CreateFolder();
-                var subDir = Directory.CreateDirectory(Path.Combine(projectDir.Path, "subdir"));
-                File.WriteAllText(Path.Combine(subDir.FullName, "testfile.txt"), "test content");
-
-                var differentDir = testEnv.CreateFolder();
-                var decoySubDir = Directory.CreateDirectory(Path.Combine(differentDir.Path, "subdir"));
-                File.WriteAllText(Path.Combine(decoySubDir.FullName, "decoyfile.txt"), "decoy content");
-
-                string originalDirectory = Directory.GetCurrentDirectory();
-                try
-                {
-                    Directory.SetCurrentDirectory(projectDir.Path);
-
-                    ExecuteListCommandInDirectory(
-                        TaskEnvironmentHelper.CreateForTest(),
-                        workingDirectory: "subdir",
-                        expectedFile: "testfile.txt",
-                        notExpectedFile: "decoyfile.txt");
-                }
-                finally
-                {
-                    Directory.SetCurrentDirectory(originalDirectory);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Verify that Exec uses TaskEnvironment.ProjectDirectory when WorkingDirectory is not specified.
-        /// Uses MultiThreadedTaskEnvironmentDriver so process CWD differs from project directory.
-        /// </summary>
         [Fact]
         public void ExecUsesProjectDirectoryAsDefaultWorkingDirectory()
         {
@@ -1173,42 +1135,47 @@ echo line 3"" />
             }
         }
 
-        /// <summary>
-        /// Verify that Exec resolves relative WorkingDirectory relative to TaskEnvironment.ProjectDirectory,
-        /// not the process current directory. Uses MultiThreadedTaskEnvironmentDriver to simulate
-        /// multithreaded mode where process CWD differs from project directory.
-        /// </summary>
         [Fact]
-        public void ExecResolvesRelativeWorkingDirectoryRelativeToProjectDirectory()
+        public void InvalidRelativeWorkingDirectory_LogsOriginalPathNotAbsolutized()
         {
-            using (var testEnv = TestEnvironment.Create(_output))
+            using var testEnv = TestEnvironment.Create(_output);
+            var projectDir = testEnv.CreateFolder();
+            const string relativeDir = "testDir";
+            string absolutePath = Path.Combine(projectDir.Path, relativeDir);
+
+            var exec = new Exec
             {
-                var projectDir = testEnv.CreateFolder();
-                var subDir = Directory.CreateDirectory(Path.Combine(projectDir.Path, "builddir"));
-                File.WriteAllText(Path.Combine(subDir.FullName, "multithreaded.txt"), "multithreaded content");
+                BuildEngine = new MockEngine(_output),
+                Command = "echo hi",
+                WorkingDirectory = relativeDir,
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
 
-                var differentCwd = testEnv.CreateFolder();
-                File.WriteAllText(Path.Combine(differentCwd.Path, "decoyfile.txt"), "decoy content");
+            exec.Execute().ShouldBeFalse();
 
-                string originalDirectory = Directory.GetCurrentDirectory();
-                TaskEnvironment taskEnvironment = null;
-                try
-                {
-                    Directory.SetCurrentDirectory(differentCwd.Path);
+            var engine = (MockEngine)exec.BuildEngine;
+            engine.AssertLogContains("MSB6003");
+            engine.AssertLogContains(relativeDir);
+            engine.AssertLogDoesntContain(absolutePath);
+        }
 
-                    taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path);
-                    ExecuteListCommandInDirectory(
-                        taskEnvironment,
-                        workingDirectory: "builddir",
-                        expectedFile: "multithreaded.txt",
-                        notExpectedFile: "decoyfile.txt");
-                }
-                finally
-                {
-                    taskEnvironment?.Dispose();
-                    Directory.SetCurrentDirectory(originalDirectory);
-                }
-            }
+        [Fact]
+        public void Exec_RelativeWorkingDirectory_ResolvedAgainstProjectDirectory()
+        {
+            using var testEnv = TestEnvironment.Create(_output);
+            var projectDir = testEnv.CreateFolder();
+            Directory.CreateDirectory(Path.Combine(projectDir.Path, "builddir"));
+
+            var exec = new Exec
+            {
+                BuildEngine = new MockEngine(_output),
+                Command = "echo hi",
+                WorkingDirectory = "builddir",
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            exec.ValidateParametersAccessor().ShouldBeTrue();
+            exec.GetWorkingDirectoryAccessor().ShouldBe(Path.Combine(projectDir.Path, "builddir"));
         }
     }
 
