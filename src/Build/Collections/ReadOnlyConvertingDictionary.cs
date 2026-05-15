@@ -52,15 +52,7 @@ namespace Microsoft.Build.Collections
         /// Returns the collection of values in the dictionary.
         /// </summary>
         public ICollection<N> Values
-        {
-            get
-            {
-                InternalError.Throw("Values is not supported on ReadOnlyConvertingDictionary.");
-
-                // Show the compiler that this always throws:
-                throw new NotImplementedException();
-            }
-        }
+            => InternalError.Throw<ICollection<N>>("Values is not supported on ReadOnlyConvertingDictionary.");
 
         /// <summary>
         /// Returns the number of items in the collection.

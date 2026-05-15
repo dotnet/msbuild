@@ -814,25 +814,25 @@ namespace Microsoft.Build.BackEnd
                         if (RequestOrAnyItIsBlockedByCanBeServiced(request))
                         {
                             DumpSchedulerState();
-                            InternalError.Throw($"Somehow no requests are currently executing, and at least one of the {_schedulingData.BlockedRequestsCount} requests blocked by in-progress requests is servicable by a currently existing node, but no circular dependency was detected ...");
+                            Assumed.Unreachable($"Somehow no requests are currently executing, and at least one of the {_schedulingData.BlockedRequestsCount} requests blocked by in-progress requests is servicable by a currently existing node, but no circular dependency was detected ...");
                         }
                     }
 
                     if (!createNodePending)
                     {
                         DumpSchedulerState();
-                        InternalError.Throw($"None of the {_schedulingData.BlockedRequestsCount} blocked requests can be serviced by currently existing nodes, but we aren't requesting a new one.");
+                        Assumed.Unreachable($"None of the {_schedulingData.BlockedRequestsCount} blocked requests can be serviced by currently existing nodes, but we aren't requesting a new one.");
                     }
                 }
                 else if (_schedulingData.ReadyRequestsCount != 0)
                 {
                     DumpSchedulerState();
-                    InternalError.Throw($"Somehow we have {_schedulingData.ReadyRequestsCount} requests which are ready to go but we didn't tell the nodes to continue.");
+                    Assumed.Unreachable($"Somehow we have {_schedulingData.ReadyRequestsCount} requests which are ready to go but we didn't tell the nodes to continue.");
                 }
                 else if (_schedulingData.UnscheduledRequestsCount != 0 && !createNodePending)
                 {
                     DumpSchedulerState();
-                    InternalError.Throw($"Somehow we have {_schedulingData.UnscheduledRequestsCount} unassigned build requests but {idleNodes.Count} of our nodes are free and we aren't requesting a new one...");
+                    Assumed.Unreachable($"Somehow we have {_schedulingData.UnscheduledRequestsCount} unassigned build requests but {idleNodes.Count} of our nodes are free and we aren't requesting a new one...");
                 }
             }
             else

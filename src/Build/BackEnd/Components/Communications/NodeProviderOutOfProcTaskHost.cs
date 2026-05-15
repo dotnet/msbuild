@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -373,8 +373,9 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     break;
+
                 default:
-                    InternalError.Throw($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
+                    Assumed.Unreachable($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
                     break;
             }
         }
@@ -481,10 +482,7 @@ namespace Microsoft.Build.BackEnd
 
             if (isCLR2)
             {
-                if (isArm64)
-                {
-                    InternalError.Throw("ARM64 CLR2 task hosts are not supported.");
-                }
+                Assumed.False(isArm64, "ARM64 CLR2 task hosts are not supported.");
 
                 return isX64
                     ? Path.Combine(GetOrInitializeX64Clr2Path(toolName, basePath64), toolName)

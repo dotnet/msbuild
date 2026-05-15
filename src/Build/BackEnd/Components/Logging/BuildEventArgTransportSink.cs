@@ -122,9 +122,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This method should not be used since we need the sinkID
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
-        {
-            InternalError.Throw("Do not use this method for the transport sink");
-        }
+            => InternalError.Throw("Do not use this method for the transport sink");
 
         /// <summary>
         /// Consumes the buildEventArg and creates a logMessagePacket

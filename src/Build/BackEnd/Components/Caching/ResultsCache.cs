@@ -67,7 +67,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_resultsByConfiguration.TryGetValue(result.ConfigurationId, out BuildResult buildResult))
                 {
-                    if (Object.ReferenceEquals(buildResult, result))
+                    if (ReferenceEquals(buildResult, result))
                     {
                         // Merging results would be meaningless as we would be merging the object with itself.
                         return;
@@ -80,10 +80,7 @@ namespace Microsoft.Build.BackEnd
                     // Note that we are not making a copy here.  This is by-design.  The TargetBuilder uses this behavior
                     // to ensure that re-entering a project will be able to see all previously built targets and avoid
                     // building them again.
-                    if (!_resultsByConfiguration.TryAdd(result.ConfigurationId, result))
-                    {
-                        InternalError.Throw($"Failed to add result for configuration {result.ConfigurationId}");
-                    }
+                    Assumed.True(_resultsByConfiguration.TryAdd(result.ConfigurationId, result), $"Failed to add result for configuration {result.ConfigurationId}");
                 }
             }
         }

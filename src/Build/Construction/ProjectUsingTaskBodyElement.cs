@@ -106,13 +106,7 @@ namespace Microsoft.Build.Construction
         /// This does not allow conditions, so it should not be called.
         /// </summary>
         public override ElementLocation ConditionLocation
-        {
-            get
-            {
-                InternalError.Throw("Should not evaluate this");
-                return null;
-            }
-        }
+            => InternalError.Throw<ElementLocation>("Should not evaluate this");
 
         /// <summary>
         /// Location of the "Condition" attribute on this element, if any.

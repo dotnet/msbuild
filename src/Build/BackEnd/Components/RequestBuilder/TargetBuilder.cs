@@ -335,10 +335,7 @@ namespace Microsoft.Build.BackEnd
         /// Required for interface - this should never be called.
         /// </summary>
         Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingGlobalBuildRequestId, string blockingTarget, BuildResult partialBuildResult)
-        {
-            InternalError.Throw("This method should never be called by anyone except the TargetBuilder.");
-            return Task.FromResult(false);
-        }
+            => InternalError.Throw<Task>("This method should never be called by anyone except the TargetBuilder.");
 
         /// <summary>
         /// Yields the node.
@@ -545,7 +542,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        InternalError.Throw($"Unexpected target state {currentTargetEntry.State}");
+                        Assumed.Unreachable($"Unexpected target state {currentTargetEntry.State}");
                         break;
                 }
             }

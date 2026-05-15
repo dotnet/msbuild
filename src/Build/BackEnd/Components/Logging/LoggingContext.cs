@@ -324,11 +324,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     new CheckLoggingContext(_loggingService, BuildEventContext));
 
         private protected void CheckValidity()
-        {
-            if (!_isValid)
-            {
-                InternalError.Throw($"LoggingContext (type: {this.GetType()}) was not valid during logging attempt.");
-            }
-        }
+            => Assumed.True(_isValid, $"LoggingContext (type: {GetType()}) was not valid during logging attempt.");
     }
 }

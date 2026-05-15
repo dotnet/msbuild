@@ -281,11 +281,8 @@ namespace Microsoft.Build.BackEnd.Client
                                     ValueTask<int> bytesReadTask = localStream.ReadAsync(packetData.AsMemory(packetBytesRead, packetLength - packetBytesRead));
                                     int bytesRead = bytesReadTask.IsCompleted ? bytesReadTask.Result : bytesReadTask.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
-                                    if (bytesRead == 0)
-                                    {
-                                        // Incomplete read.  Abort.
-                                        InternalError.Throw($"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
-                                    }
+
+                                    Assumed.NotEqual(bytesRead, 0, $"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
 
                                     packetBytesRead += bytesRead;
                                 }
@@ -320,7 +317,7 @@ namespace Microsoft.Build.BackEnd.Client
                             break;
 
                         default:
-                            InternalError.Throw($"WaitId {waitId} out of range.");
+                            Assumed.Unreachable($"WaitId {waitId} out of range.");
                             break;
                     }
                 }

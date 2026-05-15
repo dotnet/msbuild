@@ -546,20 +546,21 @@ namespace Microsoft.Build.BackEnd.Logging
                 // A projectContextId was provided, so use it with some sanity checks
                 if (_projectFileMap.TryGetValue(projectContextId, out string existingProjectFile))
                 {
-                    if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
-                    {
-                        InternalError.Throw($"ContextID {projectContextId} was already in the ID-to-project file mapping but the project file {existingProjectFile} did not match the provided one {projectFile}!");
-                    }
+                    Assumed.Equal(
+                        projectFile,
+                        existingProjectFile,
+                        StringComparison.OrdinalIgnoreCase,
+                        $"ContextID {projectContextId} was already in the ID-to-project file mapping but the project file {existingProjectFile} did not match the provided one {projectFile}!");
                 }
                 else
                 {
                     // Currently, an existing projectContextId can only be provided in the project cache scenario, which runs on the in-proc node.
                     // If there was a cache miss and the build was scheduled on a worker node, it may not have seen this projectContextId yet.
                     // So we only need this sanity check for the in-proc node.
-                    if (nodeBuildEventContext.NodeId == Scheduler.InProcNodeId)
-                    {
-                        InternalError.Throw($"ContextID {projectContextId} should have been in the ID-to-project file mapping but wasn't!");
-                    }
+                    Assumed.NotEqual(
+                        nodeBuildEventContext.NodeId,
+                        Scheduler.InProcNodeId,
+                        $"ContextID {projectContextId} should have been in the ID-to-project file mapping but wasn't!");
 
                     _projectFileMap[projectContextId] = projectFile;
                 }

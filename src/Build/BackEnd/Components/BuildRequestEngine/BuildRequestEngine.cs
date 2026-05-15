@@ -813,7 +813,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        InternalError.Throw("Unexpected BuildRequestEntry state " + currentEntry.State);
+                        Assumed.Unreachable($"Unexpected BuildRequestEntry state {currentEntry.State}");
                         break;
                 }
             }

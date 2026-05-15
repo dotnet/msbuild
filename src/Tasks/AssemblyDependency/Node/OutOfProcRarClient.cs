@@ -86,14 +86,14 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                                 rarTask.BuildEngine.LogMessageEvent((BuildMessageEventArgs)buildEvent);
                                 break;
                             default:
-                                InternalError.Throw($"Received unexpected log event type {logMessagePacket.Type}");
+                                Assumed.Unreachable($"Received unexpected log event type {logMessagePacket.Type}");
                                 break;
                         }
                     }
                 }
                 else
                 {
-                    InternalError.Throw($"Received unexpected packet type {packet.Type}");
+                    Assumed.Unreachable($"Received unexpected packet type {packet.Type}");
                 }
 
                 packet = _pipeClient.ReadPacket();

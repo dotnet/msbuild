@@ -47,10 +47,7 @@ internal static class ErrorUtilities
     /// <param name="locker">The object that should already have been used as a lock.</param>
     internal static void VerifyThrowInternalLockHeld(object locker)
     {
-        if (!Monitor.IsEntered(locker))
-        {
-            InternalError.Throw("Lock should already have been taken");
-        }
+        Assumed.True(Monitor.IsEntered(locker), "Lock should already have been taken");
     }
 
     /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalRooted(string)"/>

@@ -469,14 +469,9 @@ namespace Microsoft.Build.Framework
                 return null;
             }
 
-            if (bool.TryParse(value, out bool result))
-            {
-                return result;
-            }
-
-            InternalError.Throw($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
-
-            return null;
+            return bool.TryParse(value, out bool result)
+                ? result
+                : InternalError.Throw<bool?>($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
         }
 
         private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
@@ -498,9 +493,7 @@ namespace Microsoft.Build.Framework
                 return ProjectInstanceTranslationMode.Partial;
             }
 
-            InternalError.Throw($"Invalid escape hatch for project instance translation: {mode}");
-
-            return null;
+            return InternalError.Throw<ProjectInstanceTranslationMode?>($"Invalid escape hatch for project instance translation: {mode}");
         }
 
         private static SdkReferencePropertyExpansionMode? ComputeSdkReferencePropertyExpansion()
@@ -538,9 +531,7 @@ namespace Microsoft.Build.Framework
                 return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
             }
 
-            InternalError.Throw($"Invalid escape hatch for SdkReference property expansion: {mode}");
-
-            return null;
+            return InternalError.Throw<SdkReferencePropertyExpansionMode?>($"Invalid escape hatch for SdkReference property expansion: {mode}");
         }
 
         public enum ProjectInstanceTranslationMode

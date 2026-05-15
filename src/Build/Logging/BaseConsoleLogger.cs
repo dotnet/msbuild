@@ -292,9 +292,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     return LoggerVerbosity.Detailed;
 
                 default:
-                    InternalError.Throw("Impossible");
                     lightenText = false;
-                    return LoggerVerbosity.Detailed;
+                    return Assumed.Unreachable<LoggerVerbosity>();
             }
         }
 

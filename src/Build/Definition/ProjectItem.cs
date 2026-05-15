@@ -929,8 +929,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string ItemType
             {
-                get { return _xml.ItemType; }
-                set { InternalError.Throw("Cannot change the item type on ProjectItem.ProjectItemFactory"); }
+                get => _xml.ItemType;
+                set => InternalError.Throw("Cannot change the item type on ProjectItem.ProjectItemFactory");
             }
 
             /// <summary>

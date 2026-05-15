@@ -120,14 +120,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int node, INodePacket packet)
         {
-            if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider))
-            {
-                InternalError.Throw($"Node {node} does not have a provider.");
-            }
-            else
-            {
-                provider.SendData(node, packet);
-            }
+            Assumed.True(_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider), $"Node {node} does not have a provider.");
+
+            provider.SendData(node, packet);
         }
 
         /// <summary>
@@ -313,16 +308,12 @@ namespace Microsoft.Build.BackEnd
         private IList<NodeInfo> AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration, int numberOfNodesToCreate)
         {
             // If no provider was passed in, we obviously can't create a node.
-            if (nodeProvider == null)
-            {
-                InternalError.Throw("No node provider provided.");
-                return new List<NodeInfo>();
-            }
+            Assumed.NotNull(nodeProvider, "No node provider provided.");
 
             // Are there any free slots on this provider?
             if (nodeProvider.AvailableNodes == 0)
             {
-                return new List<NodeInfo>();
+                return [];
             }
 
             // Assign a global ID to the node we are about to create.

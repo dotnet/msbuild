@@ -1897,7 +1897,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        InternalError.Throw($"Unexpected packet received by BuildManager: {packet.Type}");
+                        Assumed.Unreachable($"Unexpected packet received by BuildManager: {packet.Type}");
                         break;
                 }
             }
@@ -2387,10 +2387,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void VerifyStateInternal(BuildManagerState requiredState)
         {
-            if (_buildManagerState != requiredState)
-            {
-                InternalError.Throw($"Expected state {requiredState}, actual state {_buildManagerState}");
-            }
+            Assumed.Equal(_buildManagerState, requiredState, $"Expected state {requiredState}, actual state {_buildManagerState}");
         }
 
         /// <summary>
@@ -2941,7 +2938,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        InternalError.Throw($"Scheduling action {response.Action} not handled.");
+                        Assumed.Unreachable($"Scheduling action {response.Action} not handled.");
                         break;
                 }
             }

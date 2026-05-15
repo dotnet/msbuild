@@ -73,12 +73,9 @@ namespace Microsoft.Build.BackEnd
         private void AddConfiguration(BuildRequestConfiguration config, Configurations configurations)
         {
             ArgumentNullException.ThrowIfNull(config);
-            Assumed.True(config.ConfigurationId != 0, "Invalid configuration ID");
 
-            if (!configurations.ById.TryAdd(config.ConfigurationId, config))
-            {
-                InternalError.Throw($"Configuration {config.ConfigurationId} already cached");
-            }
+            Assumed.True(config.ConfigurationId != 0, "Invalid configuration ID");
+            Assumed.True(configurations.ById.TryAdd(config.ConfigurationId, config), $"Configuration {config.ConfigurationId} already cached");
 
             _ = configurations.ByMetadata[new ConfigurationMetadata(config)] = config;
         }

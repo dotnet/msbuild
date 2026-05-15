@@ -84,8 +84,7 @@ namespace Microsoft.Build.BackEnd
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
             if (_nodeContexts.Count + numberOfNodesToCreate > ComponentHost.BuildParameters.MaxNodeCount)
             {
-                InternalError.Throw($"Exceeded max node count of '{ComponentHost.BuildParameters.MaxNodeCount}', current count is '{_nodeContexts.Count}' ");
-                return new List<NodeInfo>();
+                return InternalError.Throw<IList<NodeInfo>>($"Exceeded max node count of '{ComponentHost.BuildParameters.MaxNodeCount}', current count is '{_nodeContexts.Count}' ");
             }
 
             ConcurrentBag<NodeInfo> nodes = new();

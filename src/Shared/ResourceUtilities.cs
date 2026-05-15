@@ -447,10 +447,7 @@ namespace Microsoft.Build.Shared
                 // NOTE: the AssemblyResources.GetString() method is thread-safe
                 string unformattedMessage = AssemblyResources.GetString(resourceName);
 
-                if (unformattedMessage == null)
-                {
-                    InternalError.Throw($"The resource string \"{resourceName}\" was not found.");
-                }
+                Assumed.NotNull(unformattedMessage, $"The resource string \"{resourceName}\" was not found.");
             }
             catch (ArgumentException e)
             {

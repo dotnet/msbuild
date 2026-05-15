@@ -109,15 +109,8 @@ namespace Microsoft.Build.BackEnd
             ElementLocation elementLocation,
             LoggingContext loggingContext)
         {
-            if (batchableObjectParameters == null)
-            {
-                InternalError.Throw("Need the parameters of the batchable object to determine if it can be batched.");
-            }
-
-            if (lookup == null)
-            {
-                InternalError.Throw("Need to specify the lookup.");
-            }
+            Assumed.NotNull(batchableObjectParameters, "Need the parameters of the batchable object to determine if it can be batched.");
+            Assumed.NotNull(lookup, "Need to specify the lookup.");
 
             ItemsAndMetadataPair pair = ExpressionShredder.GetReferencedItemNamesAndMetadata(batchableObjectParameters);
 

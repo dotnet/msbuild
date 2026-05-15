@@ -110,10 +110,7 @@ namespace Microsoft.Build.BackEnd
         /// </para>
         /// </remarks>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
-        {
-            InternalError.Throw("Use internal call to properly initialize the assembly task factory");
-            return false;
-        }
+            => InternalError.Throw<bool>("Use internal call to properly initialize the assembly task factory");
 
         /// <summary>
         /// Initializes this factory for instantiating tasks with a particular inline task block and a set of UsingTask parameters.
@@ -135,10 +132,7 @@ namespace Microsoft.Build.BackEnd
         /// </para>
         /// </remarks>
         public bool Initialize(string taskName, IDictionary<string, string> factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
-        {
-            InternalError.Throw("Use internal call to properly initialize the assembly task factory");
-            return false;
-        }
+            => InternalError.Throw<bool>("Use internal call to properly initialize the assembly task factory");
 
         /// <summary>
         /// Get a list of parameters for the task.
@@ -159,10 +153,7 @@ namespace Microsoft.Build.BackEnd
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
-        {
-            InternalError.Throw("Use internal call to properly create a task instance from the assembly task factory");
-            return null;
-        }
+            => InternalError.Throw<ITask>("Use internal call to properly create a task instance from the assembly task factory");
 
         /// <summary>
         /// Create an instance of the task to be used.
@@ -182,10 +173,7 @@ namespace Microsoft.Build.BackEnd
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost, IDictionary<string, string> taskIdentityParameters)
-        {
-            InternalError.Throw("Use internal call to properly create a task instance from the assembly task factory");
-            return null;
-        }
+            => InternalError.Throw<ITask>("Use internal call to properly create a task instance from the assembly task factory");
 
         /// <summary>
         /// Cleans up any context or state that may have been built up for a given task.
@@ -523,7 +511,7 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-#endregion
+        #endregion
 
         #region Private members
 
@@ -628,14 +616,12 @@ namespace Microsoft.Build.BackEnd
 
             if (!XMakeAttributes.TryMergeRuntimeValues(taskIdentityParameters.Runtime, factoryIdentityParameters.Runtime, out var mergedRuntime))
             {
-                InternalError.Throw("How did we get two runtime values that were unmergeable? " +
-                    $"TaskIdentity Runtime: {taskIdentityParameters.Runtime}, FactoryIdentity Runtime: {factoryIdentityParameters.Runtime}.");
+                InternalError.Throw($"How did we get two runtime values that were unmergeable? TaskIdentity Runtime: {taskIdentityParameters.Runtime}, FactoryIdentity Runtime: {factoryIdentityParameters.Runtime}.");
             }
 
             if (!XMakeAttributes.TryMergeArchitectureValues(taskIdentityParameters.Architecture, factoryIdentityParameters.Architecture, out var mergedArchitecture))
             {
-                InternalError.Throw("How did we get two architecture values that were unmergeable? " +
-                    $"TaskIdentity Architecture: {taskIdentityParameters.Architecture}, FactoryIdentity Architecture: {factoryIdentityParameters.Architecture}.");
+                InternalError.Throw($"How did we get two architecture values that were unmergeable? TaskIdentity Architecture: {taskIdentityParameters.Architecture}, FactoryIdentity Architecture: {factoryIdentityParameters.Architecture}.");
             }
 
             return new TaskHostParameters(
@@ -780,10 +766,7 @@ namespace Microsoft.Build.BackEnd
         /// </para>
         /// </remarks>
         public bool Initialize(string taskName, TaskHostParameters factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
-        {
-            InternalError.Throw("Use internal call to properly initialize the assembly task factory");
-            return false;
-        }
+            => InternalError.Throw<bool>("Use internal call to properly initialize the assembly task factory");
 
         /// <summary>
         /// Create an instance of the task to be used.
@@ -803,10 +786,7 @@ namespace Microsoft.Build.BackEnd
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost, TaskHostParameters taskIdentityParameters)
-        {
-            InternalError.Throw("Use internal call to properly create a task instance from the assembly task factory");
-            return null;
-        }
+            => InternalError.Throw<ITask>("Use internal call to properly create a task instance from the assembly task factory");
 
         #endregion
     }

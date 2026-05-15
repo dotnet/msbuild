@@ -184,11 +184,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public LoggerVerbosity Verbosity
         {
-            get
-            {
-                InternalError.Throw("Should not be getting verbosity from distributed file logger");
-                return LoggerVerbosity.Detailed;
-            }
+            get => InternalError.Throw<LoggerVerbosity>("Should not be getting verbosity from distributed file logger");
             set
             {
                 // Dont really care about verbosity at this point, but dont want to throw exception as it is set for all distributed loggers

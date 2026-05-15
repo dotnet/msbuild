@@ -1041,6 +1041,7 @@ namespace Microsoft.Build.Tasks
             {
                 InternalError.Throw("Unknown wrapper type!");
             }
+
             referenceInfo.resolvedWrapper = wrapperInfo;
 
             // update the timestamp cache with the timestamp of the component we just processed

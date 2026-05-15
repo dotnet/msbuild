@@ -157,10 +157,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The component</returns>
         public IBuildComponent GetComponent(BuildComponentType type)
         {
-            if (!_componentEntriesByType.TryGetValue(type, out BuildComponentEntry componentEntry))
-            {
-                InternalError.Throw($"No factory registered for component type {type}");
-            }
+            Assumed.True(_componentEntriesByType.TryGetValue(type, out BuildComponentEntry componentEntry), $"No factory registered for component type {type}");
 
             return componentEntry.GetInstance(_host);
         }

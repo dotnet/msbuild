@@ -46,10 +46,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
-            if (!String.Equals(taskName, TaskType.Name, StringComparison.OrdinalIgnoreCase))
-            {
-                InternalError.Throw($"Unexpected task name {taskName}.  Expected {TaskType.Name}");
-            }
+            Assumed.Equal(taskName, TaskType.Name, StringComparison.OrdinalIgnoreCase, $"Unexpected task name {taskName}.  Expected {TaskType.Name}");
 
             return true;
         }
@@ -83,8 +80,7 @@ namespace Microsoft.Build.BackEnd
                 return new CallTarget();
             }
 
-            InternalError.Throw($"Unexpected intrinsic task type {TaskType}");
-            return null;
+            return InternalError.Throw<ITask>($"Unexpected intrinsic task type {TaskType}");
         }
 
         /// <summary>

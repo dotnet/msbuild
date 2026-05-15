@@ -403,7 +403,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case SchedulableRequestState.Unscheduled:
-                    InternalError.Throw($"Request with global id {request.BuildRequest.GlobalRequestId} cannot transition to the Unscheduled state");
+                    Assumed.Unreachable($"Request with global id {request.BuildRequest.GlobalRequestId} cannot transition to the Unscheduled state");
                     break;
             }
 
@@ -719,14 +719,10 @@ namespace Microsoft.Build.BackEnd
         private void ExpectScheduledRequestState(int globalRequestId, SchedulableRequestState state)
         {
             SchedulableRequest request = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
-            if (request == null)
-            {
-                InternalError.Throw($"Request {globalRequestId} was expected to be in state {state} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)");
-            }
-            else
-            {
-                request.VerifyState(state);
-            }
+
+            Assumed.NotNull(request, $"Request {globalRequestId} was expected to be in state {state} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)");
+
+            request.VerifyState(state);
         }
 
         internal struct UnscheduledRequestsWhichCanBeScheduledEnumerator

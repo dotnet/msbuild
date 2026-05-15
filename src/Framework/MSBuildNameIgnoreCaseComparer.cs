@@ -44,15 +44,9 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Equals(string compareToString, string constrainedString, int start, int lengthToCompare)
         {
-            if (lengthToCompare < 0)
-            {
-                InternalError.Throw($"Invalid lengthToCompare '{constrainedString}' {start} {lengthToCompare}");
-            }
-
-            if (start < 0 || start > (constrainedString?.Length ?? 0) - lengthToCompare)
-            {
-                InternalError.Throw($"Invalid start '{constrainedString}' {start} {lengthToCompare}");
-            }
+            Assumed.PositiveOrZero(lengthToCompare, $"Invalid {nameof(lengthToCompare)} '{constrainedString}' {start} {lengthToCompare}");
+            Assumed.PositiveOrZero(start, $"Invalid {nameof(start)} '{constrainedString}' {start} {lengthToCompare}");
+            Assumed.LessThanOrEqual(start, (constrainedString?.Length ?? 0) - lengthToCompare, $"Invalid {nameof(start)} '{constrainedString}' {start} {lengthToCompare}");
 
             if (ReferenceEquals(compareToString, constrainedString))
             {

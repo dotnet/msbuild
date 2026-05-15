@@ -1692,13 +1692,10 @@ namespace Microsoft.Build.Shared
         {
             if (input == ReadOnlySpan<char>.Empty)
             {
-                InternalError.Throw("Unexpected empty 'input' provided.");
+                InternalError.Throw($"Unexpected empty '{nameof(input)}' provided.");
             }
 
-            if (pattern == null)
-            {
-                throw new ArgumentNullException(nameof(pattern));
-            }
+            ArgumentNullException.ThrowIfNull(pattern);
 
             // Parameter lengths
             int patternLength = pattern.Length;
