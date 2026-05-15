@@ -506,7 +506,7 @@ namespace Microsoft.Build.Construction
             var clone = CreateNewInstance(factory);
             if (!clone.GetType().IsEquivalentTo(GetType()))
             {
-                ErrorUtilities.ThrowInternalError("{0}.Clone() returned an instance of type {1}.", GetType().Name, clone.GetType().Name);
+                ErrorUtilities.ThrowInternalError($"{GetType().Name}.Clone() returned an instance of type {clone.GetType().Name}.");
             }
 
             clone.CopyFrom(this);

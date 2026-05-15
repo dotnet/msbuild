@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Copy results from result.TargetOutputsPerProject to targetOutputsPerProject
                 // We should always have the same number of entries - although an entry might be empty if a project failed.
-                ErrorUtilities.VerifyThrow(targetOutputsPerProject.Length == result.TargetOutputsPerProject.Count, "{0} != {1}", targetOutputsPerProject.Length, result.TargetOutputsPerProject.Count);
+                ErrorUtilities.VerifyThrow(targetOutputsPerProject.Length == result.TargetOutputsPerProject.Count, $"{targetOutputsPerProject.Length} != {result.TargetOutputsPerProject.Count}");
 
                 for (int i = 0; i < targetOutputsPerProject.Length; i++)
                 {
@@ -388,7 +388,7 @@ namespace Microsoft.Build.BackEnd
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId != -1, "Cannot call Reacquire() before Yield().");
-                ErrorUtilities.VerifyThrow(_yieldThreadId == Environment.CurrentManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Environment.CurrentManagedThreadId, _yieldThreadId);
+                ErrorUtilities.VerifyThrow(_yieldThreadId == Environment.CurrentManagedThreadId, $"Cannot call Reacquire() on thread {Environment.CurrentManagedThreadId} when Yield() was called on thread {_yieldThreadId}");
                 MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Reacquire();
@@ -1215,7 +1215,7 @@ namespace Microsoft.Build.BackEnd
                         skipNonexistentTargets: skipNonexistentTargets);
 
                     // Even if one of the projects fails to build and therefore has no outputs, it should still have an entry in the results array (albeit with an empty list in it)
-                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length, "{0}!={1}.", results.Length, projectFileNames.Length);
+                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length, $"{results.Length}!={projectFileNames.Length}.");
 
                     if (returnTargetOutputs)
                     {
@@ -1260,7 +1260,7 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || !overallSuccess, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
+                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || !overallSuccess, $"The number of results returned {results.Length} cannot be less than the number of project files {projectFileNames.Length} unless one of the results indicated failure.");
                 }
 
                 BuildRequestsSucceeded = overallSuccess;

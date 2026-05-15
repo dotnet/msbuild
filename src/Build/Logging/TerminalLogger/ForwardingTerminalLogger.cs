@@ -46,11 +46,6 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         eventSource.ErrorRaised += ForwardEventUnconditionally;
         eventSource.StatusEventRaised += ForwardEvaluationEvents;
 
-        if (eventSource is IEventSource3 eventSource3)
-        {
-            eventSource3.IncludeTaskInputs();
-        }
-
         if (eventSource is IEventSource4 eventSource4)
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();

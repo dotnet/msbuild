@@ -750,6 +750,10 @@
     <value>MSB4036: The "{0}" task was not found. Check the following: 1.) The name of the task in the project file is the same as the name of the task class. 2.) The task class is "public" and implements the Microsoft.Build.Framework.ITask interface. 3.) The task is correctly declared with &lt;UsingTask&gt; in the project file, or in the *.tasks files located in the "{1}" directory.</value>
     <comment>{StrBegin="MSB4036: "}LOCALIZATION: &lt;UsingTask&gt; and "*.tasks" should not be localized.</comment>
   </data>
+  <data name="MSBuildTaskInheritedSkipNonexistentTargets" xml:space="preserve">
+    <value>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</value>
+    <comment>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</comment>
+  </data>
   <data name="MSBuildToolsPathIsNotSpecified" xml:space="preserve">
     <value>MSB4141: MSBuildToolsPath is not specified for the ToolsVersion "{0}" defined at "{1}", or the value specified evaluates to the empty string.</value>
     <comment>{StrBegin="MSB4141: "}</comment>
@@ -1226,6 +1230,10 @@
   <data name="TaskHostAcquireFailed" xml:space="preserve">
     <value>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</value>
     <comment>{StrBegin="MSB4216: "}</comment>
+  </data>
+  <data name="TaskHostDetails" xml:space="preserve">
+    <value>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</value>
+    <comment>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</comment>
   </data>
   <data name="TaskHostNodeFailedToLaunch" xml:space="preserve">
     <value>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</value>

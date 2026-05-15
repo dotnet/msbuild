@@ -2716,8 +2716,7 @@ namespace Microsoft.Build.Tasks
                 {
                     currentOutputFile = outFileOrDir;
                     ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                        "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                        _readers.Count);
+                        $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2726,8 +2725,7 @@ namespace Microsoft.Build.Tasks
                     try
                     {
                         ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                            "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                            _readers.Count);
+                            $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
