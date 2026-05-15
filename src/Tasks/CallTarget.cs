@@ -15,6 +15,7 @@ namespace Microsoft.Build.Tasks
     /// id validation checks to fail.
     /// </remarks>
     [RunInMTA]
+    [MSBuildMultiThreadableTask]
     public class CallTarget : TaskExtension
     {
         #region Properties
