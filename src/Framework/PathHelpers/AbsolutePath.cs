@@ -102,6 +102,14 @@ namespace Microsoft.Build.Framework
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
+        /// <remarks>
+        /// <see cref="System.IO.Path.Combine(string, string)"/> "resets" on a rooted second argument, so on
+        /// Windows the root-relative (<c>"\foo"</c>) and drive-relative (<c>"X:foo"</c>) inputs survive
+        /// unchanged — yielding a result that is rooted but not fully qualified, i.e. not a valid absolute
+        /// path. Anchor those shapes to <paramref name="basePath"/> here so <see cref="Value"/> is always
+        /// a valid, fully qualified absolute path that does not depend on process state (current drive,
+        /// per-drive cwd). Required for multithreaded task isolation.
+        /// </remarks>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(path);
@@ -109,7 +117,38 @@ namespace Microsoft.Build.Framework
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
             // For .NET Core, System.IO.Path.Combine already does not throw in this case.
-            Value = Path.Combine(basePath.Value, path);
+            string combined = Path.Combine(basePath.Value, path);
+
+#if NETFRAMEWORK || NET
+            // Path.Combine returns a rooted-but-not-fully-qualified result for Windows shapes like
+            // "\foo" and "X:foo" (it lets a rooted second argument override the first). That is not
+            // a valid absolute path. Anchor those shapes against basePath using purely string
+            // operations so Value is always fully qualified and deterministic.
+            //
+            // We intentionally do not delegate to the two-argument Path.GetFullPath overload — on
+            // .NET Framework it lives in Microsoft.IO.Path with different normalization semantics
+            // than the System.IO.Path implementation used elsewhere in this struct.
+            if (NativeMethods.IsWindows
+                && !Path.IsPathFullyQualified(combined)
+                && basePath.Value is { Length: >= 2 } baseValue && baseValue[1] == ':')
+            {
+                if (combined[0] == '\\' || combined[0] == '/')
+                {
+                    // Root-relative ("\foo"): prepend basePath's drive prefix ("X:" + "\foo").
+                    combined = baseValue.Substring(0, 2) + combined;
+                }
+                else if (combined.Length >= 2 && combined[1] == ':')
+                {
+                    // Drive-relative ("X:foo"): combine basePath with the remainder after the colon.
+                    // When the path's drive differs from basePath's, this still anchors to basePath
+                    // — a deliberate trade-off; the alternative (the path-drive's cwd) re-introduces
+                    // the process-state leak we're fixing.
+                    combined = Path.Combine(baseValue, combined.Substring(2));
+                }
+            }
+#endif
+
+            Value = combined;
             OriginalValue = path;
         }
 
