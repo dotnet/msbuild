@@ -197,7 +197,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
-            var encoding = EncodingUtilities.BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
+            var encoding = EncodingUtilities.BatchFileEncoding(Command + _workingDirectory.Value, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFileName(".exec.cmd");
@@ -473,7 +473,10 @@ namespace Microsoft.Build.Tasks
             // will not be able to auto-map to the UNC path
             if (workingDirectoryIsUNC && NativeMethods.AllDrivesMapped())
             {
-                Log.LogErrorWithCodeFromResources("Exec.AllDriveLettersMappedError", _workingDirectory.OriginalValue);
+                Log.LogErrorWithCodeFromResources(
+                    "Exec.AllDriveLettersMappedError",
+                    _workingDirectory.OriginalValue,
+                    _workingDirectory.Value);
                 return false;
             }
 
@@ -495,7 +498,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to cmd.exe</returns>
         protected override string GenerateFullPathToTool()
         {
-            return CommandProcessorPath.Value;
+            return CommandProcessorPath.Value
+                ?? TaskEnvironment.GetEnvironmentVariable("ComSpec");
         }
 
         private static readonly Lazy<string> CommandProcessorPath = new Lazy<string>(() =>
@@ -509,9 +513,11 @@ namespace Microsoft.Build.Tasks
                 // Work around https://github.com/dotnet/msbuild/issues/2273 and
                 // https://github.com/dotnet/corefx/issues/19110, which result in
                 // a bad path being returned above on Nano Server SKUs of Windows.
+                // Returning null signals GenerateFullPathToTool to consult TaskEnvironment
+                // for the ComSpec environment variable.
                 if (!FileSystems.Default.FileExists(systemCmd))
                 {
-                    return Environment.GetEnvironmentVariable("ComSpec");
+                    return null;
                 }
 #endif
 
