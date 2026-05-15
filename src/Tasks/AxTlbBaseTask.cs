@@ -107,9 +107,7 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
-                f => !string.IsNullOrEmpty(f)
-                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
-                    : SdkToolsPathUtility.FileInfoExists(f),
+                FileInfoExists,
                 Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolName,
@@ -127,8 +125,8 @@ namespace Microsoft.Build.Tasks
         {
             // Verify that a path for the tool exists -- if the tool doesn't exist in it
             // we'll worry about that later
-            if ((string.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(ToolPath))) &&
-                (string.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(SdkToolsPath))))
+            if ((string.IsNullOrEmpty(ToolPath) || !DirectoryExists(ToolPath)) &&
+                (string.IsNullOrEmpty(SdkToolsPath) || !DirectoryExists(SdkToolsPath)))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -180,11 +178,14 @@ namespace Microsoft.Build.Tasks
         private bool ValidateStrongNameParameters()
         {
             bool keyFileExists = false;
+            string keyFileForRead = null;
 
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                if (FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(KeyFile)))
+                keyFileForRead = GetAbsolutePathIfValid(KeyFile);
+
+                if (keyFileForRead != null && FileSystems.Default.FileExists(keyFileForRead))
                 {
                     keyFileExists = true;
                 }
@@ -221,8 +222,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    string keyFileForRead = string.IsNullOrEmpty(KeyFile) ? KeyFile : TaskEnvironment.GetAbsolutePath(KeyFile).Value;
-                    StrongNameUtils.GetStrongNameKey(Log, keyFileForRead, KeyContainer, out keyPair, out publicKey);
+                    StrongNameUtils.GetStrongNameKey(Log, keyFileForRead, KeyFile, KeyContainer, out keyPair, out publicKey);
                 }
                 catch (StrongNameException e)
                 {
@@ -264,6 +264,35 @@ namespace Microsoft.Build.Tasks
             }
 
             return true;
+        }
+
+        private bool DirectoryExists(string path)
+        {
+            string absolutePath = GetAbsolutePathIfValid(path);
+            return absolutePath != null && FileSystems.Default.DirectoryExists(absolutePath);
+        }
+
+        private bool FileInfoExists(string path)
+        {
+            string absolutePath = GetAbsolutePathIfValid(path);
+            return absolutePath != null && SdkToolsPathUtility.FileInfoExists(absolutePath);
+        }
+
+        private string GetAbsolutePathIfValid(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
+            try
+            {
+                return TaskEnvironment.GetAbsolutePath(path).Value;
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
         }
 
         #endregion // ToolTask Members
