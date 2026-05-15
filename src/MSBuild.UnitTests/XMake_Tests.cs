@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests
             process.ExitCode.ShouldBe(0);
 
             string output = process.StandardOutput.ReadToEnd();
-            output.EndsWith(Environment.NewLine).ShouldBeTrue();
+            output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeTrue();
 
             process.Close();
         }
@@ -620,7 +620,7 @@ namespace Microsoft.Build.UnitTests
             process.ExitCode.ShouldBe(0);
 
             string output = process.StandardOutput.ReadToEnd();
-            output.EndsWith(Environment.NewLine).ShouldBeFalse();
+            output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeFalse();
 
             process.Close();
         }
@@ -3137,6 +3137,42 @@ EndGlobal
             string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
 
             MSBuildApp.Execute([@"c:\bin\msbuild.exe", project, "/m:257 /mt"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableEnablesMultiThreadedMode()
+        {
+            // When MSBUILDFORCEMULTITHREADED=1 is set, IsMultiThreadedEnabled should return true
+            // even when the -multiThreaded / -mt switch is not passed on the command line.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded).ShouldBeFalse();
+
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()
+        {
+            // When the env var is not set and the switch is not passed, IsMultiThreadedEnabled should return false.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableNonOneValueDoesNotEnableMultiThreadedMode()
+        {
+            // The env var is only honored when set to exactly "1", matching other MSBUILDFORCE* flags.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "true");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
         }
 
         private string CopyMSBuild()

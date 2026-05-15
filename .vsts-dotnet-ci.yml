@@ -98,7 +98,7 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: -onlyDocChanged $(onlyDocChanged)
+      arguments: '-onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
     env:
       ForceUseXCopyMSBuild: 1
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
@@ -210,7 +210,7 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
+      arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
     env:
       MSBUILDUSESERVER: "1"
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
@@ -267,6 +267,9 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
 
+# Dedicated /mt validation that turns on the ThreadSafeTaskAnalyzer (BuildAnalyzer=true),
+# kept as a separate Linux Core job because the analyzer is more expensive and the regular
+# bootstrapped CI jobs (which all run /mt now too) do not need it.
 - job: BootstrapMSBuildWithMTMode
   displayName: "Linux Core Multithreaded Mode"
   pool:
@@ -406,7 +409,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --stage2Properties '/mt'
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
@@ -494,7 +497,7 @@ jobs:
         arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --stage2Properties '/mt'
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"

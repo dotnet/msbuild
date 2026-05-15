@@ -620,7 +620,7 @@ namespace Microsoft.Build.ProjectCache
                     plugin.InitializationException?.Throw();
 
 
-                    ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, "Plugin '{0}' instance is null", plugin.Name);
+                    ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, $"Plugin '{plugin.Name}' instance is null");
 
                     MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(plugin.Name, buildRequest.ProjectFullPath, targetNames ?? MSBuildConstants.DefaultTargetsMarker);
                     if (plugin.PluginInstance is ProjectCachePluginBase currentPlugin)
@@ -636,7 +636,7 @@ namespace Microsoft.Build.ProjectCache
 #pragma warning restore CS0618 // Type or member is obsolete
                     else
                     {
-                        ErrorUtilities.ThrowInternalError("Unknown plugin type", plugin.Name);
+                        ErrorUtilities.ThrowInternalError($"Unknown plugin type: {plugin.Name}");
                     }
 
                     if (pluginLogger.HasLoggedErrors || experimentalPluginLogger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
@@ -898,7 +898,7 @@ namespace Microsoft.Build.ProjectCache
                         // Rethrow any initialization exception.
                         plugin.InitializationException?.Throw();
 
-                        ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, "Plugin '{0}' instance is null", plugin.Name);
+                        ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, $"Plugin '{plugin.Name}' instance is null");
 
                         MSBuildEventSource.Log.ProjectCacheHandleBuildResultStart(plugin.Name, fileAccessContext.ProjectFullPath, targetNames);
                         try

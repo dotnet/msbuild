@@ -123,7 +123,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider))
             {
-                ErrorUtilities.ThrowInternalError("Node {0} does not have a provider.", node);
+                ErrorUtilities.ThrowInternalError($"Node {node} does not have a provider.");
             }
             else
             {
@@ -287,7 +287,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.NodeManager, "Cannot create component of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.NodeManager, $"Cannot create component of type {type}");
             return new NodeManager();
         }
 
