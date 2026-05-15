@@ -46,12 +46,12 @@ namespace Microsoft.Build.Collections
         {
             if (lengthToCompare < 0)
             {
-                EscapeHatches.ThrowInternalError("Invalid lengthToCompare '{0}' {1} {2}", constrainedString, start, lengthToCompare);
+                InternalError.Throw($"Invalid lengthToCompare '{constrainedString}' {start} {lengthToCompare}");
             }
 
             if (start < 0 || start > (constrainedString?.Length ?? 0) - lengthToCompare)
             {
-                EscapeHatches.ThrowInternalError("Invalid start '{0}' {1} {2}", constrainedString, start, lengthToCompare);
+                InternalError.Throw($"Invalid start '{constrainedString}' {start} {lengthToCompare}");
             }
 
             if (ReferenceEquals(compareToString, constrainedString))

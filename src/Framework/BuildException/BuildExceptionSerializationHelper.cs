@@ -55,7 +55,7 @@ namespace Microsoft.Build.Framework.BuildException
 
                 if (!IsSupportedExceptionType(exceptionType))
                 {
-                    EscapeHatches.ThrowInternalError($"Type {exceptionType.FullName} is not recognized as a build exception type.");
+                    InternalError.Throw($"Type {exceptionType.FullName} is not recognized as a build exception type.");
                 }
 
                 string key = GetExceptionSerializationKey(exceptionType);
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Framework.BuildException
 
             if (Interlocked.Exchange(ref s_exceptionFactories, exceptionFactories) != null)
             {
-                EscapeHatches.ThrowInternalError("Serialization contract was already initialized.");
+                InternalError.Throw("Serialization contract was already initialized.");
             }
         }
 
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Framework.BuildException
             Func<string, Exception?, BuildExceptionBase>? factory = null;
             if (s_exceptionFactories == null)
             {
-                EscapeHatches.ThrowInternalError("Serialization contract was not initialized.");
+                InternalError.Throw("Serialization contract was not initialized.");
             }
             else
             {

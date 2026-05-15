@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 
 namespace Microsoft.Build.Framework
 {
@@ -475,7 +474,7 @@ namespace Microsoft.Build.Framework
                 return result;
             }
 
-            ThrowInternalError($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
+            InternalError.Throw($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
 
             return null;
         }
@@ -499,7 +498,7 @@ namespace Microsoft.Build.Framework
                 return ProjectInstanceTranslationMode.Partial;
             }
 
-            ThrowInternalError($"Invalid escape hatch for project instance translation: {mode}");
+            InternalError.Throw($"Invalid escape hatch for project instance translation: {mode}");
 
             return null;
         }
@@ -539,7 +538,7 @@ namespace Microsoft.Build.Framework
                 return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
             }
 
-            ThrowInternalError($"Invalid escape hatch for SdkReference property expansion: {mode}");
+            InternalError.Throw($"Invalid escape hatch for SdkReference property expansion: {mode}");
 
             return null;
         }
@@ -556,75 +555,6 @@ namespace Microsoft.Build.Framework
             DefaultExpand,
             ExpandUnescape,
             ExpandLeaveEscaped
-        }
-
-        /// <summary>
-        /// Throws InternalErrorException.
-        /// </summary>
-        /// <remarks>
-        /// Clone of InternalError.Throw which isn't available in Framework.
-        /// </remarks>
-        internal static void ThrowInternalError(string message)
-        {
-            throw new InternalErrorException(message);
-        }
-
-        /// <summary>
-        /// Throws InternalErrorException.
-        /// This is only for situations that would mean that there is a bug in MSBuild itself.
-        /// </summary>
-        /// <remarks>
-        /// Clone from ErrorUtilities which isn't available in Framework.
-        /// </remarks>
-        internal static void ThrowInternalError(string message, params object?[] args)
-        {
-            throw new InternalErrorException(FormatString(message, args));
-        }
-
-        /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        ///
-        /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
-        /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        ///
-        /// Thread safe.
-        /// </summary>
-        /// <param name="unformatted">The string to format.</param>
-        /// <param name="args">Optional arguments for formatting the given string.</param>
-        /// <returns>The formatted string.</returns>
-        /// <remarks>
-        /// Clone from ResourceUtilities which isn't available in Framework.
-        /// </remarks>
-        internal static string FormatString(string unformatted, params object?[] args)
-        {
-            string formatted = unformatted;
-
-            // NOTE: String.Format() does not allow a null arguments array
-            if ((args?.Length > 0))
-            {
-#if DEBUG
-                // If you accidentally pass some random type in that can't be converted to a string,
-                // FormatResourceString calls ToString() which returns the full name of the type!
-                foreach (object? param in args)
-                {
-                    // Check it has a real implementation of ToString() and the type is not actually System.String
-                    if (param != null)
-                    {
-                        if (string.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal) &&
-                            param.GetType() != typeof(string))
-                        {
-                            ThrowInternalError("Invalid resource parameter type, was {0}",
-                                param.GetType().FullName);
-                        }
-                    }
-                }
-#endif
-                // Format the string, using the variable arguments passed in.
-                // NOTE: all String methods are thread-safe
-                formatted = String.Format(CultureInfo.CurrentCulture, unformatted, args);
-            }
-
-            return formatted;
         }
     }
 }
