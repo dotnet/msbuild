@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -462,6 +464,126 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_EmptyProjectDirectory_Throws()
         {
             Should.Throw<ArgumentException>(() => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(string.Empty));
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13770.
+        /// When a variable is removed from the multithreaded TaskEnvironment via
+        /// <see cref="TaskEnvironment.SetEnvironmentVariable(string, string?)"/>, the resulting
+        /// <see cref="ProcessStartInfo"/> must not still expose the variable inherited from the
+        /// host MSBuild process environment.
+        /// </summary>
+        [Fact]
+        public void TaskEnvironment_MultithreadedGetProcessStartInfo_RemovedVariableDoesNotLeakFromHostEnvironment()
+        {
+            string leakVarName = $"MSBUILD_LEAK_REMOVE_TEST_{Guid.NewGuid():N}";
+            string leakVarValue = "should_not_leak";
+
+            try
+            {
+                Environment.SetEnvironmentVariable(leakVarName, leakVarValue);
+
+                TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath());
+
+                taskEnvironment.GetEnvironmentVariable(leakVarName).ShouldBe(leakVarValue);
+
+                taskEnvironment.SetEnvironmentVariable(leakVarName, null);
+                taskEnvironment.GetEnvironmentVariable(leakVarName).ShouldBeNull();
+
+                ProcessStartInfo startInfo = taskEnvironment.GetProcessStartInfo();
+
+                startInfo.ShouldNotBeNull();
+                startInfo.Environment.ShouldNotContainKey(leakVarName);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(leakVarName, null);
+            }
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13770.
+        /// <see cref="TaskEnvironment.SetEnvironment"/> replaces the entire virtualized environment.
+        /// The resulting <see cref="ProcessStartInfo"/> must expose exactly the supplied environment
+        /// — variables that exist only in the host process environment must not appear.
+        /// </summary>
+        [Fact]
+        public void TaskEnvironment_MultithreadedGetProcessStartInfo_SetEnvironmentProducesExactlySuppliedEnvironment()
+        {
+            string leakVarName = $"MSBUILD_LEAK_SET_TEST_{Guid.NewGuid():N}";
+            string otherVarName = $"MSBUILD_OTHER_VAR_{Guid.NewGuid():N}";
+
+            try
+            {
+                Environment.SetEnvironmentVariable(leakVarName, "yes");
+
+                TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath());
+
+                taskEnvironment.SetEnvironment(new Dictionary<string, string>
+                {
+                    [otherVarName] = "x"
+                });
+
+                ProcessStartInfo startInfo = taskEnvironment.GetProcessStartInfo();
+
+                startInfo.ShouldNotBeNull();
+                startInfo.Environment.ShouldContainKeyAndValue(otherVarName, "x");
+                startInfo.Environment.ShouldNotContainKey(leakVarName);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(leakVarName, null);
+            }
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13770.
+        /// Two concurrently-running multithreaded TaskEnvironments must produce <see cref="ProcessStartInfo"/>
+        /// instances with independent environments — each must only expose its own virtualized variables
+        /// and must not leak unrelated variables from the host MSBuild process.
+        /// </summary>
+        [Fact]
+        public void TaskEnvironment_MultithreadedGetProcessStartInfo_ConcurrentDriversHaveIndependentEnvironments()
+        {
+            string sharedKey = $"MSBUILD_PARALLEL_K_{Guid.NewGuid():N}";
+            string leakVarName = $"MSBUILD_PARALLEL_LEAK_{Guid.NewGuid():N}";
+
+            try
+            {
+                Environment.SetEnvironmentVariable(leakVarName, "process_value");
+
+                // Each driver starts with an empty virtualized environment; only the shared key is set per-driver.
+                TaskEnvironment driverA = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(
+                    GetResolvedTempPath(),
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+                TaskEnvironment driverB = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(
+                    GetResolvedTempPath(),
+                    new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+
+                driverA.SetEnvironmentVariable(sharedKey, "A");
+                driverB.SetEnvironmentVariable(sharedKey, "B");
+
+                ProcessStartInfo? startInfoA = null;
+                ProcessStartInfo? startInfoB = null;
+
+                Parallel.Invoke(
+                    () => startInfoA = driverA.GetProcessStartInfo(),
+                    () => startInfoB = driverB.GetProcessStartInfo());
+
+                startInfoA.ShouldNotBeNull();
+                startInfoB.ShouldNotBeNull();
+
+                startInfoA!.Environment.ShouldContainKeyAndValue(sharedKey, "A");
+                startInfoB!.Environment.ShouldContainKeyAndValue(sharedKey, "B");
+
+                // Neither child env should expose the variable that only exists in the host MSBuild process.
+                startInfoA.Environment.ShouldNotContainKey(leakVarName);
+                startInfoB.Environment.ShouldNotContainKey(leakVarName);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(leakVarName, null);
+            }
         }
 
         [Theory]

@@ -116,7 +116,8 @@ namespace Microsoft.Build.Framework
                 WorkingDirectory = ProjectDirectory.Value
             };
 
-            // Set environment variables
+            startInfo.EnvironmentVariables.Clear();
+
             foreach (var kvp in _environmentVariables)
             {
                 startInfo.EnvironmentVariables[kvp.Key] = kvp.Value;
