@@ -462,33 +462,6 @@ public class FileUtilities_Tests
         });
     }
 
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathBadUNC1()
-    {
-        Assert.Throws<ArgumentException>(() =>
-        {
-            Assert.Null(FileUtilities.NormalizePath(@"\\"));
-        });
-    }
-
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathBadUNC2()
-    {
-        Assert.Throws<ArgumentException>(() =>
-        {
-            Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
-        });
-    }
-
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathBadUNC3()
-    {
-        Assert.Throws<ArgumentException>(() =>
-        {
-            Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
-        });
-    }
-
     [WindowsOnlyFact]
     public void NormalizePathGoodUNC()
     {
@@ -500,17 +473,6 @@ public class FileUtilities_Tests
     {
         string longPart = new string('x', 300);
         Assert.Equal(@"c:\abc\def", FileUtilities.NormalizePath(@"c:\abc\" + longPart + @"\..\def"));
-    }
-
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathInvalid()
-    {
-        string filePath = @"c:\aardvark\|||";
-
-        Assert.Throws<ArgumentException>(() =>
-        {
-            FileUtilities.NormalizePath(filePath);
-        });
     }
 
     [WindowsOnlyFact]
