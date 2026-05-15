@@ -3244,7 +3244,7 @@ namespace Microsoft.Build.CommandLine
 
         internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
         {
-            if (NativeMethodsShared.IsWindows || Path.IsPathRooted(projectFile))
+            if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(projectFile) || Path.IsPathRooted(projectFile))
             {
                 return projectFile;
             }
@@ -3257,6 +3257,11 @@ namespace Microsoft.Build.CommandLine
 
             string currentDirectory = Directory.GetCurrentDirectory();
             if (!IsSamePhysicalDirectoryAsCurrentDirectory(logicalCurrentDirectory, currentDirectory))
+            {
+                return projectFile;
+            }
+
+            if (projectFile.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains(".."))
             {
                 return projectFile;
             }

@@ -1362,6 +1362,34 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain("[A=1]");
         }
 
+        [UnixOnlyFact]
+        public void ResponseFileInLogicalProjectDirectoryFoundImplicitly()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "repo", "project");
+            string logicalParentDirectory = Path.Combine(root, "links");
+            string linkDirectory = Path.Combine(logicalParentDirectory, "project");
+            Directory.CreateDirectory(realDirectory);
+            Directory.CreateDirectory(logicalParentDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            File.WriteAllText(Path.Combine(realDirectory, "my.proj"), content);
+            File.WriteAllText(Path.Combine(root, "repo", "Directory.Build.rsp"), "/p:A=physical");
+            File.WriteAllText(Path.Combine(logicalParentDirectory, "Directory.Build.rsp"), "/p:A=logical");
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+
+            string output = RunnerUtilities.ExecMSBuild("my.proj", out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
+
+            output.ShouldContain("[A=logical]");
+            output.ShouldNotContain("[A=physical]");
+        }
+
         [Fact]
         public void ResponseFileSwitchesAppearInCommandLine()
         {
@@ -1891,6 +1919,31 @@ namespace Microsoft.Build.UnitTests
 
             MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
                 .ShouldBe(Path.Combine(linkDirectory, relativeProjectPath));
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryDoesNotRebaseToDifferentPhysicalPath()
+        {
+            string root = _env.CreateFolder().Path;
+            string realCurrentDirectory = Path.Combine(root, "repo", "current");
+            string realProjectDirectory = Path.Combine(root, "repo", "other");
+            string linkParentDirectory = Path.Combine(root, "links");
+            string linkDirectory = Path.Combine(linkParentDirectory, "link");
+            Directory.CreateDirectory(realCurrentDirectory);
+            Directory.CreateDirectory(realProjectDirectory);
+            Directory.CreateDirectory(linkParentDirectory);
+            File.WriteAllText(Path.Combine(realProjectDirectory, "MyApp.csproj"), "<Project />");
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realCurrentDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+
+            string relativeProjectPath = Path.Combine("..", "other", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
         }
 
         [UnixOnlyFact]
