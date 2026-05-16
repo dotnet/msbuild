@@ -355,21 +355,44 @@ namespace Microsoft.Build.BackEnd
 
                 try
                 {
+                    int hostProcessId;
+                    bool wasNewlyCreated;
+                    bool effectiveNodeReuse;
+
                     lock (_taskHostLock)
                     {
+                        effectiveNodeReuse = _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost;
+
                         _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
                             taskHost: true,
 
                             // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
-                            nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost,
+                            nodeReuse: effectiveNodeReuse,
                             taskHostParameters: _taskHostParameters);
 
                         _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
-                        _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_taskHostNodeKey, this, this, hostConfiguration, _taskHostParameters);
+                        _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(
+                            _taskHostNodeKey,
+                            this,
+                            this,
+                            hostConfiguration,
+                            _taskHostParameters,
+                            out hostProcessId,
+                            out wasNewlyCreated);
                     }
 
                     if (_connectedToTaskHost)
                     {
+                        _taskLoggingContext.LogComment(
+                            MessageImportance.Low,
+                            "TaskHostDetails",
+                            _taskType.Type.Name,
+                            hostProcessId,
+                            Process.GetCurrentProcess().Id,
+                            wasNewlyCreated,
+                            _useSidecarTaskHost,
+                            effectiveNodeReuse);
+
                         try
                         {
                             bool taskFinished = false;
