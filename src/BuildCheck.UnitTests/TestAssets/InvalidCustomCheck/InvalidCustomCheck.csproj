@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <None Include="InvalidCustomCheck.props" Pack="true" PackagePath="build\InvalidCustomCheck.props" />
-    <Content Include="README.md" />
+    <None Include="README.md" />
   </ItemGroup>
 
   <Import Project="..\Common\CommonTest.targets" />

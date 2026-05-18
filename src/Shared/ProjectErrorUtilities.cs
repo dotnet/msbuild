@@ -252,7 +252,7 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Extra arguments for formatting the error message.</param>
         private static void ThrowInvalidProject(string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 #if DEBUG
             if (errorSubCategoryResourceName != null)
             {

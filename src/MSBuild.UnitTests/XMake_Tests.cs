@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Xml.Linq;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -985,8 +986,8 @@ namespace Microsoft.Build.UnitTests
                 var msbuildExeName = Path.GetFileName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
                 var newPathToMSBuildExe = Path.Combine(startDirectory, msbuildExeName);
                 var pathToConfigFile = Path.Combine(startDirectory, msbuildExeName + ".config");
-
-                string configContent = @"<?xml version =""1.0""?>
+                XElement configRuntimeElement = XDocument.Load(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + ".config").Root.Element("runtime");
+                string configContent = $@"<?xml version =""1.0""?>
                                             <configuration>
                                                 <configSections>
                                                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
@@ -1006,6 +1007,7 @@ namespace Microsoft.Build.UnitTests
                                                 <foo/>
                                                 </msbuildToolsets>
                                                 <foo/>
+                                                {configRuntimeElement}
                                             </configuration>";
                 File.WriteAllText(pathToConfigFile, configContent);
 
@@ -1575,8 +1577,10 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Theory]
         [InlineData(new[] { "my.proj", "my.sln", "my.slnf" }, "my.sln")]
+        [InlineData(new[] { "my.proj", "my.slnx", "my.slnf" }, "my.slnx")]
         [InlineData(new[] { "abc.proj", "bcd.csproj", "slnf.slnf", "other.slnf" }, "abc.proj")]
         [InlineData(new[] { "abc.sln", "slnf.slnf", "abc.slnf" }, "abc.sln")]
+        [InlineData(new[] { "abc.slnx", "slnf.slnf", "abc.slnf" }, "abc.slnx")]
         [InlineData(new[] { "abc.csproj", "abc.slnf", "not.slnf" }, "abc.csproj")]
         [InlineData(new[] { "abc.slnf" }, "abc.slnf")]
         public void TestDefaultBuildWithSolutionFilter(string[] projects, string answer)
@@ -1722,10 +1726,20 @@ namespace Microsoft.Build.UnitTests
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
+            projects = new[] { "test.proj", "test.slnx" };
+            extensionsToIgnore = new[] { ".vcproj" };
+            projectHelper = new IgnoreProjectExtensionsHelper(projects);
+            MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.slnx", StringCompareShould.IgnoreCase); // "Expected test.slnx to be only solution found"
+
             projects = new[] { "test.proj", "test.sln", "test.proj~", "test.sln~" };
             extensionsToIgnore = Array.Empty<string>();
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
+
+            projects = new[] { "test.proj", "test.slnx", "test.proj~", "test.sln~" };
+            extensionsToIgnore = Array.Empty<string>();
+            projectHelper = new IgnoreProjectExtensionsHelper(projects);
+            MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.slnx", StringCompareShould.IgnoreCase); // "Expected test.slnx to be only solution found"
 
             projects = new[] { "test.proj" };
             extensionsToIgnore = Array.Empty<string>();
@@ -1741,6 +1755,12 @@ namespace Microsoft.Build.UnitTests
             extensionsToIgnore = Array.Empty<string>();
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
+
+            projects = new[] { "test.slnx" };
+            extensionsToIgnore = Array.Empty<string>();
+            projectHelper = new IgnoreProjectExtensionsHelper(projects);
+            MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.slnx", StringCompareShould.IgnoreCase); // "Expected test.slnx to be only solution found"
+
 
             projects = new[] { "test.sln", "test.sln~" };
             extensionsToIgnore = Array.Empty<string>();
@@ -1794,6 +1814,21 @@ namespace Microsoft.Build.UnitTests
             });
         }
         /// <summary>
+        /// Test the case where there is a .slnx and a project in the same directory but they have different names
+        /// </summary>
+        [Fact]
+        public void TestProcessProjectSwitchSlnxProjDifferentNames()
+        {
+            string[] projects = ["test.proj", "Different.slnx"];
+            string[] extensionsToIgnore = null;
+
+            Should.Throw<InitializationException>(() =>
+            {
+                IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
+                MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
+            });
+        }
+        /// <summary>
         /// Test the case where we have two proj files in the same directory
         /// </summary>
         [Fact]
@@ -1831,6 +1866,33 @@ namespace Microsoft.Build.UnitTests
             {
                 string[] projects = { "test.sln", "Different.sln" };
                 string[] extensionsToIgnore = null;
+                IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
+                MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
+            });
+        }
+        /// <summary>
+        /// Test when there are two solutions in the same directory - .sln and .slnx
+        /// </summary>
+        [Fact]
+        public void TestProcessProjectSwitchSlnAndSlnx()
+        {
+            string[] projects = ["test.slnx", "Different.sln"];
+            string[] extensionsToIgnore = null;
+
+            Should.Throw<InitializationException>(() =>
+            {
+                IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
+                MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
+            });
+        }
+        [Fact]
+        public void TestProcessProjectSwitchTwoSlnx()
+        {
+            string[] projects = ["test.slnx", "Different.slnx"];
+            string[] extensionsToIgnore = null;
+
+            Should.Throw<InitializationException>(() =>
+            {
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });
@@ -1895,7 +1957,7 @@ namespace Microsoft.Build.UnitTests
                 List<string> fileNamesToReturn = new List<string>();
                 foreach (string file in _directoryFileNameList)
                 {
-                    if (string.Equals(searchPattern, "*.sln", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(searchPattern, "*.sln?", StringComparison.OrdinalIgnoreCase))
                     {
                         if (FileUtilities.IsSolutionFilename(file))
                         {

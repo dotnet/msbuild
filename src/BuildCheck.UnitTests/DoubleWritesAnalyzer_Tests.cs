@@ -28,7 +28,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
         private TaskInvocationCheckData MakeTaskInvocationData(string taskName, Dictionary<string, TaskInvocationCheckData.TaskParameter> parameters)
         {
-            string projectFile = NativeMethodsShared.IsWindows ? @"C:\fake\project.proj" : "/fake/project.proj";
+            string projectFile = Framework.NativeMethods.IsWindows ? @"C:\fake\project.proj" : "/fake/project.proj";
             return new TaskInvocationCheckData(
                 projectFile,
                 null,

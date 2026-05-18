@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;

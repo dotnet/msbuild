@@ -35,8 +35,8 @@ namespace Microsoft.Build.BackEnd
             bool skipStaticGraphIsolationConstraints = false,
             BuildRequestDataFlags flags = BuildRequestDataFlags.None)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
-            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
+            ErrorUtilities.VerifyThrowArgumentNull(config);
+            ErrorUtilities.VerifyThrowArgumentNull(targets);
 
             Config = config;
             Targets = targets;

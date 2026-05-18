@@ -486,6 +486,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
+#if NETFRAMEWORK
+            // MSB4233: Check if .NET runtime is requested, which is not supported in .NET Framework builds of MSBuild (17.14 and earlier).
+            // All .NET Core/5+ MSBuilds and all 18.0+ builds do support .NET runtime tasks, so this check is not needed there.
+            // This provides a clear error message instead of the confusing "MSBuild.dll not found" error that would otherwise occur.
+            if ((hostContext & HandshakeOptions.NET) == HandshakeOptions.NET)
+            {
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    new BuildEventFileInfo(configuration.ProjectFileOfTask, configuration.LineNumberOfTask, configuration.ColumnNumberOfTask),
+                    "TaskRuntimeNET",
+                    configuration.TaskName,
+                    configuration.TaskLocation);
+            }
+#endif
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(hostContext))
             {
@@ -527,7 +541,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CreateNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowArgumentNull(factory);
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             if (AvailableNodes <= 0)

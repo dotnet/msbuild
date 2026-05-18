@@ -83,7 +83,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] ContainedLooseEtcFiles { get; set; }
 
         private ITaskItem[] _nativeReferences;
-        private string[] _additionalSearchPaths = Array.Empty<string>();
+        private string[] _additionalSearchPaths = [];
         #endregion
 
         #region Nested classes

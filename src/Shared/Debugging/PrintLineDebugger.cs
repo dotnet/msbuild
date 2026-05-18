@@ -27,7 +27,7 @@ namespace Microsoft.Build.Shared.Debugging
 
                 var propertyInfo = commonWriterType.GetProperty("Writer", BindingFlags.Public | BindingFlags.Static);
 
-                ErrorUtilities.VerifyThrowInternalNull(propertyInfo, nameof(propertyInfo));
+                ErrorUtilities.VerifyThrowInternalNull(propertyInfo);
 
                 return propertyInfo;
             });
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Shared.Debugging
 #if DEBUG
             var writer = GetWriter();
 
-            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), new[] { message });
+            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), [message]);
 #endif
         }
 

@@ -5,7 +5,7 @@
 [Deploy-MSBuild](https://github.com/dotnet/msbuild/blob/deploy-msbuild/scripts/Deploy-MSBuild.ps1) is a way to conveniently take private bits and install them into Visual Studio (VS) for testing. To use it:
 
 - If you haven't already, clone [MSBuild](https://github.com/dotnet/msbuild) and make the changes you want.
-- Build MSBuild with the changes you want using `build.cmd /p:CreateBootstrap=true`.
+- Build MSBuild with the changes you want using `build.cmd`.
 - In an administrator powershell window, navigate to the msbuild folder.
 - Run `scripts\Deploy-MSBuild.ps1 -destination {destination} -configuration {configuration}`.
   - Specify the Bin folder of MSBuild in your VS install as the destination. This is somewhere like `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin"`.

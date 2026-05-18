@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
             {
                 resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
             }
-     
+
             if (resolvedPath != null)
             {
                 foundPath = resolvedPath;

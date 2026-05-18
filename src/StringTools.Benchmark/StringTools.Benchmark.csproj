@@ -16,12 +16,6 @@
     <PackageReference Include="BenchmarkDotNet" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
-    <!-- Bump these to the latest version despite transitive references to older -->
-    <PackageReference Include="System.Private.Uri" />
-    <PackageReference Include="System.Runtime" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>

@@ -96,8 +96,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectParser(XmlDocumentWithLocation document, ProjectRootElement project)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
-            ErrorUtilities.VerifyThrowInternalNull(document, nameof(document));
+            ErrorUtilities.VerifyThrowInternalNull(project);
+            ErrorUtilities.VerifyThrowInternalNull(document);
 
             _document = document;
             _project = project;

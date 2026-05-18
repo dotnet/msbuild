@@ -97,7 +97,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal BuildEventFileInfo(string file, XmlException e) : this(e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(file, nameof(file));
+            ErrorUtilities.VerifyThrowArgumentNull(file);
 
             _file = file;
         }

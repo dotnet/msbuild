@@ -102,7 +102,7 @@ namespace Microsoft.Build.Tasks
                             var parameters = constructor.GetParameters();
                             if (parameters.Length == 1 && parameters[0].ParameterType == typeof(ITranslator))
                             {
-                                retVal = constructor.Invoke(new object[] { translator }) as T;
+                                retVal = constructor.Invoke([translator]) as T;
                             }
                         }
 

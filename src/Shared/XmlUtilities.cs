@@ -69,7 +69,7 @@ namespace Microsoft.Build.Shared
         /// <param name="name">name to validate</param>
         internal static void VerifyThrowArgumentValidElementName(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             int firstInvalidCharLocation = LocateFirstInvalidElementNameCharacter(name);
 
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static void VerifyThrowProjectValidElementName(string name, IElementLocation location)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             int firstInvalidCharLocation = LocateFirstInvalidElementNameCharacter(name);
 
             if (-1 != firstInvalidCharLocation)

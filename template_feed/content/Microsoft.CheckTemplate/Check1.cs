@@ -11,7 +11,8 @@ namespace Company.CheckTemplate
             "Title",
             "Description",
             "Message format: {0}",
-            new CheckConfiguration());
+            new CheckConfiguration(),
+            "http://sampleHelpLink.com/X01234");
 
         public override string FriendlyName => "Company.Check1";
 

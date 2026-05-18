@@ -68,7 +68,7 @@ public class CheckConfiguration_Test
         {
             { "severity", parameter },
         };
-        
+
         var buildConfig = CheckConfiguration.Create(config);
 
         buildConfig.IsEnabled.ShouldBe(expected);

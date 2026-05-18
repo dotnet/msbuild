@@ -527,5 +527,33 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.AssertLogContains("MSB4181");
             }
         }
+
+        /// <summary>
+        /// MSBuildWarningsAsMessages should allow comma separation.
+        /// </summary>
+        [Fact]
+        public void MSBuildWarningsAsMessagesWithCommaSeparation()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                var content = """
+                <Project>
+                    <PropertyGroup>
+                       <MSBuildWarningsAsMessages>NAT011,NAT012</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+
+                    <Target Name='Build'>
+                        <Warning Code="NAT011" Text="You fail" />
+                        <Warning Code="NAT012" Text="Other Fail" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
+            }
+        }
     }
 }

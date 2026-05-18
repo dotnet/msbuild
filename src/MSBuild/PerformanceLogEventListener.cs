@@ -22,15 +22,15 @@ namespace Microsoft.Build.CommandLine
             internal EventLevel Level { get; set; }
         }
 
-        private static ProviderConfiguration[] s_config = new ProviderConfiguration[]
-        {
+        private static ProviderConfiguration[] s_config =
+        [
             new ProviderConfiguration()
             {
                 Name = "Microsoft-Build",
                 Keywords = MSBuildEventSource.Keywords.PerformanceLog,
                 Level = EventLevel.Verbose
             }
-        };
+        ];
 
         private const string PerfLogDirEnvVar = "DOTNET_PERFLOG_DIR";
         private const char EventDelimiter = '\n';
@@ -79,7 +79,7 @@ namespace Microsoft.Build.CommandLine
 
         internal void Initialize(string logDirectory)
         {
-            _processIDStr = Process.GetCurrentProcess().Id.ToString();
+            _processIDStr = EnvironmentUtilities.CurrentProcessId.ToString();
 
             // Use a GUID disambiguator to make sure that we have a unique file name.
             string logFilePath = Path.Combine(logDirectory, $"perf-{_processIDStr}-{Guid.NewGuid().ToString("N")}.log");

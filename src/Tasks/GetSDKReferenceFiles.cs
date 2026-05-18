@@ -1168,7 +1168,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(redistPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Enumerable.Empty<string>();
+                return [];
             }
 
             /// <summary>
@@ -1182,7 +1182,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(referencesPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Enumerable.Empty<string>();
+                return [];
             }
         }
 

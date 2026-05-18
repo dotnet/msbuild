@@ -95,10 +95,10 @@ namespace Microsoft.Build.FileSystem
 #endif
             IEnumerable<string> directories = includeDirectories
                 ? _directoryCache.EnumerateDirectories(path, searchPattern, predicate, transform)
-                : Enumerable.Empty<string>();
+                : [];
             IEnumerable<string> files = includeFiles
                 ? _directoryCache.EnumerateFiles(path, searchPattern, predicate, transform)
-                : Enumerable.Empty<string>();
+                : [];
 
             return Enumerable.Concat(directories, files);
         }

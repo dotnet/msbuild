@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Verify.Xunit" />
   </ItemGroup>
 

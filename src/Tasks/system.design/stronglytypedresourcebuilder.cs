@@ -71,10 +71,10 @@ namespace Microsoft.Build.Tasks
 
         // When fixing up identifiers, we will replace all these chars with
         // a single char that is valid in identifiers, such as '_'.
-        private static readonly char[] s_charsToReplace = new char[] { ' ',
+        private static readonly char[] s_charsToReplace = [' ',
         '\u00A0' /* non-breaking space */, '.', ',', ';', '|', '~', '@',
         '#', '%', '^', '&', '*', '+', '-', '/', '\\', '<', '>', '?', '[',
-        ']', '(', ')', '{', '}', '\"', '\'', ':', '!' };
+        ']', '(', ')', '{', '}', '\"', '\'', ':', '!'];
         private const char ReplacementChar = '_';
 
         private const String DocCommentSummaryStart = "<summary>";

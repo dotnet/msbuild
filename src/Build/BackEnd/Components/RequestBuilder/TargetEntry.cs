@@ -175,11 +175,11 @@ namespace Microsoft.Build.BackEnd
             LoggingContext loggingContext,
             bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
+            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback);
             ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;

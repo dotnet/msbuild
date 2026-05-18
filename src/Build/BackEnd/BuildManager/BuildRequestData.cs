@@ -64,7 +64,7 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, IEnumerable<string>? propertiesToTransfer)
             : this(targetsToBuild, hostServices, flags, projectInstance.FullPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectInstance, nameof(projectInstance));
+            ErrorUtilities.VerifyThrowArgumentNull(projectInstance);
 
             foreach (string targetName in targetsToBuild)
             {
@@ -93,7 +93,7 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, IEnumerable<string>? propertiesToTransfer, RequestedProjectState requestedProjectState)
             : this(projectInstance, targetsToBuild, hostServices, flags, propertiesToTransfer)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState, nameof(requestedProjectState));
+            ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState);
 
             RequestedProjectState = requestedProjectState;
         }
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Execution
             RequestedProjectState requestedProjectState)
             : this(projectFullPath, globalProperties, toolsVersion, targetsToBuild, hostServices, flags)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState, nameof(requestedProjectState));
+            ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState);
 
             RequestedProjectState = requestedProjectState;
         }
@@ -144,8 +144,8 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(string projectFullPath, IDictionary<string, string?> globalProperties, string? toolsVersion, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags, FileUtilities.NormalizePath(projectFullPath)!)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, nameof(projectFullPath));
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath);
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
 
             GlobalPropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
             foreach (KeyValuePair<string, string?> propertyPair in globalProperties)

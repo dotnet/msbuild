@@ -23,8 +23,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="targetFrameworkVersion">The <see cref="Version"/> of the target framework.</param>
         public AssemblyFoldersFromConfigInfo(string directoryPath, Version targetFrameworkVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(directoryPath, nameof(directoryPath));
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion, nameof(targetFrameworkVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(directoryPath);
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion);
 
             // When we get a path, it may be relative to Visual Studio (i.e. reference assemblies). If the
             // VSInstallDir environment is used, replace with our known location to Visual Studio.

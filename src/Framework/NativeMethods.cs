@@ -1522,9 +1522,18 @@ internal static class NativeMethods
     [SupportedOSPlatform("windows")]
     internal static unsafe string GetFullPath(string path)
     {
-        int bufferSize = GetFullPathWin32(path, 0, null, IntPtr.Zero);
-        char* buffer = stackalloc char[bufferSize];
-        int fullPathLength = GetFullPathWin32(path, bufferSize, buffer, IntPtr.Zero);
+        char* buffer = stackalloc char[MAX_PATH];
+        int fullPathLength = GetFullPathWin32(path, MAX_PATH, buffer, IntPtr.Zero);
+
+        // if user is using long paths we could need to allocate a larger buffer
+        if (fullPathLength > MAX_PATH)
+        {
+            char* newBuffer = stackalloc char[fullPathLength];
+            fullPathLength = GetFullPathWin32(path, fullPathLength, newBuffer, IntPtr.Zero);
+
+            buffer = newBuffer;
+        }
+
         // Avoid creating new strings unnecessarily
         return AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
     }
@@ -1546,6 +1555,7 @@ internal static class NativeMethods
     /// <returns>True only if the contents of <paramref name="s"/> and the first <paramref name="len"/> characters in <paramref name="buffer"/> are identical.</returns>
     private static unsafe bool AreStringsEqual(char* buffer, int len, string s)
     {
+#if CLR2COMPATIBILITY
         if (len != s.Length)
         {
             return false;
@@ -1560,6 +1570,9 @@ internal static class NativeMethods
         }
 
         return true;
+#else
+        return MemoryExtensions.SequenceEqual(new ReadOnlySpan<char>(buffer, len), s.AsSpan());
+#endif
     }
 
     internal static void VerifyThrowWin32Result(int result)

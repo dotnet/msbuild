@@ -3270,41 +3270,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Generate a fake reference which has been resolved from the gac. We will use it to verify the creation of the exclusion list.
-        /// </summary>
-        /// <returns></returns>
-        private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
-        {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
-#if FEATURE_WIN32_REGISTRY
-                null, null, null,
-#endif
-                null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
-
-            AssemblyNameExtension assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
-            TaskItem taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-
-            Reference reference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
-            reference.MakePrimaryAssemblyReference(taskItem, false, ".dll");
-            // "Resolve the assembly from the gac"
-            reference.FullPath = "c:\\Microsoft.VisualStudio.Interopt.dll";
-            reference.ResolvedSearchPath = location;
-            referenceTable.AddReference(assemblyNameExtension, reference);
-
-            assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Team.System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
-            taskItem = new TaskItem("Team, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-
-            reference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
-            reference.MakePrimaryAssemblyReference(taskItem, false, ".dll");
-
-            // "Resolve the assembly from the gac"
-            reference.FullPath = "c:\\Team.System.dll";
-            reference.ResolvedSearchPath = location;
-            referenceTable.AddReference(assemblyNameExtension, reference);
-            return referenceTable;
-        }
-
-        /// <summary>
         /// Given a reference that resolves to a bad image, we should get a warning and
         /// no reference. We don't want an exception.
         /// </summary>
@@ -4888,37 +4853,28 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress314573_VeryLongPaths()
         {
-            string veryLongPath = @"C:\" + new String('a', 260);
-            string veryLongFile = veryLongPath + "\\A.dll";
+            string veryLongPath = @"C:\" + new string('a', 260);
+            string veryLongFile = veryLongPath + @"\A.dll";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine(_output);
+            MockEngine e = new (_output);
             t.BuildEngine = e;
 
-            t.Assemblies = new ITaskItem[]
-            {
-                new TaskItem("A")                    // Resolved by HintPath
-            };
+            t.Assemblies = [new TaskItem("A")]; // Resolved by HintPath
             t.Assemblies[0].SetMetadata(
                 "HintPath",
                 veryLongFile);
 
-            t.SearchPaths = new string[]
-            {
-                "{HintPathFromItem}"
-            };
+            t.SearchPaths = ["{HintPathFromItem}"];
 
-            t.AssemblyFiles = new ITaskItem[]
-            {
-                new TaskItem(veryLongFile)            // Resolved as File Reference
-            };
+            t.AssemblyFiles = [new TaskItem(veryLongFile)]; // Resolved as File Reference
 
-            Execute(t);
-
-            Assert.Equal(1, e.Warnings); // "One warning expected in this scenario." // Couldn't find dependencies for {HintPathFromItem}-resolved item.
-            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Empty(t.ResolvedFiles);  // This test used to have 1 here. But that was because the mock GetAssemblyName was not accurately throwing an exception for non-existent files.
+            e.ShouldSatisfyAllConditions(
+                () => Execute(t).ShouldBeTrue(),
+                () => e.Warnings.ShouldBe(1, "One warning expected in this scenario."), // Couldn't find dependencies for {HintPathFromItem}-resolved item.
+                () => e.Errors.ShouldBe(0, "No errors expected in this scenario."),
+                () => t.ResolvedFiles.ShouldBeEmpty());
         }
 
         /// <summary>
@@ -6744,11 +6700,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableDependentItemsInDenyList4()
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
             Dictionary<string, string> denyList;
@@ -6922,11 +6878,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static ReferenceTable MakeEmptyReferenceTable(TaskLoggingHelper log)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
             return referenceTable;
         }
 

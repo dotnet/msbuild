@@ -128,11 +128,13 @@ namespace Microsoft.Build.UnitTests
             Task t = new MockTask();
             t.BuildEngine = mockEngine;
 
+#pragma warning disable CA2241 // Format argument invalid. True! But exactly what we're testing here.
             t.Log.LogMessage("echo {");
             t.Log.LogMessageFromText("{1", MessageImportance.High);
             t.Log.LogCommandLine("{2");
             t.Log.LogWarning("{3");
             t.Log.LogError("{4");
+#pragma warning restore CA2241
 
             mockEngine.AssertLogContains("echo {");
             mockEngine.AssertLogContains("{1");

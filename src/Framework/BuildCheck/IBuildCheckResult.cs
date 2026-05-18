@@ -16,6 +16,11 @@ internal interface IBuildCheckResult
     string LocationString { get; }
 
     /// <summary>
+    /// The short code of the diagnostic - e.g. 'BC0201'
+    /// </summary>
+    string Code { get; }
+
+    /// <summary>
     /// Location of the finding.
     /// </summary>
     IMSBuildElementLocation Location { get; }

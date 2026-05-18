@@ -11,7 +11,7 @@
 
   <!-- In the real world scenario, the dependencies are added as Nuget PackageReference, modified for test purposes only. -->
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Build\Microsoft.Build.csproj" IncludeInPackage="true" />
+    <ProjectReference Include="..\..\..\Build\Microsoft.Build.csproj" />
   </ItemGroup>
 
 </Project>

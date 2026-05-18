@@ -9,6 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.TelemetryInfra;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable
@@ -63,6 +64,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private ISdkResolverService _sdkResolverService;
 
         private IBuildCheckManagerProvider _buildCheckManagerProvider;
+
+        private TelemetryForwarderProvider _telemetryForwarder;
 
         #region SystemParameterFields
 
@@ -132,6 +135,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _buildCheckManagerProvider = new NullBuildCheckManagerProvider();
             ((IBuildComponent)_buildCheckManagerProvider).InitializeComponent(this);
+
+            _telemetryForwarder = new TelemetryForwarderProvider();
+            ((IBuildComponent)_telemetryForwarder).InitializeComponent(this);
         }
 
         /// <summary>
@@ -201,12 +207,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
                 BuildComponentType.BuildCheckManagerProvider => (IBuildComponent)_buildCheckManagerProvider,
+                BuildComponentType.TelemetryForwarder => (IBuildComponent)_telemetryForwarder,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }
 
         public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
-            => (TComponent) GetComponent(type);
+            => (TComponent)GetComponent(type);
 
         /// <summary>
         /// Register a new build component factory with the host.

@@ -207,7 +207,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (projectProperties is null)
                 {
-                    properties = Enumerable.Empty<DictionaryEntry>();
+                    properties = [];
                 }
                 else if (Traits.LogAllEnvironmentVariables)
                 {
@@ -218,7 +218,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     properties = projectProperties.Filter(p => p is not EnvironmentDerivedProjectPropertyInstance || EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(p.Name), p => new DictionaryEntry(p.Name, p.EvaluatedValue));
                 }
 
-                items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? Enumerable.Empty<DictionaryEntry>();
+                items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? [];
             }
 
             if (projectProperties != null &&

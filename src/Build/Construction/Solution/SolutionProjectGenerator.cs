@@ -189,7 +189,7 @@ namespace Microsoft.Build.Construction
 
             if (targetNames != null)
             {
-                _targetNames = targetNames.Select(i => i.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
+                _targetNames = targetNames.Select(i => i.Split([':'], 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
         }
 
@@ -691,12 +691,16 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectInstance[] Generate()
         {
-            // Validate against our minimum for upgradable projects
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                _solutionFile.Version >= SolutionFile.slnFileMinVersion,
-                "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(_solutionFile.FullPath),
-                "SolutionParseUpgradeNeeded");
+            // The Version is not available in the new parser.
+            if (!_solutionFile.UseNewParser)
+            {
+                // Validate against our minimum for upgradable projects
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                    _solutionFile.Version >= SolutionFile.slnFileMinVersion,
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(_solutionFile.FullPath),
+                    "SolutionParseUpgradeNeeded");
+            }
 
             // This is needed in order to make decisions about tools versions such as whether to put a
             // ToolsVersion parameter on <MSBuild> task tags and what MSBuildToolsPath to use when
@@ -944,15 +948,7 @@ namespace Microsoft.Build.Construction
             // Add our local extensibility points to the project representing the solution
             // Imported at the top: before.mysolution.sln.targets
             // Imported at the bottom: after.mysolution.sln.targets
-            string escapedSolutionFile = EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath));
-            string escapedSolutionDirectory = EscapingUtilities.Escape(_solutionFile.SolutionFileDirectory);
-            string localFile = Path.Combine(escapedSolutionDirectory, "before." + escapedSolutionFile + ".targets");
-            ProjectImportElement importBeforeLocal = traversalProject.CreateImportElement(localFile);
-            importBeforeLocal.Condition = @"exists('" + localFile + "')";
-
-            localFile = Path.Combine(escapedSolutionDirectory, "after." + escapedSolutionFile + ".targets");
-            ProjectImportElement importAfterLocal = traversalProject.CreateImportElement(localFile);
-            importAfterLocal.Condition = @"exists('" + localFile + "')";
+            (ProjectImportElement importBeforeLocal, ProjectImportElement importAfterLocal) = CreateBeforeAndAfterSolutionImports(traversalProject);
 
             // Put locals second so they can override globals if they want
             traversalProject.PrependChild(importBeforeLocal);
@@ -1019,6 +1015,27 @@ namespace Microsoft.Build.Construction
             AddStandardTraversalTargets(traversalInstance, projectsInOrder);
 
             return traversalInstance;
+        }
+
+        private (ProjectImportElement ImportBeforeSln, ProjectImportElement ImportAfterSln) CreateBeforeAndAfterSolutionImports(ProjectRootElement traversalProject)
+        {
+            string escapedSolutionFileName = EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath));
+            if (escapedSolutionFileName.EndsWith(".slnx"))
+            {
+                // We want to load only after.{solutionFileName}.sln.targets for solution files with .slnx extension
+                escapedSolutionFileName = escapedSolutionFileName.Substring(0, escapedSolutionFileName.Length - 1);
+            }
+
+            string escapedSolutionDirectory = EscapingUtilities.Escape(_solutionFile.SolutionFileDirectory);
+            string localFile = Path.Combine(escapedSolutionDirectory, $"before.{escapedSolutionFileName}.targets");
+            ProjectImportElement importBeforeLocal = traversalProject.CreateImportElement(localFile);
+            importBeforeLocal.Condition = $"exists('{localFile}')";
+
+            localFile = Path.Combine(escapedSolutionDirectory, $"after.{escapedSolutionFileName}.targets");
+            ProjectImportElement importAfterLocal = traversalProject.CreateImportElement(localFile);
+            importAfterLocal.Condition = $"exists('{localFile}')";
+
+            return (importBeforeLocal, importAfterLocal);
         }
 
         private void EmitMetaproject(ProjectRootElement metaproject, string path)

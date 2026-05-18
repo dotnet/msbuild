@@ -14,7 +14,8 @@ namespace CustomCheck
             "Title",
             "Description",
             "Message format: {0}",
-            new CheckConfiguration());
+            new CheckConfiguration(),
+            "http://samplelink.com/X01234");
 
         public override string FriendlyName => "CustomRule1";
 

@@ -37,7 +37,6 @@
       <SwrProperty Include="FrameworkBinPath=$(FrameworkBinPath)" />
       <SwrProperty Include="TaskHostBinPath=$(MSBuildTaskHostBinPath)" />
       <SwrProperty Include="TaskHostX64BinPath=$(MSBuildTaskHostX64BinPath)" />
-      <SwrProperty Include="MSBuildConversionBinPath=$(MSBuildConversionBinPath)" />
     </ItemGroup>
   </Target>
 

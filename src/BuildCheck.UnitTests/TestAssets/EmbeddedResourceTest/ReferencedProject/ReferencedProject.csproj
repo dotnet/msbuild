@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Target net8.0 - as from net9.0 the RespectAlreadyAssignedItemCulture is added by common targets. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<EnableCustomCulture>true</EnableCustomCulture>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RespectAlreadyAssignedItemCulture>$(RespectCulture)</RespectAlreadyAssignedItemCulture>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resource1.resx">
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resource1.en.resx">
+      <Culture>en</Culture>
+      <LogicalName>Test.en.resources</LogicalName>
+    </EmbeddedResource>
+    ###EmbeddedResourceToAdd
+  </ItemGroup>
+
+</Project>

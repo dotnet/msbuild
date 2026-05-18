@@ -156,6 +156,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
 
+        private readonly PropertyTrackingSetting _propertyTrackingSettings;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -172,6 +174,8 @@ namespace Microsoft.Build.BackEnd
             {
                 LogTaskInputs = Traits.Instance.EscapeHatches.LogTaskInputs;
             }
+
+            _propertyTrackingSettings = (PropertyTrackingSetting)Traits.Instance.LogPropertyTracking;
         }
 
         /// <summary>
@@ -299,8 +303,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
-            ErrorUtilities.VerifyThrowArgumentNull(batchBucket, nameof(batchBucket));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ErrorUtilities.VerifyThrowArgumentNull(batchBucket);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
@@ -352,7 +356,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
         public bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameters, nameof(parameters));
+            ErrorUtilities.VerifyThrowArgumentNull(parameters);
 
             bool taskInitialized = true;
 
@@ -804,7 +808,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!(outputs is ITaskItem[] taskItemOutputs))
             {
-                taskItemOutputs = new[] { (ITaskItem)outputs };
+                taskItemOutputs = [(ITaskItem)outputs];
             }
 
             return taskItemOutputs;
@@ -1223,15 +1227,18 @@ namespace Microsoft.Build.BackEnd
 
             string taskAndParameterName = _taskName + "_" + parameter.Name;
             string key = "DisableLogTaskParameter_" + taskAndParameterName;
-            string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
 
             if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
                 parameter.Log = false;
             }
-            else if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+            else
             {
-                parameter.LogItemMetadata = false;
+                string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
+                if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+                {
+                    parameter.LogItemMetadata = false;
+                }
             }
         }
 
@@ -1325,7 +1332,7 @@ namespace Microsoft.Build.BackEnd
                             parameterName: parameter.Name,
                             propertyName: null,
                             itemType: parameter.Name,
-                            parameterValueAsList ?? new object[] { parameterValue },
+                            parameterValueAsList ?? (object[])[parameterValue],
                             parameter.LogItemMetadata);
                     }
                 }
@@ -1486,7 +1493,7 @@ namespace Microsoft.Build.BackEnd
                                     parameterName: parameter.Name,
                                     propertyName: outputTargetName,
                                     itemType: outputTargetName,
-                                    new object[] { outputString },
+                                    (object[])[outputString],
                                     parameter.LogItemMetadata);
                             }
                             else
@@ -1573,7 +1580,7 @@ namespace Microsoft.Build.BackEnd
                                     parameterName: parameter.Name,
                                     propertyName: outputTargetName,
                                     itemType: outputTargetName,
-                                    new object[] { outputString },
+                                    (object[])[outputString],
                                     parameter.LogItemMetadata);
                             }
                             else
@@ -1581,6 +1588,14 @@ namespace Microsoft.Build.BackEnd
                                 _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
                             }
                         }
+
+                        PropertyTrackingUtils.LogPropertyAssignment(
+                            _propertyTrackingSettings,
+                            outputTargetName,
+                            outputString,
+                            parameterLocation,
+                            _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null,
+                            _taskLoggingContext);
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
                     }

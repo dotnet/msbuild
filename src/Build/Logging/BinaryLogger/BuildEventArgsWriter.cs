@@ -187,6 +187,7 @@ namespace Microsoft.Build.Logging
                     BuildSubmissionStarted
                     BuildStarted
                     BuildFinished
+                    BuildCanceled
                     ProjectEvaluationStarted
                     ProjectEvaluationFinished
                 BuildError
@@ -215,6 +216,7 @@ namespace Microsoft.Build.Logging
                 case BuildSubmissionStartedEventArgs buildSubmissionStarted: return Write(buildSubmissionStarted);
                 case BuildStartedEventArgs buildStarted: return Write(buildStarted);
                 case BuildFinishedEventArgs buildFinished: return Write(buildFinished);
+                case BuildCanceledEventArgs buildCanceled: return Write(buildCanceled);
                 case ProjectEvaluationStartedEventArgs projectEvaluationStarted: return Write(projectEvaluationStarted);
                 case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: return Write(projectEvaluationFinished);
                 case BuildCheckTracingEventArgs buildCheckTracing: return Write(buildCheckTracing);
@@ -307,32 +309,18 @@ namespace Microsoft.Build.Logging
             return BinaryLogRecordKind.BuildFinished;
         }
 
+        private BinaryLogRecordKind Write(BuildCanceledEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+
+            return BinaryLogRecordKind.BuildCanceled;
+        }
+
         private BinaryLogRecordKind Write(ProjectEvaluationStartedEventArgs e)
         {
             WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
             return BinaryLogRecordKind.ProjectEvaluationStarted;
-        }
-
-        private BinaryLogRecordKind Write(BuildCheckResultMessage e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckMessage;
-        }
-
-        private BinaryLogRecordKind Write(BuildCheckResultWarning e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckWarning;
-        }
-
-        private BinaryLogRecordKind Write(BuildCheckResultError e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckError;
         }
 
         private BinaryLogRecordKind Write(BuildCheckTracingEventArgs e)
@@ -528,7 +516,6 @@ namespace Microsoft.Build.Logging
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
-                case BuildCheckResultMessage buildCheckMessage: return Write(buildCheckMessage);
 
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);
@@ -585,19 +572,21 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.PreviousValue);
             WriteDeduplicatedString(e.NewValue);
             WriteDeduplicatedString(e.Location);
+
             return BinaryLogRecordKind.PropertyReassignment;
         }
 
         private BinaryLogRecordKind Write(UninitializedPropertyReadEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
+
             return BinaryLogRecordKind.UninitializedPropertyRead;
         }
 
         private BinaryLogRecordKind Write(PropertyInitialValueSetEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
             WriteDeduplicatedString(e.PropertyValue);
             WriteDeduplicatedString(e.PropertySource);
