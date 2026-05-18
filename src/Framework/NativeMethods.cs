@@ -1217,32 +1217,6 @@ internal static class NativeMethods
         return true;
     }
 
-#if FEATURE_WINDOWSINTEROP
-    [SupportedOSPlatform("windows6.1")]
-    internal static unsafe string GetFullPath(string path)
-    {
-        using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-        int fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
-
-        // If user is using long paths we could need to allocate a larger buffer
-        if (fullPathLength > buffer.Length)
-        {
-            buffer.EnsureCapacity(fullPathLength);
-            fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
-        }
-
-        if (fullPathLength == 0)
-        {
-            HRESULT.FromLastError().ThrowOnFailure();
-        }
-
-        // Avoid creating new strings unnecessarily
-        ReadOnlySpan<char> result = buffer.AsSpan().Slice(0, fullPathLength);
-        return result.SequenceEqual(path.AsSpan()) ? path : result.ToString();
-    }
-
-#endif
-
     internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(bool useStandardError = false)
     {
         if (Console.IsOutputRedirected)
