@@ -116,7 +116,6 @@
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
@@ -136,6 +135,8 @@
     <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.DefaultLogger.cs" />
     <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
@@ -187,7 +188,6 @@
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />
-    <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
     <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />

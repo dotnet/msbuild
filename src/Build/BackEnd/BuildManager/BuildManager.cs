@@ -265,6 +265,8 @@ namespace Microsoft.Build.Execution
 
         private ProjectCacheService? _projectCacheService;
 
+        private CoordinatorClient? _coordinatorClient;
+
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
 #if DEBUG
@@ -583,6 +585,17 @@ namespace Microsoft.Build.Execution
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
+
+                // If the coordinator is enabled, request a node grant and cap MaxNodeCount.
+                if (Traits.Instance.EnableCoordinator)
+                {
+                    _coordinatorClient = CoordinatorClient.TryConnect(_buildParameters.MaxNodeCount);
+
+                    if (_coordinatorClient != null)
+                    {
+                        _buildParameters.MaxNodeCount = _coordinatorClient.GrantedNodes;
+                    }
+                }
 
                 if (_buildParameters.UsesCachedResults() && _buildParameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
@@ -1173,6 +1186,9 @@ namespace Microsoft.Build.Execution
                 }
                 finally
                 {
+                    _coordinatorClient?.Dispose();
+                    _coordinatorClient = null;
+
                     if (_buildParameters!.LegacyThreadingSemantics)
                     {
                         _legacyThreadingData.MainThreadSubmissionId = -1;

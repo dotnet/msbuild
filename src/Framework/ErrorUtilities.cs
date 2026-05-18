@@ -188,8 +188,24 @@ internal static class FrameworkErrorUtilities
     /// This is only for situations that would mean that there is a bug in MSBuild itself.
     /// </summary>
     [DoesNotReturn]
+    public static T ThrowInternalError<T>(string message)
+        => throw new InternalErrorException(message);
+
+    /// <summary>
+    /// Throws InternalErrorException.
+    /// This is only for situations that would mean that there is a bug in MSBuild itself.
+    /// </summary>
+    [DoesNotReturn]
     public static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler)
         => ThrowInternalError(handler.GetFormattedText());
+
+    /// <summary>
+    /// Throws InternalErrorException.
+    /// This is only for situations that would mean that there is a bug in MSBuild itself.
+    /// </summary>
+    [DoesNotReturn]
+    public static T ThrowInternalError<T>(ref UnconditionalInterpolatedStringHandler handler)
+        => ThrowInternalError<T>(handler.GetFormattedText());
 
     /// <summary>
     /// Throws InternalErrorException.
