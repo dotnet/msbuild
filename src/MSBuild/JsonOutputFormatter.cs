@@ -101,7 +101,7 @@ namespace Microsoft.Build.CommandLine
                         jsonItem[metadatum.Name] = metadatum.EvaluatedValue;
                     }
 
-                    foreach (string metadatumName in FileUtilities.ItemSpecModifiers.All)
+                    foreach (string metadatumName in ItemSpecModifiers.All)
                     {
                         if (metadatumName.Equals("Identity"))
                         {

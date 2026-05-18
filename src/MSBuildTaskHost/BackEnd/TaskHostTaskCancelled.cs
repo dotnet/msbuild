@@ -1,0 +1,39 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Microsoft.Build.TaskHost.BackEnd;
+
+/// <summary>
+/// TaskHostTaskCancelled informs the task host that the task it is
+/// currently executing has been canceled.
+/// </summary>
+internal sealed class TaskHostTaskCancelled : INodePacket
+{
+    public TaskHostTaskCancelled()
+    {
+    }
+
+    /// <summary>
+    /// Gets the type of this NodePacket.
+    /// </summary>
+    public NodePacketType Type => NodePacketType.TaskHostTaskCancelled;
+
+    /// <summary>
+    /// Translates the packet to/from binary form.
+    /// </summary>
+    /// <param name="translator">The translator to use.</param>
+    public void Translate(ITranslator translator)
+    {
+        // Do nothing -- this packet doesn't contain any parameters.
+    }
+
+    /// <summary>
+    /// Factory for deserialization.
+    /// </summary>
+    internal static INodePacket FactoryForDeserialization(ITranslator translator)
+    {
+        var taskCancelled = new TaskHostTaskCancelled();
+        taskCancelled.Translate(translator);
+        return taskCancelled;
+    }
+}

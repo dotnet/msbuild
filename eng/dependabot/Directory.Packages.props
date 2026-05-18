@@ -10,8 +10,11 @@
   these properties to override package versions if necessary. -->
 
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.10" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageVersion Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
+
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.12" />
+    <PackageVersion Update="BenchmarkDotNet.Diagnostics.Windows" Condition="'$(BenchmarkDotNetDiagnosticsWindowsVersion)' != ''" Version="$(BenchmarkDotNetDiagnosticsWindowsVersion)" />
 
     <PackageVersion Include="AwesomeAssertions" Version="8.0.2" />
     <PackageVersion Update="AwesomeAssertions" Condition="'$(AwesomeAssertionsVersion)' != ''" Version="$(AwesomeAssertionsVersion)" />
@@ -37,7 +40,7 @@
     <PackageVersion Include="PdbGit" Version="3.0.41" />
     <PackageVersion Update="PdbGit" Condition="'$(PdbGitVersion)' != ''" Version="$(PdbGitVersion)" />
 
-    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
     <PackageVersion Include="FakeItEasy" Version="8.1.0" />
@@ -49,6 +52,13 @@
 
     <PackageVersion Include="Verify.Xunit" Version="19.14.1" />
     <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
+  </ItemGroup>
+
+  <!-- Roslyn analyzer authoring packages (used by ThreadSafeTaskAnalyzer) -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">

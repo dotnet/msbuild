@@ -870,7 +870,7 @@ namespace Microsoft.Build.Tasks
             if (string.IsNullOrEmpty(name))
             {
                 // Fall back to inferring assembly name from file name.
-                name = item.GetMetadata(FileUtilities.ItemSpecModifiers.Filename);
+                name = item.GetMetadata(ItemSpecModifiers.Filename);
             }
 
             return new AssemblyNameExtension($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");

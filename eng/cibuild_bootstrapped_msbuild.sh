@@ -4,8 +4,10 @@ configuration="Debug"
 host_type="core"
 build_stage1=true
 onlyDocChanged=0
+skipTests=false
 properties=
 extra_properties=
+stage2Properties=
 
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -32,6 +34,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --onlydocchanged)
       onlyDocChanged=$2
+      shift 2
+      ;;
+    --skiptests)
+      skipTests=true
+      shift 1
+      ;;
+    --stage2properties)
+      stage2Properties=$2
       shift 2
       ;;
     *)
@@ -88,10 +98,15 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Create bootstrap environment as it's required when also running tests
+# - stage2Properties are passed to all Stage 2 builds since some MSBuild switches (like /mt) may not work with the SDK MSBuild used in Stage 1
 if [ $onlyDocChanged = 0 ]
 then
-    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration $properties $extra_properties
-
+    if [ "$skipTests" = true ]
+    then
+        . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration $properties $extra_properties $stage2Properties
+    else
+        . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration $properties $extra_properties $stage2Properties
+    fi
 else
-    . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+    . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties $stage2Properties
 fi

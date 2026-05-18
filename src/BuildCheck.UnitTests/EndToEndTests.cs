@@ -21,7 +21,6 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class EndToEndTests : IDisposable
 {
     private const string EditorConfigFileName = ".editorconfig";
-    private const string LatestDotNetCoreForMSBuild = "net10.0";
 
     private readonly TestEnvironment _env;
 
@@ -171,7 +170,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success, timeoutMilliseconds: timeoutInMilliseconds);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture={(respectCulture ? "True" : "\"\"")} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -232,7 +231,7 @@ public class EndToEndTests : IDisposable
 
     private CopyTestOutput RunCopyToOutputTest(bool restore, bool skipUnchangedDuringCopy)
     {
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -361,19 +360,26 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    private const string testAssetsFolder = "TFMConfusionCheck";
+
+    public static IEnumerable<object[]> TFMConfusionCheckTestData()
+    {
+        yield return [$"""<TargetFramework>{RunnerUtilities.LatestDotNetCoreForMSBuild}</TargetFramework>""", "", false];
+        yield return [$"""<TargetFrameworks>{RunnerUtilities.LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false];
+        yield return [$"""<TargetFrameworks>{RunnerUtilities.LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", $" /p:TargetFramework={RunnerUtilities.LatestDotNetCoreForMSBuild}", false];
+        yield return [$"""<TargetFramework></TargetFramework><TargetFrameworks>{RunnerUtilities.LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false];
+        yield return [$"""<TargetFramework /><TargetFrameworks>{RunnerUtilities.LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false];
+        yield return [$"""<TargetFramework>{RunnerUtilities.LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false];
+        yield return [$"""<TargetFramework>{RunnerUtilities.LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks />""", "", false];
+        yield return [$"""<TargetFramework>{RunnerUtilities.LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks>{RunnerUtilities.LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", true];
+    }
+
     [Theory]
-    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>""", "", false)]
-    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
-    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", $" /p:TargetFramework={LatestDotNetCoreForMSBuild}", false)]
-    [InlineData($"""<TargetFramework></TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
-    [InlineData($"""<TargetFramework /><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
-    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false)]
-    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks />""", "", false)]
-    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", true)]
+    [MemberData(nameof(TFMConfusionCheckTestData))]
     public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
     {
         const string testAssetsFolderName = "TFMConfusionCheck";
-        const string projectName = testAssetsFolderName;
+        const string projectName = testAssetsFolder;
         const string templateToReplace = "###TFM";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
@@ -407,56 +413,61 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    public static IEnumerable<object[]> TFMinNonSdkCheckTestData()
+    {
+        yield return [
+            """
+            <Project ToolsVersion="msbuilddefaulttoolsversion">
+                <PropertyGroup>
+                  <TargetFramework>net48</TargetFramework>
+                </PropertyGroup>
+                <Target Name="Build">
+                    <Message Text="Build done"/>
+                </Target>
+            </Project>
+            """,
+            false];
+        yield return [
+            $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>{RunnerUtilities.LatestDotNetCoreForMSBuild}</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """,
+            false];
+        yield return [
+            """
+            <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+              <PropertyGroup>
+                <OutputType>Library</OutputType>
+                <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+                <OutputPath>bin\Debug\</OutputPath>
+            	<NoWarn>CS2008</NoWarn>
+              </PropertyGroup>
+              <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+            </Project>
+            """,
+            false];
+        yield return [
+            """
+            <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+              <PropertyGroup>
+                <OutputType>Library</OutputType>
+                <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+                <TargetFramework>v4.8</TargetFramework>
+                <OutputPath>bin\Debug\</OutputPath>
+            	<NoWarn>CS2008</NoWarn>
+              </PropertyGroup>
+              <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+            </Project>
+            """,
+            true];
+    }
+
     // Windows only - due to targeting NetFx
     [WindowsOnlyTheory]
-    [InlineData(
-        """
-        <Project ToolsVersion="msbuilddefaulttoolsversion">
-            <PropertyGroup>
-              <TargetFramework>net48</TargetFramework>
-            </PropertyGroup>
-            <Target Name="Build">
-                <Message Text="Build done"/>
-            </Target>
-        </Project>
-        """,
-        false)]
-    [InlineData(
-        $"""
-        <Project Sdk="Microsoft.NET.Sdk">
-          <PropertyGroup>
-            <TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>
-          </PropertyGroup>
-        </Project>
-        """,
-        false)]
-    [InlineData(
-        """
-        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-          <PropertyGroup>
-            <OutputType>Library</OutputType>
-            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-            <OutputPath>bin\Debug\</OutputPath>
-        	<NoWarn>CS2008</NoWarn>
-          </PropertyGroup>
-          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-        </Project>
-        """,
-        false)]
-    [InlineData(
-        """
-        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-          <PropertyGroup>
-            <OutputType>Library</OutputType>
-            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-            <TargetFramework>v4.8</TargetFramework>
-            <OutputPath>bin\Debug\</OutputPath>
-        	<NoWarn>CS2008</NoWarn>
-          </PropertyGroup>
-          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-        </Project>
-        """,
-        true)]
+    [MemberData(nameof(TFMinNonSdkCheckTestData))]
     public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);

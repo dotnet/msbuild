@@ -18,11 +18,16 @@ namespace Microsoft.Build.Framework.UnitTests
             WorkerNodeTelemetryData td = new WorkerNodeTelemetryData(
                 new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>()
                 {
-                        { (TaskOrTargetTelemetryKey)"task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5, 1234) },
-                        { (TaskOrTargetTelemetryKey)"task2", new TaskExecutionStats(TimeSpan.Zero, 0, 0) },
-                        { (TaskOrTargetTelemetryKey)"task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12, 987654321) }
+                        { (TaskOrTargetTelemetryKey)"task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5, 1234, "AssemblyTaskFactory", "CLR4") },
+                        { (TaskOrTargetTelemetryKey)"task2", new TaskExecutionStats(TimeSpan.Zero, 0, 0, null, null) },
+                        { (TaskOrTargetTelemetryKey)"task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12, 987654321, "CodeTaskFactory", "NET") }
                 },
-                new Dictionary<TaskOrTargetTelemetryKey, bool>() { { (TaskOrTargetTelemetryKey)"target1", false }, { (TaskOrTargetTelemetryKey)"target2", true }, });
+                new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>()
+                {
+                    { (TaskOrTargetTelemetryKey)"target1", TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
+                    { (TaskOrTargetTelemetryKey)"target2", TargetExecutionStats.Executed() },
+                    { (TaskOrTargetTelemetryKey)"target3", TargetExecutionStats.Skipped(TargetSkipReason.ConditionWasFalse) },
+                });
 
             WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(td);
 

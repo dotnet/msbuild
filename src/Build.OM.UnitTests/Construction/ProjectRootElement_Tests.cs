@@ -19,6 +19,7 @@ using Microsoft.Build.Shared;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Xunit;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -253,7 +254,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SetFullPathProjectXmlAlreadyLoaded()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
-            projectXml1.FullPath = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+            projectXml1.FullPath = FileUtilities.GetTemporaryFile();
 
             ProjectRootElement projectXml2 = ProjectRootElement.Create();
             projectXml2.FullPath = projectXml1.FullPath;
@@ -425,7 +426,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     try
                     {
-                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                        path = FileUtilities.GetTemporaryFileName();
                         File.WriteAllText(path, content);
 
                         ProjectRootElement.Open(path);
@@ -909,7 +910,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 try
                 {
-                    tempFileSentinel = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    tempFileSentinel = FileUtilities.GetTemporaryFile();
                     solutionFile = Path.ChangeExtension(tempFileSentinel, ".sln");
                     File.Copy(tempFileSentinel, solutionFile);
 
@@ -954,7 +955,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 try
                 {
                     // Does not have .sln or .vcproj extension so loads as project
-                    projectFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    projectFile = FileUtilities.GetTemporaryFile();
 
                     security = new FileSecurity(projectFile, System.Security.AccessControl.AccessControlSections.All);
                     security.AddAccessRule(rule);
@@ -990,7 +991,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 try
                 {
-                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                    solutionFile = FileUtilities.GetTemporaryFileName();
 
                     // Arbitrary corrupt content
                     string content = @"Microsoft Visual Studio Solution File, Format Version 10.00

@@ -510,7 +510,7 @@ namespace Microsoft.Build.Evaluation
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildPath;
             }
 #endif
 

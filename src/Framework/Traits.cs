@@ -131,9 +131,37 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
 
         /// <summary>
+        /// Enable IBuildEngine callbacks in the TaskHost process.
+        /// Temporary escape hatch until all callback stages are complete and PacketVersion is bumped to 3.
+        /// </summary>
+        public readonly bool EnableTaskHostCallbacks = Environment.GetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS") == "1";
+
+        /// <summary>
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
+
+        /// <summary>
+        /// Name of environment variable for logging arguments (e.g., -bl, -check).
+        /// </summary>
+        public const string MSBuildLoggingArgsEnvVarName = "MSBUILD_LOGGING_ARGS";
+
+        /// <summary>
+        /// Name of environment variable that controls the logging level for diagnostic messages
+        /// emitted when processing the MSBUILD_LOGGING_ARGS environment variable.
+        /// Set to "message" to emit as low-importance build messages instead of console warnings.
+        /// </summary>
+        public const string MSBuildLoggingArgsLevelEnvVarName = "MSBUILD_LOGGING_ARGS_LEVEL";
+
+        /// <summary>
+        /// Value of the MSBUILD_LOGGING_ARGS environment variable.
+        /// </summary>
+        public static string? MSBuildLoggingArgs => Environment.GetEnvironmentVariable(MSBuildLoggingArgsEnvVarName);
+
+        /// <summary>
+        /// Gets if the logging level for MSBUILD_LOGGING_ARGS diagnostic is message.
+        /// </summary>
+        public readonly bool EmitLogsAsMessage = string.Equals(Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName), "message", StringComparison.OrdinalIgnoreCase);
 
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
@@ -148,20 +176,23 @@ namespace Microsoft.Build.Framework
         public readonly bool ForceTaskFactoryOutOfProc = Environment.GetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC") == "1";
 
         /// <summary>
+        /// Make Console use default encoding in the system. It opts out automatic console encoding UTF-8.
+        /// </summary>
+        public readonly bool ConsoleUseDefaultEncoding = Environment.GetEnvironmentVariable("MSBUILD_CONSOLE_USE_DEFAULT_ENCODING") == "1" || Environment.GetEnvironmentVariable("DOTNET_CLI_CONSOLE_USE_DEFAULT_ENCODING") == "1";
+
+        /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
         /// mirroring
         /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry
         /// </summary>
         public bool SdkTelemetryOptOut = IsEnvVarOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
         public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
-        public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
         public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
         public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
 
         public bool EnableTargetOutputLogging = IsEnvVarOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
         // for VS17.14
-        public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
         public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
 
         public static void UpdateFromEnvironment()
@@ -178,19 +209,6 @@ namespace Microsoft.Build.Framework
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
                 ? result
                 : defaultValue;
-        }
-
-        /// <summary>
-        /// Parse a double from an environment variable with invariant culture.
-        /// </summary>
-        private static double? ParseDoubleFromEnvironmentVariable(string environmentVariable)
-        {
-            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable),
-                                  NumberStyles.Float,
-                                  CultureInfo.InvariantCulture,
-                                  out double result)
-                ? result
-                : null;
         }
 
         internal static bool IsEnvVarOneOrTrue(string name)
@@ -383,6 +401,13 @@ namespace Microsoft.Build.Framework
         /// Disable AssemblyLoadContext isolation for plugins.
         /// </summary>
         public readonly bool UseSingleLoadContext = Environment.GetEnvironmentVariable("MSBUILDSINGLELOADCONTEXT") == "1";
+
+        /// <summary>
+        /// Use custom AssemblyLoadContext for loading dependencies found in the MSBuild tools directory.
+        /// When enabled, assemblies found in the MSBuild tools directory are loaded into the plugin's isolated context
+        /// instead of the shared default context, preventing potential version conflicts with the host application.
+        /// </summary>
+        public readonly bool UseCustomLoadContextForDependenciesInToolsDirectory = Environment.GetEnvironmentVariable("MSBUILDUSECUSTOMLOADCONTEXTFORDEPENDENCIESINTOOLSDIRECTORY") == "1";
 
         /// <summary>
         /// Enables the user of autorun functionality in CMD.exe on Windows which is disabled by default in MSBuild.

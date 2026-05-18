@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -1996,6 +1998,143 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains(buildNonexistentProjectsByDefault == true
                 ? "MSB4025" // error MSB4025: The project file could not be loaded.
                 : "MSB3202"); // error MSB3202: The project file was not found.
+        }
+
+        /// <summary>
+        /// Verifies that a virtual (in-memory) project can be resolved via <c>&lt;ProjectReference&gt;</c>
+        /// through the real <c>_SplitProjectReferencesByFileExistence</c> target from
+        /// <c>Microsoft.Common.CurrentVersion.targets</c> when <c>_BuildNonexistentProjectsByDefault</c> is set.
+        /// This is used by file-based apps (<c>dotnet run file.cs</c>) to support
+        /// <c>#:ref</c> directives that create virtual project references.
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void VirtualProjectReference_SplitByFileExistence(bool buildNonexistentProjectsByDefault)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            string projectDir = env.CreateFolder().Path;
+
+            using var collection = new ProjectCollection();
+
+            // Create the referenced virtual project (NOT on disk).
+            string referencedProjectPath = Path.Combine(projectDir, "referenced.csproj");
+            using var referencedReader = XmlReader.Create(new StringReader("""
+                <Project>
+                    <Target Name="GetTargetPath" Returns="@(TargetPathItem)">
+                        <ItemGroup>
+                            <TargetPathItem Include="referenced_output.dll" />
+                        </ItemGroup>
+                    </Target>
+                </Project>
+                """));
+            var referencedRoot = ProjectRootElement.Create(referencedReader, collection);
+            referencedRoot.FullPath = referencedProjectPath;
+
+            // Create the main project ON DISK with <ProjectReference> and import of real targets.
+            string mainProjectPath = Path.Combine(projectDir, "main.csproj");
+            File.WriteAllText(mainProjectPath, """
+                <Project>
+                    <Import Project="$(MSBuildBinPath)\Microsoft.Common.CurrentVersion.targets" />
+                    <ItemGroup>
+                        <ProjectReference Include="referenced.csproj" />
+                    </ItemGroup>
+                    <Target Name="CheckSplit" DependsOnTargets="AssignProjectConfiguration;_SplitProjectReferencesByFileExistence">
+                        <Message Text="Existent: @(_MSBuildProjectReferenceExistent)" Importance="High" />
+                        <Message Text="Nonexistent: @(_MSBuildProjectReferenceNonexistent)" Importance="High" />
+                    </Target>
+                </Project>
+                """);
+
+            var globalProperties = new Dictionary<string, string>();
+            if (buildNonexistentProjectsByDefault)
+            {
+                globalProperties[PropertyNames.BuildNonexistentProjectsByDefault] = bool.TrueString;
+            }
+
+            var project = new Project(mainProjectPath, globalProperties, null, collection);
+            var logger = new MockLogger(_testOutput);
+            bool result = project.Build("CheckSplit", [logger]);
+            _testOutput.WriteLine(logger.FullLog);
+            Assert.True(result);
+
+            if (buildNonexistentProjectsByDefault)
+            {
+                logger.AssertLogContains("Existent: referenced.csproj");
+                logger.AssertLogDoesntContain("Nonexistent: referenced.csproj");
+            }
+            else
+            {
+                logger.AssertLogDoesntContain("Existent: referenced.csproj");
+                logger.AssertLogContains("Nonexistent: referenced.csproj");
+            }
+        }
+
+        /// <summary>
+        /// End-to-end: a virtual project referenced via <c>&lt;ProjectReference&gt;</c> is actually
+        /// built through the real <c>ResolveProjectReferences</c> target when
+        /// <c>_BuildNonexistentProjectsByDefault</c> is set. Parameterized to verify
+        /// that the main project can also be virtual (not on disk).
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void VirtualProjectReference_EndToEnd(bool mainProjectVirtual)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            string projectDir = env.CreateFolder().Path;
+
+            using var collection = new ProjectCollection(
+                globalProperties: new Dictionary<string, string>
+                {
+                    { PropertyNames.BuildNonexistentProjectsByDefault, bool.TrueString },
+                });
+
+            // Create the referenced virtual project (NOT on disk).
+            string referencedProjectPath = Path.Combine(projectDir, "referenced.csproj");
+            using var referencedReader = XmlReader.Create(new StringReader("""
+                <Project>
+                    <Target Name="GetTargetPath" Returns="@(TargetPathItem)">
+                        <ItemGroup>
+                            <TargetPathItem Include="referenced_output.dll" />
+                        </ItemGroup>
+                        <Message Text="message from referenced project" Importance="High" />
+                    </Target>
+                </Project>
+                """));
+            var referencedRoot = ProjectRootElement.Create(referencedReader, collection);
+            referencedRoot.FullPath = referencedProjectPath;
+
+            // Create the main project with <ProjectReference> and import of real targets.
+            string mainProjectPath = Path.Combine(projectDir, "main.csproj");
+            string mainProjectXml = """
+                <Project>
+                    <Import Project="$(MSBuildBinPath)\Microsoft.Common.CurrentVersion.targets" />
+                    <ItemGroup>
+                        <ProjectReference Include="referenced.csproj" SkipGetTargetFrameworkProperties="true" />
+                    </ItemGroup>
+                </Project>
+                """;
+
+            Project project;
+            if (mainProjectVirtual)
+            {
+                using var mainReader = XmlReader.Create(new StringReader(mainProjectXml));
+                var mainRoot = ProjectRootElement.Create(mainReader, collection);
+                mainRoot.FullPath = mainProjectPath;
+                project = new Project(mainRoot, null, null, collection);
+            }
+            else
+            {
+                File.WriteAllText(mainProjectPath, mainProjectXml);
+                project = new Project(mainProjectPath, null, null, collection);
+            }
+
+            var logger = new MockLogger(_testOutput);
+            bool result = project.Build("ResolveProjectReferences", [logger]);
+            _testOutput.WriteLine(logger.FullLog);
+            Assert.True(result);
+            logger.AssertLogContains("message from referenced project");
         }
     }
 }

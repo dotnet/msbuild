@@ -24,7 +24,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
-using Constants = Microsoft.Build.Internal.Constants;
+using Constants = Microsoft.Build.Framework.Constants;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;

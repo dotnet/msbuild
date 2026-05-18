@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Xunit;
 
 #nullable disable
@@ -111,7 +112,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             try
             {
-                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement projectXml = ProjectRootElement.Create(path);
                 projectXml.Save();
 

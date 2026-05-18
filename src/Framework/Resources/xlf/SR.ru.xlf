@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../SR.resx">
+    <body>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
+        <source>{0} ('{1}') must be equal to '{2}'.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть равно "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
+        <source>{0} ('{1}') must be greater than '{2}'.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть больше "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
+        <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть больше или равно "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
+        <source>{0} ('{1}') must be less than '{2}'.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть меньше "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
+        <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть меньше или равно "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
+        <source>{0} ('{1}') must be a non-negative value.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть неотрицательным значением.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
+        <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть неотрицательным и ненулевым значением.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
+        <source>{0} ('{1}') must be a non-zero value.</source>
+        <target state="translated">Значение {0} ("{1}") должно быть ненулевым значением.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
+        <source>{0} ('{1}') must not be equal to '{2}'.</source>
+        <target state="translated">Значение {0} ("{1}") не должно быть равно "{2}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyOrWhiteSpaceString">
+        <source>The value cannot be an empty string or composed entirely of whitespace.</source>
+        <target state="translated">Значение не может быть пустой строкой или полностью состоять из пробелов.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyString">
+        <source>The value cannot be an empty string.</source>
+        <target state="translated">Значение не может быть пустой строкой.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">Строка "{0}" не может быть преобразована в логическое значение (истина/ложь).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">Эта коллекция доступна только для чтения.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">Ошибка при попытке создать ссылочный путь к сборке из пути "{0}" и моникер инфраструктуры "{1}". {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">Путь "{0}", используемый для журналов отладки, слишком длинный. Установите более короткое значение, используя переменную среду MSBUILDDEBUGPATH, или измените конфигурацию системы, чтобы разрешить длинные пути.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">Не удалось создать временный файл. Папка временных файлов переполнена, или указан неверный путь. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Возникло исключение при расширении fileSpec со стандартными масками: fileSpec: "{0}", предполагая, что это имя файла. Исключение: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">У элемента "{0}" имеется атрибут "{1}" со значением "{2}", который не удалось преобразовать в "{3}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">Не удается применить метаданные элемента "%({0})" к пути "{1}". {2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">Параметр "{0}" может быть только именем файла и не может включать в себя каталог.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathMustBeRooted">
+        <source>Path must be rooted.</source>
+        <target state="translated">Путь должен иметь корень.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">Длина пути {0} превышает максимально допустимую в ОС. Символов в полном имени файла должно быть не больше {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">.NET Framework версии "{0}" не поддерживается. Укажите значение из перечисления Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">При явном использовании пакета Windows SDK платформа .NET Framework версии "{0}" не поддерживается; она поддерживается только платформой .NET 4.5 и более поздними версиями.  Укажите значение из перечисления Microsoft.Build.Utilities.TargetDotNetFrameworkVersion версии Version45 или более поздней.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Visual Studio версии "{0}" не поддерживается.  Укажите значение из перечисления Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

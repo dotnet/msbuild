@@ -8,7 +8,7 @@ using System.Globalization;
 #endif
 using System.Threading;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.Debugging;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 
 #nullable disable
@@ -462,7 +462,7 @@ namespace Microsoft.Build.BackEnd
                 // Dump all engine exceptions to a temp file
                 // so that we have something to go on in the
                 // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
                 throw;
             }
         }

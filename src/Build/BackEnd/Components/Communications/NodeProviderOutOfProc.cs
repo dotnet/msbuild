@@ -89,17 +89,21 @@ namespace Microsoft.Build.BackEnd
             }
 
             ConcurrentBag<NodeInfo> nodes = new();
+            Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority));
 
             // Start the new process.  We pass in a node mode with a node number of 1, to indicate that we
             // want to start up just a standard MSBuild out-of-proc node.
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
-            string commandLineArgs = $"/noautoresponse /nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}";
+            NodeLaunchData nodeLaunchData = new(
+                MSBuildLocation: null,
+                CommandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcNode)} /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}",
+                Handshake: hostHandshake,
+                EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
 
             CommunicationsUtilities.Trace("Starting to acquire {1} new or existing node(s) to establish nodes from ID {0} to {2}...", nextNodeId, numberOfNodesToCreate, nextNodeId + numberOfNodesToCreate - 1);
-
-            Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority));
-            IList<NodeContext> nodeContexts = GetNodes(null, commandLineArgs, nextNodeId, factory, hostHandshake, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
+     
+            IList<NodeContext> nodeContexts = GetNodes(nodeLaunchData, nextNodeId, factory, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
 
             if (nodeContexts.Count > 0)
             {
