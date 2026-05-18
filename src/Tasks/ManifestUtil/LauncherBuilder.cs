@@ -32,10 +32,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <value>Path to Launcher files.</value>
         public string LauncherPath { get; set; }
 
+        internal TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         public BuildResults Build(string filename, string outputPath)
         {
-            string launcherFilename = Path.GetFileName(LauncherPath);
+            AbsolutePath path = string.IsNullOrEmpty(outputPath) ? default : TaskEnvironment.GetAbsolutePath(outputPath);
+            return Build(filename, path);
+        }
 
+        internal BuildResults Build(string filename, AbsolutePath outputPath)
+        {
             _results = new BuildResults();
 
             try
@@ -46,15 +52,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     return _results;
                 }
 
-                if (String.IsNullOrEmpty(outputPath))
+                if (String.IsNullOrEmpty(outputPath.Value))
                 {
                     _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.NoOutputPath"));
                     return _results;
                 }
 
+                AbsolutePath launcherPath = string.IsNullOrEmpty(LauncherPath) ? default : TaskEnvironment.GetAbsolutePath(LauncherPath);
+                string launcherPathForFileSystem = launcherPath.Value ?? LauncherPath;
+                string launcherFilename = Path.GetFileName(launcherPathForFileSystem);
+
                 // Copy setup.bin to the output directory
-                string strOutputExe = System.IO.Path.Combine(outputPath, launcherFilename);
-                if (!CopyLauncherToOutputDirectory(strOutputExe))
+                string strOutputExe = Path.Combine(outputPath.Value, launcherFilename);
+                string strOutputExeForMessages = Path.Combine(outputPath.OriginalValue, launcherFilename);
+                if (!CopyLauncherToOutputDirectory(launcherPath, launcherPathForFileSystem, strOutputExe, strOutputExeForMessages))
                 {
                     // Appropriate messages should have been stuffed into the results already
                     return _results;
@@ -78,23 +89,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return _results;
         }
 
-        private bool CopyLauncherToOutputDirectory(string strOutputExe)
+        private bool CopyLauncherToOutputDirectory(AbsolutePath launcherPath, string launcherPathForFileSystem, string strOutputExe, string strOutputExeForMessages)
         {
-            if (!FileSystems.Default.FileExists(LauncherPath))
+            string launcherPathForMessages = launcherPath.OriginalValue ?? LauncherPath;
+
+            if (!FileSystems.Default.FileExists(launcherPathForFileSystem))
             {
-                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.MissingLauncherExe", LauncherPath));
+                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.MissingLauncherExe", launcherPathForMessages));
                 return false;
             }
 
             try
             {
                 EnsureFolderExists(Path.GetDirectoryName(strOutputExe));
-                File.Copy(LauncherPath, strOutputExe, true);
+                File.Copy(launcherPathForFileSystem, strOutputExe, true);
                 ClearReadOnlyAttribute(strOutputExe);
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.CopyError", LauncherPath, strOutputExe, ex.Message));
+                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.CopyError", launcherPathForMessages, strOutputExeForMessages, ex.Message));
                 return false;
             }
 
