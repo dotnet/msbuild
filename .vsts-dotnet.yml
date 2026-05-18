@@ -1,6 +1,12 @@
 trigger:
-- main
-- vs*
+  branches:
+    include:
+    - main
+    - vs*
+  paths:
+    exclude:
+    - documentation/**
+    - .github/**
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
