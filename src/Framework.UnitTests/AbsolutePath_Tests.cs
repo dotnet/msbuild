@@ -308,5 +308,23 @@ namespace Microsoft.Build.UnitTests
             var exception = Should.Throw<ArgumentException>(() => new AbsolutePath("relative/path"));
             exception.Message.ShouldContain("Path must be rooted");
         }
+
+        [WindowsOnlyFact]
+        public void AbsolutePath_WhitespacePath_ShouldThrowOnWindows()
+        {
+            var basePath = GetTestBasePath();
+
+            Should.Throw<ArgumentException>(() => new AbsolutePath(" ", basePath));
+        }
+
+        [UnixOnlyFact]
+        public void AbsolutePath_WhitespacePath_ShouldNotThrowOnUnix()
+        {
+            var basePath = GetTestBasePath();
+
+            // Whitespace is a valid filename character on Unix — should not throw.
+            var absolutePath = new AbsolutePath(" ", basePath);
+            absolutePath.Value.ShouldNotBeNullOrEmpty();
+        }
     }
 }
