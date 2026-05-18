@@ -28,12 +28,12 @@ These are configured in `Directory.Build.props` (repo root), `src/Directory.Buil
 - **Test runner**: `TestRunnerName=XUnitV3`, MTP `1.9.1`, xUnit v3 `3.2.2` (set in repo-root `Directory.Build.props`).
 - **DOTNET_HOST_PATH**: `RunnerUtilities.GetMSBuildEnvironmentVariables` (in `src/UnitTests.Shared/RunnerUtilities.cs`) sets `DOTNET_HOST_PATH` to the bootstrap dotnet when tests launch MSBuild as a child process, so tasks like `RoslynCodeTaskFactory` resolve the right host. Don't override `DOTNET_HOST_PATH` from a test.
 
-## Flags — `dotnet test` (MTP + xUnit v3) vs VSTest pitfalls
+## Flags — MTP vs VSTest pitfalls
 
-This repo uses MTP with the xUnit v3 MTP runner, **not** VSTest. Many familiar `dotnet test` flags silently do nothing. Note that some flags below come from MTP itself (e.g. `--report-trx`, `--coverage`) and some from the xUnit v3 MTP runner (e.g. the `--filter-*` family, `xUnit.*` settings); both differ from VSTest. Key differences:
+This repo uses MTP with the xUnit v3 MTP runner, **not** VSTest. Many familiar `dotnet test` flags silently do nothing. Key differences:
 
-- **Use** `--report-trx` (not `--logger trx`) and `--coverage` (not `--collect "XPlat Code Coverage"`) — these are MTP-native. For test filtering, use the xUnit v3 runner's `--filter-method`/`--filter-class`/`--filter-trait` (MTP's own `--filter-uid` takes opaque node UIDs and isn't useful by hand).
-- **Don't use** `--nologo`, `--blame`, `--settings *.runsettings`, `--diag`, `--collect`, or `-- RunConfiguration.MaxCpuCount=...` — these are VSTest-only and ignored.
+- **Use** `--report-trx` (not `--logger trx`), `--coverage` (not `--collect "XPlat Code Coverage"`), `--filter-method`/`--filter-class`/`--filter-trait` for xUnit v3 native filtering.
+- **Don't use** `--filter`, `--nologo`, `--blame`, `--settings *.runsettings`, `--diag`, `--collect`, or `-- RunConfiguration.MaxCpuCount=...` — these are VSTest-only and ignored.
 - **Still works**: `-c`, `-f`, `--no-restore`, `--no-build`, `-v`, `-bl:`, `-p:Property=Value` — these are interpreted by `dotnet test` itself before MTP sees them.
 
 For comprehensive MTP vs VSTest flag reference, see the `run-tests` skill from the `dotnet-test` plugin.
@@ -44,12 +44,12 @@ Aim for sub-30s iterations.
 
 > Examples below use Windows-style backslashes and PowerShell line continuations. Forward slashes work everywhere with `dotnet` (`src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.csproj`); on Linux/macOS use `/` and shell line continuations (`\`), and the exe path becomes `artifacts/bin/<Proj>/Debug/net10.0/<Proj>` (no `.exe`).
 
-1. **Run via `dotnet test` with a single TFM and filter** (incremental build handles rebuilding automatically; `--` is required so the xUnit v3 filter is passed through, not eaten by `dotnet test`):
+1. **Run via `dotnet test` with a single TFM and filter** (incremental build handles rebuilding automatically):
    ```powershell
    dotnet test src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj `
      -f net10.0 -- --filter-method "*MyFeature*"
    ```
-2. **Or run the test exe directly** (fastest — no SDK overhead; each test assembly is a self-contained MTP host with the xUnit v3 runner. Build first if source changed):
+2. **Or run the test exe directly** (fastest — no SDK overhead; build first if source changed):
    ```powershell
    dotnet build src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj -c Debug -f net10.0
    artifacts\bin\Microsoft.Build.Tasks.UnitTests\Debug\net10.0\Microsoft.Build.Tasks.UnitTests.exe `
@@ -71,7 +71,7 @@ These trade safety for speed — use during iteration, **revert before final val
     "parallelizeTestCollections": true
   }
   ```
-  Or pass them as xUnit v3 runner args after `--`: `-- xUnit.MaxParallelThreads=-1 xUnit.ParallelizeTestCollections=true`. Expect flakes in tests that touch env vars, cwd, the file system, or the global ProjectCollection — **don't ship a fix that depends on this being on**.
+  Or pass them as runner args after `--`: `-- xUnit.MaxParallelThreads=-1 xUnit.ParallelizeTestCollections=true`. Expect flakes in tests that touch env vars, cwd, the file system, or the global ProjectCollection — **don't ship a fix that depends on this being on**.
 - **Skip bootstrap packaging** for non-bootstrap test projects:
   `dotnet build ... -p:CreateBootstrap=false` (useful when the local bootstrap SDK payload is missing).
 - **Narrow with traits**: `--filter-trait Category=mytraitduringdev` if you've tagged a focused subset.
