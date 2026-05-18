@@ -1922,6 +1922,28 @@ namespace Microsoft.Build.UnitTests
         }
 
         [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryCanBeDisabledByChangeWave()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "real");
+            string linkDirectory = Path.Combine(root, "link");
+            Directory.CreateDirectory(realDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
+        }
+
+        [UnixOnlyFact]
         public void ResolveProjectPathAgainstLogicalCurrentDirectoryDoesNotRebaseToDifferentPhysicalPath()
         {
             string root = _env.CreateFolder().Path;
@@ -1944,6 +1966,31 @@ namespace Microsoft.Build.UnitTests
 
             MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
                 .ShouldBe(relativeProjectPath);
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryPreservesSiblingPathThroughSymlink()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "real");
+            string realAppDirectory = Path.Combine(realDirectory, "App");
+            string realLibDirectory = Path.Combine(realDirectory, "Lib");
+            string linkDirectory = Path.Combine(root, "link");
+            Directory.CreateDirectory(realAppDirectory);
+            Directory.CreateDirectory(realLibDirectory);
+            File.WriteAllText(Path.Combine(realLibDirectory, "Lib.csproj"), "<Project />");
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            string logicalAppDirectory = Path.Combine(linkDirectory, "App");
+            _env.SetCurrentDirectory(logicalAppDirectory);
+            _env.SetEnvironmentVariable("PWD", logicalAppDirectory);
+
+            string relativeProjectPath = Path.Combine("..", "Lib", "Lib.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(Path.Combine(linkDirectory, "Lib", "Lib.csproj"));
         }
 
         [UnixOnlyFact]
