@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -114,7 +115,13 @@ namespace Microsoft.Build.Tasks
                 Log,
                 true);
 
-            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
+            if (string.IsNullOrEmpty(pathToTool))
+            {
+                return pathToTool;
+            }
+
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(pathToTool);
+            return absolutePath.Value ?? pathToTool;
         }
 
         /// <summary>
@@ -178,14 +185,14 @@ namespace Microsoft.Build.Tasks
         private bool ValidateStrongNameParameters()
         {
             bool keyFileExists = false;
-            string keyFileForRead = null;
+            AbsolutePath keyFileForRead = default;
 
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                keyFileForRead = GetAbsolutePathIfValid(KeyFile);
+                keyFileForRead = TaskEnvironment.GetAbsolutePathIfValid(KeyFile);
 
-                if (keyFileForRead != null && FileSystems.Default.FileExists(keyFileForRead))
+                if (keyFileForRead.Value != null && FileSystems.Default.FileExists(keyFileForRead))
                 {
                     keyFileExists = true;
                 }
@@ -222,7 +229,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    StrongNameUtils.GetStrongNameKey(Log, keyFileForRead, KeyFile, KeyContainer, out keyPair, out publicKey);
+                    StrongNameUtils.GetStrongNameKey(Log, keyFileForRead, KeyContainer, out keyPair, out publicKey);
                 }
                 catch (StrongNameException e)
                 {
@@ -268,31 +275,14 @@ namespace Microsoft.Build.Tasks
 
         private bool DirectoryExists(string path)
         {
-            string absolutePath = GetAbsolutePathIfValid(path);
-            return absolutePath != null && FileSystems.Default.DirectoryExists(absolutePath);
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(path);
+            return absolutePath.Value != null && FileSystems.Default.DirectoryExists(absolutePath);
         }
 
         private bool FileInfoExists(string path)
         {
-            string absolutePath = GetAbsolutePathIfValid(path);
-            return absolutePath != null && SdkToolsPathUtility.FileInfoExists(absolutePath);
-        }
-
-        private string GetAbsolutePathIfValid(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return null;
-            }
-
-            try
-            {
-                return TaskEnvironment.GetAbsolutePath(path).Value;
-            }
-            catch (ArgumentException)
-            {
-                return null;
-            }
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(path);
+            return absolutePath.Value != null && SdkToolsPathUtility.FileInfoExists(absolutePath);
         }
 
         #endregion // ToolTask Members

@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
@@ -110,7 +111,14 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given a key file or container, extract private/public key data. Reused from vsdesigner code.
         /// </summary>
-        internal static void GetStrongNameKey(TaskLoggingHelper log, string keyFile, string keyFileDisplayName, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
+        internal static void GetStrongNameKey(TaskLoggingHelper log, AbsolutePath keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
+        {
+            Debug.Assert(keyFile.Value != null || !string.IsNullOrEmpty(keyContainer));
+
+            GetStrongNameKey(log, keyFile, keyFile.OriginalValue, keyContainer, out keyPair, out publicKey);
+        }
+
+        private static void GetStrongNameKey(TaskLoggingHelper log, string keyFile, string keyFileDisplayName, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
             // Gets either a strong name key pair from the key file or a key container.
             // If keyFile and keyContainer are both null/zero length then returns null.
