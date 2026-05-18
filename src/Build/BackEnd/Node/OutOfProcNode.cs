@@ -33,6 +33,9 @@ namespace Microsoft.Build.Execution
     /// </summary>
     public class OutOfProcNode : INode, IBuildComponentHost, INodePacketFactory, INodePacketHandler
     {
+        private static readonly object s_activeNodeLock = new();
+        private static OutOfProcNode s_activeNode;
+
         /// <summary>
         /// Whether the current appdomain has an out of proc node.
         /// For diagnostics.
@@ -254,33 +257,73 @@ namespace Microsoft.Build.Execution
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
-            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
-
-            // Get the current directory before doing any work. We need this so we can restore the directory when the node shutsdown.
-            while (true)
+            lock (s_activeNodeLock)
             {
-                int index = WaitHandle.WaitAny(waitHandles);
-                switch (index)
+                s_activeNode = this;
+            }
+
+            try
+            {
+                WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
+
+                // Get the current directory before doing any work. We need this so we can restore the directory when the node shutsdown.
+                while (true)
                 {
-                    case 0:
-                        NodeEngineShutdownReason shutdownReason = HandleShutdown(out shutdownException);
-                        return shutdownReason;
+                    int index = WaitHandle.WaitAny(waitHandles);
+                    switch (index)
+                    {
+                        case 0:
+                            NodeEngineShutdownReason shutdownReason = HandleShutdown(out shutdownException);
+                            return shutdownReason;
 
-                    case 1:
+                        case 1:
 
-                        while (_receivedPackets.TryDequeue(out INodePacket packet))
-                        {
-                            if (packet != null)
+                            while (_receivedPackets.TryDequeue(out INodePacket packet))
                             {
-                                HandlePacket(packet);
+                                if (packet != null)
+                                {
+                                    HandlePacket(packet);
+                                }
                             }
-                        }
 
-                        break;
+                            break;
+                    }
+                }
+            }
+            finally
+            {
+                lock (s_activeNodeLock)
+                {
+                    if (s_activeNode == this)
+                    {
+                        s_activeNode = null;
+                    }
                 }
             }
 
             // UNREACHABLE
+        }
+
+        /// <summary>
+        /// Requests the active out-of-proc worker node (if any) to shut down in response to an external stop signal.
+        /// Windows Restart Manager sends <c>CTRL_C_EVENT</c> to console processes; the MSBuild console handler must exit
+        /// worker nodes that never set the main-build "started" flag used by the MSBuild console entry point.
+        /// </summary>
+        public static void RequestExternalShutdown()
+        {
+            OutOfProcNode node;
+            lock (s_activeNodeLock)
+            {
+                node = s_activeNode;
+            }
+
+            node?.SignalShutdownFromExternalStopRequest();
+        }
+
+        private void SignalShutdownFromExternalStopRequest()
+        {
+            _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+            _shutdownEvent.Set();
         }
 
         #endregion
