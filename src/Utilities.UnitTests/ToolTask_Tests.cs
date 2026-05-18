@@ -209,24 +209,22 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "netcore-linux-failing")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
-            using (MyTool t = new MyTool())
-            {
-                MockEngine3 engine = new MockEngine3();
-                t.BuildEngine = engine;
-                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
-                                                : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
+            using MyTool t = new MyTool();
+            MockEngine engine = new MockEngine(_output);
+            t.BuildEngine = engine;
+            t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                            ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
+                                            : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
 
-                t.Execute().ShouldBeFalse();
+            t.Execute().ShouldBeFalse();
 
-                // The above command logged a canonical error message.  Therefore ToolTask should
-                // not log its own error beyond that.
-                engine.AssertLogDoesntContain("MSB6006");
-                engine.AssertLogContains("CS0168");
-                engine.AssertLogContains("The variable 'foo' is declared but never used");
-                t.ExitCode.ShouldBe(-1);
-                engine.Errors.ShouldBe(1);
-            }
+            // The above command logged a canonical error message.  Therefore ToolTask should
+            // not log its own error beyond that.
+            engine.AssertLogDoesntContain("MSB6006");
+            engine.AssertLogContains("CS0168");
+            engine.AssertLogContains("The variable 'foo' is declared but never used");
+            t.ExitCode.ShouldBe(-1);
+            engine.Errors.ShouldBe(1);
         }
 
         /// <summary>

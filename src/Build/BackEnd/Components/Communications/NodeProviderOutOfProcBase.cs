@@ -239,19 +239,9 @@ namespace Microsoft.Build.BackEnd
             // worker nodes are launched via dotnet.exe, matching the parent process.
             // This only applies to regular out-of-proc worker nodes (nodemode:1), not task host nodes
             // (nodemode:2) which may need the AppHost for COM host object support.
-            if (expectedNodeMode == NodeMode.OutOfProcNode
-                && !String.IsNullOrEmpty(msbuildLocation)
-                && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase))
+            if (expectedNodeMode == NodeMode.OutOfProcNode)
             {
-                string currentProcessName = Path.GetFileName(EnvironmentUtilities.ProcessPath);
-                if (currentProcessName?.Equals(Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    string dllPath = Path.Combine(Path.GetDirectoryName(msbuildLocation), Constants.MSBuildAssemblyName);
-                    if (File.Exists(dllPath))
-                    {
-                        msbuildLocation = dllPath;
-                    }
-                }
+                msbuildLocation = RemapAppHostToManagedDllIfHostedByDotnet(msbuildLocation);
             }
 #endif
 
@@ -469,24 +459,27 @@ namespace Microsoft.Build.BackEnd
             string msbuildLocation = null,
             NodeMode? expectedNodeMode = null)
         {
-            bool isNativeHost = msbuildLocation != null && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
-            string expectedProcessName = Path.GetFileNameWithoutExtension(isNativeHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
+            string[] processNamesToSearch = ResolveProcessNamesToSearch(
+                msbuildLocation,
+                _componentHost?.BuildParameters?.NodeExeLocation);
 
-#if NETFRAMEWORK
-            // Fall back to the standard executable name for most nodes
-            // on .NET Framework, to function in `ShutdownAllNodes()`
-            expectedProcessName ??= Constants.MSBuildAppName;
-#endif
+            ErrorUtilities.VerifyThrow(processNamesToSearch.Length > 0, "Expected at least one process name to search for.");
+            string expectedProcessName = processNamesToSearch.Length == 1
+                ? processNamesToSearch[0]
+                : string.Join(", ", processNamesToSearch);
 
-            Process[] processes;
-            try
+            // Enumerate all candidate processes matching any of the target names.
+            List<Process> processes = new();
+            foreach (string name in processNamesToSearch)
             {
-                processes = Process.GetProcessesByName(expectedProcessName);
-            }
-            catch
-            {
-                // Process enumeration can fail due to permissions or transient OS errors.
-                return (expectedProcessName, Array.Empty<Process>());
+                try
+                {
+                    processes.AddRange(Process.GetProcessesByName(name));
+                }
+                catch
+                {
+                    // Process enumeration can fail due to permissions or transient OS errors.
+                }
             }
 
             bool shouldFilterByNodeMode = expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5);
@@ -495,21 +488,98 @@ namespace Microsoft.Build.BackEnd
                 return (expectedProcessName, FilterProcessesByNodeMode(processes, expectedNodeMode.Value, expectedProcessName));
             }
 
-            Array.Sort(processes, static (left, right) => left.Id.CompareTo(right.Id));
+            processes.Sort(static (left, right) => left.Id.CompareTo(right.Id));
 
             return (expectedProcessName, processes);
         }
+
+        /// <summary>
+        /// Returns the candidate process names to search for when locating worker nodes.
+        /// On the reuse path (<paramref name="msbuildLocation"/> non-null) returns the single name
+        /// that location would produce. On the shutdown path (<paramref name="msbuildLocation"/> null)
+        /// derives the name from <paramref name="configuredNodeExeLocation"/> or the current MSBuild
+        /// path — mirroring <see cref="GetNodes"/> — and adds the alternate host as a defensive
+        /// fallback for idle nodes started by an earlier build under a different host kind.
+        /// <paramref name="configuredNodeExeLocation"/> is a parameter (rather than instance state)
+        /// so the resolver can be unit-tested in isolation.
+        /// </summary>
+        internal static string[] ResolveProcessNamesToSearch(string msbuildLocation, string configuredNodeExeLocation)
+        {
+            if (msbuildLocation != null)
+            {
+                return [GetProcessNameForLocation(msbuildLocation)];
+            }
+
+            string wouldLaunchPath = !string.IsNullOrEmpty(configuredNodeExeLocation)
+                ? configuredNodeExeLocation
+                : BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+
+#if RUNTIME_TYPE_NETCORE
+            wouldLaunchPath = RemapAppHostToManagedDllIfHostedByDotnet(wouldLaunchPath);
+#endif
+
+            string primary = !string.IsNullOrEmpty(wouldLaunchPath)
+                ? GetProcessNameForLocation(wouldLaunchPath)
+                : (Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost()) ?? Constants.MSBuildAppName);
+
+            string alternate = string.Equals(primary, Constants.MSBuildAppName, StringComparison.OrdinalIgnoreCase)
+                ? Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost())
+                : Constants.MSBuildAppName;
+
+            return string.IsNullOrEmpty(alternate) || string.Equals(primary, alternate, StringComparison.OrdinalIgnoreCase)
+                ? [primary]
+                : [primary, alternate];
+
+            // AppHost path -> "MSBuild"; managed DLL path -> current host name (e.g. "dotnet").
+            static string GetProcessNameForLocation(string location)
+            {
+                bool isAppHost = Path.GetFileName(location)
+                    .Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+
+                return Path.GetFileNameWithoutExtension(
+                    isAppHost ? location : (CurrentHost.GetCurrentHost() ?? location));
+            }
+        }
+
+#if RUNTIME_TYPE_NETCORE
+        /// <summary>
+        /// When the current process is <c>dotnet</c> and <paramref name="msbuildLocation"/> points
+        /// at the MSBuild AppHost, returns the sibling <c>MSBuild.dll</c> (so workers launch via
+        /// <c>dotnet MSBuild.dll</c> instead of the AppHost). Otherwise returns the input
+        /// unchanged. Shared by <see cref="GetNodes"/> and <see cref="ResolveProcessNamesToSearch"/>.
+        /// </summary>
+        /// <remarks>
+        /// This is a point-in-time workaround, not a permanent design choice. The AppHost was
+        /// disabled for worker nodes by https://github.com/dotnet/msbuild/pull/13452 because it
+        /// caused a NuGet restore performance regression (devdiv2857570). Once that regression is
+        /// understood and resolved, worker nodes should launch via the AppHost again and this
+        /// remap (along with its callers) should be removed. Tracked by
+        /// https://github.com/dotnet/msbuild/issues/13464.
+        /// </remarks>
+        private static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
+        {
+            if (string.IsNullOrEmpty(msbuildLocation)
+                || !Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
+                || !string.Equals(Path.GetFileName(EnvironmentUtilities.ProcessPath), Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase))
+            {
+                return msbuildLocation;
+            }
+
+            string dllPath = Path.Combine(Path.GetDirectoryName(msbuildLocation), Constants.MSBuildAssemblyName);
+            return File.Exists(dllPath) ? dllPath : msbuildLocation;
+        }
+#endif
 
         /// <summary>
         /// Filters candidate processes whose command-line NodeMode argument matches the expected value.
         /// Processes whose command line cannot be retrieved (unsupported platform) are included
         /// unconditionally to preserve node reuse on those platforms.
         /// </summary>
-        private static IList<Process> FilterProcessesByNodeMode(Process[] processes, NodeMode expectedNodeMode, string expectedProcessName)
+        private static IList<Process> FilterProcessesByNodeMode(List<Process> processes, NodeMode expectedNodeMode, string expectedProcessName)
         {
-            CommunicationsUtilities.Trace($"Filtering {processes.Length} candidate processes by NodeMode {expectedNodeMode} for process name '{expectedProcessName}'");
+            CommunicationsUtilities.Trace($"Filtering {processes.Count} candidate processes by NodeMode {expectedNodeMode} for process name '{expectedProcessName}'");
 
-            List<Process> filtered = new(capacity: processes.Length);
+            List<Process> filtered = new(capacity: processes.Count);
 
             foreach (Process process in processes)
             {
