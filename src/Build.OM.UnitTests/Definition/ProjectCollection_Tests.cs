@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -1496,6 +1497,60 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectPropertyInstance property = collection.GetGlobalProperty("a");
             Assert.NotNull(property);
             Assert.Equal(ProjectCollection.Unescape(propertyValue), property.EvaluatedValue);
+        }
+
+        /// <summary>
+        /// Verifies that LoadProject(string fileName, IDictionary&lt;string, string&gt; globalProperties, string toolsVersion)
+        /// can be called concurrently and consistently returns the same loaded project for equivalent inputs.
+        /// </summary>
+        [Fact]
+        public void LoadProject_WithGlobalPropertiesAndToolsVersion_IsThreadSafeInParallel()
+        {
+            string path = null;
+
+            try
+            {
+                path = CreateProjectFile();
+
+                using var collection = new ProjectCollection();
+
+                const int concurrency = 16;
+                using var start = new ManualResetEventSlim(false);
+                var tasks = new System.Threading.Tasks.Task<Project>[concurrency];
+                var globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["p"] = "test"
+                };
+
+                for (int i = 0; i < concurrency; i++)
+                {
+                    int index = i;
+                    tasks[i] = System.Threading.Tasks.Task.Run(() =>
+                    {
+                        start.Wait();
+
+                        return collection.LoadProject(path, globals, toolsVersion: null);
+                    });
+                }
+
+                start.Set();
+                System.Threading.Tasks.Task.WaitAll(tasks);
+
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    tasks[i].Result.ShouldNotBeNull();
+                    tasks[i].Result.FullPath.ShouldBe(path);
+                }
+
+                collection.Count.ShouldBe(1);
+            }
+            finally
+            {
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
+            }
         }
     }
 }
