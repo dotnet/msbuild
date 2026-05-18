@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -107,14 +108,20 @@ namespace Microsoft.Build.Tasks
         protected override string GenerateFullPathToTool()
         {
             string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
-                SdkToolsPathUtility.FileInfoExists,
+                FileInfoExists,
                 Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolName,
                 Log,
                 true);
 
-            return pathToTool;
+            if (string.IsNullOrEmpty(pathToTool))
+            {
+                return pathToTool;
+            }
+
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(pathToTool);
+            return absolutePath.Value ?? pathToTool;
         }
 
         /// <summary>
@@ -125,8 +132,8 @@ namespace Microsoft.Build.Tasks
         {
             // Verify that a path for the tool exists -- if the tool doesn't exist in it
             // we'll worry about that later
-            if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
-                (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
+            if ((string.IsNullOrEmpty(ToolPath) || !DirectoryExists(ToolPath)) &&
+                (string.IsNullOrEmpty(SdkToolsPath) || !DirectoryExists(SdkToolsPath)))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -155,6 +162,9 @@ namespace Microsoft.Build.Tasks
             // throw an error.
             //
             // So use /publickey if that's all our KeyFile contains, but KeyFile otherwise.
+            // The KeyFile path is passed verbatim to the spawned tool; ToolTask sets the child
+            // process's WorkingDirectory to the project directory (via TaskEnvironment), so the
+            // tool resolves relative paths correctly without us absolutizing here.
             if (_delaySigningAndKeyFileOnlyContainsPublicKey)
             {
                 commandLine.AppendSwitchIfNotNull("/publickey:", KeyFile);
@@ -175,11 +185,14 @@ namespace Microsoft.Build.Tasks
         private bool ValidateStrongNameParameters()
         {
             bool keyFileExists = false;
+            AbsolutePath keyFileForRead = default;
 
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                if (FileSystems.Default.FileExists(KeyFile))
+                keyFileForRead = TaskEnvironment.GetAbsolutePathIfValid(KeyFile);
+
+                if (keyFileForRead.Value != null && FileSystems.Default.FileExists(keyFileForRead))
                 {
                     keyFileExists = true;
                 }
@@ -216,7 +229,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    StrongNameUtils.GetStrongNameKey(Log, KeyFile, KeyContainer, out keyPair, out publicKey);
+                    StrongNameUtils.GetStrongNameKey(Log, keyFileForRead, KeyContainer, out keyPair, out publicKey);
                 }
                 catch (StrongNameException e)
                 {
@@ -258,6 +271,18 @@ namespace Microsoft.Build.Tasks
             }
 
             return true;
+        }
+
+        private bool DirectoryExists(string path)
+        {
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(path);
+            return absolutePath.Value != null && FileSystems.Default.DirectoryExists(absolutePath);
+        }
+
+        private bool FileInfoExists(string path)
+        {
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(path);
+            return absolutePath.Value != null && SdkToolsPathUtility.FileInfoExists(absolutePath);
         }
 
         #endregion // ToolTask Members

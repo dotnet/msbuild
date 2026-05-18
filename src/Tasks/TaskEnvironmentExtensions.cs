@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks
@@ -31,6 +32,27 @@ namespace Microsoft.Build.Tasks
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Absolutizes <paramref name="path"/> using <see cref="TaskEnvironment.GetAbsolutePath"/>.
+        /// Returns <see langword="default"/> if <paramref name="path"/> is null, empty, or invalid.
+        /// </summary>
+        internal static AbsolutePath GetAbsolutePathIfValid(this TaskEnvironment taskEnvironment, string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return default;
+            }
+
+            try
+            {
+                return taskEnvironment.GetAbsolutePath(path);
+            }
+            catch (ArgumentException)
+            {
+                return default;
+            }
         }
 
         /// <summary>

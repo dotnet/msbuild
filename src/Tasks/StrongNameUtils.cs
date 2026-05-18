@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Security;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
@@ -34,6 +35,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void ReadKeyFile(TaskLoggingHelper log, string keyFile, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
+            ReadKeyFile(log, keyFile, keyFile, out keyPair, out publicKey);
+        }
+
+        /// <summary>
+        /// Reads contents of a key file. Reused from vsdesigner code.
+        /// </summary>
+        internal static void ReadKeyFile(TaskLoggingHelper log, string keyFile, string keyFileDisplayName, out StrongNameKeyPair keyPair, out byte[] publicKey)
+        {
             // Initialize parameters
             keyPair = null;
             publicKey = null;
@@ -54,19 +63,19 @@ namespace Microsoft.Build.Tasks
             }
             catch (ArgumentException e)
             {
-                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile);
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFileDisplayName);
                 log.LogErrorFromException(e);
                 throw new StrongNameException(e);
             }
             catch (IOException e)
             {
-                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile);
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFileDisplayName);
                 log.LogErrorFromException(e);
                 throw new StrongNameException(e);
             }
             catch (SecurityException e)
             {
-                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile);
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFileDisplayName);
                 log.LogErrorFromException(e);
                 throw new StrongNameException(e);
             }
@@ -95,6 +104,21 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void GetStrongNameKey(TaskLoggingHelper log, string keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
+            GetStrongNameKey(log, keyFile, keyFile, keyContainer, out keyPair, out publicKey);
+        }
+
+        /// <summary>
+        /// Given a key file or container, extract private/public key data. Reused from vsdesigner code.
+        /// </summary>
+        internal static void GetStrongNameKey(TaskLoggingHelper log, AbsolutePath keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
+        {
+            Debug.Assert(keyFile.Value != null || !string.IsNullOrEmpty(keyContainer));
+
+            GetStrongNameKey(log, keyFile, keyFile.OriginalValue, keyContainer, out keyPair, out publicKey);
+        }
+
+        private static void GetStrongNameKey(TaskLoggingHelper log, string keyFile, string keyFileDisplayName, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
+        {
             // Gets either a strong name key pair from the key file or a key container.
             // If keyFile and keyContainer are both null/zero length then returns null.
             // Initialize parameters
@@ -122,7 +146,7 @@ namespace Microsoft.Build.Tasks
             }
             else if (!string.IsNullOrEmpty(keyFile))
             {
-                ReadKeyFile(log, keyFile, out keyPair, out publicKey);
+                ReadKeyFile(log, keyFile, keyFileDisplayName, out keyPair, out publicKey);
             }
         }
 
