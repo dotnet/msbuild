@@ -13,11 +13,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     public class TypeForwarding_Tests
     {
-        private static readonly HashSet<string> s_forwardedTypeNames = typeof(BuildManager).Assembly
-            .GetForwardedTypes()
-            .Select(type => type.FullName!)
-            .ToHashSet(StringComparer.Ordinal);
-
         [Theory]
         [InlineData("Microsoft.Build.Internal.Handshake")]
         [InlineData("Microsoft.Build.Internal.HandshakeComponents")]
@@ -32,7 +27,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData("Microsoft.Build.Shared.XMakeElements")]
         public void BuildAssemblyContainsExpectedTypeForwarders(string typeName)
         {
-            s_forwardedTypeNames.ShouldContain(typeName);
+            GetForwardedTypeNames().ShouldContain(typeName);
         }
+
+        private static HashSet<string> GetForwardedTypeNames()
+            => typeof(BuildManager).Assembly
+                .GetForwardedTypes()
+                .Select(type => type.FullName!)
+                .ToHashSet(StringComparer.Ordinal);
     }
 }
