@@ -23,7 +23,7 @@ This file should be imported by eng/Versions.props
     <SystemResourcesExtensionsPackageVersion>10.0.4</SystemResourcesExtensionsPackageVersion>
     <SystemSecurityCryptographyPkcsPackageVersion>10.0.4</SystemSecurityCryptographyPkcsPackageVersion>
     <SystemSecurityCryptographyProtectedDataPackageVersion>10.0.4</SystemSecurityCryptographyProtectedDataPackageVersion>
-    <SystemSecurityCryptographyXmlPackageVersion>10.0.4</SystemSecurityCryptographyXmlPackageVersion>
+    <SystemSecurityCryptographyXmlPackageVersion>10.0.6</SystemSecurityCryptographyXmlPackageVersion>
     <SystemTextEncodingCodePagesPackageVersion>10.0.4</SystemTextEncodingCodePagesPackageVersion>
     <SystemTextJsonPackageVersion>10.0.4</SystemTextJsonPackageVersion>
     <SystemThreadingChannelsPackageVersion>10.0.4</SystemThreadingChannelsPackageVersion>
