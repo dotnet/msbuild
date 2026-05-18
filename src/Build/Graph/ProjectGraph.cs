@@ -420,10 +420,33 @@ namespace Microsoft.Build.Graph
             ProjectInstanceFactoryFunc projectInstanceFactory,
             int degreeOfParallelism,
             CancellationToken cancellationToken)
+            : this(new ProjectGraphOptions
+                    {
+                        EntryPoints = entryPoints,
+                        ProjectCollection = projectCollection,
+                        ProjectInstanceFactoryFunc = projectInstanceFactory,
+                        DegreeOfParallelism = degreeOfParallelism
+                    },
+                  cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+        }
+
+        /// <summary>
+        /// Constructs a graph starting from the given graph options.
+        /// </summary>
+        /// <param name="options">A <see cref="ProjectGraphOptions" /> containing the entry projects, project collection, and other details about the graph.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe.</param>
+        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="CircularDependencyException">If the evaluation is successful but the project graph contains a circular dependency.</exception>
+        public ProjectGraph(
+            ProjectGraphOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(options.ProjectCollection);
 
             var measurementInfo = BeginMeasurement();
+
+            ProjectInstanceFactoryFunc projectInstanceFactory = options.ProjectInstanceFactoryFunc;
 
             if (projectInstanceFactory is null)
             {
@@ -432,11 +455,12 @@ namespace Microsoft.Build.Graph
             }
 
             var graphBuilder = new GraphBuilder(
-                entryPoints,
-                projectCollection,
+                options.EntryPoints,
+                options.ProjectCollection,
                 projectInstanceFactory,
                 ProjectInterpretation.Instance,
-                degreeOfParallelism,
+                options.DegreeOfParallelism,
+                options.Mode,
                 cancellationToken);
             graphBuilder.BuildGraph();
 
@@ -456,7 +480,7 @@ namespace Microsoft.Build.Graph
 
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
-                    etwArgs = string.Join(";", entryPoints.Select(
+                    etwArgs = string.Join(";", options.EntryPoints.Select(
                         e =>
                         {
                             var globalPropertyString = e.GlobalProperties == null

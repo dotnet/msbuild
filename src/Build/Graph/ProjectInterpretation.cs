@@ -74,7 +74,7 @@ namespace Microsoft.Build.Graph
             public bool SkipIfNonexistent { get; }
         }
 
-        public IEnumerable<ReferenceInfo> GetReferences(ProjectGraphNode projectGraphNode, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectGraphNode projectGraphNode, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory, ProjectGraphMode graphMode)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
@@ -197,6 +197,56 @@ namespace Microsoft.Build.Graph
                 }
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
+
+                // When in Full graph mode, enumerate all target frameworks regardless of SetTargetFramework
+                if (graphMode == ProjectGraphMode.Full && projectReferenceItem.HasMetadata(SetTargetFrameworkMetadataName))
+                {
+                    // Evaluate the referenced project with no global properties to discover all its target frameworks
+                    var projectInstanceForDiscovery = projectInstanceFactory(
+                        projectReferenceFullPath,
+                        null,
+                        projectCollection);
+
+                    string targetFrameworksValue = projectInstanceForDiscovery.GetPropertyValue(PropertyNames.TargetFrameworks);
+
+                    // If the project has multiple target frameworks, yield the outer build only
+                    // The normal ConstructInnerBuildReferences logic will discover and create all inner builds
+                    if (!string.IsNullOrWhiteSpace(targetFrameworksValue))
+                    {
+                        // Create base properties without SetTargetFramework constraint
+                        // GetGlobalPropertiesForItem processes SetTargetFramework and adds TargetFramework to properties,
+                        // so we need to create properties without that processing
+                        var baseProperties = GetGlobalPropertiesForItem(
+                            projectReferenceItem,
+                            requesterInstance.GlobalPropertiesDictionary,
+                            allowCollectionReuse: false,
+                            // Use empty list to skip ProjectReferenceGlobalPropertiesModifier which processes SetTargetFramework
+                            []);
+
+                        // Yield only the outer build (no TargetFramework override)
+                        // The ConstructInnerBuildReferences logic will discover and create the inner builds
+                        yield return new ReferenceInfo(new ConfigurationMetadata(projectReferenceFullPath, baseProperties), projectReferenceItem);
+
+                        yield break;
+                    }
+                    else
+                    {
+                        string targetFrameworkValue = projectInstanceForDiscovery.GetPropertyValue(PropertyNames.TargetFramework);
+                        
+                        // Single target framework project - just yield it as is without SetTargetFramework constraint
+                        if (!string.IsNullOrWhiteSpace(targetFrameworkValue))
+                        {
+                            var baseProperties = GetGlobalPropertiesForItem(
+                                projectReferenceItem,
+                                requesterInstance.GlobalPropertiesDictionary,
+                                allowCollectionReuse: false,
+                                // Use empty list to skip SetTargetFramework processing
+                                []);
+                            yield return new ReferenceInfo(new ConfigurationMetadata(projectReferenceFullPath, baseProperties), projectReferenceItem);
+                            yield break;
+                        }
+                    }
+                }
 
                 yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
 
