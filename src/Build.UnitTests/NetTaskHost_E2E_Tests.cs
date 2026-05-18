@@ -28,13 +28,10 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsFullFrameworkOnlyFact]
-        public void NetTaskHostTest_AppHostFromResolvedSdk()
+        public void NetTaskHostTest_FallbackToDotnet()
         {
-            // This test verifies that without an explicit DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR override,
-            // MSBuild resolves the .NET SDK from the standard location (DOTNET_ROOT) and uses the SDK's
-            // MSBuild.exe app host to spawn the .NET TaskHost. Starting with .NET SDK 10.0.300, the SDK
-            // ships an app host (MSBuild.exe) alongside MSBuild.dll, so the app host path is preferred
-            // over the legacy `dotnet.exe MSBuild.dll` fallback.
+            // This test verifies the fallback behavior when app host is not used.
+            // When DOTNET_HOST_PATH points to system dotnet, it uses dotnet.exe + MSBuild.dll.
             using TestEnvironment env = TestEnvironment.Create(_output);
             var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
 
@@ -48,11 +45,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
 
             successTestTask.ShouldBeTrue();
-
-            // The TaskHost should be the app host (MSBuild.exe), not `dotnet.exe MSBuild.dll`.
-            testTaskOutput.ShouldContain("The task is executed in process: MSBuild", customMessage: testTaskOutput);
-
-            // The resolved app host path lives under DOTNET_ROOT (e.g. {DOTNET_ROOT}\sdk\<version>\MSBuild.exe).
+            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
             testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
 
             var customTaskAssemblyLocation = Path.GetFullPath(Path.Combine(AssemblyLocation, "..", RunnerUtilities.LatestDotNetCoreForMSBuild, "ExampleTask.dll"));
@@ -257,8 +250,8 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("ChildProject: GetOutputs target executed");
         }
 
-        [WindowsFullFrameworkOnlyFact] // This test verifies app host behavior with implicit host parameters.
-        public void NetTaskWithImplicitHostParamsTest_AppHostWithImplicitParams()
+        [WindowsFullFrameworkOnlyFact] // This test verifies the fallback behavior with implicit host parameters.
+        public void NetTaskWithImplicitHostParamsTest_FallbackToDotnet()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
@@ -274,11 +267,8 @@ namespace Microsoft.Build.Engine.UnitTests
 
             successTestTask.ShouldBeTrue();
 
-            // Output from the task where only Runtime was specified.
-            // The TaskHost should be the app host (MSBuild.exe) resolved from the standard SDK location
-            // under DOTNET_ROOT (e.g. {DOTNET_ROOT}\sdk\<version>\MSBuild.exe). Starting with .NET SDK
-            // 10.0.300 the SDK ships an app host, so it is preferred over `dotnet.exe MSBuild.dll`.
-            testTaskOutput.ShouldContain("The task is executed in process: MSBuild", customMessage: testTaskOutput);
+            // Output from the task where only Runtime was specified
+            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
             testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
             testTaskOutput.ShouldContain("/nodereuse:True");
 
