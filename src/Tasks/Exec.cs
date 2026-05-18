@@ -21,6 +21,7 @@ namespace Microsoft.Build.Tasks
     /// for it to complete, and then returns True if the process completed successfully, and False if an error occurred.
     /// </summary>
     // UNDONE: ToolTask has a "UseCommandProcessor" flag that duplicates much of the code in this class. Remove the duplication.
+    [MSBuildMultiThreadableTask]
     public class Exec : ToolTaskExtension
     {
         #region Constructors
@@ -46,7 +47,7 @@ namespace Microsoft.Build.Tasks
 
         // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
-        private string _workingDirectory;
+        private AbsolutePath _workingDirectory;
         private ITaskItem[] _outputs;
         internal bool workingDirectoryIsUNC; // internal for unit testing
         private string _batchFile;
@@ -196,7 +197,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
-            var encoding = EncodingUtilities.BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
+            var encoding = EncodingUtilities.BatchFileEncoding(Command + _workingDirectory.Value, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFileName(".exec.cmd");
@@ -244,7 +245,7 @@ namespace Microsoft.Build.Tasks
                     // https://support.microsoft.com/en-us/kb/156276
                     if (workingDirectoryIsUNC)
                     {
-                        sw.WriteLine("pushd " + _workingDirectory);
+                        sw.WriteLine("pushd " + _workingDirectory.Value);
                     }
                 }
                 else
@@ -458,10 +459,12 @@ namespace Microsoft.Build.Tasks
             }
 
             // determine what the working directory for the exec command is going to be -- if the user specified a working
-            // directory use that, otherwise it's the current directory
+            // directory use that, otherwise default to the project directory (TaskEnvironment.ProjectDirectory). Using the
+            // project directory instead of the process current directory is important for correctness in multithreaded (/mt)
+            // builds, where the process working directory may not match the project being built.
             _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
-                ? WorkingDirectory
-                : Directory.GetCurrentDirectory();
+                ? TaskEnvironment.GetAbsolutePath(WorkingDirectory)
+                : TaskEnvironment.ProjectDirectory;
 
             // check if the working directory we're going to use for the exec command is a UNC path
             workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern(_workingDirectory);
@@ -470,7 +473,10 @@ namespace Microsoft.Build.Tasks
             // will not be able to auto-map to the UNC path
             if (workingDirectoryIsUNC && NativeMethods.AllDrivesMapped())
             {
-                Log.LogErrorWithCodeFromResources("Exec.AllDriveLettersMappedError", _workingDirectory);
+                Log.LogErrorWithCodeFromResources(
+                    "Exec.AllDriveLettersMappedError",
+                    _workingDirectory.OriginalValue,
+                    _workingDirectory.Value);
                 return false;
             }
 
@@ -492,7 +498,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to cmd.exe</returns>
         protected override string GenerateFullPathToTool()
         {
-            return CommandProcessorPath.Value;
+            return CommandProcessorPath.Value
+                ?? TaskEnvironment.GetEnvironmentVariable("ComSpec");
         }
 
         private static readonly Lazy<string> CommandProcessorPath = new Lazy<string>(() =>
@@ -506,9 +513,11 @@ namespace Microsoft.Build.Tasks
                 // Work around https://github.com/dotnet/msbuild/issues/2273 and
                 // https://github.com/dotnet/corefx/issues/19110, which result in
                 // a bad path being returned above on Nano Server SKUs of Windows.
+                // Returning null signals GenerateFullPathToTool to consult TaskEnvironment
+                // for the ComSpec environment variable.
                 if (!FileSystems.Default.FileExists(systemCmd))
                 {
-                    return Environment.GetEnvironmentVariable("ComSpec");
+                    return null;
                 }
 #endif
 
@@ -533,7 +542,7 @@ namespace Microsoft.Build.Tasks
             // So verify it's valid here.
             if (!FileSystems.Default.DirectoryExists(_workingDirectory))
             {
-                throw new DirectoryNotFoundException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Exec.InvalidWorkingDirectory", _workingDirectory));
+                throw new DirectoryNotFoundException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Exec.InvalidWorkingDirectory", _workingDirectory.OriginalValue));
             }
 
             if (workingDirectoryIsUNC)
