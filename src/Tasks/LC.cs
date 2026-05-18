@@ -15,7 +15,8 @@ namespace Microsoft.Build.Tasks
     /// The License Compiler task
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Class structure has existed for a long time and shouldn't be adjusted.")]
-    public class LC : ToolTaskExtension
+    [MSBuildMultiThreadableTask]
+    public class LC : ToolTaskExtension, IMultiThreadableTask
     {
         #region Input/output properties
 
@@ -133,9 +134,28 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to lc.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
-            return pathToTool;
+            // In multithreaded mode there is no reliable per-task CWD: resolve relative paths
+            // against the project directory and return an absolute path. In legacy mode preserve
+            // the original (possibly relative) return value.
+            bool isMultiThreaded = TaskEnvironment != TaskEnvironment.Fallback;
+
+            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
+                isMultiThreaded
+                    ? f => SdkToolsPathUtility.FileInfoExists(AbsolutizeIfRelative(f))
+                    : SdkToolsPathUtility.FileInfoExists,
+                ProcessorArchitecture.CurrentProcessArchitecture,
+                SdkToolsPath,
+                ToolExe,
+                Log,
+                true);
+
+            return isMultiThreaded ? AbsolutizeIfRelative(pathToTool) : pathToTool;
         }
+
+        private string AbsolutizeIfRelative(string path)
+            => string.IsNullOrEmpty(path) || Path.IsPathRooted(path)
+                ? path
+                : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm().Value;
 
         /// <summary>
         /// Generates arguments to be passed to lc.exe
