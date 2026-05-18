@@ -1125,7 +1125,7 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
 
-            context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+            context.SavedCurrentDirectory = Environment.CurrentDirectory;
             context.SavedEnvironment = new Dictionary<string, string>(
                 CommunicationsUtilities.GetEnvironmentVariables(),
                 StringComparer.OrdinalIgnoreCase);
@@ -1733,7 +1733,7 @@ namespace Microsoft.Build.CommandLine
 #pragma warning disable SYSLIB0050
                 // Types which are not serializable and are not IExtendedBuildEventArgs as
                 // those always implement custom serialization by WriteToStream and CreateFromStream.
-                if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+                if (!e.GetType().IsSerializable && e is not IExtendedBuildEventArgs)
 #pragma warning disable SYSLIB0050
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact

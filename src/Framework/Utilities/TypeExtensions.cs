@@ -9,5 +9,5 @@ namespace Microsoft.Build.Shared;
 internal static class TypeExtensions
 {
     public static string GetAssemblyPath(this Type type)
-        => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(type.Assembly));
+        => Path.GetFullPath(type.Assembly.Location);
 }

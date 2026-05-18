@@ -62,7 +62,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The startup directory.
         /// </summary>
-        private static string s_startupDirectory = NativeMethodsShared.GetCurrentDirectory();
+        private static string s_startupDirectory = Environment.CurrentDirectory;
 
         /// <summary>
         /// Process-wide flag indicating that the engine is hosted in a long-lived process
