@@ -281,6 +281,38 @@ namespace Microsoft.Build.UnitTests
             result.OriginalValue.ShouldBe(absolutePath.OriginalValue);
         }
 
+        /// <summary>
+        /// Windows rooted-but-not-fully-qualified inputs (root-relative <c>"\foo"</c>, drive-relative <c>"X:foo"</c>)
+        /// must be anchored to the supplied base path, not to process state (current drive, per-drive cwd).
+        /// Required for multithreaded task isolation. Anchoring happens at construction so both
+        /// <see cref="AbsolutePath.Value"/> and the canonical form are deterministic.
+        /// </summary>
+        [WindowsOnlyTheory]
+        // Root-relative — anchored at base path's drive root.
+        [InlineData(@"\foo", @"X:\foo")]
+        [InlineData(@"\foo\bar", @"X:\foo\bar")]
+        [InlineData(@"\sub\dir\file.txt", @"X:\sub\dir\file.txt")]
+        // Drive-relative on the same drive as base path — anchored under base path itself.
+        [InlineData(@"X:foo", @"X:\proj\foo")]
+        [InlineData(@"X:sub\file.txt", @"X:\proj\sub\file.txt")]
+        public void GetCanonicalForm_WindowsRootedButNotFullyQualifiedPath_AnchorsToBasePath_NotProcessState(string input, string expected)
+        {
+            const string baseDir = @"X:\proj";
+            var basePath = new AbsolutePath(baseDir);
+            var combined = new AbsolutePath(input, basePath);
+
+            // Construction anchors rooted-but-not-fully-qualified inputs to basePath, so Value
+            // is already fully qualified and does not depend on process state.
+            combined.Value.ShouldBe(expected,
+                customMessage: $"Construction leaked process state: '{input}' did not anchor to '{baseDir}'.");
+
+            AbsolutePath canonical = combined.GetCanonicalForm();
+
+            canonical.Value.ShouldBe(expected,
+                customMessage: $"GetCanonicalForm leaked process state: '{input}' did not anchor to '{baseDir}'.");
+            canonical.OriginalValue.ShouldBe(input);
+        }
+
         [Fact]
         public void GetCanonicalForm_InvalidPathCharacters_ShouldThrowSameAsPathGetFullPath()
         {
