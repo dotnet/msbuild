@@ -253,15 +253,23 @@ namespace Microsoft.Build.Engine.UnitTests
 
             if (byBuildManager)
             {
-                BuildManager.DefaultBuildManager.ShutdownAllNodes();
+                // ShutdownAllNodes does not expose whether the MSBuildServer was successfully
+                // contacted. The server may be recycling its pipe right after the build completes
+                // (busy mutex released before new pipe is ready), causing the first attempt to
+                // silently fail. Retry until the process exits or a reasonable timeout elapses.
+                Stopwatch sw = Stopwatch.StartNew();
+                while (!serverProcess.HasExited && sw.ElapsedMilliseconds < 10_000)
+                {
+                    BuildManager.DefaultBuildManager.ShutdownAllNodes();
+                    serverProcess.WaitForExit(500);
+                }
             }
             else
             {
                 bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
                 serverIsDown.ShouldBeTrue();
+                serverProcess.WaitForExit(10_000);
             }
-
-            serverProcess.WaitForExit(10_000);
 
             serverProcess.HasExited.ShouldBeTrue();
         }
