@@ -39,9 +39,11 @@ Similar to how MSBuild provides the abstract `Task` class with default implement
 namespace Microsoft.Build.Utilities;
 public abstract class MultiThreadableTask : Task, IMultiThreadableTask
 {
-    public TaskEnvironment TaskEnvironment{ get; set; }
+    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 }
 ```
+
+Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
 
 Task authors who want to support older MSBuild versions need to:
 - Maintain both thread-safe and legacy implementations.
@@ -109,15 +111,17 @@ To prevent common thread-safety issues related to path handling, we introduce pa
 
 ```csharp
 namespace Microsoft.Build.Framework;
-public readonly struct AbsolutePath
+public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 {
     // Default value returns string.Empty for Path property
-    public string Path { get; }
+    public string Value { get; }
     internal AbsolutePath(string path, bool ignoreRootedCheck) { }
     public AbsolutePath(string path); // Checks Path.IsPathRooted
     public AbsolutePath(string path, AbsolutePath basePath) { }
     public static implicit operator string(AbsolutePath path) { }
-    public override string ToString() => Path;
+    public override string ToString() => Value;
+
+    // overrides for equality and hashcode
 }
 ```
 

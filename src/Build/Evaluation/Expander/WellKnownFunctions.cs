@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -105,7 +105,9 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = Path.GetFullPath(arg0);
+                    returnVal = !string.IsNullOrEmpty(FileUtilities.CurrentThreadWorkingDirectory)
+                        ? Path.GetFullPath(Path.Combine(FileUtilities.CurrentThreadWorkingDirectory, arg0))
+                        : Path.GetFullPath(arg0);
                     return true;
                 }
             }
@@ -167,7 +169,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.StartsWith(arg0);
+                    returnVal = text.StartsWith(arg0, StringComparison.CurrentCulture);
                     return true;
                 }
             }
@@ -207,7 +209,12 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.EndsWith(arg0);
+                    returnVal = text.EndsWith(arg0, StringComparison.CurrentCulture);
+                    return true;
+                }
+                else if (ParseArgs.TryGetArgs(args, out arg0, out StringComparison arg1) && arg0 != null)
+                {
+                    returnVal = text.EndsWith(arg0, arg1);
                     return true;
                 }
             }
@@ -239,12 +246,12 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.LastIndexOf(arg0);
+                    returnVal = text.LastIndexOf(arg0, StringComparison.CurrentCulture);
                     return true;
                 }
                 else if (ParseArgs.TryGetArgs(args, out arg0, out int startIndex) && arg0 != null)
                 {
-                    returnVal = text.LastIndexOf(arg0, startIndex);
+                    returnVal = text.LastIndexOf(arg0, startIndex, StringComparison.CurrentCulture);
                     return true;
                 }
                 else if (ParseArgs.TryGetArgs(args, out arg0, out StringComparison arg1) && arg0 != null)
@@ -880,7 +887,7 @@ namespace Microsoft.Build.Evaluation.Expander
                     if (string.Equals(methodName, nameof(char.IsDigit), StringComparison.OrdinalIgnoreCase))
                     {
                         bool? result = null;
-                        
+
                         if (ParseArgs.TryGetArg(args, out string? arg0) && arg0?.Length == 1)
                         {
                             char c = arg0[0];
@@ -890,7 +897,7 @@ namespace Microsoft.Build.Evaluation.Expander
                         {
                             result = char.IsDigit(str, index);
                         }
-                        
+
                         if (result.HasValue)
                         {
                             returnVal = result.Value;
@@ -898,12 +905,15 @@ namespace Microsoft.Build.Evaluation.Expander
                         }
                     }
                 }
-                else if (string.Equals(methodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
+                else if (receiverType == typeof(Regex))
                 {
-                    if (ParseArgs.TryGetArgs(args, out string? arg1, out string? arg2, out string? arg3) && arg1 != null && arg2 != null && arg3 != null)
+                    if (string.Equals(methodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
                     {
-                        returnVal = Regex.Replace(arg1, arg2, arg3);
-                        return true;
+                        if (ParseArgs.TryGetArgs(args, out string? arg1, out string? arg2, out string? arg3) && arg1 != null && arg2 != null && arg3 != null)
+                        {
+                            returnVal = Regex.Replace(arg1, arg2, arg3);
+                            return true;
+                        }
                     }
                 }
             }

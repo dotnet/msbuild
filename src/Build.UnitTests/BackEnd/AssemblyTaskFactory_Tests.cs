@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -37,6 +38,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// The loaded type from the initialized task factory.
         /// </summary>
         private LoadedType _loadedType;
+
+        /// <summary>
+        /// Creates a stub TaskEnvironment for testing.
+        /// </summary>
+        private static TaskEnvironment CreateStubTaskEnvironment() => TaskEnvironmentHelper.CreateForTest();
 
         /// <summary>
         /// Initialize a task factory
@@ -153,7 +159,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                Assert.False(_taskFactory.TaskNameCreatableByFactory(String.Empty, TaskHostParameters.Empty, String.Empty, null, ElementLocation.Create(".", 1, 1)));
+                _taskFactory.TaskNameCreatableByFactory(String.Empty, TaskHostParameters.Empty, String.Empty, null, ElementLocation.Create(".", 1, 1));
             });
         }
         /// <summary>
@@ -164,7 +170,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                Assert.False(_taskFactory.TaskNameCreatableByFactory(null, TaskHostParameters.Empty, String.Empty, null, ElementLocation.Create(".", 1, 1)));
+                _taskFactory.TaskNameCreatableByFactory(null, TaskHostParameters.Empty, String.Empty, null, ElementLocation.Create(".", 1, 1));
             });
         }
         /// <summary>
@@ -238,13 +244,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    TaskHostParameters.Empty,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 createdTask.ShouldNotBeNull();
                 createdTask.ShouldNotBeOfType<TaskHostTask>();
             }
@@ -269,13 +282,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 TaskHostParameters taskParameters = new (XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    taskParameters,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -300,13 +320,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 TaskHostParameters taskParameters = new (XMakeAttributes.GetCurrentMSBuildRuntime(), XMakeAttributes.GetCurrentMSBuildArchitecture());
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    taskParameters,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -333,13 +360,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    TaskHostParameters.Empty,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -366,13 +400,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    TaskHostParameters.Empty,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -401,13 +442,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 TaskHostParameters taskParameters = new (architecture: XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    taskParameters,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -434,13 +482,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    TaskHostParameters.Empty,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -465,13 +520,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 TaskHostParameters taskParameters = new(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    taskParameters,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -500,13 +562,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 TaskHostParameters taskParameters = new(architecture: XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    taskParameters,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -531,13 +600,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 SetupTaskFactory(TaskHostParameters.Empty, true /* want task host */, true);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    TaskHostParameters.Empty,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -564,13 +640,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(taskParameters, true /* want task host */, isTaskHostFactory: true);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    TaskHostParameters.Empty,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -597,13 +680,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 TaskHostParameters taskParameters = new (XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    taskParameters,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -631,13 +721,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 // #1: don't launch task host
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    TaskHostParameters.Empty,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsNotType<TaskHostTask>(createdTask);
             }
@@ -654,13 +751,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // #2: launch task host
                 TaskHostParameters taskParameters = new(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
-                createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+                createdTask = _taskFactory.CreateTaskInstance(
+                    ElementLocation.Create("MSBUILD"),
+                    null,
+                    new MockHost(),
+                    taskParameters,
+                    projectFile: "proj.proj",
+                    hostServices: null,
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
                     false,
                     scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
+                    CreateStubTaskEnvironment());
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -691,11 +795,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 factoryParameters = factoryParameters.WithTaskHostFactoryExplicitlyRequested(true);
             }
-            _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
+
+            _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)), ElementLocation.Create("NONE"), String.Empty);
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
         }
 
-        #endregion
+#endregion
 
         #region InternalClasses
         /// <summary>

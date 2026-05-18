@@ -28,6 +28,7 @@ using Microsoft.Build.Instance.ImmutableProjectCollections;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Constants = Microsoft.Build.Framework.Constants;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -1385,18 +1386,23 @@ namespace Microsoft.Build.Execution
             get => _sdkResolvedEnvironmentVariableProperties;
         }
 
+        /// <summary>
+        /// Adds an Environment Variable that was resolved by an <see cref="SdkResolver"/> to the set of properties tracked by this <see cref="ProjectInstance"/>.
+        /// </summary>
+        /// <param name="name">The name of the environment variable.</param>
+        /// <param name="value">The value of the environment variable.</param>
+        /// <remarks>
+        /// SDK-resolved environment variables override ambient environment variables, but do not override regular properties defined in XML.
+        /// </remarks>
         public void AddSdkResolvedEnvironmentVariable(string name, string value)
         {
-            // If the property has already been set as an environment variable, we do not overwrite it.
-            if (_environmentVariableProperties.Contains(name))
-            {
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value);
-                return;
-            }
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(value);
+
             // If another SDK already set it, we do not overwrite it.
-            else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
+            if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value);
+                LogIfValueDiffers(_sdkResolvedEnvironmentVariableProperties, name, value, "SdkEnvironmentVariableAlreadySetBySdk");
                 return;
             }
 
@@ -1406,14 +1412,35 @@ namespace Microsoft.Build.Execution
 
             _sdkResolvedEnvironmentVariableProperties.Set(property);
 
-            // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
-            if (GetProperty(name) is null)
+            // SDK-resolved environment variables override ambient environment variables.
+            bool overridingAmbient = _environmentVariableProperties.Contains(name);
+            if (overridingAmbient)
+            {
+                // Log before removing so LogIfValueDiffers can compare the old and new values.
+                LogIfValueDiffers(_environmentVariableProperties, name, value, "SdkEnvironmentVariableOverridingAmbient");
+                _environmentVariableProperties.Remove(name);
+            }
+
+            // Set the property, overriding ambient environment variables but not regular properties defined in XML (aka if the Property explicitly exists already).
+            // We have to logically 'set' a property here to do the ambient override (marking this set as coming from an env var) but we're not actually 'overridding'
+            // a pre-existing Property.
+            if (overridingAmbient || GetProperty(name) is null)
             {
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
                    .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);
             }
+        }
 
-            _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableSet", name, value);
+        /// <summary>
+        /// Helper method to log a message if the attempted value differs from the existing value.
+        /// </summary>
+        private void LogIfValueDiffers(PropertyDictionary<ProjectPropertyInstance> propertyDictionary, string name, string attemptedValue, string messageResourceName)
+        {
+            ProjectPropertyInstance existingProperty = propertyDictionary.GetProperty(name);
+            if (existingProperty != null && !string.Equals(existingProperty.EvaluatedValue, attemptedValue, StringComparison.Ordinal))
+            {
+                _loggingContext.LogComment(MessageImportance.Low, messageResourceName, name, attemptedValue, existingProperty.EvaluatedValue);
+            }
         }
 
         /// <summary>
@@ -2624,7 +2651,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(buildParameters);
-            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(projectFile), "Project file {0} is not a solution.", projectFile);
+            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(projectFile), $"Project file {projectFile} is not a solution.");
 
             ProjectInstance[] projectInstances = null;
 
@@ -2902,7 +2929,7 @@ namespace Microsoft.Build.Execution
             VerifyThrowNotImmutable();
 
             ErrorUtilities.VerifyThrowInternalLength(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), "Target {0} already exists.", targetName);
+            ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), $"Target {targetName} already exists.");
 
             ProjectTargetInstance target = new ProjectTargetInstance(
                 targetName,
@@ -3387,7 +3414,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            var multiDictionary = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
+            var multiDictionary = new MultiDictionary<string, ProjectItemInstance>(items.Count, StringComparer.OrdinalIgnoreCase);
             foreach (var item in items)
             {
                 multiDictionary.Add(item.EvaluatedInclude, projectItemToInstanceMap[item]);

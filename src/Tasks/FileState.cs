@@ -3,8 +3,15 @@
 
 using System;
 using System.IO;
+#if FEATURE_WINDOWSINTEROP
 using System.Runtime.InteropServices;
+#endif
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Storage.FileSystem;
+#endif
 
 #nullable disable
 
@@ -85,6 +92,7 @@ namespace Microsoft.Build.Tasks
 
                 _filename = FileUtilities.AttemptToShortenPath(filename); // This is no-op unless the path actually is too long
 
+#if FEATURE_WINDOWSINTEROP
                 int oldMode = 0;
 
                 if (NativeMethodsShared.IsWindows)
@@ -97,13 +105,14 @@ namespace Microsoft.Build.Tasks
                     // mode back, since this may have wide-ranging effects.
                     NativeMethodsShared.SetThreadErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */, out oldMode);
                 }
+#endif
 
                 try
                 {
+#if FEATURE_WINDOWSINTEROP
                     if (NativeMethodsShared.IsWindows)
                     {
-                        var data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-                        bool success = NativeMethodsShared.GetFileAttributesEx(_filename, 0, ref data);
+                        bool success = PInvoke.GetFileAttributesEx(_filename, out WIN32_FILE_ATTRIBUTE_DATA data);
 
                         if (!success)
                         {
@@ -131,14 +140,14 @@ namespace Microsoft.Build.Tasks
                         }
 
                         Exists = true;
-                        IsDirectory = (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0;
+                        IsDirectory = ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0;
                         IsReadOnly = !IsDirectory
-                                      && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_READONLY) != 0;
-                        LastWriteTimeUtc =
-                            DateTime.FromFileTimeUtc(((long)data.ftLastWriteTimeHigh << 0x20) | data.ftLastWriteTimeLow);
-                        Length = IsDirectory ? 0 : (((long)data.fileSizeHigh << 0x20) | data.fileSizeLow);
+                                      && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_READONLY) != 0;
+                        LastWriteTimeUtc = DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
+                        Length = IsDirectory ? 0 : ((long)((ulong)data.nFileSizeHigh << 32) | data.nFileSizeLow);
                     }
                     else
+#endif
                     {
                         var fileInfo = new FileInfo(_filename);
 
@@ -173,11 +182,13 @@ namespace Microsoft.Build.Tasks
                 }
                 finally
                 {
+#if FEATURE_WINDOWSINTEROP
                     // Reset the error mode on Windows
                     if (NativeMethodsShared.IsWindows)
                     {
                         NativeMethodsShared.SetThreadErrorMode(oldMode, out _);
                     }
+#endif
                 }
             }
 
@@ -227,16 +238,6 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The name of the file.
-        /// </summary>
-        private readonly string _filename;
-
-        /// <summary>
-        /// Holds the full path equivalent of _filename
-        /// </summary>
-        public string FileNameFullPath;
-
-        /// <summary>
         /// Actual file or directory information
         /// </summary>
         private Lazy<FileDirInfo> _data;
@@ -245,11 +246,11 @@ namespace Microsoft.Build.Tasks
         /// Constructor.
         /// Only stores file name: does not grab the file state until first request.
         /// </summary>
-        internal FileState(string filename)
+        /// <param name="path">The normalized (absolute) path to the file.</param>
+        internal FileState(AbsolutePath path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(filename);
-            _filename = filename;
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
+            Path = path;
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(Path));
         }
 
         /// <summary>
@@ -309,10 +310,18 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Name of the file as it was passed in.
-        /// Not normalized.
+        /// Path of the file.
         /// </summary>
-        internal string Name => _filename;
+        internal AbsolutePath Path
+        {
+            get;
+            set
+            {
+                ErrorUtilities.VerifyThrowArgumentLength(value);
+                field = value;
+                _data = new Lazy<FileDirInfo>(() => new FileDirInfo(value));
+            }
+        }
 
         /// <summary>
         /// Whether this is a directory.
@@ -333,7 +342,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void Reset()
         {
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(Path));
         }
     }
 }

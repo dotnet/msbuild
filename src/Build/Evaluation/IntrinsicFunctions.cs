@@ -500,7 +500,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
-            architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
+            architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture, runtime);
 
             TaskHostParameters parameters = new(runtime, architecture);
 
@@ -510,7 +510,7 @@ namespace Microsoft.Build.Evaluation
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildPath;
             }
 #endif
 

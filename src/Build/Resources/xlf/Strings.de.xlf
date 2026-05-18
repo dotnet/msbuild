@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: Das Websiteprojekt "{0}" kann nicht erstellt werden. Der ASP.NET-Compiler steht nur in der .NET Framework-Version von MSBuild zur Verfügung.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="translated">Der benutzerdefinierte Task „{0}“ erforderte einen Fallback auf die prozessexterne Ausführung, da in der UsingTask-Definition nicht die korrekten Runtime- und Architektur-Attribute angegeben sind. Dies verringert die Buildleistung. Aktualisieren Sie das UsingTask-Element, um die Attribute „Runtime“ und „Architecture“ explizit anzugeben (z. B. Runtime=„CLR4“ Architecture=„x64“) oder verwenden Sie TaskFactory=„TaskHostFactory“.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: Fehler beim Abrufen der Attribute für Parameter in der {0}-Aufgabe. {1}</target>
@@ -30,6 +35,11 @@
         <target state="translated">MSB4003: {0} ist ein reserviertes Attribut des &lt;{1}&gt;-Elements, bei dem die Groß-/Kleinschreibung beachtet werden muss. Dieses Attribut kann nicht als Parameter für die {2}-Aufgabe verwendet werden.</target>
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
+      </trans-unit>
+      <trans-unit id="BinlogFormatVersionMismatch">
+        <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
+        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
         <source>Content already acquired as StreamReader via GetContentReader.</source>
@@ -456,6 +466,16 @@
         <target state="translated">MSB4276: Der SDK-Standardresolver konnte SDK "{0}" nicht auflösen, da das Verzeichnis "{1}" nicht vorhanden war.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: Die Umgebungsvariable DOTNET_HOST_PATH ist auf ein Verzeichnis („{0}“) und nicht auf den Pfad zur ausführbaren dotnet-Datei festgelegt. Dies kann zu Buildfehlern bei Aufgaben führen, die diese Variable verwenden, wie zum Beispiel beim Roslyn-Compiler. Entfernen Sie die Variable oder aktualisieren Sie sie so, dass sie direkt auf die ausführbare dotnet-Datei zeigt (z. B. „C:\Program Files\dotnet\dotnet.exe“).</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
+      <trans-unit id="DotnetHostPathNotSet">
+        <source>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</source>
+        <target state="translated">DOTNET_HOST_PATH ist nicht festgelegt. Der Laufzeitpfad für den App-Host-Bootstrap kann nicht ermittelt werden. Diese Einstellung sollte immer gesetzt sein, wenn die Ausführung unter dem .NET SDK erfolgt.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Es wurde versucht, mehrere Außerkraftsetzungen derselben Aufgabe zu erstellen: {0}</target>
@@ -483,6 +503,11 @@
         <source>Read environment variable "{0}"</source>
         <target state="translated">Umgebungsvariable "{0}" lesen</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: Fehler beim Kopieren des Binärprotokolls von „{0}“ nach „{1}“. {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
@@ -514,6 +539,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" verweist auf {0} Element(e), und "{3}" verweist auf {1} Element(e). Die Anzahl von Elementen muss identisch sein.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="translated">Die Aufgabe „{0}“ konnte ihr Hostobjekt nicht abrufen. {1} Wenden Sie sich an die Person, die die Aufgabe erstellt hat, um dieses Problem zu melden.</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -571,6 +601,11 @@
         <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
         <target state="translated">Die Parameter wurden über diesen Punkt hinaus abgeschnitten. Um alle Parameter anzuzeigen, löschen Sie die Umgebungsvariable MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -640,11 +675,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Die Methode "{0}" kann nicht mit einer Sammlung aufgerufen werden, die NULL oder leere Zielnamen enthält.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Fehler beim Laden von Telemetriebibliotheken. Ausnahme:{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -805,6 +835,17 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
+        <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
+        <target state="new">The project file '{0}' could not be loaded when referenced by {1}.</target>
+        <note>
+      This message is shown during static graph construction when a referenced project file cannot be loaded,
+      along with information about which project(s) are referencing the failed project.
+      {0} is the full path to the project that failed to load
+      {1} is a comma-separated list of full paths to the projects that reference the failed project
+      The specific reason for the load failure (e.g., "Could not find file '...'") is appended separately in code.
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
         <target state="translated">Das Projekt "{0}" wurde nicht von "{1}" bei ({2},{3}) importiert, weil der Ausdruck in eine leere Zeichenfolge ausgewertet wurde.</target>
@@ -897,18 +938,18 @@ Fehler: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits als Umgebungsvariable festgelegt.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits als Umgebungsvariable auf „{2}“ festgelegt.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits von einem anderen SDK festgelegt.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits von einem anderen SDK auf „{2}“ festgelegt.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen.</target>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -991,6 +1032,11 @@ Fehler: {3}</target>
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
         <target state="translated">Die Aufgabenassembly wurde aus „{0}“ geladen, während der gewünschte Speicherort „{1}“ war.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
+        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
@@ -2019,7 +2065,7 @@ Fehler: {3}</target>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Der MSBuild v3.5-Projektmappenwrapper-Generator wird mit der Toolsversion {0} verwendet, da die Version des Projektmappendateiformats {1} war und keine Toolsversion angegeben wurde.</target>
+        <target state="translated">Der MSBuild v3.5-Projektmappenwrapper-Generator wird mit Toolsversion {0} verwendet, da die Version des Projektmappen-Dateiformats {1} war und keine Toolsversion angegeben wurde.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">

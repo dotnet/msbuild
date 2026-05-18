@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -85,7 +86,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Allows to serialize and deserialize different versions of the build result.
         /// </remarks>
-        private int _version = Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 1;
+        private int _version = Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 2;
 
         /// <summary>
         /// The request caused a circular dependency in scheduling.
@@ -143,6 +144,11 @@ namespace Microsoft.Build.Execution
         /// Is optional, the field is expected to be present starting <see cref="_version"/> 1.
         /// </remarks>
         private BuildRequestDataFlags _buildRequestDataFlags;
+
+        /// <summary>
+        /// The evaluation ID of the project used for this build.
+        /// </summary>
+        private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
         private string? _schedulerInducedError;
 
@@ -426,6 +432,17 @@ namespace Microsoft.Build.Execution
         public BuildRequestDataFlags? BuildRequestDataFlags => (_version > 0) ? _buildRequestDataFlags : null;
 
         /// <summary>
+        /// The evaluation ID of the project used for this build.
+        /// </summary>
+        internal int EvaluationId
+        {
+            [DebuggerStepThrough]
+            get => _evaluationId;
+            [DebuggerStepThrough]
+            set => _evaluationId = value;
+        }
+
+        /// <summary>
         /// Returns the node packet type.
         /// </summary>
         NodePacketType INodePacket.Type
@@ -535,7 +552,7 @@ namespace Microsoft.Build.Execution
 
             if (_resultsByTarget.TryGetValue(target, out TargetResult? targetResult))
             {
-                ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, "Items already exist for target {0}.", target);
+                ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, $"Items already exist for target {target}.");
             }
 
             _resultsByTarget[target] = result;
@@ -652,7 +669,7 @@ namespace Microsoft.Build.Execution
             if (_version == 0)
             {
                 // Escape hatch: serialize/deserialize without version field.
-                translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+                translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
             }
             else
             {
@@ -665,7 +682,7 @@ namespace Microsoft.Build.Execution
                     additionalEntries.Add(SpecialKeyForVersion, String.Empty);
 
                     // Serialize the special key together with _savedEnvironmentVariables dictionary using the workaround overload of TranslateDictionary:
-                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
 
                     // Serialize version
                     translator.Translate(ref _version);
@@ -673,8 +690,9 @@ namespace Microsoft.Build.Execution
                 else if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
                     // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
-                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
-                    _savedEnvironmentVariables = savedEnvironmentVariables?.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
+                    _savedEnvironmentVariables = savedEnvironmentVariables?
+                        .ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer); // no-op if already frozen
 
                     // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
                     if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))
@@ -692,6 +710,12 @@ namespace Microsoft.Build.Execution
             if (_version > 0)
             {
                 translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
+            }
+
+            // Starting version 2 the _evaluationId field is present.
+            if (_version >= 2)
+            {
+                translator.Translate(ref _evaluationId);
             }
         }
 

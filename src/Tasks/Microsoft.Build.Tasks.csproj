@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
@@ -31,17 +30,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <!-- Binary serialization by ITranslatable -->
-    <Compile Include="..\Shared\InterningBinaryReader.cs" />
-    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <!-- Node communication -->
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
@@ -66,15 +61,6 @@
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameComparer.cs">
-      <Link>AssemblyNameComparer.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameReverseVersionComparer.cs">
-      <Link>AssemblyDependency\AssemblyNameReverseVersionComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
     </Compile>
@@ -83,18 +69,11 @@
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>FileDelegates.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
-      <Link>ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>RegistryDelegates.cs</Link>
@@ -102,51 +81,17 @@
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StrongNameHelpers.cs">
-      <Link>StrongNameHelpers.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\SolutionConfiguration.cs">
-      <Link>SolutionConfiguration.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\MetadataConversionUtilities.cs">
-      <Link>MetadataConversionUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\StringUtils.cs">
-      <Link>StringUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>EscapingUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileMatcher.cs" />
-    <Compile Include="..\Shared\Modifiers.cs">
-      <Link>Modifiers.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyCollection.cs" />
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\VersionUtilities.cs">
-      <Link>VersionUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyNameExtension.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\ConversionUtilities.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\LanguageParser\token.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
@@ -161,9 +106,6 @@
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
-    <Compile Include="..\Shared\XMakeAttributes.cs" />
-    <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
@@ -202,6 +144,7 @@
     <Compile Include="AssemblyDependency\Node\OutOfProcRarClient.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNode.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeBufferedLogEvents.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeBuildEngine.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
@@ -220,6 +163,7 @@
     <Compile Include="CommandLineBuilderExtension.cs" />
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
+    <Compile Include="IFixedTypeInfo.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
@@ -305,10 +249,12 @@
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs" />
     <Compile Include="TaskTranslatorHelpers.cs" />
+    <Compile Include="TaskEnvironmentExtensions.cs" />
     <Compile Include="Telemetry.cs" />
     <Compile Include="ToolTaskExtension.cs" />
     <Compile Include="Touch.cs" />
     <Compile Include="Unzip.cs" />
+    <Compile Include="Utilities\StrongNameHelpers.cs" />
     <Compile Include="VisualBasicParserUtilities.cs" />
     <Compile Include="Warning.cs" />
     <Compile Include="XslTransformation.cs" />
@@ -665,8 +611,15 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
+  <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
+  <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
+    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
+    <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005</WarningsNotAsErrors>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Resources.Extensions" />
@@ -686,6 +639,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
@@ -707,7 +661,6 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
     <PackageReference Update="System.CodeDom" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Resources.Extensions" PrivateAssets="all" />
@@ -716,7 +669,6 @@
     <PackageReference Update="System.Threading.Tasks.Dataflow" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
     <PackageReference Include="System.Reflection.Metadata" PrivateAssets="all" />
-    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

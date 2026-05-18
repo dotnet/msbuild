@@ -8,7 +8,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -36,6 +35,7 @@ namespace Microsoft.Build.UnitTests
             i.SetMetadata("Locale", "en-GB");
             t.Directories = new ITaskItem[] { i };
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Execute();
 
@@ -61,6 +61,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     FailIfNotIncremental = true,
                 };
                 t.Execute().ShouldBeFalse();
@@ -69,6 +70,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
                 t2.Execute().ShouldBeTrue();
                 t2.RemovedDirectories.Length.ShouldBe(list.Count);
@@ -83,6 +85,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     FailIfNotIncremental = true,
                 };
                 t3.Execute().ShouldBeTrue();
@@ -108,6 +111,7 @@ namespace Microsoft.Build.UnitTests
                 RemoveDir t = new RemoveDir();
                 t.Directories = list.ToArray();
                 t.BuildEngine = new MockEngine(_output);
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.Execute().ShouldBeTrue();
 
                 t.RemovedDirectories.Length.ShouldBe(0);

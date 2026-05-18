@@ -24,7 +24,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
-using Constants = Microsoft.Build.Internal.Constants;
+using Constants = Microsoft.Build.Framework.Constants;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
@@ -4466,9 +4466,11 @@ namespace Microsoft.Build.Evaluation
             /// <param name="value">Environment variable value.</param>
             public void AddSdkResolvedEnvironmentVariable(string name, string value)
             {
-                // If the property has already been set as an environment variable or by another SDK, we do not overwrite it.
-                if (EnvironmentVariablePropertiesDictionary?.Contains(name) == true
-                    || SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
+                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ErrorUtilities.VerifyThrowArgumentNull(value);
+
+                // If another SDK already set it, we do not overwrite it.
+                if (SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
                 {
                     return;
                 }
@@ -4478,6 +4480,7 @@ namespace Microsoft.Build.Evaluation
                 SdkResolvedEnvironmentVariablePropertiesDictionary ??= new();
                 SdkResolvedEnvironmentVariablePropertiesDictionary.Set(property);
 
+                // SDK-resolved environment variables override ambient environment variables.
                 SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: null);
             }
 

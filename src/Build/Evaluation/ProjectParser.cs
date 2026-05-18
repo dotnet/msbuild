@@ -376,7 +376,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) || XMakeElements.ReservedItemNames.Contains(name))
+            if (ItemSpecModifiers.IsItemSpecModifier(name) || XMakeElements.ReservedItemNames.Contains(name))
             {
                 isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
@@ -397,7 +397,7 @@ namespace Microsoft.Build.Construction
             XmlUtilities.VerifyThrowProjectValidElementName(element);
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(parent is ProjectItemElement) || ((ProjectItemElement)parent).Remove.Length == 0, element.Location, "ChildElementsBelowRemoveNotAllowed", element.Name);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(element.Name), element.Location, "ItemSpecModifierCannotBeCustomMetadata", element.Name);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!ItemSpecModifiers.IsItemSpecModifier(element.Name), element.Location, "ItemSpecModifierCannotBeCustomMetadata", element.Name);
             ProjectErrorUtilities.VerifyThrowInvalidProject(!XMakeElements.ReservedItemNames.Contains(element.Name), element.Location, "CannotModifyReservedItemMetadata", element.Name);
 
             ProjectMetadataElement metadatum = new ProjectMetadataElement(element, parent, _project);

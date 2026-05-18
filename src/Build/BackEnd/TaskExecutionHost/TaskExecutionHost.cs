@@ -109,6 +109,11 @@ namespace Microsoft.Build.BackEnd
         private string _taskName;
 
         /// <summary>
+        /// The project file path that runs the task.
+        /// </summary>
+        private string _projectFile;
+
+        /// <summary>
         /// The XML location of the task element.
         /// </summary>
         private ElementLocation _taskLocation;
@@ -158,6 +163,11 @@ namespace Microsoft.Build.BackEnd
         private readonly Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
 
         private readonly PropertyTrackingSetting _propertyTrackingSettings;
+
+        /// <summary>
+        /// The task environment to be used by IMultiThreadableTask instances.
+        /// </summary>
+        internal TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Constructor
@@ -221,6 +231,8 @@ namespace Microsoft.Build.BackEnd
             set => _taskFactoryWrapper = value;
         }
 
+        private HostServices _hostServices;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// App domain configuration.
@@ -247,16 +259,28 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific task.
         /// </summary>
-        public void InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError,
+        public void InitializeForTask(
+            IBuildEngine2 buildEngine,
+            TargetLoggingContext loggingContext,
+            ProjectInstance projectInstance,
+            string taskName,
+            ElementLocation taskLocation,
+            ITaskHost taskHost,
+            bool continueOnError,
+            string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            bool isOutOfProc, CancellationToken cancellationToken)
+            HostServices hostServices,
+            bool isOutOfProc,
+            CancellationToken cancellationToken,
+            TaskEnvironment taskEnvironment)
         {
             _buildEngine = buildEngine;
             _projectInstance = projectInstance;
             _targetLoggingContext = loggingContext;
             _taskName = taskName;
+            _projectFile = projectFile;
             _taskLocation = taskLocation;
             _cancellationTokenRegistration = cancellationToken.Register(Cancel);
             _taskHost = taskHost;
@@ -264,7 +288,9 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup = appDomainSetup;
 #endif
+            _hostServices = hostServices;
             IsOutOfProc = isOutOfProc;
+            TaskEnvironment = taskEnvironment;
         }
 
         /// <summary>
@@ -368,6 +394,11 @@ namespace Microsoft.Build.BackEnd
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
 
+            if (TaskInstance is IMultiThreadableTask multiThreadableTask)
+            {
+                multiThreadableTask.TaskEnvironment = TaskEnvironment;
+            }
+
             return true;
 
             // Function to validate that if this is a TaskHostTask, the assembly it loaded is the same one we found in the registry.
@@ -425,7 +456,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            if (TaskInstance is IIncrementalTask incrementalTask)
             {
                 incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
             }
@@ -614,6 +645,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+                Debug.Assert(TaskInstance is not IMultiThreadableTask multiThreadableTask || multiThreadableTask.TaskEnvironment != null, "task environment missing for multi-threadable task");
                 taskReturnValue = TaskInstance.Execute();
             }
             finally
@@ -958,13 +990,20 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_taskFactoryWrapper.TaskFactory is AssemblyTaskFactory assemblyTaskFactory)
                 {
-                    task = assemblyTaskFactory.CreateTaskInstance(_taskLocation, _taskLoggingContext, _buildComponentHost, taskIdentityParameters,
+                    task = assemblyTaskFactory.CreateTaskInstance(
+                        _taskLocation,
+                        _taskLoggingContext,
+                        _buildComponentHost,
+                        taskIdentityParameters,
+                        _projectFile,
+                        _hostServices,
 #if FEATURE_APPDOMAIN
                         AppDomainSetup,
 #endif
                         IsOutOfProc,
                         scheduledNodeId,
-                        ProjectInstance.GetProperty);
+                        ProjectInstance.GetProperty,
+                        TaskEnvironment);
                 }
                 else
                 {
@@ -1449,7 +1488,7 @@ namespace Microsoft.Build.BackEnd
                             ProjectItemInstance newItem;
 
                             TaskItem outputAsProjectItem = output as TaskItem;
-                            string parameterLocationEscaped = EscapingUtilities.EscapeWithCaching(parameterLocation.File);
+                            string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
 
                             if (outputAsProjectItem != null)
                             {
@@ -1800,11 +1839,14 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                useSidecarTaskHost: false,
+                useSidecarTaskHost: true,
+                _projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif
-                scheduledNodeId);
+                _hostServices,
+                scheduledNodeId,
+                TaskEnvironment);
         }
     }
 }

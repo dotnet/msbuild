@@ -162,7 +162,7 @@ namespace Microsoft.Build.Tasks
                         return "True";
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonExistentProjects);
+                        ErrorUtilities.ThrowInternalError($"Unexpected case {_skipNonExistentProjects}");
                         break;
                 }
 
@@ -352,7 +352,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonExistProjects);
+                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, $"skipNonexistentProjects has unexpected value {skipNonExistProjects}");
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
                         success = false;
                     }
@@ -654,7 +654,7 @@ namespace Microsoft.Build.Tasks
                                         // Set a metadata on the output items called "MSBuildProjectFile" which tells you which project file produced this item.
                                         if (String.IsNullOrEmpty(outputItemFromTarget.GetMetadata(ItemMetadataNames.msbuildSourceProjectFile)))
                                         {
-                                            outputItemFromTarget.SetMetadata(ItemMetadataNames.msbuildSourceProjectFile, projects[i].GetMetadata(FileUtilities.ItemSpecModifiers.FullPath));
+                                            outputItemFromTarget.SetMetadata(ItemMetadataNames.msbuildSourceProjectFile, projects[i].GetMetadata(ItemSpecModifiers.FullPath));
                                         }
                                     }
 

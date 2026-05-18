@@ -20,7 +20,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 
 using Xunit;
-using Xunit.Abstractions;
+using Microsoft.Build.UnitTests.Shared;
 
 #nullable disable
 
@@ -107,8 +107,6 @@ namespace Microsoft.Build.UnitTests
 
             Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, null);
             Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, null);
-
-            Copy.RefreshInternalEnvironmentValues();
         }
 
         /// <summary>
@@ -118,14 +116,16 @@ namespace Microsoft.Build.UnitTests
         {
             Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, _alwaysOverwriteReadOnlyFiles);
             Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, _alwaysRetry);
-
-            Copy.RefreshInternalEnvironmentValues();
         }
 
         [Fact]
         public void CopyWithNoInput()
         {
-            var task = new Copy { BuildEngine = new MockEngine(true), };
+            var task = new Copy
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = new MockEngine(true),
+            };
             task.Execute().ShouldBeTrue();
             (task.CopiedFiles == null || task.CopiedFiles.Length == 0).ShouldBeTrue();
             (task.DestinationFiles == null || task.DestinationFiles.Length == 0).ShouldBeTrue();
@@ -141,6 +141,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = new MockEngine(true),
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
@@ -166,6 +167,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = new MockEngine(true),
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     DestinationFolder = new TaskItem(destinationFolder.Path),
@@ -209,6 +211,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = new MockEngine(true),
                     SourceFolders = new ITaskItem[] { new TaskItem(s0Folder.Path), new TaskItem(s1Folder.Path) },
                     DestinationFolder = new TaskItem(destinationFolder.Path),
@@ -235,6 +238,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
                 };
@@ -264,6 +268,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     SourceFolders = new ITaskItem[] { new TaskItem(sourceFolder.Path) },
@@ -289,6 +294,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = sourceFiles,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
@@ -313,6 +319,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFolders = sourceFolders,
                     DestinationFolder = new TaskItem(destinationFolder.Path),
@@ -337,6 +344,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     DestinationFiles = destinationFiles,
@@ -361,6 +369,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
@@ -385,6 +394,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     SourceFolders = new ITaskItem[] { new TaskItem(sourceFolder.Path) },
@@ -408,6 +418,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     DestinationFiles = new ITaskItem[] { new TaskItem("destination0.txt"), new TaskItem("destination1.txt") },
@@ -433,6 +444,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
@@ -459,6 +471,7 @@ namespace Microsoft.Build.UnitTests
 
                 var task = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile.Path) },
                     DestinationFiles = new ITaskItem[] { new TaskItem("destination.txt") },
@@ -495,6 +508,7 @@ namespace Microsoft.Build.UnitTests
                 CopyMonitor m = new CopyMonitor();
                 Copy t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -543,6 +557,7 @@ namespace Microsoft.Build.UnitTests
                 CopyMonitor m = new CopyMonitor();
                 Copy t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -603,6 +618,7 @@ namespace Microsoft.Build.UnitTests
                 CopyMonitor m = new CopyMonitor();
                 Copy t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -655,6 +671,7 @@ namespace Microsoft.Build.UnitTests
                 CopyMonitor m = new CopyMonitor();
                 Copy t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -683,8 +700,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Theory]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         [MemberData(nameof(GetHardLinksSymLinks))]
         public void DoNotNormallyCopyOverReadOnlyFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
@@ -711,6 +726,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -730,7 +746,18 @@ namespace Microsoft.Build.UnitTests
                 string destinationContent = File.ReadAllText(destination);
                 Assert.Equal("This is a destination file.", destinationContent);
 
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // did not do retries as it was r/o
+                // On Windows, ERROR_ACCESS_DENIED is not retried (it's a real ACL or r/o bit issue).
+                // On non-Windows with Wave18_7 enabled (default), access denied can be a transient lock
+                // (e.g. macOS CoW filesystem), so we retry; retries will ultimately fail for a genuinely read-only file.
+                if (NativeMethodsShared.IsWindows)
+                {
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026");
+                }
+                else
+                {
+                    // non-Windows: retries are expected due to possible transient EACCES
+                    ((MockEngine)t.BuildEngine).AssertLogContains("MSB3026");
+                }
             }
             finally
             {
@@ -738,6 +765,62 @@ namespace Microsoft.Build.UnitTests
                 File.SetAttributes(destination, FileAttributes.Normal);
                 File.Delete(source);
                 File.Delete(destination);
+            }
+        }
+
+        /// <summary>
+        /// When Wave18_7 is disabled, non-Windows should NOT retry on ERROR_ACCESS_DENIED (old behavior preserved via opt-out).
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyOverReadOnlyFileWhenWave18_7Disabled(bool isUseHardLinks, bool isUseSymbolicLinks)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+
+            // TODO: Remove test when Wave18_7 rotates out
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_7.ToString());
+
+            TransientTestFile source = env.CreateFile("source.tmp", "This is a source file.");
+            TransientTestFile destination = env.CreateFile("destination.tmp", "This is a destination file.");
+
+            File.SetAttributes(destination.Path, FileAttributes.ReadOnly);
+            try
+            {
+                ITaskItem sourceItem = new TaskItem(source.Path);
+                ITaskItem destinationItem = new TaskItem(destination.Path);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                var engine = new MockEngine(_testOutputHelper);
+                var t = new Copy
+                {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    // OverwriteReadOnlyFiles defaults to false
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
+                };
+
+                // Should fail: target is readonly
+                t.Execute().ShouldBeFalse();
+
+                // Expect for there to have been no copies.
+                t.CopiedFiles.ShouldBeEmpty();
+
+                File.ReadAllText(destination.Path).ShouldBe("This is a destination file.");
+
+                // With Wave18_7 disabled, ERROR_ACCESS_DENIED should not be retried on any platform (old behavior).
+                engine.AssertLogDoesntContain("MSB3026");
+            }
+            finally
+            {
+                File.SetAttributes(destination.Path, FileAttributes.Normal);
+                ChangeWaves.ResetStateForTests();
             }
         }
 
@@ -778,6 +861,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -824,7 +908,6 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, "1   ");
-                Copy.RefreshInternalEnvironmentValues();
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                 {
@@ -845,6 +928,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -871,7 +955,6 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, oldAlwaysRetryValue);
-                Copy.RefreshInternalEnvironmentValues();
 
                 File.SetAttributes(destination, FileAttributes.Normal);
 
@@ -912,6 +995,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -985,6 +1069,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -1051,6 +1136,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -1107,7 +1193,8 @@ namespace Microsoft.Build.UnitTests
                     var engine = new MockEngine(_testOutputHelper);
                     var t = new Copy
                     {
-                        RetryDelayMilliseconds = 1,  // speed up tests!
+                        TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
                         BuildEngine = engine,
                         SourceFiles = new[] { new TaskItem(sourceFile) },
                         DestinationFiles = new[] { new TaskItem(destinationFile) },
@@ -1186,6 +1273,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -1225,6 +1313,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = sourceFiles,
@@ -1272,6 +1361,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = sourceFiles,
@@ -1319,6 +1409,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = sourceFiles,
@@ -1362,6 +1453,7 @@ namespace Microsoft.Build.UnitTests
                     var engine = new MockEngine(_testOutputHelper);
                     var t = new Copy
                     {
+                        TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                         RetryDelayMilliseconds = 1,  // speed up tests!
                         BuildEngine = engine,
                         SourceFiles = sourceFiles,
@@ -1433,6 +1525,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(sourceFile) },
@@ -1488,6 +1581,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = sourceFiles,
@@ -1535,6 +1629,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = sourceFiles,
@@ -1590,6 +1685,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     UseHardlinksIfPossible = isUseHardLinks,
@@ -1672,6 +1768,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
@@ -1692,6 +1789,7 @@ namespace Microsoft.Build.UnitTests
                 engine = new MockEngine(_testOutputHelper);
                 t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
                     DestinationFiles = new ITaskItem[] { new TaskItem(file) },
@@ -1743,6 +1841,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1, // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(file) },
@@ -1797,6 +1896,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(invalidFile) },
@@ -1858,6 +1958,7 @@ namespace Microsoft.Build.UnitTests
                 var me = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = me,
                     SourceFiles = sourceFiles,
@@ -1930,6 +2031,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -1995,7 +2097,8 @@ namespace Microsoft.Build.UnitTests
 
             var t = new Copy
             {
-                RetryDelayMilliseconds = 1, // speed up tests!
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFolder = new TaskItem(Path.Combine(tempPath, "foo")),
@@ -2017,7 +2120,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(4, t.CopiedFiles.Length);
 
             // Copy calls to different destinations can come in any order when running in parallel.
-            filesActuallyCopied.Select(f => Path.GetFileName(f.Key.Name)).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
+            filesActuallyCopied.Select(f => Path.GetFileName(f.Key.Path)).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -2062,6 +2165,7 @@ namespace Microsoft.Build.UnitTests
 
             var t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1,  // speed up tests!
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
@@ -2085,16 +2189,16 @@ namespace Microsoft.Build.UnitTests
 
             // Copy calls to different destinations can come in any order when running in parallel.
             string xaPath = Path.Combine(tempPath, "xa.cs");
-            var xaCopies = filesActuallyCopied.Where(f => f.Value.Name == xaPath).ToList();
+            var xaCopies = filesActuallyCopied.Where(f => f.Value.Path == xaPath).ToList();
             Assert.Equal(3, xaCopies.Count);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), xaCopies[1].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[2].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[0].Key.Path);
+            Assert.Equal(Path.Combine(tempPath, "b.cs"), xaCopies[1].Key.Path);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[2].Key.Path);
 
             string xbPath = Path.Combine(tempPath, "xb.cs");
-            var xbCopies = filesActuallyCopied.Where(f => f.Value.Name == xbPath).ToList();
+            var xbCopies = filesActuallyCopied.Where(f => f.Value.Path == xbPath).ToList();
             Assert.Single(xbCopies);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), xbCopies[0].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xbCopies[0].Key.Path);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -2131,6 +2235,7 @@ namespace Microsoft.Build.UnitTests
                 var engine = new MockEngine(_testOutputHelper);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = engine,
                     SourceFiles = new ITaskItem[] { new TaskItem(inFile1), new TaskItem(inFile2) },
@@ -2179,6 +2284,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(_testOutputHelper),
                     SourceFiles = sourceFiles,
@@ -2217,6 +2323,7 @@ namespace Microsoft.Build.UnitTests
 
             var t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
@@ -2243,7 +2350,8 @@ namespace Microsoft.Build.UnitTests
         {
             var t = new Copy
             {
-                RetryDelayMilliseconds = 1,  // speed up tests!
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") },
                 DestinationFolder = new TaskItem("dest"),
@@ -2267,7 +2375,8 @@ namespace Microsoft.Build.UnitTests
         {
             var t = new Copy
             {
-                RetryDelayMilliseconds = 1,  // speed up tests!
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = new ITaskItem[] { new TaskItem("foo") },
                 DestinationFolder = new TaskItem("here | there"),
@@ -2291,7 +2400,8 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
             {
-                RetryDelayMilliseconds = 1, // speed up tests!
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
@@ -2313,7 +2423,8 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
             {
-                BuildEngine = engine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 Retries = 1,
@@ -2337,7 +2448,8 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
             {
-                RetryDelayMilliseconds = 1,  // speed up tests!
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
@@ -2362,6 +2474,7 @@ namespace Microsoft.Build.UnitTests
         {
             var t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1,  // speed up tests!
             };
 
@@ -2387,7 +2500,8 @@ namespace Microsoft.Build.UnitTests
         {
             var t = new Copy
             {
-                RetryDelayMilliseconds = 1,  // speed up tests!
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
             };
 
             Assert.False(t.UseHardlinksIfPossible);
@@ -2404,7 +2518,8 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
             {
-                RetryDelayMilliseconds = 0, // Can't really test the delay, but at least try passing in a value
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 0, // Can't really test the delay, but at least try passing in a value
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
@@ -2431,7 +2546,8 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
             {
-                RetryDelayMilliseconds = 1, // Can't really test the delay, but at least try passing in a value
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1, // Can't really test the delay, but at least try passing in a value
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source"), new TaskItem("c:\\source2") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination"), new TaskItem("c:\\destination2") },
@@ -2448,8 +2564,10 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogDoesntContain("MSB3027");
 
             // Copy calls to different destinations can come in any order when running in parallel.
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name == FileUtilities.FixFilePath("c:\\source"));
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name == FileUtilities.FixFilePath("c:\\source2"));
+            // Use .OriginalValue to compare against the original input path (before Path.GetFullPath resolution).
+            // TaskItem normalizes paths via FileUtilities.FixFilePath, so we need to do the same for comparison.
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == FileUtilities.FixFilePath("c:\\source"));
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == FileUtilities.FixFilePath("c:\\source2"));
         }
 
         /// <summary>
@@ -2463,6 +2581,7 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
@@ -2492,6 +2611,7 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true /* log to console */);
             var t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1,  // speed up tests!
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
@@ -2524,6 +2644,7 @@ namespace Microsoft.Build.UnitTests
                 MockEngine engine = new MockEngine(_testOutputHelper);
                 Copy t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,
                     UseHardlinksIfPossible = isUseHardLinks,
                     UseSymboliclinksIfPossible = isUseSymbolicLinks,
@@ -2559,6 +2680,7 @@ namespace Microsoft.Build.UnitTests
                 var me = new MockEngine(true);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1, // speed up tests!
                     BuildEngine = me,
                     SourceFiles = sourceFiles,
@@ -2649,6 +2771,7 @@ namespace Microsoft.Build.UnitTests
                 var me = new MockEngine(true);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1, // speed up tests!
                     UseHardlinksIfPossible = true,
                     BuildEngine = me,
@@ -2735,6 +2858,7 @@ namespace Microsoft.Build.UnitTests
                 MockEngine me = new MockEngine(true);
                 Copy t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1, // speed up tests!
                     UseHardlinksIfPossible = true,
                     BuildEngine = me,
@@ -2814,6 +2938,7 @@ namespace Microsoft.Build.UnitTests
                 var me = new MockEngine(true);
                 var t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = me,
                     SourceFiles = sourceFiles,
@@ -2878,6 +3003,7 @@ namespace Microsoft.Build.UnitTests
                 MockEngine me = new MockEngine(true);
                 Copy t = new Copy
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1, // speed up tests!
                     UseHardlinksIfPossible = true,
                     UseSymboliclinksIfPossible = true,
@@ -2909,7 +3035,8 @@ namespace Microsoft.Build.UnitTests
             var engine = new MockEngine(true);
             var t = new Copy
             {
-                BuildEngine = engine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
                 UseHardlinksIfPossible = false,
@@ -2946,6 +3073,7 @@ namespace Microsoft.Build.UnitTests
             var me = new MockEngine(true);
             var t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = me,
                 SourceFiles = sourceFiles,
@@ -2963,6 +3091,7 @@ namespace Microsoft.Build.UnitTests
 
             t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = me,
                 SourceFiles = sourceFiles,
@@ -2986,6 +3115,7 @@ namespace Microsoft.Build.UnitTests
 
             t = new Copy
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = me,
                 SourceFiles = sourceFiles,
@@ -3090,7 +3220,7 @@ namespace Microsoft.Build.UnitTests
         public void CopyToFileWithSameCaseInsensitiveNameAsExistingDirectoryOnUnix()
         {
             // Skip this test on case-insensitive file systems (Windows, macOS with default APFS/HFS+)
-            if (!FileUtilities.GetIsFileSystemCaseSensitive())
+            if (!FileUtilities.IsFileSystemCaseSensitive)
             {
                 return;
             }
@@ -3103,7 +3233,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(tempDir);
 
                 // Create a subdirectory structure to match the real scenario
-                string outputDir = Path.Combine(tempDir, "bin", "Debug", "net10.0");
+                string outputDir = Path.Combine(tempDir, "bin", "Debug", RunnerUtilities.LatestDotNetCoreForMSBuild);
                 Directory.CreateDirectory(outputDir);
 
                 // Create a directory named "cs" (lowercase) in the output directory
@@ -3111,7 +3241,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(lowercaseDir);
 
                 // Create a few source files to copy (representing multiple files being copied to same dest dir)
-                string sourceDir = Path.Combine(tempDir, "CS", "obj", "Debug", "net10.0");
+                string sourceDir = Path.Combine(tempDir, "CS", "obj", "Debug", RunnerUtilities.LatestDotNetCoreForMSBuild);
                 Directory.CreateDirectory(sourceDir);
                 
                 string sourceFile1 = Path.Combine(sourceDir, "apphost");
@@ -3124,6 +3254,7 @@ namespace Microsoft.Build.UnitTests
                 string destFile2 = Path.Combine(outputDir, "app.dll");
 
                 Copy t = new Copy();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.SourceFiles = new ITaskItem[] { 

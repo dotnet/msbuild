@@ -13,7 +13,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
 
@@ -476,7 +475,7 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Theory]
-        [MemberData(nameof(SolutionOnlyDependenciesData))]
+        [MemberData(nameof(SolutionOnlyDependenciesData), DisableDiscoveryEnumeration = true)]
         public void SolutionsCanInjectEdgesIntoTheProjectGraph(Dictionary<int, int[]> edges, (int, int)[] solutionDependencies, bool hasCycle, bool solutionEdgesOverlapGraphEdges)
         {
             // Use the same global properties as the solution would use so all ConfigurationMetadata objects would match on global properties.

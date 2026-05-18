@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Xunit.Sdk;
 
 #nullable disable
 
@@ -12,12 +13,17 @@ namespace Microsoft.NET.StringTools.Tests
         /// <summary>
         /// Represents an array of string fragments to initialize an InternableString with.
         /// </summary>
-        public class TestDatum
+        public class TestDatum : IXunitSerializable
         {
             private string _string;
-            public string[] Fragments { get; }
+            public string[] Fragments { get; private set; }
 
             public int Length => _string.Length;
+
+            // Required for deserialization
+            public TestDatum()
+            {
+            }
 
             public TestDatum(params string[] fragments)
             {
@@ -30,6 +36,17 @@ namespace Microsoft.NET.StringTools.Tests
             public override string ToString()
             {
                 return _string;
+            }
+
+            public void Deserialize(IXunitSerializationInfo info)
+            {
+                Fragments = info.GetValue<string[]>(nameof(Fragments));
+                _string = string.Join(string.Empty, Fragments);
+            }
+
+            public void Serialize(IXunitSerializationInfo info)
+            {
+                info.AddValue(nameof(Fragments), Fragments);
             }
         }
 

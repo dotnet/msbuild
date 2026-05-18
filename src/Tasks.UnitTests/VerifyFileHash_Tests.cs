@@ -7,7 +7,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.UnitTests.TestResources;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -27,6 +26,7 @@ namespace Microsoft.Build.UnitTests
         {
             new VerifyFileHash
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
                 BuildEngine = _mockEngine,
                 Algorithm = "SHA256",
@@ -45,6 +45,7 @@ namespace Microsoft.Build.UnitTests
         {
             new VerifyFileHash
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
                 BuildEngine = _mockEngine,
                 Algorithm = "BANANA",
@@ -63,6 +64,7 @@ namespace Microsoft.Build.UnitTests
         {
             new VerifyFileHash
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "this_does_not_exist.txt"),
                 BuildEngine = _mockEngine,
                 Algorithm = "BANANA",
@@ -84,6 +86,7 @@ namespace Microsoft.Build.UnitTests
         {
             VerifyFileHash task = new VerifyFileHash
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
                 BuildEngine = _mockEngine,
                 Algorithm = algoritm,
@@ -103,6 +106,7 @@ namespace Microsoft.Build.UnitTests
         {
             VerifyFileHash task = new VerifyFileHash
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = testBinary.FilePath,
                 BuildEngine = _mockEngine,
                 Algorithm = testBinary.HashAlgorithm,

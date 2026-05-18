@@ -122,7 +122,19 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             _componentHost = host;
-            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+
+            // Initialize with proper capacity for performance optimization
+            // Use Environment.ProcessorCount for concurrencyLevel to handle multi-threaded scenarios
+            if (host.BuildParameters?.MaxNodeCount > 0)
+            {
+                _nodeContexts = new ConcurrentDictionary<int, NodeContext>(
+                    concurrencyLevel: Environment.ProcessorCount,
+                    capacity: host.BuildParameters.MaxNodeCount);
+            }
+            else
+            {
+                _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+            }
         }
 
         /// <summary>
@@ -336,7 +348,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.InProcNodeProvider, "Cannot create component of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.InProcNodeProvider, $"Cannot create component of type {type}");
             return new NodeProviderInProc();
         }
 
@@ -370,7 +382,7 @@ namespace Microsoft.Build.BackEnd
                 InProcNodeThreadProc(nodeContext._inProcNode);
             });
 #endif
-            nodeContext._inProcNodeThread.Name = $"In-proc Node ({_componentHost.Name})";
+            nodeContext._inProcNodeThread.Name = $"In-proc Node {nodeId} ({_componentHost.Name})";
             nodeContext._inProcNodeThread.IsBackground = true;
 #if FEATURE_THREAD_CULTURE
             nodeContext._inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;
@@ -382,7 +394,7 @@ namespace Microsoft.Build.BackEnd
 
             int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
             bool connected = nodeContext._endpointConnectedEvent.WaitOne(connectionTimeout);
-            ErrorUtilities.VerifyThrow(connected, "In-proc node failed to start up within {0}ms", connectionTimeout);
+            ErrorUtilities.VerifyThrow(connected, $"In-proc node failed to start up within {connectionTimeout}ms");
             return true;
         }
 
@@ -439,7 +451,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case NodeEngineShutdownReason.ConnectionFailed:
-                    ErrorUtilities.ThrowInternalError("Unexpected shutdown code {0} received.", reason);
+                    ErrorUtilities.ThrowInternalError($"Unexpected shutdown code {reason} received.");
                     break;
             }
         }

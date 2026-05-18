@@ -13,6 +13,7 @@ namespace Microsoft.Build.Tasks
     /// Task that emits an error given a resource string. Engine will add project file path and line/column
     /// information.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public sealed class ErrorFromResources : TaskExtension
     {
         /// <summary>

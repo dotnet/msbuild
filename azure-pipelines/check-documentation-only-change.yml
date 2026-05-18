@@ -1,0 +1,21 @@
+# Template to check if only non-build files have changed (documentation and .github)
+# Sets a pipeline variable 'onlyDocChanged' to 1 if only non-build files changed, 0 otherwise
+# This template should be included at the start of test jobs to determine if tests should run
+
+steps:
+- powershell: |
+    $changedFiles = git diff --name-only HEAD HEAD~1
+    $changedFiles
+    $onlyDocChanged = 1
+    foreach ($file in $changedFiles) {
+      $isNonBuildFile = ($file -match "^documentation/") -or ($file -match "^\.github/")
+      if(!$isNonBuildFile)
+      {
+        $onlyDocChanged = 0
+        break;
+      }
+    }
+    Write-Host "##vso[task.setvariable variable=onlyDocChanged]$onlyDocChanged"
+    Write-Host "##vso[task.setvariable variable=onlyDocChanged;isoutput=true]$onlyDocChanged"
+  name: CheckDocumentationOnlyChange
+  displayName: Check whether only non-build files have been updated

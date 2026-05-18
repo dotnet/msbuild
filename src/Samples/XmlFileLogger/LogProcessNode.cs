@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -95,9 +95,9 @@ namespace Microsoft.Build.Logging.StructuredLogger
         {
             var type = childNode.GetType();
 
-            if (_childNodes.ContainsKey(type))
+            if (_childNodes.TryGetValue(type, out List<ILogNode> list))
             {
-                _childNodes[type].Add(childNode);
+                list.Add(childNode);
             }
             else
             {
@@ -114,7 +114,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         protected IEnumerable<T> GetChildrenOfType<T>() where T : ILogNode
         {
             var t = typeof(T);
-            return _childNodes.ContainsKey(t) ? _childNodes[t].Cast<T>() : new List<T>();
+            return _childNodes.TryGetValue(t, out List<ILogNode> list) ? list.Cast<T>() : new List<T>();
         }
 
         /// <summary>

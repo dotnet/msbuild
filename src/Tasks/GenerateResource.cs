@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -2716,8 +2716,7 @@ namespace Microsoft.Build.Tasks
                 {
                     currentOutputFile = outFileOrDir;
                     ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                        "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                        _readers.Count);
+                        $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2726,8 +2725,7 @@ namespace Microsoft.Build.Tasks
                     try
                     {
                         ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                            "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                            _readers.Count);
+                            $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -3049,7 +3047,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void AddResourcesUsingMinimalCoreResxParsing(string filename, ReaderInfo reader)
         {
-            using (var xmlReader = new XmlTextReader(filename))
+            using (var xmlReader = new XmlTextReader(filename) { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null })
             {
                 xmlReader.WhitespaceHandling = WhitespaceHandling.None;
                 XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
@@ -3443,7 +3441,7 @@ namespace Microsoft.Build.Tasks
                 _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
 
                 // Generate the STR class
-                String[] errors;
+                StronglyTypedResourceBuilder.SkippedResource[] skippedResources;
                 bool generateInternalClass = !_stronglyTypedClassIsPublic;
                 // StronglyTypedResourcesNamespace can be null and this is ok.
                 // If it is null then the default namespace (=stronglyTypedNamespace) is used.
@@ -3454,7 +3452,7 @@ namespace Microsoft.Build.Tasks
                         _stronglyTypedResourcesNamespace,
                         provider,
                         generateInternalClass,
-                        out errors);
+                        out skippedResources);
 
                 CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
                 using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
@@ -3462,20 +3460,23 @@ namespace Microsoft.Build.Tasks
                     provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
                 }
 
-                if (errors.Length > 0)
+                // The STR class file was generated (possibly with some properties skipped).
+                // Log warnings for any skipped resources and mark the file as successfully created.
+                foreach (StronglyTypedResourceBuilder.SkippedResource skipped in skippedResources)
                 {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.ErrorFromCodeDom", inputFileName);
-                    foreach (String error in errors)
+                    string messageKey = skipped.Reason switch
                     {
-                        _logger.LogErrorWithCodeFromResources("GenerateResource.CodeDomError", error);
-                    }
+                        StronglyTypedResourceBuilder.SkipReason.CodeDomError => "GenerateResource.CodeDomError",
+                        StronglyTypedResourceBuilder.SkipReason.ReservedName => "GenerateResource.STRPropertySkippedReservedName",
+                        StronglyTypedResourceBuilder.SkipReason.VoidType => "GenerateResource.STRPropertySkippedVoidType",
+                        StronglyTypedResourceBuilder.SkipReason.InvalidIdentifier => "GenerateResource.STRPropertySkippedInvalidIdentifier",
+                        StronglyTypedResourceBuilder.SkipReason.NameCollision => "GenerateResource.STRPropertySkippedNameCollision",
+                        _ => throw new InvalidOperationException($"Unknown SkipReason {skipped.Reason}"),
+                    };
+                    _logger.LogWarningWithCodeFromResources(null, Path.GetFullPath(inputFileName), 0, 0, 0, 0, messageKey, [skipped.Key, .. skipped.AdditionalMessageArgs]);
                 }
-                else
-                {
-                    // No errors, and no exceptions - we presumably did create the STR class file
-                    // and it should get added to FilesWritten. So set a flag to indicate this.
-                    _stronglyTypedResourceSuccessfullyCreated = true;
-                }
+
+                _stronglyTypedResourceSuccessfullyCreated = true;
             }
             finally
             {

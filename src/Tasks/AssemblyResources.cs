@@ -24,7 +24,23 @@ namespace Microsoft.Build.Shared
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resource = PrimaryResources.GetString(name, CultureInfo.CurrentUICulture) ?? SharedResources.GetString(name, CultureInfo.CurrentUICulture);
 
-            ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
+            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
+
+            return resource;
+        }
+
+        /// <summary>
+        /// Loads the specified resource string using invariant culture, either from the assembly's primary resources, or its shared resources.
+        /// This method is useful for generating code that should be culture-independent for reproducible builds.
+        /// </summary>
+        /// <remarks>This method is thread-safe.</remarks>
+        /// <returns>The resource string, or null if not found.</returns>
+        internal static string GetInvariantString(string name)
+        {
+            // NOTE: the ResourceManager.GetString() method is thread-safe
+            string resource = PrimaryResources.GetString(name, CultureInfo.InvariantCulture) ?? SharedResources.GetString(name, CultureInfo.InvariantCulture);
+
+            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
 
             return resource;
         }

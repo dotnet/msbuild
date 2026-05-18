@@ -48,7 +48,7 @@ namespace Microsoft.Build.Experimental
         /// The command line to process.
         /// The first argument on the command line is assumed to be the name/path of the executable, and is ignored.
         /// </summary>
-        private readonly string _commandLine;
+        private readonly string[] _commandLine;
 
         /// <summary>
         /// The MSBuild client execution result.
@@ -102,13 +102,19 @@ namespace Microsoft.Build.Experimental
         private MSBuildClientPacketPump _packetPump = null!;
 
         /// <summary>
+        /// PID of the server process this client launched (or null if no launch was attempted /
+        /// the server was already running). Used for diagnostics on connection failure.
+        /// </summary>
+        private int? _launchedServerPid;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="commandLine">The command line to process. The first argument
         /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
-        public MSBuildClient(string commandLine, string msbuildLocation)
+        public MSBuildClient(string[] commandLine, string msbuildLocation)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
@@ -152,9 +158,9 @@ namespace Microsoft.Build.Experimental
         public MSBuildClientExitResult Execute(CancellationToken cancellationToken)
         {
             // Command line in one string used only in human readable content.
-            string descriptiveCommandLine = _commandLine;
+            string descriptiveCommandLine = string.Join(" ", _commandLine);
 
-            CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
+            CommunicationsUtilities.Trace($"Executing build with command line '{descriptiveCommandLine}'");
 
             try
             {
@@ -192,8 +198,8 @@ namespace Microsoft.Build.Experimental
             {
                 // For unknown root cause, Mutex.TryOpenExisting can sometimes throw 'Connection timed out' exception preventing to obtain the build server state through it (Running or not, Busy or not).
                 // See: https://github.com/dotnet/msbuild/issues/7993
-                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
-                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
+                CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return _exitResult;
             }
@@ -351,7 +357,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("MSBuild client error: problem during packet handling occurred: {0}.", ex);
+                CommunicationsUtilities.Trace($"MSBuild client error: problem during packet handling occurred: {ex}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
         }
@@ -376,7 +382,7 @@ namespace Microsoft.Build.Experimental
             {
                 // on Win8 machines while in IDE Console.BufferWidth will throw (while it talks to native console it gets "operation aborted" native error)
                 // this is probably temporary workaround till we understand what is the reason for that exception
-                CommunicationsUtilities.Trace("MSBuild client warning: problem during querying console buffer width.", ex);
+                CommunicationsUtilities.Trace($"MSBuild client warning: problem during querying console buffer width: {ex}");
             }
 
             return consoleBufferWidth;
@@ -409,11 +415,11 @@ namespace Microsoft.Build.Experimental
             {
                 packet = packetResolver();
                 WritePacket(_nodeStream, packet);
-                CommunicationsUtilities.Trace("Command packet of type '{0}' sent...", packet.Type);
+                CommunicationsUtilities.Trace($"Command packet of type '{packet.Type}' sent...");
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Failed to send command packet of type '{0}' to server: {1}", packet?.Type.ToString() ?? "Unknown", ex);
+                CommunicationsUtilities.Trace($"Failed to send command packet of type '{packet?.Type.ToString() ?? "Unknown"}' to server: {ex}");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
                 return false;
             }
@@ -444,8 +450,8 @@ namespace Microsoft.Build.Experimental
             }
             catch (IOException ex) when (ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
-                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
+                CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
             }
@@ -455,16 +461,27 @@ namespace Microsoft.Build.Experimental
                 string[] msBuildServerOptions =
                 [
                     "/nologo",
-                    "/nodemode:8"
+                    NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode)
                 ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
-                using Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);
-                CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
+
+                // Set DOTNET_ROOT so the apphost server child can locate the runtime; this
+                // override is replaced by the client's environment on the first build command
+                // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
+                // The `!` works around dotnet/msbuild#13761.
+                NodeLaunchData launchData = new(
+                    MSBuildLocation: _msbuildLocation,
+                    CommandLineArgs: string.Join(" ", msBuildServerOptions),
+                    EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides()!);
+
+                using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
+                _launchedServerPid = msbuildProcess.Id;
+                CommunicationsUtilities.Trace($"Server started with PID: {_launchedServerPid}");
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Failed to launch the msbuild server: {0}", ex);
+                CommunicationsUtilities.Trace($"Failed to launch the msbuild server: {ex}");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
             }
@@ -541,7 +558,7 @@ namespace Microsoft.Build.Experimental
         {
             if (packetPump.PacketPumpException != null)
             {
-                CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
+                CommunicationsUtilities.Trace($"MSBuild client error: packet pump unexpectedly shut down: {packetPump.PacketPumpException}");
                 throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
             }
 
@@ -586,7 +603,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleServerNodeBuildResult(ServerNodeBuildResult response)
         {
-            CommunicationsUtilities.Trace("Build response received: exit code '{0}', exit type '{1}'", response.ExitCode, response.ExitType);
+            CommunicationsUtilities.Trace($"Build response received: exit code '{response.ExitCode}', exit type '{response.ExitType}'");
             _exitResult.MSBuildClientExitType = MSBuildClientExitType.Success;
             _exitResult.MSBuildAppExitTypeString = response.ExitType;
             _buildFinished = true;
@@ -605,9 +622,36 @@ namespace Microsoft.Build.Experimental
             {
                 tryAgain = false;
 
+                HandshakeResult result;
+                bool connected;
+                try
+                {
+                    connected = NodeProviderOutOfProcBase.TryConnectToPipeStream(
+                        _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds), out result);
+                }
+                catch (TimeoutException)
+                {
+                    // The underlying NamedPipeClientStream.Connect throws TimeoutException when the
+                    // pipe never becomes available — typically because the server child process
+                    // failed to start (e.g. apphost couldn't locate the runtime). Treat this as a
+                    // recoverable connection failure so MSBuildClientApp can fall back to in-proc
+                    // execution rather than crashing the whole CLI.
+                    LogConnectFailureDiagnostics(timeoutMilliseconds, isTimeout: true, errorMessage: null);
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
+                    return false;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Mirror the exception-tolerant behavior of NodeProviderOutOfProcBase.TryConnectToProcess
+                    // so any non-critical failure (UnauthorizedAccessException, IOException,
+                    // InvalidOperationException, etc.) routes through the standard fallback path
+                    // rather than escaping out of MSBuildClient.Execute.
+                    LogConnectFailureDiagnostics(timeoutMilliseconds, isTimeout: false, errorMessage: ex.Message);
+                    _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
+                    return false;
+                }
 
-                if (NodeProviderOutOfProcBase.TryConnectToPipeStream(
-                    _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds), out HandshakeResult result))
+                if (connected)
                 {
                     return true;
                 }
@@ -615,7 +659,7 @@ namespace Microsoft.Build.Experimental
                 {
                     if (result.Status is not HandshakeStatus.Timeout && sw.ElapsedMilliseconds < timeoutMilliseconds)
                     {
-                        CommunicationsUtilities.Trace("Retrying to connect to server after {0} ms", sw.ElapsedMilliseconds);
+                        CommunicationsUtilities.Trace($"Retrying to connect to server after {sw.ElapsedMilliseconds} ms");
                         // This solves race condition for time in which server started but have not yet listen on pipe or
                         // when it just finished build request and is recycling pipe.
                         tryAgain = true;
@@ -623,7 +667,7 @@ namespace Microsoft.Build.Experimental
                     }
                     else
                     {
-                        CommunicationsUtilities.Trace("Failed to connect to server: {0}", result.ErrorMessage);
+                        LogConnectFailureDiagnostics(timeoutMilliseconds, isTimeout: result.Status is HandshakeStatus.Timeout, errorMessage: result.ErrorMessage);
                         _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
                         return false;
                     }
@@ -631,6 +675,57 @@ namespace Microsoft.Build.Experimental
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Emits a single diagnostic trace entry describing why connection to the MSBuild server
+        /// failed, including the launched server PID (if any) and its current state. This makes
+        /// the otherwise-opaque 20s timeout actionable when MSBUILDDEBUGCOMM tracing is enabled.
+        /// Also populates <see cref="MSBuildClientExitResult.ServerProcessExitCode"/> when the
+        /// launched server child has already exited, so the host can surface that fact to the
+        /// user-visible "falling back to in-proc" message instead of a generic timeout.
+        /// </summary>
+        private void LogConnectFailureDiagnostics(int timeoutMilliseconds, bool isTimeout, string? errorMessage)
+        {
+            string serverState;
+            if (_launchedServerPid is int pid)
+            {
+                try
+                {
+                    using Process launched = Process.GetProcessById(pid);
+                    if (launched.HasExited)
+                    {
+                        _exitResult.ServerProcessExitCode = launched.ExitCode;
+                        serverState = $"PID {pid} (already exited with code {launched.ExitCode})";
+                    }
+                    else
+                    {
+                        serverState = $"PID {pid} (still running)";
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // Process already terminated and was reaped before we could query it.
+                    serverState = $"PID {pid} (already exited)";
+                }
+                catch (InvalidOperationException)
+                {
+                    serverState = $"PID {pid} (state unavailable)";
+                }
+            }
+            else
+            {
+                serverState = "no launch attempted (server reported as already running)";
+            }
+
+            string reason = isTimeout
+                ? $"timed out after {timeoutMilliseconds} ms waiting for the named pipe"
+                : $"connection error: {errorMessage}";
+
+            CommunicationsUtilities.Trace(
+                $"MSBuild server connection failed ({reason}). Launched server: {serverState}. " +
+                "Falling back to in-proc build. " +
+                "If the server child process exited immediately, ensure DOTNET_ROOT is set correctly so the apphost can locate the .NET runtime.");
         }
 
         private void WritePacket(Stream nodeStream, INodePacket packet)

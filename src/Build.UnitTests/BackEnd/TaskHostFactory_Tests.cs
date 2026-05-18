@@ -13,7 +13,6 @@ using Microsoft.Build.UnitTests.BackEnd;
 
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -25,7 +24,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// </summary>
     public sealed class TaskHostFactory_Tests
     {
-        private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(TaskHostFactory_Tests).Assembly.Location) ?? AppContext.BaseDirectory, "Microsoft.Build.Engine.UnitTests.dll");
+        private static string AssemblyLocation { get; } =
+            typeof(TaskHostFactory_Tests).Assembly.Location
+            ?? Path.Combine(AppContext.BaseDirectory, "Microsoft.Build.Engine.UnitTests.dll");
 
         private ITestOutputHelper _output;
 
@@ -362,6 +363,46 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             projectInstance.GetPropertyValue("DateTimeArrayOutput").ShouldBe(dateTimeArrayParam);
             projectInstance.GetPropertyValue("CustomStructOutput").ShouldBe(TaskBuilderTestTask.s_customStruct.ToString(CultureInfo.InvariantCulture));
             projectInstance.GetPropertyValue("EnumOutput").ShouldBe(TargetBuiltReason.BeforeTargets.ToString());
+        }
+
+        /// <summary>
+        /// Verifies that a task returning a string[] with null elements does not crash
+        /// when executed via TaskHostFactory. This is a regression test for
+        /// https://github.com/dotnet/msbuild/issues/13174
+        /// </summary>
+        [Fact]
+        public void StringArrayWithNullsDoesNotCrashTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{typeof(StringArrayWithNullsTask).FullName}"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestTarget"">
+        <{typeof(StringArrayWithNullsTask).Name}>
+            <Output ItemName=""OutputItems"" TaskParameter=""OutputArray"" />
+            <Output PropertyName=""TaskPid"" TaskParameter=""Pid"" />
+        </{typeof(StringArrayWithNullsTask).Name}>
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("testProject.csproj", projectContents);
+            ProjectInstance projectInstance = new(project.Path);
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(new BuildParameters(), new BuildRequestData(projectInstance, targetsToBuild: new[] { "TestTarget" }));
+
+            // The build should succeed - nulls should be filtered, not cause a crash
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify task ran out-of-process (TaskHostFactory should force this)
+            string taskPidStr = projectInstance.GetPropertyValue("TaskPid");
+            taskPidStr.ShouldNotBeNullOrEmpty();
+            int.TryParse(taskPidStr, out int taskPid).ShouldBeTrue();
+            Process.GetCurrentProcess().Id.ShouldNotBe(taskPid, "Task should have run in a separate TaskHost process");
+
+            // Verify output items - nulls should be filtered out, leaving 3 items
+            var outputItems = projectInstance.GetItems("OutputItems");
+            outputItems.Count.ShouldBe(3, "Null elements should be filtered from the string array");
         }
     }
 }

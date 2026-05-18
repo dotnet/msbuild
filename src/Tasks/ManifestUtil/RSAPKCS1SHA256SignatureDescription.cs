@@ -4,7 +4,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 
-#nullable disable
 
 namespace System.Deployment.Internal.CodeSigning
 {

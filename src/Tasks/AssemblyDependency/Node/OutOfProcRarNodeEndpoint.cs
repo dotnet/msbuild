@@ -17,13 +17,14 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     {
         private readonly int _endpointId;
         private readonly NodePipeServer _pipeServer;
-        private readonly RarNodeBuildEngine _buildEngine = new();
+        private readonly RarNodeBuildEngine _buildEngine;
 
         internal OutOfProcRarNodeEndpoint(int endpointId, SharedConfig config)
         {
             _endpointId = endpointId;
             _pipeServer = new NodePipeServer(config.PipeName, config.Handshake, config.MaxNumberOfServerInstances);
             _pipeServer.RegisterPacketFactory(config.PacketFactory);
+            _buildEngine = new RarNodeBuildEngine(_pipeServer);
         }
 
         public void Dispose() => _pipeServer.Dispose();
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         internal async Task RunAsync(CancellationToken cancellationToken = default)
         {
-            CommunicationsUtilities.Trace("({0}) Starting RAR endpoint.", _endpointId);
+            CommunicationsUtilities.Trace($"({_endpointId}) Starting RAR endpoint.");
 
             try
             {
@@ -54,12 +55,18 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 // Swallow cancellation excpetions for now. We're using this as a simple way to gracefully shutdown the
                 // endpoint, instead of having to implement separate Start / Stop methods and deferring to the caller.
                 // Can reevaluate if we need more granular control over cancellation vs shutdown.
-                CommunicationsUtilities.Trace("({0}) RAR endpoint stopped due to cancellation.", _endpointId);
+                CommunicationsUtilities.Trace($"({_endpointId}) RAR endpoint stopped due to cancellation.");
             }
         }
 
         private async Task RunInternalAsync(CancellationToken cancellationToken)
         {
+            // Send log events asynchronously to avoid sending back a single large response packet. Since RAR is often
+            // the largest producer of log events in MSBuild, serialization can inflate the overall runtime.
+            Task logEventTask = Task.Run(
+                () => _buildEngine.ProcessEventsAsync(cancellationToken),
+                cancellationToken);
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 if (!_pipeServer.IsConnected)
@@ -77,7 +84,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                     INodePacket packet = await _pipeServer.ReadPacketAsync(cancellationToken).ConfigureAwait(false);
                     NodePacketType packetType = packet.Type;
 
-                    CommunicationsUtilities.Trace("({0}) Received request.", _endpointId);
+                    CommunicationsUtilities.Trace($"({_endpointId}) Received request.");
 
                     switch (packet.Type)
                     {
@@ -85,7 +92,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                             // TODO: Pass in client state such as immutable directories, environment variables, ect.
                             break;
                         case NodePacketType.RarNodeExecuteRequest:
-                            CommunicationsUtilities.Trace("({0}) Executing RAR...", _endpointId);
+                            CommunicationsUtilities.Trace($"({_endpointId}) Executing RAR...");
 
                             RarNodeExecuteRequest request = (RarNodeExecuteRequest)packet;
                             ResolveAssemblyReference rarTask = new();
@@ -93,15 +100,17 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
                             bool success = rarTask.Execute();
 
+                            // Send any remaining log events before returning the final result packet.
+                            await _buildEngine.FlushEventsAsync(cancellationToken).ConfigureAwait(false);
                             await _pipeServer.WritePacketAsync(new RarNodeExecuteResponse(rarTask, success), cancellationToken).ConfigureAwait(false);
 
-                            CommunicationsUtilities.Trace("({0}) Completed RAR request.", _endpointId);
+                            CommunicationsUtilities.Trace($"({_endpointId}) Completed RAR request.");
                             break;
                         case NodePacketType.NodeShutdown:
                             // Although the client has already disconnected, it is still necessary to Disconnect() so the
                             // pipe can transition into PipeState.Disconnected, which is treated as an intentional pipe break.
                             // Otherwise, all future operations on the pipe will throw an exception.
-                            CommunicationsUtilities.Trace("({0}) RAR client disconnected.", _endpointId);
+                            CommunicationsUtilities.Trace($"({_endpointId}) RAR client disconnected.");
                             _pipeServer.Disconnect();
                             break;
                         default:
@@ -111,7 +120,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    CommunicationsUtilities.Trace("({0}) Exception while executing RAR request: {1}", _endpointId, e);
+                    CommunicationsUtilities.Trace($"({_endpointId}) Exception while executing RAR request: {e}");
                 }
             }
 

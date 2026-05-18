@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,25 +10,23 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using static Microsoft.Build.CommandLine.Experimental.CommandLineSwitches;
+using static Microsoft.Build.Execution.BuildManager;
 
 #nullable disable
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.CommandLine.Experimental
 {
     internal class CommandLineParser
     {
         /// <summary>
-        /// Used to keep track of response files to prevent them from
-        /// being included multiple times (or even recursively).
+        /// String replacement pattern to support paths in response files.
         /// </summary>
-        private List<string> includedResponseFiles;
-
-        /// <summary>
-        /// The name of the auto-response file.
-        /// </summary>
-        private const string autoResponseFileName = "MSBuild.rsp";
+        private const string responseFilePathReplacement = "%MSBuildThisFileDirectory%";
 
         /// <summary>
         /// The name of an auto-response file to search for in the project directory and above.
@@ -36,52 +34,52 @@ namespace Microsoft.Build.CommandLine
         private const string directoryResponseFileName = "Directory.Build.rsp";
 
         /// <summary>
-        /// String replacement pattern to support paths in response files.
+        /// The name of the auto-response file.
         /// </summary>
-        private const string responseFilePathReplacement = "%MSBuildThisFileDirectory%";
+        private const string autoResponseFileName = "MSBuild.rsp";
+
+        /// <summary>
+        /// Used to keep track of response files to prevent them from
+        /// being included multiple times (or even recursively).
+        /// </summary>
+        private List<string> includedResponseFiles;
 
         internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
-        public (CommandLineSwitches commandLineSwitches, CommandLineSwitches responseFileSwitches) Parse(IEnumerable<string> commandLineArgs)
+        /// <summary>
+        /// Parses the provided command-line arguments into a <see cref="CommandLineSwitchesAccessor"/>.
+        /// </summary>
+        /// <param name="commandLineArgs">
+        /// The command-line arguments excluding the executable path.
+        /// </param>
+        /// <returns>
+        /// A <see cref="CommandLineSwitchesAccessor"/> containing the effective set of switches after combining
+        /// switches from response files (including any auto-response file) with switches from the command line,
+        /// where command-line switches take precedence.
+        /// </returns>
+        /// <exception cref="CommandLineSwitchException">
+        /// Thrown when invalid switch syntax or values are encountered while parsing the command line or response files.
+        /// </exception>
+        public CommandLineSwitchesAccessor Parse(IEnumerable<string> commandLineArgs)
         {
+            List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. commandLineArgs];
+            List<DeferredBuildMessage> deferredBuildMessages = [];
+
             GatherAllSwitches(
-                commandLineArgs,
-                $"'{string.Join(" ", commandLineArgs)}'",
+                args,
+                deferredBuildMessages,
                 out CommandLineSwitches responseFileSwitches,
-                out CommandLineSwitches commandLineSwitches);
+                out CommandLineSwitches commandLineSwitches,
+                out string fullCommandLine,
+                out _);
 
-            return (commandLineSwitches, responseFileSwitches);
-        }
+            CommandLineSwitches result = new();
+            result.Append(responseFileSwitches, fullCommandLine); // lowest precedence
+            result.Append(commandLineSwitches, fullCommandLine);
 
-        internal void GatherAllSwitches(
-            string commandLine,
-            out CommandLineSwitches switchesFromAutoResponseFile,
-            out CommandLineSwitches switchesNotFromAutoResponseFile,
-            out string fullCommandLine,
-            out string exeName)
-        {
-            // split the command line on (unquoted) whitespace
-            List<string> commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
+            result.ThrowErrors();
 
-            exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
-
-#if USE_MSBUILD_DLL_EXTN
-            var msbuildExtn = ".dll";
-#else
-            var msbuildExtn = ".exe";
-#endif
-            if (!exeName.EndsWith(msbuildExtn, StringComparison.OrdinalIgnoreCase))
-            {
-                exeName += msbuildExtn;
-            }
-
-            fullCommandLine = $"'{commandLine}'";
-
-            GatherAllSwitches(
-                commandLineArgs,
-                fullCommandLine,
-                out switchesFromAutoResponseFile,
-                out switchesNotFromAutoResponseFile);
+            return new CommandLineSwitchesAccessor(result);
         }
 
         /// <summary>
@@ -89,20 +87,26 @@ namespace Microsoft.Build.CommandLine
         /// response files, including the auto-response file.
         /// </summary>
         /// <param name="commandLine"></param>
+        /// <param name="deferredBuildMessages"></param>
         /// <param name="switchesFromAutoResponseFile"></param>
         /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <param name="fullCommandLine"></param>
         /// <returns>Combined bag of switches.</returns>
-        private void GatherAllSwitches(
+        internal void GatherAllSwitches(
             IEnumerable<string> commandLineArgs,
-            string fullCommandLine,
+            List<DeferredBuildMessage> deferredBuildMessages,
             out CommandLineSwitches switchesFromAutoResponseFile,
-            out CommandLineSwitches switchesNotFromAutoResponseFile)
+            out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out string fullCommandLine,
+            out string exeName)
         {
             ResetGatheringSwitchesState();
 
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs = commandLineArgs.Skip(1);
+            exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+
+            fullCommandLine = $"'{string.Join(" ", commandLineArgs)}'";
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
@@ -111,11 +115,108 @@ namespace Microsoft.Build.CommandLine
             // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
             // switches on the command line
             switchesFromAutoResponseFile = new CommandLineSwitches();
-            if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+            if (!switchesNotFromAutoResponseFile[ParameterlessSwitch.NoAutoResponse])
             {
-                string exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath); // Copied from XMake
+                string exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath()); // Copied from XMake
                 GatherAutoResponseFileSwitches(exePath, switchesFromAutoResponseFile, fullCommandLine);
             }
+
+            CommandLineSwitches switchesFromEnvironmentVariable = new();
+            GatherLoggingArgsEnvironmentVariableSwitches(ref switchesFromEnvironmentVariable, deferredBuildMessages, fullCommandLine);
+            switchesNotFromAutoResponseFile.Append(switchesFromEnvironmentVariable, fullCommandLine);
+        }
+
+        /// <summary>
+        /// Gathers and validates logging switches from the MSBUILD_LOGGING_ARGS environment variable.
+        /// Only -bl and -check switches are allowed. All other switches are logged as warnings and ignored.
+        /// </summary>
+        internal void GatherLoggingArgsEnvironmentVariableSwitches(
+            ref CommandLineSwitches switches,
+            List<DeferredBuildMessage> deferredBuildMessages,
+            string commandLine)
+        {
+            if (string.IsNullOrWhiteSpace(Traits.MSBuildLoggingArgs))
+            {
+                return;
+            }
+
+            DeferredBuildMessageSeverity messageSeverity = Traits.Instance.EmitLogsAsMessage ? DeferredBuildMessageSeverity.Message : DeferredBuildMessageSeverity.Warning;
+
+            try
+            {
+                List<string> envVarArgs = QuotingUtilities.SplitUnquoted(Traits.MSBuildLoggingArgs);
+
+                List<string> validArgs = new(envVarArgs.Count);
+                List<string> invalidArgs = null;
+
+                foreach (string arg in envVarArgs)
+                {
+                    string unquotedArg = QuotingUtilities.Unquote(arg);
+                    if (string.IsNullOrWhiteSpace(unquotedArg))
+                    {
+                        continue;
+                    }
+
+                    if (IsAllowedLoggingArg(unquotedArg))
+                    {
+                        validArgs.Add(arg);
+                    }
+                    else
+                    {
+                        invalidArgs ??= [];
+                        invalidArgs.Add(unquotedArg);
+                    }
+                }
+
+                if (invalidArgs != null)
+                {
+                    foreach (string invalidArg in invalidArgs)
+                    {
+                        var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out _, "LoggingArgsEnvVarUnsupportedArgument", invalidArg);
+                        deferredBuildMessages.Add(new DeferredBuildMessage(message, warningCode, messageSeverity));
+                    }
+                }
+
+                if (validArgs.Count > 0)
+                {
+                    deferredBuildMessages.Add(new DeferredBuildMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), MessageImportance.Low));
+                    GatherCommandLineSwitches(validArgs, switches, commandLine);
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "LoggingArgsEnvVarError", ex.ToString());
+                deferredBuildMessages.Add(new DeferredBuildMessage(message, errorCode, messageSeverity));
+            }
+        }
+
+        /// <summary>
+        /// Checks if the argument is an allowed logging argument (-bl or -check).
+        /// </summary>
+        /// <param name="arg">The unquoted argument to check.</param>
+        /// <returns>True if the argument is allowed, false otherwise.</returns>
+        private bool IsAllowedLoggingArg(string arg)
+        {
+            if (!ValidateSwitchIndicatorInUnquotedArgument(arg))
+            {
+                return false;
+            }
+
+            ReadOnlySpan<char> switchPart = arg.AsSpan(GetLengthOfSwitchIndicator(arg));
+
+            // Extract switch name (before any ':' parameter indicator)
+            int colonIndex = switchPart.IndexOf(':');
+            ReadOnlySpan<char> switchNameSpan = colonIndex >= 0 ? switchPart.Slice(0, colonIndex) : switchPart;
+            string switchName = switchNameSpan.ToString();
+
+            return IsParameterizedSwitch(
+                    switchName,
+                    out ParameterizedSwitch paramSwitch,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _) && (paramSwitch == ParameterizedSwitch.BinaryLogger || paramSwitch == ParameterizedSwitch.Check);
         }
 
         /// <summary>
@@ -215,126 +316,6 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Identifies if there is rsp files near the project file
-        /// </summary>
-        /// <returns>true if there autoresponse file was found</returns>
-        internal bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
-        {
-            bool found = false;
-
-            var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
-
-            if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
-            {
-                // gather any switches from the first Directory.Build.rsp found in the project directory or above
-                string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
-
-                found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
-
-                // Don't look for more response files if it's only in the same place we already looked (next to the exe)
-                string exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath); // Copied from XMake
-                if (!string.Equals(projectDirectory, exePath, StringComparison.OrdinalIgnoreCase))
-                {
-                    // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                    found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, commandLine);
-                }
-            }
-
-            return found;
-        }
-
-        private static string GetProjectDirectory(string[] projectSwitchParameters)
-        {
-            string projectDirectory = ".";
-            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "Expect exactly one project at a time.");
-
-            if (projectSwitchParameters.Length == 1)
-            {
-                var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
-
-                if (FileSystems.Default.DirectoryExists(projectFile))
-                {
-                    // the provided argument value is actually the directory
-                    projectDirectory = projectFile;
-                }
-                else
-                {
-                    InitializationException.VerifyThrow(FileSystems.Default.FileExists(projectFile), "ProjectNotFoundError", projectFile);
-                    projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
-                }
-            }
-
-            return projectDirectory;
-        }
-
-        /// <summary>
-        /// Extracts a switch's parameters after processing all quoting around the switch.
-        /// </summary>
-        /// <remarks>
-        /// This method is marked "internal" for unit-testing purposes only -- ideally it should be "private".
-        /// </remarks>
-        /// <param name="commandLineArg"></param>
-        /// <param name="unquotedCommandLineArg"></param>
-        /// <param name="doubleQuotesRemovedFromArg"></param>
-        /// <param name="switchName"></param>
-        /// <param name="switchParameterIndicator"></param>
-        /// <param name="switchIndicatorsLength"></param>
-        /// <returns>The given switch's parameters (with interesting quoting preserved).</returns>
-        internal static string ExtractSwitchParameters(
-            string commandLineArg,
-            string unquotedCommandLineArg,
-            int doubleQuotesRemovedFromArg,
-            string switchName,
-            int switchParameterIndicator,
-            int switchIndicatorsLength)
-        {
-
-            // find the parameter indicator again using the quoted arg
-            // NOTE: since the parameter indicator cannot be part of a switch name, quoting around it is not relevant, because a
-            // parameter indicator cannot be escaped or made into a literal
-            int quotedSwitchParameterIndicator = commandLineArg.IndexOf(':');
-
-            // check if there is any quoting in the name portion of the switch
-            string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
-
-            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength),
-                "The switch name extracted from either the partially or completely unquoted arg should be the same.");
-
-            ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
-                "The name portion of the switch cannot contain more quoting than the arg itself.");
-
-            string switchParameters;
-            // if quoting in the name portion of the switch was terminated
-            if ((doubleQuotesRemovedFromSwitchIndicatorAndName % 2) == 0)
-            {
-                // get the parameters exactly as specified on the command line i.e. including quoting
-                switchParameters = commandLineArg.Substring(quotedSwitchParameterIndicator);
-            }
-            else
-            {
-                // if quoting was not terminated in the name portion of the switch, and the terminal double-quote (if any)
-                // terminates the switch parameters
-                int terminalDoubleQuote = commandLineArg.IndexOf('"', quotedSwitchParameterIndicator + 1);
-                if (((doubleQuotesRemovedFromArg - doubleQuotesRemovedFromSwitchIndicatorAndName) <= 1) &&
-                    ((terminalDoubleQuote == -1) || (terminalDoubleQuote == (commandLineArg.Length - 1))))
-                {
-                    // then the parameters are not quoted in any interesting way, so use the unquoted parameters
-                    switchParameters = unquotedCommandLineArg.Substring(switchParameterIndicator);
-                }
-                else
-                {
-                    // otherwise, use the quoted parameters, after compensating for the quoting that was started in the name
-                    // portion of the switch
-                    switchParameters = $":\"{commandLineArg.Substring(quotedSwitchParameterIndicator + 1)}";
-                }
-            }
-
-            ErrorUtilities.VerifyThrow(switchParameters != null, "We must be able to extract the switch parameters.");
-
-            return switchParameters;
         }
 
         /// <summary>
@@ -534,6 +515,126 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Identifies if there is rsp files near the project file
+        /// </summary>
+        /// <returns>true if there autoresponse file was found</returns>
+        internal bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
+        {
+            bool found = false;
+
+            var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
+
+            if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+            {
+                // gather any switches from the first Directory.Build.rsp found in the project directory or above
+                string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
+
+                found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
+
+                // Don't look for more response files if it's only in the same place we already looked (next to the exe)
+                string exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath()); // Copied from XMake
+                if (!string.Equals(projectDirectory, exePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    // this combines any found, with higher precedence, with the switches from the original auto response file switches
+                    found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, commandLine);
+                }
+            }
+
+            return found;
+        }
+
+        private static string GetProjectDirectory(string[] projectSwitchParameters)
+        {
+            string projectDirectory = ".";
+            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "Expect exactly one project at a time.");
+
+            if (projectSwitchParameters.Length == 1)
+            {
+                var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
+
+                if (FileSystems.Default.DirectoryExists(projectFile))
+                {
+                    // the provided argument value is actually the directory
+                    projectDirectory = projectFile;
+                }
+                else
+                {
+                    InitializationException.VerifyThrow(FileSystems.Default.FileExists(projectFile), "ProjectNotFoundError", projectFile);
+                    projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
+                }
+            }
+
+            return projectDirectory;
+        }
+
+        /// <summary>
+        /// Extracts a switch's parameters after processing all quoting around the switch.
+        /// </summary>
+        /// <remarks>
+        /// This method is marked "internal" for unit-testing purposes only -- ideally it should be "private".
+        /// </remarks>
+        /// <param name="commandLineArg"></param>
+        /// <param name="unquotedCommandLineArg"></param>
+        /// <param name="doubleQuotesRemovedFromArg"></param>
+        /// <param name="switchName"></param>
+        /// <param name="switchParameterIndicator"></param>
+        /// <param name="switchIndicatorsLength"></param>
+        /// <returns>The given switch's parameters (with interesting quoting preserved).</returns>
+        internal static string ExtractSwitchParameters(
+            string commandLineArg,
+            string unquotedCommandLineArg,
+            int doubleQuotesRemovedFromArg,
+            string switchName,
+            int switchParameterIndicator,
+            int switchIndicatorsLength)
+        {
+
+            // find the parameter indicator again using the quoted arg
+            // NOTE: since the parameter indicator cannot be part of a switch name, quoting around it is not relevant, because a
+            // parameter indicator cannot be escaped or made into a literal
+            int quotedSwitchParameterIndicator = commandLineArg.IndexOf(':');
+
+            // check if there is any quoting in the name portion of the switch
+            string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
+
+            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength),
+                "The switch name extracted from either the partially or completely unquoted arg should be the same.");
+
+            ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
+                "The name portion of the switch cannot contain more quoting than the arg itself.");
+
+            string switchParameters;
+            // if quoting in the name portion of the switch was terminated
+            if ((doubleQuotesRemovedFromSwitchIndicatorAndName % 2) == 0)
+            {
+                // get the parameters exactly as specified on the command line i.e. including quoting
+                switchParameters = commandLineArg.Substring(quotedSwitchParameterIndicator);
+            }
+            else
+            {
+                // if quoting was not terminated in the name portion of the switch, and the terminal double-quote (if any)
+                // terminates the switch parameters
+                int terminalDoubleQuote = commandLineArg.IndexOf('"', quotedSwitchParameterIndicator + 1);
+                if (((doubleQuotesRemovedFromArg - doubleQuotesRemovedFromSwitchIndicatorAndName) <= 1) &&
+                    ((terminalDoubleQuote == -1) || (terminalDoubleQuote == (commandLineArg.Length - 1))))
+                {
+                    // then the parameters are not quoted in any interesting way, so use the unquoted parameters
+                    switchParameters = unquotedCommandLineArg.Substring(switchParameterIndicator);
+                }
+                else
+                {
+                    // otherwise, use the quoted parameters, after compensating for the quoting that was started in the name
+                    // portion of the switch
+                    switchParameters = $":\"{commandLineArg.Substring(quotedSwitchParameterIndicator + 1)}";
+                }
+            }
+
+            ErrorUtilities.VerifyThrow(switchParameters != null, "We must be able to extract the switch parameters.");
+
+            return switchParameters;
+        }
+
+        /// <summary>
         /// Checks whether envVar is an environment variable. MSBuild uses
         /// Environment.ExpandEnvironmentVariables(string), which only
         /// considers %-delimited variables.
@@ -542,7 +643,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>Whether envVar is an environment variable</returns>
         private static bool IsEnvironmentVariable(string envVar)
         {
-            return envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1;
+            return envVar.StartsWith("%", StringComparison.Ordinal) && envVar.EndsWith("%", StringComparison.Ordinal) && envVar.Length > 1;
         }
 
         /// <summary>
@@ -620,7 +721,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        internal void ResetGatheringSwitchesState()
+        public void ResetGatheringSwitchesState()
         {
             includedResponseFiles = new List<string>();
             CommandLineSwitches.SwitchesFromResponseFiles = new();

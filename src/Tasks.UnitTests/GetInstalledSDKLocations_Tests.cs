@@ -9,6 +9,8 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -457,5 +459,102 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Tests for GetInstalledSDKLocations multithreaded task migration.
+    /// Verifies interface compliance, path absolutization via TaskEnvironment,
+    /// concurrent execution safety, and behavioral equivalence across environments.
+    /// </summary>
+    public sealed class GetInstalledSDKLocationsMultiThreadTests : IClassFixture<FakeSDKStructure>, IDisposable
+    {
+        private readonly ITestOutputHelper _output;
+        private readonly TestEnvironment _env;
+        private readonly string _fakeSDKStructureRoot;
+
+        public GetInstalledSDKLocationsMultiThreadTests(FakeSDKStructure fakeSDKStructure, ITestOutputHelper output)
+        {
+            _output = output;
+            _env = TestEnvironment.Create(output);
+            _fakeSDKStructureRoot = fakeSDKStructure.FakeSdkStructureRoot;
+        }
+
+        public void Dispose() => _env.Dispose();
+
+
+        /// <summary>
+        /// Verifies that relative SDKDirectoryRoots are resolved via TaskEnvironment's project
+        /// directory, NOT via the process working directory. Uses two TaskEnvironments pointing
+        /// at different project directories with the same relative root name — one finds SDKs
+        /// (correct parent) and the other finds none (wrong parent), proving absolutization
+        /// goes through TaskEnvironment.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void Execute_WithRelativeDirectoryRoots_AbsolutizesViaTaskEnvironment()
+        {
+            string parentDir = Path.GetDirectoryName(_fakeSDKStructureRoot);
+            string relativeName = Path.GetFileName(_fakeSDKStructureRoot);
+
+            // Set CWD to an unrelated directory so relative paths can't accidentally
+            // resolve via process CWD.
+            _env.SetCurrentDirectory(Path.GetTempPath());
+
+            // TaskEnvironment pointing at the CORRECT parent — relative root should resolve
+            // to the real fake SDK structure.
+            var correctEnv = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(
+                parentDir,
+                new Dictionary<string, string>
+                {
+                    ["MSBUILDDISABLEREGISTRYFORSDKLOOKUP"] = "true",
+                });
+
+            var engineCorrect = new MockEngine(_output);
+            var taskCorrect = new GetInstalledSDKLocations
+            {
+                TargetPlatformIdentifier = "Windows",
+                TargetPlatformVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString(),
+                SDKDirectoryRoots = new[] { relativeName },
+                SDKRegistryRoot = String.Empty,
+                BuildEngine = engineCorrect,
+                TaskEnvironment = correctEnv,
+            };
+            bool successCorrect = taskCorrect.Execute();
+
+            successCorrect.ShouldBeTrue();
+            taskCorrect.InstalledSDKs.ShouldNotBeNull();
+            taskCorrect.InstalledSDKs.Length.ShouldBe(3, "Correct project directory should resolve the relative root to the real SDK structure");
+
+            // Output metadata must preserve the original relative value (Sin 1 check).
+            foreach (ITaskItem item in taskCorrect.InstalledSDKs)
+            {
+                item.GetMetadata("DirectoryRoots").ShouldBe(relativeName);
+            }
+
+            // TaskEnvironment pointing at the WRONG parent — same relative name resolves
+            // to a non-existent directory, proving resolution goes through TaskEnvironment.
+            string wrongParent = _env.CreateFolder().Path;
+            var wrongEnv = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(
+                wrongParent,
+                new Dictionary<string, string>
+                {
+                    ["MSBUILDDISABLEREGISTRYFORSDKLOOKUP"] = "true",
+                });
+
+            var engineWrong = new MockEngine(_output);
+            var taskWrong = new GetInstalledSDKLocations
+            {
+                TargetPlatformIdentifier = "Windows",
+                TargetPlatformVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString(),
+                SDKDirectoryRoots = new[] { relativeName },
+                SDKRegistryRoot = String.Empty,
+                BuildEngine = engineWrong,
+                TaskEnvironment = wrongEnv,
+            };
+            bool successWrong = taskWrong.Execute();
+
+            successWrong.ShouldBeTrue();
+            taskWrong.InstalledSDKs.ShouldNotBeNull();
+            taskWrong.InstalledSDKs.Length.ShouldBe(0, "Wrong project directory should not find any SDKs");
+        }
     }
 }

@@ -184,6 +184,7 @@ namespace Microsoft.Build.Evaluation
                             }
 
                             transformExpressions.Add(new ItemExpressionCapture(startQuoted, endQuoted - startQuoted, expression.Substring(startQuoted, endQuoted - startQuoted)));
+                            SinkWhitespace(expression, ref currentIndex);
                             continue;
                         }
 
@@ -198,6 +199,7 @@ namespace Microsoft.Build.Evaluation
                             }
 
                             transformExpressions.Add(functionCapture.Value);
+                            SinkWhitespace(expression, ref currentIndex);
                             continue;
                         }
 
@@ -336,12 +338,14 @@ namespace Microsoft.Build.Evaluation
                         bool isQuotedTransform = SinkSingleQuotedExpression(expression, ref i, end);
                         if (isQuotedTransform)
                         {
+                            SinkWhitespace(expression, ref i);
                             continue;
                         }
 
                         ItemExpressionCapture? functionCapture = SinkItemFunctionExpression(expression, startTransform, ref i, end);
                         if (functionCapture != null)
                         {
+                            SinkWhitespace(expression, ref i);
                             continue;
                         }
 

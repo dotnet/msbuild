@@ -34,6 +34,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
@@ -63,6 +64,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
@@ -111,6 +113,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     DestinationFolder = new TaskItem(folder.Path),
                     DestinationFileName = new TaskItem(filename),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => response),
@@ -141,6 +144,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     DestinationFolder = new TaskItem(folder.Path),
                     DestinationFileName = new TaskItem(filename),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
@@ -169,6 +173,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             DownloadFile downloadFile = new DownloadFile()
             {
                 BuildEngine = _mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 SourceUrl = "&&&&&"
             };
 
@@ -183,6 +188,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             DownloadFile downloadFile = new DownloadFile()
             {
                 BuildEngine = _mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.NotFound)),
                 SourceUrl = "http://notfound/foo.txt"
             };
@@ -206,6 +212,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile()
                 {
                     BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
@@ -238,6 +245,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             DownloadFile downloadFile = new DownloadFile()
             {
                 BuildEngine = _mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.RequestTimeout)),
                 Retries = 1,
                 RetryDelayMilliseconds = 100,
@@ -257,6 +265,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             DownloadFile downloadFile = new DownloadFile()
             {
                 BuildEngine = _mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 HttpMessageHandler = new MockHttpMessageHandler((message, token) =>
                 {
                     // Http timeouts manifest as "OperationCanceledExceptions" from the handler, simulate that
@@ -319,6 +328,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
@@ -349,6 +359,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             DownloadFile downloadFile = new DownloadFile()
             {
                 BuildEngine = _mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent("Success!"),

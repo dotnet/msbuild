@@ -28,7 +28,7 @@ resources:
     branch: main # for daily main scheduled insertion
     trigger:
       branches:
-        include: # trigger as a followup to servicing CI
+        include: # trigger as a followup to CI on servicing branches
           - vs*
   repositories:
   - repository: 1ESPipelineTemplates
@@ -44,17 +44,8 @@ parameters:
     values:
       - auto
       - main
-      - rel/d18.1
-      - rel/d18.0
-      - rel/d17.14
-      - rel/d17.13
-      - rel/d17.12
-      - rel/d17.11
-      - rel/d17.10
-      - rel/d17.8
-      - rel/d17.6
-      - rel/d17.3
-      - rel/d17.0
+      - rel/insiders
+      - rel/stable
   - name: DropRetentionDays
     default: 183
     type: number
@@ -66,40 +57,11 @@ parameters:
 
 variables:
   # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
-  - name: AutoInsertTargetBranch
-    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.1') }}:
-      value: 'rel/d18.1'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs18.0') }}:
-      value: 'rel/d18.0'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.14') }}:
-      value: 'rel/d17.14'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.13') }}:
-      value: 'rel/d17.13'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.12') }}:
-      value: 'rel/d17.12'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.11') }}:
-      value: 'rel/d17.11'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.10') }}:
-      value: 'rel/d17.10'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.8') }}:
-      value: 'rel/d17.8'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.6') }}:
-      value: 'rel/d17.6'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.3') }}:
-      value: 'rel/d17.3'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.0') }}:
-      value: 'rel/d17.0'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'main') }}:
-      value: 'main'
-    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.15') }}:
-      value: 'main'
-    ${{ else }}:
-      value: ''
   - name: InsertTargetBranch
     ${{ if not(eq(parameters.TargetBranch, 'auto')) }}:
       value: ${{ parameters.TargetBranch }}
     ${{ else }}:
-      value: $(AutoInsertTargetBranch)
+      value: 'main'
   - name:  TeamName
     value: msbuild
   - name: TeamEmail
@@ -121,8 +83,10 @@ variables:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
     pool:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSStable
     customBuildTags:
     - ES365AIMigrationTooling-Release
     stages:
@@ -218,26 +182,10 @@ extends:
               $MicrosoftNETStringToolsPackageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
               Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$MicrosoftNETStringToolsPackageVersion'"
               Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($MicrosoftNETStringToolsPackageVersion)"
-              $props = @(
-                      "VS.ExternalAPIs.MSBuild=$MSBuild_ExtApisPackageVersion",
-                      "Microsoft.Build=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.Build.Framework=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.Build.Tasks.Core=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.Build.Utilities.Core=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.NET.StringTools=$MicrosoftNETStringToolsPackageVersion"
-                  )
-              # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
-              if ("$(InsertTargetBranch)" -in @("rel/d17.0", "rel/d17.3", "rel/d17.6", "rel/d17.8", "rel/d17.10", "rel/d17.11", "rel/d17.12"))
 
-              {
-                  $props += @(
-                      "Microsoft.Build.Conversion.Core=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.Build.Engine=$MicrosoftNETStringToolsPackageVersion"
-                  )
-              }
-              $propsValue = $props -join ";"
-              Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
-              Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+              # InsertPackagePropsValues was needed for old servicing branches (rel/d17.x) but is not used for main
+              Write-Host "Unsetting InsertPackagePropsValues"
+              Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]"
 
               # autocomplete main
               $autocomplete = "false"
@@ -257,27 +205,14 @@ extends:
             nuGetFeedType: internal
             publishVstsFeed: VS
             allowPackageConflicts: false
-        - template: /azure-pipelines/WIFtoPATauth.yml@self
-          parameters:
-            wifServiceConnectionName: azure-public/vside package push
-            deadPATServiceConnectionId: 42175e93-c771-4a4f-a132-3cca78f44b3b
-        - task: 1ES.PublishNuGet@1
-          condition: ${{ eq(parameters.SkipUploadingPackages, false) }}
-          displayName: 'Push MSBuild packages to VSSDK'
-          inputs:
-            packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            packagesToPush: $(MSBuildPackagePattern);$(StringToolsPackagePattern)
-            nuGetFeedType: external
-            publishFeedCredentials: azure-public/vssdk
-            allowPackageConflicts: false
         - task: PowerShell@2
           name: PrintTargetBranch
           inputs:
             targetType: inline
             script: |
               Write-Host "InsertTargetBranch: $(InsertTargetBranch)"
-        - task: MicroBuildInsertVsPayload@4
-          name: MicroBuildInsertVsPayload_4
+        - task: MicroBuildInsertVsPayload@5
+          name: MicroBuildInsertVsPayload_5
           displayName: Insert VS Payload
           inputs:
             LinkWorkItemsToPR: true
@@ -293,4 +228,7 @@ extends:
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
             AutoCompletePR: $(AutoCompleteEnabled)
             AutoCompleteMergeStrategy: Squash
-            InsertionBuildPolicy: Request Perf DDRITs
+            InsertionBuildPolicies: 'Request Perf DDRITs'
+            ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
