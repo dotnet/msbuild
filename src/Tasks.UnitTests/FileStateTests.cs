@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -417,6 +418,56 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(new FileState(TestPath(file)).FileExists);
             Assert.False(new FileState(TestPath(file)).DirectoryExists);
+        }
+
+        /// <summary>
+        /// Verifies that FileState correctly reports a file as existing when the full path exceeds
+        /// MAX_PATH (260 chars). Without the extended-length path (\\?\) fix, GetFileAttributesEx
+        /// returns ERROR_PATH_NOT_FOUND in non-longPathAware processes even when LongPathsEnabled=1
+        /// is set in the registry (MaxPath = int.MaxValue), causing FileExists to return false.
+        /// </summary>
+        [Fact]
+        public void ExistsWithLongPath()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return; // long-path Win32 behaviour is Windows-only
+            }
+
+            string longDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(longDir);
+
+            string longFilePath = null;
+            try
+            {
+                // Build a filename long enough that the full path exceeds MAX_PATH (260).
+                string longFileName = new string('A', 200) + ".txt";
+                longFilePath = Path.Combine(longDir, longFileName);
+
+                if (longFilePath.Length <= NativeMethodsShared.MAX_PATH)
+                {
+                    return; // path not long enough on this machine; nothing to test
+                }
+
+                // Use \\?\ extended-length prefix so file creation succeeds regardless of whether
+                // the test host process is longPathAware (e.g. net472 testhost is NOT longPathAware).
+                File.WriteAllText(@"\\?\" + longFilePath, "test");
+
+                // FileState must resolve existence via its own \\?\ logic (the fix under test).
+                // Pass the plain path — NOT the \\?\ path — to exercise the production code path.
+                var state = new FileState(TestPath(longFilePath));
+                Assert.True(state.FileExists, $"FileState.FileExists should be true for existing long-path file (length={longFilePath.Length}).");
+                Assert.False(state.DirectoryExists);
+            }
+            finally
+            {
+                if (longFilePath != null)
+                {
+                    // Delete using \\?\ because the test host may not be longPathAware.
+                    try { File.Delete(@"\\?\" + longFilePath); } catch { }
+                }
+                Directory.Delete(longDir, recursive: false);
+            }
         }
     }
 }

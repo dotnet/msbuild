@@ -376,7 +376,10 @@ namespace Microsoft.Build.Tasks
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.Path, destinationFileState.Path);
 
-                File.Copy(sourceFileState.Path, destinationFileState.Path, true);
+                File.Copy(
+                    NativeMethodsShared.EnsureExtendedLengthPath(sourceFileState.Path),
+                    NativeMethodsShared.EnsureExtendedLengthPath(destinationFileState.Path),
+                    true);
             }
 
             // If the destinationFile file exists, then make sure it's read-write.

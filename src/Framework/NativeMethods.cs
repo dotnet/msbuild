@@ -684,7 +684,7 @@ internal static class NativeMethods
 #if FEATURE_WINDOWSINTEROP
         if (IsWindows)
         {
-            if (PInvoke.GetFileAttributesEx(fullPath, out WIN32_FILE_ATTRIBUTE_DATA data)
+            if (PInvoke.GetFileAttributesEx(EnsureExtendedLengthPath(fullPath), out WIN32_FILE_ATTRIBUTE_DATA data)
                 && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0)
             {
                 fileModifiedTimeUtc = DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
@@ -880,7 +880,7 @@ internal static class NativeMethods
                     return GetContentLastWriteFileUtcTime(path);
                 }
 
-                bool success = PInvoke.GetFileAttributesEx(path, out WIN32_FILE_ATTRIBUTE_DATA data);
+                bool success = PInvoke.GetFileAttributesEx(EnsureExtendedLengthPath(path), out WIN32_FILE_ATTRIBUTE_DATA data);
 
                 if (success && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
@@ -1324,6 +1324,19 @@ internal static class NativeMethods
 
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
+
+    internal static string EnsureExtendedLengthPath(string path)
+    {
+        if (!IsWindows || path == null || path.Length < MAX_PATH ||
+            path.StartsWith(@"\\?\", StringComparison.Ordinal))
+        {
+            return path;
+        }
+
+        return path.StartsWith(@"\\", StringComparison.Ordinal)
+            ? @"\\?\UNC\" + path.Substring(2)
+            : @"\\?\" + path;
+    }
 
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
