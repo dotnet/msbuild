@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -28,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Associate a (nodeID and project_context_id) to a target framework.
         /// </summary>
         internal Dictionary<(int nodeId, int contextId), string> propertyOutputMap = new Dictionary<(int nodeId, int contextId), string>();
-
+        private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
         #region Constructors
         /// <summary>
         /// Default constructor.
@@ -204,6 +204,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _hasBuildStarted = false;
 
             // Reset the data structures created when the logger was created
+            _registeredLoggers.Clear();
             propertyOutputMap = new Dictionary<(int, int), string>();
             _buildEventManager = new BuildEventManager();
             _deferredMessages = new Dictionary<BuildEventContext, List<BuildMessageEventArgs>>(s_compareContextNodeId);
@@ -286,6 +287,23 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteNewLine();
                 WriteLinePretty(e.Message);
                 resetColor();
+            }
+
+            // Show paths to the files created by enabled loggers.
+            if (ShowSummary == true
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+                && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
+            {
+                WriteNewLine();
+
+                foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
+                {
+                    string displayPaths = string.Join(
+                        CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
+                        logger.OutputFilePaths);
+
+                    WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
+                }
             }
 
             // The decision whether or not to show a summary at this verbosity
@@ -1124,7 +1142,6 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
-
             if (e.BuildEventContext == null && e is AssemblyLoadBuildEventArgs)
             {
                 return;
@@ -1212,6 +1229,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     var evaluationKey = GetEvaluationKey(e.BuildEventContext);
                     propertyOutputMap[evaluationKey] = value;
                 }
+            }
+            else if (e is LoggersRegisteredEventArgs loggerEvent)
+            {
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
             }
             else if (e is BuildCanceledEventArgs buildCanceled)
             {

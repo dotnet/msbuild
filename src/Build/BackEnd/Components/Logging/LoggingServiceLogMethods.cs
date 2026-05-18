@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -9,6 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -360,6 +361,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+
+            // Register Loggers and print out all the enabled loggers.
+            if (!OnlyLogCriticalEvents)
+            {
+                LogAndRegisterLoggers();
+            }
         }
 
         /// <summary>
@@ -389,6 +396,64 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+        }
+
+        /// <summary>
+        /// In a single pass over the registered loggers, emits a message listing the enabled logger
+        /// type names and a <see cref="LoggersRegisteredEventArgs"/> describing each logger (including
+        /// any output file paths for <see cref="IFileOutputLogger"/> implementations).
+        /// </summary>
+        private void LogAndRegisterLoggers()
+        {
+            List<string> listOfLoggers = new();
+            var loggerDescriptions = new List<RegisteredLoggerInfo>();
+
+            foreach (ILogger logger in Loggers)
+            {
+                ILogger actualLogger = UnwrapLogger(logger);
+                Type loggerType = actualLogger.GetType();
+
+                listOfLoggers.Add(loggerType.FullName ?? loggerType.Name);
+
+                var outputFilePaths = new List<string>();
+                if (actualLogger is IFileOutputLogger fileLogger)
+                {
+                    foreach (string outputFilePath in fileLogger.OutputFilePaths)
+                    {
+                        if (!string.IsNullOrEmpty(outputFilePath))
+                        {
+                            outputFilePaths.Add(outputFilePath);
+                        }
+                    }
+                }
+
+                loggerDescriptions.Add(new RegisteredLoggerInfo(
+                    loggerName: loggerType.Name,
+                    outputFilePaths: outputFilePaths.Count > 0 ? outputFilePaths : null,
+                    verbosity: actualLogger.Verbosity,
+                    loggerTypeFullName: loggerType.FullName,
+                    parameters: actualLogger.Parameters));
+            }
+
+            if (listOfLoggers.Count != 0)
+            {
+                var msgEvent = new BuildMessageEventArgs(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", listOfLoggers)),
+                    null, null, MessageImportance.Low);
+                msgEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(msgEvent);
+            }
+
+            if (loggerDescriptions.Count > 0)
+            {
+                var registerEvent = new LoggersRegisteredEventArgs(loggerDescriptions);
+                registerEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(registerEvent);
+            }
+        }
+        private ILogger UnwrapLogger(ILogger logger)
+        {
+            return logger is ReusableLogger reusable ? reusable.OriginalLogger : logger;
         }
 
         /// <inheritdoc />
