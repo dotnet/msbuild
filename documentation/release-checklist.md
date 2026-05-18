@@ -73,8 +73,12 @@ Use `--configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}` on every c
   `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}`
   - [ ] **1.2d** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE1_DARC_PR}}
   - [ ] **1.2e** Ping internal "First Responders" Teams channel to get the new `VS {{NEXT_VERSION}}` channel available as a promotion target: {{URL_OF_CHANNEL_PROMOTION_PR}}
-- [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`: \
-Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
+- [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`:
+  - [ ] **1.3a** Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
+  - [ ] **1.3b** **Retire predecessor branches that will no longer be supported.** Remove their `MergeToBranch` entries and rewire the chain to skip them so automation does not open stale forward-merge PRs. \
+  How to identify a retired branch:
+    - **SDK releases** — check the lifecycle table at https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle; any branch tied to an SDK band that is past its support end date is retired.
+    - **VS releases** — the retired branch is always the version directly preceding the one being released (i.e. `vs{{THIS_RELEASE_VERSION}} - 1`).
 
 ---
 
@@ -196,6 +200,7 @@ Click *Request – Reference Publishing*. Use [existing ticket](https://dev.azur
   ```
   Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate.
 - [ ] **5.4** Update `BootstrapSdkVersion` in [`eng/Versions.props`](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props) if a fresh SDK was released. Check https://dotnet.microsoft.com/download/visual-studio-sdks — always verify the details for the targeted .NET version.
+- [ ] **5.4b** Update `tools.dotnet` in [`global.json`](https://github.com/dotnet/msbuild/blob/main/global.json) to the latest released SDK in the targeted band. `DotNetCliVersion` in `eng/Versions.props` is derived from this and **must** match (see the comment on `DotNetCliVersion`). This bump should happen monthly as new SDKs release.
 - [ ] **5.5** Extend OptProf data expiration for `vs{{THIS_RELEASE_VERSION}}` branch if the release is LTSC:
   - Find the drop at `OptimizationData/DotNet-msbuild-Trusted/vs{{THIS_RELEASE_VERSION}}/...` (in MSBuild CI logs: Build task, or OptProf pipeline: "Publish OptimizationInputs drop" task)
   - Get [drop.exe](https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/azure-artifacts/drop-service/azure-artifacts-drop) CLI
