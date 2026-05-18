@@ -361,7 +361,11 @@ namespace Microsoft.Build.CommandLine
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
-                string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                string projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                    ProcessProjectSwitch(
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                        Directory.GetFiles));
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
@@ -2225,7 +2229,11 @@ namespace Microsoft.Build.CommandLine
                                                            commandLine);
                     }
 
-                    projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                        ProcessProjectSwitch(
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                            Directory.GetFiles));
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -3237,6 +3245,104 @@ namespace Microsoft.Build.CommandLine
             }
 
             return projectFile;
+        }
+
+        /// <summary>
+        /// On Unix, rebases a relative project path onto the shell's logical working directory (<c>$PWD</c>)
+        /// when <c>$PWD</c> physically resolves to the same directory as <see cref="Directory.GetCurrentDirectory"/>.
+        /// This makes MSBuild produce the same <c>$(MSBuildProjectFullPath)</c> (and therefore the same
+        /// intermediate/output paths) regardless of whether the user reached the project via an absolute path
+        /// through a symlink or via a relative path under a symlinked working directory.
+        /// </summary>
+        /// <remarks>
+        /// No-op on Windows (where <c>GetCurrentDirectory</c> already returns the as-typed path), when
+        /// <paramref name="projectFile"/> is absolute, when <c>PWD</c> is unset/relative, or when <c>PWD</c>'s
+        /// physical target differs from <c>getcwd()</c> (defense against a stale or mismatched <c>PWD</c>).
+        /// Gated by <see cref="ChangeWaves.Wave18_8"/> so users can opt out via
+        /// <c>MSBuildDisableFeaturesFromVersion</c> if the change breaks an existing workflow.
+        /// </remarks>
+        internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
+        {
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+                || NativeMethodsShared.IsWindows
+                || string.IsNullOrEmpty(projectFile)
+                || Path.IsPathRooted(projectFile))
+            {
+                return projectFile;
+            }
+
+            string logicalCurrentDirectory = Environment.GetEnvironmentVariable("PWD");
+            if (string.IsNullOrEmpty(logicalCurrentDirectory) || !Path.IsPathRooted(logicalCurrentDirectory))
+            {
+                return projectFile;
+            }
+
+            string currentDirectory = Directory.GetCurrentDirectory();
+            if (!IsSamePhysicalDirectory(logicalCurrentDirectory, currentDirectory))
+            {
+                return projectFile;
+            }
+
+            string logicalProjectFile = Path.GetFullPath(Path.Combine(logicalCurrentDirectory, projectFile));
+
+            // A relative path without ".." segments can never lexically escape the shared physical prefix,
+            // so rebasing onto PWD is always safe. With ".." segments, lexical normalization may collapse
+            // the path above the prefix before any symlink resolution happens, so the logical and physical
+            // resolutions can land on different files. In that case, only rebase when both resolutions
+            // refer to the same physical target.
+            if (projectFile.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains(".."))
+            {
+                string currentProjectFile = Path.GetFullPath(projectFile);
+                if (!IsSamePhysicalPath(logicalProjectFile, currentProjectFile))
+                {
+                    return projectFile;
+                }
+            }
+
+            return logicalProjectFile;
+        }
+
+        private static bool IsSamePhysicalPath(string firstPath, string secondPath)
+        {
+            if (FileSystems.Default.DirectoryExists(firstPath) && FileSystems.Default.DirectoryExists(secondPath))
+            {
+                return IsSamePhysicalDirectory(firstPath, secondPath);
+            }
+
+            if (FileSystems.Default.FileExists(firstPath) && FileSystems.Default.FileExists(secondPath))
+            {
+                string firstDirectory = Path.GetDirectoryName(firstPath);
+                string secondDirectory = Path.GetDirectoryName(secondPath);
+
+                return string.Equals(Path.GetFileName(firstPath), Path.GetFileName(secondPath), StringComparison.Ordinal) &&
+                    IsSamePhysicalDirectory(firstDirectory, secondDirectory);
+            }
+
+            return false;
+        }
+
+        // Compares two directories for physical-path equivalence by canonicalizing each through getcwd().
+        // .NET does not expose POSIX realpath(3), and Path.GetFullPath only normalizes lexically (does not
+        // resolve symlinks). Mutating the process cwd is safe here because callers run on the single-threaded
+        // command-line parsing path before any build worker threads or child processes are started.
+        private static bool IsSamePhysicalDirectory(string firstDirectory, string secondDirectory)
+        {
+            string savedCurrentDirectory = Directory.GetCurrentDirectory();
+            try
+            {
+                Directory.SetCurrentDirectory(firstDirectory);
+                string resolvedFirstDirectory = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(secondDirectory);
+                return string.Equals(Directory.GetCurrentDirectory(), resolvedFirstDirectory, StringComparison.Ordinal);
+            }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+            {
+                return false;
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(savedCurrentDirectory);
+            }
         }
 
         private static void ValidateExtensions(string[] projectExtensionsToIgnore)

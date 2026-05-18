@@ -550,7 +550,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
             if (projectSwitchParameters.Length == 1)
             {
-                var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
+                var projectFile = MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(FileUtilities.FixFilePath(projectSwitchParameters[0]));
 
                 if (FileSystems.Default.DirectoryExists(projectFile))
                 {
@@ -562,6 +562,10 @@ namespace Microsoft.Build.CommandLine.Experimental
                     InitializationException.VerifyThrow(FileSystems.Default.FileExists(projectFile), "ProjectNotFoundError", projectFile);
                     projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
                 }
+            }
+            else
+            {
+                projectDirectory = MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(projectDirectory);
             }
 
             return projectDirectory;
