@@ -20,7 +20,8 @@ namespace Microsoft.Build.Tasks
     /// Take suggested redirects (from the ResolveAssemblyReference and GenerateOutOfBandAssemblyTables tasks)
     /// and add them to an intermediate copy of the App.config file.
     /// </summary>
-    public class GenerateBindingRedirects : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class GenerateBindingRedirects : TaskExtension, IMultiThreadableTask
     {
         // <param name="SuggestedRedirects">RAR suggested binding redirects.</param>
         // <param name="AppConfigFile">The source App.Config file.</param>
@@ -48,6 +49,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem OutputAppConfigFile { get; set; }
+
+        /// <summary>
+        /// Provides access to safe task environment APIs for path resolution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Execute the task.
@@ -105,7 +111,8 @@ namespace Microsoft.Build.Tasks
             runtimeNode.Add(redirectNodes);
 
             var writeOutput = true;
-            var outputExists = FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec);
+            var outputAppConfigFile = TaskEnvironment.GetAbsolutePath(OutputAppConfigFile.ItemSpec);
+            var outputExists = FileSystems.Default.FileExists(outputAppConfigFile);
 
             if (outputExists)
             {
@@ -135,7 +142,7 @@ namespace Microsoft.Build.Tasks
             if (writeOutput)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
-                using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
+                using (var stream = FileUtilities.OpenWrite(outputAppConfigFile, false))
                 {
                     doc.Save(stream);
                 }
@@ -337,7 +344,7 @@ namespace Microsoft.Build.Tasks
             else
             {
                 var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
-                using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigItem.ItemSpec), xrs))
+                using (XmlReader xr = XmlReader.Create(File.OpenRead(TaskEnvironment.GetAbsolutePath(appConfigItem.ItemSpec)), xrs))
                 {
                     document = XDocument.Load(xr);
                 }
