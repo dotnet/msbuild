@@ -1,9 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -48,7 +47,7 @@ namespace Microsoft.Build.BackEnd
     /// </remarks>
     public static bool NeedsTaskHostInMultiThreadedMode(Type taskType)
     {
-        ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
+        ArgumentNullException.ThrowIfNull(taskType);
 
         // Tasks without the thread-safety attribute need isolation in a TaskHost sidecar
         return !HasMultiThreadableTaskAttribute(taskType);
@@ -104,7 +103,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the task requires a transient TaskHost; false otherwise.</returns>
         public static bool RequiresTransientTaskHost(Type taskType)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
+            ArgumentNullException.ThrowIfNull(taskType);
 
             string? fullName = taskType.FullName;
             if (fullName is null)

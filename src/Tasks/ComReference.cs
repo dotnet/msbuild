@@ -421,7 +421,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Double check that the buffer is not insanely big
-                ErrorUtilities.VerifyThrow(bufferSize <= int.MaxValue / 2, "Buffer size approaching int.MaxValue");
+                Assumed.LessThanOrEqual(bufferSize, int.MaxValue / 2, "Buffer size approaching int.MaxValue");
             }
 
             return string.Empty;

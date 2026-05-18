@@ -14,7 +14,6 @@ using System.Security;
 using System.Threading;
 using System.Runtime.InteropServices.ComTypes;
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #endif
 
@@ -150,7 +149,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool Unregister(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath);
+            ArgumentNullException.ThrowIfNull(typeLibPath);
 
             Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisteringAssembly", assemblyPath);
 

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 #if !NET
 using System.Globalization;
@@ -36,7 +35,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_assemblyFiles, nameof(AssemblyFiles));
+                ArgumentNullException.ThrowIfNull(_assemblyFiles, nameof(AssemblyFiles));
                 return _assemblyFiles;
             }
             set => _assemblyFiles = value;

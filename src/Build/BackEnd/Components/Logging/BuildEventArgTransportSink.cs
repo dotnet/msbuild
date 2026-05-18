@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -39,7 +38,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">Send data delegate is null</exception>
         internal BuildEventArgTransportSink(SendDataDelegate sendData)
         {
-            ErrorUtilities.VerifyThrow(sendData != null, "sendData delegate is null");
+            Assumed.NotNull(sendData, "sendData delegate is null");
             _sendDataDelegate = sendData;
         }
 
@@ -123,9 +122,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This method should not be used since we need the sinkID
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
-        {
-            ErrorUtilities.ThrowInternalError("Do not use this method for the transport sink");
-        }
+            => InternalError.Throw("Do not use this method for the transport sink");
 
         /// <summary>
         /// Consumes the buildEventArg and creates a logMessagePacket
@@ -135,7 +132,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void Consume(BuildEventArgs buildEvent, int sinkId)
         {
-            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+            Assumed.NotNull(buildEvent, "buildEvent is null");
             if (buildEvent is BuildStartedEventArgs)
             {
                 HaveLoggedBuildStartedEvent = true;

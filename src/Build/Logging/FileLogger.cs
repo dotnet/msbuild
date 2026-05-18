@@ -56,7 +56,7 @@ namespace Microsoft.Build.Logging
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource);
+            ArgumentNullException.ThrowIfNull(eventSource);
             eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);
         }

@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security;
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
@@ -38,7 +37,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_assemblies, nameof(Assemblies));
+                ArgumentNullException.ThrowIfNull(_assemblies, nameof(Assemblies));
                 return _assemblies;
             }
             set => _assemblies = value;
@@ -192,7 +191,7 @@ namespace Microsoft.Build.Tasks
         /// </comment>
         public object ResolveRef(Assembly assemblyToResolve)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve);
+            ArgumentNullException.ThrowIfNull(assemblyToResolve);
 
             Log.LogErrorWithCodeFromResources("RegisterAssembly.AssemblyNotRegisteredForComInterop", assemblyToResolve.GetName().FullName);
             _typeLibExportFailed = true;
@@ -208,7 +207,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool Register(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath);
+            ArgumentNullException.ThrowIfNull(typeLibPath);
 
             Log.LogMessageFromResources(MessageImportance.Low, "RegisterAssembly.RegisteringAssembly", assemblyPath);
 

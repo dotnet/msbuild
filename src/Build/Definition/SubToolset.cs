@@ -1,13 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 using ObjectModel = System.Collections.ObjectModel;
 
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal SubToolset(string subToolsetVersion, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion);
+            ArgumentException.ThrowIfNullOrEmpty(subToolsetVersion);
 
             _subToolsetVersion = subToolsetVersion;
             _properties = properties;

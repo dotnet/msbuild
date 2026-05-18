@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -35,8 +34,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">LoggerId is less than 0</exception>
         internal EventRedirectorToSink(int loggerId, IBuildEventSink eventSink)
         {
-            ErrorUtilities.VerifyThrow(eventSink != null, "eventSink is null");
-            ErrorUtilities.VerifyThrow(loggerId >= 0, "loggerId should be greater or equal to 0");
+            Assumed.NotNull(eventSink, "eventSink is null");
+            Assumed.PositiveOrZero(loggerId, "loggerId should be greater or equal to 0");
             _centralLoggerId = loggerId;
             _sink = eventSink;
         }
@@ -51,7 +50,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">BuildEvent is null</exception>
         void IEventRedirector.ForwardEvent(BuildEventArgs buildEvent)
         {
-            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+            Assumed.NotNull(buildEvent, "buildEvent is null");
             _sink.Consume(buildEvent, _centralLoggerId);
         }
         #endregion

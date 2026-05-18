@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -109,7 +108,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public SDKManifest(string pathToSdk)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pathToSdk);
+            ArgumentException.ThrowIfNullOrEmpty(pathToSdk);
             _pathToSdk = pathToSdk;
             LoadManifestFile();
         }

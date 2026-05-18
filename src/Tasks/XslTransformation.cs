@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+                ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
                 return _outputPaths;
             }
 
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Tasks
         {
             XmlInput xmlinput;
             XsltInput xsltinput;
-            ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+            ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
 
             // Load XmlInput, XsltInput parameters
             try
@@ -518,8 +518,7 @@ namespace Microsoft.Build.Tasks
                         throw new PlatformNotSupportedException("Precompiled XSLTs are not supported in .NET Core");
 #endif
                     default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        break;
+                        return Assumed.Unreachable<XslCompiledTransform>();
                 }
 
                 return xslct;

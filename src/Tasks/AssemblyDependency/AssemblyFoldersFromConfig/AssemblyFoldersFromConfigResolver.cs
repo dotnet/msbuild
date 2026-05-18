@@ -127,8 +127,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     {
                         // This should never happen. Microsoft.Common.CurrentVersion.targets will not specify a AssemblyFoldersFromConfig search path
                         // if the specified (or default) file is not found.
-                        ErrorUtilities.VerifyThrow(FileSystems.Default.FileExists(_assemblyFolderConfigFile),
-                            $"The AssemblyFolders config file specified does not exist: {_assemblyFolderConfigFile}");
+                        Assumed.True(FileSystems.Default.FileExists(_assemblyFolderConfigFile), $"The AssemblyFolders config file specified does not exist: {_assemblyFolderConfigFile}");
 
                         try
                         {

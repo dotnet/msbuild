@@ -344,7 +344,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "TargetFrameworkSubsets");
+                ArgumentNullException.ThrowIfNull(value, "TargetFrameworkSubsets");
                 _targetFrameworkSubsets = value;
             }
         }
@@ -494,7 +494,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledAssemblySubsetTables");
+                ArgumentNullException.ThrowIfNull(value, "InstalledAssemblySubsetTables");
                 _installedAssemblySubsetTables = value;
             }
         }
@@ -525,7 +525,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkAssemblyTables");
+                ArgumentNullException.ThrowIfNull(value, "FullFrameworkAssemblyTables");
                 _fullFrameworkAssemblyTables = value;
             }
         }
@@ -877,7 +877,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "FullTargetFrameworkSubsetNames");
+                ArgumentNullException.ThrowIfNull(value, "FullTargetFrameworkSubsetNames");
                 _fullTargetFrameworkSubsetNames = value;
             }
         }
@@ -895,7 +895,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "profileName");
+                ArgumentNullException.ThrowIfNull(value, "profileName");
                 _profileName = value;
             }
         }
@@ -914,7 +914,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkFolders");
+                ArgumentNullException.ThrowIfNull(value, "FullFrameworkFolders");
                 _fullFrameworkFolders = value;
             }
         }
@@ -1369,7 +1369,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log, bool referenceIsUnified = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate);
+            Assumed.NotNull(conflictCandidate);
             log.Append(Strings.FourSpaces);
 
             string resource = referenceIsUnified ? "ResolveAssemblyReference.UnifiedReferenceDependsOn" : "ResolveAssemblyReference.ReferenceDependsOn";
@@ -1799,7 +1799,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="importance">The importance of the message.</param>
         private void LogFullName(Reference reference, MessageImportance importance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reference);
+            ArgumentNullException.ThrowIfNull(reference);
 
             if (reference.IsResolved)
             {

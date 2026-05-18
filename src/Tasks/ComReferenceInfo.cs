@@ -1,11 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 // TYPELIBATTR clashes with the one in InteropServices.
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal bool InitializeWithPath(TaskLoggingHelper log, bool silent, string path, ITaskItem originalTaskItem, string targetProcessorArchitecture)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(path);
+            ArgumentNullException.ThrowIfNull(path);
 
             this.taskItem = originalTaskItem;
 

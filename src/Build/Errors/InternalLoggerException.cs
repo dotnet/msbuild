@@ -89,10 +89,10 @@ namespace Microsoft.Build.Exceptions
             bool initializationException)
             : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
-            ErrorUtilities.VerifyThrow(innerException != null || initializationException, "Need the logger exception.");
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(helpKeyword), "Must specify the help keyword for the IDE.");
+            Assumed.NotNullOrEmpty(message, "Need error message.");
+            Assumed.True(innerException != null || initializationException, "Need the logger exception.");
+            Assumed.NotNullOrEmpty(errorCode, "Must specify the error message code.");
+            Assumed.NotNullOrEmpty(helpKeyword, "Must specify the help keyword for the IDE.");
 
             this.e = e;
             this.errorCode = errorCode;
@@ -244,7 +244,7 @@ namespace Microsoft.Build.Exceptions
             bool initializationException,
             params string[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
+            Assumed.NotNull(messageResourceName, "Need error message.");
 
             string errorCode;
             string helpKeyword;

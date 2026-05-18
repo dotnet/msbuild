@@ -16,8 +16,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal ExtensionFoldersRegistryKey(string registryKey, Version targetFrameworkVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(registryKey);
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion);
+            ArgumentNullException.ThrowIfNull(registryKey);
+            ArgumentNullException.ThrowIfNull(targetFrameworkVersion);
 
             RegistryKey = registryKey;
             TargetFrameworkVersion = targetFrameworkVersion;

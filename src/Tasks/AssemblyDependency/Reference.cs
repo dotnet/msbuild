@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -618,10 +618,8 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrow(
-                    !(IsPrimary && _primarySourceItem == null), "A primary reference must have a primary source item.");
-                ErrorUtilities.VerifyThrow(
-                    IsPrimary || _primarySourceItem == null, "Only a primary reference can have a primary source item.");
+                Assumed.False((IsPrimary && _primarySourceItem == null), "A primary reference must have a primary source item.");
+                Assumed.True(IsPrimary || _primarySourceItem == null, "Only a primary reference can have a primary source item.");
 
                 return _primarySourceItem;
             }
@@ -744,8 +742,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void AddRemapping(AssemblyNameExtension remappedFrom, AssemblyNameExtension remappedTo)
         {
-            ErrorUtilities.VerifyThrow(remappedFrom.Immutable, " Remapped from is NOT immutable");
-            ErrorUtilities.VerifyThrow(remappedTo.Immutable, " Remapped to is NOT immutable");
+            Assumed.True(remappedFrom.Immutable, " Remapped from is NOT immutable");
+            Assumed.True(remappedTo.Immutable, " Remapped to is NOT immutable");
             _remappedAssemblyNames.Add(new AssemblyRemapping(remappedFrom, remappedTo));
         }
 
