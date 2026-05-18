@@ -19,7 +19,8 @@ namespace Microsoft.Build.Tasks
     /// RequestBuilder which spawned them.
     /// </remarks>
     [RunInMTA]
-    public class MSBuild : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class MSBuild : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
@@ -187,6 +188,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetAndPropertyListSeparators { get; set; }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         #endregion
 
         #region ITask Members
@@ -276,7 +280,8 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem project = Projects[i];
 
-                string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
+                AbsolutePath projectPath = FrameworkFileUtilities.FixFilePath(
+                    TaskEnvironment.GetAbsolutePath(project.ItemSpec).GetCanonicalForm());
 
                 if (StopOnFirstFailure && !success)
                 {
