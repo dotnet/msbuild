@@ -64,9 +64,9 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            string outputPath = string.IsNullOrEmpty(OutputPath) ? OutputPath : TaskEnvironment.GetAbsolutePath(OutputPath);
+            AbsolutePath outputPath = string.IsNullOrEmpty(OutputPath) ? default : TaskEnvironment.GetAbsolutePath(OutputPath);
 
-            var launcherBuilder = new LauncherBuilder(LauncherPath);
+            var launcherBuilder = new LauncherBuilder(LauncherPath) { TaskEnvironment = TaskEnvironment };
             string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
 
             // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks
                 entryPointFileName = AssemblyName;
             }
 
-            BuildResults results = launcherBuilder.Build(entryPointFileName, outputPath, OutputPath);
+            BuildResults results = launcherBuilder.Build(entryPointFileName, outputPath);
 
             BuildMessage[] messages = results.Messages;
             if (messages != null)
