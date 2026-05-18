@@ -1,0 +1,55 @@
+name: "Copilot Review on Demand"
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  request-copilot-review:
+    # Only run when '/msbuild-review' is posted on a pull request
+    if: >-
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/msbuild-review')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Acknowledge the request
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            // React with 👀 so the requester knows the workflow picked it up
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes'
+            });
+
+      - name: Request Copilot code review
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                reviewers: ['copilot']
+              });
+              core.info(`Copilot review requested on PR #${prNumber}`);
+            } catch (error) {
+              core.warning(`Failed to request Copilot review: ${error.message}`);
+              // Post a comment explaining the failure
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `⚠️ Could not request Copilot code review automatically.\n\nPlease request it manually via the PR sidebar, or verify that [Copilot code review](https://docs.github.com/en/copilot/using-github-copilot/code-review/using-copilot-code-review) is enabled for this repository.`
+              });
+              throw error;
+            }
