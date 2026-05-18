@@ -60,24 +60,12 @@ namespace Microsoft.Build.Tasks
                         continue;
                     }
 
-                    AbsolutePath folderForResolution;
-                    if (assemblyFolder.Length == 0)
-                    {
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
-                        {
-                            // Skip empty registry entries silently. A malformed AssemblyFolders registry entry should be treated as no match.
-                            continue;
-                        }
-
-                        // Pre-Wave18_8: pass the empty string through to ResolveFromDirectory,
-                        // which Path.Combines it with the assembly name and resolves the resulting
-                        // relative path against the project directory.
-                        folderForResolution = taskEnvironment.ProjectDirectory;
-                    }
-                    else
-                    {
-                        folderForResolution = taskEnvironment.GetAbsolutePath(assemblyFolder);
-                    }
+                    // Pre-MT, an empty registry entry silently resolved to the project directory via
+                    // process CWD. Preserve that behavior by resolving empty entries against the project
+                    // directory via TaskEnvironment.
+                    AbsolutePath folderForResolution = assemblyFolder.Length == 0
+                        ? taskEnvironment.ProjectDirectory
+                        : taskEnvironment.GetAbsolutePath(assemblyFolder);
 
                     string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, folderForResolution, assembliesConsideredAndRejected);
                     if (resolvedPath != null)

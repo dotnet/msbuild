@@ -30,7 +30,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.8
-- [RAR task: across multiple input properties and resolvers, resolve relative paths against the project directory (not the process current directory) and skip empty path inputs instead of resolving them against the process current directory](https://github.com/dotnet/msbuild/pull/13319)
+- [RAR task: across multiple input properties, resolve relative paths against the project directory (not the process current directory)](https://github.com/dotnet/msbuild/pull/13319)
 
 ### 18.7
 - [Copy task retries on ERROR_ACCESS_DENIED on non-Windows platforms to handle transient lock conflicts (e.g. macOS CoW filesystems)](https://github.com/dotnet/msbuild/issues/13463)

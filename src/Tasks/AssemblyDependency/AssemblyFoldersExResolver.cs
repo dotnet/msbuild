@@ -218,26 +218,13 @@ namespace Microsoft.Build.Tasks
                                 continue;
                             }
 
-                            string directoryPath;
-                            if (assemblyFolder.DirectoryPath.Length == 0)
-                            {
-                                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
-                                {
-                                    // Skip empty registry entries silently.A malformed AssemblyFoldersEx registry entry should be treated as no match.
-                                    continue;
-                                }
-
-                                // Pre-Wave18_8: pass the empty string through to ResolveFromDirectory,
-                                // which Path.Combines it with the assembly name and resolves the resulting
-                                // relative path against the project directory.
-                                directoryPath = taskEnvironment.ProjectDirectory;
-                            }
-                            else
-                            {
-                                // Defensively absolutize the directory path — it comes from the registry and should be absolute,
-                                // but we enforce it rather than assume it.
-                                directoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath);
-                            }
+                            // Pre-MT, an empty registry entry silently resolved to the project directory via
+                            // process CWD. Preserve that behavior by resolving empty entries against the project
+                            // directory via TaskEnvironment. Non-empty registry paths should already be absolute
+                            // but are absolutized defensively.
+                            string directoryPath = assemblyFolder.DirectoryPath.Length == 0
+                                ? taskEnvironment.ProjectDirectory
+                                : taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath);
                             string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned

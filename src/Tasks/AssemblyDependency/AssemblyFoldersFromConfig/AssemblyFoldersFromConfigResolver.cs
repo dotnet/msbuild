@@ -180,27 +180,16 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     {
                         foreach (AssemblyFoldersFromConfigInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersFromConfig)
                         {
-                            // Pre-MT, an empty <DirectoryPath/> in the config file silently resolved to
-                            // the project directory because the process CWD was set per-project. Under
-                            // multithreading the CWD is no longer per-project, so we either skip empty
-                            // entries (new, wave-on) or explicitly resolve them against the project
-                            // directory via TaskEnvironment (legacy, wave-off).
-                            string directoryPath;
-                            if (string.IsNullOrEmpty(assemblyFolder.DirectoryPath))
-                            {
-                                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
-                                {
-                                    continue;
-                                }
-
-                                directoryPath = taskEnvironment.ProjectDirectory.Value;
-                            }
-                            else
-                            {
+                            // DirectoryPath is guaranteed non-null by the AssemblyFoldersFromConfigInfo ctor's
+                            // VerifyThrowArgumentNull check, so we only need to handle the empty-string case.
+                            // Pre-MT, an empty <DirectoryPath/> in the config file silently resolved to the
+                            // project directory via process CWD. Preserve that behavior by explicitly resolving
+                            // empty entries against the project directory via TaskEnvironment.
+                            string directoryPath = assemblyFolder.DirectoryPath.Length == 0
+                                ? taskEnvironment.ProjectDirectory.Value
                                 // Absolutize via TaskEnvironment: config paths may be relative, and the
                                 // process CWD is no longer guaranteed to be the project directory under MT.
-                                directoryPath = taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
-                            }
+                                : taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
 
                             string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directoryPath, assembliesConsideredAndRejected);
 

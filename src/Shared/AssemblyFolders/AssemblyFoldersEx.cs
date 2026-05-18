@@ -54,19 +54,6 @@ namespace Microsoft.Build.Shared
         private HashSet<string> _uniqueDirectoryPaths = new HashSet<string>();
 
         /// <summary>
-        /// Test-only constructor that pre-populates the directory list, bypassing the registry walk
-        /// performed by the production constructor.
-        /// </summary>
-        internal AssemblyFoldersEx(IEnumerable<AssemblyFoldersExInfo> directoryNames)
-        {
-            _directoryNames = new List<AssemblyFoldersExInfo>(directoryNames);
-            foreach (AssemblyFoldersExInfo info in _directoryNames)
-            {
-                _uniqueDirectoryPaths.Add(info.DirectoryPath);
-            }
-        }
-
-        /// <summary>
         /// Construct.
         /// </summary>
         /// <param name="registryKeyRoot">Like Software\Microsoft\[.NetFramework | .NetCompactFramework]</param>
