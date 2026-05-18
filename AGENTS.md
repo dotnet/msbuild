@@ -151,7 +151,7 @@ dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ```
 
-You can run a single unit test with `--filter {methodname}`, for example `dotnet test src/Framework.UnitTests/ --filter ExerciseBuildEventContext`.
+You can run a single unit test with `-- --filter-method "*{methodname}*"`, for example `dotnet test src/Framework.UnitTests/ -- --filter-method "*ExerciseBuildEventContext*"`. The `--` is required because these projects use Microsoft.Testing.Platform (MTP), not VSTest — `dotnet test --filter ...` (the legacy VSTest form) reports `Unknown option '--filter'`, `Zero tests ran`, and exit code 5.
 
 ### Test Verification
 

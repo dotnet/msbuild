@@ -44,10 +44,10 @@ Aim for sub-30s iterations.
 
 > Examples below use Windows-style backslashes and PowerShell line continuations. Forward slashes work everywhere with `dotnet` (`src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.csproj`); on Linux/macOS use `/` and shell line continuations (`\`), and the exe path becomes `artifacts/bin/<Proj>/Debug/net10.0/<Proj>` (no `.exe`).
 
-1. **Run via `dotnet test` with a single TFM and filter** (incremental build handles rebuilding automatically):
+1. **Run via `dotnet test` with a single TFM and filter** (incremental build handles rebuilding automatically; `--` is required so the MTP-native filter is passed through, not eaten by `dotnet test`):
    ```powershell
    dotnet test src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj `
-     -f net10.0 --filter "FullyQualifiedName~MyFeature"
+     -f net10.0 -- --filter-method "*MyFeature*"
    ```
 2. **Or run the MTP exe directly** (fastest — no SDK overhead; build first if source changed):
    ```powershell
@@ -122,9 +122,9 @@ Match the source area you changed to its `*.UnitTests` project:
 
 | Scenario | Command |
 |----------|---------|
-| Fast scoped dev loop | `dotnet test <proj> -f net10.0 --filter "FullyQualifiedName~X"` |
+| Fast scoped dev loop | `dotnet test <proj> -f net10.0 -- --filter-method "*X*"` |
 | Direct MTP exe | `artifacts\bin\<Proj>\Debug\net10.0\<Proj>.exe --filter-method "*X*" --no-progress` |
-| Single test by name | `dotnet test <proj> --filter "FullyQualifiedName~MyTestMethod"` |
+| Single test by name | `dotnet test <proj> -- --filter-method "*MyTestMethod*"` |
 | Final per-project validation | `dotnet test <proj> -c Release` (all TFMs) |
 | Final full validation | `.\build.cmd -test -c Release` / `./build.sh --test -c Release` |
 | TRX report | `--report-trx --report-trx-filename out.trx --results-directory artifacts\TestResults` |
