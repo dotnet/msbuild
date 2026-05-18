@@ -36,6 +36,11 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="BinlogFormatVersionMismatch">
+        <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
+        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
+      </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
         <source>Content already acquired as StreamReader via GetContentReader.</source>
         <target state="translated">Conteúdo já adquirido como StreamReader por meio de GetContentReader.</target>
@@ -468,7 +473,7 @@
       </trans-unit>
       <trans-unit id="DotnetHostPathNotSet">
         <source>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</source>
-        <target state="new">DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</target>
+        <target state="translated">DOTNET_HOST_PATH não está definido. Não é possível determinar o local de runtime para a inicialização do host do aplicativo. Isso sempre deve ser definido durante a execução no SDK do .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -596,6 +601,11 @@
         <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
         <target state="translated">Os parâmetros foram truncados além deste ponto. Para exibir todos os parâmetros, limpe a variável de ambiente MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -825,6 +835,17 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
+        <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
+        <target state="new">The project file '{0}' could not be loaded when referenced by {1}.</target>
+        <note>
+      This message is shown during static graph construction when a referenced project file cannot be loaded,
+      along with information about which project(s) are referencing the failed project.
+      {0} is the full path to the project that failed to load
+      {1} is a comma-separated list of full paths to the projects that reference the failed project
+      The specific reason for the load failure (e.g., "Could not find file '...'") is appended separately in code.
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
         <target state="translated">O projeto "{0}" não foi importado por "{1}" em ({2},{3}), porque a expressão foi avaliada como uma cadeia de caracteres vazia.</target>
@@ -926,6 +947,11 @@ Erros: {3}</target>
         <target state="translated">Um SDK tentou definir a variável de ambiente "{0}" como "{1}", mas ela já havia sido definida como "{2}" por outro SDK.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">O SDK '{0}' não pôde ser resolvido pelo resolvedor de SDK '{1}'. {2}</target>
@@ -1006,6 +1032,11 @@ Erros: {3}</target>
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
         <target state="translated">O assembly da tarefa foi carregado de "{0}" enquanto o local desejado era "{1}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
+        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>

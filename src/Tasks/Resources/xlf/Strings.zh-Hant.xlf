@@ -496,7 +496,7 @@
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
         <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
-        <target state="new">MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <target state="translated">MSB3077: 命令 "{0}" 已結束且傳回值為 0，但在執行期間偵測到錯誤。ExitCode 已設定為 -1。</target>
         <note>{StrBegin="MSB3077: "}</note>
       </trans-unit>
       <trans-unit id="Exec.CommandFailed">
@@ -1271,22 +1271,22 @@
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedInvalidIdentifier">
         <source>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</source>
-        <target state="new">MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</target>
+        <target state="translated">MSB3828: 已略過為資源「{0}」產生強型別資源屬性: 該名稱無法轉換為有效識別碼。</target>
         <note>{StrBegin="MSB3828: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedNameCollision">
         <source>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</source>
-        <target state="new">MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</target>
+        <target state="translated">MSB3829: 已略過為資源「{0}」產生強型別資源屬性: 識別碼正規化後與資源「{1}」發生名稱衝突。</target>
         <note>{StrBegin="MSB3829: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedReservedName">
         <source>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</source>
-        <target state="new">MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</target>
+        <target state="translated">MSB3827: 已略過為資源「{0}」產生強型別資源屬性: 該名稱與保留名稱衝突。保留名稱: {1}。</target>
         <note>{StrBegin="MSB3827: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedVoidType">
         <source>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</source>
-        <target state="new">MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</target>
+        <target state="translated">MSB3830: 已略過為資源「{0}」產生強型別資源屬性: 該資源的值型別為 void，無法作為屬性型別使用。</target>
         <note>{StrBegin="MSB3830: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnknownFileExtension">
@@ -2924,7 +2924,7 @@
       </trans-unit>
       <trans-unit id="Xaml.CommandExitedZeroWithErrors">
         <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
-        <target state="new">MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <target state="translated">MSB3725: 命令 "{0}" 已結束且傳回值為 0，但在執行期間偵測到錯誤。ExitCode 已設定為 -1。</target>
         <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">

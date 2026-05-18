@@ -10,10 +10,10 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
@@ -63,6 +63,12 @@ namespace Microsoft.Build.Execution
         /// The startup directory.
         /// </summary>
         private static string s_startupDirectory = NativeMethodsShared.GetCurrentDirectory();
+
+        /// <summary>
+        /// Process-wide flag indicating that the engine is hosted in a long-lived process
+        /// (e.g., the MSBuild Server) that persists across multiple build invocations.
+        /// </summary>
+        private static bool s_isLongLivedHost;
 
         /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
@@ -328,6 +334,7 @@ namespace Microsoft.Build.Execution
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
+            IsLongLivedHost = other.IsLongLivedHost;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
         }
@@ -651,38 +658,38 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the internal msbuild thread stack size.
         /// </summary>
-        internal static int ThreadStackSize => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDTHREADSTACKSIZE", DefaultThreadStackSize);
+        internal static int ThreadStackSize
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDTHREADSTACKSIZE", DefaultThreadStackSize);
 
         /// <summary>
         /// Gets the endpoint shutdown timeout.
         /// </summary>
-        internal static int EndpointShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDENDPOINTSHUTDOWNTIMEOUT", DefaultEndpointShutdownTimeout);
+        internal static int EndpointShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDENDPOINTSHUTDOWNTIMEOUT", DefaultEndpointShutdownTimeout);
 
         /// <summary>
         /// Gets or sets the engine shutdown timeout.
         /// </summary>
-        internal static int EngineShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDENGINESHUTDOWNTIMEOUT", DefaultEngineShutdownTimeout);
+        internal static int EngineShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDENGINESHUTDOWNTIMEOUT", DefaultEngineShutdownTimeout);
 
         /// <summary>
         /// Gets the maximum number of idle request builders to retain.
         /// </summary>
-        internal static int IdleRequestBuilderLimit => GetStaticIntVariableOrDefault("MSBUILDIDLEREQUESTBUILDERLIMIT",
-            ref s_idleRequestBuilderLimit, DefaultIdleRequestBuilderLimit);
+        internal static int IdleRequestBuilderLimit
+            => s_idleRequestBuilderLimit ??= EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDIDLEREQUESTBUILDERLIMIT", DefaultIdleRequestBuilderLimit);
 
         /// <summary>
         /// Gets the logging thread shutdown timeout.
         /// </summary>
-        internal static int LoggingThreadShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDLOGGINGTHREADSHUTDOWNTIMEOUT", DefaultLoggingThreadShutdownTimeout);
+        internal static int LoggingThreadShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDLOGGINGTHREADSHUTDOWNTIMEOUT", DefaultLoggingThreadShutdownTimeout);
 
         /// <summary>
         /// Gets the request builder shutdown timeout.
         /// </summary>
-        internal static int RequestBuilderShutdownTimeout => CommunicationsUtilities.GetIntegerVariableOrDefault(
-            "MSBUILDREQUESTBUILDERSHUTDOWNTIMEOUT", DefaultRequestBuilderShutdownTimeout);
+        internal static int RequestBuilderShutdownTimeout
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDREQUESTBUILDERSHUTDOWNTIMEOUT", DefaultRequestBuilderShutdownTimeout);
 
         /// <summary>
         /// Gets the startup directory.
@@ -700,37 +707,35 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Indicates whether the build plan is enabled or not.
         /// </summary>
-        internal static bool EnableBuildPlan => GetStaticBoolVariableOrDefault("MSBUILDENABLEBUILDPLAN",
-            ref s_enableBuildPlan, false);
+        internal static bool EnableBuildPlan
+            => s_enableBuildPlan ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDENABLEBUILDPLAN", false);
 
         /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
         /// </summary>
         internal static bool WarnOnUninitializedProperty
         {
-            get => GetStaticBoolVariableOrDefault("MSBUILDWARNONUNINITIALIZEDPROPERTY",
-                ref s_warnOnUninitializedProperty, false);
-
+            get => s_warnOnUninitializedProperty ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDWARNONUNINITIALIZEDPROPERTY", false);
             set => s_warnOnUninitializedProperty = value;
         }
 
         /// <summary>
         /// Indicates whether we should dump string interning stats
         /// </summary>
-        internal static bool DumpOpportunisticInternStats => GetStaticBoolVariableOrDefault(
-            "MSBUILDDUMPOPPORTUNISTICINTERNSTATS", ref s_dumpStringInterningStats, false);
+        internal static bool DumpOpportunisticInternStats
+            => s_dumpStringInterningStats ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDDUMPOPPORTUNISTICINTERNSTATS", false);
 
         /// <summary>
         /// Indicates whether we should dump debugging information about the expander
         /// </summary>
-        internal static bool DebugExpansion => GetStaticBoolVariableOrDefault("MSBUILDDEBUGEXPANSION",
-            ref s_debugExpansion, false);
+        internal static bool DebugExpansion
+            => s_debugExpansion ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDDEBUGEXPANSION", false);
 
         /// <summary>
         /// Indicates whether we should keep duplicate target outputs
         /// </summary>
-        internal static bool KeepDuplicateOutputs => GetStaticBoolVariableOrDefault("MSBUILDKEEPDUPLICATEOUTPUTS",
-            ref s_keepDuplicateOutputs, false);
+        internal static bool KeepDuplicateOutputs
+            => s_keepDuplicateOutputs ??= EnvironmentUtilities.ValueExistsOrDefault("MSBUILDKEEPDUPLICATEOUTPUTS", false);
 
         /// <summary>
         /// Gets or sets the build id.
@@ -800,6 +805,25 @@ namespace Microsoft.Build.Execution
         ///  (for diagnostic use) Whether or not this is out of proc
         /// </summary>
         internal bool IsOutOfProc { get; set; }
+
+        /// <summary>
+        /// True when the engine is hosted in a long-lived process (e.g., MSBuild Server)
+        /// that persists across multiple build invocations. Used to opt tasks whose static
+        /// singleton state would leak across invocations out of sidecar TaskHost reuse.
+        /// See https://github.com/dotnet/msbuild/issues/13315.
+        /// </summary>
+        internal bool IsLongLivedHost
+        {
+            get => _isLongLivedHost;
+            set => _isLongLivedHost = value;
+        }
+
+        private bool _isLongLivedHost = s_isLongLivedHost;
+
+        /// <summary>
+        /// Marks the current process as a long-lived host.
+        /// </summary>
+        internal static void MarkProcessAsLongLivedHost() => s_isLongLivedHost = true;
 
         /// <nodoc/>
         public ProjectLoadSettings ProjectLoadSettings
@@ -980,6 +1004,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
+            translator.Translate(ref _isLongLivedHost);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.
@@ -1000,40 +1025,6 @@ namespace Microsoft.Build.Execution
         }
 
         #endregion
-
-        /// <summary>
-        /// Gets the value of a boolean environment setting which is not expected to change.
-        /// </summary>
-        private static bool GetStaticBoolVariableOrDefault(string environmentVariable, ref bool? backing, bool @default)
-        {
-            if (!backing.HasValue)
-            {
-                backing = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable(environmentVariable)) || @default;
-            }
-
-            return backing.Value;
-        }
-
-        /// <summary>
-        /// Gets the value of an integer environment variable, or returns the default if none is set or it cannot be converted.
-        /// </summary>
-        private static int GetStaticIntVariableOrDefault(string environmentVariable, ref int? backingValue, int defaultValue)
-        {
-            if (!backingValue.HasValue)
-            {
-                string environmentValue = Environment.GetEnvironmentVariable(environmentVariable);
-                if (String.IsNullOrEmpty(environmentValue))
-                {
-                    backingValue = defaultValue;
-                }
-                else
-                {
-                    backingValue = Int32.TryParse(environmentValue, out var parsedValue) ? parsedValue : defaultValue;
-                }
-            }
-
-            return backingValue.Value;
-        }
 
         /// <summary>
         /// Centralization of the common parts of construction.

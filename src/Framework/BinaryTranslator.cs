@@ -475,11 +475,6 @@ namespace Microsoft.Build.BackEnd
                 value = new System.TimeSpan(ticks);
             }
 
-            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.
-            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to
-            // compile this method out of that assembly.
-#if !CLR2COMPATIBILITY
-
             /// <summary>
             /// Translates a BuildEventContext
             /// </summary>
@@ -499,7 +494,6 @@ namespace Microsoft.Build.BackEnd
                     _reader.ReadInt32(),
                     _reader.ReadInt32());
             }
-#endif
 
             /// <summary>
             /// Translates a CultureInfo
@@ -509,38 +503,8 @@ namespace Microsoft.Build.BackEnd
             {
                 string cultureName = _reader.ReadString();
 
-#if CLR2COMPATIBILITY
-                // It may be that some culture codes are accepted on later .net framework versions
-                // but not on the older 3.5 or 2.0. Fallbacks are required in this case to prevent
-                // exceptions
-                value = LoadCultureWithFallback(cultureName);
-#else
                 value = new CultureInfo(cultureName);
-#endif
             }
-
-#if CLR2COMPATIBILITY
-            private static CultureInfo LoadCultureWithFallback(string cultureName)
-            {
-                CultureInfo cultureInfo;
-
-                return TryLoadCulture(cultureName, out cultureInfo) ? cultureInfo : CultureInfo.CurrentCulture;
-            }
-
-            private static bool TryLoadCulture(string cultureName, out CultureInfo cultureInfo)
-            {
-                try
-                {
-                    cultureInfo = new CultureInfo(cultureName);
-                    return true;
-                }
-                catch
-                {
-                    cultureInfo = null;
-                    return false;
-                }
-            }
-#endif
 
             /// <summary>
             /// Translates an enumeration.
@@ -1337,11 +1301,6 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.Ticks);
             }
 
-            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.
-            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to
-            // compile this method out of that assembly.
-#if !CLR2COMPATIBILITY
-
             /// <summary>
             /// Translates a BuildEventContext
             /// </summary>
@@ -1360,7 +1319,6 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.TargetId);
                 _writer.Write(value.TaskId);
             }
-#endif
 
             /// <summary>
             /// Translates a CultureInfo

@@ -120,7 +120,7 @@ namespace Microsoft.Build.Evaluation
             // Fix path before expansion
             if (isFilePath)
             {
-                argument = FrameworkFileUtilities.FixFilePath(argument);
+                argument = FileUtilities.FixFilePath(argument);
             }
 
             IList<TaskItem> items = state.ExpandIntoTaskItems(argument);
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Evaluation
             // Fix path before expansion
             if (isFilePath)
             {
-                argument = FrameworkFileUtilities.FixFilePath(argument);
+                argument = FileUtilities.FixFilePath(argument);
             }
 
             IList<TaskItem> expanded = state.ExpandIntoTaskItems(argument);

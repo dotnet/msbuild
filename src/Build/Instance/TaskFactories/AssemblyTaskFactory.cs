@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
 
@@ -54,7 +55,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A cache of tasks and the AppDomains they are loaded in.
         /// </summary>
-        private Dictionary<ITask, AppDomain> _tasksAndAppDomains = new Dictionary<ITask, AppDomain>();
+        private readonly ConcurrentDictionary<ITask, AppDomain> _tasksAndAppDomains = new ConcurrentDictionary<ITask, AppDomain>();
 #endif
 
         /// <summary>
@@ -62,11 +63,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters _factoryIdentityParameters;
 
-        /// <summary>
-        /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
-        /// TaskLoader will be able to call back with errors.
-        /// </summary>
-        private TaskLoggingContext _taskLoggingContext;
 
         #endregion
 
@@ -204,14 +200,11 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(task);
 #if FEATURE_APPDOMAIN
-            AppDomain appDomain;
-            if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
+            if (_tasksAndAppDomains.TryRemove(task, out AppDomain appDomain))
             {
-                _tasksAndAppDomains.Remove(task);
 
                 if (appDomain != null)
                 {
-                    AssemblyLoadsTracker.StopTracking(appDomain);
                     // Unload the AppDomain asynchronously to avoid a deadlock that can happen because
                     // AppDomain.Unload blocks for the process's one Finalizer thread to finalize all
                     // objects. Some objects are RCWs for STA COM objects and as such would need the
@@ -318,9 +311,7 @@ namespace Microsoft.Build.BackEnd
             IBuildComponentHost buildComponentHost,
             in TaskHostParameters taskIdentityParameters,
             string projectFile,
-#if !NET35
             HostServices hostServices,
-#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -333,7 +324,6 @@ namespace Microsoft.Build.BackEnd
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
 
             TaskHostParameters mergedParameters = TaskHostParameters.Empty;
-            _taskLoggingContext = taskLoggingContext;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
@@ -358,7 +348,24 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+            // Workaround for tasks whose static singleton state would leak across invocations
+            // (e.g., NuGet RestoreTask). In MT mode or when MSBuild server is active, these tasks
+            // must run in a transient (non-sidecar) TaskHost so static state is cleaned up after
+            // each invocation. See https://github.com/dotnet/msbuild/issues/13315
+            bool forceTransientTaskHost = false;
+            if (_loadedType?.Type != null && TaskRouter.RequiresTransientTaskHost(_loadedType.Type))
+            {
+                bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
+                bool isLongLivedHost = buildComponentHost?.BuildParameters?.IsLongLivedHost == true;
+
+                if (isMultiThreaded || isLongLivedHost)
+                {
+                    useTaskFactory = true;
+                    forceTransientTaskHost = true;
+                }
+            }
+
+            taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
             {
@@ -372,7 +379,9 @@ namespace Microsoft.Build.BackEnd
                 // If the task host factory is explicitly requested, do not act as a sidecar task host.
                 // This is important as customers use task host factories for short lived tasks to release
                 // potential locks.
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
+                // Also disable sidecar for tasks that require a transient TaskHost so their
+                // static state is cleaned up between invocations.
+                bool useSidecarTaskHost = !forceTransientTaskHost && !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -385,9 +394,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
-#if !NET35
                     hostServices,
-#endif
                     scheduledNodeId,
                     taskEnvironment: taskEnvironment);
                 return task;
@@ -405,7 +412,8 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.File,
                     taskLocation.Line,
                     taskLocation.Column,
-                    new TaskLoader.LogError(ErrorLoggingDelegate),
+                    new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
+                        taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
@@ -422,17 +430,13 @@ namespace Microsoft.Build.BackEnd
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
                 }
-                else if (taskAppDomain != null)
-                {
-                    AssemblyLoadsTracker.StopTracking(taskAppDomain);
-                }
 #endif
 
                 // Track non-sealed subclasses of Microsoft-owned MSBuild tasks
                 if (taskInstance != null)
                 {
                     bool isMicrosoftOwned = IsMicrosoftAuthoredTask();
-                    _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
+                    taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
                 }
 
                 return taskInstance;
@@ -605,7 +609,7 @@ namespace Microsoft.Build.BackEnd
             if (taskIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(factoryIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == factoryIdentityParameters.Runtime && normalizedArch == factoryIdentityParameters.Architecture
                     ? factoryIdentityParameters
@@ -615,7 +619,7 @@ namespace Microsoft.Build.BackEnd
             if (factoryIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(taskIdentityParameters.Runtime);
-                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture);
+                string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture, normalizedRuntime);
 
                 return normalizedRuntime == taskIdentityParameters.Runtime && normalizedArch == taskIdentityParameters.Architecture
                     ? taskIdentityParameters
@@ -754,14 +758,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Log errors from TaskLoader.
-        /// </summary>
-        private void ErrorLoggingDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
-        {
-            _taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation, taskLine, taskColumn), message, messageArgs);
         }
 
         /// <summary>

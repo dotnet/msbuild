@@ -3,6 +3,7 @@
 
 #if NETFRAMEWORK
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -22,10 +23,10 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Exports a managed assembly to a windows runtime metadata.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class WinMDExp : ToolTaskExtension, IWinMDExpTaskContract
     {
         #region Properties
-
         /// <summary>
         /// Set of references to pass to the winmdexp tool.
         /// </summary>
@@ -240,9 +241,24 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The full path of the tool to execute.
         /// </summary>
-        protected override string GenerateFullPathToTool()
+        protected override string GenerateFullPathToTool() => SdkToolsPathUtility.GeneratePathToTool(
+                f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
+                Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
+                SdkToolsPath,
+                ToolExe,
+                Log,
+                true);
+
+        protected override ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
         {
-            return SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+            if (!string.IsNullOrEmpty(pathToTool) && Path.GetFileName(pathToTool).Length != pathToTool.Length)
+            {
+                pathToTool = TaskEnvironment.GetAbsolutePath(pathToTool);
+            }
+
+            return base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
 
         /// <summary>
@@ -266,11 +282,13 @@ namespace Microsoft.Build.Tasks
         {
             if (!String.IsNullOrEmpty(OutputWindowsMetadataFile))
             {
-                var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(OutputWindowsMetadataFile);
-                var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(WinMDModule);
+                AbsolutePath outputWindowsMetadataFile = TaskEnvironment.GetAbsolutePath(OutputWindowsMetadataFile);
+                AbsolutePath winMDModule = TaskEnvironment.GetAbsolutePath(WinMDModule);
+
+                var outputWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(outputWindowsMetadataFile);
+                var winMDModuleWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(winMDModule);
 
                 // If the last write time of the input file is less than the last write time of the output file
-                // then the output is newer then the input so we do not need to re-run the tool.
                 if (outputWriteTime > winMDModuleWriteTime)
                 {
                     return true;
@@ -279,6 +297,7 @@ namespace Microsoft.Build.Tasks
 
             return false;
         }
+
         #endregion
     }
 

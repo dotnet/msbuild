@@ -49,7 +49,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!String.Equals(taskName, TaskType.Name, StringComparison.OrdinalIgnoreCase))
             {
-                ErrorUtilities.ThrowInternalError("Unexpected task name {0}.  Expected {1}", taskName, TaskType.Name);
+                ErrorUtilities.ThrowInternalError($"Unexpected task name {taskName}.  Expected {TaskType.Name}");
             }
 
             return true;
@@ -84,7 +84,7 @@ namespace Microsoft.Build.BackEnd
                 return new CallTarget();
             }
 
-            ErrorUtilities.ThrowInternalError("Unexpected intrinsic task type {0}", TaskType);
+            ErrorUtilities.ThrowInternalError($"Unexpected intrinsic task type {TaskType}");
             return null;
         }
 

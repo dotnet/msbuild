@@ -9,7 +9,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices;
-using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Framework.Constants;
 #endif
 

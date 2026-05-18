@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             
@@ -239,7 +239,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             
@@ -282,7 +282,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             
@@ -325,7 +325,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             
@@ -368,7 +368,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                path = FrameworkFileUtilities.EnsureTrailingSlash(path);
+                                path = FileUtilities.EnsureTrailingSlash(path);
                                 Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", path);
                             }
                             

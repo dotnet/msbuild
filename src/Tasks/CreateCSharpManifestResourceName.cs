@@ -16,6 +16,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class CreateCSharpManifestResourceName : CreateManifestResourceName
     {
         protected override string SourceFileExtension => ".cs";
@@ -97,13 +98,13 @@ namespace Microsoft.Build.Tasks
             bool enableCustomCulture = false)
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
-            string embeddedFileName = FrameworkFileUtilities.FixFilePath(linkFileName);
+            string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
             if (string.IsNullOrEmpty(embeddedFileName))
             {
-                embeddedFileName = FrameworkFileUtilities.FixFilePath(fileName);
+                embeddedFileName = FileUtilities.FixFilePath(fileName);
             }
 
-            dependentUponFileName = FrameworkFileUtilities.FixFilePath(dependentUponFileName);
+            dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
             if (!string.IsNullOrEmpty(culture) && enableCustomCulture)

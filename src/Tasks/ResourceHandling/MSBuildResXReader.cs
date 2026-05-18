@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             try
             {
-                using (var xmlReader = new XmlTextReader(s))
+                using (var xmlReader = new XmlTextReader(s) { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null })
                 {
                     xmlReader.WhitespaceHandling = WhitespaceHandling.All;
 
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             string[] fileRefInfo = ParseResxFileRefString(value);
 
-            string fileName = FrameworkFileUtilities.FixFilePath(fileRefInfo[0]);
+            string fileName = FileUtilities.FixFilePath(fileRefInfo[0]);
             string fileRefType = fileRefInfo[1];
 
             if (pathsRelativeToBasePath)
@@ -337,7 +337,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 stringValue = stringValue.Trim();
                 string fileName;
                 string remainingString;
-                if (stringValue.StartsWith("\""))
+                if (stringValue.StartsWith("\"", StringComparison.Ordinal))
                 {
                     int lastIndexOfQuote = stringValue.LastIndexOf('"');
                     if (lastIndexOfQuote - 1 < 0)

@@ -1851,7 +1851,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 var items = lookup.GetItems("I2");
 
-                if (FileUtilities.GetIsFileSystemCaseSensitive())
+                if (FileUtilities.IsFileSystemCaseSensitive)
                 {
                     items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "g2" });
 

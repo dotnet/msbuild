@@ -258,6 +258,11 @@
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
           DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!-- macOS Gatekeeper kills copied dotnet apphosts that lack a valid local signature.
+         Ad-hoc re-sign to prevent SIGKILL (exit code 137) when tests invoke the bootstrap dotnet. -->
+    <Exec Command="codesign --force --sign - &quot;$(InstallDir)dotnet&quot;"
+          Condition="$([MSBuild]::IsOSPlatform('osx'))" />
+
   </Target>
 
 </Project>

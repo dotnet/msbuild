@@ -41,6 +41,12 @@ namespace Microsoft.Build.Framework
         public readonly bool ForceAllTasksOutOfProcToTaskHost = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
 
         /// <summary>
+        /// Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build),
+        /// equivalent to passing -multiThreaded / -mt on the command line.
+        /// </summary>
+        public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMULTITHREADED") == "1";
+
+        /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
@@ -82,7 +88,7 @@ namespace Microsoft.Build.Framework
         /// (default) uses the empirical default in Copy.cs, greater than zero can allow
         /// perf tuning beyond the defaults chosen.
         /// </summary>
-        public readonly int CopyTaskParallelism = ParseIntFromEnvironmentVariableOrDefault("MSBUILDCOPYTASKPARALLELISM", -1);
+        public readonly int CopyTaskParallelism = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDCOPYTASKPARALLELISM", -1);
 
         /// <summary>
         /// Instruct MSBuild to write out the generated "metaproj" file to disk when building a solution file.
@@ -117,24 +123,18 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Log property tracking information.
         /// </summary>
-        public readonly int LogPropertyTracking = ParseIntFromEnvironmentVariableOrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
+        public readonly int LogPropertyTracking = EnvironmentUtilities.GetValueAsInt32OrDefault("MsBuildLogPropertyTracking", 0); // Default to logging nothing via the property tracker.
 
         /// <summary>
         /// When evaluating items, this is the minimum number of items on the running list to use a dictionary-based remove optimization.
         /// </summary>
-        public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
+        public readonly int DictionaryBasedItemRemoveThreshold = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
 
         /// <summary>
         /// Launches a persistent RAR process.
         /// </summary>
         /// TODO: Replace with command line flag when feature is completed. The environment variable is intented to avoid exposing the flag early.
         public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
-
-        /// <summary>
-        /// Enable IBuildEngine callbacks in the TaskHost process.
-        /// Temporary escape hatch until all callback stages are complete and PacketVersion is bumped to 3.
-        /// </summary>
-        public readonly bool EnableTaskHostCallbacks = Environment.GetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS") == "1";
 
         /// <summary>
         /// Name of environment variables used to enable MSBuild server.
@@ -185,12 +185,12 @@ namespace Microsoft.Build.Framework
         /// mirroring
         /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry
         /// </summary>
-        public bool SdkTelemetryOptOut = IsEnvVarOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
-        public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
-        public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
-        public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
+        public bool SdkTelemetryOptOut = EnvironmentUtilities.IsValueOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
+        public bool FrameworkTelemetryOptOut = EnvironmentUtilities.IsValueOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
+        public bool ExcludeTasksDetailsFromTelemetry = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
+        public bool FlushNodesTelemetryIntoConsole = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
 
-        public bool EnableTargetOutputLogging = IsEnvVarOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
+        public bool EnableTargetOutputLogging = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
         // for VS17.14
         public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
@@ -202,21 +202,6 @@ namespace Microsoft.Build.Framework
             {
                 _instance = new Traits();
             }
-        }
-
-        private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
-        {
-            return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
-                ? result
-                : defaultValue;
-        }
-
-        internal static bool IsEnvVarOneOrTrue(string name)
-        {
-            string? value = Environment.GetEnvironmentVariable(name);
-            return value != null &&
-                   (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
-                    value.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
     }
 

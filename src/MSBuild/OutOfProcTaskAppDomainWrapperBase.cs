@@ -9,11 +9,10 @@ using System.Threading;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-#if !NET35
-using Microsoft.Build.Execution;
-#endif
 
 #nullable disable
 
@@ -58,9 +57,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private string taskName;
 
-#if !NET35
         private HostServices _hostServices;
-#endif
 
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
@@ -110,9 +107,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
-#if !NET35
                 HostServices hostServices,
-#endif
                 IDictionary<string, TaskParameter> taskParams)
         {
             buildEngine = oopTaskHostNode;
@@ -121,9 +116,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
             _taskAppDomain = null;
 #endif
-#if !NET35
             _hostServices = hostServices;
-#endif
             wrappedTask = null;
 
             LoadedType taskType = null;
@@ -285,11 +278,7 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-#if CLR2COMPATIBILITY
-                taskRunnerFinished.Close();
-#else
                 taskRunnerFinished.Dispose();
-#endif
                 taskRunnerFinished = null;
             }
 
@@ -348,12 +337,10 @@ namespace Microsoft.Build.CommandLine
                     );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
-#if !NET35
                 if (projectFile != null && _hostServices != null)
                 {
                     wrappedTask.HostObject = _hostServices.GetHostObject(projectFile, targetName, taskName);
                 }
-#endif
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
@@ -402,11 +389,16 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // If it didn't crash and return before now, we're clear to go ahead and execute here.
+                MSBuildEventSource.Log.TaskExecuteInHostStart(taskName);
                 success = wrappedTask.Execute();
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 return new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
+            }
+            finally
+            {
+                MSBuildEventSource.Log.TaskExecuteInHostStop(taskName, success);
             }
 
             PropertyInfo[] finalPropertyValues = wrappedTask.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
