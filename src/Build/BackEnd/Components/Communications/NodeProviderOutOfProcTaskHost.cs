@@ -817,7 +817,7 @@ namespace Microsoft.Build.BackEnd
             {
                 CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {appHostPath}.");
 
-                IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
+                var dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
                 return dotnetOverrides == null
                     ? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet"))

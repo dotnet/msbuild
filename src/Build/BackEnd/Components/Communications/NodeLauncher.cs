@@ -287,7 +287,9 @@ namespace Microsoft.Build.BackEnd
         /// (caller passes the inherited environment).
         /// </returns>
         [SupportedOSPlatform("windows")]
-        private static bool BuildEnvironmentBlock(ref ValueStringBuilder builder, IDictionary<string, string> environmentOverrides)
+#nullable enable annotations
+        private static bool BuildEnvironmentBlock(ref ValueStringBuilder builder, IDictionary<string, string?> environmentOverrides)
+#nullable disable annotations
         {
             if (environmentOverrides == null || environmentOverrides.Count == 0)
             {
