@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="bf38c69d5d4087d1098b5f31283ad147feadf787" BarId="312135" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="547c640d5626b2976499cb3433abc741a63d67c5" BarId="313814" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.4">
@@ -106,21 +106,21 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26164.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26257.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>e365cfcb58176841c2fb80d1a40926f394776970</Sha>
+      <Sha>3454b2fe822e52373f2604856417b0e6bce71d70</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="7.5.0-rc.36">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.8.0-rc.29">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>d2887cd591059fd675d397b48c79cdc30ee2b6ba</Sha>
+      <Sha>b385f8db53a369520b661ee58781226af57bdd58</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.6.0-2.26151.2">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.8.0-1.26267.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>6bdca1d6466c2f9ef46f8e5d3422fbe3568d503c</Sha>
+      <Sha>deb193d8ca4ec49bf33c52e6cb5de6f490a07543</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26164.1">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26257.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>e365cfcb58176841c2fb80d1a40926f394776970</Sha>
+      <Sha>3454b2fe822e52373f2604856417b0e6bce71d70</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

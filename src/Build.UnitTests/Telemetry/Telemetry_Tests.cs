@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using var activityStoppedEvent = new ManualResetEventSlim(false);
             using var listener = new ActivityListener
             {
-                ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.DefaultActivitySourceNamespace),
+                ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.DefaultActivitySourceNamespace, StringComparison.Ordinal),
                 Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStarted = a => { lock (capturedActivities) { capturedActivities.Add(a); } },
                 ActivityStopped = a =>
@@ -508,7 +508,7 @@ namespace Microsoft.Build.Engine.UnitTests
             collector.FinalizeProcessing(loggingContext);
             loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().Count().ShouldBe(1, "No new event should be emitted after reset");
 
-            // Add new data after reset — collector should still work.
+            // Add new data after reset - collector should still work.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
             collector.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
 

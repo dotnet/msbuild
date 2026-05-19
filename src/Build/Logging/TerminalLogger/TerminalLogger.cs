@@ -453,11 +453,6 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
 
-        if (eventSource is IEventSource3 eventSource3)
-        {
-            eventSource3.IncludeTaskInputs();
-        }
-
         if (eventSource is IEventSource4 eventSource4)
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();

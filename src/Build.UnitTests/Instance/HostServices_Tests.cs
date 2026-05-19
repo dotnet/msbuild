@@ -502,7 +502,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Dictionary<string, string> globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globals["UniqueDummy"] = Guid.NewGuid().ToString();
 
-            using var xmlReader = new XmlTextReader(new StringReader(contents));
+            using var xmlReader = XmlReader.Create(new StringReader(contents));
             Project project =
                 ProjectCollection.GlobalProjectCollection.LoadProject(
                     xmlReader,
