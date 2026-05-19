@@ -113,8 +113,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void GetStrongNameKey(TaskLoggingHelper log, AbsolutePath keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
-            Debug.Assert(keyFile.Value != null || !string.IsNullOrEmpty(keyContainer));
-
             GetStrongNameKey(log, keyFile, keyFile.OriginalValue, keyContainer, out keyPair, out publicKey);
         }
 
