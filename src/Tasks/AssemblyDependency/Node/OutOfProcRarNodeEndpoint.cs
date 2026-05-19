@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -96,15 +97,24 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
                             RarNodeExecuteRequest request = (RarNodeExecuteRequest)packet;
                             ResolveAssemblyReference rarTask = new();
-                            request.SetTaskInputs(rarTask, _buildEngine);
+                            
+                            // The TaskEnvironment driver here uses the RAR node process's environment variables
+                            // because the client currently only sends the project directory across the wire.
+                            // When the wire protocol is extended to carry the client's environment variables, 
+                            // construct the driver from those values instead so the task sees the same environment the client did.
+                            using (var environmentDriver = new MultiThreadedTaskEnvironmentDriver(request.ProjectDirectory))
+                            {
+                                rarTask.TaskEnvironment = new TaskEnvironment(environmentDriver);
+                                request.SetTaskInputs(rarTask, _buildEngine);
 
-                            bool success = rarTask.Execute();
+                                bool success = rarTask.Execute();
 
-                            // Send any remaining log events before returning the final result packet.
-                            await _buildEngine.FlushEventsAsync(cancellationToken).ConfigureAwait(false);
-                            await _pipeServer.WritePacketAsync(new RarNodeExecuteResponse(rarTask, success), cancellationToken).ConfigureAwait(false);
+                                // Send any remaining log events before returning the final result packet.
+                                await _buildEngine.FlushEventsAsync(cancellationToken).ConfigureAwait(false);
+                                await _pipeServer.WritePacketAsync(new RarNodeExecuteResponse(rarTask, success), cancellationToken).ConfigureAwait(false);
 
-                            CommunicationsUtilities.Trace($"({_endpointId}) Completed RAR request.");
+                                CommunicationsUtilities.Trace($"({_endpointId}) Completed RAR request.");
+                            }
                             break;
                         case NodePacketType.NodeShutdown:
                             // Although the client has already disconnected, it is still necessary to Disconnect() so the

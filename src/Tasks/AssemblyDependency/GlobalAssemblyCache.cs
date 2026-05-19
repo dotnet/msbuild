@@ -275,7 +275,12 @@ namespace Microsoft.Build.Tasks
             bool specificVersion)
         {
             ConcurrentDictionary<AssemblyNameExtension, string> fusionNameToResolvedPath = null;
+            // The GAC is a process-wide / machine-wide resource, so the MSBUILDDISABLEGACRARCACHE
+            // opt-out is read from the process environment rather than the per-task TaskEnvironment.
+            // Per-task overrides of MSBUILD* environment variables are not supported.
+#pragma warning disable MSBuildTask0002
             bool useGacRarCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEGACRARCACHE") == null;
+#pragma warning restore MSBuildTask0002
             if (buildEngine != null && useGacRarCache)
             {
                 string key = $"44d78b60-3bbe-48fe-9493-04119ebf515f|{targetProcessorArchitecture}|{targetedRuntimeVersion}|{fullFusionName}|{specificVersion}";
