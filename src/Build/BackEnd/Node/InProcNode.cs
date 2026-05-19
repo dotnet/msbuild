@@ -9,8 +9,8 @@ using System.Threading;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
@@ -187,7 +187,7 @@ namespace Microsoft.Build.BackEnd
                 // Dump all engine exceptions to a temp file
                 // so that we have something to go on in the
                 // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
 
                 // This is fatal: process will terminate: make sure the
                 // debugger launches
@@ -351,7 +351,7 @@ namespace Microsoft.Build.BackEnd
                 NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
 
                 // Restore the original environment.
-                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
             }
 
             exception = _shutdownException;
@@ -481,7 +481,7 @@ namespace Microsoft.Build.BackEnd
             CultureInfo.CurrentUICulture = configuration.BuildParameters.UICulture;
 
             // Snapshot the initial environment.
-            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
 
             // Save the current directory.
             _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();

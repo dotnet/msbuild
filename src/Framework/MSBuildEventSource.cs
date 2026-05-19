@@ -12,7 +12,7 @@ namespace Microsoft.Build.Eventing
     /// Changes to existing event method signatures will not be reflected unless you update the <see cref="EventAttribute.Version" /> property or assign a new event ID.
     /// </remarks>
     [EventSource(Name = "Microsoft-Build")]
-    internal sealed partial class MSBuildEventSource : EventSource
+    internal sealed class MSBuildEventSource : EventSource
     {
         public static class Keywords
         {
@@ -39,6 +39,8 @@ namespace Microsoft.Build.Eventing
         /// define the singleton instance of the event source
         /// </summary>
         public static MSBuildEventSource Log = new MSBuildEventSource();
+
+        private MSBuildEventSource() { }
 
         #region Events
 
@@ -706,6 +708,54 @@ namespace Microsoft.Build.Eventing
         public void FallbackAssemblyLoadStop(string assemblyName)
         {
             WriteEvent(98);
+        }
+
+        [Event(99, Keywords = Keywords.All)]
+        public void NodeConnectStart(int nodeId)
+        {
+            WriteEvent(99, nodeId);
+        }
+
+        [Event(100, Keywords = Keywords.All)]
+        public void NodeConnectStop(int nodeId, int processId, bool isReused)
+        {
+            WriteEvent(100, nodeId, processId, isReused);
+        }
+
+        [Event(101, Keywords = Keywords.All)]
+        public void NodeReuseScanStart()
+        {
+            WriteEvent(101);
+        }
+
+        [Event(102, Keywords = Keywords.All)]
+        public void NodeReuseScanStop(int candidateCount)
+        {
+            WriteEvent(102, candidateCount);
+        }
+
+        [Event(103, Keywords = Keywords.All)]
+        public void NodeLaunchStart(int nodeId)
+        {
+            WriteEvent(103, nodeId);
+        }
+
+        [Event(104, Keywords = Keywords.All)]
+        public void NodeLaunchStop(int nodeId, int processId)
+        {
+            WriteEvent(104, nodeId, processId);
+        }
+
+        [Event(105, Keywords = Keywords.All)]
+        public void NodePipeConnectStart(int nodeId, int processId)
+        {
+            WriteEvent(105, nodeId, processId);
+        }
+
+        [Event(106, Keywords = Keywords.All)]
+        public void NodePipeConnectStop(int nodeId, int processId, bool succeeded)
+        {
+            WriteEvent(106, nodeId, processId, succeeded);
         }
         #endregion
     }

@@ -38,7 +38,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(source.Path),
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
-                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeTrue(_mockEngine.Log);
@@ -68,6 +69,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
                     FailIfNotIncremental = true,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
                 _mockEngine.Log = string.Empty;
@@ -81,6 +83,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
                     FailIfNotIncremental = false,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
                 unzip2.Execute().ShouldBeTrue(_mockEngine.Log);
 
@@ -96,6 +99,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SkipUnchangedFiles = true,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
                     FailIfNotIncremental = true,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
                 unzip3.Execute().ShouldBeTrue(_mockEngine.Log);
             }
@@ -123,7 +127,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(destination.Path),
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
-                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeTrue(customMessage: _mockEngine.Log);
@@ -142,7 +147,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             Unzip unzip = new Unzip
             {
                 BuildEngine = _mockEngine,
-                DestinationFolder = new TaskItem(String.Empty)
+                DestinationFolder = new TaskItem(String.Empty),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
             };
 
             unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -191,7 +197,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(source.Path),
                     OverwriteReadOnlyFiles = false,
                     SkipUnchangedFiles = false,
-                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
+                    SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -213,7 +220,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(folder.Path),
-                    SourceFiles = new ITaskItem[] { new TaskItem(file.Path), }
+                    SourceFiles = new ITaskItem[] { new TaskItem(file.Path), },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -233,7 +241,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(folder.Path),
-                    SourceFiles = new ITaskItem[] { new TaskItem(Path.Combine(testEnvironment.DefaultTestDirectory.Path, "foo.zip")), }
+                    SourceFiles = new ITaskItem[] { new TaskItem(Path.Combine(testEnvironment.DefaultTestDirectory.Path, "foo.zip")), },
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -261,7 +270,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Include = "BE78A17D30144B549D21F71D5C633F7D.txt"
+                    Include = "BE78A17D30144B549D21F71D5C633F7D.txt",
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeTrue(_mockEngine.Log);
@@ -290,7 +300,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Exclude = "BE78A17D30144B549D21F71D5C633F7D.txt"
+                    Exclude = "BE78A17D30144B549D21F71D5C633F7D.txt",
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeTrue(_mockEngine.Log);
@@ -324,7 +335,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
                     Include = "*.js",
-                    Exclude = "*.js.map;sub\\*.js"
+                    Exclude = "*.js.map;sub\\*.js",
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeTrue(_mockEngine.Log);
@@ -356,7 +368,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Include = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
+                    Include = "<BE78A17D30144B|549D21F71D5C633F7D/.txt",
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -384,7 +397,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Include = "$(Include)"
+                    Include = "$(Include)",
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -412,7 +426,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Exclude = "<BE78A17D30144B|549D21F71D5C633F7D/.txt"
+                    Exclude = "<BE78A17D30144B|549D21F71D5C633F7D/.txt",
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -440,7 +455,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
-                    Exclude = "$(Include)"
+                    Exclude = "$(Include)",
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
 
                 unzip.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -474,6 +490,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 OverwriteReadOnlyFiles = true,
                 SkipUnchangedFiles = false,
                 SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
             };
             unzip.Execute().ShouldBeTrue(_mockEngine.Log);
             string unzippedFilePath = Path.Combine(destination.Path, executableName);

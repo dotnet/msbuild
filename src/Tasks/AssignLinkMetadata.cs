@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -45,9 +44,9 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        string definingProject = item.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
-                        string definingProjectDirectory = item.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectDirectory);
-                        string fullPath = item.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath);
+                        string definingProject = item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath);
+                        string definingProjectDirectory = item.GetMetadata(ItemSpecModifiers.DefiningProjectDirectory);
+                        string fullPath = item.GetMetadata(ItemSpecModifiers.FullPath);
 
                         if (
                                 String.IsNullOrEmpty(item.GetMetadata("Link"))

@@ -5,8 +5,6 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.BackEnd.Components.Caching
 {
     /// <summary>

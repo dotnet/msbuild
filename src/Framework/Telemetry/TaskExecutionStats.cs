@@ -8,10 +8,15 @@ namespace Microsoft.Build.Framework.Telemetry;
 /// <summary>
 /// Represents the execution statistics of tasks executed on a node.
 /// </summary>
-internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption)
+internal class TaskExecutionStats(
+    TimeSpan cumulativeExecutionTime,
+    int executionsCount,
+    long totalMemoryConsumption,
+    string? taskFactoryName,
+    string? taskHostRuntime)
 {
     private TaskExecutionStats()
-        : this(TimeSpan.Zero, 0, 0)
+        : this(TimeSpan.Zero, 0, 0, null, null)
     { }
 
     /// <summary>
@@ -37,14 +42,29 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
     public int ExecutionsCount { get; set; } = executionsCount;
 
     /// <summary>
+    /// The name of the task factory used to create this task.
+    /// Examples: AssemblyTaskFactory, IntrinsicTaskFactory, CodeTaskFactory, 
+    /// RoslynCodeTaskFactory, XamlTaskFactory, or a custom factory name.
+    /// </summary>
+    public string? TaskFactoryName { get; set; } = taskFactoryName;
+
+    /// <summary>
+    /// The runtime specified for out-of-process task execution.
+    /// Values: "CLR2", "CLR4", "NET", or null if not specified.
+    /// </summary>
+    public string? TaskHostRuntime { get; set; } = taskHostRuntime;
+
+    /// <summary>
     /// Accumulates statistics from another instance into this one.
     /// </summary>
     /// <param name="other">Statistics to add to this instance.</param>
     internal void Accumulate(TaskExecutionStats other)
     {
-        this.CumulativeExecutionTime += other.CumulativeExecutionTime;
-        this.TotalMemoryBytes += other.TotalMemoryBytes;
-        this.ExecutionsCount += other.ExecutionsCount;
+        CumulativeExecutionTime += other.CumulativeExecutionTime;
+        TotalMemoryBytes += other.TotalMemoryBytes;
+        ExecutionsCount += other.ExecutionsCount;
+        TaskFactoryName ??= other.TaskFactoryName;
+        TaskHostRuntime ??= other.TaskHostRuntime;
     }
 
     // We need custom Equals for easier assertions in tests
@@ -60,7 +80,9 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
     protected bool Equals(TaskExecutionStats other)
         => CumulativeExecutionTime.Equals(other.CumulativeExecutionTime) &&
            TotalMemoryBytes == other.TotalMemoryBytes &&
-           ExecutionsCount == other.ExecutionsCount;
+           ExecutionsCount == other.ExecutionsCount &&
+           TaskFactoryName == other.TaskFactoryName &&
+           TaskHostRuntime == other.TaskHostRuntime;
 
     // Needed since we override Equals
     public override int GetHashCode()
@@ -70,6 +92,8 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
             var hashCode = CumulativeExecutionTime.GetHashCode();
             hashCode = (hashCode * 397) ^ TotalMemoryBytes.GetHashCode();
             hashCode = (hashCode * 397) ^ ExecutionsCount.GetHashCode();
+            hashCode = (hashCode * 397) ^ (TaskFactoryName?.GetHashCode() ?? 0);
+            hashCode = (hashCode * 397) ^ (TaskHostRuntime?.GetHashCode() ?? 0);
             return hashCode;
         }
     }

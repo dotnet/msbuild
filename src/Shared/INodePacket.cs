@@ -3,6 +3,7 @@
 
 #nullable disable
 
+using System;
 using System.IO;
 using Microsoft.Build.Internal;
 
@@ -14,6 +15,12 @@ namespace Microsoft.Build.BackEnd
     /// Enumeration of all of the packet types used for communication.
     /// Uses lower 6 bits for packet type (0-63), upper 2 bits reserved for flags.
     /// </summary>
+    /// <remarks>
+    /// Several of these values must be kept in sync with MSBuildTaskHost's NodePacketType.
+    /// The values shared with MSBuildTaskHost are <see cref="LogMessage"/>,
+    /// <see cref="NodeBuildComplete"/>, <see cref="NodeShutdown"/>, <see cref="TaskHostConfiguration"/>,
+    /// <see cref="TaskHostTaskCancelled"/>, and <see cref="TaskHostTaskComplete"/>.
+    /// </remarks>
     internal enum NodePacketType : byte
     {
         // Mask for extracting packet type (lower 6 bits)
@@ -222,15 +229,60 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         RarNodeExecuteResponse, // 0x15
 
-        // Reserve space for future core packet types (0x16-0x3B available for expansion)
-
-        // Server command packets placed at end of safe range to maintain separation from core packets
-        #region ServerNode enums 
-
         /// <summary>
         /// A batch of log events emitted while the RAR task is executing.
         /// </summary>
-        RarNodeBufferedLogEvents,
+        RarNodeBufferedLogEvents, // 0x16
+
+        // Packet types 0x17-0x1F reserved for future core functionality
+
+        #region TaskHost callback packets (0x20-0x27)
+        // These support bidirectional callbacks from TaskHost to parent for IBuildEngine implementations
+
+        /// <summary>
+        /// Request from TaskHost to parent to execute BuildProjectFile* callbacks.
+        /// </summary>
+        TaskHostBuildRequest = 0x20,
+
+        /// <summary>
+        /// Response from parent to TaskHost with BuildProjectFile* results.
+        /// </summary>
+        TaskHostBuildResponse = 0x21,
+
+        /// <summary>
+        /// Request from TaskHost to owning worker node for RequestCores/ReleaseCores.
+        /// </summary>
+        TaskHostCoresRequest = 0x22,
+
+        /// <summary>
+        /// Response from owning worker node to TaskHost with core allocation result.
+        /// </summary>
+        TaskHostCoresResponse = 0x23,
+
+        /// <summary>
+        /// Request from TaskHost to owning worker node for IsRunningMultipleNodes.
+        /// </summary>
+        TaskHostIsRunningMultipleNodesRequest = 0x24,
+
+        /// <summary>
+        /// Response from owning worker node to TaskHost with IsRunningMultipleNodes value.
+        /// </summary>
+        TaskHostIsRunningMultipleNodesResponse = 0x25,
+
+        /// <summary>
+        /// Request from TaskHost to parent for Yield/Reacquire operations.
+        /// </summary>
+        TaskHostYieldRequest = 0x26,
+
+        /// <summary>
+        /// Response from parent to TaskHost acknowledging yield/reacquire.
+        /// </summary>
+        TaskHostYieldResponse = 0x27,
+
+        #endregion
+
+        // Server command packets placed at end of safe range to maintain separation from core packets
+        #region ServerNode enums
 
         /// <summary>
         /// Command in form of MSBuild command line for server node - MSBuild Server.
@@ -290,14 +342,16 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Defines the communication protocol version for node communication.
         /// 
-        /// Version 1: Introduced for the .NET Task Host protocol. This version
-        /// excludes the translation of appDomainConfig within TaskHostConfiguration
-        /// to maintain backward compatibility and reduce serialization overhead.
+        /// null: CLR2 (NET35) task host. Version-dependent fields skipped (not compiled in NET35).
+        /// 0: The constant value for Framework-to-Framework (CLR4) task host. Supports HostServices, TargetName, ProjectFile.
+        /// 1: .NET task host support.
+        /// 2: Added support for translating/reading HostServices, ProjectFile, TargetName in TaskHostConfiguration.
+        /// 3: Added App Host support.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
         /// </summary>
-        public const byte PacketVersion = 1;
+        public const byte PacketVersion = 3;
 
         // Flag bits in upper 2 bits
         private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000
@@ -326,7 +380,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if extended header flag was set, false otherwise.</returns>
         public static bool TryCreateExtendedHeaderType(HandshakeOptions handshakeOptions, NodePacketType type, out byte extendedheader)
         {
-            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, Handshake.NetTaskHostFlags))
+            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.TaskHost) && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NET))
             {
                 extendedheader = (byte)((byte)type | ExtendedHeaderFlag);
                 return true;
@@ -361,5 +415,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="stream">The stream to write the version byte to.</param>
         /// <param name="version">The protocol version to write to the stream.</param>
         public static void WriteVersion(Stream stream, byte version) => stream.WriteByte(version);
+
+        /// <summary>
+        /// Negotiates the packet version to use for communication between nodes.
+        /// Returns the lower of the two versions to ensure compatibility between
+        /// nodes that may be running different versions of MSBuild.
+        /// 
+        /// This allows forward and backward compatibility when nodes with different
+        /// packet versions communicate - they will use the lowest common version
+        /// that both understand.
+        /// </summary>
+        /// <param name="otherPacketVersion">The packet version supported by the other node.</param>
+        /// <returns>The negotiated protocol version that both nodes can use (the minimum of the two versions).</returns>
+        public static byte GetNegotiatedPacketVersion(byte otherPacketVersion) => Math.Min(PacketVersion, otherPacketVersion);
     }
 }

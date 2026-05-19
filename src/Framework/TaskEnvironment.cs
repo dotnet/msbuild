@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -23,6 +24,38 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Gets the fallback task environment that directly accesses the system environment variables
+        /// and working directory of the current process.
+        /// </summary>
+        /// <remarks>
+        /// This is the environment provided to tasks by the MSBuild engine in multi-process execution mode,
+        /// where each task runs in its own process and process-level state is inherently isolated.
+        /// </remarks>
+        public static TaskEnvironment Fallback { get; } = new(MultiProcessTaskEnvironmentDriver.Instance);
+
+        /// <summary>
+        /// Creates a new <see cref="TaskEnvironment"/> with isolated working directory and environment variables.
+        /// </summary>
+        /// <remarks>
+        /// This method is primarily intended for testing scenarios. In normal MSBuild operation, the correct task environment is provided by the MSBuild engine.
+        /// The created TaskEnvironment provides isolated environment state similar to what tasks receive in multithreaded execution mode, enabling testing of task isolation behavior.
+        /// </remarks>
+        /// <param name="projectDirectory">The initial working directory for the task.</param>
+        /// <param name="environmentVariables">A dictionary of environment variables to use, or <see langword="null"/> to use the current process environment variables.</param>
+        /// <returns>A new <see cref="TaskEnvironment"/> with isolated environment state.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="projectDirectory"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="projectDirectory"/> is empty.</exception>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static TaskEnvironment CreateWithProjectDirectoryAndEnvironment(string projectDirectory, IDictionary<string, string>? environmentVariables = null)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(projectDirectory);
+
+            return environmentVariables is null
+                ? new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectory))
+                : new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables));
+        }
+
+        /// <summary>
         /// Gets or sets the project directory for the task execution.
         /// </summary>
         public AbsolutePath ProjectDirectory
@@ -33,7 +66,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Converts a relative or absolute path string to an absolute path.
-        /// This function resolves paths relative to ProjectDirectory.
+        /// This function resolves paths relative to <see cref="ProjectDirectory"/>.
         /// </summary>
         /// <param name="path">The path to convert.</param>
         /// <returns>An absolute path representation.</returns>

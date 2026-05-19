@@ -6,15 +6,12 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Execution
 {
     internal class ResultsCacheWithOverride : IResultsCache
     {
         private readonly IResultsCache _override;
         public ResultsCache CurrentCache { get; }
-
 
         public ResultsCacheWithOverride(IResultsCache @override)
         {

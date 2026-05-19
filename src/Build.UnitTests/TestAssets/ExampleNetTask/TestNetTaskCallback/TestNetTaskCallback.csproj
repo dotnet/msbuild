@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(MSBuildThisFileDirectory)', '..', '..', '..', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask
+      TaskName="Microsoft.Build.UnitTests.BackEnd.IsRunningMultipleNodesTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+      Runtime="NET"/>
+
+  <Target Name="TestTask" BeforeTargets="Build">
+    <Microsoft.Build.UnitTests.BackEnd.IsRunningMultipleNodesTask>
+      <Output PropertyName="IsMultiNode" TaskParameter="IsRunningMultipleNodes" />
+    </Microsoft.Build.UnitTests.BackEnd.IsRunningMultipleNodesTask>
+    <Message Text="CallbackResult: IsRunningMultipleNodes = $(IsMultiNode)" Importance="high" />
+  </Target>
+
+</Project>
