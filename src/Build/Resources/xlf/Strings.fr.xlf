@@ -36,6 +36,11 @@
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
       </trans-unit>
+      <trans-unit id="BinlogFormatVersionMismatch">
+        <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
+        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
+      </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
         <source>Content already acquired as StreamReader via GetContentReader.</source>
         <target state="translated">Contenu déjà acquis en tant que StreamReader par le biais de GetContentReader.</target>
@@ -597,6 +602,11 @@
         <target state="translated">Les paramètres ont été tronqués au-delà de ce point. Pour voir tous les paramètres, désactivez la variable d'environnement MSBUILDTRUNCATETASKINPUTLOGGING.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Le métaprojet "{0}" a été généré.</target>
@@ -1022,6 +1032,11 @@ Erreurs : {3}</target>
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
         <target state="translated">L’assembly de tâche a été chargé à partir de « {0} » alors que l’emplacement souhaité était « {1} ».</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
+        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>

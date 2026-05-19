@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
+            ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
             ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
             _packetFactory = factory;
 
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         protected void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, "Attempting to change status to existing status {0}.", _status);
+            ErrorUtilities.VerifyThrow(_status != newStatus, $"Attempting to change status to existing status {_status}.");
             CommunicationsUtilities.Trace($"Changing link status from {_status} to {newStatus}");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
@@ -792,7 +792,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("waitId {0} out of range.", waitId);
+                        ErrorUtilities.ThrowInternalError($"waitId {waitId} out of range.");
                         break;
                 }
             }

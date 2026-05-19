@@ -108,6 +108,13 @@ namespace Microsoft.Build.Experimental
                 return NodeEngineShutdownReason.Error;
             }
 
+            // Mark the process as a long-lived host so per-build BuildParameters instances
+            // inherit IsLongLivedHost = true. This drives the workaround that routes tasks
+            // whose static state would leak across invocations (e.g., NuGet RestoreTask) to
+            // a transient TaskHost instead of a reusable sidecar.
+            // See https://github.com/dotnet/msbuild/issues/13315.
+            BuildParameters.MarkProcessAsLongLivedHost();
+
             while (true)
             {
                 NodeEngineShutdownReason shutdownReason = RunInternal(out shutdownException, handshake);
@@ -381,6 +388,7 @@ namespace Microsoft.Build.Experimental
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;

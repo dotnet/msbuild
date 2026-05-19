@@ -1617,8 +1617,8 @@ namespace Microsoft.Build.UnitTests
             const string otherLineLeadingSpaces = "                     ";
             const string examplesLeadingSpaces = "        ";
 
-            foreach (KeyValuePair<string, string> item in resourceManager.GetResourceSet(CultureInfo.CurrentUICulture, createIfNotExists: true, tryParents: true)
-                .Cast<DictionaryEntry>().Where(i => i.Key is string && ((string)i.Key).StartsWith("HelpMessage_"))
+            foreach (KeyValuePair<string, string> item in resourceManager.GetResourceSet(CultureInfo.InvariantCulture, createIfNotExists: true, tryParents: true)
+                .Cast<DictionaryEntry>().Where(i => i.Key is string && ((string)i.Key).StartsWith("HelpMessage_", StringComparison.Ordinal))
                 .Select(i => new KeyValuePair<string, string>((string)i.Key, (string)i.Value)))
             {
                 string[] helpMessageLines = item.Value.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
@@ -1632,7 +1632,7 @@ namespace Microsoft.Build.UnitTests
 
                     if (i == 0)
                     {
-                        if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
+                        if (trimmedLine.StartsWith("-", StringComparison.Ordinal) || trimmedLine.StartsWith("@", StringComparison.Ordinal))
                         {
                             // If the first line in a switch it needs a certain amount of leading spaces
                             Assert.StartsWith(switchLeadingSpaces, helpMessageLines[i]);
@@ -1640,7 +1640,7 @@ namespace Microsoft.Build.UnitTests
                         else
                         {
                             // Otherwise it should have no leading spaces because it's a section
-                            Assert.False(helpMessageLines[i].StartsWith(" "));
+                            Assert.False(helpMessageLines[i].StartsWith(" ", StringComparison.Ordinal));
                         }
                     }
                     else
@@ -1653,7 +1653,7 @@ namespace Microsoft.Build.UnitTests
                                 // Examples require a certain number of leading spaces
                                 Assert.StartsWith(examplesLeadingSpaces, helpMessageLines[i]);
                             }
-                            else if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
+                            else if (trimmedLine.StartsWith("-", StringComparison.Ordinal) || trimmedLine.StartsWith("@", StringComparison.Ordinal))
                             {
                                 // Switches require a certain number of leading spaces
                                 Assert.StartsWith(switchLeadingSpaces, helpMessageLines[i]);
