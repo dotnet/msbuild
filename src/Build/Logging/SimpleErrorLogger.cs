@@ -4,7 +4,6 @@
 using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.SimpleErrorLogger

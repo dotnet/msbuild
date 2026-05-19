@@ -26,11 +26,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
                 catch (FormatException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}, returning {2}", value, typeof(bool).Name, defaultValue.ToString()));
+                    Debug.Fail($"Invalid value '{value}' for {typeof(bool).Name}, returning {defaultValue}");
                 }
                 catch (ArgumentException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}, returning {2}", value, typeof(bool).Name, defaultValue.ToString()));
+                    Debug.Fail($"Invalid value '{value}' for {typeof(bool).Name}, returning {defaultValue}");
                 }
             }
             return defaultValue;

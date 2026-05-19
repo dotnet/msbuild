@@ -62,7 +62,7 @@ namespace Microsoft.Build.Collections
         {
             List<TResult> list;
 
-#if NETCOREAPP
+#if NET
             if (_backingEnumerable.TryGetNonEnumeratedCount(out int count))
             {
 #else
@@ -71,6 +71,10 @@ namespace Microsoft.Build.Collections
                 int count = backingCollection.Count;
 #endif
                 list = new List<TResult>(count);
+            }
+            else if (_backingEnumerable is IReadOnlyCollection<TSource> readOnlyCollection)
+            {
+                list = new List<TResult>(readOnlyCollection.Count);
             }
             else
             {

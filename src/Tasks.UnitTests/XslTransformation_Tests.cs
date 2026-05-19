@@ -1087,6 +1087,7 @@ namespace Microsoft.Build.UnitTests
             t.UseTrustedSettings = false;
 
             Assert.False(t.Execute()); // "Test should have failed and not allowed the use of the document() function within the xslt file"
+            engine.Log.ShouldContain("MSB3703"); // "The log should contain MSB3703 error message at XslDocumentFunctionWorks test"
 
             CleanUp(dir);
         }

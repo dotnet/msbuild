@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+#if !NET
+using System.Globalization;
+using System.Text;
+#endif
 
 #nullable disable
 
@@ -45,12 +47,17 @@ namespace Microsoft.Build.Tasks
             {
                 return null;
             }
+
+#if NET
+            return Convert.ToHexString(a);
+#else
             var s = new StringBuilder(a.Length * 2);
             foreach (Byte b in a)
             {
                 s.Append(b.ToString("X02", CultureInfo.InvariantCulture));
             }
             return s.ToString();
+#endif
         }
 
         public override bool Execute()

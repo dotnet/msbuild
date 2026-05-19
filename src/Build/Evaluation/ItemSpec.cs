@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -125,7 +124,7 @@ namespace Microsoft.Build.Evaluation
                         isTransformExpression: out _,
                         itemsFromCapture: out var itemsFromCapture);
                     _referencedItems =
-                        itemsFromCapture.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList();
+                        itemsFromCapture?.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList() ?? [];
 
                     return true;
                 }
@@ -280,7 +279,7 @@ namespace Microsoft.Build.Evaluation
 
             isItemListExpression = true;
 
-            return new ItemExpressionFragment(capture, expression, this, projectDirectory);
+            return new ItemExpressionFragment(capture.Value, expression, this, projectDirectory);
         }
 
         /// <summary>

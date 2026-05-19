@@ -11,7 +11,7 @@ namespace Microsoft.Build.Shared
     {
         public static void KillTree(this Process process, int timeoutMilliseconds)
         {
-#if NETCOREAPP
+#if NET
             process.Kill(entireProcessTree: true);
 #else
             if (NativeMethodsShared.IsWindows)

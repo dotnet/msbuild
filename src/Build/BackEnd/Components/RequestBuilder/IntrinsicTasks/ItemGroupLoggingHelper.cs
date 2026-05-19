@@ -10,7 +10,6 @@ using System.Runtime.Remoting;
 #endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

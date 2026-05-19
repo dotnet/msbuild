@@ -8,9 +8,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Xunit;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable
 
@@ -106,6 +105,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 throw new NotImplementedException();
             }
 
+            public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+            {
+                throw new NotImplementedException();
+            }
+
             public void RoutePacket(int nodeId, INodePacket packet)
             {
                 _dataReceivedContext = new DataReceivedContext(Thread.CurrentThread, packet);
@@ -173,11 +177,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             NodeEndpointInProc.EndpointPair endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Synchronous, _host);
+                    NodeEndpointInProc.EndpointMode.Synchronous, _host, nodeId: 1);
 
             endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Asynchronous, _host);
+                    NodeEndpointInProc.EndpointMode.Asynchronous, _host, nodeId: 1);
         }
 
         [Fact]
@@ -186,7 +190,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Synchronous, null);
+                    NodeEndpointInProc.EndpointMode.Synchronous, null, nodeId: 1);
             });
         }
 
@@ -196,7 +200,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Asynchronous, null);
+                    NodeEndpointInProc.EndpointMode.Asynchronous, null, nodeId: 1);
             });
         }
         /// <summary>
@@ -210,7 +214,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             NodeEndpointInProc.EndpointPair endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Synchronous, _host);
+                    NodeEndpointInProc.EndpointMode.Synchronous, _host, nodeId: 1);
 
             CallOpOnEndpoints(endpoints, VerifyLinkInactive);
             CallOpOnEndpoints(endpoints, VerifySendDataInvalidOperation);
@@ -230,7 +234,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             NodeEndpointInProc.EndpointPair endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Asynchronous, _host);
+                    NodeEndpointInProc.EndpointMode.Asynchronous, _host, nodeId: 1);
 
             CallOpOnEndpoints(endpoints, VerifyLinkInactive);
             CallOpOnEndpoints(endpoints, VerifySendDataInvalidOperation);
@@ -248,7 +252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             NodeEndpointInProc.EndpointPair endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Synchronous, _host);
+                    NodeEndpointInProc.EndpointMode.Synchronous, _host, nodeId: 1);
 
             endpoints.ManagerEndpoint.OnLinkStatusChanged += LinkStatusChanged;
             endpoints.NodeEndpoint.OnLinkStatusChanged += LinkStatusChanged;
@@ -281,14 +285,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             DisconnectionTestHelper(NodeEndpointInProc.EndpointMode.Asynchronous);
         }
 
-
         [Fact]
         public void SynchronousData()
         {
             // Create the endpoints
             NodeEndpointInProc.EndpointPair endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Synchronous, _host);
+                    NodeEndpointInProc.EndpointMode.Synchronous, _host, nodeId: 1);
 
             // Connect the endpoints
             endpoints.ManagerEndpoint.Listen(_host);
@@ -317,7 +320,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Create the endpoints
             NodeEndpointInProc.EndpointPair endpoints =
                 NodeEndpointInProc.CreateInProcEndpoints(
-                    NodeEndpointInProc.EndpointMode.Asynchronous, _host);
+                    NodeEndpointInProc.EndpointMode.Asynchronous, _host, nodeId: 1);
 
             // Connect the endpoints
             endpoints.ManagerEndpoint.Listen(_host);
@@ -422,7 +425,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private NodeEndpointInProc.EndpointPair SetupConnection(NodeEndpointInProc.EndpointMode mode)
         {
             NodeEndpointInProc.EndpointPair endpoints =
-                NodeEndpointInProc.CreateInProcEndpoints(mode, _host);
+                NodeEndpointInProc.CreateInProcEndpoints(mode, _host, nodeId: 1);
 
             endpoints.ManagerEndpoint.OnLinkStatusChanged += LinkStatusChanged;
             endpoints.NodeEndpoint.OnLinkStatusChanged += LinkStatusChanged;

@@ -2,16 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -236,7 +231,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.IndexOfAny(arg0.ToCharArray());
+                    returnVal = text.AsSpan().IndexOfAny(arg0.AsSpan());
                     return true;
                 }
             }
@@ -262,7 +257,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.LastIndexOfAny(arg0.ToCharArray());
+                    returnVal = text.AsSpan().LastIndexOfAny(arg0.AsSpan());
                     return true;
                 }
             }
@@ -749,6 +744,22 @@ namespace Microsoft.Build.Evaluation.Expander
                     return true;
                 }
             }
+            else if (string.Equals(methodName, nameof(IntrinsicFunctions.FileExists), StringComparison.OrdinalIgnoreCase))
+            {
+                if (ParseArgs.TryGetArg(args, out string? arg0))
+                {
+                    returnVal = IntrinsicFunctions.FileExists(arg0);
+                    return true;
+                }
+            }
+            else if (string.Equals(methodName, nameof(IntrinsicFunctions.DirectoryExists), StringComparison.OrdinalIgnoreCase))
+            {
+                if (ParseArgs.TryGetArg(args, out string? arg0))
+                {
+                    returnVal = IntrinsicFunctions.DirectoryExists(arg0);
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -860,6 +871,29 @@ namespace Microsoft.Build.Evaluation.Expander
                         if (args.Length == 0)
                         {
                             returnVal = Guid.NewGuid();
+                            return true;
+                        }
+                    }
+                }
+                else if (receiverType == typeof(char))
+                {
+                    if (string.Equals(methodName, nameof(char.IsDigit), StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool? result = null;
+                        
+                        if (ParseArgs.TryGetArg(args, out string? arg0) && arg0?.Length == 1)
+                        {
+                            char c = arg0[0];
+                            result = char.IsDigit(c);
+                        }
+                        else if (ParseArgs.TryGetArgs(args, out string? str, out int index) && str != null)
+                        {
+                            result = char.IsDigit(str, index);
+                        }
+                        
+                        if (result.HasValue)
+                        {
+                            returnVal = result.Value;
                             return true;
                         }
                     }

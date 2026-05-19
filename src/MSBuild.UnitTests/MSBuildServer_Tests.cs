@@ -11,7 +11,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 #if NETFRAMEWORK
@@ -286,7 +285,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void ServerShouldNotStartWhenBuildIsInteractive()
+        public void ServerShouldStartWhenBuildIsInteractive()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
@@ -296,7 +295,14 @@ namespace Microsoft.Build.Engine.UnitTests
             int pidOfServerProcess = ParseNumber(output, "Server ID is ");
 
             success.ShouldBeTrue();
-            pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when build is interactive.");
+
+            var serverProcess = Process.GetProcessById(pidOfServerProcess);
+
+            serverProcess.HasExited.ShouldBeFalse();
+
+            pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We failed to start a server node when interactive is true.");
+            bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
+            serverIsDown.ShouldBeTrue();
         }
 
         [Fact]

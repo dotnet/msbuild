@@ -33,12 +33,12 @@ namespace Microsoft.NET.StringTools
             /// <summary>
             /// Weak GC handle to the last string of the given hashcode we've seen.
             /// </summary>
-            public GCHandle WeakHandle;
+            private GCHandle weakHandle;
 
             /// <summary>
             /// Returns true if the string referenced by the handle is still alive.
             /// </summary>
-            public bool IsUsed => WeakHandle.Target != null;
+            public bool IsUsed => weakHandle.IsAllocated && weakHandle.Target != null;
 
             /// <summary>
             /// Returns the string referenced by this handle if it is equal to the given internable.
@@ -47,13 +47,21 @@ namespace Microsoft.NET.StringTools
             /// <returns>The string matching the internable or null if the handle is referencing a collected string or the string is different.</returns>
             public string? GetString(ref InternableString internable)
             {
-                if (WeakHandle.IsAllocated && WeakHandle.Target is string str)
+                if (!weakHandle.IsAllocated)
                 {
-                    if (internable.Equals(str))
-                    {
-                        return str;
-                    }
+                    return null;
                 }
+
+                if (weakHandle.Target is not string str)
+                {
+                    return null;
+                }
+
+                if (internable.Equals(str))
+                {
+                    return str;
+                }
+
                 return null;
             }
 
@@ -63,14 +71,13 @@ namespace Microsoft.NET.StringTools
             /// <param name="str">The string to set.</param>
             public void SetString(string str)
             {
-                if (!WeakHandle.IsAllocated)
+                if (weakHandle.IsAllocated)
                 {
-                    // The handle is not allocated - allocate it.
-                    WeakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
+                    weakHandle.Target = str;
                 }
                 else
                 {
-                    WeakHandle.Target = str;
+                    weakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
                 }
             }
 
@@ -79,7 +86,10 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             public void Free()
             {
-                WeakHandle.Free();
+                if (weakHandle.IsAllocated)
+                {
+                    weakHandle.Free();
+                }
             }
         }
 
@@ -98,20 +108,16 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private void DisposeImpl()
         {
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 entry.Value.Free();
             }
+
             _stringsByHashCode.Clear();
+            _weakHandlesByHashCode.Clear();
         }
 
         public void Dispose()
-        {
-            DisposeImpl();
-            GC.SuppressFinalize(this);
-        }
-
-        ~WeakStringCache()
         {
             DisposeImpl();
         }
@@ -121,9 +127,9 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private DebugInfo GetDebugInfoImpl()
         {
-            DebugInfo debugInfo = new DebugInfo();
+            DebugInfo debugInfo = new() { LiveStringCount = _stringsByHashCode.Count };
 
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 if (entry.Value.IsUsed)
                 {

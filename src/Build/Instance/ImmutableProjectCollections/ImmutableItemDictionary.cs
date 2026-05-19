@@ -5,11 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Instance
@@ -178,13 +175,11 @@ namespace Microsoft.Build.Instance
 
         private sealed class ListConverter : ICollection<T>
         {
-            private readonly string _itemType;
             private readonly ICollection<TCached> _list;
             private readonly Func<TCached, T?> _getInstance;
 
             public ListConverter(string itemType, ICollection<TCached> list, Func<TCached, T?> getInstance)
             {
-                _itemType = itemType;
                 _list = list;
                 _getInstance = getInstance;
             }

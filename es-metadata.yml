@@ -1,0 +1,8 @@
+schemaVersion: 0.0.1
+isProduction: true
+accountableOwners:
+  service: d0ebbe59-0779-4466-8280-a0ff9cab5550
+routing:
+  defaultAreaPath:
+    org: devdiv
+    path: DevDiv\NET Tools Prague\MSBuild

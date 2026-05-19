@@ -17,7 +17,6 @@ Visual Studio, on the other hand, should always run at normal priority. This ens
 4. Any reused nodes are at the priority they themselves specify. Normal priority nodes are actually at normal priority, and low priority nodes are actually at BelowNormal priority.
 5. All nodes are at the priority they should be when being used to build even if a normal priority process had connected to them as normal priority worker nodes, and they are now executing a low priority build.
 
-
 ## Non-goals
 
 Perfect parity between windows and mac or linux. Windows permits processes to raise their own priority or that of another process, whereas other operating systems do not. This is very efficient, so we should use it. As we expect this feature to be used in Visual Studio, we anticipate it being less used on mac and linux, hence not being as high priority to make it just as efficient.
@@ -27,6 +26,7 @@ Perfect parity between windows and mac or linux. Windows permits processes to ra
 Each node (including worker nodes) initially takes its priority from its parent process. Since we now need the priority to align with what it is passed instead of its parent, attempt to adjust priority afterwards if necessary as part of node startup.
 
 BuildManager.cs remembers the priority of the previous build it had executed. If that was set to a value that differs from the priority of the current build:
+
 1. On windows or when decreasing the priority: lowers the priority of all connected nodes
 2. On linux and mac when increasing the priority: disconnects from all nodes.
 

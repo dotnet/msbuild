@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if !CLR2COMPATIBILITY
+#if !CLR2COMPATIBILITY && FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 #endif
 using Microsoft.Build.Shared;

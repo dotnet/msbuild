@@ -16,12 +16,12 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
 | [BC0301](#bc0301---building-from-downloads-folder) | None | Project | 9.0.300 | Building from Downloads folder. |
-
+| [BC0302](#bc0302---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
 
 Notes: 
  * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
  * How can you alter the default configuration? [Please check the Configuration section of the BuildCheck documentation](./BuildCheck.md#sample-configuration)
- * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview
+ * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
    _Cmd:_
    ```cmd
    dotnet build -bl -check
@@ -125,7 +125,7 @@ If you specify `TargetFramework` you are instructing the build to produce a sing
 `BC0107` doesn't apply if you explicitly choose to build a single target of multitargeted build:
 
 ```
-dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
+dotnet build my-multi-target.csproj /p:TargetFramework=net10.0
 ```
 
 <a name="BC0108"></a>
@@ -136,7 +136,6 @@ dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
 'TargetFramework' or 'TargetFrameworks' control the project output targets in modern .NET SDK projects. The older SDK-less projects interprets different properties for similar mechanism (like 'TargetFrameworkVersion') and the 'TargetFramework' or 'TargetFrameworks' are silently ignored.
 
 Make sure the Target Framework is specified appropriately for your project.
-
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.
@@ -196,6 +195,13 @@ Common cases of false positives:
 Placing project files into Downloads folder (or any other folder that cannot be fully trusted including all parent folders up to a root drive) is not recomended, as unintended injection of unrelated MSBuild logic can occur.
 
 Place your projects into trusted locations - including cases when you intend to only open the project in IDE.
+
+<a name="BC0302"></a>
+## BC0302 - Building using the Exec task.
+
+"The 'Exec' task should not be used to build projects."
+
+Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
 
 <BR/>
 <BR/>

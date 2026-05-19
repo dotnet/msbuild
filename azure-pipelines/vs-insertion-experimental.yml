@@ -24,6 +24,7 @@ parameters:
     displayName: 'Insertion Target Branch (select for manual insertion)'
     values:
       - main
+      - rel/d18.0
       - rel/d17.14
       - rel/d17.13
       - rel/d17.12
@@ -105,6 +106,8 @@ extends:
               $branch = $branchSegments[-1]
               Write-Host "Setting drops branch to '$branch'"
               Write-Host "##vso[task.setvariable variable=SourceBranchName]$branch"
+              Write-Host "updating build number with build commit"
+              Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber).$(MSBuild_CI_SourceVersion)"
 
         - task: Powershell@2
           name: DetermineTargetBranch

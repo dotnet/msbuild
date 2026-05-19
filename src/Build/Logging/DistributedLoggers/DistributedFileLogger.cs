@@ -113,7 +113,7 @@ namespace Microsoft.Build.Logging
                 // but avoids confusion by being consistent with the Engine and any error messages it may produce.
                 fileName = _logFile.Replace(extension, _nodeId + extension);
                 _nodeFileLogger.Verbosity = LoggerVerbosity.Detailed;
-                _nodeFileLogger.Parameters = "ShowEventId;ShowCommandLine;logfile=" + fileName + ";" + _parameters;
+                _nodeFileLogger.Parameters = $"ShowEventId;ShowCommandLine;logfile={fileName};{_parameters}";
             }
             catch (ArgumentException e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {

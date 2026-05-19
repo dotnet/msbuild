@@ -69,7 +69,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                key = itemType + "." + name;
+                key = $"{itemType}.{name}";
             }
 
             string value;

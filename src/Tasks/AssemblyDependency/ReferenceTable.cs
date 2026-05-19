@@ -92,10 +92,6 @@ namespace Microsoft.Build.Tasks
         private readonly GetAssemblyMetadata _getAssemblyMetadata;
         /// <summary>Delegate used to get the image runtime version of a file</summary>
         private readonly GetAssemblyRuntimeVersion _getRuntimeVersion;
-#if FEATURE_WIN32_REGISTRY
-        /// <summary> Delegate to get the base registry key for AssemblyFoldersEx</summary>
-        private OpenBaseKey _openBaseKey;
-#endif
         /// <summary>Version of the runtime we are targeting</summary>
         private readonly Version _targetedRuntimeVersion;
 
@@ -320,9 +316,6 @@ namespace Microsoft.Build.Tasks
             _getRuntimeVersion = getRuntimeVersion;
             _projectTargetFramework = projectTargetFramework;
             _targetedRuntimeVersion = targetedRuntimeVersion;
-#if FEATURE_WIN32_REGISTRY
-            _openBaseKey = openBaseKey;
-#endif
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _latestTargetFrameworkDirectories = latestTargetFrameworkDirectories;
             _copyLocalDependenciesWhenParentReferenceInGac = copyLocalDependenciesWhenParentReferenceInGac;
@@ -807,9 +800,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            string newFusionName = String.Format(CultureInfo.InvariantCulture,
-                "{0}, Version={1}, Culture={2}, PublicKeyToken={3}",
-                name, version, culture, publicKeyToken);
+            string newFusionName = $"{name}, Version={version}, Culture={culture}, PublicKeyToken={publicKeyToken}";
 
             // Now try to convert to an AssemblyName.
             try
@@ -830,19 +821,20 @@ namespace Microsoft.Build.Tasks
         private static void TryGetAssemblyNameComponent(string fusionName, string component, ref string value)
         {
             int position = fusionName.IndexOf(component + "=", StringComparison.Ordinal);
-            if (position == -1)
+            if (position < 0)
             {
                 return;
             }
+
             position += component.Length + 1;
-            int nextDelimiter = fusionName.IndexOfAny([',', ' '], position);
-            if (nextDelimiter == -1)
+            int nextDelimiter = fusionName.AsSpan(position).IndexOfAny(',', ' ');
+            if (nextDelimiter < 0)
             {
                 value = fusionName.Substring(position);
             }
             else
             {
-                value = fusionName.Substring(position, nextDelimiter - position);
+                value = fusionName.Substring(position, nextDelimiter);
             }
         }
 
@@ -2320,18 +2312,9 @@ namespace Microsoft.Build.Tasks
 
             byte[] rpkt = @ref.GetPublicKeyToken();
             byte[] dpkt = def.GetPublicKeyToken();
-
-            if (rpkt.Length != dpkt.Length)
+            if (!rpkt.AsSpan().SequenceEqual(dpkt.AsSpan()))
             {
                 return false;
-            }
-
-            for (int i = 0; i < rpkt.Length; i++)
-            {
-                if (rpkt[i] != dpkt[i])
-                {
-                    return false;
-                }
             }
 
             if (@ref.Version != def.Version)

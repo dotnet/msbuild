@@ -47,7 +47,7 @@ namespace Microsoft.Build.Globbing
         }
 
         // Cache of Regex objects that we have created and are still alive.
-        private static WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
+        private static readonly WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
 
         private readonly Lazy<GlobState> _state;
 

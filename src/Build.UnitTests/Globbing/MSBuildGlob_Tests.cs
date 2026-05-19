@@ -70,9 +70,12 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [Fact]
         public void GlobFromRootWithInvalidPathThrows()
         {
-            foreach (var invalidPathChar in FileUtilities.InvalidPathChars)
+            for (int i = 0; i < 128; i++)
             {
-                Assert.Throws<ArgumentException>(() => MSBuildGlob.Parse(invalidPathChar.ToString(), "*"));
+                if (FileUtilities.InvalidPathChars.Contains((char)i))
+                {
+                    Assert.Throws<ArgumentException>(() => MSBuildGlob.Parse(((char)i).ToString(), "*"));
+                }
             }
         }
 
@@ -182,12 +185,15 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         {
             var glob = MSBuildGlob.Parse("*");
 
-            foreach (var invalidPathChar in FileUtilities.InvalidPathChars)
+            for (int i = 0; i < 128; i++)
             {
-                Assert.False(glob.IsMatch(invalidPathChar.ToString()));
+                if (FileUtilities.InvalidPathChars.Contains((char)i))
+                {
+                    Assert.False(glob.IsMatch(((char)i).ToString()));
+                }
             }
 
-            foreach (var invalidFileChar in FileUtilities.InvalidFileNameChars)
+            foreach (var invalidFileChar in FileUtilities.InvalidFileNameCharsArray)
             {
                 if (invalidFileChar == '\\' || invalidFileChar == '/')
                 {

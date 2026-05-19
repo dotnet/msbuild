@@ -34,12 +34,6 @@ namespace Microsoft.Build.BackEnd
         void AddConfiguration(BuildRequestConfiguration config);
 
         /// <summary>
-        /// Removes the specified configuration from the cache.
-        /// </summary>
-        /// <param name="configId">The id of the configuration to remove.</param>
-        void RemoveConfiguration(int configId);
-
-        /// <summary>
         /// Gets the cached configuration which matches the specified configuration
         /// </summary>
         /// <param name="config">The configuration to match.</param>

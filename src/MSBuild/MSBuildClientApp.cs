@@ -97,28 +97,5 @@ namespace Microsoft.Build.CommandLine
 
             return MSBuildApp.ExitType.MSBuildClientFailure;
         }
-
-        // Copied from NodeProviderOutOfProcBase.cs
-#if RUNTIME_TYPE_NETCORE
-        private static string? CurrentHost;
-        private static string GetCurrentHost()
-        {
-            if (CurrentHost == null)
-            {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
-                if (File.Exists(dotnetExe))
-                {
-                    CurrentHost = dotnetExe;
-                }
-                else
-                {
-                    CurrentHost = EnvironmentUtilities.ProcessPath ?? throw new InvalidOperationException("Failed to retrieve process executable.");
-                }
-            }
-
-            return CurrentHost;
-        }
-#endif
     }
 }

@@ -23,7 +23,7 @@
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Collections.Immutable" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
@@ -31,8 +31,13 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="System.Text.Encoding.CodePages" />
+    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.IO.Redist" PrivateAssets="all" />
+    <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
+    <PackageReference Update="System.Configuration.ConfigurationManager" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Label="Shared Code">
@@ -48,6 +53,7 @@
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
     </Compile>
+    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -87,14 +93,8 @@
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>Shared\FrameworkLocationHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
-      <Link>Shared\IConstrainedEqualityComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IKeyed.cs">
       <Link>Shared\IKeyed.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs">
-      <Link>Shared\MSBuildNameIgnoreCaseComparer.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Shared\Modifiers.cs</Link>

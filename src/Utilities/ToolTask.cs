@@ -1683,7 +1683,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// An object to hold the event shutdown lock
         /// </summary>
-        private readonly object _eventCloseLock = new object();
+        private readonly LockType _eventCloseLock = new LockType();
 
         /// <summary>
         /// Splitter for environment variables

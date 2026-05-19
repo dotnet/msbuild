@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Threading;
-
-using Microsoft.Build.Evaluation;
 
 using Shouldly;
 
@@ -17,10 +14,6 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
     public class ExpanderFunction_Tests
     {
-        private readonly ITestOutputHelper _output;
-
-        public ExpanderFunction_Tests(ITestOutputHelper output) => _output = output;
-
         /* Tests for TryConvertToInt */
 
         [Fact]

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
 #if !TASKHOST
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Experimental.BuildCheck;
 #endif
 
@@ -17,11 +18,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework.Profiler;
 using System.Collections;
-using System.Linq;
-#endif
-
-#if FEATURE_APPDOMAIN
-using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
 
 #nullable disable
@@ -270,15 +266,17 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
+#if TASKHOST
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
         /// </summary>
-        private static Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+        private static readonly Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
 
+#endif
         /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
-        private static Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+        private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
 
         /// <summary>
         /// Delegate for translating targetfinished events.
@@ -430,14 +428,14 @@ namespace Microsoft.Build.Shared
             bool eventCanSerializeItself = methodInfo != null;
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
-                if (_buildEvent is ProjectEvaluationStartedEventArgs
-                    or ProjectEvaluationFinishedEventArgs
-                    or ResponseFileUsedEventArgs)
-                {
-                    // switch to serialization methods that we provide in this file
-                    // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
-                    eventCanSerializeItself = false;
-                }
+            if (_buildEvent is ProjectEvaluationStartedEventArgs
+                or ProjectEvaluationFinishedEventArgs
+                or ResponseFileUsedEventArgs)
+            {
+                // switch to serialization methods that we provide in this file
+                // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
+                eventCanSerializeItself = false;
+            }
 #endif
 
             translator.Translate(ref eventCanSerializeItself);
@@ -478,6 +476,8 @@ namespace Microsoft.Build.Shared
 
             if (eventCanSerializeItself)
             {
+
+#if TASKHOST
                 MethodInfo methodInfo = null;
                 lock (s_readMethodCache)
                 {
@@ -492,6 +492,11 @@ namespace Microsoft.Build.Shared
                 ArgsReaderDelegate readerMethod = (ArgsReaderDelegate)CreateDelegateRobust(typeof(ArgsReaderDelegate), _buildEvent, methodInfo);
 
                 readerMethod(translator.Reader, packetVersion);
+
+#else
+                _buildEvent.CreateFromStream(translator.Reader, packetVersion);
+#endif
+
                 if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
                 {
                     _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);

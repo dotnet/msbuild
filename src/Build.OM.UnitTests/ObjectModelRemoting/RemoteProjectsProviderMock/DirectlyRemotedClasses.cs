@@ -40,12 +40,5 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public SdkResult SdkResult { get; }
 
         public bool IsImported { get; }
-
-        private ResolvedImport Import(ProjectCollectionLinker importer)
-        {
-            var importElement = (ProjectImportElement)importer.Import<ProjectElement, MockProjectImportElementLinkRemoter>(this.ImportingElement);
-            var projectElement = (ProjectRootElement)importer.Import<ProjectElement, MockProjectRootElementLinkRemoter>(this.ImportedProject);
-            return importer.LinkFactory.Create(importElement, projectElement, 0, this.SdkResult, this.IsImported);
-        }
     }
 }

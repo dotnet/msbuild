@@ -205,9 +205,9 @@ namespace Microsoft.Build.Graph
             {
                 var projectPath = project.Value.GraphNode.ProjectInstance.FullPath;
 
-                if (projectsByPath.ContainsKey(projectPath))
+                if (projectsByPath.TryGetValue(projectPath, out List<ProjectGraphNode> value))
                 {
-                    projectsByPath[projectPath].Add(project.Value.GraphNode);
+                    value.Add(project.Value.GraphNode);
                 }
                 else
                 {
@@ -662,8 +662,10 @@ namespace Microsoft.Build.Graph
             {
                 ReferenceItems.AddOrUpdate(
                     key,
+#pragma warning disable IDE0350
                     addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance referenceItem) => referenceItem,
                     updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance existingItem, ProjectItemInstance newItem) =>
+#pragma warning restore IDE0350
                     {
                         string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);

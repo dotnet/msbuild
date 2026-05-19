@@ -263,7 +263,7 @@ namespace Microsoft.Build.Tasks
 
                 if (typeLibName.Length >= 4)
                 {
-                    if (string.Equals(typeLibName.Substring(typeLibName.Length - 4), ".dll", StringComparison.OrdinalIgnoreCase))
+                    if (typeLibName.AsSpan().EndsWith(".dll".AsSpan(), StringComparison.OrdinalIgnoreCase))
                     {
                         typeLibName = typeLibName.Substring(0, typeLibName.Length - 4);
                     }

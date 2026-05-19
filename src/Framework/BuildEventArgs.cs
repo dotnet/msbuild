@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -284,7 +284,7 @@ namespace Microsoft.Build.Framework
         /// This is used by the Message property overrides to reconstruct the
         /// message lazily on demand.
         /// </summary>
-        internal static Func<string, string?[], string> ResourceStringFormatter = (string resourceName, string?[] arguments) =>
+        internal static Func<string, string?[], string> ResourceStringFormatter = (resourceName, arguments) =>
         {
             var sb = new StringBuilder();
             sb.Append(resourceName);
