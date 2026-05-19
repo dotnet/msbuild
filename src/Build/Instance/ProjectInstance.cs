@@ -3377,40 +3377,50 @@ namespace Microsoft.Build.Execution
             _importPathsIncludingDuplicates = importPathsIncludingDuplicates;
             ImportPathsIncludingDuplicates = importPathsIncludingDuplicates.AsReadOnly();
 
-            // Optionally synthesize MSBuildImportedProject items from the import closure,
-            // making the import tree available to targets and tasks as regular items.
-            if (string.Equals(
+            SynthesizeImportedProjectItems(importClosure);
+        }
+
+        /// <summary>
+        /// When the <c>MSBuildProvideImportedProjects</c> property is set to <c>true</c>,
+        /// synthesizes <c>MSBuildImportedProject</c> items from the import closure,
+        /// making the import tree available to targets and tasks as regular items.
+        /// </summary>
+        private void SynthesizeImportedProjectItems(IList<ResolvedImport> importClosure)
+        {
+            if (!string.Equals(
                 _properties?.GetProperty(Constants.MSBuildProvideImportedProjectsPropertyName)?.EvaluatedValue,
                 "true",
                 StringComparison.OrdinalIgnoreCase))
             {
-                List<KeyValuePair<string, string>> metadata = null;
+                return;
+            }
 
-                foreach (ResolvedImport import in importClosure)
+            List<KeyValuePair<string, string>> metadata = null;
+
+            foreach (ResolvedImport import in importClosure)
+            {
+                if (import.ImportingElement is null)
                 {
-                    if (import.ImportingElement is null)
-                    {
-                        // Skip the outer project itself, which is not an import.
-                        continue;
-                    }
-
-                    metadata ??= [];
-                    metadata.Clear();
-
-                    metadata.Add(new("ImportingProjectPath", import.ImportingElement.ContainingProject.EscapedFullPath));
-
-                    if (import.SdkResult?.SdkReference?.Name is { } sdkName)
-                    {
-                        metadata.Add(new("Sdk", sdkName));
-                    }
-
-                    _items.Add(new ProjectItemInstance(
-                        project: this,
-                        itemType: "MSBuildImportedProject",
-                        includeEscaped: import.ImportedProject.EscapedFullPath,
-                        directMetadata: metadata,
-                        definingFileEscaped: EscapingUtilities.Escape(FullPath)));
+                    // Skip the outer project itself, which is not an import.
+                    continue;
                 }
+
+                metadata ??= [];
+                metadata.Clear();
+
+                metadata.Add(new(Constants.ImportingProjectPathMetadataName, import.ImportingElement.ContainingProject.EscapedFullPath));
+
+                if (import.SdkResult?.SdkReference?.Name is { } sdkName)
+                {
+                    metadata.Add(new(Constants.SdkMetadataName, sdkName));
+                }
+
+                _items.Add(new ProjectItemInstance(
+                    project: this,
+                    itemType: Constants.MSBuildImportedProjectItemType,
+                    includeEscaped: import.ImportedProject.EscapedFullPath,
+                    directMetadata: metadata,
+                    definingFileEscaped: EscapingUtilities.Escape(FullPath)));
             }
         }
 

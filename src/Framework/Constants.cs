@@ -98,6 +98,24 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal const string MSBuildProvideImportedProjectsPropertyName = "MSBuildProvideImportedProjects";
 
+        /// <summary>
+        /// Item type for synthesized import items created when
+        /// <see cref="MSBuildProvideImportedProjectsPropertyName"/> is set to <c>true</c>.
+        /// </summary>
+        internal const string MSBuildImportedProjectItemType = "MSBuildImportedProject";
+
+        /// <summary>
+        /// Metadata name on <see cref="MSBuildImportedProjectItemType"/> items identifying the
+        /// project file that contains the <c>&lt;Import&gt;</c> element.
+        /// </summary>
+        internal const string ImportingProjectPathMetadataName = "ImportingProjectPath";
+
+        /// <summary>
+        /// Metadata name on <see cref="MSBuildImportedProjectItemType"/> items identifying the
+        /// SDK name when the import was resolved via an SDK reference.
+        /// </summary>
+        internal const string SdkMetadataName = "Sdk";
+
         internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
     }
 }
