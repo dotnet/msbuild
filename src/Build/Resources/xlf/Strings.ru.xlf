@@ -38,7 +38,7 @@
       </trans-unit>
       <trans-unit id="BinlogFormatVersionMismatch">
         <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
-        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <target state="translated">MSB4281: двоичный файл журнала был создан в более новой версии MSBuild (формат версии {0}) по сравнению с текущей версии (формат версии {1}). При воспроизведении могут отсутствовать некоторые данные.</target>
         <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
@@ -837,7 +837,7 @@
       </trans-unit>
       <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
         <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
-        <target state="new">The project file '{0}' could not be loaded when referenced by {1}.</target>
+        <target state="translated">Не удалось загрузить файл проекта "{0}", на который ссылаются {1}.</target>
         <note>
       This message is shown during static graph construction when a referenced project file cannot be loaded,
       along with information about which project(s) are referencing the failed project.
@@ -949,7 +949,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
-        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <target state="translated">Набор SDK установил для переменной среды "{0}" значение "{1}", переопределив значение "{2}", унаследованное от процесса.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
