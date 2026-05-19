@@ -594,26 +594,49 @@ namespace Microsoft.Build.BackEnd
             //
             // Skip the HashSet allocation if there is nothing to filter against (no items
             // in groupFound and no adds) or if every per-scope remove list is empty.
+            //
+            // EXPERIMENT (exp/lookup-threshold-fix): only allocate a HashSet when the linear
+            // scan would do enough work to amortize the allocation. The per-call HashSet costs
+            // ~28*M bytes; the linear scan costs ~(N+A)*M cheap comparisons. For small
+            // (N+A)*M the allocation pressure dominates and is the suspected cause of the
+            // XAML Designer Load CLR_BytesAllocated_devenv regression.
+            const int LinearScanComparisonBudget = 256;
             HashSet<ProjectItemInstance> removeSet = null;
-            bool willFilter = (groupFound?.Count > 0) || allAdds != null;
+            int groupFoundCount = groupFound?.Count ?? 0;
+            bool willFilter = groupFoundCount > 0 || allAdds != null;
             if (willFilter && totalRemoves > 0)
             {
-                removeSet = new HashSet<ProjectItemInstance>(totalRemoves);
-                foreach (List<ProjectItemInstance> removes in allRemoves)
+                long linearCost = (long)(groupFoundCount + totalAdds) * totalRemoves;
+                if (linearCost >= LinearScanComparisonBudget)
                 {
-                    foreach (ProjectItemInstance remove in removes)
+                    removeSet = new HashSet<ProjectItemInstance>(totalRemoves);
+                    foreach (List<ProjectItemInstance> removes in allRemoves)
                     {
-                        removeSet.Add(remove);
+                        foreach (ProjectItemInstance remove in removes)
+                        {
+                            removeSet.Add(remove);
+                        }
                     }
                 }
             }
 
-            if (groupFound?.Count > 0)
+            if (groupFoundCount > 0)
             {
-                if (removeSet == null)
+                if (removeSet == null && totalRemoves == 0)
                 {
-                    // No removes (or nothing to filter), so use fast path for ICollection<T>.
+                    // No removes, so use fast path for ICollection<T>.
                     result.AddRange(groupFound);
+                }
+                else if (removeSet == null)
+                {
+                    // Small (N+A)*M case: linear scan against allRemoves is cheaper than allocating a HashSet.
+                    foreach (ProjectItemInstance item in groupFound)
+                    {
+                        if (!ShouldRemoveItem(item, allRemoves))
+                        {
+                            result.Add(item);
+                        }
+                    }
                 }
                 else
                 {
@@ -634,10 +657,20 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (List<ProjectItemInstance> adds in allAdds)
                 {
-                    if (removeSet == null)
+                    if (removeSet == null && totalRemoves == 0)
                     {
                         // No removes, so use fast path for ICollection<T>.
                         result.AddRange(adds);
+                    }
+                    else if (removeSet == null)
+                    {
+                        foreach (ProjectItemInstance item in adds)
+                        {
+                            if (!ShouldRemoveItem(item, allRemoves))
+                            {
+                                result.Add(item);
+                            }
+                        }
                     }
                     else
                     {
@@ -659,6 +692,32 @@ namespace Microsoft.Build.BackEnd
             }
 
             return result;
+
+            // Small (N+A)*M linear scan helper. Reference-equality match against allRemoves,
+            // length+ordinal early-out filter to skip the reference check on obviously non-matching entries.
+            // Reference-equality semantics matches the HashSet path above and pre-#12320 ItemDictionary behavior.
+            static bool ShouldRemoveItem(ProjectItemInstance item, List<List<ProjectItemInstance>> allRemoves)
+            {
+                ITaskItem2 itemAsTaskItem = item;
+                string evaluatedInclude = itemAsTaskItem.EvaluatedIncludeEscaped;
+
+                foreach (List<ProjectItemInstance> removes in allRemoves)
+                {
+                    foreach (ProjectItemInstance remove in removes)
+                    {
+                        ITaskItem2 removeAsTaskItem = remove;
+
+                        if (evaluatedInclude.Length == removeAsTaskItem.EvaluatedIncludeEscaped.Length
+                            && StringComparer.Ordinal.Equals(evaluatedInclude, removeAsTaskItem.EvaluatedIncludeEscaped)
+                            && itemAsTaskItem == removeAsTaskItem)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
