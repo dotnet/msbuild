@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Utilities;
@@ -52,19 +52,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
         private const string ToolName = "signtool.exe";
 #if !RUNTIME_TYPE_NETCORE
-        private static XmlDocument LoadXmlDocument(string path)
-        {
-            var doc = new XmlDocument { XmlResolver = null };
-
-            using (var sr = new StringReader(path))
-            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
-            {
-                doc.Load(reader);
-            }
-
-            return doc;
-        }
-
         private const int Fx2MajorVersion = 2;
         private const int Fx3MajorVersion = 3;
         private static readonly Version s_dotNet40Version = new Version("4.0");
@@ -275,7 +262,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (!string.IsNullOrEmpty(resultInString))
             {
-                XmlDocument doc = LoadXmlDocument(resultInString);
+                var doc = new XmlDocument();
+                // CA3057: DoNotUseLoadXml. Suppressed since the xml being loaded is a string representation of the PermissionSet.
+                doc.LoadXml(resultInString);
 
                 return doc.DocumentElement;
             }
@@ -299,12 +288,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlDocument CreateXmlDocV2(string targetZone)
         {
+            var doc = new XmlDocument();
+
             switch (targetZone)
             {
                 case LocalIntranet:
-                    return LoadXmlDocument(LocalIntranetPermissionSetXml);
+                    // CA3057: DoNotUseLoadXml.  Suppressed since is LocalIntranetPermissionSetXml a constant string.
+                    doc.LoadXml(LocalIntranetPermissionSetXml);
+                    return doc;
                 case Internet:
-                    return LoadXmlDocument(InternetPermissionSetXml);
+                    // CA3057: DoNotUseLoadXml.  Suppressed since is InternetPermissionSetXml a constant string.
+                    doc.LoadXml(InternetPermissionSetXml);
+                    return doc;
                 default:
                     throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
@@ -313,12 +308,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlDocument CreateXmlDocV3(string targetZone)
         {
+            var doc = new XmlDocument();
+
             switch (targetZone)
             {
                 case LocalIntranet:
-                    return LoadXmlDocument(LocalIntranetPermissionSetWithWPFXml);
+                    // CA3057: DoNotUseLoadXml.  Suppressed since is LocalIntranetPermissionSetXml a constant string.
+                    doc.LoadXml(LocalIntranetPermissionSetWithWPFXml);
+                    return doc;
                 case Internet:
-                    return LoadXmlDocument(InternetPermissionSetWithWPFXml);
+                    // CA3057: DoNotUseLoadXml.  Suppressed since is InternetPermissionSetXml a constant string.
+                    doc.LoadXml(InternetPermissionSetWithWPFXml);
+                    return doc;
                 default:
                     throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
@@ -394,17 +395,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string[] PermissionSetToIdentityList(PermissionSet permissionSet)
         {
             string psXml = permissionSet?.ToString() ?? "<PermissionSet/>";
-            var psDocument = LoadXmlDocument(psXml);
+            var psDocument = new XmlDocument();
+            // CA3057: DoNotUseLoadXml.  Suppressed since 'psXml' is a trusted or a constant string.
+            psDocument.LoadXml(psXml);
             return XmlToIdentityList(psDocument.DocumentElement);
         }
 
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         internal static XmlDocument PermissionSetToXml(PermissionSet ps)
         {
+            XmlDocument inputDocument = new XmlDocument();
             string xml = ps?.ToString() ?? "<PermissionSet/>";
 
-            XmlDocument inputDocument = LoadXmlDocument(xml);
-            var outputDocument = new XmlDocument { XmlResolver = null };
+            // CA3057: DoNotUseLoadXml.  Suppressed since 'xml' is a trusted or a constant string.
+            inputDocument.LoadXml(xml);
+            var outputDocument = new XmlDocument();
             XmlElement psElement = XmlUtil.CloneElementToDocument(inputDocument.DocumentElement, outputDocument, XmlNamespaces.asmv2);
             outputDocument.AppendChild(psElement);
             return outputDocument;
