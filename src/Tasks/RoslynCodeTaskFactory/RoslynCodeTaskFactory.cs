@@ -141,7 +141,18 @@ namespace Microsoft.Build.Tasks
         {
             // The type of the task has already been determined and the assembly is already loaded after compilation so
             // just create an instance of the type and return it.
-            return Activator.CreateInstance(TaskType) as ITask;
+            ITask taskInstance = Activator.CreateInstance(TaskType) as ITask;
+            if (taskInstance is null)
+            {
+                TaskLoggingHelper taskInvocationLog = new TaskLoggingHelper(taskFactoryLoggingHost, _taskName)
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+                taskInvocationLog.LogErrorWithCodeFromResources("CodeTaskFactory.NeedsITaskInterface", _taskName);
+            }
+
+            return taskInstance;
         }
 
         /// <inheritdoc cref="ITaskFactory.GetTaskParameters"/>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\DebuggingSources.proj" />
 
@@ -102,12 +102,14 @@
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
     <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
     <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
+    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
+    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
+
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
@@ -126,7 +128,6 @@
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
@@ -628,12 +629,6 @@
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\XMakeAttributes.cs">
-      <Link>Resources\XMakeAttributes.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\XMakeElements.cs">
-      <Link>Resources\XMakeElements.cs</Link>
-    </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 
     <!-- Win32 RC Files -->
@@ -671,7 +666,8 @@
     </XmlPeek>
 
     <PropertyGroup>
-      <NuGetFrameworkWrapperRedirects_Content><![CDATA[
+      <NuGetFrameworkWrapperRedirects_Content>
+        <![CDATA[
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 

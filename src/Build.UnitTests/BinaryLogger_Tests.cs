@@ -18,7 +18,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -102,6 +101,17 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
+            // NOTE:
+            // We want both loggers to see the same value of EnableTargetOutputLogging, otherwise, the last assertion will fail.
+            // See logic around showTargetOutputs.
+            // In short, this controls whether or not the "Target output items:" part is shown.
+            // Traits.Instance is weird, it's not always a singleton, depending on whether or not BuildEnvironmentState.s_runningTests is true.
+            // In this case s_runningTests is true.
+            // When s_runningTests is true, we don't use a singleton, and in this case, what matters is the env variable value.
+            // So we set the env variable to 1 and clear at the end of test.
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
+
             var binaryLogger = new BinaryLogger();
 
             binaryLogger.Parameters = _logFile;

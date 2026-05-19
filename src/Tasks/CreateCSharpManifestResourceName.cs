@@ -16,6 +16,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class CreateCSharpManifestResourceName : CreateManifestResourceName
     {
         protected override string SourceFileExtension => ".cs";

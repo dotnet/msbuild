@@ -13,7 +13,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
 

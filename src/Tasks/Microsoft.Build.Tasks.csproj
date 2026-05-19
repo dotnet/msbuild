@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\DebuggingSources.proj" />
 
@@ -33,9 +33,7 @@
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <!-- Node communication -->
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
@@ -108,8 +106,6 @@
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\XMakeAttributes.cs" />
-    <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
@@ -252,6 +248,7 @@
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs" />
     <Compile Include="TaskTranslatorHelpers.cs" />
+    <Compile Include="TaskEnvironmentExtensions.cs" />
     <Compile Include="Telemetry.cs" />
     <Compile Include="ToolTaskExtension.cs" />
     <Compile Include="Touch.cs" />

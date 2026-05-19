@@ -17,7 +17,6 @@ using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 
-[UsesVerify]
 [UseInvariantCulture]
 public class NodeStatus_Transition_Tests
 {
