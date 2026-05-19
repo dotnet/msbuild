@@ -937,6 +937,11 @@ namespace Microsoft.Build.CommandLine
             // handle switch errors
             catch (CommandLineSwitchException e)
             {
+                if (commandLineParser.IncludedResponseFiles.Count > 0)
+                {
+                    PrintResponseFileNotices();
+                }
+
                 Console.WriteLine(e.Message);
                 Console.WriteLine();
                 // prompt user to display help for proper switch usage
@@ -4224,6 +4229,20 @@ namespace Microsoft.Build.CommandLine
         private static void ShowHelpPrompt()
         {
             Console.WriteLine(AssemblyResources.GetString("HelpPrompt"));
+        }
+
+        private static void PrintResponseFileNotices()
+        {
+            Console.WriteLine(
+                AssemblyResources.GetString(
+                    commandLineParser.IncludedResponseFiles.Count == 1
+                        ? "PickedUpSwitchesFromResponseFile"
+                        : "PickedUpSwitchesFromResponseFiles"));
+
+            foreach (string responseFilePath in commandLineParser.IncludedResponseFiles)
+            {
+                Console.WriteLine($"  {responseFilePath}");
+            }
         }
 
         /// <summary>
