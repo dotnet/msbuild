@@ -49,7 +49,7 @@ variables:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
-    value: true
+    value: false # Disable loc for vs18.3
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
