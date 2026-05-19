@@ -238,11 +238,28 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
                     // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
-                    AssemblyName assemblyName = new AssemblyName(resolverFileName)
+                    var buildEnvironment = BuildEnvironmentHelper.Instance;
+                    AssemblyName assemblyName = CreateAssemblyNameWithCodeBase(resolverFileName, resolverPath);
+                    
+                    // Check if we're in a scenario that needs fallback (API usage or dotnet CLI)
+                    // These scenarios are detected by: Mode = Standalone and not running in MSBuild.exe
+                    // This matches the condition set by TryFromMSBuildAssembly when MSBuild is called from external APIs
+                    // VS and MSBuild.exe direct usage can use Assembly.Load reliably, so they don't need fallback
+                    bool needsFallback = buildEnvironment.Mode == BuildEnvironmentMode.Standalone && !buildEnvironment.RunningInMSBuildExe;
+                    
+                    if (needsFallback)
                     {
-                        CodeBase = resolverPath,
-                    };
-                    return Assembly.Load(assemblyName);
+                        // For external API users and dotnet CLI, use LoadFrom directly
+                        // Assembly.Load fails in these scenarios due to assembly resolution context,
+                        // so we use LoadFrom which works reliably without needing try-catch
+                        return Assembly.LoadFrom(resolverPath);
+                    }
+                    else
+                    {
+                        // VS and MSBuild.exe direct usage: use Assembly.Load directly without fallback
+                        // These scenarios should work reliably with Assembly.Load and benefit from NGEN
+                        return Assembly.Load(assemblyName);
+                    }
                 }
             }
             return Assembly.LoadFrom(resolverPath);
@@ -250,6 +267,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return s_loader.LoadFromPath(resolverPath);
 #endif
         }
+
+#if !FEATURE_ASSEMBLYLOADCONTEXT
+        private AssemblyName CreateAssemblyNameWithCodeBase(string assemblyName, string codeBase)
+        {
+            return new AssemblyName(assemblyName)
+            {
+                CodeBase = codeBase,
+            };
+        }
+#endif
 
         protected internal virtual IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
         {

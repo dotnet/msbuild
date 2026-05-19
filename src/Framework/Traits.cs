@@ -143,6 +143,11 @@ namespace Microsoft.Build.Framework
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
         /// <summary>
+        /// Forces execution of tasks coming from a different TaskFactory than AssemblyTaskFactory out of proc.
+        /// </summary>
+        public readonly bool ForceTaskFactoryOutOfProc = Environment.GetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC") == "1";
+
+        /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
         /// mirroring
         /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry

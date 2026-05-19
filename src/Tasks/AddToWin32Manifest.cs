@@ -8,6 +8,7 @@ using System.Xml;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
@@ -89,7 +90,7 @@ namespace Microsoft.Build.Tasks
         {
             if (ApplicationManifest != null)
             {
-                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec) || !File.Exists(ApplicationManifest?.ItemSpec))
+                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec) || !FileSystems.Default.FileExists(ApplicationManifest?.ItemSpec))
                 {
                     Log.LogErrorWithCodeFromResources(null, ApplicationManifest?.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
                     return null;

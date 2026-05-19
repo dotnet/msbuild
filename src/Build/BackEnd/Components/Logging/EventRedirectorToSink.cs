@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Constructors
         /// <summary>
-        /// Initalize this class with a central logger id identifying the central logger to which
+        /// Initialize this class with a central logger id identifying the central logger to which
         /// these events should consumed by. The redirector will send the messages to the registered sink to
         /// be consumed
         /// </summary>
@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.Logging
         #region IEventRedirector Methods
 
         /// <summary>
-        /// This method is called by the node loggers to forward the events to cenral logger
+        /// This method is called by the node loggers to forward the events to central logger
         /// </summary>
         /// <param name="buildEvent">Build event to forward</param>
         /// <exception cref="InternalErrorException">BuildEvent is null</exception>

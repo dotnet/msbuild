@@ -244,6 +244,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -254,6 +257,9 @@
                      不支援此選項。
                      使用的執行緒數量上限由
                      -maxCpuCount 切換開關決定。
+                     若啟用多執行緒模式
+                     且 MSBUILDFORCEALLTASKSOUTOFPROC=1，
+                     maxCpuCount 不得超過 256。
                      (簡短形式: -m)
     </target>
         <note />

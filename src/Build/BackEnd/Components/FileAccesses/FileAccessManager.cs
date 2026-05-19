@@ -4,13 +4,13 @@
 #if FEATURE_REPORTFILEACCESSES
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Runtime.Versioning;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.FileAccesses
 {
@@ -144,7 +144,7 @@ namespace Microsoft.Build.FileAccesses
         {
             // Make a dummy file access to use as a notification that the file accesses should be completed for a project.
             string filePath = FileAccessCompletionPrefix + globalRequestId.ToString();
-            _ = File.Exists(filePath);
+            _ = FileSystems.Default.FileExists(filePath);
         }
 
         public void WaitForFileAccessReportCompletion(int globalRequestId, CancellationToken cancellationToken)

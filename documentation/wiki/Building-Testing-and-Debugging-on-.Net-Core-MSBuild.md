@@ -40,7 +40,12 @@ The best way to get .NET Core MSBuild is by installing the [.NET Core SDK](https
 
 ## Wait in Main
 
-Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually after it starts.
+Set the environment variable `MSBUILDDEBUGONSTART` to control debugger behavior at startup:
+- `1`: Launch debugger for all processes (main MSBuild and TaskHost child processes)
+- `2`: Wait for manual debugger attach for all processes
+- `3`: Launch debugger for main MSBuild process only, skip TaskHost child processes
+
+For example, set `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually after it starts.
 
 ## Using the repository binaries to perform builds
 

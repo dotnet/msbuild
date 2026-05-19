@@ -22,6 +22,7 @@ namespace Microsoft.Build.Tasks
     /// Would this need to be revised - XxHash64 from System.Io.Hashing could be used instead for better performance.
     /// (That however currently requires load of additional binary into VS process which has it's own costs)
     /// </remarks>
+    [MSBuildMultiThreadableTask]
     public class Hash : TaskExtension
     {
         private const char ItemSeparatorCharacter = '\u2028';

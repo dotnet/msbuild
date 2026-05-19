@@ -42,6 +42,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private readonly ITestOutputHelper _output;
 
+        /// <summary>
+        /// Creates a stub TaskEnvironment for testing that uses the current process environment.
+        /// </summary>
+        private static TaskEnvironment CreateStubTaskEnvironment() => TaskEnvironmentHelper.CreateForTest();
+
 #pragma warning disable xUnit1013
 
         /// <summary>
@@ -84,7 +89,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
-                BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
+                BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config, CreateStubTaskEnvironment());
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
                 TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, TargetBuiltReason.None, _host, null, false);
             });
@@ -99,7 +104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
-                BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
+                BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config, CreateStubTaskEnvironment());
                 TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, TargetBuiltReason.None, _host, null, false);
             });
         }
@@ -113,7 +118,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
-                BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
+                BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config, CreateStubTaskEnvironment());
 
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
                 TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, TargetBuiltReason.None, null, null, false);
@@ -916,7 +921,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             config.Project = project;
-            BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
+            BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config, CreateStubTaskEnvironment());
 
             Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
             TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(targetName, project.Targets[targetName].Location), lookup, null, TargetBuiltReason.None, _host, null, false);
@@ -934,7 +939,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             config.Project = project;
-            BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[1] { "foo" }), config);
+            BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[1] { "foo" }), config, CreateStubTaskEnvironment());
             TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(target, project.Targets[target].Location), baseEntry.Lookup, baseEntry, TargetBuiltReason.None, _host, null, false);
             return entry;
         }

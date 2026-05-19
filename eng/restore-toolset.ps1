@@ -14,7 +14,6 @@ function CreateBuildEnvScripts {
   $scriptContents = @"
 @echo off
 title MSBuild ($RepoRoot)
-set DOTNET_MULTILEVEL_LOOKUP=0
 REM https://aka.ms/vs/unsigned-dotnet-debugger-lib
 set VSDebugger_ValidateDotnetDebugLibSignatures=0
 
@@ -33,7 +32,6 @@ DOSKEY killdotnet=taskkill /F /IM dotnet.exe /T ^& taskkill /F /IM VSTest.Consol
   $scriptPath = Join-Path $ArtifactsDir "msbuild-build-env.ps1"
   $scriptContents = @"
 `$host.ui.RawUI.WindowTitle = "MSBuild ($RepoRoot)"
-`$env:DOTNET_MULTILEVEL_LOOKUP = 0
 # https://aka.ms/vs/unsigned-dotnet-debugger-lib
 `$env:VSDebugger_ValidateDotnetDebugLibSignatures = 0
 

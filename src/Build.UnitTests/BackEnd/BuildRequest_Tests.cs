@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Versioning;
 
 using Microsoft.Build.BackEnd;
@@ -134,6 +136,81 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Assert.Equal(request.Targets[i], deserializedRequest.Targets[i]);
             }
+        }
+
+        [WindowsOnlyFact]
+        [SupportedOSPlatform("windows")]
+        public void TestRunningObjectTableErrorLogging()
+        {
+            var rot = new RunningObjectTable();
+            var nonExistentMoniker = "NonExistent_" + Guid.NewGuid();
+
+            var exception = Should.Throw<COMException>(() => rot.GetObject(nonExistentMoniker));
+
+            exception.Message.ShouldContain($"Failed to get object '{nonExistentMoniker}' from Running Object Table");
+            exception.Message.ShouldContain("HRESULT:");
+            exception.HResult.ShouldNotBe(0);
+        }
+
+        [WindowsOnlyFact]
+        [SupportedOSPlatform("windows")]
+        public void TestRunningObjectTableErrorDoesNotMaskOriginalError()
+        {
+            var rot = new RunningObjectTable();
+            var testMoniker = "ErrorTest_" + Guid.NewGuid();
+
+            var exception = Should.Throw<COMException>(() => rot.GetObject(testMoniker));
+
+            exception.ShouldBeOfType<COMException>();
+            exception.HResult.ShouldNotBe(0);
+
+            exception.Message.ShouldContain(testMoniker);
+        }
+
+        [WindowsOnlyFact]
+        [SupportedOSPlatform("windows")]
+        public void TestRunningObjectTableSuccessDoesNotThrow()
+        {
+            var stateInHostObject = 42;
+            var hostServices = new HostServices();
+            var rot = new MockRunningObjectTable();
+            hostServices.SetTestRunningObjectTable(rot);
+
+            var moniker = nameof(TestRunningObjectTableSuccessDoesNotThrow) + Guid.NewGuid();
+            var remoteHost = new MockRemoteHostObject(stateInHostObject);
+
+            using (var result = rot.Register(moniker, remoteHost))
+            {
+                // This should succeed without throwing - validates error logging doesn't affect success path
+                var retrievedObject = Should.NotThrow(() => rot.GetObject(moniker));
+
+                retrievedObject.ShouldNotBeNull();
+                retrievedObject.ShouldBeOfType<MockRemoteHostObject>();
+                ((MockRemoteHostObject)retrievedObject).GetState().ShouldBe(stateInHostObject);
+            }
+        }
+
+        [WindowsOnlyFact]
+        [SupportedOSPlatform("windows")]
+        public void TestRunningObjectTableErrorMessageIsMultiLine()
+        {
+            var rot = new RunningObjectTable();
+            var testMoniker = "MultiLineTest_" + Guid.NewGuid();
+
+            var exception = Should.Throw<COMException>(() => rot.GetObject(testMoniker));
+
+            // The error message should have at least 2 lines:
+            // 1. "Failed to get object..." 
+            // 2. "HRESULT: ..."
+            var lines = exception.Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            lines.Length.ShouldBeGreaterThanOrEqualTo(2);
+
+            // First line should mention the failure
+            lines[0].ShouldContain("Failed to get object");
+            lines[0].ShouldContain(testMoniker);
+
+            // Second line should have HRESULT
+            lines[1].ShouldContain("HRESULT:");
         }
 
         [WindowsOnlyFact]

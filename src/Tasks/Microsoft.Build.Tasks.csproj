@@ -42,6 +42,7 @@
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="AppConfig\*.cs" />
@@ -201,6 +203,7 @@
     <Compile Include="AssemblyDependency\Node\OutOfProcRarClient.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNode.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeBufferedLogEvents.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeBuildEngine.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
@@ -685,6 +688,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
@@ -715,7 +719,6 @@
     <PackageReference Update="System.Threading.Tasks.Dataflow" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
     <PackageReference Include="System.Reflection.Metadata" PrivateAssets="all" />
-    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
