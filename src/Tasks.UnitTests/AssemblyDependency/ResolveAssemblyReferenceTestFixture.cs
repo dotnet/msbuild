@@ -849,7 +849,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             // First, MyMissingAssembly doesn't exist anywhere.
-            if (path.IndexOf("MyMissingAssembly") != -1)
+            if (path.Contains("MyMissingAssembly", StringComparison.Ordinal))
             {
                 return false;
             }
@@ -906,7 +906,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>A set of subdirectories</returns>
         internal static string[] GetDirectories(string path, string pattern)
         {
-            if (path.EndsWith(s_myVersion20Path))
+            if (path.EndsWith(s_myVersion20Path, StringComparison.Ordinal))
             {
                 string[] paths = new string[] {
                     Path.Combine(path, "en"), Path.Combine(path, "en-GB"), Path.Combine(path, "xx")
@@ -1007,11 +1007,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 return "Windows Runtime";
             }
-            else if (path.StartsWith(@"C:\WinMDArchVerification", StringComparison.OrdinalIgnoreCase) && path.EndsWith(".winmd"))
+            else if (path.StartsWith(@"C:\WinMDArchVerification", StringComparison.OrdinalIgnoreCase) && path.EndsWith(".winmd", StringComparison.Ordinal))
             {
                 return "WindowsRuntime 1.0";
             }
-            else if (path.EndsWith(".dll") || path.EndsWith(".exe") || path.EndsWith(".winmd"))
+            else if (path.EndsWith(".dll", StringComparison.Ordinal) || path.EndsWith(".exe", StringComparison.Ordinal) || path.EndsWith(".winmd", StringComparison.Ordinal))
             {
                 return "v2.0.50727";
             }
@@ -1229,7 +1229,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=A77a5c561934e089");
             }
 
-            if (path.EndsWith(Path.Combine(s_myVersion20Path, "MyGacAssembly.dll")))
+            if (path.EndsWith(Path.Combine(s_myVersion20Path, "MyGacAssembly.dll"), StringComparison.Ordinal))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("MyGacAssembly, Version=9.2.3401.1, Culture=neutral, PublicKeyToken=a6694b450823df78");
@@ -1261,19 +1261,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension(AssemblyRef.SystemData);
             }
 
-            if (path.EndsWith(s_myLibraries_V1_DDllPath))
+            if (path.EndsWith(s_myLibraries_V1_DDllPath, StringComparison.Ordinal))
             {
                 // Version 1 of D
                 return new AssemblyNameExtension("D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa");
             }
 
-            if (path.EndsWith(@"c:\RogueLibraries\v1\D.dll"))
+            if (path.EndsWith(@"c:\RogueLibraries\v1\D.dll", StringComparison.Ordinal))
             {
                 // Version 1 of D, but with a different PKT
                 return new AssemblyNameExtension("D, VERsion=1.0.0.0, Culture=neutral, PublicKeyToken=bbbbbbbbbbbbbbbb");
             }
 
-            if (path.EndsWith(s_myLibraries_V1_E_EDllPath))
+            if (path.EndsWith(s_myLibraries_V1_E_EDllPath, StringComparison.Ordinal))
             {
                 return new AssemblyNameExtension("E, Version=0.0.0.0, Culture=neutral, PUBlicKeyToken=null");
             }
@@ -1341,17 +1341,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("UnifyMe, Version=3.0.0.0, Culture=neutral, PublICkeyToken=b77a5c561934e089");
             }
 
-            if (path.EndsWith(s_myLibraries_V2_DDllPath))
+            if (path.EndsWith(s_myLibraries_V2_DDllPath, StringComparison.Ordinal))
             {
                 return new AssemblyNameExtension("D, VErsion=2.0.0.0, CulturE=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
             }
 
-            if (path.EndsWith(s_myLibraries_V1_GDllPath))
+            if (path.EndsWith(s_myLibraries_V1_GDllPath, StringComparison.Ordinal))
             {
                 return new AssemblyNameExtension("G, Version=1.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
             }
 
-            if (path.EndsWith(s_myLibraries_V2_GDllPath))
+            if (path.EndsWith(s_myLibraries_V2_GDllPath, StringComparison.Ordinal))
             {
                 return new AssemblyNameExtension("G, Version=2.0.0.0, Culture=neutral, PublicKEyToken=aaaaaaaaaaaaaaaa");
             }
