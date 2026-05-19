@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
+#if NETFRAMEWORK
+using Microsoft.IO;
 #else
 using System.IO;
 #endif
@@ -33,7 +32,7 @@ namespace Microsoft.Build.Framework
         /// The normalized string representation of this path.
         /// </summary>
         public string Value { get; }
-        
+
         /// <summary>
         /// The original string used to create this path.
         /// </summary>
@@ -85,17 +84,14 @@ namespace Microsoft.Build.Framework
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
         private static void ValidatePath(string path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentException("Path must not be null or empty.", nameof(path));
-            }
+            ArgumentException.ThrowIfNullOrEmpty(path);
 
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
             // in .NET Framework it's provided by package and in .NET it's built-in
 #if NETFRAMEWORK || NET
             if (!Path.IsPathFullyQualified(path))
             {
-                throw new ArgumentException("Path must be rooted.", nameof(path));
+                throw new ArgumentException(SR.PathMustBeRooted, nameof(path));
             }
 #endif
         }
@@ -108,23 +104,45 @@ namespace Microsoft.Build.Framework
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentException("Path must not be null or empty.", nameof(path));
-            }
+            ArgumentException.ThrowIfNullOrEmpty(path);
 
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
             // For .NET Core, System.IO.Path.Combine already does not throw in this case.
             Value = Path.Combine(basePath.Value, path);
             OriginalValue = path;
-        } 
+        }
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.
         /// </summary>
         /// <param name="path">The path to convert.</param>
         public static implicit operator string(AbsolutePath path) => path.Value;
+
+        /// <summary>
+        /// Returns the canonical form of this path, equivalent to calling <see cref="System.IO.Path.GetFullPath(string)"/>.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="AbsolutePath"/> representing the canonical form of the path.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// The canonical form of a path is exactly what <see cref="System.IO.Path.GetFullPath(string)"/> would produce,
+        /// with the following properties:
+        /// <list type="bullet">
+        ///   <item>All relative path segments ("." and "..") are resolved.</item>
+        ///   <item>Directory separators are normalized to the platform convention (backslash on Windows).</item>
+        ///   <item>Invalid path characters are rejected.</item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// Preserves the OriginalValue of the current instance.
+        /// </para>
+        /// </remarks>
+        internal AbsolutePath GetCanonicalForm()
+        {
+            return new AbsolutePath(System.IO.Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
+        }
 
         /// <summary>
         /// Determines whether two <see cref="AbsolutePath"/> instances are equal.

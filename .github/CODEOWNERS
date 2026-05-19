@@ -11,3 +11,13 @@
 /NuGet.config           @dotnet/kitten
 /Directory.Build*       @dotnet/kitten
 /.git*                  @dotnet/kitten
+
+# Build tasks that have source in this repo and ship in `Microsoft.Build.Tasks.Core.dll`
+# but are owned by the ClickOnce team.
+/src/Tasks/BootstrapperUtil/**                           @dotnet/msbuild-clickonce
+/src/Tasks/FormatUrl.cs                                  @dotnet/msbuild-clickonce
+/src/Tasks/GenerateLauncher.cs                           @dotnet/msbuild-clickonce
+/src/Tasks/GenerateManifestBase.cs                       @dotnet/msbuild-clickonce
+/src/Tasks/ManifestUtil/**                               @dotnet/msbuild-clickonce
+/src/Tasks/ResolveManifestFiles.cs                       @dotnet/msbuild-clickonce
+/src/Tasks/SignFile.cs                                   @dotnet/msbuild-clickonce

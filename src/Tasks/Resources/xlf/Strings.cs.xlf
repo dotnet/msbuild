@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: Všechna písmena jednotek od A: po Z: jsou aktuálně použita. Protože pracovní adresář {0} je cesta UNC, potřebuje úloha Exec volné písmeno jednotky pro namapování cesty UNC. Odpojením některých sdílených prostředků uvolněte písmena jednotek. Můžete také zadat místní pracovní adresář. Potom spusťte příkaz znovu.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3077: Příkaz {0} byl ukončen s návratovou hodnotou 0, ale během provádění byly zjištěny chyby. Hodnota ExitCode byla nastavena na hodnotu -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: Příkaz {0} byl ukončen s kódem {1}.</target>
@@ -612,6 +617,11 @@
       <trans-unit id="General.ExpectedFileMissing">
         <source>Expected file "{0}" does not exist.</source>
         <target state="translated">Očekávaný soubor {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="new">Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1263,6 +1273,26 @@
         <source>MSB3557: Error(s) generating strongly typed resources for file "{0}".</source>
         <target state="translated">MSB3557: Při generování prostředků se silnými typy pro soubor {0} došlo k chybám.</target>
         <note>{StrBegin="MSB3557: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedInvalidIdentifier">
+        <source>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</source>
+        <target state="translated">MSB3828: Přeskakování generování vlastnosti prostředku silného typu pro prostředek {0}: název nelze převést na platný identifikátor.</target>
+        <note>{StrBegin="MSB3828: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedNameCollision">
+        <source>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</source>
+        <target state="translated">MSB3829: Přeskakování generování vlastnosti prostředku silného typu pro prostředek {0}: po normalizaci identifikátoru existuje kolize názvů s prostředkem {1}.</target>
+        <note>{StrBegin="MSB3829: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedReservedName">
+        <source>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</source>
+        <target state="translated">MSB3827: Přeskakování generování vlastnosti prostředku silného typu pro prostředek {0}: název je v konfliktu s vyhrazeným názvem. Vyhrazené názvy: {1}.</target>
+        <note>{StrBegin="MSB3827: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedVoidType">
+        <source>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</source>
+        <target state="translated">MSB3830: Přeskakování generování vlastnosti prostředku silného typu pro prostředek {0}: typ hodnoty prostředku je neplatný a nelze použít jako typ vlastnosti.</target>
+        <note>{StrBegin="MSB3830: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnknownFileExtension">
         <source>MSB3558: Unsupported file extension "{0}" on file "{1}".</source>
@@ -1958,7 +1988,11 @@
         <target state="translated">MSB3249: Konfigurační soubor aplikace {0} je neplatný. {1}</target>
         <note>{StrBegin="MSB3249: "}</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="new">Application Configuration file path cannot be empty.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
+      </trans-unit>      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>
         <target state="translated">MSB3250: Soubor {0} nelze přečíst a bude ignorován. Tento soubor byl předán parametru InstalledAssemblyTables nebo byl nalezen ve složce {1} určené parametrem TargetFrameworkDirectories. {2}</target>
         <note>{StrBegin="MSB3250: "}</note>
@@ -2896,6 +2930,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">Pro zápis do souboru {0} se používá transakční režim.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3725: Příkaz {0} byl ukončen s návratovou hodnotou 0, ale během provádění byly zjištěny chyby. Hodnota ExitCode byla nastavena na hodnotu -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>

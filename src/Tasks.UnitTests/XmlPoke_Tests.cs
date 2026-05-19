@@ -8,6 +8,7 @@ using System.Linq;
 using System.Xml;
 
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
@@ -182,6 +183,7 @@ namespace Microsoft.Build.UnitTests
 
             XmlPoke task = new()
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
                 XmlInputPath = new TaskItem(xmlInputPath),
                 Query = "//variable/@Name",
@@ -209,7 +211,12 @@ namespace Microsoft.Build.UnitTests
 
             string result = File.ReadAllText(xmlInputPath);
             XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(result);
+            using (StringReader sreader = new StringReader(result))
+            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                xmlDocument.Load(reader);
+            }
+
             List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
             foreach (var node in nodes)
             {
@@ -224,7 +231,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPoke p = new XmlPoke();
+            XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
@@ -243,7 +250,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNs, out xmlInputPath);
 
-            XmlPoke p = new XmlPoke();
+            XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -271,7 +278,7 @@ namespace Microsoft.Build.UnitTests
                         res += attrs[k] + " ";
                     }
                 }
-                XmlPoke p = new XmlPoke();
+                XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 p.BuildEngine = engine;
                 p.XmlInputPath = new TaskItem(xmlInputPath);
                 p.Query = "//s:variable/@Name";
@@ -352,6 +359,7 @@ namespace Microsoft.Build.UnitTests
 
             XmlPoke p = new XmlPoke
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
                 XmlInputPath = new TaskItem(xmlInputPath),
                 Query = query,
@@ -363,8 +371,11 @@ namespace Microsoft.Build.UnitTests
             string result = File.ReadAllText(xmlInputPath);
 
             XmlDocument xmlDocument = new XmlDocument();
-
-            xmlDocument.LoadXml(result);
+            using (StringReader sreader = new StringReader(result))
+            using (XmlReader reader = XmlReader.Create(sreader, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                xmlDocument.Load(reader);
+            }
 
             return xmlDocument;
         }

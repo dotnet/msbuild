@@ -315,6 +315,16 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidNoLogoValue">
+        <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1071: NoLogo 值无效。{0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1071: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the nologo parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
         <target state="translated">MSBUILD : error MSB1065: 终端记录器值无效。它应为 "auto"、"true" 或 "false" 之一。{0}</target>
@@ -369,6 +379,31 @@
         <source>not set</source>
         <target state="translated">未设置</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerConnectFailed">
+        <source>could not connect to the server within the timeout window; the server may have failed to start</source>
+        <target state="new">could not connect to the server within the timeout window; the server may have failed to start</target>
+        <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerCrashedOnLaunch">
+        <source>the server process exited with code {0} immediately after launch</source>
+        <target state="new">the server process exited with code {0} immediately after launch</target>
+        <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerLaunchError">
+        <source>the server process could not be launched</source>
+        <target state="new">the server process could not be launched</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerStateUnknown">
+        <source>the current server state could not be determined</source>
+        <target state="new">the current server state could not be determined</target>
+        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerUnavailable">
+        <source>MSBuild server unavailable: {0}. Falling back to an in-process build.</source>
+        <target state="new">MSBuild server unavailable: {0}. Falling back to an in-process build.</target>
+        <note>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used. It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</note>
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -654,9 +689,11 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  -noLogo            Do not display the startup banner and copyright message.
+        <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo      不显示启动版权标志和版权消息。
+        <target state="translated">  -noLogo[:true|false] 不显示启动横幅和版权消息。
+                       指定 -nologo:false 可显式显示徽标。
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1707,6 +1744,22 @@
       where the switches are coming from.
     </note>
       </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFile">
+        <source>Some command line switches were read from this response file:</source>
+        <target state="new">Some command line switches were read from this response file:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from a response file: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file path is printed on a separate line after this message.
+    </note>
+      </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFiles">
+        <source>Some command line switches were read from these response files:</source>
+        <target state="new">Some command line switches were read from these response files:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from response files: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file paths are printed on separate lines after this message.
+    </note>
+      </trans-unit>
       <trans-unit id="Process">
         <source>Process = "{0}"</source>
         <target state="translated">进程 = "{0}"</target>
@@ -1827,6 +1880,11 @@
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: 无法打印目标。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskHostAcquired_NullsFiltered">
+        <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
+        <target state="translated">任务输出参数 "{0}" 包含 {1} 个 null 元素，这些元素已被筛选掉。</target>
+        <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>

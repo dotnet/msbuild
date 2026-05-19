@@ -12,6 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -339,6 +340,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private NodeLoggingContext GetNodeLoggingContext()
         {
             return new NodeLoggingContext(_host, 1, false);
+        }
+
+        /// <summary>
+        /// Verifies NeedsResultsTransfer returns false in MT mode, even when ResultsNodeId
+        /// points to a different node. In MT mode all in-proc nodes share the same cache,
+        /// so results are already accessible without transfer.
+        /// See https://github.com/dotnet/msbuild/issues/13188
+        /// </summary>
+        [Theory]
+        [InlineData(true, 1, 2, false)]                      // MT mode, results on different node → skip transfer (shared cache)
+        [InlineData(true, 1, 1, false)]                      // MT mode, results on same node → no transfer needed
+        [InlineData(true, Scheduler.InvalidNodeId, 2, false)]  // MT mode, results unset → no transfer needed
+        [InlineData(false, 1, 2, true)]                      // ST mode, results on different node → transfer needed
+        [InlineData(false, 1, 1, false)]                     // ST mode, results on same node → no transfer needed
+        [InlineData(false, Scheduler.InvalidNodeId, 2, false)] // ST mode, results unset → no transfer needed
+        public void NeedsResultsTransfer_SkipsInMultiThreadedMode(
+            bool isMultiThreaded, int resultsNodeId, int currentNodeId, bool expectedNeedsTransfer)
+        {
+            bool result = RequestBuilder.NeedsResultsTransfer(resultsNodeId, currentNodeId, isMultiThreaded);
+            result.ShouldBe(expectedNeedsTransfer);
         }
     }
 

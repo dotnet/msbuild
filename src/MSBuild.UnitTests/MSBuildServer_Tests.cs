@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -14,9 +13,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
+using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -185,8 +189,11 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.WithTransientProcess(pidOfServerProcess);
 
             string? dir = Path.GetDirectoryName(markerFile.Path);
-            using var watcher = new System.IO.FileSystemWatcher(dir!);
+            // mre must be declared before watcher so that it is disposed after watcher.
+            // Reversing this order would allow late FileSystemWatcher callbacks to call
+            // mre.Set() on a disposed ManualResetEvent, causing an ObjectDisposedException.
             using ManualResetEvent mre = new ManualResetEvent(false);
+            using var watcher = new System.IO.FileSystemWatcher(dir!);
             watcher.Created += (o, e) =>
             {
                 _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");

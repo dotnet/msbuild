@@ -261,7 +261,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     }
                                     else
                                     {
-                                        ErrorUtilities.ThrowInternalError("Incomplete header read.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
+                                        ErrorUtilities.ThrowInternalError($"Incomplete header read.  {headerBytesRead} of {headerByte.Length} bytes read");
                                     }
                                 }
 
@@ -285,7 +285,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     if (bytesRead == 0)
                                     {
                                         // Incomplete read.  Abort.
-                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
+                                        ErrorUtilities.ThrowInternalError($"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
                                     }
 
                                     packetBytesRead += bytesRead;
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd.Client
                                 catch
                                 {
                                     // Error while deserializing or handling packet. Logging additional info.
-                                    CommunicationsUtilities.Trace("Packet factory failed to receive package. Exception while deserializing packet {0}.", packetType);
+                                    CommunicationsUtilities.Trace($"Packet factory failed to receive package. Exception while deserializing packet {packetType}.");
                                     throw;
                                 }
 
@@ -321,7 +321,7 @@ namespace Microsoft.Build.BackEnd.Client
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError("WaitId {0} out of range.", waitId);
+                            ErrorUtilities.ThrowInternalError($"WaitId {waitId} out of range.");
                             break;
                     }
                 }
@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd.Client
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Exception occurred in the packet pump: {0}", ex);
+                CommunicationsUtilities.Trace($"Exception occurred in the packet pump: {ex}");
                 PacketPumpException = ex;
             }
 

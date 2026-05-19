@@ -39,9 +39,11 @@ Similar to how MSBuild provides the abstract `Task` class with default implement
 namespace Microsoft.Build.Utilities;
 public abstract class MultiThreadableTask : Task, IMultiThreadableTask
 {
-    public TaskEnvironment TaskEnvironment{ get; set; }
+    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 }
 ```
+
+Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
 
 Task authors who want to support older MSBuild versions need to:
 - Maintain both thread-safe and legacy implementations.

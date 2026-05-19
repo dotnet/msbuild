@@ -9,8 +9,10 @@ using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Win32;
+using Constants = Microsoft.Build.Framework.Constants;
 
 using Xunit;
 using Xunit.NetCore.Extensions;

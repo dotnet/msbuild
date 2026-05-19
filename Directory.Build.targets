@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  <Import Project="$(RepositoryEngineeringDir)packaging.targets" Condition="'$(IsPackable)' == 'true'" />
 
   <!-- Put it after Sdk.targets imports to override values from StrongName.targets. It's needed to avoid NGEN validation issues on VS exp insertions.  -->
   <PropertyGroup Condition="'$(SignType)' == 'test'">

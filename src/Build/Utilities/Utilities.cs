@@ -5,6 +5,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NET
+using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,12 +21,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
-
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
-#else
-using System.IO;
-#endif
 
 #nullable disable
 
@@ -195,12 +194,21 @@ namespace Microsoft.Build.Internal
 
             // XmlNode.InnerXml is much more expensive than InnerText. Don't use it for trivial cases.
             // (single child node with a trivial value or no child nodes)
-            if (!node.HasChildNodes || (node.ChildNodes.Count == 1 && node.FirstChild.NodeType == XmlNodeType.Whitespace))
+            // Avoid accessing node.ChildNodes -- it allocates a new XmlChildNodes wrapper on every call.
+            // Use FirstChild/NextSibling linked-list traversal instead (allocation-free).
+            XmlNode firstChild = node.FirstChild;
+            if (firstChild is null)
             {
                 return String.Empty;
             }
 
-            if (node.ChildNodes.Count == 1 && (node.FirstChild.NodeType == XmlNodeType.Text || node.FirstChild.NodeType == XmlNodeType.CDATA))
+            bool isSingleChild = firstChild.NextSibling is null;
+            if (isSingleChild && firstChild.NodeType == XmlNodeType.Whitespace)
+            {
+                return String.Empty;
+            }
+
+            if (isSingleChild && (firstChild.NodeType == XmlNodeType.Text || firstChild.NodeType == XmlNodeType.CDATA))
             {
                 return node.InnerText;
             }

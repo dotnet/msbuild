@@ -15,7 +15,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -246,7 +245,18 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
             // Exitcode is set to -1
             Assert.Equal(-1, exec.ExitCode);
-            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
+
+            MockEngine engine = (MockEngine)exec.BuildEngine;
+
+            // Should log the special "exited zero with errors" message
+            engine.AssertLogContains("MSB3077");
+
+            // Should not log other failure-related error codes
+            engine.AssertLogDoesntContain("MSB3073");
+            engine.AssertLogDoesntContain("MSB6006");
+
+            // Errors: canonical error from tool output + MSB3077 from HandleTaskExecutionErrors
+            engine.Errors.ShouldBe(2);
         }
 
         [Fact]

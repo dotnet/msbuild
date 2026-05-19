@@ -7,7 +7,9 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if !FEATURE_MSIOREDIST
 using System.IO;
+#endif
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -24,13 +26,15 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
-using ItemSpecModifiers = Microsoft.Build.Shared.FileUtilities.ItemSpecModifiers;
+using ItemSpecModifiers = Microsoft.Build.Framework.ItemSpecModifiers;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
 
 #if FEATURE_MSIOREDIST
+// File is intentionally NOT aliased — all typeof() comparisons use fully-qualified
+// System.IO.File to match the types registered in AvailableStaticMethods.
 using Directory = Microsoft.IO.Directory;
 using Path = Microsoft.IO.Path;
 #endif
@@ -1160,7 +1164,7 @@ namespace Microsoft.Build.Evaluation
 
                 string metadataValue = null;
 
-                bool isBuiltInMetadata = FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName);
+                bool isBuiltInMetadata = ItemSpecModifiers.IsItemSpecModifier(metadataName);
 
                 if (
                     (isBuiltInMetadata && ((evaluator._options & ExpanderOptions.ExpandBuiltInMetadata) != 0)) ||
@@ -1714,7 +1718,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectory, StringComparison.OrdinalIgnoreCase))
                 {
-                    value = FrameworkFileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
+                    value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
                 }
                 else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
                 {
@@ -1955,7 +1959,7 @@ namespace Microsoft.Build.Evaluation
 
                     ItemTransformFunctions functionType;
 
-                    if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
+                    if (ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
                     {
                         functionType = ItemTransformFunctions.ItemSpecModifierFunction;
                     }
@@ -2022,20 +2026,24 @@ namespace Microsoft.Build.Evaluation
                             break;
                     }
 
-                    foreach (KeyValuePair<string, S> itemTuple in transformedItems)
-                    {
-                        if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
-                        {
-                            brokeEarly = true;
-                            return transformedItems; // break out early
-                        }
-                    }
-
                     // If we have another transform, swap the source and transform lists.
                     if (i < captures.Count - 1)
                     {
                         (transformedItems, sourceItems) = (sourceItems, transformedItems);
                         transformedItems.Clear();
+                    }
+                }
+
+                // Check for break on non-empty only after ALL transforms are complete
+                if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
+                {
+                    foreach (KeyValuePair<string, S> itemTuple in transformedItems)
+                    {
+                        if (!string.IsNullOrEmpty(itemTuple.Key))
+                        {
+                            brokeEarly = true;
+                            return transformedItems; // break out early
+                        }
                     }
                 }
 
@@ -2550,9 +2558,9 @@ namespace Microsoft.Build.Evaluation
                             // only exist within a target where we can trust the current directory
                             // 2. in single process mode we get the project directory set for the thread
                             string directoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
-                            string definingProjectEscaped = item.Value.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                            string definingProjectEscaped = item.Value.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
-                            result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
+                            result = ItemSpecModifiers.GetItemSpecModifier(item.Key, functionName, directoryToUse, definingProjectEscaped);
                         }
                         // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so
                         // we do not want to rethrow in that case.
@@ -2766,7 +2774,7 @@ namespace Microsoft.Build.Evaluation
                                     // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                                     // only exist within a target where we can trust the current directory
                                     // 2. in single process mode we get the project directory set for the thread
-                                    string baseDirectoryToUse = item.Value.ProjectDirectory  ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
+                                    string baseDirectoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                                     rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                                 }
 
@@ -3310,7 +3318,7 @@ namespace Microsoft.Build.Evaluation
                     string value = null;
                     try
                     {
-                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(match.Name))
+                        if (ItemSpecModifiers.IsDerivableItemSpecModifier(match.Name))
                         {
                             // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
                             // In that case,
@@ -3318,9 +3326,9 @@ namespace Microsoft.Build.Evaluation
                             // only exist within a target where we can trust the current directory
                             // 2. in single process mode we get the project directory set for the thread
                             string directoryToUse = sourceOfMetadata.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
-                            string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                            string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
-                            value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, itemSpec, definingProjectEscaped, match.Name);
+                            value = ItemSpecModifiers.GetItemSpecModifier(itemSpec, match.Name, directoryToUse, definingProjectEscaped);
                         }
                         else
                         {
@@ -3938,6 +3946,38 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// Determines whether the argument at <paramref name="argIndex"/> for a System.IO.File
+            /// or System.IO.Directory method is a file/directory path that should be resolved
+            /// against the thread-local working directory.
+            /// </summary>
+            private static bool IsFileOrDirectoryPathArgument(string methodName, int argIndex)
+            {
+                // First argument is always a path for all File/Directory static methods.
+                if (argIndex == 0)
+                {
+                    return true;
+                }
+
+                // Second argument is a destination path for Copy, Move, Replace.
+                // CreateSymbolicLink is intentionally excluded — its arg1 (pathToTarget) is the
+                // symlink target and relative values are semantically meaningful (stored as-is).
+                if (argIndex == 1)
+                {
+                    return string.Equals(methodName, "Copy", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(methodName, "Move", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(methodName, "Replace", StringComparison.OrdinalIgnoreCase);
+                }
+
+                // Third argument is the backup path for Replace.
+                if (argIndex == 2)
+                {
+                    return string.Equals(methodName, "Replace", StringComparison.OrdinalIgnoreCase);
+                }
+
+                return false;
+            }
+
+            /// <summary>
             /// Execute the function on the given instance.
             /// </summary>
             internal object Execute(object objectInstance, IPropertyProvider<T> properties, ExpanderOptions options, IElementLocation elementLocation)
@@ -4002,13 +4042,33 @@ namespace Microsoft.Build.Evaluation
                         {
                             // Unescape the value since we're about to send it out of the engine and into
                             // the function being called. If a file or a directory function, fix the path
-                            if (_receiverType == typeof(File) || _receiverType == typeof(Directory)
-                                || _receiverType == typeof(Path))
+                            // Use fully qualified type names because FEATURE_MSIOREDIST aliases
+                            // Directory and Path to Microsoft.IO.* in this file, but _receiverType
+                            // from AvailableStaticMethods is always System.IO.*.
+                            if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
+                                || _receiverType == typeof(System.IO.Path))
                             {
-                                argumentValue = FrameworkFileUtilities.FixFilePath(argumentValue);
+                                argumentValue = FileUtilities.FixFilePath(argumentValue);
                             }
 
                             args[n] = EscapingUtilities.UnescapeAll(argumentValue);
+
+                            // In -mt mode, resolve relative path arguments for File/Directory methods
+                            // against the thread-local working directory instead of the process-global
+                            // Environment.CurrentDirectory which may point to a different project's directory.
+                            // In multiprocess mode, CurrentThreadWorkingDirectory is null and
+                            // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
+                            // This must happen AFTER UnescapeAll so that the working directory path
+                            // (a real filesystem path) is not corrupted by MSBuild unescape processing.
+                            if ((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory))
+                                && IsFileOrDirectoryPathArgument(_methodMethodName, n))
+                            {
+                                AbsolutePath? resolved = FileUtilities.MakeFullPathFromThreadWorkingDirectory((string)args[n]);
+                                if (resolved.HasValue)
+                                {
+                                    args[n] = (string)resolved.GetValueOrDefault();
+                                }
+                            }
                         }
                         else
                         {

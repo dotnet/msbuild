@@ -350,7 +350,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InvalidOperationException>(() =>
             {
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-                doc.Load(_pathToCommonTargets);
+                LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
                 Assert.True(doc.IsReadOnly);
                 doc.Save(FileUtilities.GetTemporaryFile());
             });
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly2()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-            doc.Load(_pathToCommonTargets);
+            LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
             Assert.True(doc.IsReadOnly);
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly3()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-            doc.Load(_pathToCommonTargets);
+            LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
             Assert.True(doc.IsReadOnly);
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly4()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-            doc.Load(_pathToCommonTargets);
+            LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
             Assert.True(doc.IsReadOnly);
             using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFileName(), FileMode.Create)))
             {
@@ -407,6 +407,23 @@ namespace Microsoft.Build.UnitTests.Construction
                 {
                     doc.Save(wr);
                 });
+            }
+        }
+
+        private static void LoadXmlDocumentWithLocation(XmlDocumentWithLocation doc, string file)
+        {
+            doc.FullPath = file;
+            doc.XmlResolver = null;
+
+            var settings = new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Ignore,
+                XmlResolver = null,
+            };
+
+            using (XmlReader reader = XmlReader.Create(file, settings))
+            {
+                doc.Load(reader);
             }
         }
 
@@ -422,7 +439,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 file = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(file, content);
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: readOnly);
-                doc.Load(file);
+                LoadXmlDocumentWithLocation(doc, file);
                 Assert.Equal(readOnly, doc.IsReadOnly);
                 var allNodes = doc.SelectNodes("//*|//@*");
 

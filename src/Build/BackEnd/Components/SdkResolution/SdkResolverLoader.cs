@@ -240,13 +240,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
                     var buildEnvironment = BuildEnvironmentHelper.Instance;
                     AssemblyName assemblyName = CreateAssemblyNameWithCodeBase(resolverFileName, resolverPath);
-                    
-                    // Check if we're in a scenario that needs fallback (API usage or dotnet CLI)
-                    // These scenarios are detected by: Mode = Standalone and not running in MSBuild.exe
-                    // This matches the condition set by TryFromMSBuildAssembly when MSBuild is called from external APIs
-                    // VS and MSBuild.exe direct usage can use Assembly.Load reliably, so they don't need fallback
+
+                    // Need fallback for scenarios where we're not running directly in MSBuild.exe app host.
+                    // RunningInMSBuildExe is true when the actual process is MSBuild.exe (app host),
+                    // false when running via dotnet CLI (dotnet MSBuild.dll), external API callers, or test runners.
+                    // VS and MSBuild.exe app host can use Assembly.Load reliably and benefit from NGEN.
                     bool needsFallback = buildEnvironment.Mode == BuildEnvironmentMode.Standalone && !buildEnvironment.RunningInMSBuildExe;
-                    
+
                     if (needsFallback)
                     {
                         // For external API users and dotnet CLI, use LoadFrom directly

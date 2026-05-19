@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using Constants = Microsoft.Build.Tasks.Deployment.ManifestUtilities.Constants;
 
 #nullable disable
 
@@ -12,6 +12,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// This task determines if this project requires VS2008 SP1 assembly.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public sealed class RequiresFramework35SP1Assembly : TaskExtension
     {
         #region Fields

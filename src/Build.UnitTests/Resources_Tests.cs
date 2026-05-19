@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -243,7 +242,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Start from the current directory and walk up until we find the repo root
             var currentDir = Directory.GetCurrentDirectory();
-            while (currentDir != null && !File.Exists(Path.Combine(currentDir, "MSBuild.sln")))
+            while (currentDir != null && !File.Exists(Path.Combine(currentDir, "MSBuild.slnx")))
             {
                 currentDir = Directory.GetParent(currentDir)?.FullName;
             }

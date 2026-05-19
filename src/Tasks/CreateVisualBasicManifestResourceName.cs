@@ -15,6 +15,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class CreateVisualBasicManifestResourceName : CreateManifestResourceName
     {
         protected override string SourceFileExtension => ".vb";
@@ -102,7 +103,7 @@ namespace Microsoft.Build.Tasks
                 embeddedFileName = fileName;
             }
 
-            dependentUponFileName = FrameworkFileUtilities.FixFilePath(dependentUponFileName);
+            dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
             if (!string.IsNullOrEmpty(culture) && enableCustomCulture)

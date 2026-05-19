@@ -17,7 +17,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 
@@ -2922,6 +2921,86 @@ $@"
                 InvalidProjectFileException exception = getTargetListsFunc.ShouldThrow<InvalidProjectFileException>();
                 exception.Message.ShouldContain($"The target \"{entryTarget}\" does not exist in the project.");
             }
+        }
+
+        [Fact]
+        [UseInvariantCulture]
+        public void InvalidProjectReferenceErrorIncludesReferringProject()
+        {
+            using var env = TestEnvironment.Create();
+
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var exception = Should.Throw<AggregateException>(() => new ProjectGraph(project1.Path));
+
+            exception.InnerExceptions.ShouldHaveSingleItem();
+            var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+
+            // ProjectFile on the exception should be the missing project
+            innerException.ProjectFile.ShouldContain("missing.proj");
+
+            // The message should name both the missing file and its referrer in the expected format
+            innerException.Message.ShouldContain("missing.proj");
+            innerException.Message.ShouldContain(project1.Path);
+            innerException.Message.ShouldContain("could not be loaded");
+            innerException.Message.ShouldContain("referenced by");
+        }
+
+        [Fact]
+        [UseInvariantCulture]
+        public void InvalidProjectReferenceErrorIncludesMultipleReferringProjects()
+        {
+            using var env = TestEnvironment.Create();
+
+            // Two independent projects both referencing the same missing project
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            TransientTestFile project2 = env.CreateFile("project2.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            TransientTestFile main = env.CreateFile("main.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="project1.proj" />
+                    <ProjectReference Include="project2.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var exception = Should.Throw<AggregateException>(() => new ProjectGraph(main.Path));
+
+            exception.InnerExceptions.ShouldHaveSingleItem();
+            var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+
+            // ProjectFile on the exception should be the missing project
+            innerException.ProjectFile.ShouldContain("missing.proj");
+
+            // The message should name the missing file and at least one of its referrers
+            innerException.Message.ShouldContain("missing.proj");
+            innerException.Message.ShouldContain("could not be loaded");
+            innerException.Message.ShouldContain("referenced by");
+
+            // At least one of the two referring projects must be named in the message
+            bool mentionsProject1 = innerException.Message.Contains(project1.Path);
+            bool mentionsProject2 = innerException.Message.Contains(project2.Path);
+            (mentionsProject1 || mentionsProject2).ShouldBeTrue();
         }
 
         public void Dispose()

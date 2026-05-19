@@ -16,8 +16,8 @@ using Microsoft.Build.Shared;
 using System.Buffers;
 #endif
 
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
+#if NETFRAMEWORK
+using Microsoft.IO;
 #else
 using System.IO;
 #endif
@@ -150,6 +150,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// not restoring.
     /// </summary>
     private ProjectContext? _restoreContext;
+
+    /// <summary>
+    /// True if we're replaying a binary log. In this mode, we may encounter NodeIds higher than the initial node count.
+    /// </summary>
+    private bool _isReplayMode = false;
 
     /// <summary>
     /// The thread that performs periodic refresh of the console output.
@@ -432,6 +437,9 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         ParseParameters();
 
+        // Detect if we're in replay mode
+        _isReplayMode = eventSource is IBinaryLogReplaySource;
+
         eventSource.BuildStarted += BuildStarted;
         eventSource.BuildFinished += BuildFinished;
         eventSource.ProjectStarted += ProjectStarted;
@@ -444,11 +452,6 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
-
-        if (eventSource is IEventSource3 eventSource3)
-        {
-            eventSource3.IncludeTaskInputs();
-        }
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -717,12 +720,18 @@ public sealed partial class TerminalLogger : INodeLogger
             EvalContext evalContext = new(e.BuildEventContext);
             string? targetFramework = null;
             string? runtimeIdentifier = null;
+            
             if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
             {
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
+
+            // Per-project metaproj files (e.g. MyProject.csproj.metaproj) are constructed
+            // directly without evaluation, so they won't have a matching ProjectEvaluationFinished event.
+            System.Diagnostics.Debug.Assert(
+                evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
+                "EvalProjectInfo should have been captured before ProjectStarted");
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
             _projects[c] = projectInfo;
@@ -732,6 +741,7 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(e.BuildEventContext);
+                EnsureNodeCapacity(nodeIndex);
                 _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
@@ -1053,7 +1063,29 @@ public sealed partial class TerminalLogger : INodeLogger
     private void UpdateNodeStatus(BuildEventContext buildEventContext, TerminalNodeStatus? nodeStatus)
     {
         int nodeIndex = NodeIndexForContext(buildEventContext);
+        EnsureNodeCapacity(nodeIndex);
         _nodes[nodeIndex] = nodeStatus;
+    }
+
+    /// <summary>
+    /// Ensures that the <see cref="_nodes"/> array has enough capacity to accommodate the given index.
+    /// This is necessary for binary log replay scenarios where the replay may use fewer nodes than the original build.
+    /// </summary>
+    private void EnsureNodeCapacity(int nodeIndex)
+    {
+        // Only resize in replay mode - during normal builds, the node count is fixed
+        if (_isReplayMode && nodeIndex >= _nodes.Length)
+        {
+            // Resize to accommodate the new index plus some extra capacity
+            lock (_lock)
+            {
+                if (nodeIndex >= _nodes.Length)
+                {
+                    int newSize = Math.Max(nodeIndex + 1, _nodes.Length * 2);
+                    Array.Resize(ref _nodes, newSize);
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -1191,7 +1223,9 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (hasProject && project!.IsTestProject)
             {
-                TerminalNodeStatus? node = _nodes[NodeIndexForContext(buildEventContext)];
+                int nodeIndex = NodeIndexForContext(buildEventContext);
+                EnsureNodeCapacity(nodeIndex);
+                TerminalNodeStatus? node = _nodes[nodeIndex];
 
                 // Consumes test update messages produced by VSTest and MSTest runner.
                 if (e is IExtendedBuildEventArgs extendedMessage)

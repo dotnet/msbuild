@@ -17,7 +17,6 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
@@ -2089,7 +2088,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
-            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".proj";
+            string importFileName = FileUtilities.GetTemporaryFileName() + ".proj";
             File.WriteAllText(importFileName, importProjectContent);
 
             string projectContent =
@@ -3350,7 +3349,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ("A", Operation.Include, Provenance.StringLiteral, 1)
             };
 
-            AssertProvenanceResult(expected, project, FileUtilities.GetIsFileSystemCaseSensitive() ? "a" : "A");
+            AssertProvenanceResult(expected, project, FileUtilities.IsFileSystemCaseSensitive ? "a" : "A");
         }
 
 

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: En este momento están en uso todas las letras de unidad, de la A: a la Z: Como el directorio de trabajo "{0}" es una ruta de acceso UNC, la tarea "Exec" requiere una letra de unidad libre a la que asignar la ruta de acceso UNC. Desconéctese de uno o varios recursos compartidos para liberar letras de unidad, o bien especifique un directorio de trabajo local antes de intentar ejecutar este comando de nuevo.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3077: el comando "{0}" se cerró con el valor devuelto 0, pero se detectaron errores durante la ejecución. ExitCode se estableció en -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: El comando "{0}" salió con el código {1}.</target>
@@ -612,6 +617,11 @@
       <trans-unit id="General.ExpectedFileMissing">
         <source>Expected file "{0}" does not exist.</source>
         <target state="translated">El archivo esperado "{0}" no existe.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="new">Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1263,6 +1273,26 @@
         <source>MSB3557: Error(s) generating strongly typed resources for file "{0}".</source>
         <target state="translated">MSB3557: Error(es) al generar recursos fuertemente tipados para el archivo "{0}".</target>
         <note>{StrBegin="MSB3557: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedInvalidIdentifier">
+        <source>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</source>
+        <target state="translated">MSB3828: omitiendo la generación de propiedades de recurso fuertemente tipadas para el recurso "{0}": el nombre no se puede convertir en un identificador válido.</target>
+        <note>{StrBegin="MSB3828: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedNameCollision">
+        <source>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</source>
+        <target state="translated">MSB3829: omitiendo la generación de propiedades de recurso fuertemente tipadas para el recurso "{0}": existe una colisión de nombres con el recurso "{1}" después de la normalización del identificador.</target>
+        <note>{StrBegin="MSB3829: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedReservedName">
+        <source>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</source>
+        <target state="translated">MSB3827: omitiendo la generación de propiedades de recurso fuertemente tipadas para el recurso "{0}": el nombre entra en conflicto con un nombre reservado. Nombres reservados: {1}.</target>
+        <note>{StrBegin="MSB3827: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedVoidType">
+        <source>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</source>
+        <target state="translated">MSB3830: omitiendo la generación de propiedades de recurso fuertemente tipadas para el recurso "{0}": el tipo de valor de recurso es void, que no se puede usar como tipo de propiedad.</target>
+        <note>{StrBegin="MSB3830: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnknownFileExtension">
         <source>MSB3558: Unsupported file extension "{0}" on file "{1}".</source>
@@ -1958,7 +1988,11 @@
         <target state="translated">MSB3249: El archivo de configuración de la aplicación "{0}" no es válido. {1}</target>
         <note>{StrBegin="MSB3249: "}</note>
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="new">Application Configuration file path cannot be empty.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
+      </trans-unit>      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>
         <target state="translated">MSB3250: Se omitirá el archivo "{0}" porque no se puede leer. Bien se pasó a InstalledAssemblyTables o bien se encontró al buscar en la carpeta {1} de TargetFrameworkDirectories. {2}</target>
         <note>{StrBegin="MSB3250: "}</note>
@@ -2896,6 +2930,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">Se está usando el modo transaccional para escribir en el archivo "{0}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3725: el comando "{0}" se cerró con el valor devuelto 0, pero se detectaron errores durante la ejecución. ExitCode se estableció en -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>

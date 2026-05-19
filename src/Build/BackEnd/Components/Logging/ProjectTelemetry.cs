@@ -100,8 +100,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // We identify Microsoft tasks by checking if they're in the Microsoft.Build namespace
                 string? baseTypeName = baseType.FullName;
                 if (!string.IsNullOrEmpty(baseTypeName) &&
-                    (baseTypeName.StartsWith("Microsoft.Build.Tasks.") ||
-                     baseTypeName.StartsWith("Microsoft.Build.Utilities.")))
+                    (baseTypeName.StartsWith("Microsoft.Build.Tasks.", StringComparison.Ordinal) ||
+                     baseTypeName.StartsWith("Microsoft.Build.Utilities.", StringComparison.Ordinal)))
                 {
                     // This is a subclass of a Microsoft-owned task
                     // Track it only if it's NOT itself Microsoft-owned (i.e., user-authored subclass)

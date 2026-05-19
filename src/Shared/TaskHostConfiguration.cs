@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     internal class TaskHostConfiguration : INodePacket
     {
         /// <summary>
-        /// The node id (of the parent node, to make the logging work out)
+        /// The node id (of the owning worker node, to make the logging work out)
         /// </summary>
         private int _nodeId;
 
@@ -95,9 +95,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _projectFile;
 
-#if !NET35
         private HostServices _hostServices;
-#endif
 
         /// <summary>
         /// The set of parameters to apply to the task prior to execution.
@@ -167,9 +165,7 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> buildProcessEnvironment,
             CultureInfo culture,
             CultureInfo uiCulture,
-#if !NET35
             HostServices hostServices,
-#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -206,9 +202,7 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
-#if !NET35
             _hostServices = hostServices;
-#endif
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
@@ -308,7 +302,6 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
-#if !NET35
         /// <summary>
         /// The HostServices to be used by the task host.
         /// </summary>
@@ -318,7 +311,6 @@ namespace Microsoft.Build.BackEnd
             get
             { return _hostServices; }
         }
-#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined.
@@ -480,10 +472,10 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
             // The packet version is used to determine if the AppDomain configuration should be serialized.
-            // If the packet version is bigger then 0, it means the task host will running under .NET.
-            // Although MSBuild.exe runs under .NET Framework and has AppDomain support,
-            // we don't transmit AppDomain config when communicating with dotnet.exe (it is not supported in .NET 5+).
-            if (translator.NegotiatedPacketVersion == 0)
+            // null = CLR2 (NET35) task host - supports AppDomain
+            // 0 = CLR4 (NET472) task host - supports AppDomain
+            // We serialize AppDomain for Framework task hosts (null or 0), but not for .NET (>= 2).
+            if (translator.NegotiatedPacketVersion is null or 0)
             {
                 byte[] appDomainConfigBytes = null;
 
@@ -507,14 +499,17 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
-            if (translator.NegotiatedPacketVersion >= 2)
+
+            // null = CLR2 (NET35) task hosts which don't have these fields compiled in.
+            // 0 = CLR4, 2+ = .NET - both support these fields.
+#if NET472 || NETCOREAPP
+            if (translator.NegotiatedPacketVersion.HasValue && translator.NegotiatedPacketVersion is 0 or >= 2)
             {
                 translator.Translate(ref _targetName);
                 translator.Translate(ref _projectFile);
-#if !NET35    
                 translator.Translate(ref _hostServices);
-#endif
             }
+#endif
 
             translator.Translate(ref _isTaskInputLoggingEnabled);
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
@@ -522,25 +517,13 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
             translator.Translate(collection: ref _warningsAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
             translator.Translate(collection: ref _warningsNotAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
-#if CLR2COMPATIBILITY
-                                 collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
-#else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
         }
 
         /// <summary>

@@ -3,14 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+#if !FEATURE_MSIOREDIST
+using System.IO;
+#endif
 using System.Linq;
 using Microsoft.Build.Shared;
 using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData;
 
 #if FEATURE_MSIOREDIST
 using Path = Microsoft.IO.Path;
-#else
-using System.IO;
 #endif
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;

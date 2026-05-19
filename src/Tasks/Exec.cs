@@ -325,10 +325,15 @@ namespace Microsoft.Build.Tasks
             {
                 Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", commandForLog, ExitCode);
             }
+            else if (ExitCodeOverriddenToIndicateErrors)
+            {
+                Log.LogErrorWithCodeFromResources("Exec.CommandExitedZeroWithErrors", commandForLog);
+            }
             else
             {
                 Log.LogErrorWithCodeFromResources("Exec.CommandFailed", commandForLog, ExitCode);
             }
+
             return false;
         }
 
