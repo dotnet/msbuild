@@ -166,7 +166,7 @@ namespace Microsoft.Build.Experimental
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A <see cref="Task{TResult}"/> that will complete with a value of type <see cref="MSBuildClientExitResult"/>
         /// that indicates whether the build succeeded, or the manner in which it failed.</returns>
-        internal async Task<MSBuildClientExitResult> ExecuteAsync(CancellationToken cancellationToken)
+        public async Task<MSBuildClientExitResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             // Command line in one string used only in human readable content.
             string descriptiveCommandLine = string.Join(" ", _commandLine);

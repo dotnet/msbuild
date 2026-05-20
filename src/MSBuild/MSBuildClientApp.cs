@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
@@ -39,10 +40,10 @@ namespace Microsoft.Build.CommandLine
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
-            return Execute(
+            return ExecuteAsync(
                 commandLineArgs,
                 msbuildLocation,
-                cancellationToken);
+                cancellationToken).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -56,10 +57,10 @@ namespace Microsoft.Build.CommandLine
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static MSBuildApp.ExitType Execute(string[] commandLineArgs, string msbuildLocation, CancellationToken cancellationToken)
+        public static async Task<MSBuildApp.ExitType> ExecuteAsync(string[] commandLineArgs, string msbuildLocation, CancellationToken cancellationToken)
         {
             MSBuildClient msbuildClient = new MSBuildClient(commandLineArgs, msbuildLocation);
-            MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
+            MSBuildClientExitResult exitResult = await msbuildClient.ExecuteAsync(cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
                 exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
