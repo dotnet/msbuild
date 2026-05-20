@@ -38,7 +38,7 @@
       </trans-unit>
       <trans-unit id="BinlogFormatVersionMismatch">
         <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
-        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <target state="translated">MSB4281: 이진 로그 파일이 현재 버전(형식 버전 {0})보다 최신 버전(형식 버전 {1})의 MSBuild로 만들어졌습니다. 재생 시 일부 데이터가 누락될 수 있습니다.</target>
         <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
@@ -602,6 +602,11 @@
         <target state="translated">이 지점 이후의 매개 변수가 잘렸습니다. 모든 매개 변수를 보려면 MSBUILDTRUNCATETASKINPUTLOGGING 환경 변수를 지우세요.</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">메타프로젝트 "{0}"이(가) 생성되었습니다.</target>
@@ -832,7 +837,7 @@
       </trans-unit>
       <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
         <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
-        <target state="new">The project file '{0}' could not be loaded when referenced by {1}.</target>
+        <target state="translated">프로젝트 파일 '{0}'이(가) {1}에서 참조되는 경우에는 파일을 로드할 수 없습니다.</target>
         <note>
       This message is shown during static graph construction when a referenced project file cannot be loaded,
       along with information about which project(s) are referencing the failed project.
@@ -944,7 +949,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
-        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하여 프로세스에서 상속된 값 "{2}"을(를) 재정의했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -1027,6 +1032,11 @@ Errors: {3}</source>
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
         <target state="translated">원하는 위치가 '{1}'인 동안 '{0}'에서 작업 어셈블리를 로드했습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
+        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>

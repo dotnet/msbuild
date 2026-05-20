@@ -846,7 +846,7 @@ namespace Microsoft.Build.BackEnd
                             itemVectorCollection[itemVectorType] = itemVectorPartition;
                         }
 
-                        ErrorUtilities.VerifyThrow(!itemVectorPartition.ContainsKey(item), "ItemVectorPartition already contains a vector for items with the expression '{0}'", item);
+                        ErrorUtilities.VerifyThrow(!itemVectorPartition.ContainsKey(item), $"ItemVectorPartition already contains a vector for items with the expression '{item}'");
                         itemVectorPartition[item] = itemVectorContents;
 
                         ErrorUtilities.VerifyThrow((itemVectorTransforms == null) || (itemVectorCollection.Equals(itemVectorTransforms)) || (itemVectorPartition.Count == 1),
