@@ -421,6 +421,23 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CoordinatorFailedToLaunch">
+        <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <note>Displayed when the coordinator could not be started. The build continues without coordination.</note>
+      </trans-unit>
+      <trans-unit id="CoordinatorNodeGrantReceived">
+        <source>Coordinator granted {0} node(s) for this build.</source>
+        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <note>
+      LOCALIZATION: {0} is the number of nodes granted by the coordinator.
+    </note>
+      </trans-unit>
+      <trans-unit id="CoordinatorWaitingForNodes">
+        <source>Waiting for coordinator to grant build resources...</source>
+        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <note>Displayed when the build is blocked waiting for the coordinator to allocate node resources.</note>
+      </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
         <target state="translated">找不到指定的自訂檢查組件: '{0}'。請確認其是否存在。</target>

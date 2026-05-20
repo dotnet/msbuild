@@ -7,7 +7,7 @@ using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Framework.Coordinator;
 
-internal interface ICoordinatorLogger
+internal interface ICoordinatorOutput
 {
     bool IsEnabled { get; }
 
@@ -20,9 +20,9 @@ internal interface ICoordinatorLogger
     {
         private StringBuilderHelper _builder;
 
-        public WriteLineInterpolatedStringHandler(int literalLength, int formattedCount, ICoordinatorLogger logger, out bool isEnabled)
+        public WriteLineInterpolatedStringHandler(int literalLength, int formattedCount, ICoordinatorOutput output, out bool isEnabled)
         {
-            isEnabled = logger.IsEnabled;
+            isEnabled = output.IsEnabled;
             _builder = isEnabled ? new(literalLength) : default;
         }
 

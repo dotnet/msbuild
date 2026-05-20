@@ -15,9 +15,7 @@ namespace Microsoft.Build.Coordinator;
 ///  The coordinator server that listens for MSBuild client connections on a named pipe,
 ///  manages node grants, and monitors build health via heartbeats.
 /// </summary>
-internal sealed partial class CoordinatorServer(
-    CoordinatorSettings settings,
-    ICoordinatorLogger? logger = null) : IDisposable
+internal sealed partial class CoordinatorServer(CoordinatorSettings settings, ICoordinatorOutput? output = null) : IDisposable
 {
     private readonly CoordinatorSettings _settings = settings;
     private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget);
@@ -28,7 +26,7 @@ internal sealed partial class CoordinatorServer(
     private readonly object _budgetLock = new();
     private readonly ReaderWriterLockSlim _connectionLock = new();
     private readonly CancellationTokenSource _cts = new();
-    private readonly ICoordinatorLogger _logger = logger ?? DefaultLogger.Instance;
+    private readonly ICoordinatorOutput _output = output ?? DefaultOutput.Instance;
     private Timer? _heartbeatMonitor;
     private Timer? _shutdownTimer;
 
@@ -51,7 +49,7 @@ internal sealed partial class CoordinatorServer(
         // Start auto-shutdown timer.
         ResetShutdownTimer();
 
-        _logger.WriteLine($"Server: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
+        _output.WriteLine($"Server: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
 
         ConcurrentDictionary<Task, byte> clientTasks = [];
 
@@ -83,7 +81,7 @@ internal sealed partial class CoordinatorServer(
         }
         finally
         {
-            _logger.WriteLine("Server: Accept loop exiting");
+            _output.WriteLine("Server: Accept loop exiting");
             _heartbeatMonitor?.Dispose();
             _shutdownTimer?.Dispose();
 
@@ -142,7 +140,7 @@ internal sealed partial class CoordinatorServer(
 
             if (firstMessage is not RequestNodesMessage request)
             {
-                _logger.WriteLine($"Server: Rejected client — first message was {firstMessage.GetType().Name}");
+                _output.WriteLine($"Server: Rejected client — first message was {firstMessage.GetType().Name}");
                 using BinaryWriter errorWriter = new(pipeStream, Encoding.UTF8, leaveOpen: true);
                 errorWriter.Write(new ErrorMessage("First message must be RequestNodes"));
                 pipeStream.Dispose();
@@ -151,14 +149,14 @@ internal sealed partial class CoordinatorServer(
 
             if (request.ProcessId <= 0 || request.RequestedNodes <= 0)
             {
-                _logger.WriteLine($"Server: Rejected client — invalid request (PID={request.ProcessId}, RequestedNodes={request.RequestedNodes})");
+                _output.WriteLine($"Server: Rejected client — invalid request (PID={request.ProcessId}, RequestedNodes={request.RequestedNodes})");
                 using BinaryWriter errorWriter = new(pipeStream, Encoding.UTF8, leaveOpen: true);
                 errorWriter.Write(new ErrorMessage("Invalid request: ProcessId and RequestedNodes must be > 0"));
                 pipeStream.Dispose();
                 return;
             }
 
-            _logger.WriteLine($"Server: Client connected (PID {request.ProcessId}, requested {request.RequestedNodes} nodes)");
+            _output.WriteLine($"Server: Client connected (PID {request.ProcessId}, requested {request.RequestedNodes} nodes)");
 
             BuildGrant grant = new(request.ProcessId, request.RequestedNodes);
             connection = new ClientConnection(grant, pipeStream);
@@ -178,12 +176,12 @@ internal sealed partial class CoordinatorServer(
 
             if (grantedNodes > 0)
             {
-                _logger.WriteLine($"Server: Granted {grantedNodes} nodes to PID {request.ProcessId}");
+                _output.WriteLine($"Server: Granted {grantedNodes} nodes to PID {request.ProcessId}");
                 connection.Writer.Write(new NodeGrantMessage(grantedNodes));
             }
             else
             {
-                _logger.WriteLine($"Server: PID {request.ProcessId} queued (no nodes available)");
+                _output.WriteLine($"Server: PID {request.ProcessId} queued (no nodes available)");
                 connection.Writer.Write(WaitMessage.Instance);
 
                 // The grant will be fulfilled later when resources free up.
@@ -202,14 +200,14 @@ internal sealed partial class CoordinatorServer(
                 }
                 catch (EndOfStreamException)
                 {
-                    _logger.WriteLine($"Server: PID {request.ProcessId} disconnected (end of stream)");
+                    _output.WriteLine($"Server: PID {request.ProcessId} disconnected (end of stream)");
 
                     // Client disconnected.
                     break;
                 }
                 catch (IOException)
                 {
-                    _logger.WriteLine($"Server: PID {request.ProcessId} disconnected (pipe broken)");
+                    _output.WriteLine($"Server: PID {request.ProcessId} disconnected (pipe broken)");
 
                     // Pipe broken.
                     break;
@@ -222,7 +220,7 @@ internal sealed partial class CoordinatorServer(
                         break;
 
                     case ReleaseNodesMessage:
-                        _logger.WriteLine($"Server: PID {request.ProcessId} released grant");
+                        _output.WriteLine($"Server: PID {request.ProcessId} released grant");
                         ReleaseConnection(connection);
                         connection.Dispose();
                         connection = null;
@@ -232,7 +230,7 @@ internal sealed partial class CoordinatorServer(
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
-            _logger.WriteLine($"Server: Exception handling client: {ex.Message}");
+            _output.WriteLine($"Server: Exception handling client: {ex.Message}");
 
             // Swallow exceptions from individual client handling.
         }
@@ -275,7 +273,7 @@ internal sealed partial class CoordinatorServer(
 
         if (newlyGranted.Length > 0)
         {
-            _logger.WriteLine($"Server: Draining wait queue, {newlyGranted.Length} build(s) to notify");
+            _output.WriteLine($"Server: Draining wait queue, {newlyGranted.Length} build(s) to notify");
         }
 
         // Notify newly granted builds outside the locks.
@@ -292,12 +290,12 @@ internal sealed partial class CoordinatorServer(
             {
                 try
                 {
-                    _logger.WriteLine($"Server: Granting {grant.GrantedNodes} deferred nodes to PID {grant.ProcessId}");
+                    _output.WriteLine($"Server: Granting {grant.GrantedNodes} deferred nodes to PID {grant.ProcessId}");
                     waitingConnection.Writer.Write(new NodeGrantMessage(grant.GrantedNodes));
                 }
                 catch (IOException)
                 {
-                    _logger.WriteLine($"Server: PID {grant.ProcessId} disconnected while waiting");
+                    _output.WriteLine($"Server: PID {grant.ProcessId} disconnected while waiting");
 
                     // Client disconnected while waiting. Release their grant too.
                     ReleaseConnection(waitingConnection);
@@ -335,7 +333,7 @@ internal sealed partial class CoordinatorServer(
                 continue;
             }
 
-            _logger.WriteLine($"Server: Reclaiming grant from dead PID {connection.Grant.ProcessId}");
+            _output.WriteLine($"Server: Reclaiming grant from dead PID {connection.Grant.ProcessId}");
 
             // ReleaseConnection will acquire its own write lock.
             ReleaseConnection(connection);
@@ -370,7 +368,7 @@ internal sealed partial class CoordinatorServer(
                 {
                     if (_budgetManager.ActiveBuildCount == 0 && _budgetManager.WaitingBuildCount == 0)
                     {
-                        _logger.WriteLine("Server: Auto-shutdown (no active or waiting builds)");
+                        _output.WriteLine("Server: Auto-shutdown (no active or waiting builds)");
                         _cts.Cancel();
                     }
                 }

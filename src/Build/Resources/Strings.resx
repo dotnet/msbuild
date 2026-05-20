@@ -2176,6 +2176,20 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheckEnabled" xml:space="preserve">
     <value>The BuildCheck is enabled for this build.</value>
   </data>
+  <data name="CoordinatorFailedToLaunch" xml:space="preserve">
+    <value>Failed to launch the build coordinator. The build will proceed without node coordination.</value>
+    <comment>Displayed when the coordinator could not be started. The build continues without coordination.</comment>
+  </data>
+  <data name="CoordinatorNodeGrantReceived" xml:space="preserve">
+    <value>Coordinator granted {0} node(s) for this build.</value>
+    <comment>
+      LOCALIZATION: {0} is the number of nodes granted by the coordinator.
+    </comment>
+  </data>
+  <data name="CoordinatorWaitingForNodes" xml:space="preserve">
+    <value>Waiting for coordinator to grant build resources...</value>
+    <comment>Displayed when the build is blocked waiting for the coordinator to allocate node resources.</comment>
+  </data>
   <data name="CustomCheckRegistered" xml:space="preserve">
     <value>The custom check: '{0}' is registered for the build from the location: '{1}'.</value>
   </data>

@@ -14,19 +14,19 @@ internal sealed partial class CoordinatorServer
     ///  pattern as CommunicationsUtilities.Trace in Microsoft.Build.Framework.
     ///  Gated on MSBUILDDEBUGCOMM.
     /// </summary>
-    private sealed class DefaultLogger : ICoordinatorLogger
+    private sealed class DefaultOutput : ICoordinatorOutput
     {
         private static readonly bool s_isEnabled = Traits.Instance.DebugNodeCommunication;
 
         private static readonly object s_lock = new();
-        private static long s_lastLoggedTicks = DateTime.UtcNow.Ticks;
+        private static long s_lastTicks = DateTime.UtcNow.Ticks;
 
         private readonly string _debugDumpDirectory;
         private readonly string _debugDumpTraceFilePath;
 
-        public static readonly DefaultLogger Instance = new();
+        public static readonly DefaultOutput Instance = new();
 
-        private DefaultLogger()
+        private DefaultOutput()
         {
             _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
 
@@ -48,7 +48,7 @@ internal sealed partial class CoordinatorServer
             }
         }
 
-        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorLogger.WriteLineInterpolatedStringHandler handler)
+        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorOutput.WriteLineInterpolatedStringHandler handler)
         {
             if (s_isEnabled)
             {
@@ -67,8 +67,8 @@ internal sealed partial class CoordinatorServer
                     using (StreamWriter writer = FileUtilities.OpenWrite(_debugDumpTraceFilePath, append: true))
                     {
                         long now = DateTime.UtcNow.Ticks;
-                        float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
-                        s_lastLoggedTicks = now;
+                        float millisecondsSinceLastLog = (float)(now - s_lastTicks) / 10000L;
+                        s_lastTicks = now;
 
                         writer.WriteLine($"{Thread.CurrentThread.Name} (TID {Environment.CurrentManagedThreadId}) {now,15} +{millisecondsSinceLastLog,10}ms: {message}");
                     }

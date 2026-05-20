@@ -10,11 +10,11 @@ namespace Microsoft.Build.BackEnd;
 
 internal sealed partial class CoordinatorClient
 {
-    private sealed class DefaultLogger : ICoordinatorLogger
+    private sealed class DefaultOutput : ICoordinatorOutput
     {
-        public static readonly DefaultLogger Instance = new();
+        public static readonly DefaultOutput Instance = new();
 
-        private DefaultLogger()
+        private DefaultOutput()
         {
         }
 
@@ -28,7 +28,7 @@ internal sealed partial class CoordinatorClient
             }
         }
 
-        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorLogger.WriteLineInterpolatedStringHandler handler)
+        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorOutput.WriteLineInterpolatedStringHandler handler)
         {
             if (IsEnabled)
             {

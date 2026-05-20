@@ -19,7 +19,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
 
     private readonly CancellationTokenSource _cts = new();
 
-    private readonly TestLogger _logger = new(testOutput);
+    private readonly TestCoordinatorOutput _output = new(testOutput);
 
     private CoordinatorSettings DefaultSettings => CoordinatorSettings.Default with
     {
@@ -201,11 +201,11 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     private CoordinatorServer CreateServer(int totalNodeBudget)
-        => new(DefaultSettings with { TotalNodeBudget = totalNodeBudget }, _logger);
+        => new(DefaultSettings with { TotalNodeBudget = totalNodeBudget }, _output);
 
     private CoordinatorClient? TryConnectToServer(int requestedNodes, int processId)
         => TryConnectToServer(requestedNodes, DefaultSettings with { ProcessId = processId });
 
     private CoordinatorClient? TryConnectToServer(int requestedNodes, CoordinatorSettings settings)
-        => CoordinatorClient.TryConnectToServer(requestedNodes, settings, _logger);
+        => CoordinatorClient.TryConnectToServer(requestedNodes, settings, _output);
 }

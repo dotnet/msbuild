@@ -7,6 +7,8 @@ using System.IO;
 using System.IO.Pipes;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Shared;
 
@@ -23,7 +25,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     private readonly BinaryReader _reader;
     private readonly BinaryWriter _writer;
     private readonly Timer _heartbeatTimer;
-    private readonly ICoordinatorLogger _logger;
+    private readonly ICoordinatorOutput _output;
     private volatile bool _disposed;
 
     /// <summary>
@@ -37,12 +39,12 @@ internal sealed partial class CoordinatorClient : IDisposable
         BinaryWriter writer,
         int grantedNodes,
         int heartbeatIntervalMs,
-        ICoordinatorLogger logger)
+        ICoordinatorOutput output)
     {
         _pipeStream = pipeStream;
         _reader = reader;
         _writer = writer;
-        _logger = logger;
+        _output = output;
         GrantedNodes = grantedNodes;
 
         _heartbeatTimer = new Timer(
@@ -56,10 +58,12 @@ internal sealed partial class CoordinatorClient : IDisposable
     ///  Attempts to connect to the coordinator and request a node grant.
     ///  Returns null if the coordinator is not available or an error occurs.
     /// </summary>
-    public static CoordinatorClient? TryConnect(int requestedNodes, CoordinatorSettings? settings = null)
+    public static CoordinatorClient? TryConnect(
+        int requestedNodes,
+        CoordinatorSettings settings,
+        ILoggingService loggingService)
     {
-        settings ??= CoordinatorSettings.FromEnvironment();
-        ICoordinatorLogger logger = DefaultLogger.Instance;
+        ICoordinatorOutput output = DefaultOutput.Instance;
 
         NamedPipeClientStream? pipeStream = null;
 
@@ -67,17 +71,17 @@ internal sealed partial class CoordinatorClient : IDisposable
         {
             pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-            logger.WriteLine($"CoordinatorClient: Connecting to pipe '{settings.PipeName}'");
+            output.WriteLine($"CoordinatorClient: Connecting to pipe '{settings.PipeName}'");
 
             // Try to connect to an existing coordinator.
             if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
             {
-                logger.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
+                output.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
 
                 // No coordinator running. Try to launch one and retry.
-                if (!TryLaunchCoordinator(logger))
+                if (!TryLaunchCoordinator(loggingService, output))
                 {
-                    logger.WriteLine("CoordinatorClient: Failed to launch coordinator");
+                    output.WriteLine("CoordinatorClient: Failed to launch coordinator");
                     pipeStream.Dispose();
                     return null;
                 }
@@ -86,23 +90,23 @@ internal sealed partial class CoordinatorClient : IDisposable
                 pipeStream.Dispose();
                 pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-                logger.WriteLine("CoordinatorClient: Retrying connection after launch");
+                output.WriteLine("CoordinatorClient: Retrying connection after launch");
 
                 if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
                 {
-                    logger.WriteLine("CoordinatorClient: Retry connection failed");
+                    output.WriteLine("CoordinatorClient: Retry connection failed");
                     pipeStream.Dispose();
                     return null;
                 }
             }
 
-            logger.WriteLine("CoordinatorClient: Connected to coordinator");
+            output.WriteLine("CoordinatorClient: Connected to coordinator");
 
-            return TryNegotiate(pipeStream, requestedNodes, settings, logger);
+            return TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService);
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
-            logger.WriteLine($"CoordinatorClient: Exception during connect: {ex.Message}");
+            output.WriteLine($"CoordinatorClient: Exception during connect: {ex.Message}");
 
             // Any failure in coordinator communication should not break the build.
             pipeStream?.Dispose();
@@ -116,33 +120,31 @@ internal sealed partial class CoordinatorClient : IDisposable
     /// </summary>
     internal static CoordinatorClient? TryConnectToServer(
         int requestedNodes,
-        CoordinatorSettings? settings = null,
-        ICoordinatorLogger? logger = null)
+        CoordinatorSettings settings,
+        ICoordinatorOutput output)
     {
-        settings ??= CoordinatorSettings.Default;
-        logger ??= DefaultLogger.Instance;
         NamedPipeClientStream? pipeStream = null;
 
         try
         {
             pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
-            logger.WriteLine($"CoordinatorClient: Connecting to test pipe '{settings.PipeName}'");
+            output.WriteLine($"CoordinatorClient: Connecting to test pipe '{settings.PipeName}'");
 
             if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
             {
-                logger.WriteLine("CoordinatorClient: Test connection timed out");
+                output.WriteLine("CoordinatorClient: Test connection timed out");
                 pipeStream.Dispose();
                 return null;
             }
 
-            logger.WriteLine("CoordinatorClient: Connected to test server");
+            output.WriteLine("CoordinatorClient: Connected to test server");
 
-            return TryNegotiate(pipeStream, requestedNodes, settings, logger);
+            return TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService: null);
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
-            logger.WriteLine($"CoordinatorClient: Exception during test connect: {ex.Message}");
+            output.WriteLine($"CoordinatorClient: Exception during test connect: {ex.Message}");
             pipeStream?.Dispose();
             return null;
         }
@@ -156,7 +158,8 @@ internal sealed partial class CoordinatorClient : IDisposable
         NamedPipeClientStream pipeStream,
         int requestedNodes,
         CoordinatorSettings settings,
-        ICoordinatorLogger logger)
+        ICoordinatorOutput output,
+        ILoggingService? loggingService)
     {
         var reader = new BinaryReader(pipeStream, Encoding.UTF8, leaveOpen: true);
         var writer = new BinaryWriter(pipeStream, Encoding.UTF8, leaveOpen: true);
@@ -164,7 +167,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         try
         {
             // Send the node request.
-            logger.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId})");
+            output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId})");
             writer.Write(new RequestNodesMessage(requestedNodes, settings.ProcessId));
 
             // Read the response.
@@ -173,9 +176,10 @@ internal sealed partial class CoordinatorClient : IDisposable
             switch (response)
             {
                 case NodeGrantMessage grant:
-                    logger.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
+                    output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
+                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
 
-                    var client = new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
+                    var client = new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, output);
 
                     // Ownership transferred to client
                     reader = null;
@@ -184,7 +188,8 @@ internal sealed partial class CoordinatorClient : IDisposable
                     return client;
 
                 case WaitMessage:
-                    logger.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
+                    output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
+                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
 
                     // Send heartbeats while waiting so the server doesn't consider us stale.
                     using (Timer heartbeatPump = CreateHeartbeatPump(writer, settings.HeartbeatIntervalMs))
@@ -193,9 +198,10 @@ internal sealed partial class CoordinatorClient : IDisposable
 
                         if (grantAfterWait is NodeGrantMessage deferredGrant)
                         {
-                            logger.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes");
+                            output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes");
+                            loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
 
-                            var deferredClient = new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, logger);
+                            var deferredClient = new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output);
 
                             // Ownership transferred to deferred client
                             reader = null;
@@ -204,13 +210,13 @@ internal sealed partial class CoordinatorClient : IDisposable
                             return deferredClient;
                         }
 
-                        logger.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name}");
+                        output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name}");
                     }
 
                     return null;
 
                 default:
-                    logger.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
+                    output.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
                     return null;
             }
         }
@@ -274,7 +280,7 @@ internal sealed partial class CoordinatorClient : IDisposable
             disposeEvent.WaitOne();
         }
 
-        _logger.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
+        _output.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
 
         try
         {
@@ -311,7 +317,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
         catch (IOException)
         {
-            _logger.WriteLine("CoordinatorClient: Heartbeat failed (pipe broken)");
+            _output.WriteLine("CoordinatorClient: Heartbeat failed (pipe broken)");
 
             // Pipe broken — nothing we can do. The build continues
             // with whatever nodes were already granted.
@@ -331,7 +337,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
     }
 
-    private static bool TryLaunchCoordinator(ICoordinatorLogger logger)
+    private static bool TryLaunchCoordinator(ILoggingService loggingService, ICoordinatorOutput output)
     {
         try
         {
@@ -342,13 +348,15 @@ internal sealed partial class CoordinatorClient : IDisposable
                 return false;
             }
 
-            logger.WriteLine($"CoordinatorClient: Launching coordinator: {startInfo.FileName} {startInfo.Arguments}");
+            output.WriteLine($"CoordinatorClient: Launching coordinator: {startInfo.FileName} {startInfo.Arguments}");
 
             Process? process = Process.Start(startInfo);
             return process is not null;
         }
-        catch (Exception) when (!Debugger.IsAttached)
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
+            output.WriteLine($"CoordinatorClient: Exception during launch: {ex}");
+            loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToLaunch");
             return false;
         }
     }

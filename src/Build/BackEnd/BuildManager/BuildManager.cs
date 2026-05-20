@@ -28,6 +28,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
@@ -586,17 +587,6 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                // If the coordinator is enabled, request a node grant and cap MaxNodeCount.
-                if (Traits.Instance.EnableCoordinator)
-                {
-                    _coordinatorClient = CoordinatorClient.TryConnect(_buildParameters.MaxNodeCount);
-
-                    if (_coordinatorClient != null)
-                    {
-                        _buildParameters.MaxNodeCount = _coordinatorClient.GrantedNodes;
-                    }
-                }
-
                 if (_buildParameters.UsesCachedResults() && _buildParameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
                     // If input or output caches are used and the project isolation mode is set to
@@ -641,6 +631,22 @@ namespace Microsoft.Build.Execution
 
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
+
+                // If the coordinator is enabled, request a node grant and cap MaxNodeCount.
+                // This is done after logging initialization so that waiting/grant messages
+                // are visible in the terminal logger.
+                if (Traits.Instance.EnableCoordinator)
+                {
+                    _coordinatorClient = CoordinatorClient.TryConnect(
+                        requestedNodes: _buildParameters.MaxNodeCount,
+                        settings: CoordinatorSettings.FromEnvironment(),
+                        loggingService);
+
+                    if (_coordinatorClient != null)
+                    {
+                        _buildParameters.MaxNodeCount = _coordinatorClient.GrantedNodes;
+                    }
+                }
 
                 // Validate environment variables (e.g., DOTNET_HOST_PATH)
                 EnvironmentVariableValidator.ValidateEnvironmentVariables(loggingService);

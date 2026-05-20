@@ -7,13 +7,13 @@ using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-internal sealed class TestLogger(ITestOutputHelper testOutput) : ICoordinatorLogger
+internal sealed class TestCoordinatorOutput(ITestOutputHelper testOutput) : ICoordinatorOutput
 {
     public bool IsEnabled => true;
 
     public void WriteLine(string message)
         => testOutput.WriteLine(message);
 
-    public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorLogger.WriteLineInterpolatedStringHandler handler)
+    public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorOutput.WriteLineInterpolatedStringHandler handler)
         => testOutput.WriteLine(handler.GetFormattedText());
 }
