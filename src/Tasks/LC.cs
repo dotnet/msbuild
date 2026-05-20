@@ -134,28 +134,16 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to lc.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            // In multithreaded mode there is no reliable per-task CWD: resolve relative paths
-            // against the project directory and return an absolute path. In legacy mode preserve
-            // the original (possibly relative) return value.
-            bool isMultiThreaded = TaskEnvironment != TaskEnvironment.Fallback;
-
             string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
-                isMultiThreaded
-                    ? f => SdkToolsPathUtility.FileInfoExists(AbsolutizeIfRelative(f))
-                    : SdkToolsPathUtility.FileInfoExists,
+                f => SdkToolsPathUtility.FileInfoExists(string.IsNullOrEmpty(f) ? f : TaskEnvironment.GetAbsolutePath(f).Value),
                 ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolExe,
                 Log,
                 true);
 
-            return isMultiThreaded ? AbsolutizeIfRelative(pathToTool) : pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
-
-        private string AbsolutizeIfRelative(string path)
-            => string.IsNullOrEmpty(path) || Path.IsPathRooted(path)
-                ? path
-                : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm().Value;
 
         /// <summary>
         /// Generates arguments to be passed to lc.exe
