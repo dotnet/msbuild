@@ -496,8 +496,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to cmd.exe</returns>
         protected override string GenerateFullPathToTool()
         {
-            return CommandProcessorPath.Value
-                ?? TaskEnvironment.GetEnvironmentVariable("ComSpec");
+            return CommandProcessorPath.Value;
         }
 
         private static readonly Lazy<string> CommandProcessorPath = new Lazy<string>(() =>
@@ -511,11 +510,11 @@ namespace Microsoft.Build.Tasks
                 // Work around https://github.com/dotnet/msbuild/issues/2273 and
                 // https://github.com/dotnet/corefx/issues/19110, which result in
                 // a bad path being returned above on Nano Server SKUs of Windows.
-                // Returning null signals GenerateFullPathToTool to consult TaskEnvironment
-                // for the ComSpec environment variable.
                 if (!FileSystems.Default.FileExists(systemCmd))
                 {
-                    return null;
+#pragma warning disable MSBuildTask0002 // We do not support changing of ComSpec during execution
+                    return Environment.GetEnvironmentVariable("ComSpec");
+#pragma warning restore MSBuildTask0002
                 }
 #endif
 

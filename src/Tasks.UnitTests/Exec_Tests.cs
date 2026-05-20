@@ -1096,10 +1096,11 @@ echo line 3"" />
             bool result = exec.Execute();
 
             result.ShouldBeTrue();
-            ((MockEngine)exec.BuildEngine).AssertLogContains(expectedFile);
+            string[] outputLines = exec.ConsoleOutput.Select(item => item.ItemSpec).ToArray();
+            outputLines.ShouldContain(expectedFile);
             if (notExpectedFile != null)
             {
-                ((MockEngine)exec.BuildEngine).AssertLogDoesntContain(notExpectedFile);
+                outputLines.ShouldNotContain(notExpectedFile);
             }
         }
 
