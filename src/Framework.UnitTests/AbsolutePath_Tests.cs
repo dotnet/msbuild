@@ -82,6 +82,38 @@ namespace Microsoft.Build.UnitTests
             exception.Message.ShouldStartWith("The value cannot be an empty string.");
         }
 
+        [WindowsOnlyTheory]
+        [InlineData(" ")]
+        [InlineData("  ")]
+        [InlineData("\t")]
+        [InlineData(" \t ")]
+        public void AbsolutePath_WhitespaceWithBasePath_ShouldThrowOnWindows(string whitespace)
+        {
+            // Before the multi-threaded migration, Path.GetFullPath(" ") threw ArgumentException on Windows.
+            // The "absolutize-at-boundary" pattern combines the input with a base path first, so without this
+            // guard Path.GetFullPath would silently trim the trailing whitespace and return the base directory,
+            // masking the original error. The constructor explicitly rejects whitespace-only input on Windows.
+            var basePath = GetTestBasePath();
+
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(whitespace, basePath));
+            exception.Message.ShouldContain("Path cannot be null or whitespace on Windows");
+        }
+
+        [UnixOnlyTheory]
+        [InlineData(" ")]
+        [InlineData("  ")]
+        [InlineData("\t")]
+        public void AbsolutePath_WhitespaceWithBasePath_ShouldNotThrowOnUnix(string whitespace)
+        {
+            // Whitespace is a legal filename character on Unix; preserve the historical accepting behavior.
+            var basePath = GetTestBasePath();
+
+            var absolutePath = new AbsolutePath(whitespace, basePath);
+
+            absolutePath.Value.ShouldBe(Path.Combine(basePath.Value, whitespace));
+            absolutePath.OriginalValue.ShouldBe(whitespace);
+        }
+
         [Theory]
         [InlineData("subfolder")]
         [InlineData("deep/nested/path")]

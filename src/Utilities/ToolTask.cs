@@ -678,9 +678,11 @@ namespace Microsoft.Build.Utilities
                 startInfo.RedirectStandardInput = true;
             }
 
-            // Generally we won't set a working directory, and it will use the current directory
+            // Generally we won't set a working directory, and it will use the current directory.
+            // Treat whitespace-only working directories the same as null/empty so AbsolutePath's
+            // Windows whitespace guard cannot turn a benign "no working directory" case into a throw.
             string workingDirectory = GetWorkingDirectory();
-            if (!string.IsNullOrEmpty(workingDirectory))
+            if (!string.IsNullOrWhiteSpace(workingDirectory))
             {
                 startInfo.WorkingDirectory = TaskEnvironment.GetAbsolutePath(workingDirectory);
             }

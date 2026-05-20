@@ -176,7 +176,7 @@ namespace Microsoft.Build.Tasks
                         success = false;
                     }
                 }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e) || e is ArgumentException)
                 {
                     string lockedFileMessage = LockCheck.GetLockedFileMessage(sourceFile?.OriginalValue ?? sourceSpec);
                     Log.LogErrorWithCodeFromResources("Move.Error", sourceSpec, destinationSpec, e.Message, lockedFileMessage);

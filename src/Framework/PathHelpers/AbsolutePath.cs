@@ -101,10 +101,25 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <paramref name="path"/> is null or empty, or if <paramref name="path"/> is whitespace-only on Windows.
+        /// </exception>
+        /// <remarks>
+        /// On Windows, whitespace-only inputs are rejected to preserve the historical contract of
+        /// <see cref="System.IO.Path.GetFullPath(string)"/>, which threw <see cref="ArgumentException"/> for
+        /// whitespace-only paths. Without this guard the "absolutize-at-boundary" pattern used by multi-threadable
+        /// tasks would silently combine a whitespace input with the project directory (e.g. <c>"C:\\proj\\ "</c>),
+        /// which <see cref="System.IO.Path.GetFullPath(string)"/> then trims back to the project directory, masking
+        /// the original error. On Unix whitespace is a valid filename character and the input is accepted.
+        /// </remarks>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
             ArgumentException.ThrowIfNullOrEmpty(path);
+
+            if (NativeMethods.IsWindows && string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException(SR.WhitespacePathNotAllowedOnWindows, nameof(path));
+            }
 
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.

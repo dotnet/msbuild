@@ -94,7 +94,7 @@ namespace Microsoft.Build.Tasks
         {
             if (ApplicationManifest != null)
             {
-                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec))
+                if (string.IsNullOrWhiteSpace(ApplicationManifest.ItemSpec))
                 {
                     Log.LogErrorWithCodeFromResources(null, ApplicationManifest.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
                     return null;
