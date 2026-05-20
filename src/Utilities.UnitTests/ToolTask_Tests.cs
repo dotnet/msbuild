@@ -1068,7 +1068,7 @@ namespace Microsoft.Build.UnitTests
                 // pipe handles. cmd exits immediately; ping outlives the 30s EOF timeout.
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                     ? "/c echo hello & start /b ping -n 40 127.0.0.1 > nul"
-                    : "-c \"echo hello; sleep 60 &\"";
+                    : "-c \"echo hello; sleep 40 &\"";
 
                 // Outer task timeout is generous; the EOF timeout (30s) is what bounds us.
                 t.Timeout = 60000;
