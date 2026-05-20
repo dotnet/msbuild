@@ -11,7 +11,6 @@ using Shouldly;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

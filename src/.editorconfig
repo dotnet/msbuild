@@ -1,0 +1,7 @@
+[*.cs]
+# TSA-flagged analyzer rules
+dotnet_diagnostic.CA1310.severity = warning
+dotnet_diagnostic.CA3075.severity = warning
+dotnet_diagnostic.CA3076.severity = warning
+dotnet_diagnostic.CA3077.severity = warning
+

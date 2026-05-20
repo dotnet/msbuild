@@ -13,7 +13,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -2171,7 +2170,7 @@ namespace Microsoft.Build.UnitTests
                             if (nextSlash != -1)
                             {
                                 // UNC paths start with a \\ fragment. Match against \\ when path is empty (i.e., inside the current working directory)
-                                string match = normalizedCandidate.StartsWith(@"\\") && string.IsNullOrEmpty(path)
+                                string match = normalizedCandidate.StartsWith(@"\\", StringComparison.Ordinal) && string.IsNullOrEmpty(path)
                                     ? @"\\"
                                     : normalizedCandidate.Substring(0, nextSlash);
 
@@ -2254,7 +2253,7 @@ namespace Microsoft.Build.UnitTests
                     normalized = path.Replace("\\", Path.DirectorySeparatorChar.ToString());
                 }
                 // Replace leading UNC.
-                if (normalized.StartsWith(@"\\"))
+                if (normalized.StartsWith(@"\\", StringComparison.Ordinal))
                 {
                     normalized = "<:UNC:>" + normalized.Substring(2);
                 }
