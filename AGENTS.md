@@ -151,7 +151,7 @@ dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ```
 
-You can run a single unit test with `--filter {methodname}`, for example `dotnet test src/Framework.UnitTests/ --filter ExerciseBuildEventContext`.
+You can run a single unit test with `-- --filter-method "*{methodname}*"`, for example `dotnet test src/Framework.UnitTests/ -- --filter-method "*ExerciseBuildEventContext*"`.
 
 ### Test Verification
 
