@@ -2,7 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Build.BackEnd;
+
+#if NET
+using Microsoft.Build.Utilities;
+#endif
 
 namespace Microsoft.Build.Framework.Coordinator;
 
@@ -81,6 +87,16 @@ internal sealed record class CoordinatorSettings()
     /// </summary>
     public long HeartbeatTimeoutMs => (long)HeartbeatIntervalMs * MissedHeartbeatsThreshold;
 
+    /// <summary>
+    ///  The named mutex used by the coordinator server to ensure single-instance execution.
+    /// </summary>
+    public string ServerMutexName => GetMutexName("server");
+
+    /// <summary>
+    ///  The named mutex used by clients to serialize coordinator launch attempts.
+    /// </summary>
+    public string LaunchMutexName => GetMutexName("launch");
+
     public static CoordinatorSettings FromEnvironment()
     {
         string? pipeNameOverride = Environment.GetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName);
@@ -105,4 +121,88 @@ internal sealed record class CoordinatorSettings()
             ProcessId = EnvironmentUtilities.CurrentProcessId,
         };
     }
+
+    /// <summary>
+    ///  Generates a platform-appropriate mutex name by combining the pipe name with a purpose suffix.
+    /// </summary>
+    private string GetMutexName(string purpose)
+    {
+        if (NativeMethods.IsWindows)
+        {
+            return $"Global\\{PipeName}-{purpose}";
+        }
+
+        // Named mutexes on Unix do not accept path-like names (for example '/tmp/...').
+        // Hash the pipe name into a stable, compact identifier safe for the runtime.
+        string prefix = $"msbuild-coordinator-{purpose}-";
+
+#if NET
+        int byteCount = Encoding.UTF8.GetByteCount(PipeName);
+        using BufferScope<byte> pipeNameBytes = byteCount <= 256
+            ? new(stackalloc byte[byteCount])
+            : new(byteCount);
+
+        Encoding.UTF8.GetBytes(PipeName, pipeNameBytes);
+
+        Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
+        SHA256.HashData(pipeNameBytes[..byteCount], hash);
+#else
+        using SHA256 sha256 = SHA256.Create();
+        byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(PipeName));
+#endif
+
+        // We're being a bit clever here by defining PrefixAndHash as a ref struct on modern .NET
+        // since string.Create<TState> is defined with a 'where TState : allows ref struct' constraint.
+        return string.Create(prefix.Length + (hash.Length * 2), new PrefixAndHash(prefix, hash), static (span, state) =>
+        {
+            var (prefix, hash) = state;
+
+            prefix.CopyTo(span);
+            span = span[prefix.Length..];
+
+            for (int i = 0; i < hash.Length; i++)
+            {
+                byte b = hash[i];
+                span[0] = HexDigitChar(b / 16);
+                span[1] = HexDigitChar(b % 16);
+                span = span[2..];
+            }
+        });
+
+        static char HexDigitChar(int value)
+            => (char)(value + (value < 10 ? '0' : 'a' - 10));
+    }
+
+#if NET
+    private readonly ref struct PrefixAndHash
+    {
+        public readonly ReadOnlySpan<char> Prefix;
+        public readonly ReadOnlySpan<byte> Hash;
+
+        public PrefixAndHash(ReadOnlySpan<char> prefix, ReadOnlySpan<byte> hash)
+        {
+            Prefix = prefix;
+            Hash = hash;
+        }
+
+        public void Deconstruct(out ReadOnlySpan<char> prefix, out ReadOnlySpan<byte> hash)
+        {
+            prefix = Prefix;
+            hash = Hash;
+        }
+    }
+#else
+    private readonly struct PrefixAndHash(string prefix, byte[] hash)
+    {
+        public ReadOnlySpan<char> Prefix => prefix;
+
+        public ReadOnlySpan<byte> Hash => hash;
+
+        public void Deconstruct(out ReadOnlySpan<char> prefix, out ReadOnlySpan<byte> hash)
+        {
+            prefix = Prefix;
+            hash = Hash;
+        }
+    }
+#endif
 }

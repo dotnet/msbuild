@@ -421,10 +421,20 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CoordinatorFailedToConnect">
+        <source>Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</source>
+        <target state="new">Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</target>
+        <note>Displayed when the coordinator was launched but the client could not connect to it afterward.</note>
+      </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
         <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
         <note>Displayed when the coordinator could not be started. The build continues without coordination.</note>
+      </trans-unit>
+      <trans-unit id="CoordinatorLaunchTimedOut">
+        <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <note>Displayed when the client could not acquire the launch mutex in time, indicating another client is taking too long to launch.</note>
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>

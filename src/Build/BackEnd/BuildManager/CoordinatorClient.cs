@@ -125,31 +125,23 @@ internal sealed partial class CoordinatorClient : IDisposable
             {
                 output.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
 
-                // No coordinator running. Try to launch one and retry.
-                if (!TryLaunchCoordinator(loggingService, output))
-                {
-                    output.WriteLine("CoordinatorClient: Failed to launch coordinator");
-                    pipeStream.Dispose();
-                    return null;
-                }
-
-                // The first pipe may be in a bad state after a failed connect. Create a new one.
+                // Acquire a launch mutex so only one client launches the coordinator.
+                // Other clients racing here will block until the launcher finishes, then
+                // connect to the now-running coordinator.
                 pipeStream.Dispose();
-                pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                pipeStream = TryLaunchAndConnect(settings, loggingService, output);
 
-                output.WriteLine("CoordinatorClient: Retrying connection after launch");
-
-                if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
+                if (pipeStream is null)
                 {
-                    output.WriteLine("CoordinatorClient: Retry connection failed");
-                    pipeStream.Dispose();
                     return null;
                 }
             }
 
             output.WriteLine("CoordinatorClient: Connected to coordinator");
 
-            return TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService);
+            CoordinatorClient? client = TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService);
+            pipeStream = null; // Ownership transferred unconditionally; TryNegotiate disposes on failure.
+            return client;
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
@@ -158,6 +150,89 @@ internal sealed partial class CoordinatorClient : IDisposable
             // Any failure in coordinator communication should not break the build.
             pipeStream?.Dispose();
             return null;
+        }
+    }
+
+    /// <summary>
+    ///  Acquires a named mutex to serialize coordinator launches, then either launches
+    ///  the coordinator or connects to one that was launched by another client.
+    /// </summary>
+    /// <param name="settings">Coordinator connection settings.</param>
+    /// <param name="loggingService">The MSBuild logging service for user-visible messages.</param>
+    /// <param name="output">Debug trace output.</param>
+    /// <returns>
+    ///  A connected pipe stream, or <see langword="null"/> if the coordinator could not be started or reached.
+    /// </returns>
+    private static NamedPipeClientStream? TryLaunchAndConnect(
+        CoordinatorSettings settings,
+        ILoggingService loggingService,
+        ICoordinatorOutput output)
+    {
+        using Mutex launchMutex = new(initiallyOwned: false, settings.LaunchMutexName);
+
+        try
+        {
+            // Wait for the mutex. If another client is already launching, we'll block here
+            // until it finishes and releases the mutex.
+            if (!launchMutex.WaitOne(settings.ConnectionTimeoutMs))
+            {
+                output.WriteLine("CoordinatorClient: Timed out waiting for launch mutex");
+                loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorLaunchTimedOut");
+                return null;
+            }
+        }
+        catch (AbandonedMutexException)
+        {
+            // The previous holder crashed — we now own the mutex and should proceed with launch.
+            output.WriteLine("CoordinatorClient: Acquired abandoned launch mutex");
+        }
+
+        NamedPipeClientStream? pipeStream = null;
+
+        try
+        {
+            // After acquiring the mutex, try connecting again — another client may have
+            // already launched the coordinator while we were waiting.
+            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+
+            if (TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
+            {
+                output.WriteLine("CoordinatorClient: Connected after waiting for launch mutex");
+                NamedPipeClientStream result = pipeStream;
+                pipeStream = null; // Ownership transferred to caller.
+                return result;
+            }
+
+            // Still no coordinator. Launch one.
+            pipeStream.Dispose();
+            pipeStream = null;
+
+            if (!TryLaunchCoordinator(loggingService, output))
+            {
+                output.WriteLine("CoordinatorClient: Failed to launch coordinator");
+                return null;
+            }
+
+            // Retry connection after launch.
+            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+
+            output.WriteLine("CoordinatorClient: Retrying connection after launch");
+
+            if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
+            {
+                output.WriteLine("CoordinatorClient: Retry connection failed");
+                loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToConnect");
+                return null;
+            }
+
+            NamedPipeClientStream connected = pipeStream;
+            pipeStream = null; // Ownership transferred to caller.
+            return connected;
+        }
+        finally
+        {
+            pipeStream?.Dispose();
+            launchMutex.ReleaseMutex();
         }
     }
 

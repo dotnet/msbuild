@@ -2176,9 +2176,17 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheckEnabled" xml:space="preserve">
     <value>The BuildCheck is enabled for this build.</value>
   </data>
+  <data name="CoordinatorFailedToConnect" xml:space="preserve">
+    <value>Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</value>
+    <comment>Displayed when the coordinator was launched but the client could not connect to it afterward.</comment>
+  </data>
   <data name="CoordinatorFailedToLaunch" xml:space="preserve">
     <value>Failed to launch the build coordinator. The build will proceed without node coordination.</value>
     <comment>Displayed when the coordinator could not be started. The build continues without coordination.</comment>
+  </data>
+  <data name="CoordinatorLaunchTimedOut" xml:space="preserve">
+    <value>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</value>
+    <comment>Displayed when the client could not acquire the launch mutex in time, indicating another client is taking too long to launch.</comment>
   </data>
   <data name="CoordinatorNodeGrantReceived" xml:space="preserve">
     <value>Coordinator granted {0} node(s) for this build.</value>
