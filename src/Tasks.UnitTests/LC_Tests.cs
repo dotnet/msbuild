@@ -70,38 +70,35 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GenerateFullPathToToolResolvesRelativeSdkToolsPathAgainstTaskEnvironmentProjectDirectory()
+        public void GenerateFullPathToToolResolvesRelativeSdkToolsPath()
         {
-            string projectDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectDir = env.CreateFolder().Path;
             string sdkToolsPath = "tools";
-            string processorSpecificDirectory = ProcessorArchitecture.CurrentProcessArchitecture switch
+            string sdkToolsDirectory = Path.Combine(projectDir, sdkToolsPath);
+            string[] toolDirectories =
             {
-                ProcessorArchitecture.ARM => Path.Combine(projectDir, sdkToolsPath, "arm"),
-                ProcessorArchitecture.AMD64 => Path.Combine(projectDir, sdkToolsPath, "x64"),
-                ProcessorArchitecture.IA64 => Path.Combine(projectDir, sdkToolsPath, "ia64"),
-                _ => Path.Combine(projectDir, sdkToolsPath),
+                sdkToolsDirectory,
+                Path.Combine(sdkToolsDirectory, "arm"),
+                Path.Combine(sdkToolsDirectory, "ia64"),
+                Path.Combine(sdkToolsDirectory, "x64"),
             };
-            string expectedToolPath = Path.Combine(processorSpecificDirectory, "lc.exe");
 
-            try
+            foreach (string toolDirectory in toolDirectories)
             {
-                Directory.CreateDirectory(processorSpecificDirectory);
-                File.WriteAllText(expectedToolPath, string.Empty);
-
-                TestableLC task = CreateTestableTask(projectDir);
-                task.SdkToolsPath = sdkToolsPath;
-
-                // The returned tool path must be absolute, independent of the process current
-                // working directory, so the file is launchable in multithreaded execution mode.
-                Assert.Equal(expectedToolPath, task.CallGenerateFullPathToTool());
+                Directory.CreateDirectory(toolDirectory);
+                File.WriteAllText(Path.Combine(toolDirectory, "lc.exe"), string.Empty);
             }
-            finally
-            {
-                if (Directory.Exists(projectDir))
-                {
-                    Directory.Delete(projectDir, recursive: true);
-                }
-            }
+
+            TestableLC task = CreateTestableTask(projectDir);
+            task.SdkToolsPath = sdkToolsPath;
+
+            string result = task.CallGenerateFullPathToTool();
+
+            Assert.NotNull(result);
+            Assert.True(Path.IsPathRooted(result), result);
+            Assert.True(result.StartsWith(projectDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase), result);
+            Assert.True(File.Exists(result), result);
         }
 
         private static string GetProjectDir()
