@@ -1,8 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Shouldly;
 using Xunit;
@@ -18,14 +19,18 @@ namespace Microsoft.Build.UnitTests
             _out = testOutputHelper;
         }
 
+        private FormatUrl GetFormatUrlUnderTest() => new FormatUrl
+        {
+            BuildEngine = new MockEngine(_out),
+        };
+
         /// <summary>
         /// The URL to format is null.
         /// </summary>
         [Fact]
         public void NullTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = null;
             t.Execute().ShouldBeTrue();
@@ -38,8 +43,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EmptyTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = string.Empty;
             t.Execute().ShouldBeTrue();
@@ -52,8 +56,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoInputTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.Execute().ShouldBeTrue();
             t.OutputUrl.ShouldBe(string.Empty);
@@ -61,15 +64,13 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is white space.
-        /// FormatUrl depends on Path.GetFullPath.
-        /// From the documentation, Path.GetFullPath(" ") should throw an ArgumentException, but it doesn't on macOS and Linux
-        /// where whitespace characters are valid characters for filenames.
+        /// Whitespace is a valid filename character on macOS and Linux, so the task should succeed and
+        /// resolve the input against the task's project directory.
         /// </summary>
         [UnixOnlyFact]
         public void WhitespaceTestOnUnix()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = " ";
             t.Execute().ShouldBeTrue();
@@ -78,14 +79,48 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is white space.
+        /// FormatUrl explicitly throws <see cref="ArgumentException"/> on Windows for whitespace-only
+        /// input to replicate the historical contract of <see cref="Path.GetFullPath(string)"/>,
+        /// which was lost when the task migrated to multithreaded execution (relative paths are now
+        /// resolved against the project directory via AbsolutePath, which would otherwise silently
+        /// trim trailing whitespace and mask the original error).
         /// </summary>
         [WindowsOnlyFact]
         public void WhitespaceTestOnWindows()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = " ";
+            Should.Throw<ArgumentException>(() => t.Execute());
+        }
+
+        /// <summary>
+        /// Specifically validates that the Windows-only whitespace guard in <see cref="FormatUrl"/>
+        /// fires even when the task is wired up to a real <see cref="TaskEnvironment"/> with an
+        /// isolated project directory (i.e. the multithreaded execution path). Without the guard,
+        /// the input would silently absolutize against the project directory and lose the
+        /// historical <see cref="ArgumentException"/> contract from <see cref="Path.GetFullPath(string)"/>.
+        /// Uses a single-space input which is the canonical case that <see cref="Path.GetFullPath(string)"/>
+        /// rejects with <see cref="ArgumentException"/> across all supported .NET runtimes on Windows.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void WhitespaceInputThrowsOnWindowsWithIsolatedProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_out);
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+
+            // Sanity check: project directory must differ from the process current directory so we know
+            // the guard fires before the AbsolutePath absolutization (which would otherwise silently
+            // resolve "projectDir\ " to projectDir on Windows and hide the historical error).
+            projectFolder.Path.ShouldNotBe(Environment.CurrentDirectory);
+
+            var t = new FormatUrl
+            {
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolder.Path),
+                BuildEngine = new MockEngine(_out),
+                InputUrl = " ",
+            };
+
             Should.Throw<ArgumentException>(() => t.Execute());
         }
 
@@ -95,8 +130,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UncPathTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"\\server\filename.ext";
             t.Execute().ShouldBeTrue();
@@ -110,8 +144,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LocalAbsolutePathTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = Environment.CurrentDirectory;
             t.Execute().ShouldBeTrue();
@@ -125,8 +158,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LocalRelativePathTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @".";
             t.Execute().ShouldBeTrue();
@@ -139,8 +171,7 @@ namespace Microsoft.Build.UnitTests
         [UnixOnlyFact]
         public void LocalUnixAbsolutePathTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"/usr/local/share";
             t.Execute().ShouldBeTrue();
@@ -153,8 +184,7 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact]
         public void LocalWindowsAbsolutePathTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"c:\folder\filename.ext";
             t.Execute().ShouldBeTrue();
@@ -167,8 +197,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UrlLocalHostTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"https://localhost/Example/Path";
             t.Execute().ShouldBeTrue();
@@ -181,8 +210,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UrlTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"https://example.com/Example/Path";
             t.Execute().ShouldBeTrue();
@@ -195,12 +223,37 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UrlParentPathTest()
         {
-            var t = new FormatUrl();
-            t.BuildEngine = new MockEngine(_out);
+            var t = GetFormatUrlUnderTest();
 
             t.InputUrl = @"https://example.com/Example/../Path";
             t.Execute().ShouldBeTrue();
             t.OutputUrl.ShouldBe(@"https://example.com/Path");
+        }
+
+        /// <summary>
+        /// A relative input URL is resolved against the task's <see cref="TaskEnvironment.ProjectDirectory"/>,
+        /// not the process current working directory. This documents the intentional semantic change
+        /// introduced when migrating the task to multithreaded execution.
+        /// </summary>
+        [Fact]
+        public void RelativePathResolvesAgainstProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_out);
+            TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+
+            // Sanity check: project directory must differ from the process current directory
+            // for the assertion below to be meaningful.
+            projectFolder.Path.ShouldNotBe(Environment.CurrentDirectory);
+
+            var t = new FormatUrl
+            {
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolder.Path),
+                BuildEngine = new MockEngine(_out),
+                InputUrl = @".",
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.OutputUrl.ShouldBe(new Uri(projectFolder.Path).AbsoluteUri);
         }
     }
 }
