@@ -207,5 +207,5 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         => TryConnectToServer(requestedNodes, DefaultSettings with { ProcessId = processId });
 
     private CoordinatorClient? TryConnectToServer(int requestedNodes, CoordinatorSettings settings)
-        => CoordinatorClient.TryConnectToServer(requestedNodes, settings, _output);
+        => CoordinatorClient.TestAccessor.TryConnectToServer(requestedNodes, settings, _output);
 }

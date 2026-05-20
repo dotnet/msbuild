@@ -40,6 +40,10 @@ internal sealed class NodeBudgetManager
     /// </summary>
     public int WaitingBuildCount => _waitQueue.Count;
 
+    /// <summary>
+    ///  Creates a new budget manager with the specified total node capacity.
+    /// </summary>
+    /// <param name="totalBudget">The maximum number of nodes available across all builds.</param>
     public NodeBudgetManager(int totalBudget)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(totalBudget, nameof(totalBudget));
@@ -51,6 +55,10 @@ internal sealed class NodeBudgetManager
     ///  Attempts to grant nodes to a build using fair-share allocation.
     ///  Returns the number of nodes granted, or zero if the build must wait.
     /// </summary>
+    /// <param name="grant">The build grant to allocate nodes for.</param>
+    /// <returns>
+    ///  The number of nodes granted, or zero if no resources are available and the build was queued.
+    /// </returns>
     public int TryGrant(BuildGrant grant)
     {
         if (grant.RequestedNodes <= 0)
@@ -84,6 +92,10 @@ internal sealed class NodeBudgetManager
     ///  Releases a build's grant and returns any builds from the wait queue
     ///  that can now be granted nodes.
     /// </summary>
+    /// <param name="grant">The build grant to release.</param>
+    /// <returns>
+    ///  An array of grants that were fulfilled from the wait queue as a result of the release.
+    /// </returns>
     public ImmutableArray<BuildGrant> Release(BuildGrant grant)
     {
         if (grant.IsActive)
@@ -105,6 +117,9 @@ internal sealed class NodeBudgetManager
     ///  Processes the wait queue, granting nodes to as many waiting builds as possible
     ///  using fair-share allocation.
     /// </summary>
+    /// <returns>
+    ///  An array of grants that were newly fulfilled from the wait queue.
+    /// </returns>
     private ImmutableArray<BuildGrant> DrainWaitQueue()
     {
         using RefArrayBuilder<BuildGrant> newlyGranted = new();

@@ -33,6 +33,11 @@ internal sealed class BuildGrant
     /// </summary>
     public bool IsActive => GrantedNodes > 0;
 
+    /// <summary>
+    ///  Creates a new build grant for the specified process.
+    /// </summary>
+    /// <param name="processId">The OS process ID of the MSBuild process requesting nodes.</param>
+    /// <param name="requestedNodes">The number of nodes the build is requesting.</param>
     public BuildGrant(int processId, int requestedNodes)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(processId);

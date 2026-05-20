@@ -15,6 +15,8 @@ namespace Microsoft.Build.Coordinator;
 ///  The coordinator server that listens for MSBuild client connections on a named pipe,
 ///  manages node grants, and monitors build health via heartbeats.
 /// </summary>
+/// <param name="settings">Configuration for the coordinator (pipe name, budget, timeouts, etc.).</param>
+/// <param name="output">Optional debug trace output. Defaults to file-based trace logging gated on MSBUILDDEBUGCOMM.</param>
 internal sealed partial class CoordinatorServer(CoordinatorSettings settings, ICoordinatorOutput? output = null) : IDisposable
 {
     private readonly CoordinatorSettings _settings = settings;
@@ -30,10 +32,20 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private Timer? _heartbeatMonitor;
     private Timer? _shutdownTimer;
 
+    public void Dispose()
+    {
+        _cts.Cancel();
+        _heartbeatMonitor?.Dispose();
+        _shutdownTimer?.Dispose();
+        _cts.Dispose();
+        _connectionLock.Dispose();
+    }
+
     /// <summary>
     ///  Runs the coordinator server until cancellation is requested or the auto-shutdown
     ///  timeout elapses with no active or waiting builds.
     /// </summary>
+    /// <param name="cancellationToken">Token to signal the server should stop accepting connections.</param>
     public async Task RunAsync(CancellationToken cancellationToken = default)
     {
         using CancellationTokenSource linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _cts.Token);
@@ -103,6 +115,13 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         }
     }
 
+    /// <summary>
+    ///  Waits for a client to connect to the named pipe.
+    /// </summary>
+    /// <param name="token">Cancellation token to abort the wait.</param>
+    /// <returns>
+    ///  The connected pipe stream, or <see langword="null"/> if the wait was cancelled.
+    /// </returns>
     private async Task<NamedPipeServerStream?> WaitForClientAsync(CancellationToken token)
     {
         NamedPipeServerStream pipeStream = new(
@@ -127,6 +146,8 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <summary>
     ///  Handles a single client connection for its entire lifetime.
     /// </summary>
+    /// <param name="pipeStream">The connected pipe stream for this client.</param>
+    /// <param name="token">Cancellation token to signal the client loop should exit.</param>
     private async Task HandleClientAsync(NamedPipeServerStream pipeStream, CancellationToken token)
     {
         ClientConnection? connection = null;
@@ -252,6 +273,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <summary>
     ///  Releases a connection's grant and notifies any builds that were waiting for resources.
     /// </summary>
+    /// <param name="connection">The client connection whose grant is being released.</param>
     private void ReleaseConnection(ClientConnection connection)
     {
         using (_connectionLock.EnterDisposableWriteLock())
@@ -309,6 +331,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <summary>
     ///  Periodically checks for builds that have missed heartbeats and reclaims their grants.
     /// </summary>
+    /// <param name="state">Timer callback state (unused).</param>
     private void CheckHeartbeats(object? state)
     {
         DateTime threshold = DateTime.UtcNow - TimeSpan.FromMilliseconds(_settings.HeartbeatTimeoutMs);
@@ -340,6 +363,13 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         }
     }
 
+    /// <summary>
+    ///  Checks whether a process with the given ID is still running.
+    /// </summary>
+    /// <param name="processId">The OS process ID to check.</param>
+    /// <returns>
+    ///  <see langword="true"/> if the process exists and has not exited; otherwise <see langword="false"/>.
+    /// </returns>
     private static bool IsProcessAlive(int processId)
     {
         try
@@ -376,14 +406,5 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             state: null,
             dueTime: _shutdownTimeoutMs,
             period: Timeout.Infinite);
-    }
-
-    public void Dispose()
-    {
-        _cts.Cancel();
-        _heartbeatMonitor?.Dispose();
-        _shutdownTimer?.Dispose();
-        _cts.Dispose();
-        _connectionLock.Dispose();
     }
 }

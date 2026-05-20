@@ -55,13 +55,60 @@ internal sealed partial class CoordinatorClient : IDisposable
     }
 
     /// <summary>
+    ///  Releases the node grant and disconnects from the coordinator.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _disposed = true;
+
+        // Stop heartbeat timer and wait for any in-flight callback to complete.
+        // This prevents SendHeartbeat from running after resources are disposed.
+        using (var disposeEvent = new ManualResetEvent(false))
+        {
+            _heartbeatTimer.Dispose(disposeEvent);
+            disposeEvent.WaitOne();
+        }
+
+        _output.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
+
+        try
+        {
+            _writer.Write(ReleaseNodesMessage.Instance);
+        }
+        catch (IOException)
+        {
+            // Pipe may already be broken.
+        }
+
+        try
+        {
+            _writer.Dispose();
+        }
+        catch (IOException)
+        {
+            // Flush in BinaryWriter.Dispose can throw on broken pipe.
+        }
+
+        _reader.Dispose();
+        _pipeStream.Dispose();
+    }
+
+    /// <summary>
     ///  Attempts to connect to the coordinator and request a node grant.
     ///  Returns null if the coordinator is not available or an error occurs.
     /// </summary>
-    public static CoordinatorClient? TryConnect(
-        int requestedNodes,
-        CoordinatorSettings settings,
-        ILoggingService loggingService)
+    /// <param name="requestedNodes">The maximum number of nodes to request from the coordinator.</param>
+    /// <param name="settings">Coordinator connection settings (pipe name, timeouts, etc.).</param>
+    /// <param name="loggingService">The MSBuild logging service used to emit user-visible messages.</param>
+    /// <returns>
+    ///  A connected <see cref="CoordinatorClient"/> instance, or <see langword="null"/> if the coordinator is not available.
+    /// </returns>
+    public static CoordinatorClient? TryConnect(int requestedNodes, CoordinatorSettings settings, ILoggingService loggingService)
     {
         ICoordinatorOutput output = DefaultOutput.Instance;
 
@@ -115,45 +162,17 @@ internal sealed partial class CoordinatorClient : IDisposable
     }
 
     /// <summary>
-    ///  Attempts to connect to a coordinator using the provided settings and request a node grant.
-    ///  This overload does not attempt to launch the coordinator and is intended for testing.
-    /// </summary>
-    internal static CoordinatorClient? TryConnectToServer(
-        int requestedNodes,
-        CoordinatorSettings settings,
-        ICoordinatorOutput output)
-    {
-        NamedPipeClientStream? pipeStream = null;
-
-        try
-        {
-            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-
-            output.WriteLine($"CoordinatorClient: Connecting to test pipe '{settings.PipeName}'");
-
-            if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
-            {
-                output.WriteLine("CoordinatorClient: Test connection timed out");
-                pipeStream.Dispose();
-                return null;
-            }
-
-            output.WriteLine("CoordinatorClient: Connected to test server");
-
-            return TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService: null);
-        }
-        catch (Exception ex) when (!Debugger.IsAttached)
-        {
-            output.WriteLine($"CoordinatorClient: Exception during test connect: {ex.Message}");
-            pipeStream?.Dispose();
-            return null;
-        }
-    }
-
-    /// <summary>
     ///  Performs the request/response negotiation over an already-connected pipe.
     ///  On failure, disposes the pipe and returns null.
     /// </summary>
+    /// <param name="pipeStream">The connected named pipe stream.</param>
+    /// <param name="requestedNodes">The number of nodes to request.</param>
+    /// <param name="settings">Coordinator settings including heartbeat interval and process ID.</param>
+    /// <param name="output">Debug trace output for diagnostic logging.</param>
+    /// <param name="loggingService">Optional MSBuild logging service for user-visible messages.</param>
+    /// <returns>
+    ///  A connected <see cref="CoordinatorClient"/> instance, or <see langword="null"/> if negotiation fails.
+    /// </returns>
     private static CoordinatorClient? TryNegotiate(
         NamedPipeClientStream pipeStream,
         int requestedNodes,
@@ -240,6 +259,11 @@ internal sealed partial class CoordinatorClient : IDisposable
     ///  Creates a heartbeat pump that periodically writes a heartbeat message to the given writer.
     ///  Dispose the returned timer to stop the pump.
     /// </summary>
+    /// <param name="writer">The binary writer connected to the coordinator pipe.</param>
+    /// <param name="intervalMs">The interval in milliseconds between heartbeats.</param>
+    /// <returns>
+    ///  A <see cref="Timer"/> that sends heartbeats. Dispose it to stop the pump.
+    /// </returns>
     private static Timer CreateHeartbeatPump(BinaryWriter writer, int intervalMs)
         => new(
             static state =>
@@ -259,70 +283,6 @@ internal sealed partial class CoordinatorClient : IDisposable
             state: writer,
             dueTime: intervalMs,
             period: intervalMs);
-
-    /// <summary>
-    ///  Releases the node grant and disconnects from the coordinator.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-
-        // Stop heartbeat timer and wait for any in-flight callback to complete.
-        // This prevents SendHeartbeat from running after resources are disposed.
-        using (var disposeEvent = new ManualResetEvent(false))
-        {
-            _heartbeatTimer.Dispose(disposeEvent);
-            disposeEvent.WaitOne();
-        }
-
-        _output.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
-
-        try
-        {
-            _writer.Write(ReleaseNodesMessage.Instance);
-        }
-        catch (IOException)
-        {
-            // Pipe may already be broken.
-        }
-
-        try
-        {
-            _writer.Dispose();
-        }
-        catch (IOException)
-        {
-            // Flush in BinaryWriter.Dispose can throw on broken pipe.
-        }
-
-        _reader.Dispose();
-        _pipeStream.Dispose();
-    }
-
-    private void SendHeartbeat(object? state)
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        try
-        {
-            _writer.Write(HeartbeatMessage.Instance);
-        }
-        catch (IOException)
-        {
-            _output.WriteLine("CoordinatorClient: Heartbeat failed (pipe broken)");
-
-            // Pipe broken — nothing we can do. The build continues
-            // with whatever nodes were already granted.
-        }
-    }
 
     private static bool TryConnectToPipe(NamedPipeClientStream pipeStream, int timeoutMs)
     {
@@ -393,5 +353,25 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
 
         return null;
+    }
+
+    private void SendHeartbeat(object? state)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        try
+        {
+            _writer.Write(HeartbeatMessage.Instance);
+        }
+        catch (IOException)
+        {
+            _output.WriteLine("CoordinatorClient: Heartbeat failed (pipe broken)");
+
+            // Pipe broken — nothing we can do. The build continues
+            // with whatever nodes were already granted.
+        }
     }
 }

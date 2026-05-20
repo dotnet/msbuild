@@ -11,14 +11,31 @@ namespace Microsoft.Build.Coordinator;
 /// </summary>
 internal sealed class ClientConnection : IDisposable
 {
+    /// <summary>
+    ///  The build grant associated with this connection.
+    /// </summary>
     public BuildGrant Grant { get; }
 
+    /// <summary>
+    ///  The named pipe stream connected to the client.
+    /// </summary>
     public NamedPipeServerStream PipeStream { get; }
 
+    /// <summary>
+    ///  A reader for deserializing client messages from the pipe.
+    /// </summary>
     public BinaryReader Reader { get; }
 
+    /// <summary>
+    ///  A writer for serializing server messages to the pipe.
+    /// </summary>
     public BinaryWriter Writer { get; }
 
+    /// <summary>
+    ///  Creates a new client connection wrapping the given grant and pipe stream.
+    /// </summary>
+    /// <param name="grant">The build grant associated with this connection.</param>
+    /// <param name="pipeStream">The named pipe stream connected to the client.</param>
     public ClientConnection(BuildGrant grant, NamedPipeServerStream pipeStream)
     {
         Grant = grant;
