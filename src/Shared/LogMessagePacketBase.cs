@@ -259,7 +259,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
-       /// <summary>
+        /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
         private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
@@ -498,8 +498,7 @@ namespace Microsoft.Build.Shared
         /// Takes in a id (LoggingEventType as an int) and creates the correct specific logging class
         /// </summary>
         private BuildEventArgs GetBuildEventArgFromId()
-        {
-            return _eventType switch
+            => _eventType switch
             {
                 LoggingEventType.BuildErrorEvent => new BuildErrorEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
                 LoggingEventType.BuildFinishedEvent => new BuildFinishedEventArgs(null, null, false),
@@ -544,9 +543,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
 
-                _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
+                _ => Assumed.Unreachable<BuildEventArgs>($"Should not get to the default of GetBuildEventArgFromId ID: {_eventType}")
             };
-        }
 
         /// <summary>
         /// Based on the type of the BuildEventArg to be wrapped

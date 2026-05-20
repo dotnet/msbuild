@@ -283,10 +283,12 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                 "UnknownLoggingType",
                                 loggingMechanism?.GetType(),
                                 nameof(GetFileList)));
+
+                            break;
                     }
                 }
 
@@ -324,10 +326,12 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                 "UnknownLoggingType",
                                 loggingMechanism?.GetType(),
                                 nameof(GetFileList)));
+
+                            break;
                     }
                 }
                 else
@@ -354,13 +358,14 @@ namespace Microsoft.Build.Internal
                                 evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
                                 break;
                             default:
-                                throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                     "UnknownLoggingType",
                                     loggingMechanism.GetType(),
                                     nameof(GetFileList)));
+
+                                break;
                         }
                     }
-
 
                     Assumed.NotNull(fileList, "We must have a list of files here, even if it's empty.");
 

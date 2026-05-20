@@ -342,7 +342,7 @@ internal static class ItemSpecModifiers
     {
         if (!TryGetModifierKind(modifier, out ItemSpecModifierKind kind))
         {
-            throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
+            return Assumed.Unreachable<string>($"\"{modifier}\" is not a valid item-spec modifier.");
         }
 
         Cache cache = default;
@@ -474,7 +474,7 @@ internal static class ItemSpecModifiers
             throw new InvalidOperationException(SR.FormatInvalidFilespecForTransform(modifier, itemSpec, e.Message));
         }
 
-        throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
+        return Assumed.Unreachable<string>($"\"{modifier}\" is not a valid item-spec modifier.");
     }
 
     private static string ComputeFullPath(string? currentDirectory, string itemSpec)
