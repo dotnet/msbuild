@@ -53,8 +53,11 @@ namespace Microsoft.Build.Tasks
             {
                 // Launcher lives next to ClickOnce bootstrapper.
                 // GetDefaultPath obtains the root ClickOnce boostrapper path.
+                // Pass the project directory as the fallback so we don't depend on
+                // the process-wide current directory in multithreaded execution.
+                string fallbackPath = TaskEnvironment.ProjectDirectory.Value;
                 LauncherPath = Path.Combine(
-                    Microsoft.Build.Tasks.Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion),
+                    Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion, fallbackPath),
                     ENGINE_PATH,
                     LAUNCHER_EXE);
             }
@@ -79,7 +82,12 @@ namespace Microsoft.Build.Tasks
                 entryPointFileName = AssemblyName;
             }
 
+            // Suppress MSBuildTask0005: the transitive unsafe-API calls reached via LauncherBuilder.Build
+            // (File.OpenRead is in a dead branch; File.Copy/Get/SetAttributes/CreateDirectory all
+            // receive absolute paths derived from AbsolutePath.Value).
+#pragma warning disable MSBuildTask0005
             BuildResults results = launcherBuilder.Build(entryPointFileName, outputPath);
+#pragma warning restore MSBuildTask0005
 
             BuildMessage[] messages = results.Messages;
             if (messages != null)

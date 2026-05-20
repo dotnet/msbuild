@@ -60,12 +60,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 AbsolutePath launcherPath = string.IsNullOrEmpty(LauncherPath) ? default : TaskEnvironment.GetAbsolutePath(LauncherPath);
                 string launcherPathForFileSystem = launcherPath.Value ?? LauncherPath;
+                string launcherPathForMessages = launcherPath.OriginalValue ?? LauncherPath;
                 string launcherFilename = Path.GetFileName(launcherPathForFileSystem);
 
                 // Copy setup.bin to the output directory
                 string strOutputExe = Path.Combine(outputPath.Value, launcherFilename);
                 string strOutputExeForMessages = Path.Combine(outputPath.OriginalValue, launcherFilename);
-                if (!CopyLauncherToOutputDirectory(launcherPath, launcherPathForFileSystem, strOutputExe, strOutputExeForMessages))
+                if (!CopyLauncherToOutputDirectory(launcherPathForFileSystem, launcherPathForMessages, strOutputExe, strOutputExeForMessages))
                 {
                     // Appropriate messages should have been stuffed into the results already
                     return _results;
@@ -73,7 +74,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 var resourceUpdater = new ResourceUpdater();
                 resourceUpdater.AddStringResource(LAUNCHER_RESOURCE_TABLE, LAUNCHER_RESOURCENAME, filename);
-                if (!resourceUpdater.UpdateResources(strOutputExe, _results))
+                if (!resourceUpdater.UpdateResources(strOutputExe, _results, strOutputExeForMessages))
                 {
                     return _results;
                 }
@@ -89,10 +90,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return _results;
         }
 
-        private bool CopyLauncherToOutputDirectory(AbsolutePath launcherPath, string launcherPathForFileSystem, string strOutputExe, string strOutputExeForMessages)
+        private bool CopyLauncherToOutputDirectory(string launcherPathForFileSystem, string launcherPathForMessages, string strOutputExe, string strOutputExeForMessages)
         {
-            string launcherPathForMessages = launcherPath.OriginalValue ?? LauncherPath;
-
             if (!FileSystems.Default.FileExists(launcherPathForFileSystem))
             {
                 _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateLauncher.MissingLauncherExe", launcherPathForMessages));

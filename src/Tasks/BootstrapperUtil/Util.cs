@@ -109,10 +109,35 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         // This method is not going to cache the path as it could be different depending on the Visual Studio version.
         public static string GetDefaultPath(string visualStudioVersion)
         {
+            return GetDefaultPath(visualStudioVersion, fallbackPath: null);
+        }
+
+        [SupportedOSPlatform("windows")]
+        // Overload that accepts an explicit fallback path instead of using Directory.GetCurrentDirectory().
+        // Used by multithreaded-safe tasks that supply a project-scoped fallback via TaskEnvironment.
+        internal static string GetDefaultPath(string visualStudioVersion, string fallbackPath)
+        {
             // if the Visual Studio Version is not a valid string, we will fall back to using the v4.0 property.
             if (String.IsNullOrEmpty(visualStudioVersion))
             {
-                return DefaultPath;
+                if (fallbackPath == null)
+                {
+                    return DefaultPath;
+                }
+
+                string defaultPathV4 = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
+                if (!String.IsNullOrEmpty(defaultPathV4))
+                {
+                    return defaultPathV4;
+                }
+
+                defaultPathV4 = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
+                if (!String.IsNullOrEmpty(defaultPathV4))
+                {
+                    return defaultPathV4;
+                }
+
+                return fallbackPath;
             }
 
             // With version 11.0 we start a direct mapping between the VS version and the registry key we use.
@@ -158,7 +183,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 return defaultPath;
             }
 
-            return Directory.GetCurrentDirectory();
+            return fallbackPath ?? Directory.GetCurrentDirectory();
         }
 
         [SupportedOSPlatform("windows")]
