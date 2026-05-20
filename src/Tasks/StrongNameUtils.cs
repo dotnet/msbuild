@@ -99,6 +99,41 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        private static byte[] ReadKeyFileContents(TaskLoggingHelper log, AbsolutePath keyFile, string keyFileDisplayName)
+        {
+            try
+            {
+                // Read the stuff from the file stream
+                using (FileStream fs = new FileStream(keyFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    int fileLength = (int)fs.Length;
+                    byte[] keyFileContents = new byte[fileLength];
+
+                    // TODO: Read the count of read bytes and check if it matches the expected length, if not raise an exception
+                    fs.ReadExactly(keyFileContents, 0, fileLength);
+                    return keyFileContents;
+                }
+            }
+            catch (ArgumentException e)
+            {
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFileDisplayName);
+                log.LogErrorFromException(e);
+                throw new StrongNameException(e);
+            }
+            catch (IOException e)
+            {
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFileDisplayName);
+                log.LogErrorFromException(e);
+                throw new StrongNameException(e);
+            }
+            catch (SecurityException e)
+            {
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFileDisplayName);
+                log.LogErrorFromException(e);
+                throw new StrongNameException(e);
+            }
+        }
+
         /// <summary>
         /// Given a key file or container, extract private/public key data. Reused from vsdesigner code.
         /// </summary>
@@ -112,7 +147,31 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void GetStrongNameKey(TaskLoggingHelper log, AbsolutePath keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
-            GetStrongNameKey(log, keyFile, keyFile.OriginalValue, keyContainer, out keyPair, out publicKey);
+            if (!string.IsNullOrEmpty(keyContainer))
+            {
+                GetStrongNameKeyFromContainer(log, keyContainer, out keyPair, out publicKey);
+            }
+            else if (!string.IsNullOrEmpty(keyFile))
+            {
+                byte[] keyFileContents = ReadKeyFileContents(log, keyFile, keyFile.OriginalValue);
+                var snp = new StrongNameKeyPair(keyFileContents);
+
+                try
+                {
+                    publicKey = snp.PublicKey;
+                    keyPair = snp;
+                }
+                catch (ArgumentException)
+                {
+                    keyPair = null;
+                    publicKey = keyFileContents;
+                }
+            }
+            else
+            {
+                keyPair = null;
+                publicKey = null;
+            }
         }
 
         private static void GetStrongNameKey(TaskLoggingHelper log, string keyFile, string keyFileDisplayName, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
@@ -124,27 +183,32 @@ namespace Microsoft.Build.Tasks
             publicKey = null;
             if (!string.IsNullOrEmpty(keyContainer))
             {
-                try
-                {
-                    keyPair = new StrongNameKeyPair(keyContainer);
-                    publicKey = keyPair.PublicKey;
-                }
-                catch (SecurityException e)
-                {
-                    log.LogErrorWithCodeFromResources("StrongNameUtils.BadKeyContainer", keyContainer);
-                    log.LogErrorFromException(e);
-                    throw new StrongNameException(e);
-                }
-                catch (ArgumentException e)
-                {
-                    log.LogErrorWithCodeFromResources("StrongNameUtils.BadKeyContainer", keyContainer);
-                    log.LogErrorFromException(e);
-                    throw new StrongNameException(e);
-                }
+                GetStrongNameKeyFromContainer(log, keyContainer, out keyPair, out publicKey);
             }
             else if (!string.IsNullOrEmpty(keyFile))
             {
                 ReadKeyFile(log, keyFile, keyFileDisplayName, out keyPair, out publicKey);
+            }
+        }
+
+        private static void GetStrongNameKeyFromContainer(TaskLoggingHelper log, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
+        {
+            try
+            {
+                keyPair = new StrongNameKeyPair(keyContainer);
+                publicKey = keyPair.PublicKey;
+            }
+            catch (SecurityException e)
+            {
+                log.LogErrorWithCodeFromResources("StrongNameUtils.BadKeyContainer", keyContainer);
+                log.LogErrorFromException(e);
+                throw new StrongNameException(e);
+            }
+            catch (ArgumentException e)
+            {
+                log.LogErrorWithCodeFromResources("StrongNameUtils.BadKeyContainer", keyContainer);
+                log.LogErrorFromException(e);
+                throw new StrongNameException(e);
             }
         }
 

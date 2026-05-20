@@ -309,6 +309,47 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 }
             }
         }
+
+        /// <summary>
+        /// Regression test for the multithreaded task migration: a relative KeyFile must be
+        /// resolved against the task's project directory (via TaskEnvironment), not the
+        /// process working directory.
+        /// </summary>
+        [Fact]
+        public void RelativeKeyFile_ResolvedAgainstTaskEnvironmentProjectDirectory()
+        {
+            string projectDir = Path.Combine(Path.GetTempPath(), "AxTlbRelKey_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(projectDir);
+            string keyFileName = "myKey.key";
+            string keyFilePath = Path.Combine(projectDir, keyFileName);
+            File.WriteAllBytes(keyFilePath, new byte[] { 0x01, 0x02, 0x03, 0x04 });
+
+            try
+            {
+                var t = new ResolveComReference.AxImp
+                {
+                    ActiveXControlName = "FakeControl.ocx",
+                    ToolPath = projectDir,
+                    KeyFile = keyFileName, // relative — must be resolved against projectDir
+                    TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
+                };
+
+                // Process CWD intentionally differs from projectDir. With the multithreaded fix
+                // the relative KeyFile resolves via TaskEnvironment.ProjectDirectory, so the
+                // "InvalidKeyFileSpecified" error must not be logged; the task should instead
+                // proceed and fail because the file is not a valid key pair.
+                MockEngine e = new MockEngine();
+                t.BuildEngine = e;
+                Assert.False(t.Execute());
+
+                Utilities.VerifyLogDoesNotContainErrorFromResource(e, t.Log, "AxTlbBaseTask.InvalidKeyFileSpecified", keyFileName);
+                Utilities.VerifyLogContainsErrorFromResource(e, t.Log, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile", keyFileName);
+            }
+            finally
+            {
+                try { Directory.Delete(projectDir, recursive: true); } catch { }
+            }
+        }
     }
 
     internal sealed class Utilities
