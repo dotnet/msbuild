@@ -631,11 +631,17 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            in TaskHostParameters taskHostParameters)
+            in TaskHostParameters taskHostParameters,
+            out int hostProcessId,
+            out bool wasNewlyCreated)
         {
+            hostProcessId = -1;
+            wasNewlyCreated = false;
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(nodeKey))
             {
+                wasNewlyCreated = true;
                 nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
             }
             else
@@ -652,6 +658,16 @@ namespace Microsoft.Build.BackEnd
                 lock (handlerStack)
                 {
                     handlerStack.Push(handler);
+                }
+
+                try
+                {
+                    hostProcessId = context.Process?.Id ?? -1;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                    hostProcessId = -1;
                 }
 
                 // Configure the node.
