@@ -26,16 +26,8 @@
         "vs18.0": {
             "MergeToBranch": "vs18.3"
         },
-        // Automate opening PRs to merge msbuild's vs18.3 (SDK 10.0.2xx) into vs18.4 (VS)
+        // Automate opening PRs to merge msbuild's vs18.3 (SDK 10.0.2xx) into vs18.6 (VS, SDK 10.0.3xx)
         "vs18.3": {
-            "MergeToBranch": "vs18.4"
-        },
-        // Automate opening PRs to merge msbuild's vs18.4 (VS) into vs18.5 (VS)
-        "vs18.4": {
-            "MergeToBranch": "vs18.5"
-        },
-        // Automate opening PRs to merge msbuild's vs18.5 (VS) into vs18.6 (VS, SDK 10.0.3xx)
-        "vs18.5": {
             "MergeToBranch": "vs18.6"
         },
         // Automate opening PRs to merge msbuild's vs18.6 (VS, SDK 10.0.3xx) into vs18.7 (VS)
