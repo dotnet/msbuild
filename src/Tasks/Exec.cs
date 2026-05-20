@@ -459,9 +459,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // determine what the working directory for the exec command is going to be -- if the user specified a working
-            // directory use that, otherwise default to the project directory (TaskEnvironment.ProjectDirectory). Using the
-            // project directory instead of the process current directory is important for correctness in multithreaded (/mt)
-            // builds, where the process working directory may not match the project being built.
+            // directory use that, otherwise default to the project directory (TaskEnvironment.ProjectDirectory).
             _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
                 ? TaskEnvironment.GetAbsolutePath(WorkingDirectory)
                 : TaskEnvironment.ProjectDirectory;
