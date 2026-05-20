@@ -289,23 +289,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 resetColor();
             }
 
-            // Show paths to the files created by enabled loggers.
-            if (ShowSummary == true
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
-                && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
-            {
-                WriteNewLine();
-
-                foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
-                {
-                    string displayPaths = string.Join(
-                        CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
-                        logger.OutputFilePaths);
-
-                    WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
-                }
-            }
-
             // The decision whether or not to show a summary at this verbosity
             // was made during initialization. We just do what we're told.
             if (ShowSummary == true)
@@ -338,6 +321,23 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 WriteLinePrettyFromResource(2, "ErrorCount", errorCount);
                 resetColor();
+            }
+
+            // Show paths to the files created by enabled loggers.
+            if (ShowSummary == true
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+                && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
+            {
+                WriteNewLine();
+
+                foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
+                {
+                    string displayPaths = string.Join(
+                        CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
+                        logger.OutputFilePaths);
+
+                    WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
+                }
             }
 
             // Show build time if verbosity is normal, detailed or diagnostic or the user specified to

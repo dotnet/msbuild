@@ -1048,7 +1048,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
         [Fact]
-        public void LogBuildStartedLoggerNames()
+        public void LogBuildStartedLogsLoggerNames()
         {
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
             ConsoleLogger consoleLogger = new ConsoleLogger();
@@ -1087,7 +1087,6 @@ namespace Microsoft.Build.UnitTests.Logging
             var fileLoggerDesc = registeredEvent.Loggers.First(l => l.LoggerName == nameof(FileLogger));
             var expectedPath = Path.GetFullPath(logFilePath);
             fileLoggerDesc.OutputFilePaths.ShouldContain(expectedPath);
-            fileLoggerDesc.LoggerTypeFullName.ShouldBe(typeof(FileLogger).FullName);
             fileLoggerDesc.Parameters.ShouldBe(fileLogger.Parameters);
 
             // Check the file log itself contains the exact path

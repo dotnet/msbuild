@@ -399,7 +399,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// In a single pass over the registered loggers, emits a message listing the enabled logger
+        /// Emits a message listing the enabled logger
         /// type names and a <see cref="LoggersRegisteredEventArgs"/> describing each logger (including
         /// any output file paths for <see cref="IFileOutputLogger"/> implementations).
         /// </summary>
@@ -431,7 +431,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     loggerName: loggerType.Name,
                     outputFilePaths: outputFilePaths.Count > 0 ? outputFilePaths : null,
                     verbosity: actualLogger.Verbosity,
-                    loggerTypeFullName: loggerType.FullName,
                     parameters: actualLogger.Parameters));
             }
 

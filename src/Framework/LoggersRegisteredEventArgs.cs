@@ -18,12 +18,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Initialize a new instance of the RegisteredLoggerInfo class.
         /// </summary>
-        public RegisteredLoggerInfo(string loggerName, IReadOnlyList<string>? outputFilePaths = null, LoggerVerbosity? verbosity = null, string? loggerTypeFullName = null, string? parameters = null)
+        public RegisteredLoggerInfo(string loggerName, IReadOnlyList<string>? outputFilePaths = null, LoggerVerbosity? verbosity = null, string? parameters = null)
         {
             LoggerName = loggerName;
             OutputFilePaths = outputFilePaths ?? Array.Empty<string>();
             Verbosity = verbosity;
-            LoggerTypeFullName = loggerTypeFullName;
             Parameters = parameters;
         }
 
@@ -31,11 +30,6 @@ namespace Microsoft.Build.Framework
         /// The name of the logger.
         /// </summary>
         public string LoggerName { get; }
-
-        /// <summary>
-        /// The full type name of the logger.
-        /// </summary>
-        public string? LoggerTypeFullName { get; }
 
         /// <summary>
         /// The logger parameters.
@@ -88,7 +82,7 @@ namespace Microsoft.Build.Framework
 
             return string.Join("; ", withPaths.Select(l => string.Format(
                 CultureInfo.CurrentCulture,
-                "{0} wrote to: {1}",
+                SR.LogFileOutputPath,
                 l.LoggerName,
                 string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", l.OutputFilePaths))));
         }
@@ -106,7 +100,6 @@ namespace Microsoft.Build.Framework
             foreach (var logger in Loggers)
             {
                 writer.Write(logger.LoggerName);
-                writer.WriteOptionalString(logger.LoggerTypeFullName);
                 writer.WriteOptionalString(logger.Parameters);
                 writer.Write(logger.Verbosity.HasValue);
                 if (logger.Verbosity.HasValue)
@@ -131,7 +124,6 @@ namespace Microsoft.Build.Framework
             for (int i = 0; i < count; i++)
             {
                 string loggerName = reader.ReadString();
-                string? loggerTypeFullName = reader.ReadOptionalString();
                 string? parameters = reader.ReadOptionalString();
 
                 LoggerVerbosity? verbosity = null;
@@ -147,7 +139,7 @@ namespace Microsoft.Build.Framework
                     outputFilePaths[j] = reader.ReadString();
                 }
 
-                loggers.Add(new RegisteredLoggerInfo(loggerName, outputFilePaths, verbosity, loggerTypeFullName, parameters));
+                loggers.Add(new RegisteredLoggerInfo(loggerName, outputFilePaths, verbosity, parameters));
             }
 
             Loggers = loggers;

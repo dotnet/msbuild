@@ -102,6 +102,11 @@
         <target state="translated">パラメーター '{0}' に使用できるのはファイル名のみで、ディレクトリを含めることはできません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogFileOutputPath">
+        <source>{0} wrote to: {1}</source>
+        <target state="new">{0} wrote to: {1}</target>
+        <note>{0} is the logger name. {1} is a list of full file paths separated by the current culture's list separator.</note>
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">パスはルート指定パスである必要があります。</target>

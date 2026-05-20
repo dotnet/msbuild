@@ -327,6 +327,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     {
                         new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }),
                         new RegisteredLoggerInfo("BinaryLogger"),
+                        new RegisteredLoggerInfo(
+                            "ConsoleLogger",
+                            outputFilePaths: null,
+                            verbosity: LoggerVerbosity.Detailed,
+                            parameters: "ShowTimestamp;ShowEventId"),
+                        new RegisteredLoggerInfo(
+                            "MultiFileLogger",
+                            outputFilePaths: new[] { @"C:\logs\a.log", @"C:\logs\b.log" },
+                            verbosity: LoggerVerbosity.Diagnostic,
+                            parameters: "LogFile=a.log;LogFile=b.log"),
                     }),
                 };
                 foreach (BuildEventArgs arg in testArgs)

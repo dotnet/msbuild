@@ -300,7 +300,7 @@ namespace Microsoft.Build.Logging
         internal string FilePath { get; private set; }
 
         /// <inheritdoc/>
-        System.Collections.Generic.IReadOnlyList<string> IFileOutputLogger.OutputFilePaths
+        IReadOnlyList<string> IFileOutputLogger.OutputFilePaths
             => AdditionalFilePaths is null || AdditionalFilePaths.Count == 0
                 ? [FilePath]
                 : [FilePath, .. AdditionalFilePaths];

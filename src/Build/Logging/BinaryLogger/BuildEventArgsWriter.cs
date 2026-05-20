@@ -324,7 +324,6 @@ namespace Microsoft.Build.Logging
             foreach (var logger in e.Loggers)
             {
                 WriteDeduplicatedString(logger.LoggerName);
-                WriteDeduplicatedString(logger.LoggerTypeFullName);
                 WriteDeduplicatedString(logger.Parameters);
                 Write(logger.Verbosity.HasValue);
                 if (logger.Verbosity.HasValue)

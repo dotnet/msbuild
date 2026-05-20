@@ -591,8 +591,8 @@
         <note />
       </trans-unit>
       <trans-unit id="LogEnabledLogs">
-        <source>Enabled logs: {0}</source>
-        <target state="new">Enabled logs: {0}</target>
+        <source>Enabled loggers: {0}</source>
+        <target state="new">Enabled loggers: {0}</target>
         <note>{0} is a comma-separated list of log types (e.g. "Binary log", "File log").</note>
       </trans-unit>
       <trans-unit id="LogFileOutputPath">
