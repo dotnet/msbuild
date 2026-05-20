@@ -341,7 +341,7 @@ namespace Microsoft.Build.Experimental
                         await HandleCancellationAsync().ConfigureAwait(false);
 
                         // After the cancelation, we want to wait to server gracefuly finish the build.
-                        // We have to replace the cancelation token, because WaitAny would cause to repeatedly hit this branch of code.
+                        // We have to replace the cancelation token, because the thrown OCE would cause to repeatedly hit this branch of code.
                         cancellationToken = CancellationToken.None;
                         continue;
                     }
