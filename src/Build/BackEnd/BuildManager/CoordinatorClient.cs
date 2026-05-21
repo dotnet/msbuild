@@ -282,6 +282,8 @@ internal sealed partial class CoordinatorClient : IDisposable
                     output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
                     loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
 
+                    var waitTimer = Stopwatch.StartNew();
+
                     // Send heartbeats while waiting so the server doesn't consider us stale.
                     using (Timer heartbeatPump = CreateHeartbeatPump(writer, settings.HeartbeatIntervalMs))
                     {
@@ -289,7 +291,10 @@ internal sealed partial class CoordinatorClient : IDisposable
 
                         if (grantAfterWait is NodeGrantMessage deferredGrant)
                         {
-                            output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes");
+                            // TODO: Report wait time to telemetry
+                            waitTimer.Stop();
+
+                            output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
                             loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
 
                             var deferredClient = new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output);
@@ -301,7 +306,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                             return deferredClient;
                         }
 
-                        output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name}");
+                        output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
                     }
 
                     return null;
