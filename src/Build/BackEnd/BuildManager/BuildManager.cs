@@ -645,6 +645,11 @@ namespace Microsoft.Build.Execution
                     if (_coordinatorClient != null)
                     {
                         _buildParameters.MaxNodeCount = _coordinatorClient.GrantedNodes;
+
+                        if (_coordinatorClient.WaitDuration is TimeSpan waitDuration)
+                        {
+                            _buildTelemetry.CoordinatorWaitDurationMs = waitDuration.TotalMilliseconds;
+                        }
                     }
                 }
 

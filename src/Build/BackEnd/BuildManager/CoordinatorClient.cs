@@ -33,6 +33,11 @@ internal sealed partial class CoordinatorClient : IDisposable
     /// </summary>
     public int GrantedNodes { get; }
 
+    /// <summary>
+    ///  The time spent waiting for a deferred node grant, or <see langword="null"/> if no wait occurred.
+    /// </summary>
+    public TimeSpan? WaitDuration { get; private init; }
+
     private CoordinatorClient(
         NamedPipeClientStream pipeStream,
         BinaryReader reader,
@@ -291,13 +296,15 @@ internal sealed partial class CoordinatorClient : IDisposable
 
                         if (grantAfterWait is NodeGrantMessage deferredGrant)
                         {
-                            // TODO: Report wait time to telemetry
                             waitTimer.Stop();
 
                             output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
                             loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
 
-                            var deferredClient = new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output);
+                            var deferredClient = new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
+                            {
+                                WaitDuration = waitTimer.Elapsed,
+                            };
 
                             // Ownership transferred to deferred client
                             reader = null;
