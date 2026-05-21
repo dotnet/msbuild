@@ -20,6 +20,12 @@ if (args.Length == 0)
     return 1;
 }
 
+if (string.IsNullOrWhiteSpace(args[0]))
+{
+    Console.Error.WriteLine("Error: binlog path argument is empty");
+    return 1;
+}
+
 var binlogPath = Path.GetFullPath(args[0]);
 var outputDir = args.Length > 1 ? args[1] : "/tmp";
 
