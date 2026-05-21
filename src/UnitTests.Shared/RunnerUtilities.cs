@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 }
                 else
                 {
-                    WriteOutput($"Process {pid} exited in {exitElapsedMs}ms (budget {timeoutMilliseconds}ms, headroom {timeoutMilliseconds - exitElapsedMs}ms)");
+                    WriteOutput($"Process {pid} exited in {exitElapsedMs}ms (budget {timeoutMilliseconds}ms, {timeoutMilliseconds - exitElapsedMs}ms remaining)");
                 }
             }
 
