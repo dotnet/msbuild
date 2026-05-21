@@ -120,6 +120,15 @@ No blanket `NoWarn` — handle semantically:
 - Enum flags: use bitwise `&` — `HasFlag()` boxes on .NET Framework
 - Anonymous unions: `systemInfo.Anonymous.Anonymous.wProcessorArchitecture` — check generated source in `obj/`
 
+### Pointer / nint Conventions
+
+Inside `unsafe` blocks and on `[DllImport]` signatures:
+
+- **Use `void*` for opaque / reserved native pointers** — never `IntPtr` / `IntPtr.Zero`. Pass `null` literally.
+- **Prefer `nint` / `nuint` over `IntPtr` / `UIntPtr`** for native-sized integers. Better cast semantics with `int` / `long`, no `IntPtr.Zero` ceremony, no boxing surprises.
+- **Use `T**` not `out T*`** on signatures of unmanaged-COM vtable methods and `[DllImport]`s returning pointer outputs. `out T*` forces a marshaling path and a `fixed` round-trip at the call site; `T**` is the blittable raw signature.
+- `IntPtr` is fine where the wider .NET surface uses it (`Marshal.*`, `SafeHandle.DangerousGetHandle`, public API boundaries).
+
 ### Source-Build Verification (REQUIRED before pushing)
 
 Source builds (`DotNetBuildSourceOnly=true`) disable `FEATURE_WINDOWSINTEROP`. CI treats **all warnings as errors**. Run both builds before every push:

@@ -125,6 +125,8 @@
   <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true'">
     <Compile Remove="Windows\Win32\System\Com\ComScope.cs" />
     <Compile Remove="Windows\Win32\System\Com\ComClassFactory.cs" />
+    <Compile Remove="Windows\Win32\System\Com\GlobalInterfaceTable.cs" />
+    <Compile Remove="Windows\Win32\System\Com\AgileComPointer.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true' OR '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <Compile Remove="Utilities\Wmi\*.cs" />
