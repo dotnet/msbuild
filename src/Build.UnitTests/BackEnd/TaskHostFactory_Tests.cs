@@ -88,13 +88,30 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     {
                         Process taskHostNode = Process.GetProcessById(pid);
 
+                        // Capture identity up-front so a PID-reuse race (the OS recycled this
+                        // pid to an unrelated process between build-end and GetProcessById) is
+                        // visible in the failure diagnostic rather than looking like the task
+                        // host hung. See jankratochvilcz/msbuild#43.
+                        string capturedName = SafeGetProcessField(() => taskHostNode.ProcessName);
+                        string capturedStart = SafeGetProcessField(() => taskHostNode.StartTime.ToString("O", CultureInfo.InvariantCulture));
+
                         // The task host should exit shortly after the build completes. Use a generous
                         // timeout because slow CI agents have been observed to take up to ~10s for the
                         // child process to drain stdio and exit (issue #43).
+                        // TELEMETRY: elapsedMs is logged so a future iteration can tune this back down
+                        // to a tight-but-safe value. If observed elapsed never approaches the timeout,
+                        // shrink TaskHostExitTimeoutMs in a follow-up PR.
                         const int TaskHostExitTimeoutMs = 15000;
+                        Stopwatch sw = Stopwatch.StartNew();
                         bool exited = taskHostNode.WaitForExit(TaskHostExitTimeoutMs);
+                        sw.Stop();
+                        _output.WriteLine(
+                            $"TaskHostFactory wait: pid={pid} processName={capturedName} startTime={capturedStart} " +
+                            $"exited={exited} elapsedMs={sw.ElapsedMilliseconds} timeoutMs={TaskHostExitTimeoutMs}");
+
                         exited.ShouldBeTrue(
-                            $"TaskHost (pid={pid}) was still running after {TaskHostExitTimeoutMs}ms. HasExited={taskHostNode.HasExited}");
+                            $"TaskHost (pid={pid}, name={capturedName}, started={capturedStart}) was still running after {TaskHostExitTimeoutMs}ms. " +
+                            $"elapsedMs={sw.ElapsedMilliseconds} HasExited={taskHostNode.HasExited}");
                     }
 
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
@@ -152,6 +169,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         // Ignore exceptions from Kill - the process may have exited between the WaitForExit and Kill calls.
                     }
                 }
+            }
+        }
+
+        // Some Process fields (ProcessName, StartTime) can throw if the process
+        // has already exited or access is denied. We capture them best-effort for
+        // diagnostic output; never let a diagnostic read fail the test.
+        private static string SafeGetProcessField(Func<string> read)
+        {
+            try
+            {
+                return read();
+            }
+            catch (Exception ex)
+            {
+                return $"<unavailable: {ex.GetType().Name}>";
             }
         }
 
