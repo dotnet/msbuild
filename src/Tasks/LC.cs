@@ -132,10 +132,6 @@ namespace Microsoft.Build.Tasks
         /// Determing the path to lc.exe
         /// </summary>
         /// <returns>path to lc.exe, null if not found</returns>
-        /// <summary>
-        /// Determing the path to lc.exe
-        /// </summary>
-        /// <returns>path to lc.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
             string sdkToolsPath = TaskEnvironment.AbsolutizeSdkToolsPath(SdkToolsPath);
