@@ -100,7 +100,7 @@ When the errors include NuGet resolution failures (`NU1605`, `NU1608`, `NU1100`,
 
 ```bash
 # Get a remediation plan for vulnerable/conflicting packages in a project
-NuGet.Mcp.Server --source https://api.nuget.org/v3/index.json --yes <<< '{"method":"tools/call","params":{"name":"fix_vulnerable_packages","arguments":{"projectPath":"/path/to/project.csproj"}}}'
+dotnet NuGet.Mcp.Server -- --source https://api.nuget.org/v3/index.json --project /path/to/project.csproj
 ```
 
 Available tools (pass as JSON via stdin):
@@ -121,7 +121,7 @@ For each root cause, identify the **smallest set of files** that need to change.
 
 - For Roslyn / C# errors: read 6 lines above and 10 lines below the reported line.
 - For MSBuild errors: read the offending element and the surrounding `<PropertyGroup>` / `<ItemGroup>` / `<Target>`.
-- For NuGet failures: read the `.csproj`, `Directory.Packages.props`, and `eng/Versions.props` rows mentioning the package. Then run `NuGet.Mcp.Server` via bash to get a concrete resolution plan.
+- For NuGet failures: read the `.csproj`, `Directory.Packages.props`, and `eng/Versions.props` rows mentioning the package. Then run `dotnet NuGet.Mcp.Server` to get a concrete resolution plan.
 
 If the source line at the reported `file:line` does not look like a plausible cause (sometimes the compiler reports the *call site*, not the *declaration site*), search the PR-changed files for the symbol named in the error message and use that as the suggestion target.
 

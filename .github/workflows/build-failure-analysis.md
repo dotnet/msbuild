@@ -166,7 +166,7 @@ tools:
     - "uniq"
     - "ls"
     - "find"
-    - "NuGet.Mcp.Server"
+    - "dotnet"
 
 safe-outputs:
   add-comment:
