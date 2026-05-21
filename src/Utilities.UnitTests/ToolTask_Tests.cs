@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -216,14 +216,22 @@ namespace Microsoft.Build.UnitTests
                                             ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
                                             : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
 
+            // TODO(jankratochvilcz/msbuild#39): remove diagnostics once root cause is fixed.
+            // Likely-suspect: race in ToolTask's async pipe drain — Execute() may return
+            // before stdout EOF, so the canonical-error parser misses the line. Confirmed
+            // signal would be Errors==0 but Log contains the echoed command. Engine is
+            // wired to _output already, so individual log lines stream live — no need to
+            // dump engine.Log again here.
+            Stopwatch sw = Stopwatch.StartNew();
             bool executeResult = t.Execute();
+            sw.Stop();
 
-            // Diagnostic dump for issue #39: t.Execute() occasionally returns true on slow
-            // CI agents, suggesting the canonical error parser sometimes misses the line.
-            _output.WriteLine($"[HandleExecutionErrorsWhenToolLogsError] Execute()={executeResult}, ExitCode={t.ExitCode}, Errors={engine.Errors}");
-            _output.WriteLine($"[HandleExecutionErrorsWhenToolLogsError] engine.Log:\n{engine.Log}");
+            _output.WriteLine(
+                $"[HandleExecutionErrorsWhenToolLogsError] Execute()={executeResult}, ExitCode={t.ExitCode}, " +
+                $"Errors={engine.Errors}, Warnings={engine.Warnings}, MessageCount={engine.Messages}, " +
+                $"elapsedMs={sw.ElapsedMilliseconds}");
 
-            executeResult.ShouldBeFalse($"ToolTask.Execute should report failure when the tool logs a canonical error. ExitCode={t.ExitCode}, Errors={engine.Errors}.");
+            executeResult.ShouldBeFalse($"ToolTask.Execute should report failure when the tool logs a canonical error. ExitCode={t.ExitCode}, Errors={engine.Errors}, elapsedMs={sw.ElapsedMilliseconds}.");
 
             // The above command logged a canonical error message.  Therefore ToolTask should
             // not log its own error beyond that.
@@ -593,12 +601,20 @@ namespace Microsoft.Build.UnitTests
                                                 ? $"/C type \"{tempFile}\""
                                                 : $"-c \"cat \'{tempFile}\'\"";
 
+                // TODO(jankratochvilcz/msbuild#38): remove diagnostics once root cause is fixed.
+                // Likely-suspect: same async-pipe-drain race as #39 — Execute() returns
+                // before the cat/type output is flushed through ToolTask's stdout reader,
+                // so engine.Log only contains the cmd echo. MessageCount==0 with non-empty
+                // exit confirms truncation; MessageCount>0 with missing strings means a
+                // parser bug.
+                Stopwatch sw = Stopwatch.StartNew();
                 bool executeResult = t.Execute();
+                sw.Stop();
 
-                // Always emit captured tool log to xUnit output so flaky failures can be
-                // diagnosed (issue #38: log occasionally captures only the command echo
-                // instead of the cmd /C output).
-                _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] Execute() returned {executeResult}, ExitCode={t.ExitCode}");
+                _output.WriteLine(
+                    $"[ToolTaskCanChangeCanonicalErrorFormat] Execute()={executeResult}, ExitCode={t.ExitCode}, " +
+                    $"Errors={engine.Errors}, Warnings={engine.Warnings}, MessageCount={engine.Messages}, " +
+                    $"elapsedMs={sw.ElapsedMilliseconds}");
                 _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
 
                 // The above command logged a canonical warning, as well as a custom error.
@@ -1043,10 +1059,20 @@ namespace Microsoft.Build.UnitTests
             for (int attempt = 1; attempt <= repeats; attempt++)
             {
                 bool shouldSucceed = attempt > 1 || !timeoutOnFirstExecution;
+                int configuredTimeout = (int)task.Timeout;
+                Stopwatch sw = Stopwatch.StartNew();
                 bool result = task.Execute();
+                sw.Stop();
 
+                // TELEMETRY (jankratochvilcz/msbuild#40): log elapsedMs alongside the
+                // configured Timeout so a follow-up PR can shrink the bumped budgets
+                // (slowDelay=20s, timeout=5s) back to tighter values once we see the
+                // actual distribution. The "slow" path uses `ping -n 21` (~20s on
+                // Windows); the "fast" path uses `ping -n 2` (~1s, ping's minimum).
                 _output.WriteLine(
-                    $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, exitCode={task.ExitCode}.");
+                    $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, " +
+                    $"exitCode={task.ExitCode}, elapsedMs={sw.ElapsedMilliseconds}, configuredTimeoutMs={configuredTimeout}, " +
+                    $"slowDelayMs={slowDelayMilliseconds}, fastDelayMs={fastDelayMilliseconds}.");
 
                 if (!string.IsNullOrEmpty(engine.Log))
                 {
@@ -1054,10 +1080,10 @@ namespace Microsoft.Build.UnitTests
                     engine.Log = string.Empty;
                 }
 
-                task.RepeatCount.ShouldBe(attempt);
+                task.RepeatCount.ShouldBe(attempt, $"RepeatCount mismatch on attempt {attempt}/{repeats}.");
                 result.ShouldBe(
                     shouldSucceed,
-                    $"Attempt {attempt}/{repeats} expected success={shouldSucceed} but got {result}. ExitCode={task.ExitCode}, timeoutOnFirstExecution={timeoutOnFirstExecution}.");
+                    $"Attempt {attempt}/{repeats} expected success={shouldSucceed} but got {result}. ExitCode={task.ExitCode}, elapsedMs={sw.ElapsedMilliseconds}, configuredTimeoutMs={configuredTimeout}, timeoutOnFirstExecution={timeoutOnFirstExecution}.");
 
                 if (shouldSucceed)
                 {
