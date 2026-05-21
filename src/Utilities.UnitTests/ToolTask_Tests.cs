@@ -216,7 +216,14 @@ namespace Microsoft.Build.UnitTests
                                             ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
                                             : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
 
-            t.Execute().ShouldBeFalse();
+            bool executeResult = t.Execute();
+
+            // Diagnostic dump for issue #39: t.Execute() occasionally returns true on slow
+            // CI agents, suggesting the canonical error parser sometimes misses the line.
+            _output.WriteLine($"[HandleExecutionErrorsWhenToolLogsError] Execute()={executeResult}, ExitCode={t.ExitCode}, Errors={engine.Errors}");
+            _output.WriteLine($"[HandleExecutionErrorsWhenToolLogsError] engine.Log:\n{engine.Log}");
+
+            executeResult.ShouldBeFalse($"ToolTask.Execute should report failure when the tool logs a canonical error. ExitCode={t.ExitCode}, Errors={engine.Errors}.");
 
             // The above command logged a canonical error message.  Therefore ToolTask should
             // not log its own error beyond that.
@@ -586,7 +593,13 @@ namespace Microsoft.Build.UnitTests
                                                 ? $"/C type \"{tempFile}\""
                                                 : $"-c \"cat \'{tempFile}\'\"";
 
-                t.Execute();
+                bool executeResult = t.Execute();
+
+                // Always emit captured tool log to xUnit output so flaky failures can be
+                // diagnosed (issue #38: log occasionally captures only the command echo
+                // instead of the cmd /C output).
+                _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] Execute() returned {executeResult}, ExitCode={t.ExitCode}");
+                _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
 
                 // The above command logged a canonical warning, as well as a custom error.
                 engine.AssertLogContains("CS0168");
@@ -1007,9 +1020,13 @@ namespace Microsoft.Build.UnitTests
         {
             using var env = TestEnvironment.Create(_output);
 
+            // Larger gap between fast/slow delays and the timeout to keep the test
+            // robust on slow CI agents where the test process startup overhead can
+            // eat into the configured budgets and cause the "slow" path to finish
+            // before the timeout fires (issue #40).
             int fastDelayMilliseconds = 100;
-            int slowDelayMilliseconds = 5_000;
-            int timeoutMilliseconds = 2_000;
+            int slowDelayMilliseconds = 20_000;
+            int timeoutMilliseconds = 5_000;
 
             MockEngine3 engine = new();
 
@@ -1038,11 +1055,13 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 task.RepeatCount.ShouldBe(attempt);
-                result.ShouldBe(shouldSucceed);
+                result.ShouldBe(
+                    shouldSucceed,
+                    $"Attempt {attempt}/{repeats} expected success={shouldSucceed} but got {result}. ExitCode={task.ExitCode}, timeoutOnFirstExecution={timeoutOnFirstExecution}.");
 
                 if (shouldSucceed)
                 {
-                    task.ExitCode.ShouldBe(0);
+                    task.ExitCode.ShouldBe(0, $"Attempt {attempt}/{repeats} expected exit code 0.");
                 }
             }
         }
