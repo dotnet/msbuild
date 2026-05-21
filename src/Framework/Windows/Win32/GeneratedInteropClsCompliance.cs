@@ -89,6 +89,11 @@ namespace Windows.Win32.System.Com
     internal partial struct IErrorInfo
     {
     }
+
+    [CLSCompliant(false)]
+    internal partial struct IGlobalInterfaceTable
+    {
+    }
 }
 
 namespace Windows.Win32.System.Com.StructuredStorage
