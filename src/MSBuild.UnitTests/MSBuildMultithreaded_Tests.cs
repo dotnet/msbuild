@@ -148,5 +148,40 @@ namespace Microsoft.Build.Engine.UnitTests
 
             success.ShouldBeTrue();
         }
+
+        /// <summary>
+        /// Verifies that MSBUILDFORCEMULTITHREADED=1 propagates all the way to
+        /// BuildParameters.MultiThreaded so tasks observe true multi-threaded behavior,
+        /// even without the -mt switch on the command line.
+        /// </summary>
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariablePropagatesToBuildParameters()
+        {
+            string project = $@"
+<Project>
+    <UsingTask TaskName='EnvironmentIsolationTestTask' AssemblyFile='{typeof(EnvironmentIsolationTestTask).Assembly.Location}' />
+
+    <Target Name='Build'>
+        <EnvironmentIsolationTestTask IsMultithreadedMode='true' />
+    </Target>
+</Project>";
+            TransientTestFile projectFile = _env.CreateFile("main.proj", project);
+
+            // Set MSBUILDFORCEMULTITHREADED=1 in the env that the spawned MSBuild process inherits,
+            // and intentionally do NOT pass /mt on the command line.
+            _env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{projectFile.Path}\" /m /nodereuse:false",
+                out bool success,
+                false,
+                _output);
+
+            // If the env var really propagated to BuildParameters.MultiThreaded, the task
+            // observes TaskEnvironment isolated from the global environment (multi-threaded
+            // semantics) and the build succeeds.
+            success.ShouldBeTrue();
+        }
     }
 }

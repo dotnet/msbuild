@@ -163,5 +163,59 @@ namespace Microsoft.Build.UnitTests
             Assert.False(XMakeAttributes.TryMergeArchitectureValues(XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, notCurrentArchitecture, out mergedArchitecture));
             Assert.False(XMakeAttributes.TryMergeArchitectureValues(XMakeAttributes.MSBuildArchitectureValues.x64, XMakeAttributes.MSBuildArchitectureValues.x86, out mergedArchitecture));
         }
+
+        /// <summary>
+        /// When Runtime="NET" is specified and architecture is unspecified (null or "*"/"any") under
+        /// .NET Framework MSBuild, the explicit architecture should remain "*" (any) rather than being
+        /// pinned to the current process architecture. This avoids attempting to launch e.g. an x86
+        /// .NET task host from an x86 .NET Framework MSBuild process, which would fail because the
+        /// .NET SDK ships only x64/arm64 binaries (MSB4216). Bitness compatibility with the spawned
+        /// dotnet task host is handled by the existing IsAllowedBitnessMismatch tolerance on the
+        /// task host server side.
+        ///
+        /// Under .NET MSBuild the existing behavior is preserved: Runtime="NET" runs in-process so the
+        /// architecture resolves to the current process architecture, like any other runtime.
+        /// </summary>
+        [Fact]
+        public void GetExplicitMSBuildArchitecture_NetRuntimeUnspecifiedArchitecture()
+        {
+            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
+#if NETFRAMEWORK
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.any);
+            XMakeAttributes.GetExplicitMSBuildArchitecture(null, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.any);
+#else
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(currentArchitecture);
+            XMakeAttributes.GetExplicitMSBuildArchitecture(null, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(currentArchitecture);
+#endif
+            // Architecture="CurrentArchitecture" is an explicit user request to pin to the current process
+            // architecture; it is honored on every TFM, including .NET Framework with Runtime="NET".
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(currentArchitecture);
+        }
+
+        /// <summary>
+        /// When Runtime="NET" is specified and an explicit architecture is provided, the explicit architecture
+        /// should be honored (e.g. to allow opting into a specific NET task host architecture).
+        /// </summary>
+        [Fact]
+        public void GetExplicitMSBuildArchitecture_NetRuntimeExplicitArchitecture_ReturnsExplicitArchitecture()
+        {
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.x64, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.x64);
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.x86, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.x86);
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.arm64, XMakeAttributes.MSBuildRuntimeValues.net).ShouldBe(XMakeAttributes.MSBuildArchitectureValues.arm64);
+        }
+
+        /// <summary>
+        /// For non-NET runtimes the explicit architecture resolution should match the current process architecture
+        /// when the architecture is unspecified, preserving the existing behavior.
+        /// </summary>
+        [Fact]
+        public void GetExplicitMSBuildArchitecture_NonNetRuntimeUnspecifiedArchitecture_ReturnsCurrentProcessArchitecture()
+        {
+            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
+
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildRuntimeValues.clr4).ShouldBe(currentArchitecture);
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildRuntimeValues.clr2).ShouldBe(currentArchitecture);
+            XMakeAttributes.GetExplicitMSBuildArchitecture(XMakeAttributes.MSBuildArchitectureValues.any, runtime: null).ShouldBe(currentArchitecture);
+        }
     }
 }
