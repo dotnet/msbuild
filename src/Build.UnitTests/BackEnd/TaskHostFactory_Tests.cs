@@ -87,7 +87,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     try
                     {
                         Process taskHostNode = Process.GetProcessById(pid);
-                        taskHostNode.WaitForExit(3000).ShouldBeTrue("The process with taskHostNode is still running.");
+
+                        // The task host should exit shortly after the build completes. Use a generous
+                        // timeout because slow CI agents have been observed to take up to ~10s for the
+                        // child process to drain stdio and exit (issue #43).
+                        const int TaskHostExitTimeoutMs = 15000;
+                        bool exited = taskHostNode.WaitForExit(TaskHostExitTimeoutMs);
+                        exited.ShouldBeTrue(
+                            $"TaskHost (pid={pid}) was still running after {TaskHostExitTimeoutMs}ms. HasExited={taskHostNode.HasExited}");
                     }
 
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
