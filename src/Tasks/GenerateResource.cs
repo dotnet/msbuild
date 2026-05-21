@@ -989,18 +989,28 @@ namespace Microsoft.Build.Tasks
                             // We only want to parse data nodes,
                             // the mimetype attribute gives the serializer
                             // that's requested.
-                            if (reader.LocalName.Equals("data"))
+                            if (reader.LocalName.Equals("data") || reader.LocalName.Equals("metadata"))
                             {
                                 if (reader["mimetype"] != null)
                                 {
                                     dangerous = true;
                                 }
-                            }
-                            else if (reader.LocalName.Equals("metadata"))
-                            {
-                                if (reader["mimetype"] != null)
+                                else
                                 {
-                                    dangerous = true;
+                                    // ResXFileRef can reference external files
+                                    string typeAttribute = reader["type"];
+                                    if (typeAttribute != null)
+                                    {
+                                        if (typeAttribute.IndexOf("ResXFileRef", StringComparison.Ordinal) >= 0)
+                                        {
+                                            dangerous = true;
+                                        }
+                                        else if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+                                        {
+                                            // Require any typed entry on a "Mark of the web" to be unblocked by user
+                                            dangerous = true;
+                                        }
+                                    }
                                 }
                             }
                         }
