@@ -41,6 +41,12 @@ namespace Microsoft.Build.Tasks
         public ITaskItem OutputEntryPoint { get; set; }
         #endregion
 
+        // Suppress MSBuildTask0005 around Execute because the transitive analyzer reports
+        // on the task entry point, not on the LauncherBuilder.Build call below. The
+        // LauncherBuilder.Build paths are safe here:
+        // File.OpenRead is in a dead branch; File.Copy/Get/SetAttributes/CreateDirectory all
+        // receive absolute paths derived from AbsolutePath.Value.
+#pragma warning disable MSBuildTask0005
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -82,12 +88,7 @@ namespace Microsoft.Build.Tasks
                 entryPointFileName = AssemblyName;
             }
 
-            // Suppress MSBuildTask0005: the transitive unsafe-API calls reached via LauncherBuilder.Build
-            // (File.OpenRead is in a dead branch; File.Copy/Get/SetAttributes/CreateDirectory all
-            // receive absolute paths derived from AbsolutePath.Value).
-#pragma warning disable MSBuildTask0005
             BuildResults results = launcherBuilder.Build(entryPointFileName, outputPath);
-#pragma warning restore MSBuildTask0005
 
             BuildMessage[] messages = results.Messages;
             if (messages != null)
@@ -114,5 +115,6 @@ namespace Microsoft.Build.Tasks
 
             return !Log.HasLoggedErrors;
         }
+#pragma warning restore MSBuildTask0005
     }
 }
