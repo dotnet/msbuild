@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
                                             ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
                                             : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
 
-            // TODO(jankratochvilcz/msbuild#39): remove diagnostics once root cause is fixed.
+            // TODO: remove diagnostics once root cause is fixed.
             // Likely-suspect: race in ToolTask's async pipe drain — Execute() may return
             // before stdout EOF, so the canonical-error parser misses the line. Confirmed
             // signal would be Errors==0 but Log contains the echoed command. Engine is
@@ -601,8 +601,8 @@ namespace Microsoft.Build.UnitTests
                                                 ? $"/C type \"{tempFile}\""
                                                 : $"-c \"cat \'{tempFile}\'\"";
 
-                // TODO(jankratochvilcz/msbuild#38): remove diagnostics once root cause is fixed.
-                // Likely-suspect: same async-pipe-drain race as #39 — Execute() returns
+                // TODO: remove diagnostics once root cause is fixed.
+                // Likely-suspect: same async-pipe-drain race seen in HandleExecutionErrorsWhenToolLogsError — Execute() returns
                 // before the cat/type output is flushed through ToolTask's stdout reader,
                 // so engine.Log only contains the cmd echo. MessageCount==0 with non-empty
                 // exit confirms truncation; MessageCount>0 with missing strings means a
@@ -615,7 +615,15 @@ namespace Microsoft.Build.UnitTests
                     $"[ToolTaskCanChangeCanonicalErrorFormat] Execute()={executeResult}, ExitCode={t.ExitCode}, " +
                     $"Errors={engine.Errors}, Warnings={engine.Warnings}, MessageCount={engine.Messages}, " +
                     $"elapsedMs={sw.ElapsedMilliseconds}");
-                _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
+
+                // Only dump engine.Log when it looks suspicious (no messages routed through, or
+                // a non-zero exit code). Keeping the full log out of the success path avoids
+                // bloating CI output for every passing run while still capturing detail when
+                // the async-pipe-drain race actually fires.
+                if (engine.Messages == 0 || t.ExitCode != 0)
+                {
+                    _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
+                }
 
                 // The above command logged a canonical warning, as well as a custom error.
                 engine.AssertLogContains("CS0168");
@@ -1039,7 +1047,7 @@ namespace Microsoft.Build.UnitTests
             // Larger gap between fast/slow delays and the timeout to keep the test
             // robust on slow CI agents where the test process startup overhead can
             // eat into the configured budgets and cause the "slow" path to finish
-            // before the timeout fires (issue #40).
+            // before the timeout fires.
             int fastDelayMilliseconds = 100;
             int slowDelayMilliseconds = 20_000;
             int timeoutMilliseconds = 5_000;
@@ -1064,11 +1072,11 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 sw.Stop();
 
-                // TELEMETRY (jankratochvilcz/msbuild#40): log elapsedMs alongside the
-                // configured Timeout so a follow-up PR can shrink the bumped budgets
-                // (slowDelay=20s, timeout=5s) back to tighter values once we see the
-                // actual distribution. The "slow" path uses `ping -n 21` (~20s on
-                // Windows); the "fast" path uses `ping -n 2` (~1s, ping's minimum).
+                // TELEMETRY: log elapsedMs alongside the configured Timeout so a follow-up
+                // PR can shrink the bumped budgets (slowDelay=20s, timeout=5s) back to tighter
+                // values once we see the actual distribution. The underlying ToolTaskThatSleeps
+                // uses `ping -n N 127.0.0.1` on Windows and `sleep` on Unix-like platforms; the
+                // "slow" delay drives the timeout path and the "fast" delay drives success.
                 _output.WriteLine(
                     $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, " +
                     $"exitCode={task.ExitCode}, elapsedMs={sw.ElapsedMilliseconds}, configuredTimeoutMs={configuredTimeout}, " +
