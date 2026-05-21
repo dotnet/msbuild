@@ -621,7 +621,7 @@
       </trans-unit>
       <trans-unit id="General.FailedToCanonicalizePath">
         <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
-        <target state="new">Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</target>
+        <target state="translated">"." 및 ".." 세그먼트를 확인하여 경로 "{0}"을(를) 정규화할 수 없습니다. {1}. 경로가 있는 그대로 사용됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1990,7 +1990,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
         <source>Application Configuration file path cannot be empty.</source>
-        <target state="new">Application Configuration file path cannot be empty.</target>
+        <target state="translated">애플리케이션 구성 파일 경로는 비워 둘 수 없습니다.</target>
         <note>This message can be used as the {1} in MSB3249</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
