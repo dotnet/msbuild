@@ -91,13 +91,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         // Capture identity up-front so a PID-reuse race (the OS recycled this
                         // pid to an unrelated process between build-end and GetProcessById) is
                         // visible in the failure diagnostic rather than looking like the task
-                        // host hung. See jankratochvilcz/msbuild#43.
+                        // host hung.
                         string capturedName = SafeGetProcessField(() => taskHostNode.ProcessName);
                         string capturedStart = SafeGetProcessField(() => taskHostNode.StartTime.ToString("O", CultureInfo.InvariantCulture));
 
                         // The task host should exit shortly after the build completes. Use a generous
                         // timeout because slow CI agents have been observed to take up to ~10s for the
-                        // child process to drain stdio and exit (issue #43).
+                        // child process to drain stdio and exit.
                         // TELEMETRY: elapsedMs is logged so a future iteration can tune this back down
                         // to a tight-but-safe value. If observed elapsed never approaches the timeout,
                         // shrink TaskHostExitTimeoutMs in a follow-up PR.
@@ -109,9 +109,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             $"TaskHostFactory wait: pid={pid} processName={capturedName} startTime={capturedStart} " +
                             $"exited={exited} elapsedMs={sw.ElapsedMilliseconds} timeoutMs={TaskHostExitTimeoutMs}");
 
+                        // Wrap HasExited in SafeGetProcessField — Process.HasExited can throw on
+                        // access-denied / transient handle failures, and the message is evaluated
+                        // eagerly even when the assertion passes.
                         exited.ShouldBeTrue(
                             $"TaskHost (pid={pid}, name={capturedName}, started={capturedStart}) was still running after {TaskHostExitTimeoutMs}ms. " +
-                            $"elapsedMs={sw.ElapsedMilliseconds} HasExited={taskHostNode.HasExited}");
+                            $"elapsedMs={sw.ElapsedMilliseconds} HasExited={SafeGetProcessField(() => taskHostNode.HasExited.ToString())}");
                     }
 
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
