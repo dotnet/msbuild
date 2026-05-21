@@ -34,6 +34,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Absolutizes <paramref name="sdkToolsPath"/> so paths subsequently built from it
+        /// (SdkToolsPath + architecture-specific directory + ToolExe) are absolute.
+        /// Returns the input unchanged when it is null or empty.
+        /// </summary>
+        internal static string AbsolutizeSdkToolsPath(this TaskEnvironment taskEnvironment, string sdkToolsPath)
+            => string.IsNullOrEmpty(sdkToolsPath) ? sdkToolsPath : taskEnvironment.GetAbsolutePath(sdkToolsPath).Value;
+
+        /// <summary>
         /// Converts an array of <see cref="AbsolutePath"/> to a string array.
         /// Returns <see langword="null"/> if <paramref name="paths"/> is <see langword="null"/>.
         /// </summary>

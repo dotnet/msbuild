@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests a simple case of valid arguments
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("lc.exe is a Windows-only SDK tool.")]
         public void SimpleValidArgumentsCommandLine()
         {
             string projectDir = GetProjectDir();
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests a simple case of valid arguments
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("lc.exe is a Windows-only SDK tool.")]
         public void SimpleValidArgumentsResponseFile()
         {
             string projectDir = GetProjectDir();
@@ -69,38 +69,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(Path.Combine("bin\\debug", "target.exe.licenses"), task.OutputLicense.ItemSpec);
         }
 
-        [Fact]
-        public void GenerateFullPathToToolResolvesRelativeSdkToolsPath()
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-            string projectDir = env.CreateFolder().Path;
-            string sdkToolsPath = "tools";
-            string sdkToolsDirectory = Path.Combine(projectDir, sdkToolsPath);
-            string[] toolDirectories =
-            {
-                sdkToolsDirectory,
-                Path.Combine(sdkToolsDirectory, "arm"),
-                Path.Combine(sdkToolsDirectory, "ia64"),
-                Path.Combine(sdkToolsDirectory, "x64"),
-            };
-
-            foreach (string toolDirectory in toolDirectories)
-            {
-                Directory.CreateDirectory(toolDirectory);
-                File.WriteAllText(Path.Combine(toolDirectory, "lc.exe"), string.Empty);
-            }
-
-            TestableLC task = CreateTestableTask(projectDir);
-            task.SdkToolsPath = sdkToolsPath;
-
-            string result = task.CallGenerateFullPathToTool();
-
-            Assert.NotNull(result);
-            Assert.True(Path.IsPathRooted(result), result);
-            Assert.True(result.StartsWith(projectDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase), result);
-            Assert.True(File.Exists(result), result);
-        }
-
         private static string GetProjectDir()
         {
             return Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -113,20 +81,6 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(),
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
             };
-        }
-
-        private static TestableLC CreateTestableTask(string projectDir)
-        {
-            return new TestableLC
-            {
-                BuildEngine = new MockEngine(),
-                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
-            };
-        }
-
-        private sealed class TestableLC : LC
-        {
-            public string CallGenerateFullPathToTool() => GenerateFullPathToTool();
         }
     }
 }

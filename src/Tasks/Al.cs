@@ -318,9 +318,7 @@ namespace Microsoft.Build.Tasks
                                         "x64".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? ProcessorArchitecture.AMD64 : // x64 maps to AMD64 in GeneratePathToTool
                                         ProcessorArchitecture.CurrentProcessArchitecture;
 
-                // Absolutize SdkToolsPath up front so the path GeneratePathToTool builds
-                // (SdkToolsPath + architecture-specific directory + ToolExe) is already absolute.
-                string sdkToolsPath = string.IsNullOrEmpty(SdkToolsPath) ? SdkToolsPath : TaskEnvironment.GetAbsolutePath(SdkToolsPath).Value;
+                string sdkToolsPath = TaskEnvironment.AbsolutizeSdkToolsPath(SdkToolsPath);
 
                 pathToTool = SdkToolsPathUtility.GeneratePathToTool(
                     SdkToolsPathUtility.FileInfoExists,
@@ -331,7 +329,7 @@ namespace Microsoft.Build.Tasks
                     true);
             }
 
-            return pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
 
         /// <summary>
