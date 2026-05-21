@@ -85,13 +85,6 @@ internal static class CommunicationsUtilities
 
 #if NETFRAMEWORK
     /// <summary>
-    ///  Set environment variable P/Invoke.
-    /// </summary>
-    [DllImport("kernel32.dll", EntryPoint = "SetEnvironmentVariable", SetLastError = true, CharSet = CharSet.Unicode)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool SetEnvironmentVariableNative(string name, string? value);
-
-    /// <summary>
     ///  Sets an environment variable using P/Invoke to workaround the .NET Framework BCL implementation.
     /// </summary>
     /// <remarks>
@@ -100,7 +93,7 @@ internal static class CommunicationsUtilities
     /// </remarks>
     internal static void SetEnvironmentVariable(string name, string? value)
     {
-        if (!SetEnvironmentVariableNative(name, value))
+        if (!PInvoke.SetEnvironmentVariable(name, value))
         {
             throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
         }
