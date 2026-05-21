@@ -26,6 +26,7 @@ concurrency:
 
 env:
   BINLOG_MCP_VERSION: '1.0.0-preview.26268.3'
+  NUGET_MCP_VERSION: '1.4.3'
 
 timeout-minutes: 30
 
@@ -58,6 +59,7 @@ steps:
       BINLOG=$(find artifacts/log -name '*.binlog' -type f -printf '%T@ %p\n' 2>/dev/null \
         | sort -rn | head -1 | cut -d' ' -f2-)
       if [ -n "$BINLOG" ] && [ -f "$BINLOG" ]; then
+        BINLOG=$(realpath "$BINLOG")
         echo "found=true"   >> "$GITHUB_OUTPUT"
         echo "path=$BINLOG" >> "$GITHUB_OUTPUT"
       else
@@ -83,6 +85,11 @@ steps:
         --version "$BINLOG_MCP_VERSION"
       echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
 
+  - name: Install NuGet MCP Server
+    if: steps.build.outcome == 'failure' && steps.find-binlog.outputs.found == 'true'
+    continue-on-error: true
+    run: dotnet tool install --global NuGet.Mcp.Server --version "$NUGET_MCP_VERSION"
+
   - name: Dump binlog as JSON
     if: steps.build.outcome == 'failure' && steps.find-binlog.outputs.found == 'true'
     continue-on-error: true
@@ -91,7 +98,7 @@ steps:
     run: |
       mkdir -p /tmp/binlog-data
       timeout 180 dotnet run --project .github/workflows/scripts/DumpBinlog -- \
-        "$GITHUB_WORKSPACE/$BINLOG_PATH" \
+        "$BINLOG_PATH" \
         /tmp/binlog-data
 
   # `pull_request_comment` events use the `issues` event payload, so
@@ -137,6 +144,7 @@ tools:
     - "uniq"
     - "ls"
     - "find"
+    - "NuGet.Mcp.Server"
 
 safe-outputs:
   add-comment:

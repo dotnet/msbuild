@@ -39,7 +39,7 @@ failed.
      start by `cat`ing those files via the `bash` tool.
    - A reminder that the parent workflow `noop`s immediately and that the
      sub-agent itself is responsible for calling `add_comment` (summary) and
-     `create_pull_request_review_comment` (inline ```suggestion blocks).
+     `create_pull_request_review_comment` (inline `suggestion` blocks).
    - A reminder that `submit_pull_request_review` is **not** a safe output
      for this workflow — inline comments stand alone.
 
