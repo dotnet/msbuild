@@ -50,9 +50,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem OutputAppConfigFile { get; set; }
 
-        /// <summary>
-        /// Provides access to safe task environment APIs for path resolution.
-        /// </summary>
+        /// <inheritdoc/>
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
@@ -111,14 +109,14 @@ namespace Microsoft.Build.Tasks
             runtimeNode.Add(redirectNodes);
 
             var writeOutput = true;
-            var outputAppConfigFile = TaskEnvironment.GetAbsolutePath(OutputAppConfigFile.ItemSpec);
+            AbsolutePath outputAppConfigFile = TaskEnvironment.GetAbsolutePath(OutputAppConfigFile.ItemSpec);
             var outputExists = FileSystems.Default.FileExists(outputAppConfigFile);
 
             if (outputExists)
             {
                 try
                 {
-                    var outputDoc = LoadAppConfig(OutputAppConfigFile);
+                    var outputDoc = LoadAppConfig(outputAppConfigFile);
                     if (outputDoc.ToString() == doc.ToString())
                     {
                         writeOutput = false;
@@ -343,17 +341,25 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
-                using (XmlReader xr = XmlReader.Create(File.OpenRead(TaskEnvironment.GetAbsolutePath(appConfigItem.ItemSpec)), xrs))
-                {
-                    document = XDocument.Load(xr);
-                }
+                document = LoadAppConfig(TaskEnvironment.GetAbsolutePath(appConfigItem.ItemSpec));
+            }
 
-                if (document.Root == null || document.Root.Name != "configuration")
-                {
-                    Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");
-                    return null;
-                }
+            return document;
+        }
+
+        private XDocument LoadAppConfig(AbsolutePath appConfigFile)
+        {
+            XDocument document;
+            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+            using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigFile), xrs))
+            {
+                document = XDocument.Load(xr);
+            }
+
+            if (document.Root == null || document.Root.Name != "configuration")
+            {
+                Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");
+                return null;
             }
 
             return document;
