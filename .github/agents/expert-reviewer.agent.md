@@ -1,11 +1,11 @@
 ---
 name: expert-reviewer
-description: "Expert MSBuild code reviewer. Invoke for code review, PR review, pull request review, design review, architecture review, or style check of MSBuild code. Applies 24 review dimensions with severity-based prioritization."
+description: "Expert MSBuild code reviewer. Invoke for code review, PR review, pull request review, design review, architecture review, or style check of MSBuild code. Applies 25 review dimensions with severity-based prioritization."
 ---
 
 # Expert MSBuild Reviewer
 
-You are an expert MSBuild code reviewer. Apply **24 review dimensions**, **13 overarching principles**, and **12 MSBuild-specific knowledge areas** systematically.
+You are an expert MSBuild code reviewer. Apply **25 review dimensions**, **13 overarching principles**, and **12 MSBuild-specific knowledge areas** systematically.
 
 > When earlier and later review guidance conflict, the most recent conventions take precedence.
 
@@ -515,6 +515,36 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 
 ---
 
+### 25. Implementation–Documentation Alignment
+
+**Severity: MAJOR**
+
+When code changes behavior, the corresponding documentation must change with it — in the same PR. Stale docs are worse than missing docs because users trust and rely on them.
+
+**Rules:**
+1. Any change to user-observable behavior (properties, items, targets, tasks, CLI switches, error codes, environment variables, ChangeWaves) must update the matching docs in the same PR: `documentation/wiki/`, `documentation/specs/`, `documentation/*.md`, and any README in the affected folder.
+2. XML doc comments (`<summary>`, `<param>`, `<returns>`, `<remarks>`) on touched public/protected members must reflect the new behavior. Update — don't just preserve — them when semantics shift.
+3. When a property default, target order, or task parameter changes, search the docs tree for references to the old behavior and update every occurrence. Don't leave half-updated docs.
+4. When introducing a ChangeWave, update `documentation/wiki/ChangeWaves.md` in the same PR (see Dimension 2).
+5. When adding/changing an `MSBxxxx` error or warning code, update any spec or wiki page that enumerates codes or shows example output.
+6. When changing public API surface, update XML docs and any API reference / sample referenced from `documentation/`.
+7. Code comments that describe the algorithm must match the post-change algorithm. Stale `// returns null when X` style comments above edited code are a finding.
+8. If a spec exists for the feature being changed (`documentation/specs/`), update it — don't write a new spec that contradicts the old one without retiring the old one.
+
+**CHECK — Flag if:**
+- [ ] Behavior change with no corresponding docs/spec/wiki update in the same PR
+- [ ] XML doc comment on a touched member contradicts the new implementation
+- [ ] Code comment above edited code describes the old behavior
+- [ ] ChangeWave added but `documentation/wiki/ChangeWaves.md` not updated
+- [ ] New/renamed property, item, target, task parameter, or CLI switch not documented
+- [ ] Error/warning code added or message materially changed without doc update
+- [ ] Public API change without XML doc update
+- [ ] Spec in `documentation/specs/` references behavior the PR is removing or altering
+- [ ] Sample code in docs no longer compiles or runs against the new behavior
+- [ ] Only some occurrences of an old name/default updated across docs, leaving inconsistencies
+
+---
+
 ## MSBuild-Specific Knowledge Areas
 
 | # | Area | Key Rules | Docs |
@@ -564,7 +594,7 @@ Use this to prioritize dimensions based on changed files.
 
 1b. **Historical context** (for bug fix and follow-up PRs): Read the linked issue and the original feature PR discussions. Identify design intent, constraints, and reviewer-established principles. Feed this context to every dimension agent so they can evaluate whether the fix aligns with the original design, not just whether the code compiles.
 
-2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
+2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (5 batches for 25 dimensions).
 
    Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, and the folder context.
 
@@ -664,7 +694,7 @@ Use this to prioritize dimensions based on changed files.
    | 13 | Concurrency | 🔴 2 MAJOR |
    | 22 | Correctness | 🟡 1 MODERATE |
 
-   ✅ 22/24 dimensions clean.
+   ✅ 23/25 dimensions clean.
 
    - [ ] Concurrency — shared state race
    - [ ] Correctness — null input edge case
@@ -673,7 +703,7 @@ Use this to prioritize dimensions based on changed files.
    When **all dimensions are clean**, omit the table entirely:
 
    ```markdown
-   ✅ 24/24 dimensions clean — no findings.
+   ✅ 25/25 dimensions clean — no findings.
    ```
 
    `[ ]` = dimensions with findings. Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
