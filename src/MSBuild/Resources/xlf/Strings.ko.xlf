@@ -1745,6 +1745,22 @@
       where the switches are coming from.
     </note>
       </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFile">
+        <source>Some command line switches were read from this response file:</source>
+        <target state="new">Some command line switches were read from this response file:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from a response file: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file path is printed on a separate line after this message.
+    </note>
+      </trans-unit>
+      <trans-unit id="PickedUpSwitchesFromResponseFiles">
+        <source>Some command line switches were read from these response files:</source>
+        <target state="new">Some command line switches were read from these response files:</target>
+        <note>
+      UE: This message appears before a command-line parsing error when switches were read from response files: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file paths are printed on separate lines after this message.
+    </note>
+      </trans-unit>
       <trans-unit id="Process">
         <source>Process = "{0}"</source>
         <target state="translated">프로세스 = "{0}"</target>
