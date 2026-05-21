@@ -44,6 +44,34 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that LC resolves a relative SdkToolsPath against the task project directory before probing for lc.exe.
+        /// </summary>
+        [Fact]
+        public void GenerateFullPathToToolResolvesRelativeSdkToolsPath()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectDir = env.CreateFolder().Path;
+            string sdkToolsPath = "tools";
+            string sdkToolsDirectory = Path.Combine(projectDir, sdkToolsPath);
+            string processorSpecificToolDirectory = SdkToolsPathUtility.GetProcessorSpecificToolDirectory(ProcessorArchitecture.CurrentProcessArchitecture, sdkToolsDirectory);
+
+            string expectedToolPath = Path.Combine(processorSpecificToolDirectory, "lc.exe");
+            Directory.CreateDirectory(processorSpecificToolDirectory);
+            File.WriteAllText(expectedToolPath, string.Empty);
+
+            TestableLC task = CreateTestableTask(projectDir);
+            task.SdkToolsPath = sdkToolsPath;
+
+            string result = task.CallGenerateFullPathToTool();
+
+            Assert.NotNull(result);
+            Assert.True(Path.IsPathRooted(result), result);
+            Assert.True(result.StartsWith(projectDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase), result);
+            Assert.Equal(expectedToolPath, result, StringComparer.OrdinalIgnoreCase);
+            Assert.True(File.Exists(result), result);
+        }
+
+        /// <summary>
         /// Tests a simple case of valid arguments
         /// </summary>
         [WindowsOnlyFact("lc.exe is a Windows-only SDK tool.")]
@@ -81,6 +109,23 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(),
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
             };
+        }
+
+        private static TestableLC CreateTestableTask(string projectDir)
+        {
+            return new TestableLC
+            {
+                BuildEngine = new MockEngine(),
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
+            };
+        }
+
+        private sealed class TestableLC : LC
+        {
+            internal string CallGenerateFullPathToTool()
+            {
+                return GenerateFullPathToTool();
+            }
         }
     }
 }
