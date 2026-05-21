@@ -172,6 +172,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.StandardInput.Dispose();
 
                 TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
+                Stopwatch sw = Stopwatch.StartNew();
                 if (Traits.Instance.DebugUnitTests)
                 {
                     p.WaitForExit();
@@ -184,13 +185,31 @@ namespace Microsoft.Build.UnitTests.Shared
                     throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than {timeout.TotalSeconds} sec.");
                 }
 
+                // Capture elapsed at process exit, before the post-exit drain below, so the
+                // telemetry below reports the budget-relevant time only (the drain is bookkeeping).
+                long exitElapsedMs = sw.ElapsedMilliseconds;
+
                 // We need the WaitForExit call without parameters because our processing of output/error streams is not synchronous.
                 // See https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit?view=net-6.0#system-diagnostics-process-waitforexit(system-int32).
                 // The overload WaitForExit() waits for the error and output to be handled. The WaitForExit(int timeout) overload does not, so we could lose the data.
                 p.WaitForExit();
+                sw.Stop();
 
                 pid = p.Id;
                 successfulExit = p.ExitCode == 0;
+
+                // Telemetry: log actual elapsed time so callers tuning their timeouts can see
+                // how close to the budget we ran. In DebugUnitTests mode the budget is not
+                // enforced (WaitForExit without timeout above), so the budget/headroom fields
+                // would be misleading and are omitted.
+                if (Traits.Instance.DebugUnitTests)
+                {
+                    WriteOutput($"Process {pid} exited in {exitElapsedMs}ms (DebugUnitTests: budget not enforced)");
+                }
+                else
+                {
+                    WriteOutput($"Process {pid} exited in {exitElapsedMs}ms (budget {timeoutMilliseconds}ms, headroom {timeoutMilliseconds - exitElapsedMs}ms)");
+                }
             }
 
             if (attachProcessId)
