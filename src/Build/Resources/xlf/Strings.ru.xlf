@@ -590,6 +590,11 @@
         <target state="translated">Идет загрузка следующего подключаемого модуля кэша проектов: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="new">Enabled loggers: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Уровень детализации журнала: {0}.</target>
