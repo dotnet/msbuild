@@ -120,7 +120,7 @@ namespace Microsoft.Build.Tasks
                 return pathToTool;
             }
 
-            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(pathToTool);
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(pathToTool, Log);
             return absolutePath.Value ?? pathToTool;
         }
 
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Tasks
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                keyFileForRead = TaskEnvironment.GetAbsolutePathIfValid(KeyFile);
+                keyFileForRead = TaskEnvironment.GetAbsolutePathIfValid(KeyFile, Log);
 
                 if (keyFileForRead.Value != null && FileSystems.Default.FileExists(keyFileForRead))
                 {
@@ -275,14 +275,16 @@ namespace Microsoft.Build.Tasks
 
         private bool DirectoryExists(string path)
         {
-            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(path);
+            // Match the original Directory.Exists semantics: invalid paths return false rather than throwing.
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(path, Log);
             return absolutePath.Value != null && FileSystems.Default.DirectoryExists(absolutePath);
         }
 
         private bool FileInfoExists(string path)
         {
-            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathIfValid(path);
-            return absolutePath.Value != null && SdkToolsPathUtility.FileInfoExists(absolutePath);
+            // Match the original FileInfo semantics: null/empty/invalid paths throw rather than silently returning false.
+            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePathAllowEmpty(path);
+            return SdkToolsPathUtility.FileInfoExists(absolutePath);
         }
 
         #endregion // ToolTask Members

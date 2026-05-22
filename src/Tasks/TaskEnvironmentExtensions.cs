@@ -49,9 +49,7 @@ namespace Microsoft.Build.Tasks
             var result = new AbsolutePath[paths.Length];
             for (int i = 0; i < paths.Length; i++)
             {
-                result[i] = string.IsNullOrEmpty(paths[i])
-                    ? new AbsolutePath(paths[i], ignoreRootedCheck: true)
-                    : taskEnvironment.GetAbsolutePath(paths[i]);
+                result[i] = taskEnvironment.GetAbsolutePathAllowEmpty(paths[i]);
             }
 
             return result;
@@ -59,9 +57,26 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Absolutizes <paramref name="path"/> using <see cref="TaskEnvironment.GetAbsolutePath"/>.
-        /// Returns <see langword="default"/> if <paramref name="path"/> is null, empty, or invalid.
+        /// Null or empty input is passed through unchanged (wrapped as an <see cref="AbsolutePath"/>
+        /// with <c>ignoreRootedCheck</c>) rather than being treated as invalid; this preserves the
+        /// original semantics for callers that want downstream APIs to throw on null/empty/invalid
+        /// paths instead of silently short-circuiting.
         /// </summary>
-        internal static AbsolutePath GetAbsolutePathIfValid(this TaskEnvironment taskEnvironment, string path)
+        internal static AbsolutePath GetAbsolutePathAllowEmpty(this TaskEnvironment taskEnvironment, string path)
+        {
+            return string.IsNullOrEmpty(path)
+                ? new AbsolutePath(path, ignoreRootedCheck: true)
+                : taskEnvironment.GetAbsolutePath(path);
+        }
+
+        /// <summary>
+        /// Absolutizes <paramref name="path"/> using <see cref="TaskEnvironment.GetAbsolutePath"/>.
+        /// Returns <see langword="default"/> if <paramref name="path"/> is null, empty, or invalid.
+        /// When the path is invalid (i.e. <see cref="TaskEnvironment.GetAbsolutePath"/> throws
+        /// <see cref="ArgumentException"/>) and <paramref name="log"/> is supplied, a low-importance
+        /// diagnostic is logged so the swallowed failure is still discoverable.
+        /// </summary>
+        internal static AbsolutePath GetAbsolutePathIfValid(this TaskEnvironment taskEnvironment, string path, TaskLoggingHelper? log = null)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -72,8 +87,9 @@ namespace Microsoft.Build.Tasks
             {
                 return taskEnvironment.GetAbsolutePath(path);
             }
-            catch (ArgumentException)
+            catch (ArgumentException e)
             {
+                log?.LogMessageFromResources(MessageImportance.Low, "General.FailedToAbsolutizePath", path, e.Message);
                 return default;
             }
         }
