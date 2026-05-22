@@ -363,19 +363,19 @@ namespace Microsoft.Build.Tasks
             Marshal.Copy((IntPtr)publicKeyPtr, publicKey, 0, (int)publicKeyLength);
             assemblyAttributes.PublicHexKey = BitConverter.ToString(publicKey).Replace("-", string.Empty);
 
-            assemblyAttributes.Description = GetStringCustomAttribute(assemblyScope, "System.Reflection.AssemblyDescriptionAttribute");
-            assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
-            var guid = GetStringCustomAttribute(assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
+            assemblyAttributes.Description = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Reflection.AssemblyDescriptionAttribute");
+            assemblyAttributes.TargetFrameworkMoniker = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.Versioning.TargetFrameworkAttribute");
+            var guid = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.InteropServices.GuidAttribute");
             if (!string.IsNullOrEmpty(guid))
             {
-                string importedFromTypeLibString = GetStringCustomAttribute(assemblyScope, "System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
+                string importedFromTypeLibString = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
                 if (!string.IsNullOrEmpty(importedFromTypeLibString))
                 {
                     assemblyAttributes.IsImportedFromTypeLib = true;
                 }
                 else
                 {
-                    string primaryInteropAssemblyString = GetStringCustomAttribute(assemblyScope, "System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
+                    string primaryInteropAssemblyString = GetStringCustomAttribute(import2.Pointer, assemblyScope, "System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
                     assemblyAttributes.IsImportedFromTypeLib = !string.IsNullOrEmpty(primaryInteropAssemblyString);
                 }
             }
@@ -390,15 +390,16 @@ namespace Microsoft.Build.Tasks
             return assemblyAttributes;
         }
 
-        private string GetStringCustomAttribute(MdToken assemblyScope, string attributeName)
+        // Takes a borrowed IMetaDataImport2* so callers in a hot path (GetAssemblyMetadata's
+        // 4+ attribute lookups) can reuse a single GIT round-trip instead of paying one per call.
+        private string GetStringCustomAttribute(IMetaDataImport2* import2, MdToken assemblyScope, string attributeName)
         {
             HRESULT hr;
-            void* data;
-            uint valueLen;
-            using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+            void* data = null;
+            uint valueLen = 0;
             fixed (char* pName = attributeName)
             {
-                hr = import2.Pointer->GetCustomAttributeByName(assemblyScope, pName, &data, &valueLen);
+                hr = import2->GetCustomAttributeByName(assemblyScope, pName, &data, &valueLen);
             }
 
             if (hr == HRESULT.S_OK)
@@ -430,7 +431,8 @@ namespace Microsoft.Build.Tasks
                     asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).ThrowOnFailure();
                 }
 
-                string frameworkNameAttribute = GetStringCustomAttribute(assemblyScope, s_targetFrameworkAttribute);
+                using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+                string frameworkNameAttribute = GetStringCustomAttribute(import2.Pointer, assemblyScope, s_targetFrameworkAttribute);
                 if (!string.IsNullOrEmpty(frameworkNameAttribute))
                 {
                     frameworkAttribute = new FrameworkName(frameworkNameAttribute);

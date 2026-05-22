@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 #else
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Tasks.Metadata;
 using Windows.Win32;
@@ -335,20 +334,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return r._assemblyImport is not null ? r : null;
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.Build.Tasks.Metadata.IMetaDataImport2.GetCustomAttributeByName", Justification = "We verify the valueLen, we don't care what the return value is in this case")]
         public bool HasAssemblyAttribute(string name)
         {
             using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
             using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
             MdAssembly assemblyScope;
             asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).ThrowOnFailure();
-            void* valuePtr;
-            uint valueLen;
+
+            // The CLR returns S_OK with pcbData=size when the attribute is present, S_FALSE with
+            // pcbData=0 when it is absent, and an error HRESULT otherwise. Treat anything that is
+            // not S_OK as "not present" so failure paths cannot leave valueLen indeterminate.
+            void* valuePtr = null;
+            uint valueLen = 0;
+            HRESULT hr;
             fixed (char* pName = name)
             {
-                import2.Pointer->GetCustomAttributeByName(assemblyScope, pName, &valuePtr, &valueLen);
+                hr = import2.Pointer->GetCustomAttributeByName(assemblyScope, pName, &valuePtr, &valueLen);
             }
-            return valueLen != 0;
+            return hr == HRESULT.S_OK && valueLen != 0;
         }
 
         public string Name => Attributes[nameof(Name)];
