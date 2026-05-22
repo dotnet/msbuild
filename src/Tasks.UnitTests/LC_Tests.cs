@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests
             result.ShouldNotBeNull();
             Path.IsPathRooted(result).ShouldBeTrue(result);
             result.ShouldStartWith(projectDir + Path.DirectorySeparatorChar, Case.Insensitive);
-            result.ShouldBe(expectedToolPath, Case.Insensitive);
+            result.ShouldBe(expectedToolPath, StringCompareShould.IgnoreCase);
             File.Exists(result).ShouldBeTrue(result);
         }
 
