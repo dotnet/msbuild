@@ -188,6 +188,9 @@ namespace Microsoft.Build.BackEnd.Client
             {
                 await _packetPumpTask.ConfigureAwait(false);
             }
+
+            // Complete the channel in case Start has not been called yet.
+            _ = _receivedPacketsChannel.Writer.TryComplete();
         }
 
         /// <summary>
