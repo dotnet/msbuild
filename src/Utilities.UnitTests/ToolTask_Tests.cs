@@ -1049,8 +1049,8 @@ namespace Microsoft.Build.UnitTests
             // eat into the configured budgets and cause the "slow" path to finish
             // before the timeout fires.
             int fastDelayMilliseconds = 100;
-            int slowDelayMilliseconds = 20_000;
-            int timeoutMilliseconds = 5_000;
+            int slowDelayMilliseconds = 18_000;
+            int timeoutMilliseconds = 4_500;
 
             MockEngine3 engine = new();
 
@@ -1072,9 +1072,12 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 sw.Stop();
 
-                // TELEMETRY: log elapsedMs alongside the configured Timeout so a follow-up
-                // PR can shrink the bumped budgets (slowDelay=20s, timeout=5s) back to tighter
-                // values once we see the actual distribution. The underlying ToolTaskThatSleeps
+                // TELEMETRY: log elapsedMs alongside the configured Timeout so future
+                // regressions are visible in the test output. 24h of post-merge data showed
+                // fast p95=1131ms / max=1370ms and the slow path terminating at ~= configured
+                // timeout, so the bumped budgets from #13830 (slowDelay=20s, timeout=5s) have
+                // been tightened to slowDelay=18s, timeout=4.5s here — ~3.3x of observed fast
+                // max, with the 4x slow/fast gap preserved. The underlying ToolTaskThatSleeps
                 // uses `ping -n N 127.0.0.1` on Windows and `sleep` on Unix-like platforms; the
                 // "slow" delay drives the timeout path and the "fast" delay drives success.
                 _output.WriteLine(
