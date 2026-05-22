@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -49,24 +50,12 @@ namespace Microsoft.Build.Tasks
             var result = new AbsolutePath[paths.Length];
             for (int i = 0; i < paths.Length; i++)
             {
-                result[i] = taskEnvironment.GetAbsolutePathAllowEmpty(paths[i]);
+                result[i] = string.IsNullOrEmpty(paths[i])
+                    ? new AbsolutePath(paths[i], ignoreRootedCheck: true)
+                    : taskEnvironment.GetAbsolutePath(paths[i]);
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Absolutizes <paramref name="path"/> using <see cref="TaskEnvironment.GetAbsolutePath"/>.
-        /// Null or empty input is passed through unchanged (wrapped as an <see cref="AbsolutePath"/>
-        /// with <c>ignoreRootedCheck</c>) rather than being treated as invalid; this preserves the
-        /// original semantics for callers that want downstream APIs to throw on null/empty/invalid
-        /// paths instead of silently short-circuiting.
-        /// </summary>
-        internal static AbsolutePath GetAbsolutePathAllowEmpty(this TaskEnvironment taskEnvironment, string path)
-        {
-            return string.IsNullOrEmpty(path)
-                ? new AbsolutePath(path, ignoreRootedCheck: true)
-                : taskEnvironment.GetAbsolutePath(path);
         }
 
         /// <summary>
@@ -92,6 +81,16 @@ namespace Microsoft.Build.Tasks
                 log?.LogMessageFromResources(MessageImportance.Low, "General.FailedToAbsolutizePath", path, e.Message);
                 return default;
             }
+        }
+
+        /// <summary>
+        /// Absolutizes <paramref name="path"/> before checking whether the directory exists.
+        /// Invalid paths return <see langword="false"/> rather than throwing.
+        /// </summary>
+        internal static bool DirectoryExists(this TaskEnvironment taskEnvironment, string path, TaskLoggingHelper? log = null)
+        {
+            AbsolutePath absolutePath = taskEnvironment.GetAbsolutePathIfValid(path, log);
+            return absolutePath.Value != null && FileSystems.Default.DirectoryExists(absolutePath);
         }
 
         /// <summary>
