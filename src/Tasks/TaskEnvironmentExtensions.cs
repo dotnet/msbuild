@@ -58,6 +58,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Returns the absolute path string for <paramref name="path"/>, or the input unchanged
+        /// when it is null or empty. Useful for tolerating optional path inputs that callers may
+        /// later combine with other path segments.
+        /// </summary>
+        internal static string GetAbsolutePathOrEmpty(this TaskEnvironment taskEnvironment, string path)
+            => string.IsNullOrEmpty(path) ? path : taskEnvironment.GetAbsolutePath(path).Value;
+
+        /// <summary>
         /// Converts an array of <see cref="AbsolutePath"/> to a string array of <see cref="AbsolutePath.Value"/>s.
         /// Returns <see langword="null"/> if <paramref name="paths"/> is <see langword="null"/>.
         /// </summary>

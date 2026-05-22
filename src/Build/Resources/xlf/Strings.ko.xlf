@@ -590,6 +590,11 @@
         <target state="translated">다음 프로젝트 캐시 플러그 인을 로드하는 중:{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="new">Enabled loggers: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">로깅의 세부 정보 표시가 {0}(으)로 설정되었습니다.</target>
@@ -604,7 +609,7 @@
       </trans-unit>
       <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
         <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
-        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <target state="translated">SkipNonexistentTargets="true"는 메타프로젝트 경계를 넘어 호출자로부터 상속되었습니다.</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -1035,7 +1040,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskHostDetails">
         <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
-        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <target state="translated">작업 "{0}"은(는) 호출한 MSBuild 프로세스 {1}(이)가 생성한 TaskHost 프로세스 {2}에서 실행되었습니다. 이 호출에 대해 새 TaskHost가 생성되었습니다: {3}. TaskHost는 재사용 가능한 사이드카입니다: {4}. 노드 재사용: {5}.</target>
         <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

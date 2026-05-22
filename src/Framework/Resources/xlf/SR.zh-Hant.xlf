@@ -107,6 +107,11 @@
         <target state="translated">參數 '{0}' 只可以是檔案名稱，不得包含目錄。</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogFileOutputPath">
+        <source>{0} wrote to: {1}</source>
+        <target state="new">{0} wrote to: {1}</target>
+        <note>{0} is the logger name. {1} is a list of full file paths separated by the current culture's list separator (followed by a space).</note>
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">路徑必須為根路徑。</target>

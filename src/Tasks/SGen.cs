@@ -306,7 +306,7 @@ namespace Microsoft.Build.Tasks
                     ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             }
 
-            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
+            return TaskEnvironment.GetAbsolutePathOrEmpty(pathToTool);
         }
 
         /// <summary>
