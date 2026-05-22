@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd.Client
                 byte[] headerByte = new byte[5];
                 while (true)
                 {
-                    // Client recieved a packet header. Read the rest of it.
+                    // Client received a packet header. Read the rest of it.
 #if NET
                     int headerBytesRead = await _stream.ReadAsync(headerByte, shutdownToken).ConfigureAwait(false);
 #else
