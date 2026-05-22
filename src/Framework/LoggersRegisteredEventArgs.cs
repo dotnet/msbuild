@@ -90,7 +90,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The registered loggers.
         /// </summary>
-        public IReadOnlyList<RegisteredLoggerInfo> Loggers { get; internal set; } = Array.Empty<RegisteredLoggerInfo>();
+        public IReadOnlyList<RegisteredLoggerInfo> Loggers { get; private set; } = Array.Empty<RegisteredLoggerInfo>();
 
         internal override void WriteToStream(BinaryWriter writer)
         {

@@ -644,7 +644,7 @@ public sealed partial class TerminalLogger : INodeLogger
                                 CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
                                 logger.OutputFilePaths.Select(outputPath => $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
 
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
+                            Terminal.WriteLine(string.Format(CultureInfo.CurrentCulture, Microsoft.Build.Framework.Resources.SR.LogFileOutputPath, logger.LoggerName, displayPaths));
                         }
                     }
                 }

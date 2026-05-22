@@ -336,7 +336,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
                         logger.OutputFilePaths);
 
-                    WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogFileOutputPath", logger.LoggerName, displayPaths));
+                    WriteLinePretty(string.Format(CultureInfo.CurrentCulture, Microsoft.Build.Framework.Resources.SR.LogFileOutputPath, logger.LoggerName, displayPaths));
                 }
             }
 

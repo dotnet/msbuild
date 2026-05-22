@@ -1,5 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Logging
 {
@@ -19,6 +20,6 @@ namespace Microsoft.Build.Logging
         /// Gets the absolute paths of the log files that this logger writes to.
         /// Reported in the end-of-build summary emitted by the console logger.
         /// </summary>
-        System.Collections.Generic.IReadOnlyList<string> OutputFilePaths { get; }
+        IReadOnlyList<string> OutputFilePaths { get; }
     }
 }

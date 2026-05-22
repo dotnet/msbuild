@@ -363,7 +363,10 @@ namespace Microsoft.Build.BackEnd.Logging
             WaitForLoggingToProcessEvents();
 
             // Register Loggers and print out all the enabled loggers.
-            if (!OnlyLogCriticalEvents)
+            // Gated behind ChangeWaves.Wave18_8 so that disabling the wave fully suppresses
+            // the new "Enabled loggers" message and the new LoggersRegisteredEventArgs,
+            // not just their rendering in the console/terminal loggers.
+            if (!OnlyLogCriticalEvents && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
             {
                 LogAndRegisterLoggers();
             }
@@ -413,7 +416,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 ILogger actualLogger = UnwrapLogger(logger);
                 Type loggerType = actualLogger.GetType();
 
-                listOfLoggers.Add(loggerType.FullName ?? loggerType.Name);
+                listOfLoggers.Add(loggerType.Name);
 
                 var outputFilePaths = new List<string>();
                 if (actualLogger is IFileOutputLogger fileLogger)
