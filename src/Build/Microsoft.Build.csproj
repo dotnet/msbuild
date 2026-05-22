@@ -381,6 +381,7 @@
     <Compile Include="Collections\ArrayDictionary.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
+    <Compile Include="Collections\ConcurrentWeakValueDictionary.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />

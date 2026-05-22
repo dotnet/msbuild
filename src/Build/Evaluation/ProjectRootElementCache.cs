@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -116,35 +117,58 @@ namespace Microsoft.Build.Evaluation
 #endif
 
         /// <summary>
-        /// The map of weakly-held ProjectRootElement's
+        /// The map of weakly-held ProjectRootElement's keyed by full path.
+        /// </summary>
+        private readonly ConcurrentWeakValueDictionary<string, ProjectRootElement> _weakCache;
+
+        /// <summary>
+        /// Lock objects keyed by project file path. Used to serialize concurrent loads
+        /// (and the rare <see cref="ProjectRootElement.Reload"/> on preserveFormatting mismatch)
+        /// for the same file.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, LockType> _fileLoadLocks;
+
+        /// <summary>
+        /// The LRU list of strongly-held ProjectRootElement's, preventing GC of commonly used entries.
         /// </summary>
         /// <remarks>
-        /// Be sure that the string keys are strongly held, or unpredictable bad
-        /// behavior will ensue.
+        /// Mutated only while holding <see cref="_strongCacheLock"/>.
         /// </remarks>
-        private WeakValueDictionary<string, ProjectRootElement> _weakCache;
+        private readonly LinkedList<ProjectRootElement> _strongCacheList;
 
         /// <summary>
-        /// Lock objects keyed by project file path.
+        /// Index from <see cref="ProjectRootElement"/> to its node in <see cref="_strongCacheList"/>
+        /// so that <see cref="BoostEntryInStrongCache"/> is O(1) instead of O(n). Uses reference identity.
         /// </summary>
-        private ConcurrentDictionary<string, object> _fileLoadLocks;
-
-        /// <summary>
-        /// The list of strongly-held ProjectRootElement's
-        /// </summary>
-        private LinkedList<ProjectRootElement> _strongCache;
+        /// <remarks>
+        /// Mutated only while holding <see cref="_strongCacheLock"/>.
+        /// </remarks>
+        private readonly Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>> _strongCacheIndex;
 
         /// <summary>
         /// Whether the cache should check the timestamp of the file on disk
         /// whenever it is requested, and update with the latest content of that
         /// file if it has changed.
         /// </summary>
-        private bool _autoReloadFromDisk;
+        private readonly bool _autoReloadFromDisk;
 
         /// <summary>
-        /// Locking object for this shared cache
+        /// Lock protecting the strong cache (<see cref="_strongCacheList"/>, <see cref="_strongCacheIndex"/>)
+        /// and serializing any multi-step write that must remain atomic across the strong cache and
+        /// <see cref="_weakCache"/> together (e.g., <see cref="RenameEntryInternal"/>).
+        ///
+        /// This lock serializes every writer to <see cref="_weakCache"/> that
+        /// inserts or replaces a value. The only writers that bypass it — <see cref="DiscardAnyWeakReference"/>
+        /// and the dictionary's internal weak-reference sweep — can only remove an entry; they never replace it with a different one. 
+        /// So while inside this lock, the value under any given key either stays the same or disappears entirely.
+        /// It is never silently swapped for a different instance.
+        ///
+        /// Hot-path reads of <see cref="_weakCache"/> do NOT take this lock.
+        ///
+        /// Lock ordering: a per-file lock from <see cref="_fileLoadLocks"/> may be held while acquiring
+        /// this lock, but never the reverse.
         /// </summary>
-        private object _locker = new object();
+        private readonly LockType _strongCacheLock = new LockType();
 
         /// <summary>
         /// Creates an empty cache.
@@ -153,9 +177,10 @@ namespace Microsoft.Build.Evaluation
         {
             DebugTraceCache("Constructing with autoreload from disk: ", autoReloadFromDisk);
 
-            _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-            _strongCache = new LinkedList<ProjectRootElement>();
-            _fileLoadLocks = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+            _weakCache = new ConcurrentWeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+            _strongCacheList = new LinkedList<ProjectRootElement>();
+            _strongCacheIndex = new Dictionary<ProjectRootElement, LinkedListNode<ProjectRootElement>>(ReferenceComparer.Instance);
+            _fileLoadLocks = new ConcurrentDictionary<string, LockType>(StringComparer.OrdinalIgnoreCase);
             _autoReloadFromDisk = autoReloadFromDisk;
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
@@ -251,9 +276,9 @@ namespace Microsoft.Build.Evaluation
             // Verify that loadProjectRootElement delegate does not call ProjectRootElementCache.Get().
             using var reentrancyGuard = new ReentrancyGuard();
 
-            // Verify that we never call this with _locker held, as that would create a lock ordering inversion with the per-file lock.
+            // Verify that we never call this with _strongCacheLock held, as that would create a lock ordering inversion with the per-file lock.
             ErrorUtilities.VerifyThrow(
-                !System.Threading.Monitor.IsEntered(_locker),
+                !IsLockHeld(_strongCacheLock),
                 "Detected lock ordering inversion in ProjectRootElementCache.");
 #endif
             // Should already have been canonicalized
@@ -271,7 +296,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
                 // We are about to load. Take a per-file lock to prevent multiple threads from duplicating the work multiple times.
-                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, static _ => new object());
+                LockType perFileLock = _fileLoadLocks.GetOrAdd(projectFile, static _ => new LockType());
                 lock (perFileLock)
                 {
                     // Call GetOrLoad again, this time with the OpenProjectRootElement callback.
@@ -294,31 +319,47 @@ namespace Microsoft.Build.Evaluation
         private ProjectRootElement GetOrLoad(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
-            ProjectRootElement projectRootElement;
-            lock (_locker)
-            {
-                _weakCache.TryGetValue(projectFile, out projectRootElement);
+            ProjectRootElement projectRootElement = null;
 
-                if (projectRootElement != null)
+            // Hot path: lock-free lookup in the concurrent weak-value dictionary.
+            if (_weakCache.TryGetValue(projectFile, out projectRootElement))
+            {
+                // Boost in the strong-cache LRU. This is now an O(1) operation guarded by a
+                // narrow lock, so we always take it (skipping under contention would corrupt
+                // LRU eviction order under exactly the workload we are trying to fix).
+                lock (_strongCacheLock)
                 {
                     BoostEntryInStrongCache(projectRootElement);
+                }
 
-                    // An implicit load will never reset the explicit flag.
-                    if (isExplicitlyLoaded)
+                // An implicit load will never reset the explicit flag.
+                // Setting this flag is safe outside the lock because IsExplicitlyLoaded
+                // is backed by a volatile field and is monotonic (false -> true only).
+                if (isExplicitlyLoaded)
+                {
+                    projectRootElement.MarkAsExplicitlyLoaded();
+                }
+
+                if (preserveFormatting != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                {
+                    // Serialize concurrent Reloads of the same file so two writers cannot interleave
+                    // a tear-down/reparse of the same XmlDocument.
+
+                    // Note: this lock only protects Reload-vs-Reload, not Reload-vs-read. Callers that
+                    // already hold a reference to this PRE may observe a half-reloaded XmlDocument.
+                    LockType perFileLock = _fileLoadLocks.GetOrAdd(projectFile, static _ => new LockType());
+                    lock (perFileLock)
                     {
-                        projectRootElement.MarkAsExplicitlyLoaded();
+                        if (projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                        {
+                            projectRootElement.Reload(true, preserveFormatting);
+                        }
                     }
                 }
-                else
-                {
-                    DebugTraceCache("Not found in cache: ", projectFile);
-                }
-
-                if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
-                {
-                    // Cached project doesn't match preserveFormatting setting, so reload it
-                    projectRootElement.Reload(true, preserveFormatting);
-                }
+            }
+            else
+            {
+                DebugTraceCache("Not found in cache: ", projectFile);
             }
 
             bool projectRootElementIsInvalid = IsInvalidEntry(projectFile, projectRootElement);
@@ -373,14 +414,40 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Add an entry to the cache.
         /// </summary>
+        /// <remarks>
+        /// The <see cref="ProjectRootElementCacheBase.ProjectRootElementAddedHandler"/> event is
+        /// raised OUTSIDE <see cref="_strongCacheLock"/>. This has two observable consequences:
+        ///
+        /// 1. Re-entrancy model: subscribers may freely call back into any cache API
+        ///    (e.g., <see cref="Get"/>, <see cref="TryGet(string)"/>) from their handler — the
+        ///    cache is fully unlocked when the event fires. However, the cache no longer supports
+        ///    same-thread recursive acquisition of <see cref="_strongCacheLock"/>: any code
+        ///    path that ends up re-entering a lock-taking cache method while already holding
+        ///    <see cref="_strongCacheLock"/> on the same thread will throw
+        ///    <see cref="System.Threading.LockRecursionException"/> (since <see cref="LockType"/>
+        ///    is non-recursive on net9+). All internal helpers that require the lock to be held
+        ///    are private and asserted via <c>IsLockHeld</c>; public entry points always start
+        ///    from an unlocked state.
+        ///
+        /// 2. Event ordering: under concurrent <see cref="AddEntry"/> calls, the order in which
+        ///    the cache-added event fires is NOT guaranteed to match the order in which entries
+        ///    were published into the cache. A thread may release the lock and then be preempted
+        ///    before raising its event, while another thread completes its own add-and-raise in
+        ///    between. Subscribers must not rely on the event order reflecting the addition
+        ///    order; the event is a per-entry notification, not an ordered log of cache mutations.
+        /// </remarks>
         internal override void AddEntry(ProjectRootElement projectRootElement)
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
                 RenameEntryInternal(null, projectRootElement);
-
-                RaiseProjectRootElementAddedToCacheEvent(projectRootElement);
             }
+
+            // Fire the event outside the LRU lock: prevents subscriber work from stalling other
+            // cache operations, and avoids LockRecursionException if a subscriber re-enters the
+            // cache on the same thread (LockType is non-recursive on net9+). See remarks above
+            // for the two limitations this introduces.
+            RaiseProjectRootElementAddedToCacheEvent(projectRootElement);
         }
 
         /// <summary>
@@ -389,7 +456,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void RenameEntry(string oldFullPath, ProjectRootElement projectRootElement)
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
                 ErrorUtilities.VerifyThrowArgumentLength(oldFullPath);
                 RenameEntryInternal(oldFullPath, projectRootElement);
@@ -430,11 +497,12 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal override void DiscardStrongReferences()
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                DebugTraceCache("Clearing strong refs: ", _strongCache.Count);
+                DebugTraceCache("Clearing strong refs: ", _strongCacheList.Count);
 
-                _strongCache = new LinkedList<ProjectRootElement>();
+                _strongCacheList.Clear();
+                _strongCacheIndex.Clear();
 
                 // A scavenge of the weak cache is probably not worth it as
                 // the GC would have had to run immediately after the line above.
@@ -447,10 +515,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void Clear()
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-                _strongCache = new LinkedList<ProjectRootElement>();
+                _weakCache.Clear();
+                _strongCacheList.Clear();
+                _strongCacheIndex.Clear();
             }
         }
 
@@ -465,34 +534,31 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely
-                // be many items which were not explicitly loaded (ie p2p references).
-                WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                _strongCache = new LinkedList<ProjectRootElement>();
-
-                foreach (KeyValuePair<string, ProjectRootElement> kvp in oldWeakCache)
+                // Drop everything from the strong cache that is not explicitly loaded.
+                LinkedListNode<ProjectRootElement> node = _strongCacheList.First;
+                while (node != null)
                 {
-                    if (kvp.Value is null)
+                    LinkedListNode<ProjectRootElement> next = node.Next;
+                    if (!node.Value.IsExplicitlyLoaded)
                     {
-                        continue;
+                        _strongCacheIndex.Remove(node.Value);
+                        _strongCacheList.Remove(node);
                     }
+                    node = next;
+                }
 
-                    if (kvp.Value.IsExplicitlyLoaded)
+                // Drop weak-cache entries that are either dead or not explicitly loaded.
+                // Enumeration is snapshot-ish; entries added during enumeration will simply remain
+                // (which is fine: they were added after the caller decided to discard implicit refs).
+                foreach (KeyValuePair<string, ProjectRootElement> kvp in _weakCache)
+                {
+                    if (!kvp.Value.IsExplicitlyLoaded)
                     {
-                        _weakCache[kvp.Key] = kvp.Value;
-                    }
-
-                    if (oldStrongCache.Contains(kvp.Value))
-                    {
-                        if (kvp.Value.IsExplicitlyLoaded)
-                        {
-                            _strongCache.AddFirst(kvp.Value);
-                        }
+                        // Only delete if the slot still holds this exact PRE, so a fresh entry
+                        // published for the same path by another writer is preserved.
+                        _weakCache.TryRemove(kvp.Key, kvp.Value);
                     }
                 }
             }
@@ -516,10 +582,9 @@ namespace Microsoft.Build.Evaluation
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)
             {
-                lock (_locker)
-                {
-                    _weakCache.Remove(projectRootElement.FullPath);
-                }
+                // Only delete if the slot still maps to this PRE — otherwise we'd clobber
+                // a fresh entry that another thread just inserted for the same path.
+                _weakCache.TryRemove(projectRootElement.FullPath, projectRootElement);
             }
         }
 
@@ -528,17 +593,23 @@ namespace Microsoft.Build.Evaluation
         /// Old full path may be null iff it was not already in the cache.
         /// </summary>
         /// <remarks>
-        /// Must be called within the cache lock.
+        /// Must be called within <see cref="_strongCacheLock"/>.
         /// </remarks>
         private void RenameEntryInternal(string oldFullPathIfAny, ProjectRootElement projectRootElement)
         {
+#if DEBUG
+            Debug.Assert(IsLockHeld(_strongCacheLock), "RenameEntryInternal must be called under _strongCacheLock.");
+#endif
             ErrorUtilities.VerifyThrowInternalNull(projectRootElement.FullPath, "FullPath");
 
             if (oldFullPathIfAny != null)
             {
                 ErrorUtilities.VerifyThrowInternalRooted(oldFullPathIfAny);
-                ErrorUtilities.VerifyThrow(_weakCache[oldFullPathIfAny] == projectRootElement, "Should already be present");
-                _weakCache.Remove(oldFullPathIfAny);
+                ErrorUtilities.VerifyThrow(
+                    _weakCache.TryGetValue(oldFullPathIfAny, out ProjectRootElement oldPre) &&
+                    ReferenceEquals(oldPre, projectRootElement),
+                    "Should already be present");
+                _weakCache.TryRemove(oldFullPathIfAny);
             }
 
             // There may already be a ProjectRootElement in the cache with the new name. In this case we cannot throw an exception;
@@ -551,12 +622,10 @@ namespace Microsoft.Build.Evaluation
             // but clients ought not get themselves into such a state - and unless they save them to disk,
             // it may not be a problem. Replacing also doesn't cause a problem for the strong cache,
             // as it is never consulted by us, but it is reasonable for us to remove the old entry in that case.
-            ProjectRootElement existingWeakEntry;
-            _weakCache.TryGetValue(projectRootElement.FullPath, out existingWeakEntry);
-
-            if (existingWeakEntry != null && !object.ReferenceEquals(existingWeakEntry, projectRootElement))
+            if (_weakCache.TryGetValue(projectRootElement.FullPath, out ProjectRootElement existingWeakEntry) &&
+                !ReferenceEquals(existingWeakEntry, projectRootElement))
             {
-                _strongCache.Remove(existingWeakEntry);
+                RemoveFromStrongCache(existingWeakEntry);
             }
 
             DebugTraceCache("Adding: ", projectRootElement.FullPath);
@@ -572,72 +641,119 @@ namespace Microsoft.Build.Evaluation
         /// If the list is too large, remove an entry from the bottom.
         /// </summary>
         /// <remarks>
-        /// Must be called within the cache lock.
-        /// If the size of strong cache gets large, this needs a faster data structure
-        /// than a linked list. It's currently O(n).
+        /// Must be called within <see cref="_strongCacheLock"/>. O(1) via <see cref="_strongCacheIndex"/>.
         /// </remarks>
         private void BoostEntryInStrongCache(ProjectRootElement projectRootElement)
         {
-            LinkedListNode<ProjectRootElement> node = _strongCache.First;
-
-            while (node != null)
+#if DEBUG
+            Debug.Assert(IsLockHeld(_strongCacheLock), "BoostEntryInStrongCache must be called under _strongCacheLock.");
+#endif
+            if (_strongCacheIndex.TryGetValue(projectRootElement, out LinkedListNode<ProjectRootElement> node))
             {
-                if (Object.ReferenceEquals(node.Value, projectRootElement))
+                // Already in strong cache — move to front.
+                if (!ReferenceEquals(node, _strongCacheList.First))
                 {
-                    // DebugTraceCache("Boosting: ", projectRootElement.FullPath);
-                    _strongCache.Remove(node);
-                    _strongCache.AddFirst(node);
-
-                    return;
+                    _strongCacheList.Remove(node);
+                    _strongCacheList.AddFirst(node);
                 }
-
-                node = node.Next;
             }
-
-            _strongCache.AddFirst(projectRootElement);
-
-            if (_strongCache.Count > s_maximumStrongCacheSize)
+            else
             {
-                node = _strongCache.Last;
+                // New entry — add to front.
+                LinkedListNode<ProjectRootElement> newNode = _strongCacheList.AddFirst(projectRootElement);
+                _strongCacheIndex[projectRootElement] = newNode;
 
-                DebugTraceCache("Shedding: ", node.Value.FullPath);
-                _strongCache.Remove(node);
+                if (_strongCacheList.Count > s_maximumStrongCacheSize)
+                {
+                    LinkedListNode<ProjectRootElement> last = _strongCacheList.Last;
+                    DebugTraceCache("Shedding: ", last.Value.FullPath);
+                    _strongCacheList.RemoveLast();
+                    _strongCacheIndex.Remove(last.Value);
+                }
             }
         }
 
         /// <summary>
-        /// Completely remove an entry from this cache
+        /// Remove an entry from the strong cache (both list and index).
         /// </summary>
         /// <remarks>
-        /// Must be called within the cache lock.
+        /// Must be called within <see cref="_strongCacheLock"/>.
+        /// </remarks>
+        private void RemoveFromStrongCache(ProjectRootElement projectRootElement)
+        {
+#if DEBUG
+            Debug.Assert(IsLockHeld(_strongCacheLock), "RemoveFromStrongCache must be called under _strongCacheLock.");
+#endif
+            if (_strongCacheIndex.TryGetValue(projectRootElement, out LinkedListNode<ProjectRootElement> node))
+            {
+                _strongCacheList.Remove(node);
+                _strongCacheIndex.Remove(projectRootElement);
+            }
+        }
+
+        /// <summary>
+        /// Completely remove an entry from this cache.
+        /// </summary>
+        /// <remarks>
+        /// Must be called within <see cref="_strongCacheLock"/>.
         /// </remarks>
         private void ForgetEntry(ProjectRootElement projectRootElement)
         {
+#if DEBUG
+            Debug.Assert(IsLockHeld(_strongCacheLock), "ForgetEntry must be called under _strongCacheLock.");
+#endif
             DebugTraceCache("Forgetting: ", projectRootElement.FullPath);
 
-            _weakCache.Remove(projectRootElement.FullPath);
-
-            LinkedListNode<ProjectRootElement> strongCacheEntry = _strongCache.Find(projectRootElement);
-            if (strongCacheEntry != null)
-            {
-                _strongCache.Remove(strongCacheEntry);
-            }
+            _weakCache.TryRemove(projectRootElement.FullPath);
+            RemoveFromStrongCache(projectRootElement);
 
             DebugTraceCache("Out of date dropped from XML cache: ", projectRootElement.FullPath);
         }
 
         /// <summary>
-        /// Completely remove an entry from this cache if it exists.
+        /// Completely remove an entry from this cache if it exists and still maps to the
+        /// expected <see cref="ProjectRootElement"/> instance.
         /// </summary>
         private void ForgetEntryIfExists(ProjectRootElement projectRootElement)
         {
-            lock (_locker)
+            lock (_strongCacheLock)
             {
-                if (_weakCache.TryGetValue(projectRootElement.FullPath, out var cached) && cached == projectRootElement)
+                // The caller's reference came from an earlier lock-free read, so the
+                // slot may now hold a fresh entry for the same path. Per the invariant on
+                // _strongCacheLock, no swap can occur while inside the lock — so a matching reference
+                // means it is safe to evict; a mismatch means a fresh entry was published and we leave it alone.
+                if (_weakCache.TryGetValue(projectRootElement.FullPath, out ProjectRootElement cached) &&
+                    ReferenceEquals(cached, projectRootElement))
                 {
                     ForgetEntry(projectRootElement);
                 }
             }
+        }
+
+#if DEBUG
+        /// <summary>
+        /// Returns true if the given lock is held by the current thread.
+        /// Encapsulates the difference between the lock type used on net9+ and on net472.
+        /// </summary>
+        private static bool IsLockHeld(LockType lockObj) =>
+#if NET
+            lockObj.IsHeldByCurrentThread;
+#else
+            System.Threading.Monitor.IsEntered(lockObj);
+#endif
+#endif
+
+        /// <summary>
+        /// Equality comparer using reference identity for <see cref="ProjectRootElement"/>.
+        /// Used by <see cref="_strongCacheIndex"/> to match entries by object identity, not value equality.
+        /// </summary>
+        private sealed class ReferenceComparer : IEqualityComparer<ProjectRootElement>
+        {
+            public static readonly ReferenceComparer Instance = new();
+
+            public bool Equals(ProjectRootElement x, ProjectRootElement y) => ReferenceEquals(x, y);
+
+            public int GetHashCode(ProjectRootElement obj) => RuntimeHelpers.GetHashCode(obj);
         }
 
         /// <summary>
