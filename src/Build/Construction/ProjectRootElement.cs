@@ -685,10 +685,11 @@ namespace Microsoft.Build.Construction
         public ElementLocation TreatAsLocalPropertyLocation => GetAttributeLocation(XMakeAttributes.treatAsLocalProperty);
 
         /// <summary>
-        /// Backing field for <see cref="IsExplicitlyLoaded"/>. Volatile because the flag may be set
-        /// by <see cref="MarkAsExplicitlyLoaded"/> without holding the cache lock and is later read
-        /// by <see cref="ProjectRootElementCache.DiscardImplicitReferences"/> to decide whether to
-        /// drop the entry.
+        /// Backing field for <see cref="IsExplicitlyLoaded"/>. Written without the cache lock by
+        /// <see cref="MarkAsExplicitlyLoaded"/> and read by <see cref="ProjectRootElementCache.DiscardImplicitReferences"/>.
+        /// Monotonic (only transitions false → true), so <see langword="volatile"/> alone is sufficient:
+        /// it provides the release/acquire ordering, and concurrent writers can only race to set the
+        /// same value.
         /// </summary>
         private volatile bool _isExplicitlyLoaded;
 
