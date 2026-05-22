@@ -394,7 +394,7 @@
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
   <data name="Exec.AllDriveLettersMappedError">
-    <value>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</value>
+    <value>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</value>
     <comment>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</comment>
   </data>
   <data name="Exec.MissingCommandError">
@@ -499,6 +499,9 @@
   </data>
   <data name="General.ExpectedFileMissing">
     <value>Expected file "{0}" does not exist.</value>
+  </data>
+  <data name="General.FailedToCanonicalizePath">
+    <value>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</value>
   </data>
   <data name="General.FrameworksFileNotFound">
     <value>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</value>
@@ -1528,6 +1531,10 @@
   <data name="ResolveAssemblyReference.InvalidAppConfig">
     <value>MSB3249: Application Configuration file "{0}" is invalid. {1}</value>
     <comment>{StrBegin="MSB3249: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.AppConfigFilePathEmpty">
+    <value>Application Configuration file path cannot be empty.</value>
+    <comment>This message can be used as the {1} in MSB3249</comment>
   </data>
   <data name="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
     <value>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</value>

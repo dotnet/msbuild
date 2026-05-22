@@ -1135,23 +1135,56 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Invalid app.config path should not crash.
+        /// Invalid or empty app.config paths should not crash.
+        /// Invalid path "|" causes a logged error and task failure.
+        /// Empty string is silently ignored (Wave18_8 behavior) and task succeeds.
         /// </summary>
-        [Fact]
-        public void Regress286699_InvalidAppConfig()
+        [Theory]
+        [InlineData("|", false)]
+        [InlineData("", true)]
+        public void InvalidOrEmptyAppConfig_DoesNotCrash(string appConfigFile, bool expectedSuccess)
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
-
-            t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
-            t.AppConfigFile = "|";
+            t.Assemblies = [new TaskItem("mscorlib")];
+            t.AppConfigFile = appConfigFile;
 
             bool retval = Execute(t);
 
-            Assert.False(retval);
+            retval.ShouldBe(expectedSuccess);
+        }
 
-            // Should not crash.
+        /// <summary>
+        /// When Wave18_8 is disabled, empty AppConfigFile should cause the task to fail
+        /// with an error, preserving backward-compatible behavior.
+        /// </summary>
+        [Fact]
+        public void EmptyAppConfigFile_Wave18_8_Disabled_Fails()
+        {            
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
+
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                ResolveAssemblyReference t = new ResolveAssemblyReference();
+
+                MockEngine engine = new MockEngine(_output);
+                t.BuildEngine = engine;
+                t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
+                t.AppConfigFile = string.Empty;
+
+                bool retval = Execute(t);
+                retval.ShouldBeFalse();
+                engine.Errors.ShouldBe(1);
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
         }
 
         /// <summary>
@@ -6702,7 +6735,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
+                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>(), TaskEnvironmentHelper.CreateForTest());
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
             Dictionary<string, string> denyList;
@@ -6880,7 +6913,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
+                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>(), TaskEnvironmentHelper.CreateForTest());
             return referenceTable;
         }
 
