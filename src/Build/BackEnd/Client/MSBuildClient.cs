@@ -145,7 +145,7 @@ namespace Microsoft.Build.Experimental
 #endif
             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            _packetPump = new MSBuildClientPacketPump(_nodeStream);
+            _packetPump = new MSBuildClientPacketPump(_nodeStream, DeserializePacket);
         }
 
         /// <summary>
@@ -318,15 +318,19 @@ namespace Microsoft.Build.Experimental
             return serverWasBusy;
         }
 
+        private INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator) => packetType switch
+        {
+            NodePacketType.ServerNodeConsoleWrite => ServerNodeConsoleWrite.FactoryForDeserialization(translator),
+            NodePacketType.ServerNodeBuildResult => ServerNodeBuildResult.FactoryForDeserialization(translator),
+            _ => throw new InvalidOperationException($"Unexpected packet type {packetType}"),
+        };
+
         private async Task ReadPacketsLoop(CancellationToken cancellationToken)
         {
             try
             {
                 // Start packet pump
                 await using MSBuildClientPacketPump packetPump = _packetPump;
-
-                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization);
-                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization);
                 packetPump.Start();
 
                 while (true)

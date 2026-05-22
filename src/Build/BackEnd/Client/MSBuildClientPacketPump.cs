@@ -3,7 +3,6 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Channels;
@@ -33,9 +32,9 @@ namespace Microsoft.Build.BackEnd.Client
         private readonly Channel<INodePacket> _receivedPacketsChannel;
 
         /// <summary>
-        /// Mapping of packet types to deserialization methods.
+        /// The factory method for creating packets based on packet type.
         /// </summary>
-        private readonly Dictionary<NodePacketType, NodePacketFactoryMethod> _packetDeserializationMethods;
+        private readonly Func<NodePacketType, ITranslator, INodePacket> _packetFactoryMethod;
 
         /// <summary>
         /// The memory stream for a read buffer.
@@ -64,39 +63,18 @@ namespace Microsoft.Build.BackEnd.Client
         /// </summary>
         private volatile bool _isServerDisconnecting;
 
-        public MSBuildClientPacketPump(Stream stream)
+        public MSBuildClientPacketPump(Stream stream, Func<NodePacketType, ITranslator, INodePacket> packetFactoryMethod)
         {
             ErrorUtilities.VerifyThrowArgumentNull(stream);
+            ErrorUtilities.VerifyThrowArgumentNull(packetFactoryMethod);
 
             _stream = stream;
             _shutdownTokenSource = new CancellationTokenSource();
             _receivedPacketsChannel = Channel.CreateUnbounded<INodePacket>(s_channelOptions);
-            _packetDeserializationMethods = new Dictionary<NodePacketType, NodePacketFactoryMethod>();
+            _packetFactoryMethod = packetFactoryMethod;
 
             _readBufferMemoryStream = new MemoryStream();
             _binaryReadTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
-        }
-
-        /// <summary>
-        /// Registers a packet handler.
-        /// </summary>
-        /// <param name="packetType">The packet type for which the handler should be registered.</param>
-        /// <param name="factory">The factory used to create packets.</param>
-        public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory) =>
-            _packetDeserializationMethods.Add(packetType, factory);
-
-        /// <summary>
-        /// Deserializes a packet.
-        /// </summary>
-        /// <param name="packetType">The packet type.</param>
-        /// <param name="translator">The translator to use as a source for packet data.</param>
-        private INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
-        {
-            ErrorUtilities.VerifyThrow(
-                _packetDeserializationMethods.TryGetValue(packetType, out NodePacketFactoryMethod? factory),
-                $"No packet handler for type {packetType}");
-
-            return factory(translator);
         }
 
         #region Packet Pump
@@ -169,7 +147,7 @@ namespace Microsoft.Build.BackEnd.Client
 
                     try
                     {
-                        INodePacket packet = DeserializePacket(packetType, _binaryReadTranslator);
+                        INodePacket packet = _packetFactoryMethod(packetType, _binaryReadTranslator);
                         await packetWriter.WriteAsync(packet, shutdownToken).ConfigureAwait(false);
                     }
                     catch
