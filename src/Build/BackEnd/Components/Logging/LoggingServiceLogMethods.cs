@@ -707,6 +707,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext targetBuildEventContext = new BuildEventContext(
                     projectBuildEventContext.SubmissionId,
                     projectBuildEventContext.NodeId,
+                    projectBuildEventContext.EvaluationId,
                     projectBuildEventContext.ProjectInstanceId,
                     projectBuildEventContext.ProjectContextId,
                     NextTargetId,
@@ -804,6 +805,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext taskBuildEventContext = new BuildEventContext(
                     targetBuildEventContext.SubmissionId,
                     targetBuildEventContext.NodeId,
+                    targetBuildEventContext.EvaluationId,
                     targetBuildEventContext.ProjectInstanceId,
                     targetBuildEventContext.ProjectContextId,
                     targetBuildEventContext.TargetId,

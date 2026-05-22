@@ -4775,5 +4775,54 @@ $@"<Project InitialTargets=`Sleep`>
                 firstChildStarted.BuildEventContext.EvaluationId,
                 "Cache-served ProjectStartedEventArgs should have the same EvaluationId as the original build.");
         }
+
+        /// <summary>
+        /// Verifies that TargetStartedEventArgs and TaskStartedEventArgs preserve
+        /// the EvaluationId from their parent project's BuildEventContext.
+        /// Previously, the 6-arg BuildEventContext constructor dropped EvaluationId.
+        /// Regression test for https://github.com/dotnet/msbuild/issues/12998
+        /// </summary>
+        [Fact]
+        public void TargetAndTaskBuildEventContexts_PreserveEvaluationId()
+        {
+            string contents = CleanupFileContents("""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                    <Target Name="Build">
+                        <Message Text="[hello]" Importance="High" />
+                    </Target>
+                </Project>
+                """);
+
+            var project = CreateProject(contents, null, _projectCollection, false);
+            var data = new BuildRequestData(
+                project.FullPath,
+                new Dictionary<string, string>(),
+                MSBuildDefaultToolsVersion,
+                Array.Empty<string>(),
+                null);
+
+            BuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Get the project's EvaluationId from the ProjectStartedEventArgs.
+            _logger.ProjectStartedEvents.Count.ShouldBeGreaterThan(0);
+            ProjectStartedEventArgs projectStarted = _logger.ProjectStartedEvents[0];
+            int expectedEvaluationId = projectStarted.BuildEventContext.EvaluationId;
+            expectedEvaluationId.ShouldNotBe(BuildEventContext.InvalidEvaluationId,
+                "ProjectStartedEventArgs should have a valid EvaluationId.");
+
+            // Verify TargetStartedEventArgs preserves EvaluationId.
+            _logger.TargetStartedEvents.Count.ShouldBeGreaterThan(0);
+            TargetStartedEventArgs targetStarted = _logger.TargetStartedEvents
+                .First(t => t.TargetName == "Build");
+            targetStarted.BuildEventContext.EvaluationId.ShouldBe(expectedEvaluationId,
+                "TargetStartedEventArgs should preserve the project's EvaluationId.");
+
+            // Verify TaskStartedEventArgs preserves EvaluationId.
+            _logger.TaskStartedEvents.Count.ShouldBeGreaterThan(0);
+            TaskStartedEventArgs taskStarted = _logger.TaskStartedEvents[0];
+            taskStarted.BuildEventContext.EvaluationId.ShouldBe(expectedEvaluationId,
+                "TaskStartedEventArgs should preserve the project's EvaluationId.");
+        }
     }
 }
