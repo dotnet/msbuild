@@ -42,7 +42,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BINLOG_MCP_VERSION: '1.0.0-preview.26268.3'
+  BINLOG_MCP_VERSION: '1.0.0-preview.26272.1'
   NUGET_MCP_VERSION: '1.4.3'
 
 timeout-minutes: 30
@@ -102,7 +102,7 @@ steps:
         </packageSources>
       </configuration>
       EOF
-      dotnet tool install --global AITools.BinlogMcp \
+      dotnet tool install --global Microsoft.AITools.BinlogMcp \
         --configfile /tmp/binlog-tool/nuget.config \
         --version "$BINLOG_MCP_VERSION"
       echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
