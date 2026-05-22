@@ -43,8 +43,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             using var collection = new ProjectCollection();
             var project = new Project(projectFile.Path, globalProperties: null, toolsVersion: null, collection);
-            ProjectInstance instance = project.CreateProjectInstance();
 
+            // Items should not exist on the Project
+            project.GetItems("MSBuildImportedProject").Count.ShouldBe(0);
+
+            // Nor on ProjectInstance
+            ProjectInstance instance = project.CreateProjectInstance();
             instance.GetItems("MSBuildImportedProject").Count.ShouldBe(0);
         }
 
@@ -68,13 +72,20 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             using var collection = new ProjectCollection();
             var project = new Project(projectFile.Path, globalProperties: null, toolsVersion: null, collection);
-            ProjectInstance instance = project.CreateProjectInstance();
 
-            var items = instance.GetItems("MSBuildImportedProject").ToList();
-            items.Count.ShouldBe(1);
-            items[0].EvaluatedInclude.ShouldBe(importFile.Path);
-            items[0].GetMetadataValue("ImportingProjectPath").ShouldBe(projectFile.Path);
-            items[0].GetMetadataValue("Sdk").ShouldBeEmpty();
+            // Items should be visible on Project (created during evaluation)
+            var projectItems = project.GetItems("MSBuildImportedProject").ToList();
+            projectItems.Count.ShouldBe(1);
+            projectItems[0].EvaluatedInclude.ShouldBe(importFile.Path);
+            projectItems[0].GetMetadataValue("ImportingProjectPath").ShouldBe(projectFile.Path);
+            projectItems[0].GetMetadataValue("Sdk").ShouldBeEmpty();
+
+            // And also on ProjectInstance
+            ProjectInstance instance = project.CreateProjectInstance();
+            var instanceItems = instance.GetItems("MSBuildImportedProject").ToList();
+            instanceItems.Count.ShouldBe(1);
+            instanceItems[0].EvaluatedInclude.ShouldBe(importFile.Path);
+            instanceItems[0].GetMetadataValue("ImportingProjectPath").ShouldBe(projectFile.Path);
         }
 
         [Fact]

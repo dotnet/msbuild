@@ -106,6 +106,13 @@ namespace Microsoft.Build.Evaluation
         private readonly Dictionary<string, ProjectImportElement> _importsSeen;
 
         /// <summary>
+        /// Resolved imports collected during the depth-first pass, used to optionally synthesize
+        /// <c>MSBuildImportedProject</c> items at the start of item evaluation.
+        /// Each entry records the imported file, the importing element, and the SDK result (if any).
+        /// </summary>
+        private List<(ProjectRootElement ImportedProject, ProjectImportElement ImportingElement, SdkResult SdkResult)> _resolvedImports;
+
+        /// <summary>
         /// Depth first collection of InitialTargets strings declared in the main
         /// Project and all its imported files, split on semicolons.
         /// </summary>
@@ -700,6 +707,9 @@ namespace Microsoft.Build.Evaluation
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
+
+                    SynthesizeImportedProjectItems();
+
                     foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
                     {
                         using (_evaluationProfiler.TrackElement(itemGroup))
@@ -1412,6 +1422,9 @@ namespace Microsoft.Build.Evaluation
                     foreach (ProjectRootElement importedProjectRootElement in importedProjectRootElements)
                     {
                         _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
+
+                        _resolvedImports ??= [];
+                        _resolvedImports.Add((importedProjectRootElement, importElement, sdkResult));
 
                         PerformDepthFirstPass(importedProjectRootElement);
                     }
@@ -2623,6 +2636,55 @@ namespace Microsoft.Build.Evaluation
                     isGlobalProperty: false,
                     mayBeReserved: false,
                     loggingContext: _evaluationLoggingContext);
+            }
+        }
+
+        /// <summary>
+        /// When the <c>MSBuildProvideImportedProjects</c> property is set to <c>true</c>,
+        /// synthesizes <c>MSBuildImportedProject</c> items from the resolved imports,
+        /// making the import tree available to targets and tasks as regular items.
+        /// Called at the beginning of the items pass, after all properties have been evaluated.
+        /// </summary>
+        private void SynthesizeImportedProjectItems()
+        {
+            if (_resolvedImports is null)
+            {
+                return;
+            }
+
+            P provideProperty = _data.GetProperty(Constants.MSBuildProvideImportedProjectsPropertyName);
+            if (provideProperty is null || !string.Equals(provideProperty.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            // Create a disconnected item element to back the factory — needed because
+            // ProjectItemFactory derives ItemType from its backing XML element.
+            ProjectItemElement syntheticItemElement = ProjectItemElement.CreateDisconnected(
+                Constants.MSBuildImportedProjectItemType,
+                _projectRootElement);
+            _itemFactory.ItemElement = syntheticItemElement;
+
+            string definingProject = _projectRootElement.FullPath ?? string.Empty;
+
+            foreach (var (importedProject, importingElement, sdkResult) in _resolvedImports)
+            {
+                I item = _itemFactory.CreateItem(importedProject.EscapedFullPath ?? string.Empty, definingProject);
+
+                ProjectMetadataElement importingPathMetadata = ProjectMetadataElement.CreateDisconnected(
+                    Constants.ImportingProjectPathMetadataName,
+                    _projectRootElement);
+                item.SetMetadata(importingPathMetadata, importingElement.ContainingProject.EscapedFullPath ?? string.Empty);
+
+                if (sdkResult?.SdkReference?.Name is { } sdkName)
+                {
+                    ProjectMetadataElement sdkMetadata = ProjectMetadataElement.CreateDisconnected(
+                        Constants.SdkMetadataName,
+                        _projectRootElement);
+                    item.SetMetadata(sdkMetadata, sdkName);
+                }
+
+                _data.AddItem(item);
             }
         }
 
