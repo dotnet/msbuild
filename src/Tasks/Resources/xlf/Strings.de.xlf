@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="new">MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</target>
+        <target state="translated">MSB3071: Alle Laufwerkbuchstaben von A: bis Z: werden zurzeit verwendet. Da das Arbeitsverzeichnis „{0}“ (aufgelöst in UNC-Pfad „{1}“) eine UNC-Zuordnung erfordert, benötigt die Aufgabe „Exec“ einen freien Laufwerkbuchstaben, um den UNC-Pfad zuzuordnen. Trennen Sie die Verbindung mindestens einer freigegebenen Ressource, um Laufwerkbuchstaben freizugeben, oder geben Sie ein lokales Arbeitsverzeichnis an, bevor Sie diesen Befehl wiederholen.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
