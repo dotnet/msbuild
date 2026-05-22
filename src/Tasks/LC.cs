@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Class structure has existed for a long time and shouldn't be adjusted.")]
     [MSBuildMultiThreadableTask]
-    public class LC : ToolTaskExtension, IMultiThreadableTask
+    public class LC : ToolTaskExtension
     {
         #region Input/output properties
 
@@ -134,15 +134,17 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to lc.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string sdkToolsPath = TaskEnvironment.AbsolutizeSdkToolsPath(SdkToolsPath);
-
-            return SdkToolsPathUtility.GeneratePathToTool(
-                SdkToolsPathUtility.FileInfoExists,
+            string pathToTool = SdkToolsPathUtility.GeneratePathToTool(
+                f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
                 ProcessorArchitecture.CurrentProcessArchitecture,
-                sdkToolsPath,
+                SdkToolsPath,
                 ToolExe,
                 Log,
                 true);
+
+            return TaskEnvironment.GetAbsolutePathOrEmpty(pathToTool);
         }
 
         /// <summary>

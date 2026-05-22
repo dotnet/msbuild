@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -64,11 +65,11 @@ namespace Microsoft.Build.UnitTests
 
             string result = task.CallGenerateFullPathToTool();
 
-            Assert.NotNull(result);
-            Assert.True(Path.IsPathRooted(result), result);
-            Assert.True(result.StartsWith(projectDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase), result);
-            Assert.Equal(expectedToolPath, result, StringComparer.OrdinalIgnoreCase);
-            Assert.True(File.Exists(result), result);
+            result.ShouldNotBeNull();
+            Path.IsPathRooted(result).ShouldBeTrue(result);
+            result.ShouldStartWith(projectDir + Path.DirectorySeparatorChar, Case.Insensitive);
+            result.ShouldBe(expectedToolPath, Case.Insensitive);
+            File.Exists(result).ShouldBeTrue(result);
         }
 
         /// <summary>

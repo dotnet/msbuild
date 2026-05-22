@@ -318,18 +318,18 @@ namespace Microsoft.Build.Tasks
                                         "x64".Equals(Platform, StringComparison.OrdinalIgnoreCase) ? ProcessorArchitecture.AMD64 : // x64 maps to AMD64 in GeneratePathToTool
                                         ProcessorArchitecture.CurrentProcessArchitecture;
 
-                string sdkToolsPath = TaskEnvironment.AbsolutizeSdkToolsPath(SdkToolsPath);
-
                 pathToTool = SdkToolsPathUtility.GeneratePathToTool(
-                    SdkToolsPathUtility.FileInfoExists,
+                    f => !string.IsNullOrEmpty(f)
+                        ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                        : SdkToolsPathUtility.FileInfoExists(f),
                     archToLookFor,
-                    sdkToolsPath,
+                    SdkToolsPath,
                     ToolExe,
                     Log,
                     true);
             }
 
-            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
+            return TaskEnvironment.GetAbsolutePathOrEmpty(pathToTool);
         }
 
         /// <summary>
