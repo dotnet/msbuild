@@ -283,7 +283,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Erstellen von {0} in {1}s</target>
+        <target state="translated">Erstellen {0} in {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -886,7 +886,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">Wiederherstellen von {0} in {1}s</target>
+        <target state="translated">Wiederherstellen {0} in {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
