@@ -79,12 +79,12 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is white space.
-        /// FormatUrl explicitly fails on Windows for whitespace-only input because whitespace-only
-        /// paths are not valid on Windows file systems. This guard preserves the historical
-        /// rejection behavior previously raised by <see cref="Path.GetFullPath(string)"/>, which
-        /// was lost when the task migrated to multithreaded execution (relative paths are now
-        /// resolved against the project directory via AbsolutePath, which would otherwise silently
-        /// trim trailing whitespace and mask the error).
+        /// FormatUrl explicitly fails on Windows for whitespace-only input: it logs a localized
+        /// MSB4311 error AND throws <see cref="ArgumentException"/> from <see cref="Path.GetFullPath(string)"/>
+        /// to preserve backwards compatibility with any caller relying on the historical exception
+        /// contract that was lost when the task migrated to multithreaded execution (relative paths
+        /// are now resolved against the project directory via AbsolutePath, which would otherwise
+        /// silently trim trailing whitespace and mask the error).
         /// </summary>
         [WindowsOnlyFact]
         public void WhitespaceTestOnWindows()
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests
             var t = GetFormatUrlUnderTest();
 
             t.InputUrl = " ";
-            t.Execute().ShouldBeFalse();
+            Should.Throw<ArgumentException>(() => t.Execute());
             ((MockEngine)t.BuildEngine).AssertLogContains("MSB4311");
         }
 
@@ -101,9 +101,8 @@ namespace Microsoft.Build.UnitTests
         /// fires even when the task is wired up to a real <see cref="TaskEnvironment"/> with an
         /// isolated project directory (i.e. the multithreaded execution path). Without the guard,
         /// the input would silently absolutize against the project directory and lose the
-        /// historical rejection behavior.
-        /// Uses a single-space input which is the canonical case rejected on Windows across all
-        /// supported .NET runtimes.
+        /// historical <see cref="ArgumentException"/> contract from <see cref="Path.GetFullPath(string)"/>.
+        /// Asserts both the localized MSB4311 log entry and the rethrown exception.
         /// </summary>
         [WindowsOnlyFact]
         public void WhitespaceInputFailsOnWindowsWithIsolatedProjectDirectory()
@@ -124,7 +123,7 @@ namespace Microsoft.Build.UnitTests
                 InputUrl = " ",
             };
 
-            t.Execute().ShouldBeFalse();
+            Should.Throw<ArgumentException>(() => t.Execute());
             engine.AssertLogContains("MSB4311");
         }
 
