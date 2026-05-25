@@ -1044,13 +1044,20 @@ namespace Microsoft.Build.UnitTests
         {
             using var env = TestEnvironment.Create(_output);
 
-            // Larger gap between fast/slow delays and the timeout to keep the test
-            // robust on slow CI agents where the test process startup overhead can
-            // eat into the configured budgets and cause the "slow" path to finish
-            // before the timeout fires.
+            // Delays for the underlying ToolTaskThatSleeps. On Windows the delay is realized by
+            // `ping -n N 127.0.0.1`, which sends 1 packet/sec, so the effective wall clock is
+            // roughly ceil(delayMs/1000)+1 seconds; on Unix-like platforms it is a `sleep` of
+            // delayMs/1000 seconds.
             int fastDelayMilliseconds = 100;
-            int slowDelayMilliseconds = 20_000;
-            int timeoutMilliseconds = 5_000;
+            int slowDelayMilliseconds = 10_000;
+
+            // Timeout enforced *only* on the attempt that is expected to time out. The slow delay
+            // is chosen large enough (5x timeout) that even a heavily loaded agent cannot let the
+            // tool finish before the timeout fires, and the success-path attempts run with a large
+            // but finite ceiling so test process startup overhead cannot race the wall clock while
+            // still bounding the test against a pathological ToolTask hang (cf. #13351).
+            int timeoutMilliseconds = 2_000;
+            int successPathCeilingMilliseconds = 30_000;
 
             MockEngine3 engine = new();
 
@@ -1060,27 +1067,32 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = engine,
                 InitialDelay = timeoutOnFirstExecution ? slowDelayMilliseconds : fastDelayMilliseconds,
                 FollowupDelay = fastDelayMilliseconds,
-                Timeout = timeoutOnFirstExecution ? timeoutMilliseconds : System.Threading.Timeout.Infinite
             };
 
             // Execute the same task instance multiple times. The index is one-based.
             for (int attempt = 1; attempt <= repeats; attempt++)
             {
-                bool shouldSucceed = attempt > 1 || !timeoutOnFirstExecution;
+                bool isTimingOutAttempt = timeoutOnFirstExecution && attempt == 1;
+                bool shouldSucceed = !isTimingOutAttempt;
+
+                // Set Timeout per-attempt so the success path is wall-clock-independent. This is
+                // the deterministic fix for the historical flake where ping's ~1-2s fastpath
+                // raced a shared 5s timeout under CI cold-start overhead (dotnet/msbuild#13667,
+                // dotnet/msbuild#13830). The timing-out attempt enforces the short timeout;
+                // every other attempt uses a generous 30s ceiling -- ~30x the worst-observed
+                // cold-start (~1.4s), so it cannot race normal execution, while still bounding
+                // the test against a pathological ToolTask hang.
+                task.Timeout = isTimingOutAttempt ? timeoutMilliseconds : successPathCeilingMilliseconds;
                 int configuredTimeout = (int)task.Timeout;
                 Stopwatch sw = Stopwatch.StartNew();
                 bool result = task.Execute();
                 sw.Stop();
 
-                // TELEMETRY: log elapsedMs alongside the configured Timeout so a follow-up
-                // PR can shrink the bumped budgets (slowDelay=20s, timeout=5s) back to tighter
-                // values once we see the actual distribution. The underlying ToolTaskThatSleeps
-                // uses `ping -n N 127.0.0.1` on Windows and `sleep` on Unix-like platforms; the
-                // "slow" delay drives the timeout path and the "fast" delay drives success.
                 _output.WriteLine(
-                    $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, " +
-                    $"exitCode={task.ExitCode}, elapsedMs={sw.ElapsedMilliseconds}, configuredTimeoutMs={configuredTimeout}, " +
-                    $"slowDelayMs={slowDelayMilliseconds}, fastDelayMs={fastDelayMilliseconds}.");
+                    $"[TTTAR-TELEMETRY] attempt={attempt}/{repeats} role={(isTimingOutAttempt ? "timeoutAttempt" : "successAttempt")} " +
+                    $"expectedSuccess={shouldSucceed} actualSuccess={result} exitCode={task.ExitCode} " +
+                    $"elapsedMs={sw.ElapsedMilliseconds} configuredTimeoutMs={configuredTimeout} " +
+                    $"slowDelayMs={slowDelayMilliseconds} fastDelayMs={fastDelayMilliseconds}");
 
                 if (!string.IsNullOrEmpty(engine.Log))
                 {
