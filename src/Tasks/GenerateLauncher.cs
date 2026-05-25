@@ -41,12 +41,17 @@ namespace Microsoft.Build.Tasks
         public ITaskItem OutputEntryPoint { get; set; }
         #endregion
 
-        // Suppress MSBuildTask0005 around Execute because the transitive analyzer reports
-        // on the task entry point, not on the LauncherBuilder.Build call below. The
-        // LauncherBuilder.Build paths are safe here:
-        // File.OpenRead is in a dead branch; File.Copy/Get/SetAttributes/CreateDirectory all
-        // receive absolute paths derived from AbsolutePath.Value.
-#pragma warning disable MSBuildTask0005
+        // MSBuildTask0005 (transitive unsafe API) is reported here by the call-graph analyzer
+        // because ResourceUpdater.UpdateResources contains a File.OpenRead call. That branch
+        // only executes when ResourceUpdater._fileResources is non-empty, which happens only
+        // via AddFileResource — and AddFileResource is called exclusively from
+        // BootstrapperBuilder, never from LauncherBuilder (which uses AddStringResource only).
+        // All other I/O reachable from this task — File.Copy, File.Get/SetAttributes,
+        // Directory.CreateDirectory, FileSystems.Default.FileExists/DirectoryExists — receives
+        // an AbsolutePath.Value, and Util.GetDefaultPath is called with an explicit project-
+        // scoped fallback (TaskEnvironment.ProjectDirectory.Value) instead of
+        // Directory.GetCurrentDirectory(). The warning is left unsuppressed so the analyzer
+        // can be improved to track data-flow reachability; see analyzer issue (to be filed).
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -58,12 +63,10 @@ namespace Microsoft.Build.Tasks
             if (LauncherPath == null)
             {
                 // Launcher lives next to ClickOnce bootstrapper.
-                // GetDefaultPath obtains the root ClickOnce boostrapper path.
-                // Pass the project directory as the fallback so we don't depend on
-                // the process-wide current directory in multithreaded execution.
-                string fallbackPath = TaskEnvironment.ProjectDirectory.Value;
+                // Use the TaskEnvironment overload of GetDefaultPath so the fallback is the
+                // project directory rather than the process-wide current directory.
                 LauncherPath = Path.Combine(
-                    Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion, fallbackPath),
+                    Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion, TaskEnvironment),
                     ENGINE_PATH,
                     LAUNCHER_EXE);
             }
@@ -75,7 +78,7 @@ namespace Microsoft.Build.Tasks
 
             AbsolutePath outputPath = string.IsNullOrEmpty(OutputPath) ? default : TaskEnvironment.GetAbsolutePath(OutputPath);
 
-            var launcherBuilder = new LauncherBuilder(LauncherPath) { TaskEnvironment = TaskEnvironment };
+            var launcherBuilder = new LauncherBuilder(LauncherPath, TaskEnvironment);
             string entryPointFileName = Path.GetFileName(EntryPoint.ItemSpec);
 
             // If the EntryPoint specified is apphost.exe or singlefilehost.exe, we need to replace the EntryPoint
@@ -115,6 +118,5 @@ namespace Microsoft.Build.Tasks
 
             return !Log.HasLoggedErrors;
         }
-#pragma warning restore MSBuildTask0005
     }
 }
