@@ -236,12 +236,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return path;
             }
 
-            // if not unc or url then it must be a local disk path...
-            // Use AbsolutePath to root the path against the project's base directory instead of the
-            // process current directory. GetCanonicalForm() preserves the canonicalization that
-            // Path.GetFullPath performed previously. FormatUrl performs an explicit Windows-only
-            // whitespace check before calling into this helper to preserve the historical
-            // ArgumentException raised by Path.GetFullPath(" ") on Windows.
+            // If not UNC or URL then treat as a local disk path. Root the (possibly relative)
+            // path against the supplied base directory rather than the process current directory
+            // so the resolution is deterministic under multithreaded task execution, and return
+            // its canonical (fully qualified, normalized) form. FormatUrl rejects whitespace-only
+            // inputs on Windows before reaching this method, since AbsolutePath would otherwise
+            // silently trim trailing whitespace and absolutize "baseDirectory\ " to baseDirectory.
             return new AbsolutePath(path, baseDirectory).GetCanonicalForm();
         }
 

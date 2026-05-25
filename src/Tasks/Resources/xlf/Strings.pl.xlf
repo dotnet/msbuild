@@ -564,6 +564,11 @@
         <target state="translated">MSB3541: {0} zawiera nieprawidłową wartość „{1}”. {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
       </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="new">MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</target>
+        <note>{StrBegin="MSB4311: "}</note>
+      </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
         <target state="translated">MSB3102: Nie można usunąć pliku stanu „{0}”. {1}</target>
@@ -1992,7 +1997,8 @@
         <source>Application Configuration file path cannot be empty.</source>
         <target state="new">Application Configuration file path cannot be empty.</target>
         <note>This message can be used as the {1} in MSB3249</note>
-      </trans-unit>      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>
         <target state="translated">MSB3250: Plik „{0}” zostanie zignorowany, ponieważ nie można go odczytać. Plik ten został przekazany do parametru InstalledAssemblyTables lub znaleziony podczas przeszukiwania folderu {1} określonego w parametrze TargetFrameworkDirectories. {2}</target>
         <note>{StrBegin="MSB3250: "}</note>

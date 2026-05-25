@@ -79,11 +79,12 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// The URL to format is white space.
-        /// FormatUrl explicitly throws <see cref="ArgumentException"/> on Windows for whitespace-only
-        /// input to replicate the historical contract of <see cref="Path.GetFullPath(string)"/>,
-        /// which was lost when the task migrated to multithreaded execution (relative paths are now
+        /// FormatUrl explicitly fails on Windows for whitespace-only input because whitespace-only
+        /// paths are not valid on Windows file systems. This guard preserves the historical
+        /// rejection behavior previously raised by <see cref="Path.GetFullPath(string)"/>, which
+        /// was lost when the task migrated to multithreaded execution (relative paths are now
         /// resolved against the project directory via AbsolutePath, which would otherwise silently
-        /// trim trailing whitespace and mask the original error).
+        /// trim trailing whitespace and mask the error).
         /// </summary>
         [WindowsOnlyFact]
         public void WhitespaceTestOnWindows()
@@ -91,7 +92,8 @@ namespace Microsoft.Build.UnitTests
             var t = GetFormatUrlUnderTest();
 
             t.InputUrl = " ";
-            Should.Throw<ArgumentException>(() => t.Execute());
+            t.Execute().ShouldBeFalse();
+            ((MockEngine)t.BuildEngine).AssertLogContains("MSB4311");
         }
 
         /// <summary>
@@ -99,12 +101,12 @@ namespace Microsoft.Build.UnitTests
         /// fires even when the task is wired up to a real <see cref="TaskEnvironment"/> with an
         /// isolated project directory (i.e. the multithreaded execution path). Without the guard,
         /// the input would silently absolutize against the project directory and lose the
-        /// historical <see cref="ArgumentException"/> contract from <see cref="Path.GetFullPath(string)"/>.
-        /// Uses a single-space input which is the canonical case that <see cref="Path.GetFullPath(string)"/>
-        /// rejects with <see cref="ArgumentException"/> across all supported .NET runtimes on Windows.
+        /// historical rejection behavior.
+        /// Uses a single-space input which is the canonical case rejected on Windows across all
+        /// supported .NET runtimes.
         /// </summary>
         [WindowsOnlyFact]
-        public void WhitespaceInputThrowsOnWindowsWithIsolatedProjectDirectory()
+        public void WhitespaceInputFailsOnWindowsWithIsolatedProjectDirectory()
         {
             using TestEnvironment env = TestEnvironment.Create(_out);
             TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
@@ -114,14 +116,16 @@ namespace Microsoft.Build.UnitTests
             // resolve "projectDir\ " to projectDir on Windows and hide the historical error).
             projectFolder.Path.ShouldNotBe(Environment.CurrentDirectory);
 
+            var engine = new MockEngine(_out);
             var t = new FormatUrl
             {
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolder.Path),
-                BuildEngine = new MockEngine(_out),
+                BuildEngine = engine,
                 InputUrl = " ",
             };
 
-            Should.Throw<ArgumentException>(() => t.Execute());
+            t.Execute().ShouldBeFalse();
+            engine.AssertLogContains("MSB4311");
         }
 
         /// <summary>
@@ -254,6 +258,42 @@ namespace Microsoft.Build.UnitTests
 
             t.Execute().ShouldBeTrue();
             t.OutputUrl.ShouldBe(new Uri(projectFolder.Path).AbsoluteUri);
+        }
+
+        /// <summary>
+        /// Two <see cref="FormatUrl"/> instances configured with different
+        /// <see cref="TaskEnvironment.ProjectDirectory"/> values resolve the same relative input
+        /// independently, each against its own project directory. Locks in the multithreaded-safety
+        /// contract: relative-path resolution must derive from the per-task <see cref="TaskEnvironment"/>
+        /// rather than any process-wide state (the original bug class motivating the migration).
+        /// </summary>
+        [Fact]
+        public void RelativePathResolvesIndependentlyAcrossInstances()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_out);
+            TransientTestFolder projectFolderA = env.CreateFolder(createFolder: true);
+            TransientTestFolder projectFolderB = env.CreateFolder(createFolder: true);
+
+            projectFolderA.Path.ShouldNotBe(projectFolderB.Path);
+
+            var taskA = new FormatUrl
+            {
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolderA.Path),
+                BuildEngine = new MockEngine(_out),
+                InputUrl = @".",
+            };
+            var taskB = new FormatUrl
+            {
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolderB.Path),
+                BuildEngine = new MockEngine(_out),
+                InputUrl = @".",
+            };
+
+            taskA.Execute().ShouldBeTrue();
+            taskB.Execute().ShouldBeTrue();
+
+            taskA.OutputUrl.ShouldBe(new Uri(projectFolderA.Path).AbsoluteUri);
+            taskB.OutputUrl.ShouldBe(new Uri(projectFolderB.Path).AbsoluteUri);
         }
     }
 }
