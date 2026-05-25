@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -56,41 +55,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Absolutizes <paramref name="path"/> using <see cref="TaskEnvironment.GetAbsolutePath"/>.
-        /// Returns <see langword="default"/> if <paramref name="path"/> is null, empty, or invalid.
-        /// When the path is invalid (i.e. <see cref="TaskEnvironment.GetAbsolutePath"/> throws
-        /// <see cref="ArgumentException"/>) and <paramref name="log"/> is supplied, a low-importance
-        /// diagnostic is logged so the swallowed failure is still discoverable.
-        /// </summary>
-        internal static AbsolutePath GetAbsolutePathIfValid(this TaskEnvironment taskEnvironment, string path, TaskLoggingHelper? log = null)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return default;
-            }
-
-            try
-            {
-                return taskEnvironment.GetAbsolutePath(path);
-            }
-            catch (ArgumentException e)
-            {
-                log?.LogMessageFromResources(MessageImportance.Low, "General.FailedToAbsolutizePath", path, e.Message);
-                return default;
-            }
-        }
-
-        /// <summary>
-        /// Absolutizes <paramref name="path"/> before checking whether the directory exists.
-        /// Invalid paths return <see langword="false"/> rather than throwing.
-        /// </summary>
-        internal static bool DirectoryExists(this TaskEnvironment taskEnvironment, string path, TaskLoggingHelper? log = null)
-        {
-            AbsolutePath absolutePath = taskEnvironment.GetAbsolutePathIfValid(path, log);
-            return absolutePath.Value != null && FileSystems.Default.DirectoryExists(absolutePath);
         }
 
         /// <summary>

@@ -127,9 +127,12 @@ namespace Microsoft.Build.Tasks
         protected override bool ValidateParameters()
         {
             // Verify that a path for the tool exists -- if the tool doesn't exist in it
-            // we'll worry about that later
-            if ((string.IsNullOrEmpty(ToolPath) || !TaskEnvironment.DirectoryExists(ToolPath, Log)) &&
-                (string.IsNullOrEmpty(SdkToolsPath) || !TaskEnvironment.DirectoryExists(SdkToolsPath, Log)))
+            // we'll worry about that later. ToolPath and SdkToolsPath are alternative locations;
+            // an unset (null/empty) value just means "not configured" and is not an error on its
+            // own -- only failing to find the tool in *either* location is. A non-empty path that
+            // cannot be absolutized (e.g. contains illegal characters) is unusable, so we log a
+            // low-importance diagnostic to make the swallowed failure discoverable.
+            if (!IsToolDirectoryConfigured(ToolPath) && !IsToolDirectoryConfigured(SdkToolsPath))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -142,6 +145,27 @@ namespace Microsoft.Build.Tasks
                 return base.ValidateParameters();
             }
             return false;
+        }
+
+        private bool IsToolDirectoryConfigured(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return false;
+            }
+
+            AbsolutePath absolutePath;
+            try
+            {
+                absolutePath = TaskEnvironment.GetAbsolutePath(path);
+            }
+            catch (ArgumentException e)
+            {
+                Log.LogMessageFromResources(MessageImportance.Low, "General.FailedToAbsolutizePath", path, e.Message);
+                return false;
+            }
+
+            return FileSystems.Default.DirectoryExists(absolutePath);
         }
 
         /// <summary>
@@ -158,9 +182,7 @@ namespace Microsoft.Build.Tasks
             // throw an error.
             //
             // So use /publickey if that's all our KeyFile contains, but KeyFile otherwise.
-            // The KeyFile path is passed verbatim to the spawned tool; ToolTask sets the child
-            // process's WorkingDirectory to the project directory (via TaskEnvironment), so the
-            // tool resolves relative paths correctly without us absolutizing here.
+            // Relative paths are allowed in the KeyFile path.
             if (_delaySigningAndKeyFileOnlyContainsPublicKey)
             {
                 commandLine.AppendSwitchIfNotNull("/publickey:", KeyFile);

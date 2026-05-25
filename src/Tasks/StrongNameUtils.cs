@@ -136,19 +136,11 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given a key file or container, extract private/public key data. Reused from vsdesigner code.
+        /// <see cref="AbsolutePath"/> overload of <see cref="GetStrongNameKey(TaskLoggingHelper, string, string, out StrongNameKeyPair, out byte[])"/>,
+        /// for callers that have already resolved the key file to an absolute path.
         /// </summary>
         internal static void GetStrongNameKey(TaskLoggingHelper log, AbsolutePath keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
-        {
-            if (!string.IsNullOrEmpty(keyContainer) || string.IsNullOrEmpty(keyFile))
-            {
-                GetStrongNameKey(log, keyFile.OriginalValue, keyContainer, out keyPair, out publicKey);
-            }
-            else
-            {
-                ReadKeyFile(log, keyFile, out keyPair, out publicKey);
-            }
-        }
+            => GetStrongNameKey(log, keyFile.Value, keyContainer, out keyPair, out publicKey);
 
         /// <summary>
         /// Given an assembly path, determine if the assembly is [delay] signed or not.

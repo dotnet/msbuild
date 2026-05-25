@@ -333,10 +333,10 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
             };
 
-            // Process CWD intentionally differs from projectDir. With the multithreaded fix
-            // the relative KeyFile resolves via TaskEnvironment.ProjectDirectory, so the
-            // "InvalidKeyFileSpecified" error must not be logged; the task should instead
-            // proceed and fail because the file is not a valid key pair.
+            // Precondition: process CWD must differ from projectDir, otherwise this test
+            // would pass trivially without exercising the TaskEnvironment-based resolution.
+            Assert.NotEqual(projectDir, Environment.CurrentDirectory);
+
             MockEngine e = new MockEngine();
             t.BuildEngine = e;
             t.Execute().ShouldBeFalse();
@@ -365,9 +365,13 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
             };
 
-            // Process CWD intentionally differs from projectDir. With the multithreaded fix
-            // the relative ToolPath resolves via TaskEnvironment.ProjectDirectory, so the
-            // "SdkOrToolPathNotSpecifiedOrInvalid" error must not be logged.
+            // Precondition: process CWD must differ from projectDir, otherwise this test
+            // would pass trivially without exercising the TaskEnvironment-based resolution.
+            Assert.NotEqual(projectDir, Environment.CurrentDirectory);
+
+            // With the multithreaded fix the relative ToolPath resolves via
+            // TaskEnvironment.ProjectDirectory, so the "SdkOrToolPathNotSpecifiedOrInvalid"
+            // error must not be logged.
             MockEngine e = new MockEngine();
             t.BuildEngine = e;
             t.Execute().ShouldBeFalse(); // task still fails for other reasons (missing tool exe)
