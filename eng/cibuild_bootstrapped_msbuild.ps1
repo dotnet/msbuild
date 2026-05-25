@@ -85,11 +85,18 @@ try {
   else
   {
     $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
-    $globalJsonPath = Join-Path $PSScriptRoot "..\global.json"
-    $bootstrapSdkVersion = (Get-Content $globalJsonPath -Raw | ConvertFrom-Json).tools.dotnet
-    if ([string]::IsNullOrWhiteSpace($bootstrapSdkVersion)) {
-      throw "Could not read tools.dotnet from $globalJsonPath."
+
+    # Read the resolved BootstrapSdkVersion (which is Max(hardcoded floor, NETCoreSdkVersion))
+    # from the MSBuild.Bootstrap project itself. This is the same project that drove the
+    # stage1 bootstrap layout, so the value here matches the on-disk sdk\<version> directory.
+    # User properties are forwarded so that explicit /p:BootstrapSdkVersion=... overrides
+    # used during stage1 are honored.
+    $bootstrapCsproj = Join-Path $RepoRoot "src\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj"
+    $bootstrapSdkVersion = & $dotnetExePath msbuild $bootstrapCsproj "-getProperty:BootstrapSdkVersion" -nologo @properties
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($bootstrapSdkVersion)) {
+      throw "Could not resolve BootstrapSdkVersion from $bootstrapCsproj."
     }
+    $bootstrapSdkVersion = $bootstrapSdkVersion.Trim()
     $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
     $buildToolFramework = "net"
 

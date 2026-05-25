@@ -68,18 +68,19 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  global_json="$script_dir/../global.json"
-  # Prefer jq for proper JSON parsing; fall back to grep/sed on environments where jq is not installed.
-  # The grep/sed fallback matches the first "dotnet": "..." value in global.json, which in practice
-  # is always tools.dotnet since that is the only top-level "dotnet" key in the file.
-  if command -v jq &> /dev/null; then
-    sdk_version=$(jq -r '.tools.dotnet' "$global_json")
-  else
-    sdk_version=$(grep -o '"dotnet"[[:space:]]*:[[:space:]]*"[^"]*"' "$global_json" | head -1 | sed 's/.*"dotnet"[[:space:]]*:[[:space:]]*"\([^"]*\)"/\1/')
+  # Read the resolved BootstrapSdkVersion (Max(hardcoded floor, NETCoreSdkVersion))
+  # from the same project that drove the stage1 bootstrap layout, so the value here
+  # matches the on-disk sdk/<version> directory. User properties are forwarded so
+  # /p:BootstrapSdkVersion=... overrides used during stage1 are honored.
+  bootstrap_csproj="$RepoRoot/src/MSBuild.Bootstrap/MSBuild.Bootstrap.csproj"
+  if ! sdk_version_raw=$("$_InitializeDotNetCli/dotnet" msbuild "$bootstrap_csproj" -getProperty:BootstrapSdkVersion -nologo $properties 2>&1); then
+    echo "ERROR: Failed to invoke 'dotnet msbuild -getProperty:BootstrapSdkVersion' on $bootstrap_csproj:" >&2
+    echo "$sdk_version_raw" >&2
+    exit 1
   fi
-  if [ -z "$sdk_version" ] || [ "$sdk_version" = "null" ]; then
-    echo "ERROR: Could not read tools.dotnet from $global_json." >&2
+  sdk_version=$(echo "$sdk_version_raw" | tr -d '[:space:]')
+  if [ -z "$sdk_version" ]; then
+    echo "ERROR: Could not resolve BootstrapSdkVersion from $bootstrap_csproj." >&2
     exit 1
   fi
 

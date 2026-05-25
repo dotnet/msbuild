@@ -17,4 +17,22 @@
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapBinaryDestination>$(BootstrapDestination)</BootstrapBinaryDestination>
   </PropertyGroup>
+
+  <!--
+       Ensure BootstrapSdkVersion is never older than the SDK version delivered
+       by global.json. NETCoreSdkVersion is set by Microsoft.NETCoreSdk.BundledVersions.props
+       (imported transitively from Microsoft.NET.Sdk), so it reflects the SDK
+       resolving this project. The hardcoded floor in eng/Versions.props remains
+       authoritative when it is higher (allowing pinning to a NEWER SDK), but
+       global.json bumps automatically flow through without needing a second edit.
+
+       Note: [MSBuild]::VersionGreaterThan uses MSBuild's SimpleVersion which
+       compares only the numeric components (Major.Minor.Build.Revision) and
+       discards any SemVer prerelease/build suffix, so e.g. "10.0.0-preview.1"
+       and "10.0.0-preview.7" compare equal. Bootstrap SDKs are stable in
+       practice, so this is acceptable.
+  -->
+  <PropertyGroup Condition="'$(NETCoreSdkVersion)' != ''">
+    <BootstrapSdkVersion Condition="$([MSBuild]::VersionGreaterThan('$(NETCoreSdkVersion)', '$(BootstrapSdkVersion)'))">$(NETCoreSdkVersion)</BootstrapSdkVersion>
+  </PropertyGroup>
 </Project>
