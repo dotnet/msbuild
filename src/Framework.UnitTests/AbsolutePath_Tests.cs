@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
         // Plain relative input — anchored to basePath via Path.Combine, never touches CWD.
         [InlineData(@"C:\proj", @"foo", @"C:\proj\foo")]
         [InlineData(@"C:\proj", @"sub\file.txt", @"C:\proj\sub\file.txt")]
-        public void GetCanonicalForm_WindowsRootedButNotFullyQualifiedPath_AnchorsToBasePath_NotProcessState(string baseDir, string input, string expected)
+        public void AnchorsToBasePath_NotProcessState(string baseDir, string input, string expected)
         {
             var basePath = new AbsolutePath(baseDir);
             var combined = new AbsolutePath(input, basePath);
