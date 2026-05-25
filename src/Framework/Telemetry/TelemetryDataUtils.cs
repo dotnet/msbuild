@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
@@ -59,137 +57,6 @@ namespace Microsoft.Build.Framework.Telemetry
         }
 
         /// <summary>
-        /// Event name for per-task execution details emitted via TelemetryEventArgs.
-        /// Uses a separate event name so per-task details are distinguishable from
-        /// the per-project aggregated "build/tasks" telemetry event.
-        /// </summary>
-        internal const string TasksDetailsEventName = "build/tasks/details";
-
-        /// <summary>
-        /// Maximum number of individual task details to include in TelemetryEventArgs-based telemetry.
-        /// </summary>
-        private const int MaxTaskDetailsForTelemetryEvent = 100;
-
-        /// <summary>
-        /// Thin serialization wrapper around the shared <see cref="GetTasksDetails"/> for the
-        /// TelemetryEventArgs/CLI path. Produces the same data that the Activity/VS path gets
-        /// via <see cref="AsActivityDataHolder"/>, but as a JSON array in a single "Tasks" property
-        /// for easy Kusto <c>mv-expand</c>.
-        /// </summary>
-        internal static Dictionary<string, string>? GetTasksDetailsProperties(this IWorkerNodeTelemetryData? telemetryData)
-        {
-            if (telemetryData is null || telemetryData.TasksExecutionData.Count == 0)
-            {
-                return null;
-            }
-
-            List<TaskDetailInfo> allTasks = GetTasksDetails(telemetryData.TasksExecutionData);
-            List<TaskDetailInfo> topTasks = allTasks
-                .OrderByDescending(t => t.ExecutionsCount)
-                .Take(MaxTaskDetailsForTelemetryEvent)
-                .ToList();
-
-            var properties = new Dictionary<string, string>(3)
-            {
-                ["TaskCount"] = topTasks.Count.ToString(CultureInfo.InvariantCulture),
-                ["TotalTaskCount"] = allTasks.Count.ToString(CultureInfo.InvariantCulture),
-                ["Tasks"] = SerializeTaskDetailsToJson(topTasks),
-            };
-
-            return properties;
-        }
-
-        /// <summary>
-        /// Serializes task details to a JSON array string using StringBuilder.
-        /// Manual construction avoids System.Text.Json dependency on netstandard2.0.
-        /// </summary>
-        private static string SerializeTaskDetailsToJson(List<TaskDetailInfo> tasks)
-        {
-            var sb = new StringBuilder();
-            sb.Append('[');
-
-            for (int i = 0; i < tasks.Count; i++)
-            {
-                if (i > 0)
-                {
-                    sb.Append(',');
-                }
-
-                TaskDetailInfo t = tasks[i];
-                sb.Append('{');
-                AppendJsonProperty(sb, "Name", t.Name, isFirst: true);
-                AppendJsonProperty(sb, "ExecutionsCount", t.ExecutionsCount);
-                AppendJsonProperty(sb, "TotalMilliseconds", t.TotalMilliseconds);
-                AppendJsonProperty(sb, "TotalMemoryBytes", t.TotalMemoryBytes);
-                AppendJsonProperty(sb, "IsCustom", t.IsCustom);
-                AppendJsonProperty(sb, "IsNuget", t.IsNuget);
-
-                if (t.FactoryName is not null)
-                {
-                    AppendJsonProperty(sb, "FactoryName", t.FactoryName);
-                }
-
-                if (t.TaskHostRuntime is not null)
-                {
-                    AppendJsonProperty(sb, "TaskHostRuntime", t.TaskHostRuntime);
-                }
-
-                sb.Append('}');
-            }
-
-            sb.Append(']');
-            return sb.ToString();
-        }
-
-        private static void AppendJsonProperty(StringBuilder sb, string name, string value, bool isFirst = false)
-        {
-            if (!isFirst)
-            {
-                sb.Append(',');
-            }
-
-            sb.Append('"').Append(name).Append("\":\"");
-            AppendJsonEscaped(sb, value);
-            sb.Append('"');
-        }
-
-        private static void AppendJsonProperty(StringBuilder sb, string name, int value)
-        {
-            sb.Append(",\"").Append(name).Append("\":").Append(value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private static void AppendJsonProperty(StringBuilder sb, string name, long value)
-        {
-            sb.Append(",\"").Append(name).Append("\":").Append(value.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private static void AppendJsonProperty(StringBuilder sb, string name, double value)
-        {
-            sb.Append(",\"").Append(name).Append("\":").Append(value.ToString("F1", CultureInfo.InvariantCulture));
-        }
-
-        private static void AppendJsonProperty(StringBuilder sb, string name, bool value)
-        {
-            sb.Append(",\"").Append(name).Append("\":").Append(value ? "true" : "false");
-        }
-
-        private static void AppendJsonEscaped(StringBuilder sb, string value)
-        {
-            foreach (char c in value)
-            {
-                switch (c)
-                {
-                    case '"': sb.Append("\\\""); break;
-                    case '\\': sb.Append("\\\\"); break;
-                    case '\n': sb.Append("\\n"); break;
-                    case '\r': sb.Append("\\r"); break;
-                    case '\t': sb.Append("\\t"); break;
-                    default: sb.Append(c); break;
-                }
-            }
-        }
-
-        /// <summary>
         /// Converts targets details to a list of custom objects for telemetry.
         /// </summary>
         private static List<TargetDetailInfo> GetTargetsDetails(Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsDetails)
@@ -219,7 +86,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Converts tasks details to a list of custom objects for telemetry.
         /// </summary>
-        private static List<TaskDetailInfo> GetTasksDetails(
+        internal static List<TaskDetailInfo> GetTasksDetails(
             Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksDetails)
         {
             var result = new List<TaskDetailInfo>();

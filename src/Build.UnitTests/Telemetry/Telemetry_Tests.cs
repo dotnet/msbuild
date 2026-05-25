@@ -18,6 +18,7 @@ using Shouldly;
 using Xunit;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 using static Microsoft.Build.Framework.Telemetry.TelemetryDataUtils;
+using static Microsoft.Build.TelemetryInfra.TasksDetailsTelemetry;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -651,6 +652,75 @@ namespace Microsoft.Build.Engine.UnitTests
             first.GetProperty("IsNuget").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.False);
         }
 
+        [Fact]
+        public void GetTasksDetailsProperties_OmitsNullFactoryNameAndTaskHostRuntime()
+        {
+            // Both FactoryName and TaskHostRuntime are null - they should be omitted from JSON,
+            // not emitted as null. This locks in JsonIgnoreCondition.WhenWritingNull behavior.
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(500), 10, 2048, null, null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+            using var doc = System.Text.Json.JsonDocument.Parse(properties!["Tasks"]);
+            var task = doc.RootElement[0];
+
+            task.TryGetProperty("FactoryName", out _).ShouldBeFalse();
+            task.TryGetProperty("TaskHostRuntime", out _).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_EscapesSpecialCharactersInFactoryName()
+        {
+            // Custom factory names are hashed (so they don't contain special chars in practice),
+            // but a built-in factory name with embedded quotes or backslashes must still round-trip
+            // through JSON without producing invalid output.
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(1), 1, 0, "Factory\"with\\special\nchars", null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+
+            // The hashed factory-name pipeline only hashes non-known factories, so this value gets hashed.
+            // What we care about here: the resulting JSON must parse cleanly regardless of input.
+            using var doc = System.Text.Json.JsonDocument.Parse(properties!["Tasks"]);
+            doc.RootElement.GetArrayLength().ShouldBe(1);
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_EmitsNumericAndBooleanFieldsAsJsonPrimitives()
+        {
+            // Guards against regressions where numbers/bools could be accidentally serialized as strings
+            // (e.g. via a custom JsonConverter). The SDK consumer parses these as numbers in Kusto.
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                // Use ticks (1 ms = 10_000 ticks) so the fractional millisecond value round-trips on both
+                // net472 (where TimeSpan.FromMilliseconds(double) rounds to whole ms) and net10.
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, true), new TaskExecutionStats(TimeSpan.FromTicks(1234000), 7, 8192, "AssemblyTaskFactory", null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+            using var doc = System.Text.Json.JsonDocument.Parse(properties!["Tasks"]);
+            var task = doc.RootElement[0];
+
+            task.GetProperty("ExecutionsCount").GetInt32().ShouldBe(7);
+            task.GetProperty("TotalMemoryBytes").GetInt64().ShouldBe(8192);
+            task.GetProperty("TotalMilliseconds").GetDouble().ShouldBe(123.4);
+            task.GetProperty("IsCustom").GetBoolean().ShouldBeFalse();
+            task.GetProperty("IsNuget").GetBoolean().ShouldBeTrue();
+        }
+
 #if NET
         [Fact]
         public void BuildManager_EmitsTasksDetailsTelemetryEvent()
@@ -683,7 +753,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Find the tasks details telemetry event
             var tasksDetailsEvent = logger.TelemetryEvents
-                .FirstOrDefault(e => e.EventName == TelemetryDataUtils.TasksDetailsEventName);
+                .FirstOrDefault(e => e.EventName == TasksDetailsTelemetry.TasksDetailsEventName);
             tasksDetailsEvent.ShouldNotBeNull();
 
             // Verify top-level properties

@@ -1170,7 +1170,7 @@ namespace Microsoft.Build.Execution
                                 Dictionary<string, string>? tasksDetailsProperties = _telemetryConsumingLogger?.WorkerNodeTelemetryData.GetTasksDetailsProperties();
                                 if (tasksDetailsProperties is not null)
                                 {
-                                    loggingService.LogTelemetry(buildEventContext: null, TelemetryDataUtils.TasksDetailsEventName, tasksDetailsProperties);
+                                    loggingService.LogTelemetry(buildEventContext: null, TasksDetailsTelemetry.TasksDetailsEventName, tasksDetailsProperties);
                                 }
                             }
 
