@@ -535,8 +535,11 @@ namespace Microsoft.Build.Engine.UnitTests
             data.GetTasksDetailsProperties().ShouldBeNull();
         }
 
-        [Fact]
-        public void GetTasksDetailsProperties_ProducesCorrectProperties()
+        /// <summary>
+        /// Standard three-task fixture used by the <c>GetTasksDetailsProperties_*</c> tests:
+        /// Copy (10 executions), Csc (5 executions), and a custom task (3 executions).
+        /// </summary>
+        private static Dictionary<string, string> BuildThreeTaskFixtureProperties()
         {
             var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
             {
@@ -545,38 +548,51 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("MyCustomTask", true, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(100), 3, 512, "MyCompany.Factory", null) },
             };
             var data = new WorkerNodeTelemetryData(tasksData, []);
-
             Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
-
             properties.ShouldNotBeNull();
-            properties!["TaskCount"].ShouldBe("3");
-            properties["TotalTaskCount"].ShouldBe("3");
+            return properties!;
+        }
 
-            // Parse the JSON Tasks property
-            properties.ShouldContainKey("Tasks");
+        [Fact]
+        public void GetTasksDetailsProperties_ReportsTaskCounts()
+        {
+            Dictionary<string, string> properties = BuildThreeTaskFixtureProperties();
+
+            properties["TaskCount"].ShouldBe("3");
+            properties["TotalTaskCount"].ShouldBe("3");
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_OrdersTasksByExecutionsCountDescending()
+        {
+            Dictionary<string, string> properties = BuildThreeTaskFixtureProperties();
+
             using var doc = System.Text.Json.JsonDocument.Parse(properties["Tasks"]);
             var tasks = doc.RootElement;
             tasks.ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Array);
             tasks.GetArrayLength().ShouldBe(3);
 
-            // Tasks should be ordered by ExecutionsCount descending. Copy (10) is first.
-            var first = tasks[0];
-            first.GetProperty("Name").GetString().ShouldBe("Microsoft.Build.Tasks.Copy");
-            first.GetProperty("ExecutionsCount").GetInt32().ShouldBe(10);
+            tasks[0].GetProperty("Name").GetString().ShouldBe("Microsoft.Build.Tasks.Copy");
+            tasks[0].GetProperty("ExecutionsCount").GetInt32().ShouldBe(10);
 
-            // Second is Csc (5)
-            var second = tasks[1];
-            second.GetProperty("Name").GetString().ShouldBe("Microsoft.Build.Tasks.Csc");
-            second.GetProperty("ExecutionsCount").GetInt32().ShouldBe(5);
+            tasks[1].GetProperty("Name").GetString().ShouldBe("Microsoft.Build.Tasks.Csc");
+            tasks[1].GetProperty("ExecutionsCount").GetInt32().ShouldBe(5);
 
-            // Third is custom task (3) - name should be hashed
-            var third = tasks[2];
-            third.GetProperty("Name").GetString().ShouldBe(GetHashed("MyCustomTask"));
-            third.GetProperty("ExecutionsCount").GetInt32().ShouldBe(3);
-            third.GetProperty("IsCustom").GetBoolean().ShouldBeTrue();
+            tasks[2].GetProperty("ExecutionsCount").GetInt32().ShouldBe(3);
+        }
 
-            // Custom factory name should be hashed
-            third.GetProperty("FactoryName").GetString().ShouldBe(GetHashed("MyCompany.Factory"));
+        [Fact]
+        public void GetTasksDetailsProperties_HashesCustomTaskAndFactoryNames()
+        {
+            Dictionary<string, string> properties = BuildThreeTaskFixtureProperties();
+
+            using var doc = System.Text.Json.JsonDocument.Parse(properties["Tasks"]);
+            // Custom task is sorted last (lowest ExecutionsCount).
+            var customTask = doc.RootElement[2];
+
+            customTask.GetProperty("IsCustom").GetBoolean().ShouldBeTrue();
+            customTask.GetProperty("Name").GetString().ShouldBe(GetHashed("MyCustomTask"));
+            customTask.GetProperty("FactoryName").GetString().ShouldBe(GetHashed("MyCompany.Factory"));
         }
 
         [Fact]
