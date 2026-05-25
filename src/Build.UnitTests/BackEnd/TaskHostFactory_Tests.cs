@@ -103,7 +103,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         // that motivated #13828.
                         // TELEMETRY: elapsedMs is still logged so future regressions are visible
                         // in the test output without another bump.
-                        const int TaskHostExitTimeoutMs = 2000;
+                        const int TaskHostExitTimeoutMs = 5000;
                         Stopwatch sw = Stopwatch.StartNew();
                         bool exited = taskHostNode.WaitForExit(TaskHostExitTimeoutMs);
                         sw.Stop();
