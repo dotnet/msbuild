@@ -13,6 +13,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32.Foundation;
+#endif
 
 #nullable disable
 
@@ -1030,7 +1033,9 @@ namespace Microsoft.Build.Tasks
                             int code = Marshal.GetHRForException(e);
 
                             LogAlwaysRetryDiagnosticFromResources("Copy.IOException", e.ToString(), sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue, code);
-                            if (code == NativeMethods.ERROR_ACCESS_DENIED)
+#if FEATURE_WINDOWSINTEROP
+                            // HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_ACCESS_DENIED)
+                            if (code == (int)(HRESULT)WIN32_ERROR.ERROR_ACCESS_DENIED)
                             {
                                 // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
                                 // In either case, that's likely not a race, and retrying won't help.
@@ -1051,11 +1056,13 @@ namespace Microsoft.Build.Tasks
                                     LogAlwaysRetryDiagnosticFromResources("Copy.RetryingOnAccessDenied");
                                 }
                             }
-                            else if (code == NativeMethods.ERROR_INVALID_FILENAME)
+                            // HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_INVALID_NAME) -- illegal characters in name
+                            else if (code == (int)(HRESULT)WIN32_ERROR.ERROR_INVALID_NAME)
                             {
                                 // Invalid characters used in file name; no point retrying.
                                 throw;
                             }
+#endif
 
                             if (e is UnauthorizedAccessException)
                             {

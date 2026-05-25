@@ -110,6 +110,33 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripLoggersRegisteredEventArgs()
+        {
+            var args = new LoggersRegisteredEventArgs(new List<RegisteredLoggerInfo>
+            {
+                new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }),
+                new RegisteredLoggerInfo("BinaryLogger"),
+                new RegisteredLoggerInfo(
+                    "ConsoleLogger",
+                    outputFilePaths: null,
+                    verbosity: LoggerVerbosity.Detailed,
+                    parameters: "ShowTimestamp;ShowEventId"),
+                new RegisteredLoggerInfo(
+                    "MultiFileLogger",
+                    outputFilePaths: new[] { @"C:\logs\a.log", @"C:\logs\b.log" },
+                    verbosity: LoggerVerbosity.Diagnostic,
+                    parameters: "LogFile=a.log;LogFile=b.log"),
+            });
+
+            Roundtrip(args,
+                e => e.Loggers.Count.ToString(CultureInfo.InvariantCulture),
+                e => string.Join("|", e.Loggers.Select(l => l.LoggerName)),
+                e => string.Join("|", e.Loggers.Select(l => l.Parameters ?? "<null>")),
+                e => string.Join("|", e.Loggers.Select(l => l.Verbosity?.ToString() ?? "<null>")),
+                e => string.Join("|", e.Loggers.Select(l => string.Join(",", l.OutputFilePaths))));
+        }
+
+        [Fact]
         public void RoundtripBuildSubmissionStartedEventArgs()
         {
             var globalVariables = new Dictionary<string, string>

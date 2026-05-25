@@ -162,6 +162,10 @@
   <data name="InvalidGetPathOfFileAboveParameter" xml:space="preserve">
     <value>The parameter '{0}' can only be a file name and cannot include a directory.</value>
   </data>
+  <data name="LogFileOutputPath" xml:space="preserve">
+    <value>{0} wrote to: {1}</value>
+    <comment>{0} is the logger name. {1} is a list of full file paths separated by the current culture's list separator (followed by a space).</comment>
+  </data>
   <data name="DebugPathTooLong" xml:space="preserve">
     <value>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</value>
   </data>
