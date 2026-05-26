@@ -1327,15 +1327,17 @@ internal static class NativeMethods
 
     internal static string EnsureExtendedLengthPath(string path)
     {
-        if (!IsWindows || path == null || path.Length < MAX_PATH ||
+        if (!IsWindows || path == null || HasMaxPath || path.Length < MAX_PATH ||
             path.StartsWith(@"\\?\", StringComparison.Ordinal))
         {
             return path;
         }
 
-        return path.StartsWith(@"\\", StringComparison.Ordinal)
-            ? @"\\?\UNC\" + path.Substring(2)
-            : @"\\?\" + path;
+        string normalizedPath = path.Replace('/', '\\');
+
+        return normalizedPath.StartsWith(@"\\", StringComparison.Ordinal)
+            ? @"\\?\UNC\" + normalizedPath.Substring(2)
+            : @"\\?\" + normalizedPath;
     }
 
 #if FEATURE_WINDOWSINTEROP

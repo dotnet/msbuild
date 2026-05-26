@@ -423,7 +423,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Path.OriginalValue);
                     }
 
-                    File.SetAttributes(file.Path, FileAttributes.Normal);
+                    File.SetAttributes(NativeMethodsShared.EnsureExtendedLengthPath(file.Path), FileAttributes.Normal);
                     file.Reset();
                 }
             }
