@@ -532,9 +532,9 @@ namespace Microsoft.Build.Graph
                             // and an intermediate TargetSpecification[] vs the previous
                             // .Select(...).ToArray() + AddRange pattern.
                             ref List<TargetSpecification> dest = ref targetsAreForOuterBuild ? ref targetsForOuterBuild : ref targetsForInnerBuild;
-                            dest ??= [];
                             foreach (string target in ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue))
                             {
+                                dest ??= [];
                                 dest.Add(new TargetSpecification(target, skipNonexistentTargets));
                             }
                         }

@@ -52,6 +52,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void Dedupes_WhenMarkerExpansionProducesDuplicates()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = ["Build", MSBuildConstants.DefaultTargetsMarker];
             List<string> defaultTargets = ["Build", "X"];
@@ -69,6 +71,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void Dedupes_PRTOrDefaultMarker_WhenTargetsMetadataDuplicatesExpansion()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdgeWithTargetsMetadata("A;B;A");
             string[] input = [
                 MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker,
@@ -91,6 +95,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void Dedupes_ExplicitNonMarkerDuplicates()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = ["Build", "Build", "Build"];
             List<string> defaultTargets = ["DefaultsShouldNotBeUsed"];
@@ -108,6 +114,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void Dedupes_IgnoresCase()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = ["Build", MSBuildConstants.DefaultTargetsMarker];
             List<string> defaultTargets = ["BUILD", "x"];
@@ -124,6 +132,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void NoMarkerNoDuplicates_ReturnsSameInstance()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = ["Build", "X", "Y"];
             List<string> defaultTargets = ["ShouldNotBeUsed"];
@@ -140,6 +150,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void MarkerExpanded_NoDuplicates_ReturnsExpandedList()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = [MSBuildConstants.DefaultTargetsMarker];
             List<string> defaultTargets = ["A", "B"];
@@ -156,6 +168,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void MarkerExpandsToEmptyDefaults_ReturnsEmptyList()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = [MSBuildConstants.DefaultTargetsMarker];
             List<string> defaultTargets = [];
@@ -172,6 +186,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void AllEntriesCollapseToSingleton()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = ["Build", MSBuildConstants.DefaultTargetsMarker, MSBuildConstants.DefaultTargetsMarker];
             List<string> defaultTargets = ["Build"];
@@ -188,6 +204,8 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void PreservesFirstOccurrenceOrder()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
             ProjectItemInstance edge = CreateEdge();
             string[] input = ["First", MSBuildConstants.DefaultTargetsMarker, "Last"];
             List<string> defaultTargets = ["Middle", "First"];
