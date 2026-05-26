@@ -1325,6 +1325,49 @@ internal static class NativeMethods
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
 
+    [DllImport("libc", EntryPoint = "realpath", SetLastError = true)]
+    private static extern IntPtr realpath_native(string path, IntPtr resolved);
+
+    [DllImport("libc", EntryPoint = "free")]
+    private static extern void libc_free(IntPtr ptr);
+
+    /// <summary>
+    /// Resolves <paramref name="path"/> to its canonical form via POSIX <c>realpath(3)</c>, following
+    /// symlinks. Returns <c>null</c> on Windows, on null/empty input, or when the call fails.
+    /// Unlike <see cref="System.IO.Path.GetFullPath(string)"/>, this resolves symlinks against the real
+    /// filesystem without mutating process-global state, so it is safe to call from any thread.
+    /// </summary>
+    internal static string RealPath(string path)
+    {
+        if (IsWindows || string.IsNullOrEmpty(path))
+        {
+            return null;
+        }
+
+        IntPtr ptr = IntPtr.Zero;
+        try
+        {
+            ptr = realpath_native(path, IntPtr.Zero);
+            if (ptr == IntPtr.Zero)
+            {
+                return null;
+            }
+#if NET
+            return Marshal.PtrToStringUTF8(ptr);
+#else
+            return Marshal.PtrToStringAnsi(ptr);
+#endif
+        }
+        finally
+        {
+            if (ptr != IntPtr.Zero)
+            {
+                // realpath() with NULL second arg returns a malloc()'d buffer; caller must free().
+                libc_free(ptr);
+            }
+        }
+    }
+
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
     internal static unsafe bool SetThreadErrorMode(int newMode, out int oldMode)
