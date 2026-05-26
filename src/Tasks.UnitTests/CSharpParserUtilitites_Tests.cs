@@ -411,7 +411,7 @@ class c {}")]
         [InlineData("namespace MyNamespace { public sealed record MyRecord { } }", "MyNamespace.MyRecord")]
         [InlineData("namespace MyNamespace { public record class MyRecord { } }", "MyNamespace.MyRecord")]
         [InlineData("namespace MyNamespace { record MyRecord(string Name); public static class Extensions { } }", "MyNamespace.MyRecord")]
-        public void Record(string fileContents, string expected)
+        public void RecordTypeResolution(string fileContents, string expected)
         {
             AssertParse(fileContents, expected);
         }
