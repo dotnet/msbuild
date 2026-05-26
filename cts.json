@@ -65,13 +65,19 @@
             "**/*.yml",
             "**/*.yaml",
             "**/package-lock.json",
-            "**/.npmrc",
-            "src/UnitTests.Shared/TestEnvironment.cs"
+            "**/.npmrc"
         ]
     },
     "Filter":
     {
         "Include": [
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.BuildCheck.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.CommandLine.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Engine.OM.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Engine.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Framework.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Tasks.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Utilities.UnitTests.dll",
             "artifacts/bin/**/Debug/net10.0/Microsoft.NET.StringTools.UnitTests.dll"
         ],
         "Exclude": [
