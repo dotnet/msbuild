@@ -404,6 +404,18 @@ class c {}")]
             AssertParse(fileContents, "n2.c");
         }
 
+        [Theory]
+        [InlineData("namespace MyNamespace { record MyRecord(string Name); }", "MyNamespace.MyRecord")]
+        [InlineData("namespace MyNamespace; record MyRecord(string Name);", "MyNamespace.MyRecord")]
+        [InlineData("record MyRecord(string Name);", "MyRecord")]
+        [InlineData("namespace MyNamespace { public sealed record MyRecord { } }", "MyNamespace.MyRecord")]
+        [InlineData("namespace MyNamespace { public record class MyRecord { } }", "MyNamespace.MyRecord")]
+        [InlineData("namespace MyNamespace { record MyRecord(string Name); public static class Extensions { } }", "MyNamespace.MyRecord")]
+        public void Record(string fileContents, string expected)
+        {
+            AssertParse(fileContents, expected);
+        }
+
         /*
         * Method:  AssertParse
         *
