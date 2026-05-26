@@ -261,7 +261,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     }
                                     else
                                     {
-                                        ErrorUtilities.ThrowInternalError("Incomplete header read.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
+                                        ErrorUtilities.ThrowInternalError($"Incomplete header read.  {headerBytesRead} of {headerByte.Length} bytes read");
                                     }
                                 }
 
@@ -321,7 +321,7 @@ namespace Microsoft.Build.BackEnd.Client
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError("WaitId {0} out of range.", waitId);
+                            ErrorUtilities.ThrowInternalError($"WaitId {waitId} out of range.");
                             break;
                     }
                 }

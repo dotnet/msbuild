@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
+#if NETFRAMEWORK
 using System.Runtime.InteropServices;
+#endif
 using System.Security.Principal;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -16,6 +18,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+#endif
 
 namespace Microsoft.Build.Internal;
 
@@ -78,28 +83,7 @@ internal static class CommunicationsUtilities
     /// </summary>
     private static EnvironmentState? s_environmentState;
 
-    /// <summary>
-    ///  Get environment block.
-    /// </summary>
-    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    [System.Runtime.Versioning.SupportedOSPlatform("windows6.1")]
-    private static extern unsafe char* GetEnvironmentStrings();
-
-    /// <summary>
-    ///  Free environment block.
-    /// </summary>
-    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    [System.Runtime.Versioning.SupportedOSPlatform("windows6.1")]
-    private static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
-
 #if NETFRAMEWORK
-    /// <summary>
-    ///  Set environment variable P/Invoke.
-    /// </summary>
-    [DllImport("kernel32.dll", EntryPoint = "SetEnvironmentVariable", SetLastError = true, CharSet = CharSet.Unicode)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool SetEnvironmentVariableNative(string name, string? value);
-
     /// <summary>
     ///  Sets an environment variable using P/Invoke to workaround the .NET Framework BCL implementation.
     /// </summary>
@@ -109,7 +93,7 @@ internal static class CommunicationsUtilities
     /// </remarks>
     internal static void SetEnvironmentVariable(string name, string? value)
     {
-        if (!SetEnvironmentVariableNative(name, value))
+        if (!PInvoke.SetEnvironmentVariable(name, value))
         {
             throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
         }
@@ -125,6 +109,7 @@ internal static class CommunicationsUtilities
         FrozenDictionary<string, string> EnvironmentVariables,
         ReadOnlyMemory<char> EnvironmentBlock = default);
 
+#if FEATURE_WINDOWSINTEROP
     /// <summary>
     ///  Returns key value pairs of environment variables in a new dictionary
     ///  with a case-insensitive key comparer.
@@ -146,7 +131,7 @@ internal static class CommunicationsUtilities
 
             try
             {
-                pEnvironmentBlock = GetEnvironmentStrings();
+                pEnvironmentBlock = PInvoke.GetEnvironmentStringsW();
                 if (pEnvironmentBlock == null)
                 {
                     throw new OutOfMemoryException();
@@ -241,11 +226,12 @@ internal static class CommunicationsUtilities
             {
                 if (pEnvironmentBlock != null)
                 {
-                    FreeEnvironmentStrings(pEnvironmentBlock);
+                    PInvoke.FreeEnvironmentStrings(pEnvironmentBlock);
                 }
             }
         }
     }
+#endif
 
 #if NET
     /// <summary>
@@ -269,10 +255,12 @@ internal static class CommunicationsUtilities
     {
         // Always call the native method on Windows, as we'll be able to avoid the internal
         // string and Hashtable allocations caused by Environment.GetEnvironmentVariables().
+#if FEATURE_WINDOWSINTEROP
         if (NativeMethods.IsWindows)
         {
             return GetEnvironmentVariablesWindows();
         }
+#endif
 
         IDictionary vars = Environment.GetEnvironmentVariables();
 

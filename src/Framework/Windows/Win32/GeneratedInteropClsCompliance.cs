@@ -49,6 +49,51 @@ namespace Windows.Win32.System.Com
     internal partial struct ITypeLib
     {
     }
+
+    [CLSCompliant(false)]
+    internal partial struct IRunningObjectTable
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IMoniker
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IBindCtx
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IEnumMoniker
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IPersist
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IPersistStream
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IEnumString
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IErrorInfo
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IGlobalInterfaceTable
+    {
+    }
 }
 
 namespace Windows.Win32.System.Com.StructuredStorage

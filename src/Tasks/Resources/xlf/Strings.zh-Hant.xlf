@@ -490,8 +490,8 @@
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
-        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="translated">MSB3071: 從 A: 到 Z: 的所有磁碟機代號目前都在使用中。由於工作目錄 "{0}" 是 UNC 路徑，因此 "Exec" 工作需要有可用的磁碟機代號以便對應 UNC 路徑。請先中斷一或多個共用資源的連線以釋放磁碟機代號，或指定本機工作目錄，再嘗試重新執行這個命令。</target>
+        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
+        <target state="new">MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -617,6 +617,11 @@
       <trans-unit id="General.ExpectedFileMissing">
         <source>Expected file "{0}" does not exist.</source>
         <target state="translated">預期的檔案 "{0}" 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="translated">無法透過解析 "." 和 ".." 區段來正常化路徑 "{0}": {1}。路徑將維持現況使用。</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1982,6 +1987,11 @@
         <source>MSB3249: Application Configuration file "{0}" is invalid. {1}</source>
         <target state="translated">MSB3249: 應用程式組態檔 "{0}" 無效。{1}</target>
         <note>{StrBegin="MSB3249: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="translated">應用程式組態檔路徑不可以空白。</target>
+        <note>This message can be used as the {1} in MSB3249</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>

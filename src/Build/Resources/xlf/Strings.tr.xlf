@@ -38,7 +38,7 @@
       </trans-unit>
       <trans-unit id="BinlogFormatVersionMismatch">
         <source>MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</source>
-        <target state="new">MSB4281: The binary log file was created with a newer version of MSBuild (format version {0}) than the current version (format version {1}). Some data may be missing from the replay.</target>
+        <target state="translated">MSB4281: İkili günlük dosyası MSBuild'in geçerli sürümünden (biçim sürümü {1}) daha yeni bir sürümünde (biçim sürümü {0}) oluşturuldu. Yeniden yürütmede bazı veriler eksik olabilir.</target>
         <note>{StrBegin="MSB4281: "}{0} is the binlog file format version. {1} is the current MSBuild file format version.</note>
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
@@ -590,6 +590,11 @@
         <target state="translated">Şu proje önbelleği eklentisi yükleniyor:{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="new">Enabled loggers: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Günlük kaydı ayrıntı düzeyi {0} olarak ayarlandı.</target>
@@ -601,6 +606,11 @@
         <source>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</source>
         <target state="translated">Parametreler bu noktanın ötesinde kısaltıldı. Tüm parametreleri görüntülemek için MSBUILDTRUNCATETASKINPUTLOGGING ortam değişkenini temizleyin.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
+        <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
+        <target state="translated">SkipNonexistentTargets="true" çağırandan meta proje sınırı boyunca devralındı.</target>
+        <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -832,7 +842,7 @@
       </trans-unit>
       <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
         <source>The project file '{0}' could not be loaded when referenced by {1}.</source>
-        <target state="new">The project file '{0}' could not be loaded when referenced by {1}.</target>
+        <target state="translated">'{0}' proje dosyası, {1} tarafından başvurulduğunda yüklenemedi.</target>
         <note>
       This message is shown during static graph construction when a referenced project file cannot be loaded,
       along with information about which project(s) are referencing the failed project.
@@ -944,7 +954,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
-        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</target>
+        <target state="translated">Bir SDK, "{0}" ortam değişkenini "{1}" olarak ayarlayarak, işlemden devralınan "{2}" değerini geçersiz kıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -1027,6 +1037,11 @@ Hatalar: {3}</target>
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
         <target state="translated">İstenilen konum '{1}' iken görev derlemesi '{0}'dan yüklendi.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="TaskHostDetails">
+        <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
+        <target state="translated">"{0}" görevi {1} TaskHost işleminde çalıştı, {2} çağıran işlemi tarafından üretildi. Bu çağrı için yeni bir TaskHost üretildi: {3}. TaskHost yeniden kullanılabilir bir sepettir: {4}. Düğüm yeniden kullanımı: {5}.</target>
+        <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>

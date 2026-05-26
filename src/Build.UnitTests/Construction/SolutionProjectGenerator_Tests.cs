@@ -2400,6 +2400,162 @@ EndGlobal
         }
 
         /// <summary>
+        /// End-to-end regression test for https://github.com/dotnet/msbuild/issues/11025.
+        ///
+        /// Uses the issue reporter's literal `Directory.Solution.targets`: a custom solution-wide
+        /// `xyz` target whose body invokes <c>&lt;MSBuild Projects="@(ProjectReference)"
+        /// Targets="xyz" SkipNonexistentTargets="True" Properties="...SolutionProperties..."&gt;</c>
+        /// against a sln containing an inter-project <c>ProjectSection(ProjectDependencies)</c>
+        /// dependency. The user's explicit <c>Properties="..."</c> matches the metaproj's
+        /// registered globals so the dispatch hits the in-memory metaproj cache; the metaproj's
+        /// auto-generated `xyz` target body then dispatches to the underlying csproj. On
+        /// <c>main</c> this fails with <c>MSB4057</c> because the user's
+        /// <c>SkipNonexistentTargets="True"</c> is consumed at the immediate dispatch (no-op
+        /// against the metaproj which has the target) and never reaches the metaproj's own
+        /// inner dispatches.
+        ///
+        /// With the fix, the engine's <c>RequestBuilder.BuildProjects</c> propagates the
+        /// <see cref="BuildRequestDataFlags.SkipNonexistentTargets"/> flag from the metaproj's
+        /// own request to the new requests it creates, so the inner dispatch silently skips the
+        /// missing target.
+        /// </summary>
+        [Fact]
+        public void Issue11025_UserSkipNonexistentTargetsAttributePropagatesThroughMetaproj()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(output))
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+
+                env.CreateFile(folder, "a.csproj",
+                    """
+                    <Project>
+                      <Target Name="Build" />
+                    </Project>
+                    """);
+                env.CreateFile(folder, "b.csproj",
+                    """
+                    <Project>
+                      <Target Name="Build" />
+                    </Project>
+                    """);
+
+                // Literal Directory.Solution.targets from the issue reporter (#11025). The explicit
+                // Properties parameter matches the metaproj's registered globals so the dispatch
+                // doesn't cache-miss into MSB4025.
+                env.CreateFile(folder, "Directory.Solution.targets",
+                    """
+                    <Project>
+                      <Target Name="xyz">
+                        <MSBuild Targets="xyz"
+                                 BuildInParallel="True"
+                                 SkipNonexistentTargets="True"
+                                 Projects="@(ProjectReference)"
+                                 Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+                      </Target>
+                    </Project>
+                    """);
+
+                TransientTestFile sln = env.CreateFile(folder, "b.sln",
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "a", "a.csproj", "{2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F} = {DCACBC11-AC42-45EC-BD9C-90B776F3424F}
+                        EndProjectSection
+                    EndProject
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "b", "b.csproj", "{DCACBC11-AC42-45EC-BD9C-90B776F3424F}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        EndGlobalSection
+                    EndGlobal
+                    """);
+
+                string buildOutput = RunnerUtilities.ExecMSBuild("\"" + sln.Path + "\" /t:xyz", out bool success);
+                success.ShouldBeTrue($"Build of {sln.Path} /t:xyz with user's SkipNonexistentTargets=\"True\" must succeed (issue #11025). MSBuild output:\n{buildOutput}");
+                buildOutput.ShouldNotContain("MSB4057");
+            }
+        }
+
+        /// <summary>
+        /// Companion to <see cref="Issue11025_UserSkipNonexistentTargetsAttributePropagatesThroughMetaproj"/>:
+        /// when the user's outer &lt;MSBuild&gt; task does NOT set
+        /// <c>SkipNonexistentTargets="true"</c>, the metaproj's inner dispatches must continue
+        /// to surface <c>MSB4057</c> (today's behaviour). The flag-inheritance fix only fires
+        /// when the parent metaproj request itself carries the flag.
+        /// </summary>
+        [Fact]
+        public void Issue11025_BuildStillFailsWhenUserDidNotSetSkipNonexistentTargets()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(output))
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+
+                env.CreateFile(folder, "a.csproj",
+                    """
+                    <Project>
+                      <Target Name="Build" />
+                    </Project>
+                    """);
+                env.CreateFile(folder, "b.csproj",
+                    """
+                    <Project>
+                      <Target Name="Build" />
+                    </Project>
+                    """);
+
+                // Same shape as the previous test but WITHOUT SkipNonexistentTargets on the outer task.
+                env.CreateFile(folder, "Directory.Solution.targets",
+                    """
+                    <Project>
+                      <Target Name="xyz">
+                        <MSBuild Targets="xyz"
+                                 BuildInParallel="True"
+                                 Projects="@(ProjectReference)"
+                                 Properties="BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+                      </Target>
+                    </Project>
+                    """);
+
+                TransientTestFile sln = env.CreateFile(folder, "b.sln",
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "a", "a.csproj", "{2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F} = {DCACBC11-AC42-45EC-BD9C-90B776F3424F}
+                        EndProjectSection
+                    EndProject
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "b", "b.csproj", "{DCACBC11-AC42-45EC-BD9C-90B776F3424F}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {2DC00580-0BCC-4CD9-A25C-72FE3F093BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {DCACBC11-AC42-45EC-BD9C-90B776F3424F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        EndGlobalSection
+                    EndGlobal
+                    """);
+
+                string buildOutput = RunnerUtilities.ExecMSBuild("\"" + sln.Path + "\" /t:xyz", out bool success);
+                success.ShouldBeFalse($"Build of {sln.Path} /t:xyz without SkipNonexistentTargets on the outer task must fail (legacy behaviour preserved). MSBuild output:\n{buildOutput}");
+                buildOutput.ShouldContain("MSB4057");
+            }
+        }
+
+        /// <summary>
         /// Verifies that when target names are specified they end up in the metaproj.
         /// </summary>
         [Theory]
