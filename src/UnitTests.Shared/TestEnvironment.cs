@@ -486,7 +486,10 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var key in subset.Keys)
                 {
-                    if (key is "_MSBUILDTLENABLED" || IsInstrumentationEnvironmentVariable((string)key))
+                    if (key is "_MSBUILDTLENABLED"
+                        or "MSBuildLoadMicrosoftTargetsReadOnly"
+                        or "MSBUILDLOADALLFILESASWRITEABLE"
+                        || IsInstrumentationEnvironmentVariable((string)key))
                     {
                         continue;
                     }
