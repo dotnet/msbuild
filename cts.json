@@ -71,12 +71,18 @@
     "Filter":
     {
         "Include": [
-            "artifacts/bin/**/Debug/**/*UnitTests*.dll",
-            "artifacts/bin/**/Debug/**/Microsoft.Build.Engine.OM.UnitTests.dll",
-            "artifacts/bin/**/Debug/**/Microsoft.Build.CommandLine.UnitTests.dll",
-            "artifacts/bin/**/Debug/**/StringTools.UnitTests.dll"
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.BuildCheck.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.CommandLine.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Engine.OM.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Engine.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Framework.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Tasks.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.Build.Utilities.UnitTests.dll",
+            "artifacts/bin/**/Debug/net10.0/Microsoft.NET.StringTools.UnitTests.dll"
         ],
         "Exclude": [
+            "**/*.resources.dll",
+            "**/Microsoft.Build.UnitTests.Shared.dll",
             "artifacts/bin/**/ref/**",
             "artifacts/bin/**/refint/**"
         ]
