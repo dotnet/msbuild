@@ -27,7 +27,7 @@ $logsDir = Join-Path $repoRoot 'artifacts\cts\logs'
 
 New-Item -ItemType Directory -Force -Path $baselineDir, $logsDir | Out-Null
 
-& cts collect vstest `
+& cts collect testingplatform `
     --rootPath $repoRoot `
     --config $config `
     --storage-type filesystem `

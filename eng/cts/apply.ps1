@@ -27,7 +27,7 @@ if (-not (Test-Path $baselineDir)) {
 
 New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
 
-& cts apply vstest `
+& cts apply testingplatform `
     --rootPath $repoRoot `
     --config $config `
     --storage-type filesystem `
