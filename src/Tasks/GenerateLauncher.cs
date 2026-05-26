@@ -41,17 +41,8 @@ namespace Microsoft.Build.Tasks
         public ITaskItem OutputEntryPoint { get; set; }
         #endregion
 
-        // MSBuildTask0005 (transitive unsafe API) is reported here by the call-graph analyzer
-        // because ResourceUpdater.UpdateResources contains a File.OpenRead call. That branch
-        // only executes when ResourceUpdater._fileResources is non-empty, which happens only
-        // via AddFileResource — and AddFileResource is called exclusively from
-        // BootstrapperBuilder, never from LauncherBuilder (which uses AddStringResource only).
-        // All other I/O reachable from this task — File.Copy, File.Get/SetAttributes,
-        // Directory.CreateDirectory, FileSystems.Default.FileExists/DirectoryExists — receives
-        // an AbsolutePath.Value, and Util.GetDefaultPath is called with an explicit project-
-        // scoped fallback (TaskEnvironment.ProjectDirectory.Value) instead of
-        // Directory.GetCurrentDirectory(). The warning is left unsuppressed so the analyzer
-        // can be improved to track data-flow reachability; see analyzer issue (to be filed).
+        // MSBuildTask0005 (transitive unsafe API) warnings are currently emitted here due to
+        // an analyzer limitation around data-flow reachability. See https://github.com/dotnet/msbuild/issues/13867.
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)

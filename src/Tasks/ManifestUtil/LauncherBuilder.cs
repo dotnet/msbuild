@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <value>Path to Launcher files.</value>
         public string LauncherPath { get; set; }
-        internal TaskEnvironment TaskEnvironment { get; }
+        internal TaskEnvironment TaskEnvironment { get; } = TaskEnvironment.Fallback;
 
         internal LauncherBuilder(string launcherPath, TaskEnvironment taskEnvironment)
         {
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
 
                 AbsolutePath launcherPath = string.IsNullOrEmpty(LauncherPath) ? default : TaskEnvironment.GetAbsolutePath(LauncherPath);
-                string launcherFilename = Path.GetFileName(launcherPath.Value ?? LauncherPath);
+                string launcherFilename = Path.GetFileName(LauncherPath);
 
                 // Copy setup.bin to the output directory.
                 AbsolutePath outputExe = new AbsolutePath(

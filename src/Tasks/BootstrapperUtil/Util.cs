@@ -89,19 +89,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 if (String.IsNullOrEmpty(s_defaultPath))
                 {
-                    s_defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
-                    if (!String.IsNullOrEmpty(s_defaultPath))
-                    {
-                        return s_defaultPath;
-                    }
-
-                    s_defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
-                    if (!String.IsNullOrEmpty(s_defaultPath))
-                    {
-                        return s_defaultPath;
-                    }
-
-                    s_defaultPath = Directory.GetCurrentDirectory();
+                    string probed = ProbeRegistryDefaultPath(String.Empty);
+                    s_defaultPath = String.IsNullOrEmpty(probed) ? Directory.GetCurrentDirectory() : probed;
                 }
 
                 return s_defaultPath;
@@ -119,74 +108,27 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 return DefaultPath;
             }
 
-            // With version 11.0 we start a direct mapping between the VS version and the registry key we use.
-            // For Dev10, we use 4.0.
-            // For Dev15 this will go versionless as there will be singleton MSI setting the registry which will be common for all future VS.
-
-            int dotIndex = visualStudioVersion.IndexOf('.');
-            if (dotIndex < 0)
-            {
-                dotIndex = visualStudioVersion.Length;
-            }
-
-#if NET
-            if (Int32.TryParse(visualStudioVersion.AsSpan(0, dotIndex), out int majorVersion) && (majorVersion < 11))
-#else
-            if (Int32.TryParse(visualStudioVersion.Substring(0, dotIndex), out int majorVersion) && (majorVersion < 11))
-#endif
-            {
-                visualStudioVersion = BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010;
-            }
-
-            string defaultPath = ReadRegistryString(Registry.LocalMachine, BOOTSTRAPPER_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
-            if (!String.IsNullOrEmpty(defaultPath))
-            {
-                return defaultPath;
-            }
-
-            defaultPath = ReadRegistryString(Registry.LocalMachine, BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
-            if (!String.IsNullOrEmpty(defaultPath))
-            {
-                return defaultPath;
-            }
-
-            defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, visualStudioVersion), REGISTRY_DEFAULTPATH);
-            if (!String.IsNullOrEmpty(defaultPath))
-            {
-                return defaultPath;
-            }
-
-            defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, visualStudioVersion), REGISTRY_DEFAULTPATH);
-            if (!String.IsNullOrEmpty(defaultPath))
-            {
-                return defaultPath;
-            }
-
-            return Directory.GetCurrentDirectory();
+            string probed = ProbeRegistryDefaultPath(NormalizeVisualStudioVersion(visualStudioVersion));
+            return !String.IsNullOrEmpty(probed) ? probed : Directory.GetCurrentDirectory();
         }
 
         [SupportedOSPlatform("windows")]
-        // Multithreaded-safe overload: takes a TaskEnvironment and uses its ProjectDirectory as the
-        // fallback when no registry value is found. Unlike GetDefaultPath(string), this overload
-        // cannot reach Directory.GetCurrentDirectory(), so the MT contract is enforced by the
-        // signature itself. Registry-derived results are cached in s_defaultPathByVersion keyed on
-        // the normalized Visual Studio version; the project directory is not cached so each call
-        // resolves its own.
+        // MT-safe overload: falls back to TaskEnvironment.ProjectDirectory instead of the process CWD.
         internal static string GetDefaultPath(string visualStudioVersion, TaskEnvironment taskEnvironment)
         {
             string projectDirectory = taskEnvironment.ProjectDirectory.Value;
+            string normalized = String.IsNullOrEmpty(visualStudioVersion)
+                ? String.Empty
+                : NormalizeVisualStudioVersion(visualStudioVersion);
 
-            // if the Visual Studio Version is not a valid string, we will fall back to using the v4.0 keys.
-            if (String.IsNullOrEmpty(visualStudioVersion))
-            {
-                string defaultPathV4 = s_defaultPathByVersion.GetOrAdd(String.Empty, _ => ProbeRegistryDefaultPath(String.Empty));
-                return !String.IsNullOrEmpty(defaultPathV4) ? defaultPathV4 : projectDirectory;
-            }
+            string defaultPath = s_defaultPathByVersion.GetOrAdd(normalized, ProbeRegistryDefaultPath);
+            return !String.IsNullOrEmpty(defaultPath) ? defaultPath : projectDirectory;
+        }
 
-            // With version 11.0 we start a direct mapping between the VS version and the registry key we use.
-            // For Dev10, we use 4.0.
-            // For Dev15 this will go versionless as there will be singleton MSI setting the registry which will be common for all future VS.
-
+        // Maps a raw Visual Studio version string to the registry sub-key suffix used for probing.
+        // Versions older than 11.0 collapse to "4.0"; everything else is returned unchanged.
+        private static string NormalizeVisualStudioVersion(string visualStudioVersion)
+        {
             int dotIndex = visualStudioVersion.IndexOf('.');
             if (dotIndex < 0)
             {
@@ -199,24 +141,19 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (Int32.TryParse(visualStudioVersion.Substring(0, dotIndex), out int majorVersion) && (majorVersion < 11))
 #endif
             {
-                visualStudioVersion = BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010;
+                return BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010;
             }
 
-            string defaultPath = s_defaultPathByVersion.GetOrAdd(visualStudioVersion, ProbeRegistryDefaultPath);
-            return !String.IsNullOrEmpty(defaultPath) ? defaultPath : projectDirectory;
+            return visualStudioVersion;
         }
 
         [SupportedOSPlatform("windows")]
-        // Performs the registry probes for the MT-safe GetDefaultPath overload.
-        // Returns the first non-empty registry value, or String.Empty to record a known miss
-        // (so the cache entry distinguishes "not yet probed" from "probed and absent").
+        // Returns the first non-empty registry value, or String.Empty if none.
         private static string ProbeRegistryDefaultPath(string normalizedVersion)
         {
             if (normalizedVersion.Length == 0)
             {
-                // Empty-version branch: probe only the v4.0 keys (matches the legacy behavior
-                // of the empty-version path; the versionless base-key probes used by the
-                // non-empty path are intentionally not included here).
+                // Empty-version branch: probe only the v4.0 keys (matches the legacy empty-version path).
                 string p = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
                 if (!String.IsNullOrEmpty(p))
                 {
