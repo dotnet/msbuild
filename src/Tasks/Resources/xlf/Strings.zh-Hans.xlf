@@ -619,11 +619,6 @@
         <target state="translated">所需文件“{0}”不存在。</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.FailedToAbsolutizePath">
-        <source>Could not convert path "{0}" to an absolute path: {1}. The path will be treated as invalid.</source>
-        <target state="new">Could not convert path "{0}" to an absolute path: {1}. The path will be treated as invalid.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.FailedToCanonicalizePath">
         <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
         <target state="translated">无法通过解析 "." 和 ".." 段来规范化路径“{0}”: {1}。将按原样使用该路径。</target>

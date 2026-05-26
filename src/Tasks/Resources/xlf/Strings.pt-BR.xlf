@@ -619,11 +619,6 @@
         <target state="translated">O arquivo esperado "{0}" não existe.</target>
         <note />
       </trans-unit>
-      <trans-unit id="General.FailedToAbsolutizePath">
-        <source>Could not convert path "{0}" to an absolute path: {1}. The path will be treated as invalid.</source>
-        <target state="new">Could not convert path "{0}" to an absolute path: {1}. The path will be treated as invalid.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="General.FailedToCanonicalizePath">
         <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
         <target state="translated">Não foi possível normalizar o caminho "{0}" resolvendo segmentos "." e ".": {1}. O caminho será usado no estado em que se encontra.</target>

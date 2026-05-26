@@ -58,7 +58,6 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Converts an array of <see cref="AbsolutePath"/> to a string array.
         /// Returns the absolute path string for <paramref name="path"/>, or the input unchanged
         /// when it is null or empty. Useful for tolerating optional path inputs that callers may
         /// later combine with other path segments.

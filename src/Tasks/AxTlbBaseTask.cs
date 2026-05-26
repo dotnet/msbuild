@@ -129,10 +129,9 @@ namespace Microsoft.Build.Tasks
             // Verify that a path for the tool exists -- if the tool doesn't exist in it
             // we'll worry about that later. ToolPath and SdkToolsPath are alternative locations;
             // an unset (null/empty) value just means "not configured" and is not an error on its
-            // own -- only failing to find the tool in *either* location is. A non-empty path that
-            // cannot be absolutized (e.g. contains illegal characters) is unusable, so we log a
-            // low-importance diagnostic to make the swallowed failure discoverable.
-            if (!IsToolDirectoryConfigured(ToolPath) && !IsToolDirectoryConfigured(SdkToolsPath))
+            // own -- only failing to find the tool in *either* location is.
+            if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(ToolPath))) &&
+                (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(SdkToolsPath))))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -145,27 +144,6 @@ namespace Microsoft.Build.Tasks
                 return base.ValidateParameters();
             }
             return false;
-        }
-
-        private bool IsToolDirectoryConfigured(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return false;
-            }
-
-            AbsolutePath absolutePath;
-            try
-            {
-                absolutePath = TaskEnvironment.GetAbsolutePath(path);
-            }
-            catch (ArgumentException e)
-            {
-                Log.LogMessageFromResources(MessageImportance.Low, "General.FailedToAbsolutizePath", path, e.Message);
-                return false;
-            }
-
-            return FileSystems.Default.DirectoryExists(absolutePath);
         }
 
         /// <summary>
