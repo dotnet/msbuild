@@ -71,7 +71,11 @@ namespace Microsoft.Build.UnitTests
 
             public IXunitTestClass TestClass => _wrapped.TestClass;
 
+#if XUNIT_V3_4_OR_LATER
+            public int? TestClassMetadataToken => _wrapped.TestClassMetadataToken;
+#else
             public int TestClassMetadataToken => _wrapped.TestClassMetadataToken;
+#endif
 
             public string TestClassName => _wrapped.TestClassName;
 
@@ -116,6 +120,16 @@ namespace Microsoft.Build.UnitTests
             int? ITestCaseMetadata.TestClassMetadataToken => TestClassMetadataToken;
 
             int? ITestCaseMetadata.TestMethodMetadataToken => TestMethodMetadataToken;
+
+#if XUNIT_V3_4_OR_LATER
+            int ICoreTestCase.TestMethodArity => TestMethodArity ?? 0;
+
+            ICoreTestClass ICoreTestCase.TestClass => TestClass;
+
+            ICoreTestCollection ICoreTestCase.TestCollection => TestCollection;
+
+            ICoreTestMethod ICoreTestCase.TestMethod => TestMethod;
+#endif
 
             public ValueTask<IReadOnlyCollection<IXunitTest>> CreateTests() => _wrapped.CreateTests();
 

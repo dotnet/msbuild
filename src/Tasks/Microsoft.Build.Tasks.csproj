@@ -225,6 +225,10 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="AssemblyDependency\Fusion\Fusion.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Fusion\IAssemblyCache.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Fusion\IAssemblyEnum.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Fusion\IAssemblyName.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
     <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="AddToWin32Manifest.cs" />
@@ -621,7 +625,6 @@
     <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005</WarningsNotAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
