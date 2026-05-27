@@ -50,6 +50,16 @@
     <XUnitCoreSettingsFile>$(XUnitDesktopSettingsFile)</XUnitCoreSettingsFile>
   </PropertyGroup>
 
+  <!-- Remove xunit.v3.mtp-v1 from compile/runtime references; we use mtp-v2 instead (for CTS). -->
+  <Target Name="_RemoveXunitMtpV1References" AfterTargets="ResolveLockFileReferences;ResolvePackageAssets" BeforeTargets="CoreCompile" Condition="'$(IsUnitTestProject)' == 'true' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(FileName)' == 'xunit.v3.mtp-v1'" />
+      <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'xunit.v3.mtp-v1'" />
+      <ResolvedCompileFileDefinitions Remove="@(ResolvedCompileFileDefinitions)" Condition="'%(FileName)' == 'xunit.v3.mtp-v1'" />
+      <RuntimeCopyLocalItems Remove="@(RuntimeCopyLocalItems)" Condition="'%(FileName)' == 'xunit.v3.mtp-v1'" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
     <!-- As of 17.3, one TF of Microsoft.NET.Test.Sdk depends on Newtonsoft.Json
          9.0.1, causing it to be downloaded and flagged by component governance -->
@@ -57,6 +67,9 @@
 
     <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+
+    <!-- Use the MTP v2 xUnit adapter (required by CTS). Replaces the mtp-v1 default brought in by Arcade's XUnitV3 runner. -->
+    <PackageReference Include="xunit.v3.mtp-v2" VersionOverride="$(XUnitV3Version)" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
