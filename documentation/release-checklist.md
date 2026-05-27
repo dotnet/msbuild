@@ -133,9 +133,8 @@ Verifications (**parallel** — read-only, no ordering dependency):
 
 - [ ] **3.4** Verify Arcade subscription — **and add it if missing**. \
 `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
-  - **Every supported branch must have an Arcade subscription from the matching `.NET <X> Eng` channel.** For an SDK-coupled release this is the single most commonly forgotten piece of configuration — verify a subscription exists from **`.NET <X> Eng`** (the channel matching the .NET version this VS release ships with) into `vs{{THIS_RELEASE_VERSION}}`.
-  - Expected cadence: weekly Arcade flow into `vs{{THIS_RELEASE_VERSION}}`. If you don't see weekly Arcade-bump PRs after a release, the subscription is missing or pointed at the wrong channel.
-  - If missing, add it via the configuration branch in **3.3e** (use `darc add-subscription ... --source-repo https://github.com/dotnet/arcade --channel ".NET <X> Eng" --target-repo https://github.com/dotnet/msbuild --target-branch vs{{THIS_RELEASE_VERSION}} --update-frequency EveryWeek`).
+  - **Every supported branch must have an Arcade subscription** from the matching `.NET <X> Eng` channel.
+  - The **channel** is determined by the .NET band the branch is paired with (e.g. a branch paired with .NET 10 subscribes to `.NET 10 Eng`).
 
 > _Roslyn and NuGet subscription verification intentionally omitted: there is always exactly one Roslyn and NuGet subscription, it targets `main` only, is permanently disabled, and never changes per release — re-verifying it every release adds no signal._
 
