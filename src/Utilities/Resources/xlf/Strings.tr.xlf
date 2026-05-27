@@ -72,6 +72,11 @@
         <target state="translated">Güncel olmadığı için görev atlanamıyor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEofTimeoutOnExit">
+        <source>Tool process exited but did not close its stdout/stderr pipes within {0} seconds. Output may be truncated; this usually indicates a grandchild process inherited the pipes.</source>
+        <target state="new">Tool process exited but did not close its stdout/stderr pipes within {0} seconds. Output may be truncated; this usually indicates a grandchild process inherited the pipes.</target>
+        <note>{StrBegin="MSBUILD : "}{0} is the configured EOF timeout in seconds (e.g. "30"). Logged at MessageImportance.Low.</note>
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: "{0}" öğesinden {1} koduyla çıkıldı.</target>

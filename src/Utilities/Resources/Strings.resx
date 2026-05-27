@@ -299,6 +299,10 @@
   <data name="ToolTask.ToolCommandExitedZeroWithErrors" xml:space="preserve">
     <value>The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</value>
 </data>
+  <data name="ToolTask.PipeEofTimeoutOnExit" xml:space="preserve">
+    <value>Tool process exited but did not close its stdout/stderr pipes within {0} seconds. Output may be truncated; this usually indicates a grandchild process inherited the pipes.</value>
+    <comment>{StrBegin="MSBUILD : "}{0} is the configured EOF timeout in seconds (e.g. "30"). Logged at MessageImportance.Low.</comment>
+  </data>
   <!--
         The Utilities message bucket is: MSB6001 - MSB6200
 

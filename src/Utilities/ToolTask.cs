@@ -1127,12 +1127,51 @@ namespace Microsoft.Build.Utilities
                 // (delivering any final partial line) and sends Data=null via the callback.
                 // Our ReceiveStandardErrorOrOutputData handler signals the EOF events.
                 //
-                // Use a bounded timeout as a safety net for the grandchild case where
-                // EOF never arrives because grand child inherited the pipe and keeps it open.
-                const int eofTimeoutSec = 2;
+                // We poll in short slices and drain whatever has already been delivered
+                // between slices. That way, even if the outer budget expires (the
+                // grandchild-inherited-pipe case), every line the reader already pushed
+                // onto our queues has been logged before we return -- the caller's
+                // single post-return drain is no longer the only chance.
+                //
+                // The total budget is bounded as a safety net for grandchildren that
+                // keep the pipes open forever. 30 s is large compared to the worst CI
+                // pipe-flush latency observed (#13734) but still small compared to
+                // legitimate tool runtimes that would have already hit their own timeout.
+                const int eofTimeoutMs = 30_000;
+                const int sliceMs = 50;
 
                 WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                int waitedMs = 0;
+                bool eofReached = false;
+                while (waitedMs < eofTimeoutMs)
+                {
+                    int thisSlice = Math.Min(sliceMs, eofTimeoutMs - waitedMs);
+                    if (WaitHandle.WaitAll(eofEvents, thisSlice))
+                    {
+                        eofReached = true;
+                        break;
+                    }
+
+                    // Pump whatever the reader has delivered so far. The consumer
+                    // loop calls these again after we return; calling them here is
+                    // safe because the underlying queues are drained, and it ensures
+                    // no data is lost if we ultimately time out below.
+                    LogMessagesFromStandardError();
+                    LogMessagesFromStandardOutput();
+                    waitedMs += thisSlice;
+                }
+
+                if (!eofReached)
+                {
+                    // Rare grandchild-inherited-pipe case. Surface it as a low-importance
+                    // diagnostic so that future occurrences are recognizable in the
+                    // binlog without needing to repro. Output up to this point has
+                    // already been logged by the drain loop above.
+                    LogPrivate.LogMessageFromResources(
+                        MessageImportance.Low,
+                        "ToolTask.PipeEofTimeoutOnExit",
+                        eofTimeoutMs / 1000);
+                }
             }
             else
             {
