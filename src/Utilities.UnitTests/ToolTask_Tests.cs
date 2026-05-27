@@ -597,9 +597,14 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 // The command we're giving is the command to spew the contents of the temp
                 // file we created above.
+                // Temporary: keep the shell alive for ~15s after the data is written so the
+                // AsyncStreamReader's IOCP completion has time to be scheduled and deliver
+                // every line (including EOF) before WaitForProcessExit's bounded 2s wait
+                // expires under loaded CI conditions (#13734). 15s is intentionally generous
+                // to confirm whether the IOCP-starvation hypothesis fully resolves the flake.
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? $"/C type \"{tempFile}\""
-                                                : $"-c \"cat \'{tempFile}\'\"";
+                                                ? $"/C type \"{tempFile}\" & ping 127.0.0.1 -n 16 > nul"
+                                                : $"-c \"cat \'{tempFile}\'; sleep 15\"";
 
                 // TODO: remove diagnostics once root cause is fixed.
                 // Likely-suspect: same async-pipe-drain race seen in HandleExecutionErrorsWhenToolLogsError — Execute() returns

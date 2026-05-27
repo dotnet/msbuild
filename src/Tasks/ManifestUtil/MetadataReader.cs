@@ -10,8 +10,11 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 #else
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Tasks.Metadata;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
 #endif
 
 #nullable disable
@@ -269,43 +272,86 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
     }
 #else
-    internal class MetadataReader : IDisposable
+    internal unsafe class MetadataReader : IDisposable
     {
         private readonly string _path;
         private StringDictionary _attributes;
 
-        private IMetaDataDispenser _metaDispenser;
-        private IMetaDataAssemblyImport _assemblyImport;
+        // COM pointers stored thread-agile via the GIT. Disposed in Close().
+        // The CLR metadata object returned by IMetaDataDispenser::OpenScope implements
+        // all three of IMetaDataImport, IMetaDataImport2, and IMetaDataAssemblyImport;
+        // we QueryInterface for the two we actually call. The dispenser itself is only
+        // needed during construction.
+        private AgileComPointer<IMetaDataAssemblyImport> _assemblyImport;
+        private AgileComPointer<IMetaDataImport2> _import2;
 
-        private static Guid s_importerGuid = GetGuidOfType(typeof(IMetaDataImport));
         private static Guid s_refidGuid = GetGuidOfType(typeof(IReferenceIdentity));
 
         private MetadataReader(string path)
         {
             _path = path;
-            // Create the metadata dispenser and open scope on the source file.
-            _metaDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-            int hr = _metaDispenser.OpenScope(path, 0, ref s_importerGuid, out object obj);
-            if (hr == 0)
+            // Receive transient pointers directly into ComScope<T> (implicit void** conversion)
+            // so no try/finally is needed for cleanup. Each AgileComPointer is constructed with
+            // takeOwnership: false; the GIT registration AddRefs and the ComScope Releases on
+            // scope exit.
+            //
+            // CoCreateInstance failure is an environment-level problem (CLR metadata host
+            // missing/unregistered) and is thrown, matching the behavior of the old
+            // `new CorMetaDataDispenser()` built-in-interop activation. OpenScope failure is
+            // per-file (the path isn't a valid PE / assembly); we leave _assemblyImport null
+            // so that Create(...) returns null, matching the .NET Core branch's catch-all.
+            //
+            // OpenScope is asked directly for IMetaDataImport2 — the underlying CLR RegMeta
+            // coclass implements every IMetaData* interface, so this saves a QueryInterface
+            // round-trip vs. asking for the base IMetaDataImport.
+            Guid clsid = CorMetadata.CLSID_CorMetaDataDispenser;
+            Guid dispenserIid = IID.Get<IMetaDataDispenser>();
+            using ComScope<IMetaDataDispenser> dispenser = new();
+            PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, &dispenserIid, dispenser).ThrowOnFailure();
+
+            Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
+            using ComScope<IMetaDataImport2> import2 = new();
+            HRESULT hr;
+            fixed (char* pPath = path)
             {
-                _assemblyImport = (IMetaDataAssemblyImport)obj;
+                hr = dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2);
             }
+            if (hr.Failed || import2.IsNull)
+            {
+                return;
+            }
+            _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
+
+            Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
+            using ComScope<IMetaDataAssemblyImport> asmImport = new();
+            import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
+            _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
         }
 
         public static MetadataReader Create(string path)
         {
             var r = new MetadataReader(path);
-            return r._assemblyImport != null ? r : null;
+            return r._assemblyImport is not null ? r : null;
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.Build.Tasks.IMetaDataImport2.GetCustomAttributeByName(System.UInt32,System.String,System.IntPtr@,System.UInt32@)", Justification = "We verify the valueLen, we don't care what the return value is in this case")]
         public bool HasAssemblyAttribute(string name)
         {
-            _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
-            IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
-            IntPtr valuePtr;
-            import2.GetCustomAttributeByName(assemblyScope, name, out valuePtr, out uint valueLen);
-            return valueLen != 0;
+            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
+            using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+            MdAssembly assemblyScope;
+            asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).ThrowOnFailure();
+
+            // The CLR returns S_OK with pcbData=size when the attribute is present, S_FALSE with
+            // pcbData=0 when it is absent, and an error HRESULT otherwise. Treat anything that is
+            // not S_OK as "not present" so failure paths cannot leave valueLen indeterminate.
+            void* valuePtr = null;
+            uint valueLen = 0;
+            HRESULT hr;
+            fixed (char* pName = name)
+            {
+                hr = import2.Pointer->GetCustomAttributeByName(assemblyScope, pName, &valuePtr, &valueLen);
+            }
+            return hr == HRESULT.S_OK && valueLen != 0;
         }
 
         public string Name => Attributes[nameof(Name)];
@@ -335,18 +381,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public void Close()
         {
-            if (_assemblyImport != null)
-            {
-                Marshal.ReleaseComObject(_assemblyImport);
-            }
-
-            if (_metaDispenser != null)
-            {
-                Marshal.ReleaseComObject(_metaDispenser);
-            }
-            _attributes = null;
-            _metaDispenser = null;
+            _import2?.Dispose();
+            _import2 = null;
+            _assemblyImport?.Dispose();
             _assemblyImport = null;
+            _attributes = null;
         }
 
         private void ImportAttributes()
@@ -403,18 +442,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             void SetAttribute();
             void EnumAttributes();
             void Clone();
-        }
-
-        [ComImport]
-        [Guid("809c652e-7396-11d2-9771-00a0c9b4d50c")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        [TypeLibType(TypeLibTypeFlags.FRestricted)]
-        private interface IMetaDataDispenser
-        {
-            int DefineScope();
-            [PreserveSig]
-            int OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid, [Out][MarshalAs(UnmanagedType.Interface)] out object obj);
-            int OpenScopeOnMemory();
         }
     }
 #endif

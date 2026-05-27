@@ -330,7 +330,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  Helper method - exports a type library for an assembly. Returns true if succeeded.
         /// </summary>
-        private bool ExportTypeLib(Assembly asm, string typeLibFileName)
+        private unsafe bool ExportTypeLib(Assembly asm, string typeLibFileName)
         {
             _typeLibExportFailed = false;
             ITypeLib convertedTypeLib = null;
@@ -346,10 +346,27 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                // Persist the type library
-                ICreateTypeLib createTypeLib = (ICreateTypeLib)convertedTypeLib;
-
-                createTypeLib.SaveAllChanges();
+                // Persist the type library. The RCW returned by the converter wraps the
+                // same object that implements ICreateTypeLib; QueryInterface for that
+                // pointer through struct-based COM and call SaveAllChanges() on it.
+                IntPtr pUnk = Marshal.GetIUnknownForObject(convertedTypeLib);
+                try
+                {
+                    Guid iid = TypeLibInterop.ICreateTypeLib.IID_ICreateTypeLib;
+                    Marshal.ThrowExceptionForHR(Marshal.QueryInterface(pUnk, ref iid, out IntPtr pCreate));
+                    try
+                    {
+                        ((TypeLibInterop.ICreateTypeLib*)pCreate)->SaveAllChanges().ThrowOnFailure();
+                    }
+                    finally
+                    {
+                        Marshal.Release(pCreate);
+                    }
+                }
+                finally
+                {
+                    Marshal.Release(pUnk);
+                }
             }
             finally
             {
