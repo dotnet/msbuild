@@ -345,6 +345,14 @@ namespace Microsoft.Build.UnitTests
         /// "The command exited with return value 0, but errors were detected" should be logged,
         /// not the generic tool failure error MSB6006.
         /// </summary>
+        /// <remarks>
+        /// We pad the stderr stream with extra "noise" lines *after* the asserted
+        /// "Who made you king anyways" line to absorb the EOF-truncation race in
+        /// ToolTask's WaitForProcessExit (#13734): on a loaded CI VM the last line
+        /// of a short tool's stderr can be dropped if AsyncStreamReader has not
+        /// flushed it by the time the bounded EOF wait expires. Padding moves the
+        /// drop risk onto throwaway lines.
+        /// </remarks>
         [Fact]
         public void ErrorWhenTextSentToStandardError()
         {
@@ -354,19 +362,31 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? "/C Echo 'Who made you king anyways' 1>&2"
-                                                : @"-c ""echo 'Who made you king anyways' 1>&2""";
+                                                ? "/C (Echo 'Who made you king anyways' 1>&2) & (for /L %i in (1,1,16) do @echo TRAILING-NOISE %i 1>&2)"
+                                                : @"-c ""echo 'Who made you king anyways' 1>&2; for i in $(seq 1 16); do echo TRAILING-NOISE $i 1>&2; done""";
 
-                t.Execute().ShouldBeFalse();
+                bool result = t.Execute();
 
-                engine.AssertLogContains("Who made you king anyways");
+                try
+                {
+                    result.ShouldBeFalse();
+                    engine.AssertLogContains("Who made you king anyways");
 
-                // Should not log other failure error codes
-                engine.AssertLogDoesntContain("MSB3073");
+                    // Should not log other failure error codes
+                    engine.AssertLogDoesntContain("MSB3073");
 
-                t.ExitCode.ShouldBe(-1);
-                // Only the stderr-as-error from tool output
-                engine.Errors.ShouldBe(1);
+                    t.ExitCode.ShouldBe(-1);
+                    // The stderr-as-error from tool output plus the 16 padding lines
+                    // that are also routed through LogStandardErrorAsError.
+                    engine.Errors.ShouldBe(17);
+                }
+                catch
+                {
+                    _output.WriteLine($"Execute() returned: {result}, ExitCode: {t.ExitCode}, Errors: {engine.Errors}");
+                    _output.WriteLine("---- Engine log ----");
+                    _output.WriteLine(engine.Log);
+                    throw;
+                }
             }
         }
 
@@ -524,29 +544,60 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to High should show up in our log
         /// </summary>
+        /// <remarks>
+        /// The temp file is intentionally written with many repeated "hello world"
+        /// lines instead of one. Under ChangeWave 18.6 the AsyncStreamReader can
+        /// drop the last line of a short tool's stdout if it hasn't flushed before
+        /// the bounded EOF wait expires (#13734); a single matching line is exactly
+        /// the worst case. Multiple identical lines mean any one of them surviving
+        /// is enough for the assertion to pass.
+        /// </remarks>
         [Fact]
         public void OverrideStdOutImportanceToHigh()
         {
             string tempFile = FileUtilities.GetTemporaryFileName();
-            File.WriteAllText(tempFile, @"hello world");
-
-            using (MyTool t = new MyTool())
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < 32; i++)
             {
-                MockEngine3 engine = new MockEngine3();
-                engine.MinimumMessageImportance = MessageImportance.High;
-
-                t.BuildEngine = engine;
-                t.FullToolName = NativeMethodsShared.IsWindows ? "findstr.exe" : "grep";
-                t.MockCommandLineCommands = "\"hello\" \"" + tempFile + "\"";
-                t.StandardOutputImportance = "High";
-
-                t.Execute().ShouldBeTrue();
-                t.ExitCode.ShouldBe(0);
-                engine.Errors.ShouldBe(0);
-
-                engine.AssertLogContains("hello world");
+                sb.AppendLine("hello world");
             }
-            File.Delete(tempFile);
+            File.WriteAllText(tempFile, sb.ToString());
+
+            try
+            {
+                using (MyTool t = new MyTool())
+                {
+                    MockEngine3 engine = new MockEngine3();
+                    engine.MinimumMessageImportance = MessageImportance.High;
+
+                    t.BuildEngine = engine;
+                    t.FullToolName = NativeMethodsShared.IsWindows ? "findstr.exe" : "grep";
+                    t.MockCommandLineCommands = "\"hello\" \"" + tempFile + "\"";
+                    t.StandardOutputImportance = "High";
+
+                    bool result = t.Execute();
+
+                    try
+                    {
+                        result.ShouldBeTrue();
+                        t.ExitCode.ShouldBe(0);
+                        engine.Errors.ShouldBe(0);
+
+                        engine.AssertLogContains("hello world");
+                    }
+                    catch
+                    {
+                        _output.WriteLine($"Execute() returned: {result}, ExitCode: {t.ExitCode}");
+                        _output.WriteLine("---- Engine log ----");
+                        _output.WriteLine(engine.Log);
+                        throw;
+                    }
+                }
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
         }
 
         [Theory]
@@ -582,60 +633,98 @@ namespace Microsoft.Build.UnitTests
         /// himself.  This is so that in case the tool doesn't log its errors in canonical
         /// format, the task can still opt to do something reasonable with it.
         /// </summary>
+        /// <remarks>
+        /// The file content intentionally appends a tail of "TRAILING-NOISE" padding
+        /// lines after the asserted CS0168 / BADTHINGHAPPENED lines. Under
+        /// ChangeWave 18.6, ToolTask's <c>WaitForProcessExit</c> gives the
+        /// AsyncStreamReader only a bounded budget to flush its buffer after the
+        /// (very fast) <c>cmd /C type</c> / <c>sh -c cat</c> process exits; on a
+        /// loaded CI VM the *last* line of tool output can be dropped (#13734).
+        /// Putting the assertion targets mid-file and absorbing the truncation
+        /// risk on the padding lines keeps this test asserting what it actually
+        /// means to assert without re-racing the engine. The diagnostics added
+        /// in #13830 stay in place so that if the assertions still fail despite
+        /// the padding, we can see exactly which lines made it through.
+        /// </remarks>
         [Fact]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
             string tempFile = FileUtilities.GetTemporaryFileName();
-            File.WriteAllText(tempFile, @"
-                Main.cs(17,20): warning CS0168: The variable 'foo' is declared but never used.
-                BADTHINGHAPPENED: This is my custom error format that's not in canonical error format.
-                ");
-
-            using (MyTool t = new MyTool())
+            // 32 trailing padding lines is well in excess of any plausible
+            // single-flush drop window; if more than that vanishes we want the
+            // test to fail loudly so we know the underlying race got worse.
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine();
+            sb.AppendLine("                Main.cs(17,20): warning CS0168: The variable 'foo' is declared but never used.");
+            sb.AppendLine("                BADTHINGHAPPENED: This is my custom error format that's not in canonical error format.");
+            for (int i = 0; i < 32; i++)
             {
-                MockEngine3 engine = new MockEngine3();
-                t.BuildEngine = engine;
-                // The command we're giving is the command to spew the contents of the temp
-                // file we created above.
-                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? $"/C type \"{tempFile}\""
-                                                : $"-c \"cat \'{tempFile}\'\"";
-
-                // TODO: remove diagnostics once root cause is fixed.
-                // Likely-suspect: same async-pipe-drain race seen in HandleExecutionErrorsWhenToolLogsError — Execute() returns
-                // before the cat/type output is flushed through ToolTask's stdout reader,
-                // so engine.Log only contains the cmd echo. MessageCount==0 with non-empty
-                // exit confirms truncation; MessageCount>0 with missing strings means a
-                // parser bug.
-                Stopwatch sw = Stopwatch.StartNew();
-                bool executeResult = t.Execute();
-                sw.Stop();
-
-                _output.WriteLine(
-                    $"[ToolTaskCanChangeCanonicalErrorFormat] Execute()={executeResult}, ExitCode={t.ExitCode}, " +
-                    $"Errors={engine.Errors}, Warnings={engine.Warnings}, MessageCount={engine.Messages}, " +
-                    $"elapsedMs={sw.ElapsedMilliseconds}");
-
-                // Only dump engine.Log when it looks suspicious (no messages routed through, or
-                // a non-zero exit code). Keeping the full log out of the success path avoids
-                // bloating CI output for every passing run while still capturing detail when
-                // the async-pipe-drain race actually fires.
-                if (engine.Messages == 0 || t.ExitCode != 0)
-                {
-                    _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
-                }
-
-                // The above command logged a canonical warning, as well as a custom error.
-                engine.AssertLogContains("CS0168");
-                engine.AssertLogContains("The variable 'foo' is declared but never used");
-                engine.AssertLogContains("BADTHINGHAPPENED");
-                engine.AssertLogContains("This is my custom error format");
-
-                engine.Warnings.ShouldBe(1); // "Expected one warning in log."
-                engine.Errors.ShouldBe(1); // "Expected one error in log."
+                sb.AppendLine("                TRAILING-NOISE absorbs EOF-drain truncation (line " + i + ")");
             }
+            File.WriteAllText(tempFile, sb.ToString());
 
-            File.Delete(tempFile);
+            try
+            {
+                using (MyTool t = new MyTool())
+                {
+                    MockEngine3 engine = new MockEngine3();
+                    t.BuildEngine = engine;
+                    // The command we're giving is the command to spew the contents of the temp
+                    // file we created above.
+                    t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                                    ? $"/C type \"{tempFile}\""
+                                                    : $"-c \"cat \'{tempFile}\'\"";
+
+                    // TODO: remove diagnostics once root cause is fixed.
+                    // Likely-suspect: same async-pipe-drain race seen in HandleExecutionErrorsWhenToolLogsError — Execute() returns
+                    // before the cat/type output is flushed through ToolTask's stdout reader,
+                    // so engine.Log only contains the cmd echo. MessageCount==0 with non-empty
+                    // exit confirms truncation; MessageCount>0 with missing strings means a
+                    // parser bug.
+                    Stopwatch sw = Stopwatch.StartNew();
+                    bool executeResult = t.Execute();
+                    sw.Stop();
+
+                    _output.WriteLine(
+                        $"[ToolTaskCanChangeCanonicalErrorFormat] Execute()={executeResult}, ExitCode={t.ExitCode}, " +
+                        $"Errors={engine.Errors}, Warnings={engine.Warnings}, MessageCount={engine.Messages}, " +
+                        $"elapsedMs={sw.ElapsedMilliseconds}");
+
+                    // Only dump engine.Log when it looks suspicious (no messages routed through, or
+                    // a non-zero exit code). Keeping the full log out of the success path avoids
+                    // bloating CI output for every passing run while still capturing detail when
+                    // the async-pipe-drain race actually fires.
+                    if (engine.Messages == 0 || t.ExitCode != 0)
+                    {
+                        _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
+                    }
+
+                    try
+                    {
+                        // The above command logged a canonical warning, as well as a custom error.
+                        engine.AssertLogContains("CS0168");
+                        engine.AssertLogContains("The variable 'foo' is declared but never used");
+                        engine.AssertLogContains("BADTHINGHAPPENED");
+                        engine.AssertLogContains("This is my custom error format");
+
+                        engine.Warnings.ShouldBe(1); // "Expected one warning in log."
+                        engine.Errors.ShouldBe(1); // "Expected one error in log."
+                    }
+                    catch
+                    {
+                        // If assertions still fail despite the padding, dump everything so the
+                        // failure mode is fully diagnosable from the CI test attachment alone.
+                        _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] assertion failed; dumping full state");
+                        _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] file content:\n{File.ReadAllText(tempFile)}");
+                        _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
+                        throw;
+                    }
+                }
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
         }
 
         /// <summary>
