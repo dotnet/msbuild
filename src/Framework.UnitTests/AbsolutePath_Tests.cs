@@ -294,6 +294,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"X:\proj", @"\sub\dir\file.txt", @"X:\sub\dir\file.txt")]
         // Drive-relative on the same drive as base path — anchored under base path itself.
         [InlineData(@"X:\proj", @"X:foo", @"X:\proj\foo")]
+        [InlineData(@"X:\proj", @"X:", @"X:\proj")]
         [InlineData(@"X:\proj", @"X:sub\file.txt", @"X:\proj\sub\file.txt")]
         // Drive-relative with a drive different from base path — drive dropped, remainder anchored.
         [InlineData(@"C:\proj", @"D:foo", @"C:\proj\foo")]

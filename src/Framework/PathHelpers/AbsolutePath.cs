@@ -112,7 +112,7 @@ namespace Microsoft.Build.Framework
             string combined = Path.Combine(basePath.Value, path);
 
 #if NETFRAMEWORK || NET
-            combined = MakeFullyQualified(combined, basePath.Value);
+            combined = MakeFullyQualifiedRelativeToBasePath(combined, basePath.Value);
 #endif
 
             Value = combined;
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Framework
         /// Uses string operations instead of <c>Path.GetFullPath(path, basePath)</c> to preserve the
         /// un-normalized form; <see cref="GetCanonicalForm"/> is the single normalization step.
         /// </remarks>
-        private string MakeFullyQualified(string combined, string basePath)
+        private static string MakeFullyQualifiedRelativeToBasePath(string combined, string basePath)
         {
             if (!NativeMethods.IsWindows
                 || string.IsNullOrEmpty(combined)
