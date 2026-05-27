@@ -243,6 +243,12 @@ namespace Microsoft.Build.Shared
                 // GetProcAddress takes a system-default-code-page (ANSI) string. Encode through
                 // the real encoder so DBCS / multi-byte characters in an unusual export name
                 // are handled correctly. Rent from ArrayPool to avoid a per-call allocation.
+                //
+                // Encoding.Default returns the system ANSI code page on .NET Framework
+                // (correct for GetProcAddress) but UTF-8 on .NET (Core). FEATURE_FILE_TRACKER
+                // is only defined for net472 so this branch is correct as-is; if the #if
+                // guard ever broadens to .NET (Core), switch to a CodePagesEncodingProvider
+                // ANSI encoding instead.
                 Encoding ansi = Encoding.Default;
                 int maxByteCount = ansi.GetMaxByteCount(entryPointName.Length) + 1;
                 byte[] buffer = ArrayPool<byte>.Shared.Rent(maxByteCount);

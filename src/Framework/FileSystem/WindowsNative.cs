@@ -265,9 +265,26 @@ namespace Microsoft.Build.Shared.FileSystem
         [System.Runtime.Versioning.SupportedOSPlatform("windows5.1.2600")]
         public static bool FindNextFileW(SafeHandle hFindFile, out Win32FindData lpFindFileData)
         {
-            bool ok = Windows.Win32.PInvoke.FindNextFile(new Windows.Win32.Foundation.HANDLE((void*)hFindFile.DangerousGetHandle()), out var raw);
-            lpFindFileData = ConvertFindData(in raw);
-            return ok;
+            // DangerousAddRef pins the SafeHandle's ref count for the duration of the
+            // native call so a concurrent Dispose() cannot invalidate the handle mid-call.
+            // Today's enumeration callers are single-threaded but the cost is negligible.
+            bool refAdded = false;
+            try
+            {
+                hFindFile.DangerousAddRef(ref refAdded);
+                bool ok = Windows.Win32.PInvoke.FindNextFile(
+                    new Windows.Win32.Foundation.HANDLE((void*)hFindFile.DangerousGetHandle()),
+                    out Windows.Win32.Storage.FileSystem.WIN32_FIND_DATAW raw);
+                lpFindFileData = ConvertFindData(in raw);
+                return ok;
+            }
+            finally
+            {
+                if (refAdded)
+                {
+                    hFindFile.DangerousRelease();
+                }
+            }
         }
 
         /// <nodoc/>

@@ -10,8 +10,6 @@ using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 
-#nullable disable
-
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>

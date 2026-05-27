@@ -35,6 +35,10 @@ namespace Microsoft.Build.Shared
             var validInstances = new List<VisualStudioInstance>();
 
 #if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
+            // No try/catch around the COM call chain by design: AcquireSetupConfiguration2
+            // and PopulateInstances check HRESULTs inline and return gracefully on failure.
+            // If a future maintainer introduces a ThrowOnFailure() in this path, add the
+            // matching catch — "empty list" is the documented behaviour for absent VS.
             try
             {
                 using ComScope<ISetupConfiguration2> config = AcquireSetupConfiguration2();
@@ -80,7 +84,10 @@ namespace Microsoft.Build.Shared
             {
                 // Some other COM failure. The caller swallows errors, so signal "no result"
                 // by returning an empty scope rather than constructing a COMException only
-                // to have it discarded.
+                // to have it discarded. CoCreateInstance must null the out-parameter on
+                // failure per the COM spec, but Dispose defensively so the ownership model
+                // is explicit even against a buggy COM implementation.
+                config2.Dispose();
                 return default;
             }
 
@@ -93,7 +100,13 @@ namespace Microsoft.Build.Shared
             }
 
             HRESULT qiHr = config1.Pointer->QueryInterface(&iidConfig2, config2);
-            return qiHr.Succeeded ? config2 : default;
+            if (qiHr.Failed)
+            {
+                config2.Dispose();
+                return default;
+            }
+
+            return config2;
         }
 
         /// <summary>
