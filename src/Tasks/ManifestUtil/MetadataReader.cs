@@ -61,6 +61,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public bool HasAssemblyAttribute(string name)
         {
+            EnsureCustomAttributes();
+            return _customAttributes.Contains(name);
+        }
+
+        public void HasAssemblyAttributes(string[] names, bool[] results)
+        {
+            EnsureCustomAttributes();
+            for (int i = 0; i < names.Length; i++)
+            {
+                results[i] = _customAttributes.Contains(names[i]);
+            }
+        }
+
+        private void EnsureCustomAttributes()
+        {
             if (_customAttributes == null)
             {
                 lock (this)
@@ -71,8 +86,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                 }
             }
-
-            return _customAttributes.Contains(name);
         }
 
         public string Name => Attributes[nameof(Name)];
@@ -359,16 +372,46 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 return false;
             }
+            return HasAssemblyAttribute(import2.Pointer, assemblyScope, name);
+        }
 
-            // The CLR returns S_OK with pcbData=size when the attribute is present, S_FALSE with
-            // pcbData=0 when it is absent, and an error HRESULT otherwise. Treat anything that is
-            // not S_OK as "not present" so failure paths cannot leave valueLen indeterminate.
+        // Batch variant: callers (e.g. AssemblyAttributeFlags) that probe several attributes on
+        // the same reader pay a single GIT round-trip and a single GetAssemblyFromScope call
+        // instead of one per attribute.
+        public void HasAssemblyAttributes(string[] names, bool[] results)
+        {
+            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
+            using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+            MdAssembly assemblyScope;
+            if (asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).Failed || assemblyScope.IsNil)
+            {
+                for (int i = 0; i < results.Length; i++)
+                {
+                    results[i] = false;
+                }
+                return;
+            }
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                results[i] = HasAssemblyAttribute(import2, assemblyScope, names[i]);
+            }
+        }
+
+        // Takes a borrowed IMetaDataImport2* so callers in a hot path can reuse a single GIT
+        // round-trip instead of paying one per call.
+        //
+        // The CLR returns S_OK with pcbData=size when the attribute is present, S_FALSE with
+        // pcbData=0 when it is absent, and an error HRESULT otherwise. Treat anything that is
+        // not S_OK as "not present" so failure paths cannot leave valueLen indeterminate.
+        private static bool HasAssemblyAttribute(IMetaDataImport2* import2, MdAssembly assemblyScope, string name)
+        {
             void* valuePtr = null;
             uint valueLen = 0;
             HRESULT hr;
             fixed (char* pName = name)
             {
-                hr = import2.Pointer->GetCustomAttributeByName(assemblyScope, pName, &valuePtr, &valueLen);
+                hr = import2->GetCustomAttributeByName(assemblyScope, pName, &valuePtr, &valueLen);
             }
             return hr == HRESULT.S_OK && valueLen != 0;
         }

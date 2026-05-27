@@ -14,6 +14,7 @@ using Xunit;
 #if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.System.LibraryLoader;
 #endif
 
 namespace Microsoft.Build.Tasks.UnitTests
@@ -157,40 +158,36 @@ namespace Microsoft.Build.Tasks.UnitTests
         [SupportedOSPlatform("windows6.1")]
         internal sealed class AssemblyNativeResourceManager
         {
-            public enum LoadLibraryFlags : uint { LOAD_LIBRARY_AS_DATAFILE = 2 };
-
-            [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-            public static extern IntPtr LoadLibrary(string lpFileName, IntPtr hReservedNull, LoadLibraryFlags dwFlags);
-
-            [DllImport("kernel32.dll", SetLastError = true)]
-            public static extern IntPtr FindResource(IntPtr hModule, string lpName, string lpType);
-
-            [DllImport("kernel32.dll", SetLastError = true)]
-            public static extern IntPtr LoadResource(IntPtr hModule, IntPtr hResInfo);
-
-            [DllImport("kernel32.dll", SetLastError = true)]
-            public static extern IntPtr LockResource(IntPtr hResData);
-
-            [DllImport("kernel32.dll", SetLastError = true)]
-            public static extern uint SizeofResource(IntPtr hModule, IntPtr hResInfo);
-
-            public static byte[]? GetResourceFromExecutable(string assembly, string lpName, string lpType)
+            public static unsafe byte[]? GetResourceFromExecutable(string assembly, string lpName, string lpType)
             {
-                IntPtr hModule = LoadLibrary(assembly, IntPtr.Zero, LoadLibraryFlags.LOAD_LIBRARY_AS_DATAFILE);
+                HMODULE hModule;
+                fixed (char* pAssembly = assembly)
+                {
+                    hModule = PInvoke.LoadLibraryEx(new PCWSTR(pAssembly), default, LOAD_LIBRARY_FLAGS.LOAD_LIBRARY_AS_DATAFILE);
+                }
+
                 try
                 {
-                    if (hModule != IntPtr.Zero)
+                    if (!hModule.IsNull)
                     {
-                        IntPtr hResource = FindResource(hModule, lpName, lpType);
+                        HRSRC hResource;
+                        fixed (char* pName = lpName)
+                        {
+                            fixed (char* pType = lpType)
+                            {
+                                hResource = PInvoke.FindResource(hModule, new PCWSTR(pName), new PCWSTR(pType));
+                            }
+                        }
+
                         if (hResource != IntPtr.Zero)
                         {
-                            uint resSize = SizeofResource(hModule, hResource);
-                            IntPtr resData = LoadResource(hModule, hResource);
+                            uint resSize = PInvoke.SizeofResource(hModule, hResource);
+                            HGLOBAL resData = PInvoke.LoadResource(hModule, hResource);
                             if (resData != IntPtr.Zero)
                             {
                                 byte[] uiBytes = new byte[resSize];
-                                IntPtr ipMemorySource = LockResource(resData);
-                                Marshal.Copy(ipMemorySource, uiBytes, 0, (int)resSize);
+                                void* pMemorySource = PInvoke.LockResource(resData);
+                                Marshal.Copy((IntPtr)pMemorySource, uiBytes, 0, (int)resSize);
 
                                 return uiBytes;
                             }
@@ -199,7 +196,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
                 finally
                 {
-                    PInvoke.FreeLibrary((HMODULE)hModule);
+                    PInvoke.FreeLibrary(hModule);
                 }
 
                 return null;

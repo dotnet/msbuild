@@ -20,11 +20,153 @@ using Microsoft.CodeAnalysis.BuildTasks;
 #endif
 
 using Xunit;
-using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Threading;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
 
 #nullable disable
+
+namespace Microsoft.Build.UnitTests.FileTracking
+{
+    /// <summary>
+    /// Test-only CreateProcess fixture used by the (currently skipped) FileTracker tests.
+    /// Routes through <c>Windows.Win32.PInvoke.CreateProcess</c>; keeps the original API
+    /// surface that the tests were written against so the call sites read the same way.
+    /// </summary>
+    internal static class BackEndNativeMethods
+    {
+        public static readonly IntPtr NullPtr = IntPtr.Zero;
+        public static readonly IntPtr InvalidHandle = new IntPtr(-1);
+
+        public const uint NORMALPRIORITYCLASS = 0x0020;
+        public const uint CREATENOWINDOW = 0x08000000;
+        public const int STARTFUSESTDHANDLES = 0x00000100;
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        internal struct STARTUP_INFO
+        {
+            internal int cb;
+            internal string lpReserved;
+            internal string lpDesktop;
+            internal string lpTitle;
+            internal int dwX;
+            internal int dwY;
+            internal int dwXSize;
+            internal int dwYSize;
+            internal int dwXCountChars;
+            internal int dwYCountChars;
+            internal int dwFillAttribute;
+            internal int dwFlags;
+            internal short wShowWindow;
+            internal short cbReserved2;
+            internal IntPtr lpReserved2;
+            internal IntPtr hStdInput;
+            internal IntPtr hStdOutput;
+            internal IntPtr hStdError;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SECURITY_ATTRIBUTES
+        {
+            public int nLength;
+            public IntPtr lpSecurityDescriptor;
+            public int bInheritHandle;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct PROCESS_INFORMATION
+        {
+            public IntPtr hProcess;
+            public IntPtr hThread;
+            public int dwProcessId;
+            public int dwThreadId;
+        }
+
+        // Forwards to Windows.Win32.PInvoke.CreateProcess with the same parameter shape
+        // the existing tests use. Note that this code path is currently exercised only by
+        // tests gated on FEATURE_FILE_TRACKER, all of which are skipped (see issue #649).
+        public static unsafe bool CreateProcess(
+            string lpApplicationName,
+            string lpCommandLine,
+            ref SECURITY_ATTRIBUTES lpProcessAttributes,
+            ref SECURITY_ATTRIBUTES lpThreadAttributes,
+            bool bInheritHandles,
+            uint dwCreationFlags,
+            IntPtr lpEnvironment,
+            string lpCurrentDirectory,
+            ref STARTUP_INFO lpStartupInfo,
+            out PROCESS_INFORMATION lpProcessInformation)
+        {
+            // The managed STARTUP_INFO above has `string` fields, so it isn't blittable and
+            // cannot be reinterpret-cast to STARTUPINFOW*. Marshal into a Win32-shaped struct
+            // for the duration of the call. CreateProcess only consumes lpStartupInfo, so we
+            // don't need to copy anything back.
+            Windows.Win32.System.Threading.STARTUPINFOW si = default;
+            si.cb = (uint)sizeof(Windows.Win32.System.Threading.STARTUPINFOW);
+            si.dwX = (uint)lpStartupInfo.dwX;
+            si.dwY = (uint)lpStartupInfo.dwY;
+            si.dwXSize = (uint)lpStartupInfo.dwXSize;
+            si.dwYSize = (uint)lpStartupInfo.dwYSize;
+            si.dwXCountChars = (uint)lpStartupInfo.dwXCountChars;
+            si.dwYCountChars = (uint)lpStartupInfo.dwYCountChars;
+            si.dwFillAttribute = (uint)lpStartupInfo.dwFillAttribute;
+            si.dwFlags = (STARTUPINFOW_FLAGS)lpStartupInfo.dwFlags;
+            si.wShowWindow = (ushort)lpStartupInfo.wShowWindow;
+            si.hStdInput = new HANDLE(lpStartupInfo.hStdInput.ToPointer());
+            si.hStdOutput = new HANDLE(lpStartupInfo.hStdOutput.ToPointer());
+            si.hStdError = new HANDLE(lpStartupInfo.hStdError.ToPointer());
+
+            Windows.Win32.Security.SECURITY_ATTRIBUTES pSec = new()
+            {
+                nLength = (uint)sizeof(Windows.Win32.Security.SECURITY_ATTRIBUTES),
+                lpSecurityDescriptor = (void*)lpProcessAttributes.lpSecurityDescriptor,
+                bInheritHandle = lpProcessAttributes.bInheritHandle != 0,
+            };
+            Windows.Win32.Security.SECURITY_ATTRIBUTES tSec = new()
+            {
+                nLength = (uint)sizeof(Windows.Win32.Security.SECURITY_ATTRIBUTES),
+                lpSecurityDescriptor = (void*)lpThreadAttributes.lpSecurityDescriptor,
+                bInheritHandle = lpThreadAttributes.bInheritHandle != 0,
+            };
+
+            Windows.Win32.System.Threading.PROCESS_INFORMATION pi = default;
+
+            bool ok;
+            fixed (char* pApp = lpApplicationName)
+            {
+                fixed (char* pCmd = lpCommandLine)
+                {
+                    fixed (char* pCwd = lpCurrentDirectory)
+                    {
+                        ok = PInvoke.CreateProcess(
+                            new PCWSTR(pApp),
+                            new PWSTR(pCmd),
+                            &pSec,
+                            &tSec,
+                            bInheritHandles,
+                            (PROCESS_CREATION_FLAGS)dwCreationFlags,
+                            (void*)lpEnvironment,
+                            new PCWSTR(pCwd),
+                            &si,
+                            &pi);
+                    }
+                }
+            }
+
+            lpProcessInformation = new PROCESS_INFORMATION
+            {
+                hProcess = (IntPtr)pi.hProcess.Value,
+                hThread = (IntPtr)pi.hThread.Value,
+                dwProcessId = (int)pi.dwProcessId,
+                dwThreadId = (int)pi.dwThreadId,
+            };
+
+            return ok;
+        }
+    }
+}
 
 namespace Microsoft.Build.UnitTests.FileTracking
 {
