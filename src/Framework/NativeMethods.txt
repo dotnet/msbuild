@@ -52,6 +52,7 @@ GetLogicalProcessorInformationEx
 GetLongPathName
 GetModuleFileName
 GetNativeSystemInfo
+GetACP
 GetOEMCP
 GetProcAddress
 GetRunningObjectTable

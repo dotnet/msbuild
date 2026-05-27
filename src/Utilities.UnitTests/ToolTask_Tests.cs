@@ -1638,5 +1638,6 @@ namespace Microsoft.Build.UnitTests
             tool.ExecuteCalled.ShouldBeTrue(
                 "ComputePathToTool should find the tool using TaskEnvironment-absolutized path for existence check");
         }
+
     }
 }

@@ -238,49 +238,49 @@ namespace Microsoft.Build.Utilities
         /// Overridable property specifying the encoding of the captured task standard output stream
         /// </summary>
         /// <remarks>
-        /// Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
-        /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
-        /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
+        /// Most native Windows tools (e.g., MSVC v141 link.exe, cl.exe) write their string resources
+        /// using the system ANSI code page (GetACP), not the OEM code page (GetOEMCP).
+        /// On a French Windows system for example: ANSI = CP1252, OEM = CP850.
+        /// Reading tool output with OEM-850 when the tool outputs CP1252 causes garbled non-ASCII
+        /// characters (e.g., 'é' → 'Ú', 'à' → 'Ó'). Using ANSI encoding fixes this mismatch.
+        /// See: https://github.com/dotnet/msbuild/issues/12290
         /// </remarks>
-        protected virtual Encoding StandardOutputEncoding
+        protected virtual Encoding StandardOutputEncoding => GetDefaultToolEncoding();
+
+        /// <summary>
+        /// Returns the encoding to use for reading standard output and error streams from child tool processes.
+        /// Priority: UTF-8 encoding set by UseUtf8Encoding (Wave17_10) > ANSI system default (GetACP).
+        /// </summary>
+        private Encoding GetDefaultToolEncoding()
         {
-            get
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                if (_encoding != null)
                 {
-                    if (_encoding != null)
-                    {
-                        // Keep the encoding of standard output & error consistent with the console code page.
-                        return _encoding;
-                    }
+                    // Keep the encoding of standard output & error consistent with the console code page.
+                    return _encoding;
                 }
-                return EncodingUtilities.CurrentSystemOemEncoding;
             }
+
+            // Use ANSI code page (GetACP) rather than OEM (GetOEMCP): most native Windows tools
+            // compile their string resources with the ANSI code page, so reading with OEM garbles
+            // non-ASCII characters (e.g., 'é' → 'Ú' on French Windows: ANSI=CP1252, OEM=CP850).
+            // See: https://github.com/dotnet/msbuild/issues/12290
+            return EncodingUtilities.CurrentSystemAnsiEncoding;
         }
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard error stream
         /// </summary>
         /// <remarks>
-        /// Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
-        /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
-        /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
+        /// Most native Windows tools (e.g., MSVC v141 link.exe, cl.exe) write their string resources
+        /// using the system ANSI code page (GetACP), not the OEM code page (GetOEMCP).
+        /// On a French Windows system for example: ANSI = CP1252, OEM = CP850.
+        /// Reading tool output with OEM-850 when the tool outputs CP1252 causes garbled non-ASCII
+        /// characters (e.g., 'é' → 'Ú', 'à' → 'Ó'). Using ANSI encoding fixes this mismatch.
+        /// See: https://github.com/dotnet/msbuild/issues/12290
         /// </remarks>
-        protected virtual Encoding StandardErrorEncoding
-        {
-            get
-            {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-                {
-                    if (_encoding != null)
-                    {
-                        // Keep the encoding of standard output & error consistent with the console code page.
-                        return _encoding;
-                    }
-                }
-                return EncodingUtilities.CurrentSystemOemEncoding;
-            }
-        }
+        protected virtual Encoding StandardErrorEncoding => GetDefaultToolEncoding();
 
         /// <summary>
         /// Gets the Path override value.

@@ -28,6 +28,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Encoding Utf8WithoutBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
         private static Encoding s_currentOemEncoding;
+        private static Encoding s_currentAnsiEncoding;
 
         internal const string UseUtf8Always = "ALWAYS";
         internal const string UseUtf8Never = "NEVER";
@@ -83,6 +84,59 @@ namespace Microsoft.Build.Shared
                 }
 
                 return s_currentOemEncoding;
+            }
+        }
+
+        /// <summary>
+        /// Get the current system locale code page, ANSI version (GetACP). ANSI code pages are used
+        /// by most native Windows tools for string resources compiled into their binaries.
+        /// This differs from OEM code pages which are used for console I/O historically.
+        /// For example, on a French Windows system: ANSI = CP1252, OEM = CP850.
+        ///
+        /// Many native build tools (e.g., MSVC v141 link.exe, cl.exe) write output using the ANSI
+        /// code page rather than the OEM code page, so MSBuild must read with ANSI to decode correctly.
+        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// </summary>
+        internal static Encoding CurrentSystemAnsiEncoding
+        {
+            get
+            {
+                if (s_currentAnsiEncoding != null)
+                {
+                    return s_currentAnsiEncoding;
+                }
+
+#if FEATURE_ENCODING_DEFAULT
+                // On .NET Framework, Encoding.Default returns the system ANSI code page (GetACP()).
+                // e.g., CP1252 for Western European Windows. This is what most native Windows tools
+                // use when writing string resources to stdout.
+                s_currentAnsiEncoding = Encoding.Default;
+#else
+                // On .NET Core/5+, Encoding.Default is always UTF-8, so we must explicitly call GetACP().
+                s_currentAnsiEncoding = Encoding.UTF8; // fallback if GetACP() fails or on non-Windows
+
+                try
+                {
+#if FEATURE_WINDOWSINTEROP
+                    if (NativeMethods.IsWindows)
+                    {
+                        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                        // GetACP() returns the system ANSI code page (e.g., 1252 for French Windows).
+                        s_currentAnsiEncoding = Encoding.GetEncoding((int)PInvoke.GetACP());
+                    }
+#endif
+                }
+                catch (ArgumentException ex)
+                {
+                    Debug.Assert(false, "GetEncoding(system ANSI code page) threw an ArgumentException in EncodingUtilities.CurrentSystemAnsiEncoding! Please log a bug against MSBuild.", ex.Message);
+                }
+                catch (NotSupportedException ex)
+                {
+                    Debug.Assert(false, "GetEncoding(system ANSI code page) threw a NotSupportedException in EncodingUtilities.CurrentSystemAnsiEncoding! Please log a bug against MSBuild.", ex.Message);
+                }
+#endif
+
+                return s_currentAnsiEncoding;
             }
         }
 
