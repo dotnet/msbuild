@@ -90,8 +90,11 @@
   <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true'">
     <Compile Remove="Windows\**\*.cs" />
     <Compile Remove="Shared\Win32\**\*.cs" />
+    <Compile Remove="Shared\VisualStudio\**\*.cs" />
     <Compile Remove="FileSystem\MSBuildOnWindowsFileSystem.cs" />
     <Compile Remove="FileSystem\WindowsFileSystem.cs" />
+    <Compile Remove="FileSystem\WindowsNative.cs" />
+    <Compile Remove="FileSystem\SafeFileHandle.cs" />
   </ItemGroup>
 
   <!-- CsWin32 source generator for Windows interop (Windows non-source builds only) -->

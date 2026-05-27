@@ -57,10 +57,10 @@ internal static class DriveMapping
         // since this is just for test purposes - let's not overcomplicate with long paths support
         char[] buffer = new char[MAX_PATH];
         string deviceName = ToDeviceName(letter);
+        uint length;
 
         while (true)
         {
-            uint length;
             fixed (char* pBuf = buffer)
             {
                 fixed (char* pDevice = deviceName)
@@ -87,8 +87,10 @@ internal static class DriveMapping
             buffer = new char[buffer.Length * 4];
         }
 
-        // Translate from the native path semantic - starting with '\??\'
-        return new string(buffer, 4, buffer.Length - 4);
+        // Translate from the native path semantic - starting with '\??\'. `length` is the
+        // number of characters QueryDosDevice copied INCLUDING the trailing NUL; trim the
+        // prefix (4) and the terminator (1) to get the managed string content.
+        return new string(buffer, 4, (int)length - 5);
     }
 
     private static string ToDeviceName(char letter)

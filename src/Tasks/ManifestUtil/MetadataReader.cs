@@ -394,7 +394,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             for (int i = 0; i < names.Length; i++)
             {
-                results[i] = HasAssemblyAttribute(import2, assemblyScope, names[i]);
+                results[i] = HasAssemblyAttribute(import2.Pointer, assemblyScope, names[i]);
             }
         }
 

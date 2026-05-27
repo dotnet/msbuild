@@ -133,10 +133,26 @@ namespace Microsoft.Build.UnitTests.FileTracking
 
             Windows.Win32.System.Threading.PROCESS_INFORMATION pi = default;
 
+            // CreateProcessW is documented to be allowed to modify lpCommandLine in place
+            // (it parses argv[0] out of it on the way in). Pinning a managed string would let
+            // native code write to immutable string storage, so copy into a fresh char[] —
+            // sized for the null terminator — and pin that.
+            char[] cmdLineBuffer;
+            if (lpCommandLine is null)
+            {
+                cmdLineBuffer = null;
+            }
+            else
+            {
+                cmdLineBuffer = new char[lpCommandLine.Length + 1];
+                lpCommandLine.CopyTo(0, cmdLineBuffer, 0, lpCommandLine.Length);
+                // CLR initializes the array to 0, so cmdLineBuffer[length] is the terminator.
+            }
+
             bool ok;
             fixed (char* pApp = lpApplicationName)
             {
-                fixed (char* pCmd = lpCommandLine)
+                fixed (char* pCmd = cmdLineBuffer)
                 {
                     fixed (char* pCwd = lpCurrentDirectory)
                     {

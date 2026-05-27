@@ -179,11 +179,11 @@ namespace Microsoft.Build.Tasks.UnitTests
                             }
                         }
 
-                        if (hResource != IntPtr.Zero)
+                        if (!hResource.IsNull)
                         {
                             uint resSize = PInvoke.SizeofResource(hModule, hResource);
                             HGLOBAL resData = PInvoke.LoadResource(hModule, hResource);
-                            if (resData != IntPtr.Zero)
+                            if (!resData.IsNull)
                             {
                                 byte[] uiBytes = new byte[resSize];
                                 void* pMemorySource = PInvoke.LockResource(resData);
