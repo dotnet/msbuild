@@ -38,7 +38,7 @@
         "vs18.7": {
             "MergeToBranch": "vs18.8"
         },
-        // Automate opening PRs to merge msbuild's vs18.8 (VS, SDK 10.0.5xx) into main (VS canary, SDK main & next-feature-band)
+        // Automate opening PRs to merge msbuild's vs18.8 (VS) into main (VS canary, SDK main & next-feature-band)
         "vs18.8": {
             "MergeToBranch": "main"
         }
