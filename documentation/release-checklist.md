@@ -125,20 +125,19 @@ Use `--configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}-main-bump` 
   `darc update-subscription --id <subscription_id_from_3.1> --channel "VS {{NEXT_VERSION}}" --configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **3.3d** If release branch association was missing in 3.2, add it: \
   `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
-  - [ ] **3.3e** _If any subscriptions need fixing (from 3.4–3.6 below), include them here with `--no-pr`._
+  - [ ] **3.3e** _If the Arcade subscription from 3.4 below is missing or pointed at the wrong channel, include the fix here with `--no-pr`._
   - [ ] **3.3f** **Create the PR** — re-run step 3.3b (or whichever was the last write command executed) without `--no-pr` to open the PR on the configuration branch.
   - [ ] **3.3g** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE3_DARC_PR}}
 
 Verifications (**parallel** — read-only, no ordering dependency):
 
-- [ ] **3.4** Verify Arcade subscription (based on .NET version channel — rarely changes): \
+- [ ] **3.4** Verify Arcade subscription — **and add it if missing**. \
 `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
-- [ ] **3.5** Verify NuGet client subscription (based on VS version channel): \
-`darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/nuget/nuget.client`
-- [ ] **3.6** Verify Roslyn subscription (based on VS version channel): \
-`darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/roslyn`
-- [ ] **3.7** Confirm Roslyn and NuGet subscriptions are **disabled** (`Enabled: False` in output). We do not want to automatically bump them — version updates are driven by SDK or VS.
-- [ ] **3.8** Fix any missing or misconfigured subscriptions by adding write commands to the Phase 3 PR branch (step 3.3e) before merging, or with a separate `darc add-subscription` / `darc update-subscription` (run with `--help` for params)
+  - **Every supported branch must have an Arcade subscription from the matching `.NET <X> Eng` channel.** For an SDK-coupled release this is the single most commonly forgotten piece of configuration — verify a subscription exists from **`.NET <X> Eng`** (the channel matching the .NET version this VS release ships with) into `vs{{THIS_RELEASE_VERSION}}`.
+  - Expected cadence: weekly Arcade flow into `vs{{THIS_RELEASE_VERSION}}`. If you don't see weekly Arcade-bump PRs after a release, the subscription is missing or pointed at the wrong channel.
+  - If missing, add it via the configuration branch in **3.3e** (use `darc add-subscription ... --source-repo https://github.com/dotnet/arcade --channel ".NET <X> Eng" --target-repo https://github.com/dotnet/msbuild --target-branch vs{{THIS_RELEASE_VERSION}} --update-frequency EveryWeek`).
+
+> _Roslyn and NuGet subscription verification intentionally omitted: there is always exactly one Roslyn and NuGet subscription, it targets `main` only, is permanently disabled, and never changes per release — re-verifying it every release adds no signal._
 
 ---
 
@@ -166,6 +165,11 @@ The insertion PR contains the inserted package versions — useful for the nuget
 
 **After insiders snap** (only if a backport to insiders is needed):
 
+> 🛑 **4.7 and 4.8 are NOT part of the regular release flow — skip them entirely on a normal release.** \
+> They only apply when **servicing** a previously-shipped release (i.e. you actually have a hotfix commit on `vs{{THIS_RELEASE_VERSION}}` that needs to be inserted into VS's already-snapped `rel/insiders` or `rel/stable` branch). If you have no such commit to service, leave `AutoInsertTargetBranch` untouched and move on to Phase 5.
+>
+> ⚠️ When you *do* need to service: re-confirm which VS branch you actually want to insert into before flipping `AutoInsertTargetBranch`. The default is `main`, so forgetting to retarget after the snap silently lands your fix in the next VS instead of the one you're servicing.
+
 - [ ] **4.7** Update [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml): retarget `AutoInsertTargetBranch` for `vs{{THIS_RELEASE_VERSION}}` from VS `main` → `rel/insiders`. This enables direct insertion of hotfix commits into the insiders branch.
 
 **After stable snap** (only if a backport to stable is needed):
@@ -180,34 +184,52 @@ The insertion PR contains the inserted package versions — useful for the nuget
 
 Steps are **mostly parallel** unless noted.
 
-- [ ] **5.1** Push packages to nuget.org. Contact dnceng — search "Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org" email subject for template. \
-`THIS_RELEASE_EXACT_VERSION` = `VersionPrefix` from `eng/Versions.props` on the release branch (also visible in the VS insertion PR). Packages to publish taken from the official build https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434 for the {{THIS_RELEASE_VERSION}} branch; search in artifacts under the Shipping folder for:
-    - Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
-    - Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
-    - Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
-    - Microsoft.Build.Runtime.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
-    - Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
-    - Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
-    - Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+- [ ] **5.1** Push packages to nuget.org.
 
-- [ ] **5.2** Publish docs: submit reference request at https://aka.ms/publishondocs \
-Click *Request – Reference Publishing*. Use [existing ticket](https://dev.azure.com/msft-skilling/Content/_workitems/edit/183613) as a reference.
+  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Shipping** artifacts of the official build to the dnceng release team, and they push to nuget.org. Searching past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ will surface the contact and template; do **not** hard-code the contact's name or email in this checklist — internal ownership rotates and we don't want individual addresses exposed in a public GitHub doc.
+
+  - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers — **do not trust `VersionPrefix` in the release branch by itself**, it has been misleading in past releases.
+    - **If this release is coupled with an SDK release: use the SDK as the source of truth** — it has the highest fidelity, particularly for security-only patches where only some intervals get bumped. Look up the MSBuild version baked into the shipped SDK build.
+    - Otherwise: look at the MSBuild version inserted into the corresponding VS build. Note this version differs in non-obvious ways between VS major/minor versions, so confirm against the actual VS insertion PR.
+  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`).
+  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`artifacts-shipping`** drop. Verify the Shipping folder contains all of:
+    - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
+    - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
+    - `Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
+    - `Microsoft.Build.Runtime.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
+    - `Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
+    - `Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
+    - `Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
+  - [ ] **5.1d** Email the dnceng release team (use the saved _"Publish MSBuild ... to NuGet.org"_ template from your sent mail) with the `artifacts-shipping` link from 5.1c and ask them to publish to nuget.org. Track the reply until publication is confirmed.
+
+- [ ] **5.2** Publish docs
+
+  > **How publishing works:** The reference-publishing vendor team generates Microsoft Learn reference pages from the shipped MSBuild assemblies/xmldoc and then sends us a docs-repo PR with the regenerated content.
+
+  - [ ] **5.2a** Create a reference-publishing ticket for the new release based on [this existing ticket](https://dev.azure.com/msft-skilling/Content/_workitems/edit/565854) as a template. Then wait for the vendor team to ping you with a link to the generated PR.
+  - [ ] **5.2b** Review and approve the docs-repo PR the vendor team opens (example: [msbuild-api-docs#61](https://github.com/dotnet/msbuild-api-docs/pull/61)).
 - [ ] **5.3** Create GitHub release:
-  ```
-  git checkout <final-branding commit on vs{{THIS_RELEASE_VERSION}}>
-  git tag v{{THIS_RELEASE_EXACT_VERSION}}
-  git push upstream v{{THIS_RELEASE_EXACT_VERSION}}
-  ```
-  Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate.
+  - [ ] **5.3a** **Precondition — confirm the previous release tag exists on `upstream`.** \
+  `git fetch upstream --tags && git tag --list 'v{{PREVIOUS_RELEASE_EXACT_VERSION}}'` \
+  If the tag is missing (e.g. the previous release was never tagged), create and push it **first**.
+  - [ ] **5.3b** **Identify the commit to tag.** It is **not always** the final-branding commit from 4.3 — it must be the commit whose bits **actually shipped** in `{{THIS_RELEASE_EXACT_VERSION}}`. \
+  If a hotfix was applied to `vs{{THIS_RELEASE_VERSION}}` after final branding and that fix was inserted into the VS build that shipped, tag **that** commit instead. \
+  To find it: cross-reference the SHA from the **VS insertion PR that actually shipped** (the package version listed there must equal `{{THIS_RELEASE_EXACT_VERSION}}` from 5.1a) with the commit history on `vs{{THIS_RELEASE_VERSION}}`.
+  - [ ] **5.3c** Tag this release and push:
+    ```
+    git checkout <commit identified in 5.3b>
+    git tag v{{THIS_RELEASE_EXACT_VERSION}}
+    git push upstream v{{THIS_RELEASE_EXACT_VERSION}}
+    ```
+  - [ ] **5.3d** Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate.
 - [ ] **5.4** Update `BootstrapSdkVersion` in [`eng/Versions.props`](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props) if a fresh SDK was released. Check https://dotnet.microsoft.com/download/visual-studio-sdks — always verify the details for the targeted .NET version.
 - [ ] **5.4b** Update `tools.dotnet` in [`global.json`](https://github.com/dotnet/msbuild/blob/main/global.json) to the latest released SDK in the targeted band. `DotNetCliVersion` in `eng/Versions.props` is derived from this and **must** match (see the comment on `DotNetCliVersion`). This bump should happen monthly as new SDKs release.
-- [ ] **5.5** Extend OptProf data expiration for `vs{{THIS_RELEASE_VERSION}}` branch if the release is LTSC:
-  - Find the drop at `OptimizationData/DotNet-msbuild-Trusted/vs{{THIS_RELEASE_VERSION}}/...` (in MSBuild CI logs: Build task, or OptProf pipeline: "Publish OptimizationInputs drop" task)
-  - Get [drop.exe](https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/azure-artifacts/drop-service/azure-artifacts-drop) CLI
-  - Set expiration to VS support end date + 3 months per [these instructions](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/30808/Extend-a-drop's-expiration-date)
-- [ ] **5.6** Verify `main` subscriptions point to `VS {{NEXT_VERSION}}` channel (should have been done in Phase 3; confirm): \
-`darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --target-branch main`
-- [ ] **5.7** Review this tracking issue for any process deviations. If the process changed, create a PR to update `documentation/release-checklist.md` with the improvements.
+- [ ] **5.5** Verify the overall subscription map is correct — not just for `{{THIS_RELEASE_VERSION}}` but for every still-supported branch:
+  - [ ] **5.5a** `main` subscriptions point to `VS {{NEXT_VERSION}}` channel (should have been done in Phase 3; confirm): \
+  `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --target-branch main`
+  - [ ] **5.5b** Every supported `vsXX.Y` branch has an Arcade subscription matching its targeted .NET band, and each supported branch's outbound subscriptions land in the right downstream (e.g. SDK band, VMR). \
+  Open question (track with Rainer): MSBuild `main` currently flows to *two* downstream targets (VMR and the legacy SDK path) but only one subscription is configured — confirm whether this needs a dual subscription before signing off the release.
+- [ ] **5.6** Review this tracking issue for any process deviations. If the process changed, create a PR to update `documentation/release-checklist.md` with the improvements.
 
 ---
 
