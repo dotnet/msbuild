@@ -125,17 +125,15 @@ Use `--configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}-main-bump` 
   `darc update-subscription --id <subscription_id_from_3.1> --channel "VS {{NEXT_VERSION}}" --configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **3.3d** If release branch association was missing in 3.2, add it: \
   `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
-  - [ ] **3.3e** _If the Arcade subscription from 3.4 below is missing or pointed at the wrong channel, include the fix here with `--no-pr`._
+  - [ ] **3.3e** _If any subscriptions need fixing (from 3.4–3.6 below), include them here with `--no-pr`._
   - [ ] **3.3f** **Create the PR** — re-run step 3.3b (or whichever was the last write command executed) without `--no-pr` to open the PR on the configuration branch.
   - [ ] **3.3g** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE3_DARC_PR}}
 
 Verifications (**parallel** — read-only, no ordering dependency):
 
-- [ ] **3.4** Verify Arcade subscription — **and add it if missing**. \
+- [ ] **3.4** Verify the Arcade subscription for `vs{{THIS_RELEASE_VERSION}}`: \
 `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
-  - **Every supported branch must have an Arcade subscription** from the matching `.NET <X> Eng` channel.
-  - The **channel** is determined by the .NET band the branch is paired with (e.g. a branch paired with .NET 10 subscribes to `.NET 10 Eng`).
-
+  - **Every supported branch must have an Arcade subscription** from the matching `.NET <X> Eng` channel (the channel is determined by the .NET band the branch is paired with — e.g. a branch paired with .NET 10 subscribes to `.NET 10 Eng`).
 > _Roslyn and NuGet subscription verification intentionally omitted: there is always exactly one Roslyn and NuGet subscription, it targets `main` only, is permanently disabled, and never changes per release — re-verifying it every release adds no signal._
 
 ---
