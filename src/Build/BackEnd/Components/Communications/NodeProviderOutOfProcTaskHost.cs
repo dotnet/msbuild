@@ -791,8 +791,8 @@ namespace Microsoft.Build.BackEnd
             HandshakeOptions hostContext,
             bool nodeReuseEnabled)
         {
-            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
             string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
+            (string launchPath, bool useAppHost) = ResolveNetTaskHostLaunchPath(msbuildAssemblyPath);
 
             // The child task host (NodeEndpointOutOfProcTaskHost) computes its handshake
             // toolsDirectory from BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot,
@@ -813,16 +813,16 @@ namespace Microsoft.Build.BackEnd
             Handshake handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath);
 #endif
 
-            if (FileSystems.Default.FileExists(appHostPath))
+            if (useAppHost)
             {
-                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {appHostPath}.");
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {launchPath}.");
 
                 IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
                 return dotnetOverrides == null
                     ? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet"))
                     : new NodeLaunchData(
-                        appHostPath,
+                        launchPath,
                         commandLineArgs,
                         handshake,
                         dotnetOverrides);
@@ -837,12 +837,27 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found at {appHostPath}, falling back to dotnet.exe from {resolvedDotnetHostPath}.");
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found, falling back to dotnet.exe ({resolvedDotnetHostPath}) hosting {launchPath}.");
 
             return new NodeLaunchData(
                 resolvedDotnetHostPath,
-                $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
+                $"\"{launchPath}\" {commandLineArgs}",
                 handshake);
+        }
+
+        /// <summary>
+        /// Resolves the .NET task host launch target for an SDK directory: the MSBuild app host
+        /// (<c>MSBuild.exe</c>) when present, otherwise <c>MSBuild.dll</c> (which is launched via
+        /// <c>dotnet.exe</c>). Single source of truth for the apphost-vs-fallback decision,
+        /// shared by the launch path and any caller that needs to describe the launch target
+        /// (e.g. error messages).
+        /// </summary>
+        internal static (string LaunchPath, bool UseAppHost) ResolveNetTaskHostLaunchPath(string msbuildAssemblyPath)
+        {
+            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
+            return FileSystems.Default.FileExists(appHostPath)
+                ? (appHostPath, true)
+                : (Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), false);
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
