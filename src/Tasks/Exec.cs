@@ -33,13 +33,21 @@ namespace Microsoft.Build.Tasks
         {
             Command = string.Empty;
 
-            // Most native Windows tools write output using the system ANSI code page (GetACP),
-            // not the OEM code page (GetOEMCP). For example, on French Windows: ANSI=CP1252, OEM=CP850.
-            // Using OEM to read CP1252 output garbles non-ASCII characters (e.g., 'é' → 'Ú').
+            // Wave18_8: use ANSI code page (GetACP) instead of OEM (GetOEMCP). Most native Windows tools
+            // write output using the ANSI code page (e.g., MSVC link.exe on French Windows: ANSI=CP1252,
+            // OEM=CP850). Reading with OEM garbles non-ASCII characters (e.g., 'é' → 'Ú').
             // See: https://github.com/dotnet/msbuild/issues/12290
             // If the cmd file contains non-ANSI characters the encoding may change later (see CreateTemporaryBatchFile).
-            _standardOutputEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
-            _standardErrorEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+            {
+                _standardOutputEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
+                _standardErrorEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
+            }
+            else
+            {
+                _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+                _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            }
         }
 
         #endregion

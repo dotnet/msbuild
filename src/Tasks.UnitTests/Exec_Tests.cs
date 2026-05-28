@@ -1203,6 +1203,29 @@ echo line 3"" />
         }
 
         /// <summary>
+        /// When Wave18_8 is opted out, Exec falls back to OEM encoding — preserving pre-Wave18_8 behaviour.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void ExecTask_Wave18_8_OptedOut_DefaultEncodingIsOem()
+        {
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                Exec exec = PrepareExec("echo test");
+                exec.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+                exec.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        /// <summary>
         /// UseUtf8Encoding=Always overrides the ANSI default: when the batch file needs UTF-8
         /// (chcp 65001 is injected), the stdout encoding is also switched to UTF-8.
         /// UseUtf8 controls the batch-file encoding; the chcp injection then also changes stdout reading.

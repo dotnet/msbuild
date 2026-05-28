@@ -249,7 +249,7 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Returns the encoding to use for reading standard output and error streams from child tool processes.
-        /// Priority: UTF-8 encoding set by UseUtf8Encoding (Wave17_10) > ANSI system default (GetACP).
+        /// Priority: UTF-8 encoding set by UseUtf8Encoding (Wave17_10) > ANSI (Wave18_8) > OEM legacy.
         /// </summary>
         private Encoding GetDefaultToolEncoding()
         {
@@ -262,11 +262,16 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            // Use ANSI code page (GetACP) rather than OEM (GetOEMCP): most native Windows tools
+            // Wave18_8: use ANSI code page (GetACP) rather than OEM (GetOEMCP). Most native Windows tools
             // compile their string resources with the ANSI code page, so reading with OEM garbles
             // non-ASCII characters (e.g., 'é' → 'Ú' on French Windows: ANSI=CP1252, OEM=CP850).
             // See: https://github.com/dotnet/msbuild/issues/12290
-            return EncodingUtilities.CurrentSystemAnsiEncoding;
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+            {
+                return EncodingUtilities.CurrentSystemAnsiEncoding;
+            }
+
+            return EncodingUtilities.CurrentSystemOemEncoding;
         }
 
         /// <summary>
