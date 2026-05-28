@@ -646,24 +646,37 @@ Use this to prioritize dimensions based on changed files.
 
    **Important**: Use `create_pull_request_review_comment` (inline on diff), NOT `add_comment` (general PR comment). Only findings tied to a specific changed line should use this tool.
 
+   **Every inline comment must be actionable.** Do NOT post comments that only praise existing code, acknowledge good patterns, or say "looks good". If a dimension is clean, do not leave an inline comment for it and do not add it as an LGTM row in the summary table; instead, count it only in the aggregate clean-dimensions summary line described in step 7. Comments like "This is well-written 👍" or "Good use of X pattern" add noise without giving the author anything to act on.
+
 6. Post design-level concerns (not tied to a specific diff line) as a single PR comment via the `add_comment` safe-output tool — one bullet each.
 
 ### Wave 4: Summary
 
-7. Submit the final review verdict via the `submit_pull_request_review` safe-output tool. Include the summary table in the review `body` and set the `event` field:
+7. Submit the final review verdict via the `submit_pull_request_review` safe-output tool. Include the summary table in the review `body` and set the `event` field.
+
+   **Omit all LGTM dimensions from the table** — only list dimensions that have findings. This keeps the review concise and actionable. Show the count of clean dimensions as a single summary line instead.
+
+   When there **are** findings:
 
    ```markdown
    | # | Dimension | Verdict |
    |---|-----------|---------|
-   | 1 | Backwards Compatibility | ✅ LGTM |
    | 13 | Concurrency | 🔴 2 MAJOR |
+   | 22 | Correctness | 🟡 1 MODERATE |
 
-   - [x] Backwards Compat
+   ✅ 22/24 dimensions clean.
+
    - [ ] Concurrency — shared state race
+   - [ ] Correctness — null input edge case
    ```
 
-   `[x]` = LGTM or NITs only. `[ ]` = BLOCKING.
-   Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
+   When **all dimensions are clean**, omit the table entirely:
+
+   ```markdown
+   ✅ 24/24 dimensions clean — no findings.
+   ```
+
+   `[ ]` = dimensions with findings. Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
    **Never use APPROVE** — the agent must not count as a PR approval.
 
    All inline comments from step 5 are automatically bundled into this review submission.

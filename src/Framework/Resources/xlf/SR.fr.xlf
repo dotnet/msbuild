@@ -102,6 +102,11 @@
         <target state="translated">Le paramètre "{0}" peut uniquement être un nom de fichier et ne peut pas inclure de répertoire.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogFileOutputPath">
+        <source>{0} wrote to: {1}</source>
+        <target state="new">{0} wrote to: {1}</target>
+        <note>{0} is the logger name. {1} is a list of full file paths separated by the current culture's list separator (followed by a space).</note>
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">Le chemin doit être associé à une racine.</target>
@@ -125,6 +130,16 @@
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
         <target state="translated">La version "{0}" de Visual Studio n'est pas prise en charge.  Spécifiez une valeur de l'énumération Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_contains_no_elements">
+        <source>'{0}' contains no elements.</source>
+        <target state="translated">« {0} » ne contient aucun élément.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_does_not_contain_matching_element">
+        <source>'{0}' does not contain matching element.</source>
+        <target state="translated">« {0} » ne contient pas d’élément correspondant.</target>
         <note />
       </trans-unit>
     </body>

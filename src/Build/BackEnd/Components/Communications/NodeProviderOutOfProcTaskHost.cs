@@ -20,6 +20,19 @@ using Constants = Microsoft.Build.Framework.Constants;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+
+    /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
     /// </summary>
@@ -193,7 +206,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         internal void SendData(TaskHostNodeKey nodeKey, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), "Invalid host context specified: {0}.", nodeKey);
+            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), $"Invalid host context specified: {nodeKey}.");
 
             SendData(context, packet);
         }
@@ -361,7 +374,7 @@ namespace Microsoft.Build.BackEnd
 
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError("PacketReceived: no handler for node {0}, unexpected packet type {1}", node, packet.Type);
+                    ErrorUtilities.ThrowInternalError($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
                     break;
             }
         }
@@ -373,7 +386,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, "Factory cannot create components of type {0}", componentType);
+            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProcTaskHost();
         }
 
@@ -618,11 +631,17 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            in TaskHostParameters taskHostParameters)
+            in TaskHostParameters taskHostParameters,
+            out int hostProcessId,
+            out bool wasNewlyCreated)
         {
+            hostProcessId = -1;
+            wasNewlyCreated = false;
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(nodeKey))
             {
+                wasNewlyCreated = true;
                 nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
             }
             else
@@ -641,6 +660,16 @@ namespace Microsoft.Build.BackEnd
                     handlerStack.Push(handler);
                 }
 
+                try
+                {
+                    hostProcessId = context.Process?.Id ?? -1;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                    hostProcessId = -1;
+                }
+
                 // Configure the node.
                 context.SendData(configuration);
                 return true;
@@ -656,7 +685,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
             {
-                CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
+                CommunicationsUtilities.Trace($"DisconnectFromHost: Node context already removed for key: {nodeKey}");
                 return;
             }
 
@@ -702,7 +731,7 @@ namespace Microsoft.Build.BackEnd
                 return default;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext, nodeLaunchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, spawning executable from {nodeLaunchData.MSBuildLocation}.");
 
             IList<NodeContext> nodeContexts = GetNodes(
                 nodeLaunchData,
@@ -786,7 +815,7 @@ namespace Microsoft.Build.BackEnd
 
             if (FileSystems.Default.FileExists(appHostPath))
             {
-                CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {appHostPath}.");
 
                 IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
@@ -808,7 +837,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, resolvedDotnetHostPath);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found at {appHostPath}, falling back to dotnet.exe from {resolvedDotnetHostPath}.");
 
             return new NodeLaunchData(
                 resolvedDotnetHostPath,

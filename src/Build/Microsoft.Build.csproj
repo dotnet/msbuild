@@ -34,8 +34,6 @@
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
@@ -110,7 +108,6 @@
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
@@ -129,7 +126,6 @@
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
@@ -338,7 +334,6 @@
     <Compile Include="BackEnd\Node\InProcNode.cs" />
     <Compile Include="BackEnd\Node\NodeConfiguration.cs" />
     <Compile Include="BackEnd\Node\OutOfProcNode.cs" />
-    <Compile Include="BackEnd\Node\NativeMethods.cs" />
     <Compile Include="BackEnd\Shared\BuildAbortedException.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilderCallback.cs" />
@@ -578,6 +573,7 @@
     <Compile Include="Logging\SimpleErrorLogger.cs" />
     <Compile Include="Logging\ParallelLogger\ConsoleOutputAligner.cs" />
     <Compile Include="Logging\FileLogger.cs" />
+    <Compile Include="Logging\IFileOutputLogger.cs" />
     <Compile Include="Logging\LogFormatter.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectPropertyLink.cs" />
@@ -632,12 +628,6 @@
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\XMakeAttributes.cs">
-      <Link>Resources\XMakeAttributes.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\XMakeElements.cs">
-      <Link>Resources\XMakeElements.cs</Link>
-    </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 
     <!-- Win32 RC Files -->
@@ -675,7 +665,8 @@
     </XmlPeek>
 
     <PropertyGroup>
-      <NuGetFrameworkWrapperRedirects_Content><![CDATA[
+      <NuGetFrameworkWrapperRedirects_Content>
+        <![CDATA[
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 

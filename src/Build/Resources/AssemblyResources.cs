@@ -82,7 +82,7 @@ namespace Microsoft.Build.Shared
                 resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
             }
 
-            ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
+            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
 
             return resource;
         }
