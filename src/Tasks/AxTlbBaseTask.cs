@@ -117,7 +117,7 @@ namespace Microsoft.Build.Tasks
                 Log,
                 true);
 
-            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
+            return string.IsNullOrEmpty(pathToTooSl) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
 
         /// <summary>
@@ -126,10 +126,6 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if parameters are valid</returns>
         protected override bool ValidateParameters()
         {
-            // Verify that a path for the tool exists -- if the tool doesn't exist in it
-            // we'll worry about that later. ToolPath and SdkToolsPath are alternative locations;
-            // an unset (null/empty) value just means "not configured" and is not an error on its
-            // own -- only failing to find the tool in *either* location is.
             if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(ToolPath))) &&
                 (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(SdkToolsPath))))
             {
