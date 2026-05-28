@@ -2,447 +2,266 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Specialized;
-#if RUNTIME_TYPE_NETCORE
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
-#else
 using System.Runtime.InteropServices;
-using Microsoft.Build.Tasks.Metadata;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.System.Com;
-#endif
+using System.Xml;
+using System.Xml.Serialization;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
-#if RUNTIME_TYPE_NETCORE
-    internal class MetadataReader : IDisposable
+    /// <summary>
+    /// Reads an XML manifest file into an object representation.
+    /// </summary>
+    [ComVisible(false)]
+    public static class ManifestReader
     {
-        private StringDictionary _attributes;
-        private List<string> _customAttributes;
-
-        private FileStream _assemblyStream;
-        private PEReader _peReader;
-        private System.Reflection.Metadata.MetadataReader _reader;
-
-        private MetadataReader(string path)
+        internal static ComInfo[] GetComInfo(string path)
         {
-            try
+            XmlDocument document = GetXmlDocument(path);
+            XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
+            string manifestFileName = Path.GetFileName(path);
+
+            var comInfoList = new List<ComInfo>();
+            XmlNodeList comNodes = document.SelectNodes(XPaths.comFilesPath, nsmgr);
+            foreach (XmlNode comNode in comNodes)
             {
-                _assemblyStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Delete | FileShare.Read);
-                if (_assemblyStream != null)
+                XmlNode nameNode = comNode.SelectSingleNode(XPaths.fileNameAttribute, nsmgr);
+                string componentFileName = nameNode?.Value;
+
+                XmlNodeList clsidNodes = comNode.SelectNodes(XPaths.clsidAttribute, nsmgr);
+                foreach (XmlNode clsidNode in clsidNodes)
                 {
-                    _peReader = new PEReader(_assemblyStream, PEStreamOptions.LeaveOpen);
-                    if (_peReader != null)
+                    comInfoList.Add(new ComInfo(manifestFileName, componentFileName, clsidNode.Value, null));
+                }
+
+                XmlNodeList tlbidNodes = comNode.SelectNodes(XPaths.tlbidAttribute, nsmgr);
+                foreach (XmlNode tlbidNode in tlbidNodes)
+                {
+                    comInfoList.Add(new ComInfo(manifestFileName, componentFileName, null, tlbidNode.Value));
+                }
+            }
+
+            return comInfoList.ToArray();
+        }
+
+        private static XmlDocument GetXmlDocument(string path)
+        {
+            using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                byte[] buffer = new byte[2];
+                s.ReadExactly(buffer, 0, 2);
+                s.Position = 0;
+                var document = new XmlDocument();
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
+                if ((buffer[0] == 0x4D) && (buffer[1] == 0x5A))
+                {
+                    using (Stream m = EmbeddedManifestReader.Read(path))
                     {
-                        if (_peReader.HasMetadata)
+                        if (m == null)
                         {
-                            _reader = _peReader.GetMetadataReader();
+                            throw new BadImageFormatException(null, path);
+                        }
+
+                        using (XmlReader xr = XmlReader.Create(m, xrSettings))
+                        {
+                            document.Load(xr);
                         }
                     }
-                }
-            }
-            catch (Exception)
-            {
-                Close();
-            }
-        }
-
-        public static MetadataReader Create(string path)
-        {
-            var r = new MetadataReader(path);
-            return r._reader != null ? r : null;
-        }
-
-        public bool HasAssemblyAttribute(string name)
-        {
-            if (_customAttributes == null)
-            {
-                lock (this)
-                {
-                    if (_customAttributes == null)
-                    {
-                        ImportCustomAttributesNames();
-                    }
-                }
-            }
-
-            return _customAttributes.Contains(name);
-        }
-
-        public string Name => Attributes[nameof(Name)];
-        public string Version => Attributes[nameof(Version)];
-        public string PublicKeyToken => Attributes[nameof(PublicKeyToken)];
-        public string Culture => Attributes[nameof(Culture)];
-        public string ProcessorArchitecture => Attributes[nameof(ProcessorArchitecture)];
-
-        private void ImportCustomAttributesNames()
-        {
-            _customAttributes = new List<string>();
-
-            AssemblyDefinition def = _reader.GetAssemblyDefinition();
-
-            CustomAttributeHandleCollection col = def.GetCustomAttributes();
-            foreach (CustomAttributeHandle handle in col)
-            {
-                EntityHandle ctorHandle = _reader.GetCustomAttribute(handle).Constructor;
-                if (ctorHandle.Kind != HandleKind.MemberReference)
-                {
-                    continue;
-                }
-
-                EntityHandle mHandle = _reader.GetMemberReference((MemberReferenceHandle)ctorHandle).Parent;
-                if (mHandle.Kind != HandleKind.TypeReference)
-                {
-                    continue;
-                }
-
-                string type = GetTypeName((TypeReferenceHandle)mHandle);
-
-                _customAttributes.Add(type);
-            }
-        }
-
-        private StringDictionary Attributes
-        {
-            get
-            {
-                if (_attributes == null)
-                {
-                    lock (this)
-                    {
-                        if (_attributes == null)
-                        {
-                            ImportAttributes();
-                        }
-                    }
-                }
-
-                return _attributes;
-            }
-        }
-
-        private string GetTypeName(TypeReferenceHandle handle)
-        {
-            TypeReference reference = _reader.GetTypeReference(handle);
-
-            // We don't need the type reference scope.
-
-            return reference.Namespace.IsNil
-                ? _reader.GetString(reference.Name)
-                : _reader.GetString(reference.Namespace) + "." + _reader.GetString(reference.Name);
-        }
-
-        private void ImportAttributes()
-        {
-            AssemblyDefinition ad = _reader.GetAssemblyDefinition();
-
-            string name = _reader.GetString(ad.Name);
-            string version = ad.Version.ToString();
-            string publicKeyToken = GetPublicKeyToken();
-            string culture = _reader.GetString(ad.Culture);
-            if (String.IsNullOrEmpty(culture))
-            {
-                culture = "neutral";
-            }
-            string processorArchitecture = GetProcessorArchitecture();
-
-            _attributes = new StringDictionary
-            {
-                { "Name", name },
-                { "Version", version },
-                { "PublicKeyToken", publicKeyToken },
-                { "Culture", culture },
-                { "ProcessorArchitecture", processorArchitecture }
-            };
-        }
-
-        private string GetPublicKeyToken()
-        {
-            string publicKeyToken = null;
-
-            AssemblyDefinition ad = _reader.GetAssemblyDefinition();
-            BlobReader br = _reader.GetBlobReader(ad.PublicKey);
-            byte[] pk = br.ReadBytes(br.Length);
-            if (pk.Length != 0)
-            {
-                AssemblyName an = new AssemblyName();
-                an.SetPublicKey(pk);
-                byte[] pkt = an.GetPublicKeyToken();
-
-                publicKeyToken =
-#if NET
-                    Convert.ToHexString(pkt);
-#else
-                    BitConverter.ToString(pkt).Replace("-", "");
-#endif
-            }
-
-            if (!String.IsNullOrEmpty(publicKeyToken))
-            {
-                publicKeyToken = publicKeyToken.ToUpperInvariant();
-            }
-
-            return publicKeyToken;
-        }
-
-        private string GetProcessorArchitecture()
-        {
-            string processorArchitecture = "unknown";
-
-            if (_peReader.PEHeaders == null ||
-                _peReader.PEHeaders.CoffHeader == null)
-            {
-                return processorArchitecture;
-            }
-
-            Machine machine = _peReader.PEHeaders.CoffHeader.Machine;
-            CorHeader corHeader = _peReader.PEHeaders.CorHeader;
-            if (corHeader != null)
-            {
-                CorFlags corFlags = corHeader.Flags;
-                if ((corFlags & CorFlags.ILLibrary) != 0)
-                {
-                    processorArchitecture = "msil";
                 }
                 else
                 {
-                    switch (machine)
+                    using (XmlReader xr = XmlReader.Create(s, xrSettings))
                     {
-                        case Machine.I386:
-                            // "x86" only if corflags "requires" but not "prefers" x86
-                            if ((corFlags & CorFlags.Requires32Bit) != 0 &&
-                                (corFlags & CorFlags.Prefers32Bit) == 0)
-                            {
-                                processorArchitecture = "x86";
-                            }
-                            else
-                            {
-                                processorArchitecture = "msil";
-                            }
-                            break;
-                        case Machine.IA64:
-                            processorArchitecture = "ia64";
-                            break;
-                        case Machine.Amd64:
-                            processorArchitecture = "amd64";
-                            break;
-                        case Machine.Arm:
-                            processorArchitecture = "arm";
-                            break;
-                        case Machine.Arm64:
-                            processorArchitecture = "arm64";
-                            break;
-                        default:
-                            break;
+                        document.Load(xr);
                     }
                 }
-            }
 
-            return processorArchitecture;
+                return document;
+            }
         }
 
-        public void Close()
+        private static Manifest ReadEmbeddedManifest(string path)
         {
-            if (_peReader != null)
+            Stream m = EmbeddedManifestReader.Read(path);
+            if (m == null)
             {
-                _peReader.Dispose();
+                return null;
             }
 
-            if (_assemblyStream != null)
+            Util.WriteLogFile(Path.GetFileNameWithoutExtension(path) + ".embedded.xml", m);
+            Manifest manifest = ReadManifest(m, false);
+            manifest.SourcePath = path;
+            return manifest;
+        }
+
+        /// <summary>
+        /// Reads the specified manifest XML and returns an object representation.
+        /// </summary>
+        /// <param name="path">The name of the input file.</param>
+        /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation. This option is not honored if the specified input file is an embedded manfiest in a PE.</param>
+        /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        public static Manifest ReadManifest(string path, bool preserveStream)
+        {
+            if (path == null)
             {
-                _assemblyStream.Close();
+                throw new ArgumentNullException(nameof(path));
             }
 
-            _attributes = null;
-            _reader = null;
-            _peReader = null;
-            _assemblyStream = null;
-        }
-
-        void IDisposable.Dispose()
-        {
-            Close();
-        }
-    }
-#else
-    internal unsafe class MetadataReader : IDisposable
-    {
-        private readonly string _path;
-        private StringDictionary _attributes;
-
-        // COM pointers stored thread-agile via the GIT. Disposed in Close().
-        // The CLR metadata object returned by IMetaDataDispenser::OpenScope implements
-        // all three of IMetaDataImport, IMetaDataImport2, and IMetaDataAssemblyImport;
-        // we QueryInterface for the two we actually call. The dispenser itself is only
-        // needed during construction.
-        private AgileComPointer<IMetaDataAssemblyImport> _assemblyImport;
-        private AgileComPointer<IMetaDataImport2> _import2;
-
-        private static Guid s_refidGuid = GetGuidOfType(typeof(IReferenceIdentity));
-
-        private MetadataReader(string path)
-        {
-            _path = path;
-            // Receive transient pointers directly into ComScope<T> (implicit void** conversion)
-            // so no try/finally is needed for cleanup. Each AgileComPointer is constructed with
-            // takeOwnership: false; the GIT registration AddRefs and the ComScope Releases on
-            // scope exit.
-            //
-            // CoCreateInstance failure is an environment-level problem (CLR metadata host
-            // missing/unregistered) and is thrown, matching the behavior of the old
-            // `new CorMetaDataDispenser()` built-in-interop activation. OpenScope failure is
-            // per-file (the path isn't a valid PE / assembly); we leave _assemblyImport null
-            // so that Create(...) returns null, matching the .NET Core branch's catch-all.
-            //
-            // OpenScope is asked directly for IMetaDataImport2 — the underlying CLR RegMeta
-            // coclass implements every IMetaData* interface, so this saves a QueryInterface
-            // round-trip vs. asking for the base IMetaDataImport.
-            Guid clsid = CorMetadata.CLSID_CorMetaDataDispenser;
-            Guid dispenserIid = IID.Get<IMetaDataDispenser>();
-            using ComScope<IMetaDataDispenser> dispenser = new();
-            PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, &dispenserIid, dispenser).ThrowOnFailure();
-
-            Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
-            using ComScope<IMetaDataImport2> import2 = new();
-            HRESULT hr;
-            fixed (char* pPath = path)
+            string manifestType = null;
+            if (path.EndsWith(".application", StringComparison.Ordinal))
             {
-                hr = dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2);
+                manifestType = "DeployManifest";
             }
-            if (hr.Failed || import2.IsNull)
+            else if (path.EndsWith(".exe.manifest", StringComparison.Ordinal))
             {
-                return;
+                manifestType = "ApplicationManifest";
             }
-            _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
-
-            Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
-            using ComScope<IMetaDataAssemblyImport> asmImport = new();
-            import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
-            _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
+            return ReadManifest(manifestType, path, preserveStream);
         }
 
-        public static MetadataReader Create(string path)
+        /// <summary>
+        /// Reads the specified manifest XML and returns an object representation.
+        /// </summary>
+        /// <param name="manifestType">Specifies the expected type of the manifest. Valid values are "AssemblyManifest", "ApplicationManifest", or "DepoyManifest".</param>
+        /// <param name="path">The name of the input file.</param>
+        /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation. This option is not honored if the specified input file is an embedded manfiest in a PE.</param>
+        /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        public static Manifest ReadManifest(string manifestType, string path, bool preserveStream)
         {
-            var r = new MetadataReader(path);
-            return r._assemblyImport is not null ? r : null;
-        }
-
-        public bool HasAssemblyAttribute(string name)
-        {
-            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
-            using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
-            MdAssembly assemblyScope;
-            asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).ThrowOnFailure();
-
-            // The CLR returns S_OK with pcbData=size when the attribute is present, S_FALSE with
-            // pcbData=0 when it is absent, and an error HRESULT otherwise. Treat anything that is
-            // not S_OK as "not present" so failure paths cannot leave valueLen indeterminate.
-            void* valuePtr = null;
-            uint valueLen = 0;
-            HRESULT hr;
-            fixed (char* pName = name)
+            Manifest m;
+            using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                hr = import2.Pointer->GetCustomAttributeByName(assemblyScope, pName, &valuePtr, &valueLen);
-            }
-            return hr == HRESULT.S_OK && valueLen != 0;
-        }
-
-        public string Name => Attributes[nameof(Name)];
-        public string Version => Attributes[nameof(Version)];
-        public string PublicKeyToken => Attributes[nameof(PublicKeyToken)];
-        public string Culture => Attributes[nameof(Culture)];
-        public string ProcessorArchitecture => Attributes[nameof(ProcessorArchitecture)];
-
-        private StringDictionary Attributes
-        {
-            get
-            {
-                if (_attributes == null)
+                byte[] buffer = new byte[2];
+                s.ReadExactly(buffer, 0, 2);
+                s.Position = 0;
+                // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
+                if ((buffer[0] == 0x4D) && (buffer[1] == 0x5A))
                 {
-                    lock (this)
-                    {
-                        if (_attributes == null)
-                        {
-                            ImportAttributes();
-                        }
-                    }
+                    m = ReadEmbeddedManifest(path);
                 }
-
-                return _attributes;
+                else
+                {
+                    m = ReadManifest(manifestType, s, preserveStream);
+                    m.SourcePath = path;
+                }
             }
+            return m;
         }
 
-        public void Close()
+        /// <summary>
+        /// Reads the specified manifest XML and returns an object representation.
+        /// </summary>
+        /// <param name="input">Specifies an input stream.</param>
+        /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation.</param>
+        /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        public static Manifest ReadManifest(Stream input, bool preserveStream)
         {
-            _import2?.Dispose();
-            _import2 = null;
-            _assemblyImport?.Dispose();
-            _assemblyImport = null;
-            _attributes = null;
+            return ReadManifest(null, input, preserveStream);
         }
 
-        private void ImportAttributes()
+        /// <summary>
+        /// Reads the specified manifest XML and returns an object representation.
+        /// </summary>
+        /// <param name="manifestType">Specifies the expected type of the manifest. Valid values are "AssemblyManifest", "ApplicationManifest", or "DepoyManifest".</param>
+        /// <param name="input">Specifies an input stream.</param>
+        /// <param name="preserveStream">Specifies whether to preserve the input stream in the InputStream property of the resulting manifest object. Used by ManifestWriter to reconstitute input which is not represented in the object representation.</param>
+        /// <returns>A base object representation of the manifest. Can be cast to AssemblyManifest, ApplicationManifest, or DeployManifest to access more specific functionality.</returns>
+        public static Manifest ReadManifest(string manifestType, Stream input, bool preserveStream)
         {
-            IReferenceIdentity refid = (IReferenceIdentity)NativeMethods.GetAssemblyIdentityFromFile(_path, ref s_refidGuid);
-
-            string name = refid.GetAttribute(null, "name");
-            string version = refid.GetAttribute(null, "version");
-            string publicKeyToken = refid.GetAttribute(null, "publicKeyToken");
-            if (String.Equals(publicKeyToken, "neutral", StringComparison.OrdinalIgnoreCase))
+            int t1 = Environment.TickCount;
+            const string resource = "read2.xsl";
+            Manifest m;
+            Stream s;
+            if (manifestType != null)
             {
-                publicKeyToken = String.Empty;
+                DictionaryEntry arg = new DictionaryEntry("manifest-type", manifestType);
+                s = XmlUtil.XslTransform(resource, input, arg);
             }
-            else if (!String.IsNullOrEmpty(publicKeyToken))
+            else
             {
-                publicKeyToken = publicKeyToken.ToUpperInvariant();
+                s = XmlUtil.XslTransform(resource, input);
             }
 
-            string culture = refid.GetAttribute(null, "culture");
-            string processorArchitecture = refid.GetAttribute(null, "processorArchitecture");
-            if (!String.IsNullOrEmpty(processorArchitecture))
+            try
             {
-                processorArchitecture = processorArchitecture.ToLowerInvariant();
+                s.Position = 0;
+                m = Deserialize(s);
+                if (m.GetType() == typeof(ApplicationManifest))
+                {
+                    var am = (ApplicationManifest)m;
+                    am.TrustInfo = new TrustInfo();
+                    am.TrustInfo.ReadManifest(input);
+                }
+                if (preserveStream)
+                {
+                    input.Position = 0;
+                    m.InputStream = new MemoryStream();
+                    Util.CopyStream(input, m.InputStream);
+                }
+                s.Position = 0;
+                string n = m.AssemblyIdentity.GetFullName(AssemblyIdentity.FullNameFlags.All);
+                if (String.IsNullOrEmpty(n))
+                {
+                    n = m.GetType().Name;
+                }
+                Util.WriteLogFile(n + ".read.xml", s);
             }
-
-            _attributes = new StringDictionary
+            finally
             {
-                { "Name", name },
-                { "Version", version },
-                { "PublicKeyToken", publicKeyToken },
-                { "Culture", culture },
-                { "ProcessorArchitecture", processorArchitecture }
-            };
+                s.Close();
+            }
+            Util.WriteLog(String.Format(CultureInfo.InvariantCulture, "ManifestReader.ReadManifest t={0}", Environment.TickCount - t1));
+            m.OnAfterLoad();
+            return m;
         }
 
-        void IDisposable.Dispose()
+        private static Manifest Deserialize(Stream s)
         {
-            Close();
-        }
+            s.Position = 0;
+            var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = false };
+            using XmlReader r = XmlReader.Create(s, settings);
+            do
+            {
+                r.Read();
+            } while (r.NodeType != XmlNodeType.Element);
+            string ns = typeof(Util).Namespace;
+            string tn = String.Format(CultureInfo.InvariantCulture, "{0}.{1}", ns, r.Name);
+            Type t = Type.GetType(tn);
+            s.Position = 0;
 
-        private static Guid GetGuidOfType(Type type)
-        {
-            var guidAttr = (GuidAttribute)Attribute.GetCustomAttribute(type, typeof(GuidAttribute), false);
-            return new Guid(guidAttr.Value);
-        }
+            var xs = new XmlSerializer(t);
 
-        [ComImport]
-        [Guid("6eaf5ace-7917-4f3c-b129-e046a9704766")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        private interface IReferenceIdentity
-        {
-            [return: MarshalAs(UnmanagedType.LPWStr)]
-            string GetAttribute([In, MarshalAs(UnmanagedType.LPWStr)] string Namespace, [In, MarshalAs(UnmanagedType.LPWStr)] string Name);
-            void SetAttribute();
-            void EnumAttributes();
-            void Clone();
+            int t1 = Environment.TickCount;
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = false };
+            using (XmlReader xr = XmlReader.Create(s, xrSettings))
+            {
+                var m = (Manifest)xs.Deserialize(xr);
+                Util.WriteLog($"ManifestReader.Deserialize t={Environment.TickCount - t1}");
+                return m;
+            }
         }
     }
-#endif
+
+    internal class ComInfo
+    {
+        public ComInfo(string manifestFileName, string componentFileName, string clsid, string tlbid)
+        {
+            ComponentFileName = componentFileName;
+            ClsId = clsid;
+            ManifestFileName = manifestFileName;
+            TlbId = tlbid;
+        }
+        public string ComponentFileName { get; }
+
+        public string ClsId { get; }
+
+        public string ManifestFileName { get; }
+        public string TlbId { get; }
+    }
 }
