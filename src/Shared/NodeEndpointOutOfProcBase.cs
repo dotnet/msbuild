@@ -584,21 +584,30 @@ namespace Microsoft.Build.BackEnd
 
 #if NET
         /// <summary>
-        /// NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
+        /// The .NET task host child tolerates a parent that did not emit an architecture bit
+        /// on the wire (which is indistinguishable from x86) when the child itself is x64 or
+        /// arm64. This is the .NET Framework parent → .NET SDK child scenario: the parent
+        /// typically cannot describe the SDK child's architecture, but the launched task host
+        /// process is whatever the SDK ships (x64 on Windows-x64, arm64 on Windows-arm64).
+        ///
+        /// True cross-arch mismatches (e.g. parent sent X64 but child expects Arm64, or vice
+        /// versa) remain rejected.
+        ///
         /// 0x00FFFFFF is the handshake version included in component, the rest is the node type.
         /// </summary>
-        private bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
+        internal static bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
         {
             var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
             var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
 
-            // not X64 or Arm64 means we are running on x86
+            // not X64 or Arm64 means the wire-form architecture is x86 (or no arch bit).
             bool receivedIsX86 = !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
                                  !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
 
             bool expectedIsX64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+            bool expectedIsArm64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.Arm64);
 
-            return receivedIsX86 && expectedIsX64;
+            return receivedIsX86 && (expectedIsX64 || expectedIsArm64);
         }
 #endif
 
