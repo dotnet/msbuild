@@ -1197,6 +1197,7 @@ echo line 3"" />
         [WindowsOnlyFact]
         public void ExecTask_DefaultStdEncodingIsAnsi()
         {
+            ChangeWaves.ResetStateForTests();
             Exec exec = PrepareExec("echo test");
             exec.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
             exec.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
@@ -1213,7 +1214,6 @@ echo line 3"" />
                 using TestEnvironment env = TestEnvironment.Create(_output);
                 ChangeWaves.ResetStateForTests();
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 Exec exec = PrepareExec("echo test");
                 exec.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
