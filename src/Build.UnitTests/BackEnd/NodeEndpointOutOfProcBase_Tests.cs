@@ -61,6 +61,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
                 receivedOptions: (int)(BaseNet | HandshakeOptions.Arm64)).ShouldBeFalse();
         }
+
+        [Fact]
+        public void NoArchBitParent_NoArchBitChild_NotTolerated()
+        {
+            // The tolerance is scoped to x64/arm64 children; an x86-equivalent (no arch bit)
+            // child must not silently accept any handshake.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)BaseNet,
+                receivedOptions: (int)BaseNet).ShouldBeFalse();
+        }
     }
 }
 

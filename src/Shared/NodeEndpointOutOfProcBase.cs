@@ -593,7 +593,8 @@ namespace Microsoft.Build.BackEnd
         /// True cross-arch mismatches (e.g. parent sent X64 but child expects Arm64, or vice
         /// versa) remain rejected.
         ///
-        /// 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+        /// The lower 24 bits (mask 0x00FFFFFF) carry the HandshakeOptions flags; the upper
+        /// byte carries the handshake version and is ignored here.
         /// </summary>
         internal static bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
         {
