@@ -847,8 +847,8 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Resolves the .NET task host launch target for an SDK directory: the MSBuild app host
-        /// (<c>MSBuild.exe</c>) when present, otherwise <c>MSBuild.dll</c> (which is launched via
-        /// <c>dotnet.exe</c>). Single source of truth for the apphost-vs-fallback decision,
+        /// (<c>MSBuild[.exe]</c>) when present, otherwise <c>MSBuild.dll</c> (which is launched via
+        /// <c>dotnet[.exe]</c>). Single source of truth for the apphost-vs-fallback decision,
         /// shared by the launch path and any caller that needs to describe the launch target
         /// (e.g. error messages).
         /// </summary>
