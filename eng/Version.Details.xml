@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="547c640d5626b2976499cb3433abc741a63d67c5" BarId="313814" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="97e0de87936fbfabab02c216bf5712990578836f" BarId="315623" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.8">
@@ -106,21 +106,21 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26269.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26269.10">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>96a58d029003171c2302b951688fc87464b197f5</Sha>
+      <Sha>ef50e01056369b217663cac33386645a296ef53d</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="7.8.0-rc.29">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.8.0-rc.40">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>b385f8db53a369520b661ee58781226af57bdd58</Sha>
+      <Sha>4b686816fbefeca949704f6c633c2d79d01b8151</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.8.0-1.26267.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.8.0-1.26274.19">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>deb193d8ca4ec49bf33c52e6cb5de6f490a07543</Sha>
+      <Sha>b3e2ba3f0d28e529812471bcead2e2eebc7b2b54</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26269.2">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26269.10">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>96a58d029003171c2302b951688fc87464b197f5</Sha>
+      <Sha>ef50e01056369b217663cac33386645a296ef53d</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

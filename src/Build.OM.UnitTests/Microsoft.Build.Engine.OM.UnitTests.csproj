@@ -18,7 +18,6 @@
   <ItemGroup>
     <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="Shouldly" />
 
     <PackageDownload Include="NuGet.CommandLine" Version="[$(NuGetCommandLinePackageVersion)]" />
