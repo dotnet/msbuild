@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -358,7 +358,7 @@ namespace Microsoft.Build.Construction
                     if (Path.GetFileName(fullPath).StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
                     {
                         // Load read-only if they're in program files or windows directories
-                        ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
+                        Assumed.True(Path.IsPathRooted(fullPath), "should be full path");
                         string directory = Path.GetDirectoryName(fullPath);
 
                         string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);

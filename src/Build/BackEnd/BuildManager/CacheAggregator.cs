@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -29,16 +28,16 @@ namespace Microsoft.Build.Execution
 
         public void Add(IConfigCache configCache, IResultsCache resultsCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(configCache);
-            ErrorUtilities.VerifyThrowInternalNull(resultsCache);
-            ErrorUtilities.VerifyThrow(!_aggregated, "Cannot add after aggregation");
+            Assumed.NotNull(configCache);
+            Assumed.NotNull(resultsCache);
+            Assumed.False(_aggregated, "Cannot add after aggregation");
 
             _inputCaches.Add((configCache, resultsCache));
         }
 
         public CacheAggregation Aggregate()
         {
-            ErrorUtilities.VerifyThrow(!_aggregated, "Cannot aggregate twice");
+            Assumed.False(_aggregated, "Cannot aggregate twice");
 
             _aggregated = true;
 
@@ -58,7 +57,7 @@ namespace Microsoft.Build.Execution
             var configs = configCache.ToArray();
             var results = resultsCache.ToArray();
 
-            ErrorUtilities.VerifyThrow(configs.Length == results.Length, "Assuming 1-to-1 mapping between configs and results. Otherwise it means the caches are either not minimal or incomplete");
+            Assumed.Equal(configs.Length, results.Length, "Assuming 1-to-1 mapping between configs and results. Otherwise it means the caches are either not minimal or incomplete");
 
             if (configs.Length == 0 && results.Length == 0)
             {
@@ -72,7 +71,7 @@ namespace Microsoft.Build.Execution
             {
                 seenConfigIds.Add(config.ConfigurationId);
 
-                ErrorUtilities.VerifyThrow(_aggregatedConfigCache.GetMatchingConfiguration(config) == null, "Input caches should not contain entries for the same configuration");
+                Assumed.Null(_aggregatedConfigCache.GetMatchingConfiguration(config), "Input caches should not contain entries for the same configuration");
 
                 _lastConfigurationId = _nextConfigurationId();
                 configIdMapping[config.ConfigurationId] = _lastConfigurationId;
@@ -85,7 +84,7 @@ namespace Microsoft.Build.Execution
 
             foreach (var result in results)
             {
-                ErrorUtilities.VerifyThrow(seenConfigIds.Contains(result.ConfigurationId), "Each result should have a corresponding configuration. Otherwise the caches are not consistent");
+                Assumed.True(seenConfigIds.Contains(result.ConfigurationId), "Each result should have a corresponding configuration. Otherwise the caches are not consistent");
 
                 _aggregatedResultsCache.AddResult(
                     new BuildResult(

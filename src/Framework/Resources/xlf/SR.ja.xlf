@@ -47,6 +47,11 @@
         <target state="translated">{0} ('{1}') は '{2}' 以外にする必要があります。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Argument_EmptyCollection">
+        <source>The collection must contain at least one element.</source>
+        <target state="new">The collection must contain at least one element.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
         <target state="translated">値を空の文字列や、すべて空白で構成することはできません。</target>

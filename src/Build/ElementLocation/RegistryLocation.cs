@@ -30,7 +30,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal RegistryLocation(string registryPath)
         {
-            ErrorUtilities.VerifyThrowInternalLength(registryPath, nameof(registryPath));
+            Assumed.NotNullOrEmpty(registryPath);
 
             this.registryPath = registryPath;
         }

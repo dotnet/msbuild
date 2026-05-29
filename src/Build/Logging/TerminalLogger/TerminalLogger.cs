@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -486,7 +486,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </remark>
     private void ApplyParameter(string parameterName, string? parameterValue)
     {
-        ErrorUtilities.VerifyThrowArgumentNull(parameterName);
+        ArgumentNullException.ThrowIfNull(parameterName);
 
         switch (parameterName.ToUpperInvariant())
         {

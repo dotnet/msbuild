@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Security;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -147,7 +146,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static StrongNameLevel GetAssemblyStrongNameLevel(string assemblyPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath);
+            ArgumentNullException.ThrowIfNull(assemblyPath);
 
             try
             {

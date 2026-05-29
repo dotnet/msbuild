@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -544,14 +544,14 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_locker.EnterDisposableReadLock())
                 {
-                    ErrorUtilities.VerifyThrow(_defaultToolsVersion != null, "Should have a default");
+                    Assumed.NotNull(_defaultToolsVersion, "Should have a default");
                     return _defaultToolsVersion;
                 }
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(DefaultToolsVersion));
+                ArgumentException.ThrowIfNullOrEmpty(value, nameof(DefaultToolsVersion));
 
                 bool sendEvent = false;
                 using (_locker.EnterDisposableWriteLock())
@@ -1072,7 +1072,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void AddToolset(Toolset toolset)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(toolset);
+            ArgumentNullException.ThrowIfNull(toolset);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets[toolset.ToolsVersion] = toolset;
@@ -1088,7 +1088,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
 
             bool changed;
             using (_locker.EnterDisposableWriteLock())
@@ -1132,7 +1132,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
@@ -1219,7 +1219,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A loaded project.</returns>
         public Project LoadProject(string fileName, IDictionary<string, string> globalProperties, string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(fileName);
+            ArgumentException.ThrowIfNullOrEmpty(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
             using (_locker.EnterDisposableWriteLock())
@@ -1441,7 +1441,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public void UnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return;
@@ -1591,7 +1591,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElement">The project XML root element to unload.</param>
         public bool TryUnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return false;
@@ -1730,7 +1730,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterLoggerInternal(ILogger logger)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(logger);
+            ArgumentNullException.ThrowIfNull(logger);
             Debug.Assert(_locker.IsWriteLockHeld);
             _loggingService.RegisterLogger(new Logging.ReusableLogger(logger));
         }
@@ -1811,7 +1811,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // According to Framework Guidelines, Dispose methods should never throw except in dire circumstances.
                     // However if we throw at all, its a bug. Throw InternalErrorException to emphasize that.
-                    ErrorUtilities.ThrowInternalError("Throwing from logger shutdown", ex);
+                    InternalError.Throw("Throwing from logger shutdown", ex);
                     throw;
                 }
 

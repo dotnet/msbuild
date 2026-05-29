@@ -4,7 +4,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -21,7 +20,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ResolvedImport(ProjectImportElement importingElement, ProjectRootElement importedProject, int versionEvaluated, SdkResult sdkResult, bool isImported)
         {
-            ErrorUtilities.VerifyThrowInternalNull(importedProject, "child");
+            Assumed.NotNull(importedProject, valueExpression: "child");
 
             ImportingElement = importingElement;
             ImportedProject = importedProject;
@@ -35,7 +34,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ResolvedImport(Project project, ProjectImportElement importingElement, ProjectRootElement importedProject, int versionEvaluated, SdkResult sdkResult)
         {
-            ErrorUtilities.VerifyThrowInternalNull(importedProject, "child");
+            Assumed.NotNull(importedProject, valueExpression: "child");
 
             ImportingElement = importingElement;
             ImportedProject = importedProject;
