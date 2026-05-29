@@ -117,7 +117,7 @@ namespace Microsoft.Build.Tasks
                 Log,
                 true);
 
-            return string.IsNullOrEmpty(pathToTooSl) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
 
         /// <summary>
