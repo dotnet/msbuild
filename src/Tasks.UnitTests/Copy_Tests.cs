@@ -3304,7 +3304,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.Skip("Requires Windows long path support to be enabled (LongPathsEnabled=1).");
             }
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
 
             // Exact filename from the bug report (%27 = apostrophe in the csproj Include attribute).
             string longFileName = new string('A', 218) + "' [[]] === .binf";
@@ -3342,8 +3342,8 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 // Delete the long files via \\?\ so the env's plain-path cleanup can remove the rest.
-                try { File.Delete(@"\\?\" + sourcePath); } catch { }
-                try { File.Delete(@"\\?\" + destPath); } catch { }
+                FileUtilities.DeleteNoThrow(@"\\?\" + sourcePath);
+                FileUtilities.DeleteNoThrow(@"\\?\" + destPath);
             }
         }
     }

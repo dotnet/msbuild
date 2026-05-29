@@ -458,10 +458,10 @@ namespace Microsoft.Build.UnitTests
                 if (longFilePath != null)
                 {
                     // Delete using \\?\ because the test host may not be longPathAware.
-                    try { File.Delete(@"\\?\" + longFilePath); } catch { }
+                    FileUtilities.DeleteNoThrow(@"\\?\" + longFilePath);
                 }
 
-                try { Directory.Delete(longDir, recursive: false); } catch { }
+                FileUtilities.DeleteDirectoryNoThrow(longDir, recursive: false);
             }
         }
     }
