@@ -3296,9 +3296,14 @@ namespace Microsoft.Build.UnitTests
         /// Regression test: MSB3030 when copying a long-path file in a multi-targeting build.
         /// devenv.exe is not longPathAware; the net472 test host has the same condition.
         /// </summary>
-        [WindowsOnlyFact(additionalMessage: "Extended-length path (\\\\?\\) support is Windows-only.")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Long-path regression only reproduces in a non-longPathAware process; the .NET Core test host is longPathAware.")]
         public void CopyFileWithLongPath()
         {
+            if (NativeMethodsShared.HasMaxPath)
+            {
+                Assert.Skip("Requires Windows long path support to be enabled (LongPathsEnabled=1).");
+            }
+
             using TestEnvironment env = TestEnvironment.Create();
 
             // Exact filename from the bug report (%27 = apostrophe in the csproj Include attribute).

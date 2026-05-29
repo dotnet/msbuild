@@ -424,9 +424,14 @@ namespace Microsoft.Build.UnitTests
         /// FileState.FileExists must return true for a file whose path exceeds MAX_PATH in a
         /// non-longPathAware process (regression: GetFileAttributesEx without the \\?\ prefix).
         /// </summary>
-        [WindowsOnlyFact(additionalMessage: "Extended-length path (\\\\?\\) support is Windows-only.")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Long-path regression only reproduces in a non-longPathAware process; the .NET Core test host is longPathAware.")]
         public void ExistsWithLongPath()
         {
+            if (NativeMethodsShared.HasMaxPath)
+            {
+                Assert.Skip("Requires Windows long path support to be enabled (LongPathsEnabled=1).");
+            }
+
             string longDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(longDir);
 
