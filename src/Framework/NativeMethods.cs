@@ -1333,17 +1333,53 @@ internal static class NativeMethods
             return path;
         }
 
-        // \\?\ disables path normalization, so it is only valid on a fully-qualified path.
-        if (!Path.IsPathRooted(path))
+        string normalizedPath = path.Replace('/', '\\');
+
+        // \\?\ disables path normalization, so it is only safe on a fully-qualified path
+        // (drive-absolute or UNC) with no "." or ".." segments for Win32 to resolve.
+        if (!IsFullyQualifiedWindowsPath(normalizedPath) || HasRelativeSegment(normalizedPath))
         {
             return path;
         }
 
-        string normalizedPath = path.Replace('/', '\\');
-
         return normalizedPath.StartsWith(@"\\", StringComparison.Ordinal)
             ? @"\\?\UNC\" + normalizedPath.Substring(2)
             : @"\\?\" + normalizedPath;
+    }
+
+    private static bool IsFullyQualifiedWindowsPath(string path)
+    {
+        // UNC path: \\server\share.
+        if (path.Length >= 2 && path[0] == '\\' && path[1] == '\\')
+        {
+            return true;
+        }
+
+        // Drive-absolute path: C:\... (rejects drive-relative "C:foo" and root-relative "\foo").
+        return path.Length >= 3
+            && path[1] == ':'
+            && path[2] == '\\'
+            && ((path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z'));
+    }
+
+    private static bool HasRelativeSegment(string path)
+    {
+        // True if any component between backslashes is "." or "..".
+        int start = 0;
+        for (int i = 0; i <= path.Length; i++)
+        {
+            if (i == path.Length || path[i] == '\\')
+            {
+                int length = i - start;
+                if ((length == 1 && path[start] == '.') ||
+                    (length == 2 && path[start] == '.' && path[start + 1] == '.'))
+                {
+                    return true;
+                }
+                start = i + 1;
+            }
+        }
+        return false;
     }
 
 #if FEATURE_WINDOWSINTEROP
