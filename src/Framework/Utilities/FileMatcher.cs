@@ -51,7 +51,7 @@ namespace Microsoft.Build.Shared
         // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
         private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>>(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase));
         private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
-        private static readonly Lazy<ConcurrentDictionary<string, (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new(() =>new(StringComparer.Ordinal));
+        private static readonly Lazy<ConcurrentDictionary<string, (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new(() => new(StringComparer.Ordinal));
 
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
@@ -234,16 +234,14 @@ namespace Microsoft.Build.Shared
         private static IReadOnlyList<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
             path = FileUtilities.FixFilePath(path);
-            switch (entityType)
+            return entityType switch
             {
-                case FileSystemEntity.Files: return GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory);
-                case FileSystemEntity.Directories: return GetAccessibleDirectories(fileSystem, path, pattern);
-                case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(fileSystem, path, pattern);
-                default:
-                    FrameworkErrorUtilities.ThrowInternalError("Unexpected filesystem entity type.");
-                    break;
-            }
-            return [];
+                FileSystemEntity.Files => GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory),
+                FileSystemEntity.Directories => GetAccessibleDirectories(fileSystem, path, pattern),
+                FileSystemEntity.FilesAndDirectories => GetAccessibleFilesAndDirectories(fileSystem, path, pattern),
+
+                _ => Assumed.Unreachable<IReadOnlyList<string>>("Unexpected filesystem entity type."),
+            };
         }
 
         /// <summary>
@@ -458,8 +456,8 @@ namespace Microsoft.Build.Shared
                 return path;
             }
 
-            FrameworkErrorUtilities.VerifyThrow(
-                !HasWildcards(path),
+            Assumed.False(
+                HasWildcards(path),
                 $"GetLongPathName does not handle wildcards and was passed '{path}'.");
 
             string[] parts = path.Split(directorySeparatorCharacters);
@@ -525,8 +523,9 @@ namespace Microsoft.Build.Shared
                         }
 
                         // Since we know there are no wild cards, this should be length one, i.e. MoveNext should return false.
-                        FrameworkErrorUtilities.VerifyThrow(
-                            entries.Count == 1,
+                        Assumed.Equal(
+                            entries.Count,
+                            1,
                             $"Unexpected number of entries ({entries.Count}) found when enumerating '{parts[i]}' under '{longPath}'. Original path was '{path}'");
 
                         // Entries[0] contains the full path.
@@ -849,15 +848,15 @@ namespace Microsoft.Build.Shared
             catch (UnauthorizedAccessException) { }
 #endif
 
-            FrameworkErrorUtilities.VerifyThrow(
+            Assumed.True(
                 (recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
                 "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
 
-            FrameworkErrorUtilities.VerifyThrow(
+            Assumed.True(
                 (recursionState.SearchData.Filespec != null) || (recursionState.SearchData.RegexFileMatch != null),
                 "Need either a file-spec or a regular expression to match files.");
 
-            FrameworkErrorUtilities.VerifyThrow(recursionState.RemainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
+            Assumed.NotNull(recursionState.RemainingWildcardDirectory, "Expected non-null remaning wildcard directory.");
 
             RecursiveStepResult[] excludeNextSteps = null;
             // Determine if any of searchesToExclude is necessarily a superset of the results that will be returned.
@@ -1193,12 +1192,15 @@ namespace Microsoft.Build.Shared
             string filenamePart)
         {
 #if DEBUG
-            FrameworkErrorUtilities.VerifyThrow(
-                FileSpecRegexMinLength == FileSpecRegexParts.BeginningOfLine.Length
-                + FileSpecRegexParts.WildcardGroupStart.Length
-                + FileSpecRegexParts.FilenameGroupStart.Length
-                + (FileSpecRegexParts.GroupEnd.Length * 2)
-                + FileSpecRegexParts.EndOfLine.Length,
+            int actualLength = FileSpecRegexParts.BeginningOfLine.Length +
+                FileSpecRegexParts.WildcardGroupStart.Length +
+                FileSpecRegexParts.FilenameGroupStart.Length +
+                (FileSpecRegexParts.GroupEnd.Length * 2) +
+                FileSpecRegexParts.EndOfLine.Length;
+
+            Assumed.Equal(
+                actualLength,
+                FileSpecRegexMinLength,
                 "Checked-in length of known regex components differs from computed length. Update checked-in constant.");
 #endif
             using (var matchFileExpression = new ReuseableStringBuilder(FileSpecRegexMinLength + NativeMethods.MAX_PATH))
@@ -1690,12 +1692,10 @@ namespace Microsoft.Build.Shared
         {
             if (input == ReadOnlySpan<char>.Empty)
             {
-                FrameworkErrorUtilities.ThrowInternalError("Unexpected empty 'input' provided.");
+                InternalError.Throw($"Unexpected empty '{nameof(input)}' provided.");
             }
-            if (pattern == null)
-            {
-                throw new ArgumentNullException(nameof(pattern));
-            }
+
+            ArgumentNullException.ThrowIfNull(pattern);
 
             // Parameter lengths
             int patternLength = pattern.Length;

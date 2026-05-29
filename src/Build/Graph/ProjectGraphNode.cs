@@ -6,7 +6,6 @@ using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
@@ -25,7 +24,7 @@ namespace Microsoft.Build.Graph
         // No public creation.
         internal ProjectGraphNode(ProjectInstance projectInstance)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectInstance);
+            Assumed.NotNull(projectInstance);
             ProjectInstance = projectInstance;
 
             ProjectType = ProjectInterpretation.GetProjectType(projectInstance);
@@ -74,7 +73,7 @@ namespace Microsoft.Build.Graph
         {
             foreach (var reference in _projectReferences)
             {
-                ErrorUtilities.VerifyThrow(reference._referencingProjects.Contains(this), "references should point to the nodes referencing them");
+                Assumed.True(reference._referencingProjects.Contains(this), "references should point to the nodes referencing them");
                 reference._referencingProjects.Remove(this);
 
                 edges.RemoveEdge((this, reference));

@@ -421,7 +421,7 @@ namespace Microsoft.Build.Graph
             int degreeOfParallelism,
             CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             var measurementInfo = BeginMeasurement();
 
@@ -498,7 +498,7 @@ namespace Microsoft.Build.Graph
             Func<ProjectGraphNode, string> nodeIdProvider,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider);
+            ArgumentNullException.ThrowIfNull(nodeIdProvider);
 
             var nodeIds = new ConcurrentDictionary<ProjectGraphNode, string>();
 
@@ -584,7 +584,7 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            ErrorUtilities.VerifyThrow(toposort.Count == graphNodes.Count, "sorted node count must be equal to total node count");
+            Assumed.Equal(toposort.Count, graphNodes.Count, "sorted node count must be equal to total node count");
 
             toposort.Reverse();
 
