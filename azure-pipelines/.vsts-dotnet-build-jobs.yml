@@ -278,14 +278,16 @@ jobs:
           image: 1ESPT-Ubuntu22.04
           os: linux
 
-- template: /eng/common/templates-official/job/publish-build-assets.yml@self
-  parameters:
-    enablePublishBuildArtifacts: true
-    publishUsingPipelines: true
-    dependsOn:
-      - Windows_NT
-      - Source_Build_Managed
-    pool:
-      name: $(DncEngInternalBuildPool)
-      image: $(WindowsImage)
-      os: windows
+# Don't publish to the Build Asset Registry for experimental/perf builds.
+- ${{ if not(parameters.isExperimental) }}:
+  - template: /eng/common/templates-official/job/publish-build-assets.yml@self
+    parameters:
+      enablePublishBuildArtifacts: true
+      publishUsingPipelines: true
+      dependsOn:
+        - Windows_NT
+        - Source_Build_Managed
+      pool:
+        name: $(DncEngInternalBuildPool)
+        image: $(WindowsImage)
+        os: windows
