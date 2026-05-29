@@ -694,9 +694,6 @@ namespace Microsoft.Build.Tasks
 #endif
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-
-
-
         protected override void DisposeManagedResources()
         {
             _import2?.Dispose();

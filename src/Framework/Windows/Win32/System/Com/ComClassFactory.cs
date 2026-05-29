@@ -36,11 +36,15 @@ internal sealed unsafe class ComClassFactory : IDisposable
     ///   activation to that runtime's class factory.
     ///  </para>
     ///  <para>
-    ///   In hosts that did not enter the CLR via mscoree (for example, a native harness embedding MSBuild
-    ///   in-process via <c>BuildManager</c>), the shim's bound-runtime state is not initialized and
-    ///   <c>LoadLibraryShim</c> fails with <c>CLR_E_SHIM_RUNTIMELOAD (0x80131700)</c>. Calling
-    ///   <c>DllGetClassObjectInternal</c> on the already-loaded <c>clr.dll</c> bypasses the shim entirely
-    ///   and delegates straight to the CLR's class factory — which is what the CLR's own managed-COM activation
+    ///   In hosts where the CLR was loaded through the native hosting APIs
+    ///   (<c>CLRCreateInstance</c> / <c>ICLRRuntimeHost</c>) rather than the standard
+    ///   <c>mscoree</c> entry point that runs when a managed <c>.exe</c> is launched
+    ///   normally, the shim's bound-runtime state is not initialized and
+    ///   <c>LoadLibraryShim</c> fails with <c>CLR_E_SHIM_RUNTIMELOAD (0x80131700)</c>.
+    ///   (One concrete example is a native test harness that embeds MSBuild in-process
+    ///   via <c>BuildManager</c>.) Calling <c>DllGetClassObjectInternal</c> on the
+    ///   already-loaded <c>clr.dll</c> bypasses the shim entirely and delegates straight
+    ///   to the CLR's class factory — which is what the CLR's own managed-COM activation
     ///   does internally for CLSIDs on its hosted-CLSID list.
     ///  </para>
     /// </remarks>
