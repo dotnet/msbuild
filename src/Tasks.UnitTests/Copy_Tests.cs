@@ -3299,9 +3299,11 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact(additionalMessage: "Extended-length path (\\\\?\\) support is Windows-only.")]
         public void CopyFileWithLongPath()
         {
+            using TestEnvironment env = TestEnvironment.Create();
+
             // Exact filename from the bug report (%27 = apostrophe in the csproj Include attribute).
             string longFileName = new string('A', 218) + "' [[]] === .binf";
-            string tempBase = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            string tempBase = env.CreateFolder().Path;
             string sourceDir = Path.Combine(tempBase, "Serializer", "Data", "BinaryFormatterSerializedModels");
             string sourcePath = Path.Combine(sourceDir, longFileName);
             string destDir = Path.Combine(tempBase, "bin", "Debug", "net48");
@@ -3334,11 +3336,9 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                // Delete the long files via \\?\ first (TestEnvironment's plain-path cleanup can't);
-                // the remaining short-path directory tree is then safe to delete recursively.
+                // Delete the long files via \\?\ so the env's plain-path cleanup can remove the rest.
                 try { File.Delete(@"\\?\" + sourcePath); } catch { }
                 try { File.Delete(@"\\?\" + destPath); } catch { }
-                try { Directory.Delete(tempBase, true); } catch { }
             }
         }
     }
