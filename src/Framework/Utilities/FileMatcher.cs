@@ -53,6 +53,23 @@ namespace Microsoft.Build.Shared
         private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
         private static readonly Lazy<ConcurrentDictionary<string, (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new(() =>new(StringComparer.Ordinal));
 
+        // Shared, process-wide budget for parallel directory scanning in GetFiles.
+        // Without sharing, every concurrent GetFiles call (e.g., one per project
+        // evaluation in multithreaded mode) would create its own TaskOptions with
+        // a fresh budget of (cores / 2) tasks, multiplying parallelism by the
+        // number of concurrent callers and oversubscribing the ThreadPool.
+        private static readonly TaskOptions s_sharedTaskOptions = CreateSharedTaskOptions();
+
+        private static TaskOptions CreateSharedTaskOptions()
+        {
+            int maxTasks = Math.Max(1, NativeMethods.GetLogicalCoreCount() / 2);
+            return new TaskOptions(maxTasks)
+            {
+                AvailableTasks = maxTasks,
+                MaxTasksPerIteration = maxTasks,
+            };
+        }
+
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
 
@@ -991,24 +1008,15 @@ namespace Microsoft.Build.Shared
 
             // Calcuate the MaxDegreeOfParallelism value in order to prevent too much tasks being running concurrently.
             int dop = 0;
-            // Lock only when we may be dealing with multiple threads
             if (taskOptions.MaxTasks > 1 && taskOptions.MaxTasksPerIteration > 1)
             {
-                // We don't need to lock when there will be only one Parallel.ForEach running
-                // If the condition is true, means that we are going to iterate though the project root folder
-                // by using only one Parallel.ForEach
-                if (taskOptions.MaxTasks == taskOptions.MaxTasksPerIteration)
+                // Always lock: taskOptions is a process-wide singleton shared across
+                // concurrent GetFiles calls, so the previous "fast path" (no lock when
+                // MaxTasks == MaxTasksPerIteration) is no longer safe.
+                lock (taskOptions)
                 {
-                    dop = taskOptions.AvailableTasks;
-                    taskOptions.AvailableTasks = 0;
-                }
-                else
-                {
-                    lock (taskOptions)
-                    {
-                        dop = Math.Min(taskOptions.MaxTasksPerIteration, taskOptions.AvailableTasks);
-                        taskOptions.AvailableTasks -= dop;
-                    }
+                    dop = Math.Min(taskOptions.MaxTasksPerIteration, taskOptions.AvailableTasks);
+                    taskOptions.AvailableTasks -= dop;
                 }
             }
             // Use a foreach to avoid the overhead of Parallel.ForEach when we are not running in parallel
@@ -1030,14 +1038,7 @@ namespace Microsoft.Build.Shared
             {
                 return;
             }
-            // We don't need to lock if there was only one Parallel.ForEach running
-            // If the condition is true, means that we finished the iteration though the project root folder and
-            // all its subdirectories
-            if (taskOptions.MaxTasks == taskOptions.MaxTasksPerIteration)
-            {
-                taskOptions.AvailableTasks = taskOptions.MaxTasks;
-                return;
-            }
+            // Return the borrowed budget back to the shared pool.
             lock (taskOptions)
             {
                 taskOptions.AvailableTasks += dop;
@@ -2588,16 +2589,10 @@ namespace Microsoft.Build.Shared
              */
             try
             {
-                // Setup the values for calculating the MaxDegreeOfParallelism option of Parallel.ForEach
-                // Set to use only half processors when we have 4 or more of them, in order to not be too aggresive
-                // By setting MaxTasksPerIteration to the maximum amount of tasks, which means that only one
-                // Parallel.ForEach will run at once, we get a stable number of threads being created.
-                var maxTasks = Math.Max(1, NativeMethods.GetLogicalCoreCount() / 2);
-                var taskOptions = new TaskOptions(maxTasks)
-                {
-                    AvailableTasks = maxTasks,
-                    MaxTasksPerIteration = maxTasks
-                };
+                // Use a process-wide shared TaskOptions so that concurrent GetFiles calls
+                // (e.g., from parallel project evaluations in multithreaded mode) share a
+                // single budget of (cores / 2) parallel directory-scanning tasks instead
+                // of each spinning up its own pool and oversubscribing the ThreadPool.
                 GetFilesRecursive(
                     listOfFiles,
                     state,
@@ -2605,7 +2600,7 @@ namespace Microsoft.Build.Shared
                     stripProjectDirectory,
                     searchesToExclude,
                     searchesToExcludeInSubdirs,
-                    taskOptions);
+                    s_sharedTaskOptions);
             }
             // Catch exceptions that are thrown inside the Parallel.ForEach
             catch (AggregateException ex) when (InnerExceptionsAreAllIoRelated(ex))
