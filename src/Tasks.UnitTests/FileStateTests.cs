@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -436,7 +437,7 @@ namespace Microsoft.Build.UnitTests
                 string longFileName = new string('A', 230) + ".txt";
                 longFilePath = Path.Combine(longDir, longFileName);
 
-                Assert.True(longFilePath.Length > NativeMethodsShared.MAX_PATH,
+                longFilePath.Length.ShouldBeGreaterThan(NativeMethodsShared.MAX_PATH,
                     $"Test setup error: path length {longFilePath.Length} should exceed MAX_PATH ({NativeMethodsShared.MAX_PATH}).");
 
                 // Create via \\?\ since the net472 test host is not longPathAware.
@@ -444,8 +445,8 @@ namespace Microsoft.Build.UnitTests
 
                 // Pass the plain path to exercise FileState's own \\?\ logic (the fix under test).
                 var state = new FileState(TestPath(longFilePath));
-                Assert.True(state.FileExists, $"FileState.FileExists should be true for existing long-path file (length={longFilePath.Length}).");
-                Assert.False(state.DirectoryExists);
+                state.FileExists.ShouldBeTrue($"FileState.FileExists should be true for existing long-path file (length={longFilePath.Length}).");
+                state.DirectoryExists.ShouldBeFalse();
             }
             finally
             {

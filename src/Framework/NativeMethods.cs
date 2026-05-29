@@ -1327,8 +1327,8 @@ internal static class NativeMethods
 
     internal static string EnsureExtendedLengthPath(string path)
     {
-        if (!IsWindows || path is null || HasMaxPath || path.Length < MAX_PATH ||
-            path.StartsWith(@"\\?\", StringComparison.Ordinal))
+        if (!IsWindows || path is null || path.Length < MAX_PATH ||
+            path.StartsWith(@"\\?\", StringComparison.Ordinal) || HasMaxPath)
         {
             return path;
         }

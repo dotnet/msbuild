@@ -3323,8 +3323,8 @@ namespace Microsoft.Build.UnitTests
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     BuildEngine = engine,
-                    SourceFiles = new ITaskItem[] { new TaskItem(sourcePath) },
-                    DestinationFiles = new ITaskItem[] { new TaskItem(destPath) },
+                    SourceFiles = [new TaskItem(sourcePath)],
+                    DestinationFiles = [new TaskItem(destPath)],
                     RetryDelayMilliseconds = 1,
                 };
 
