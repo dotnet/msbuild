@@ -17,7 +17,6 @@ using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
 #endif
@@ -43,7 +42,9 @@ namespace Microsoft.Build.Tasks
         private AssemblyNameExtension[] _assemblyDependencies;
         private string[] _assemblyFiles;
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-        // COM pointers stored thread-agile via the GIT. Disposed in DisposeManagedResources.
+        // COM pointers stored thread-agile via the GIT. Disposed in DisposeUnmanagedResources
+        // so the finalizer path also revokes the GIT cookies and releases the underlying
+        // RegMeta — matching the lifetime of the legacy Marshal.ReleaseComObject pattern.
         // The CLR metadata object returned by IMetaDataDispenser::OpenScope implements
         // all three of IMetaDataImport, IMetaDataImport2, and IMetaDataAssemblyImport;
         // we QueryInterface for the two we actually call. The dispenser itself is only
@@ -85,30 +86,67 @@ namespace Microsoft.Build.Tasks
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             // net472-only = inherently Windows. CsWin32 types used directly.
-            // Activate the dispenser and ask OpenScope directly for IMetaDataImport2 — the
-            // underlying CLR RegMeta coclass implements every IMetaData* interface, so we save a
-            // QueryInterface round-trip vs. asking for the base IMetaDataImport. We still need a
-            // single QI for IMetaDataAssemblyImport since OpenScope only returns one pointer.
-            // Each ComScope releases at end of method; AgileComPointer (takeOwnership: false)
-            // AddRefs through GIT registration so the field retains the only persistent reference.
-            Guid clsid = CorMetadata.CLSID_CorMetaDataDispenser;
-            Guid dispenserIid = IID.Get<IMetaDataDispenser>();
-            using ComScope<IMetaDataDispenser> dispenser = new();
-            PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, &dispenserIid, dispenser)
-                .ThrowOnFailure();
+            // Activate the dispenser by calling clr.dll's exported DllGetClassObject
+            // directly via ComClassFactory.TryCreateFromModule. Once we have
+            // IMetaDataDispenser we stay on the struct-based COM path (OpenScope, QI
+            // for IMetaDataAssemblyImport, AgileComPointer storage).
+            //
+            // IMPORTANT — do NOT call PInvoke.CoCreateInstance(CLSID_CorMetaDataDispenser, ...)
+            // here, and do NOT use Activator.CreateInstance(Type.GetTypeFromCLSID(...))
+            // (which would also block AOT on .NET 10+).
+            //
+            // CLSID_CorMetaDataDispenser is registered with mscoree.dll (the .NET
+            // Framework shim) as its InprocServer32. Raw CoCreateInstance loads the
+            // shim, which then has to bind a CLR via LoadLibraryShim before delegating
+            // to MetaDataDllGetClassObject. In hosts that did not enter the CLR via
+            // mscoree (e.g., the VC cppxplatdev test harness invoking MSBuild
+            // in-process via BuildManager), the shim's bound-runtime state is not set
+            // up and LoadLibraryShim returns CLR_E_SHIM_RUNTIMELOAD = 0x80131700
+            // ("Failed to load the runtime"). RAR catches that as a
+            // DependencyResolutionException and silently drops every transitive
+            // dependency for the failing reference. Regression introduced by
+            // dotnet/msbuild #13853; observed as VC.Tests.MsBuild.VC.MsBuild.P2PReferences.08.
+            //
+            // The right approach is what the CLR's own managed-COM activation path
+            // does internally: bypass the shim entirely for CLSIDs coming from the runtime
+            // and call DllGetClassObject directly on the currently-loaded CLR module.
 
-            Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
-            using ComScope<IMetaDataImport2> import2 = new();
-            fixed (char* pPath = sourceFile)
+            if (!ComClassFactory.TryCreateFromModule(
+                "clr.dll",
+                CorMetadata.CLSID_CorMetaDataDispenser,
+                ComClassFactory.ClrDllGetClassObjectInternalExportName,
+                out ComClassFactory factory,
+                out HRESULT activationHr))
             {
-                dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2).ThrowOnFailure();
+                activationHr.ThrowOnFailure();
             }
-            _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
 
-            Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
-            using ComScope<IMetaDataAssemblyImport> asmImport = new();
-            import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
-            _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
+            using (factory)
+            {
+                using ComScope<IMetaDataDispenser> dispenser = factory.TryCreateInstance<IMetaDataDispenser>(out HRESULT createHr);
+                createHr.ThrowOnFailure();
+
+                // OpenScope is asked directly for IMetaDataImport2 — the underlying CLR RegMeta
+                // coclass implements every IMetaData* interface, so this saves a QueryInterface
+                // round-trip vs. asking for the base IMetaDataImport. We still need one QI for
+                // IMetaDataAssemblyImport since OpenScope only returns one pointer. Each
+                // AgileComPointer (takeOwnership: false) AddRefs through GIT registration so
+                // the field retains the only persistent reference; ComScope releases the
+                // transient pointer on scope exit.
+                Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
+                using ComScope<IMetaDataImport2> import2 = new();
+                fixed (char* pPath = sourceFile)
+                {
+                    dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2).ThrowOnFailure();
+                }
+                
+                _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
+
+                Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
+                using ComScope<IMetaDataAssemblyImport> asmImport = new();
+                import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
+                _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
+            }
 #endif
         }
 
@@ -304,10 +342,15 @@ namespace Microsoft.Build.Tasks
             using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
 
             MdAssembly assemblyScope;
-            asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).ThrowOnFailure();
+            // Tolerate failure here: a scope with no mdAssembly token (a netmodule or other
+            // non-assembly PE) returns CLDB_E_RECORD_NOTFOUND. The legacy [PreserveSig] RCW
+            // code silently ignored that HR and fell through to the IsNil check, returning
+            // null. Preserve that contract; the GetAssembliesMetadata task has no try/catch
+            // around this call and an exception here would fail the whole task.
+            HRESULT hr = asmImport.Pointer->GetAssemblyFromScope(&assemblyScope);
 
             // get the assembly, if there is no assembly, it is a module reference
-            if (assemblyScope.IsNil)
+            if (hr.Failed || assemblyScope.IsNil)
             {
                 return null;
             }
@@ -382,9 +425,13 @@ namespace Microsoft.Build.Tasks
 
             assemblyAttributes.RuntimeVersion = GetRuntimeVersion(_sourceFile);
 
-            uint peKind;
-            uint machine;
-            import2.Pointer->GetPEKind(&peKind, &machine).ThrowOnFailure();
+            uint peKind = 0;
+            uint machine; // out-param required by GetPEKind; value not consumed by RAR
+            // Tolerate failure: GetPEKind can return CLDB_E_FILE_BADREAD or other variant HRs
+            // on unusual PEs. The legacy [PreserveSig] code ignored the HR and left peKind at
+            // whatever value (typically 0) the call had written. Match that behavior so the
+            // GetAssembliesMetadata task does not fail end-to-end on a borderline binary.
+            _ = import2.Pointer->GetPEKind(&peKind, &machine);
             assemblyAttributes.PeKind = peKind;
 
             return assemblyAttributes;
@@ -647,9 +694,6 @@ namespace Microsoft.Build.Tasks
 #endif
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-        /// <summary>
-        /// Release interface pointers on Dispose().
-        /// </summary>
         protected override void DisposeManagedResources()
         {
             _import2?.Dispose();
