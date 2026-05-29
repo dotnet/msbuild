@@ -111,6 +111,8 @@ namespace Microsoft.Build.Framework
             // For .NET Core, System.IO.Path.Combine already does not throw in this case.
             string combined = Path.Combine(basePath.Value, path);
 
+// Path.IsPathFullyQualified is not available in .NET Standard 2.0
+// in .NET Framework it's provided by package and in .NET it's built-in
 #if NETFRAMEWORK || NET
             combined = MakeFullyQualifiedRelativeToBasePath(combined, basePath.Value);
 #endif
