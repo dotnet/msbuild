@@ -10,6 +10,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
@@ -147,6 +148,31 @@ namespace Microsoft.Build.Evaluation
         private object _locker = new object();
 
         /// <summary>
+        /// Communicates which branch of <see cref="GetOrLoad"/> served a request,
+        /// for the <see cref="MSBuildEventSource.ProjectRootElementCacheGetStop"/> event.
+        /// </summary>
+        private enum GetOrLoadOutcome
+        {
+            /// <summary>Weak miss; loader was null, returned null.</summary>
+            NoEntryNoLoader,
+
+            /// <summary>Weak miss; loader was provided and invoked, new PRE returned.</summary>
+            NoEntryLoaded,
+
+            /// <summary>Weak hit but stale; loader was null, returned null.</summary>
+            InvalidNoLoader,
+
+            /// <summary>Weak hit but stale; loader was provided and invoked, new PRE returned.</summary>
+            InvalidReloaded,
+
+            /// <summary>Weak hit, valid; cached PRE returned.</summary>
+            Valid,
+
+            /// <summary>Weak hit, valid; PRE reloaded in place because preserveFormatting differed.</summary>
+            PreserveFormattingReload,
+        }
+
+        /// <summary>
         /// Creates an empty cache.
         /// </summary>
         internal ProjectRootElementCache(bool autoReloadFromDisk, bool loadProjectsReadOnly = false)
@@ -166,61 +192,74 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private bool IsInvalidEntry(string projectFile, ProjectRootElement projectRootElement)
         {
-            // When we do not _autoReloadFromDisk we expect that cached value is always valid.
-            // Usually lifespan of cache is expected to be build duration (process will terminate after build).
-            if (projectRootElement == null || !_autoReloadFromDisk)
+            MSBuildEventSource.Log.ProjectRootElementCacheIsInvalidEntryStart(projectFile);
+            bool didStat = false;
+            bool wasInvalid = false;
+            try
             {
-                return false;
-            }
-
-            // If the project file is non modifiable, assume it is up to date and consider the cached value valid.
-            if (!Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck && FileClassifier.Shared.IsNonModifiable(projectFile))
-            {
-                return false;
-            }
-
-            FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
-
-            // If the file doesn't exist on disk, go ahead and use the cached version.
-            // It's an in-memory project that hasn't been saved yet.
-            if (fileInfo == null)
-            {
-                return false;
-            }
-
-            if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
-            {
-                // File was changed on disk by external means. Cached version is no longer valid.
-                // We could throw here or ignore the problem, but it is a common and reasonable pattern to change a file
-                // externally and load a new project over it to see the new content. So we dump it from the cache
-                // to force a load from disk. There might then exist more than one ProjectRootElement with the same path,
-                // but clients ought not get themselves into such a state - and unless they save them to disk,
-                // it may not be a problem.
-                return true;
-            }
-            else if (s_сheckFileContent)
-            {
-                // QA tests run too fast for the timestamp check to work. This environment variable is for their
-                // use: it checks the file content as well as the timestamp. That's better than completely disabling
-                // the cache as we get test coverage of the rest of the cache code.
-                XmlDocument document = new XmlDocument();
-                document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
-
-                using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath, projectRootElement.ProjectRootElementCache.LoadProjectsReadOnly))
+                // When we do not _autoReloadFromDisk we expect that cached value is always valid.
+                // Usually lifespan of cache is expected to be build duration (process will terminate after build).
+                if (projectRootElement == null || !_autoReloadFromDisk)
                 {
-                    document.Load(xtr.Reader);
+                    return false;
                 }
 
-                string diskContent = document.OuterXml;
-                string cacheContent = projectRootElement.XmlDocument.OuterXml;
-
-                if (diskContent != cacheContent)
+                // If the project file is non modifiable, assume it is up to date and consider the cached value valid.
+                if (!Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck && FileClassifier.Shared.IsNonModifiable(projectFile))
                 {
+                    return false;
+                }
+
+                didStat = true;
+                FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
+
+                // If the file doesn't exist on disk, go ahead and use the cached version.
+                // It's an in-memory project that hasn't been saved yet.
+                if (fileInfo == null)
+                {
+                    return false;
+                }
+
+                if (fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead)
+                {
+                    // File was changed on disk by external means. Cached version is no longer valid.
+                    // We could throw here or ignore the problem, but it is a common and reasonable pattern to change a file
+                    // externally and load a new project over it to see the new content. So we dump it from the cache
+                    // to force a load from disk. There might then exist more than one ProjectRootElement with the same path,
+                    // but clients ought not get themselves into such a state - and unless they save them to disk,
+                    // it may not be a problem.
+                    wasInvalid = true;
                     return true;
                 }
-            }
+                else if (s_сheckFileContent)
+                {
+                    // QA tests run too fast for the timestamp check to work. This environment variable is for their
+                    // use: it checks the file content as well as the timestamp. That's better than completely disabling
+                    // the cache as we get test coverage of the rest of the cache code.
+                    XmlDocument document = new XmlDocument();
+                    document.PreserveWhitespace = projectRootElement.XmlDocument.PreserveWhitespace;
 
-            return false;
+                    using (var xtr = XmlReaderExtension.Create(projectRootElement.FullPath, projectRootElement.ProjectRootElementCache.LoadProjectsReadOnly))
+                    {
+                        document.Load(xtr.Reader);
+                    }
+
+                    string diskContent = document.OuterXml;
+                    string cacheContent = projectRootElement.XmlDocument.OuterXml;
+
+                    if (diskContent != cacheContent)
+                    {
+                        wasInvalid = true;
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            finally
+            {
+                MSBuildEventSource.Log.ProjectRootElementCacheIsInvalidEntryStop(projectFile, didStat, wasInvalid);
+            }
         }
 
         /// <summary>
@@ -259,65 +298,128 @@ namespace Microsoft.Build.Evaluation
             // Should already have been canonicalized
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
 
-            // First try getting the ProjectRootElement from the cache.
-            ProjectRootElement projectRootElement = GetOrLoad(projectFile, loadProjectRootElement: null, isExplicitlyLoaded, preserveFormatting);
-
-            if (projectRootElement != null || loadProjectRootElement == null)
-            {
-                // If we found it or no load callback was specified, we are done.
-                return projectRootElement;
-            }
-
+            MSBuildEventSource.Log.ProjectRootElementCacheGetStart(projectFile, loadProjectRootElement != null);
+            string outcome = "Null";
             try
             {
-                // We are about to load. Take a per-file lock to prevent multiple threads from duplicating the work multiple times.
-                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, static _ => new object());
-                lock (perFileLock)
+                // First try getting the ProjectRootElement from the cache.
+                ProjectRootElement projectRootElement = GetOrLoad(projectFile, loadProjectRootElement: null, isExplicitlyLoaded, preserveFormatting, out GetOrLoadOutcome firstOutcome);
+
+                if (projectRootElement != null || loadProjectRootElement == null)
                 {
-                    // Call GetOrLoad again, this time with the OpenProjectRootElement callback.
-                    return GetOrLoad(projectFile, loadProjectRootElement, isExplicitlyLoaded, preserveFormatting);
+                    // If we found it or no load callback was specified, we are done.
+                    outcome = OutcomeToString(firstOutcome, fromPerFileLockedCall: false);
+                    return projectRootElement;
+                }
+
+                try
+                {
+                    // We are about to load. Take a per-file lock to prevent multiple threads from duplicating the work multiple times.
+                    // Capture a sentinel so we can tell whether we created the lock object ourselves
+                    // (no concurrent loader) or adopted one already in flight (potential single-flight dedup).
+                    object newLock = null;
+                    object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, _ => newLock = new object());
+                    bool wasFreshlyCreatedLockObject = ReferenceEquals(perFileLock, newLock);
+
+                    MSBuildEventSource.Log.ProjectRootElementCacheFileLockWaitStart(projectFile);
+                    lock (perFileLock)
+                    {
+                        MSBuildEventSource.Log.ProjectRootElementCacheFileLockWaitStop(projectFile, wasFreshlyCreatedLockObject);
+
+                        // Call GetOrLoad again, this time with the OpenProjectRootElement callback.
+                        ProjectRootElement loaded = GetOrLoad(projectFile, loadProjectRootElement, isExplicitlyLoaded, preserveFormatting, out GetOrLoadOutcome secondOutcome);
+                        outcome = OutcomeToString(secondOutcome, fromPerFileLockedCall: true);
+                        return loaded;
+                    }
+                }
+                finally
+                {
+                    // Remove the lock object as we have otherwise no good way of preventing _fileLoadLocks from growing unboundedly.
+                    // If another thread is inside the lock, we effectively create a race condition where someone else may enter
+                    // GetOrLoad. This is OK because this fine-grained locking is just a perf optimization, and we have either loaded
+                    // the ProjectRootElement by now, or it is an error condition where perf is not critical.
+                    _fileLoadLocks.TryRemove(projectFile, out _);
                 }
             }
             finally
             {
-                // Remove the lock object as we have otherwise no good way of preventing _fileLoadLocks from growing unboundedly.
-                // If another thread is inside the lock, we effectively create a race condition where someone else may enter
-                // GetOrLoad. This is OK because this fine-grained locking is just a perf optimization, and we have either loaded
-                // the ProjectRootElement by now, or it is an error condition where perf is not critical.
-                _fileLoadLocks.TryRemove(projectFile, out _);
+                MSBuildEventSource.Log.ProjectRootElementCacheGetStop(projectFile, outcome);
             }
+        }
+
+        /// <summary>
+        /// Translates a <see cref="GetOrLoadOutcome"/> into the public outcome string emitted on the Get Stop event.
+        /// </summary>
+        /// <param name="outcome">The branch GetOrLoad took.</param>
+        /// <param name="fromPerFileLockedCall">
+        /// True if this is the second GetOrLoad call (after acquiring the per-file load lock).
+        /// In that case, a Valid outcome means another thread loaded the entry while we waited
+        /// (single-flight dedup), so we report "MissAfterPerFileLockHit" instead of "WeakHit".
+        /// </param>
+        private static string OutcomeToString(GetOrLoadOutcome outcome, bool fromPerFileLockedCall)
+        {
+            return outcome switch
+            {
+                GetOrLoadOutcome.Valid => fromPerFileLockedCall ? "MissAfterPerFileLockHit" : "WeakHit",
+                GetOrLoadOutcome.PreserveFormattingReload => "PreserveFormattingReload",
+                GetOrLoadOutcome.InvalidReloaded => "WeakHitInvalidated",
+                GetOrLoadOutcome.NoEntryLoaded => "MissLoaded",
+                GetOrLoadOutcome.NoEntryNoLoader => "Null",
+                GetOrLoadOutcome.InvalidNoLoader => "Null",
+                _ => "Null",
+            };
         }
 
         /// <summary>
         /// A helper used by <see cref="Get"/>.
         /// </summary>
         private ProjectRootElement GetOrLoad(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
-            bool? preserveFormatting)
+            bool? preserveFormatting, out GetOrLoadOutcome outcome)
         {
             ProjectRootElement projectRootElement;
+            bool didPreserveFormattingReload = false;
+            MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(projectFile, "GetOrLoadRead");
             lock (_locker)
             {
-                _weakCache.TryGetValue(projectFile, out projectRootElement);
-
-                if (projectRootElement != null)
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(projectFile, "GetOrLoadRead");
+                MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(projectFile, "GetOrLoadRead");
+                try
                 {
-                    BoostEntryInStrongCache(projectRootElement);
+                    _weakCache.TryGetValue(projectFile, out projectRootElement);
 
-                    // An implicit load will never reset the explicit flag.
-                    if (isExplicitlyLoaded)
+                    if (projectRootElement != null)
                     {
-                        projectRootElement.MarkAsExplicitlyLoaded();
+                        BoostEntryInStrongCache(projectRootElement);
+
+                        // An implicit load will never reset the explicit flag.
+                        if (isExplicitlyLoaded)
+                        {
+                            projectRootElement.MarkAsExplicitlyLoaded();
+                        }
+                    }
+                    else
+                    {
+                        DebugTraceCache("Not found in cache: ", projectFile);
+                    }
+
+                    if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
+                    {
+                        // Cached project doesn't match preserveFormatting setting, so reload it
+                        MSBuildEventSource.Log.ProjectRootElementCachePreserveFormattingReloadStart(projectFile);
+                        try
+                        {
+                            projectRootElement.Reload(true, preserveFormatting);
+                        }
+                        finally
+                        {
+                            MSBuildEventSource.Log.ProjectRootElementCachePreserveFormattingReloadStop(projectFile);
+                        }
+                        didPreserveFormattingReload = true;
                     }
                 }
-                else
+                finally
                 {
-                    DebugTraceCache("Not found in cache: ", projectFile);
-                }
-
-                if (preserveFormatting != null && projectRootElement != null && projectRootElement.XmlDocument.PreserveWhitespace != preserveFormatting)
-                {
-                    // Cached project doesn't match preserveFormatting setting, so reload it
-                    projectRootElement.Reload(true, preserveFormatting);
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(projectFile, "GetOrLoadRead");
                 }
             }
 
@@ -330,21 +432,37 @@ namespace Microsoft.Build.Evaluation
 
             if (loadProjectRootElement == null)
             {
-                if (projectRootElement == null || projectRootElementIsInvalid)
+                if (projectRootElement == null)
                 {
+                    outcome = GetOrLoadOutcome.NoEntryNoLoader;
                     return null;
                 }
-                else
+                if (projectRootElementIsInvalid)
                 {
-                    DebugTraceCache("Satisfied from XML cache: ", projectFile);
-                    return projectRootElement;
+                    outcome = GetOrLoadOutcome.InvalidNoLoader;
+                    return null;
                 }
+
+                DebugTraceCache("Satisfied from XML cache: ", projectFile);
+                outcome = didPreserveFormattingReload ? GetOrLoadOutcome.PreserveFormattingReload : GetOrLoadOutcome.Valid;
+                return projectRootElement;
             }
 
             // Use openProjectRootElement to reload the element if the cache element does not exist or need to be reloaded.
             if (projectRootElement == null || projectRootElementIsInvalid)
             {
-                projectRootElement = loadProjectRootElement(projectFile, this);
+                bool wasInvalid = projectRootElementIsInvalid;
+                MSBuildEventSource.Log.ProjectRootElementCacheLoadDelegateInvoked(projectFile);
+                bool loaderSucceeded = false;
+                try
+                {
+                    projectRootElement = loadProjectRootElement(projectFile, this);
+                    loaderSucceeded = projectRootElement != null;
+                }
+                finally
+                {
+                    MSBuildEventSource.Log.ProjectRootElementCacheLoadDelegateCompleted(projectFile, loaderSucceeded);
+                }
                 ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
                 ErrorUtilities.VerifyThrow(
                     projectRootElement.FullPath.Equals(projectFile, StringComparison.OrdinalIgnoreCase),
@@ -361,10 +479,13 @@ namespace Microsoft.Build.Evaluation
                 // And here its entry will be replaced with the loaded projectRootElement. This is fine:
                 // if loaded projectRootElement is out of date (so, it changed since the time we loaded it), it will be updated the next time some thread calls Get function.
                 AddEntry(projectRootElement);
+
+                outcome = wasInvalid ? GetOrLoadOutcome.InvalidReloaded : GetOrLoadOutcome.NoEntryLoaded;
             }
             else
             {
                 DebugTraceCache("Satisfied from XML cache: ", projectFile);
+                outcome = didPreserveFormattingReload ? GetOrLoadOutcome.PreserveFormattingReload : GetOrLoadOutcome.Valid;
             }
 
             return projectRootElement;
@@ -375,11 +496,30 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void AddEntry(ProjectRootElement projectRootElement)
         {
+            string projectFile = projectRootElement.FullPath ?? string.Empty;
+            MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(projectFile, "AddEntry");
             lock (_locker)
             {
-                RenameEntryInternal(null, projectRootElement);
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(projectFile, "AddEntry");
+                MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(projectFile, "AddEntry");
+                try
+                {
+                    RenameEntryInternal(null, projectRootElement);
 
-                RaiseProjectRootElementAddedToCacheEvent(projectRootElement);
+                    MSBuildEventSource.Log.ProjectRootElementCacheAddedHandlerStart(projectFile);
+                    try
+                    {
+                        RaiseProjectRootElementAddedToCacheEvent(projectRootElement);
+                    }
+                    finally
+                    {
+                        MSBuildEventSource.Log.ProjectRootElementCacheAddedHandlerStop(projectFile);
+                    }
+                }
+                finally
+                {
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(projectFile, "AddEntry");
+                }
             }
         }
 
@@ -389,10 +529,21 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void RenameEntry(string oldFullPath, ProjectRootElement projectRootElement)
         {
+            string projectFile = projectRootElement.FullPath ?? oldFullPath ?? string.Empty;
+            MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(projectFile, "RenameEntry");
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath);
-                RenameEntryInternal(oldFullPath, projectRootElement);
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(projectFile, "RenameEntry");
+                MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(projectFile, "RenameEntry");
+                try
+                {
+                    ErrorUtilities.VerifyThrowArgumentLength(oldFullPath);
+                    RenameEntryInternal(oldFullPath, projectRootElement);
+                }
+                finally
+                {
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(projectFile, "RenameEntry");
+                }
             }
         }
 
@@ -430,14 +581,24 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal override void DiscardStrongReferences()
         {
+            MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(string.Empty, "DiscardStrongReferences");
             lock (_locker)
             {
-                DebugTraceCache("Clearing strong refs: ", _strongCache.Count);
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(string.Empty, "DiscardStrongReferences");
+                MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(string.Empty, "DiscardStrongReferences");
+                try
+                {
+                    DebugTraceCache("Clearing strong refs: ", _strongCache.Count);
 
-                _strongCache = new LinkedList<ProjectRootElement>();
+                    _strongCache = new LinkedList<ProjectRootElement>();
 
-                // A scavenge of the weak cache is probably not worth it as
-                // the GC would have had to run immediately after the line above.
+                    // A scavenge of the weak cache is probably not worth it as
+                    // the GC would have had to run immediately after the line above.
+                }
+                finally
+                {
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(string.Empty, "DiscardStrongReferences");
+                }
             }
         }
 
@@ -447,10 +608,20 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void Clear()
         {
+            MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(string.Empty, "Clear");
             lock (_locker)
             {
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-                _strongCache = new LinkedList<ProjectRootElement>();
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(string.Empty, "Clear");
+                MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(string.Empty, "Clear");
+                try
+                {
+                    _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                    _strongCache = new LinkedList<ProjectRootElement>();
+                }
+                finally
+                {
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(string.Empty, "Clear");
+                }
             }
         }
 
@@ -465,37 +636,59 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
+            int weakCount = 0;
+            int strongCount = 0;
+            int retainedWeakCount = 0;
+            int retainedStrongCount = 0;
+
+            MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(string.Empty, "DiscardImplicitReferences");
             lock (_locker)
             {
-                // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely
-                // be many items which were not explicitly loaded (ie p2p references).
-                WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
-                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                _strongCache = new LinkedList<ProjectRootElement>();
-
-                foreach (KeyValuePair<string, ProjectRootElement> kvp in oldWeakCache)
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(string.Empty, "DiscardImplicitReferences");
+                MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(string.Empty, "DiscardImplicitReferences");
+                try
                 {
-                    if (kvp.Value is null)
-                    {
-                        continue;
-                    }
+                    // Make a new Weak cache only with items that have been explicitly loaded, this will be a small number, there will most likely
+                    // be many items which were not explicitly loaded (ie p2p references).
+                    WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
+                    _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
 
-                    if (kvp.Value.IsExplicitlyLoaded)
-                    {
-                        _weakCache[kvp.Key] = kvp.Value;
-                    }
+                    LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
+                    strongCount = oldStrongCache.Count;
+                    _strongCache = new LinkedList<ProjectRootElement>();
 
-                    if (oldStrongCache.Contains(kvp.Value))
+                    foreach (KeyValuePair<string, ProjectRootElement> kvp in oldWeakCache)
                     {
+                        if (kvp.Value is null)
+                        {
+                            continue;
+                        }
+
+                        weakCount++;
+
                         if (kvp.Value.IsExplicitlyLoaded)
                         {
-                            _strongCache.AddFirst(kvp.Value);
+                            _weakCache[kvp.Key] = kvp.Value;
+                            retainedWeakCount++;
+                        }
+
+                        if (oldStrongCache.Contains(kvp.Value))
+                        {
+                            if (kvp.Value.IsExplicitlyLoaded)
+                            {
+                                _strongCache.AddFirst(kvp.Value);
+                                retainedStrongCount++;
+                            }
                         }
                     }
                 }
+                finally
+                {
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(string.Empty, "DiscardImplicitReferences");
+                }
             }
+
+            MSBuildEventSource.Log.ProjectRootElementCacheDiscardImplicitReferences(weakCount, strongCount, retainedWeakCount, retainedStrongCount);
         }
 
         /// <summary>
@@ -516,9 +709,20 @@ namespace Microsoft.Build.Evaluation
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)
             {
+                string projectFile = projectRootElement.FullPath;
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(projectFile, "DiscardAnyWeakReference");
                 lock (_locker)
                 {
-                    _weakCache.Remove(projectRootElement.FullPath);
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(projectFile, "DiscardAnyWeakReference");
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(projectFile, "DiscardAnyWeakReference");
+                    try
+                    {
+                        _weakCache.Remove(projectRootElement.FullPath);
+                    }
+                    finally
+                    {
+                        MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(projectFile, "DiscardAnyWeakReference");
+                    }
                 }
             }
         }
@@ -578,30 +782,43 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private void BoostEntryInStrongCache(ProjectRootElement projectRootElement)
         {
-            LinkedListNode<ProjectRootElement> node = _strongCache.First;
-
-            while (node != null)
+            string projectFile = projectRootElement.FullPath ?? string.Empty;
+            MSBuildEventSource.Log.ProjectRootElementCacheBoostStart(projectFile);
+            int scanDepth = 0;
+            bool wasFound = false;
+            try
             {
-                if (Object.ReferenceEquals(node.Value, projectRootElement))
-                {
-                    // DebugTraceCache("Boosting: ", projectRootElement.FullPath);
-                    _strongCache.Remove(node);
-                    _strongCache.AddFirst(node);
+                LinkedListNode<ProjectRootElement> node = _strongCache.First;
 
-                    return;
+                while (node != null)
+                {
+                    scanDepth++;
+                    if (Object.ReferenceEquals(node.Value, projectRootElement))
+                    {
+                        // DebugTraceCache("Boosting: ", projectRootElement.FullPath);
+                        _strongCache.Remove(node);
+                        _strongCache.AddFirst(node);
+
+                        wasFound = true;
+                        return;
+                    }
+
+                    node = node.Next;
                 }
 
-                node = node.Next;
+                _strongCache.AddFirst(projectRootElement);
+
+                if (_strongCache.Count > s_maximumStrongCacheSize)
+                {
+                    node = _strongCache.Last;
+
+                    DebugTraceCache("Shedding: ", node.Value.FullPath);
+                    _strongCache.Remove(node);
+                }
             }
-
-            _strongCache.AddFirst(projectRootElement);
-
-            if (_strongCache.Count > s_maximumStrongCacheSize)
+            finally
             {
-                node = _strongCache.Last;
-
-                DebugTraceCache("Shedding: ", node.Value.FullPath);
-                _strongCache.Remove(node);
+                MSBuildEventSource.Log.ProjectRootElementCacheBoostStop(projectFile, scanDepth, _strongCache.Count, wasFound);
             }
         }
 
@@ -631,11 +848,22 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void ForgetEntryIfExists(ProjectRootElement projectRootElement)
         {
+            string projectFile = projectRootElement.FullPath ?? string.Empty;
+            MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStart(projectFile, "ForgetEntryIfExists");
             lock (_locker)
             {
-                if (_weakCache.TryGetValue(projectRootElement.FullPath, out var cached) && cached == projectRootElement)
+                MSBuildEventSource.Log.ProjectRootElementCacheLockWaitStop(projectFile, "ForgetEntryIfExists");
+                MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStart(projectFile, "ForgetEntryIfExists");
+                try
                 {
-                    ForgetEntry(projectRootElement);
+                    if (_weakCache.TryGetValue(projectRootElement.FullPath, out var cached) && cached == projectRootElement)
+                    {
+                        ForgetEntry(projectRootElement);
+                    }
+                }
+                finally
+                {
+                    MSBuildEventSource.Log.ProjectRootElementCacheLockHeldStop(projectFile, "ForgetEntryIfExists");
                 }
             }
         }

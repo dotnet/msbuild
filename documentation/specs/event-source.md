@@ -27,6 +27,16 @@ EventSource is primarily used to profile code. For MSBuild specifically, a major
 | PacketReadSize | Reports the size of a packet sent between nodes. Note that this does not include time information. |
 | Parse | Parses an XML document into a ProjectRootElement. |
 | ProjectGraphConstruction | Constructs a dependency graph among projects. |
+| ProjectRootElementCacheGet | Wraps a top-level call to `ProjectRootElementCache.Get`. The Stop event reports an outcome string (`WeakHit`, `WeakHitInvalidated`, `PreserveFormattingReload`, `MissLoaded`, `MissAfterPerFileLockHit`, `Null`) used to compute hit/miss ratios. |
+| ProjectRootElementCacheLockWait | Brackets the time spent waiting to acquire the global cache lock (`_locker`). Parameterized by `operation` (`GetOrLoadRead`, `AddEntry`, `RenameEntry`, `Clear`, `DiscardStrongReferences`, `DiscardImplicitReferences`, `DiscardAnyWeakReference`, `ForgetEntryIfExists`). |
+| ProjectRootElementCacheLockHeld | Brackets the time spent doing work under the global cache lock. Same `operation` taxonomy as `ProjectRootElementCacheLockWait`. |
+| ProjectRootElementCacheBoost | Wraps a single `BoostEntryInStrongCache` call. Stop reports the linear scan depth, current strong cache size, and whether the entry was found (move-to-front) or newly added. |
+| ProjectRootElementCacheFileLockWait | Brackets the time spent waiting to acquire the per-file load lock. Stop reports whether this thread created the lock object or adopted one from a concurrent loader. |
+| ProjectRootElementCacheLoadDelegateInvoked / Completed | Brackets the actual XML parse via the load delegate. Comparing this count against `ProjectRootElementCacheGet` outcomes shows how often the per-file lock prevented duplicate loads. |
+| ProjectRootElementCachePreserveFormattingReload | Brackets the in-place `Reload` triggered by a `preserveFormatting` mismatch. This call currently runs while the global cache lock is held. |
+| ProjectRootElementCacheAddedHandler | Brackets the invocation of the `ProjectRootElementAdded` event handler. This call currently runs while the global cache lock is held; the duration measures external/user code under the lock. |
+| ProjectRootElementCacheIsInvalidEntry | Brackets `IsInvalidEntry`. Stop reports whether a file `stat` was actually performed and whether the cached entry was deemed invalid. |
+| ProjectRootElementCacheDiscardImplicitReferences | Reports the size and outcome of a `DiscardImplicitReferences` rebuild (weak count iterated, strong count before, retained weak/strong counts). |
 | RarComputeClosure | Resolves references from, for example, properties to explicit values. Used in resolving assembly references (RAR). |
 | RarLogResults | Logs the results from having resolved assembly references (RAR). |
 | RarOverall | Initiates the process of resolving assembly references (RAR). |

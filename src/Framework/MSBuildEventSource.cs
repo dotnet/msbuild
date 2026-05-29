@@ -821,6 +821,220 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(112, taskName, succeeded);
         }
+
+        // -----------------------------------------------------------------
+        // ProjectRootElementCache instrumentation (events 113-131).
+        //
+        // These are profiling events used to characterize lock contention and
+        // hot-path costs in ProjectRootElementCache. They add no behavior;
+        // they exist only to be observed via PerfView/EventListener captures.
+        //
+        // Naming convention: every method begins with "ProjectRootElementCache"
+        // so PerfView can group them. Start/Stop pairs auto-correlate per
+        // thread via EventSource activity tracking.
+        // -----------------------------------------------------------------
+
+        /// <summary>
+        /// Wraps a top-level call to <c>ProjectRootElementCache.Get</c>.
+        /// </summary>
+        /// <param name="projectFile">Full path of the project being requested.</param>
+        /// <param name="hasLoader">True if the caller passed a load delegate (i.e. could trigger an XML parse).</param>
+        [Event(113, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheGetStart(string projectFile, bool hasLoader)
+        {
+            WriteEvent(113, projectFile, hasLoader);
+        }
+
+        /// <param name="projectFile">Full path of the project being requested.</param>
+        /// <param name="outcome">
+        /// One of: WeakHit, WeakHitInvalidated, PreserveFormattingReload, MissLoaded,
+        /// MissAfterPerFileLockHit, Null. Drives hit/miss aggregation.
+        /// </param>
+        [Event(114, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheGetStop(string projectFile, string outcome)
+        {
+            WriteEvent(114, projectFile, outcome);
+        }
+
+        /// <summary>
+        /// Fires immediately before acquiring the global cache lock.
+        /// The interval to <see cref="ProjectRootElementCacheLockWaitStop"/> is
+        /// queueing/contention time on <c>_locker</c>.
+        /// </summary>
+        /// <param name="projectFile">Path being operated on, or empty if not associated with one file.</param>
+        /// <param name="operation">
+        /// Symbolic operation name: GetOrLoadRead, AddEntry, RenameEntry, Clear,
+        /// DiscardStrongReferences, DiscardImplicitReferences, DiscardAnyWeakReference,
+        /// ForgetEntryIfExists.
+        /// </param>
+        [Event(115, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheLockWaitStart(string projectFile, string operation)
+        {
+            WriteEvent(115, projectFile, operation);
+        }
+
+        /// <param name="projectFile">Path being operated on, or empty if not associated with one file.</param>
+        /// <param name="operation">Operation name; see <see cref="ProjectRootElementCacheLockWaitStart"/>.</param>
+        [Event(116, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheLockWaitStop(string projectFile, string operation)
+        {
+            WriteEvent(116, projectFile, operation);
+        }
+
+        /// <summary>
+        /// Fires immediately after acquiring the global cache lock.
+        /// The interval to <see cref="ProjectRootElementCacheLockHeldStop"/> is
+        /// time spent doing work under <c>_locker</c>.
+        /// </summary>
+        /// <param name="projectFile">Path being operated on, or empty if not associated with one file.</param>
+        /// <param name="operation">Operation name; see <see cref="ProjectRootElementCacheLockWaitStart"/>.</param>
+        [Event(117, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheLockHeldStart(string projectFile, string operation)
+        {
+            WriteEvent(117, projectFile, operation);
+        }
+
+        /// <param name="projectFile">Path being operated on, or empty if not associated with one file.</param>
+        /// <param name="operation">Operation name; see <see cref="ProjectRootElementCacheLockWaitStart"/>.</param>
+        [Event(118, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheLockHeldStop(string projectFile, string operation)
+        {
+            WriteEvent(118, projectFile, operation);
+        }
+
+        /// <summary>
+        /// Wraps a single call to <c>BoostEntryInStrongCache</c>. The Stop event
+        /// reports the linear scan depth so the O(n) walk can be characterized.
+        /// </summary>
+        /// <param name="projectFile">Path of the entry being boosted.</param>
+        [Event(119, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheBoostStart(string projectFile)
+        {
+            WriteEvent(119, projectFile);
+        }
+
+        /// <param name="projectFile">Path of the entry that was boosted.</param>
+        /// <param name="scanDepth">Number of <c>Object.ReferenceEquals</c> comparisons performed walking the strong cache.</param>
+        /// <param name="strongCacheSize">Strong cache size after the operation.</param>
+        /// <param name="wasFound">True if the entry was already in the strong cache (move-to-front); false if it was newly added.</param>
+        [Event(120, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheBoostStop(string projectFile, int scanDepth, int strongCacheSize, bool wasFound)
+        {
+            WriteEvent(120, projectFile, scanDepth, strongCacheSize, wasFound);
+        }
+
+        /// <summary>
+        /// Fires before acquiring the per-file load lock. The interval to
+        /// <see cref="ProjectRootElementCacheFileLockWaitStop"/> measures
+        /// time waiting for another thread to finish loading the same path.
+        /// </summary>
+        /// <param name="projectFile">Path whose load is being serialized.</param>
+        [Event(121, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheFileLockWaitStart(string projectFile)
+        {
+            WriteEvent(121, projectFile);
+        }
+
+        /// <param name="projectFile">Path whose load is being serialized.</param>
+        /// <param name="wasFreshlyCreatedLockObject">
+        /// True if the per-file lock object was created by this thread (no concurrent
+        /// loader was in flight). False if another thread had already inserted a lock
+        /// object, suggesting potential single-flight deduplication.
+        /// </param>
+        [Event(122, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheFileLockWaitStop(string projectFile, bool wasFreshlyCreatedLockObject)
+        {
+            WriteEvent(122, projectFile, wasFreshlyCreatedLockObject);
+        }
+
+        /// <summary>
+        /// Fires immediately before invoking the load delegate (which performs the actual XML parse).
+        /// </summary>
+        /// <param name="projectFile">Path being parsed.</param>
+        [Event(123, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheLoadDelegateInvoked(string projectFile)
+        {
+            WriteEvent(123, projectFile);
+        }
+
+        /// <param name="projectFile">Path that was parsed.</param>
+        /// <param name="succeeded">True if the load delegate returned a non-null PRE without throwing.</param>
+        [Event(124, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheLoadDelegateCompleted(string projectFile, bool succeeded)
+        {
+            WriteEvent(124, projectFile, succeeded);
+        }
+
+        /// <summary>
+        /// Wraps the in-place reload triggered when a cached PRE has the wrong preserveFormatting setting.
+        /// This call currently runs while <c>_locker</c> is held; the duration is "long work under lock".
+        /// </summary>
+        /// <param name="projectFile">Path being reloaded.</param>
+        [Event(125, Keywords = Keywords.All)]
+        public void ProjectRootElementCachePreserveFormattingReloadStart(string projectFile)
+        {
+            WriteEvent(125, projectFile);
+        }
+
+        /// <param name="projectFile">Path being reloaded.</param>
+        [Event(126, Keywords = Keywords.All)]
+        public void ProjectRootElementCachePreserveFormattingReloadStop(string projectFile)
+        {
+            WriteEvent(126, projectFile);
+        }
+
+        /// <summary>
+        /// Wraps the invocation of the <c>ProjectRootElementAdded</c> event handler.
+        /// This call currently runs while <c>_locker</c> is held; the duration is "external work under lock".
+        /// </summary>
+        /// <param name="projectFile">Path of the PRE being added.</param>
+        [Event(127, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheAddedHandlerStart(string projectFile)
+        {
+            WriteEvent(127, projectFile);
+        }
+
+        /// <param name="projectFile">Path of the PRE that was added.</param>
+        [Event(128, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheAddedHandlerStop(string projectFile)
+        {
+            WriteEvent(128, projectFile);
+        }
+
+        /// <summary>
+        /// Wraps an invocation of <c>IsInvalidEntry</c>. The Stop event reports
+        /// whether a file stat actually happened (vs. a short-circuit) and whether
+        /// the cached entry was deemed invalid.
+        /// </summary>
+        /// <param name="projectFile">Path being checked.</param>
+        [Event(129, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheIsInvalidEntryStart(string projectFile)
+        {
+            WriteEvent(129, projectFile);
+        }
+
+        /// <param name="projectFile">Path that was checked.</param>
+        /// <param name="didStat">True if a <c>FileInfo</c> stat was performed (i.e. autoreload mode and not short-circuited).</param>
+        /// <param name="wasInvalid">True if the cached entry was deemed stale and should be reloaded.</param>
+        [Event(130, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheIsInvalidEntryStop(string projectFile, bool didStat, bool wasInvalid)
+        {
+            WriteEvent(130, projectFile, didStat, wasInvalid);
+        }
+
+        /// <summary>
+        /// Reports the size and outcome of a <c>DiscardImplicitReferences</c> rebuild.
+        /// </summary>
+        /// <param name="weakCount">Number of entries iterated in the old weak cache.</param>
+        /// <param name="strongCount">Size of the old strong cache before the rebuild.</param>
+        /// <param name="retainedWeakCount">Number of explicitly-loaded weak entries kept after the rebuild.</param>
+        /// <param name="retainedStrongCount">Number of strong-cache entries kept after the rebuild.</param>
+        [Event(131, Keywords = Keywords.All)]
+        public void ProjectRootElementCacheDiscardImplicitReferences(int weakCount, int strongCount, int retainedWeakCount, int retainedStrongCount)
+        {
+            WriteEvent(131, weakCount, strongCount, retainedWeakCount, retainedStrongCount);
+        }
+
         #endregion
     }
 }
