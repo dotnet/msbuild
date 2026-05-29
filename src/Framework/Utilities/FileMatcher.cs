@@ -838,7 +838,7 @@ namespace Microsoft.Build.Shared
             try
             {
                 FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
-                if (linkTarget is not null && recursionState.BaseDirectory.Contains(linkTarget.FullName))
+                if (linkTarget is not null && IsSubdirectoryOf(recursionState.BaseDirectory, linkTarget.FullName))
                 {
                     return;
                 }
