@@ -12,7 +12,6 @@ using System.Reflection.PortableExecutable;
 #else
 using System.Runtime.InteropServices;
 using Microsoft.Build.Tasks.Metadata;
-using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
 #endif
@@ -290,42 +289,56 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private MetadataReader(string path)
         {
             _path = path;
-            // Receive transient pointers directly into ComScope<T> (implicit void** conversion)
-            // so no try/finally is needed for cleanup. Each AgileComPointer is constructed with
-            // takeOwnership: false; the GIT registration AddRefs and the ComScope Releases on
-            // scope exit.
+            // OpenScope failure is per-file (the path isn't a valid PE / assembly); we leave
+            // _assemblyImport null so that Create(...) returns null, matching the .NET Core
+            // branch's catch-all.
             //
-            // CoCreateInstance failure is an environment-level problem (CLR metadata host
-            // missing/unregistered) and is thrown, matching the behavior of the old
-            // `new CorMetaDataDispenser()` built-in-interop activation. OpenScope failure is
-            // per-file (the path isn't a valid PE / assembly); we leave _assemblyImport null
-            // so that Create(...) returns null, matching the .NET Core branch's catch-all.
+            // IMPORTANT — do NOT call PInvoke.CoCreateInstance(CLSID_CorMetaDataDispenser, ...)
+            // here, and do NOT use Activator.CreateInstance(Type.GetTypeFromCLSID(...)) if
+            // we want this code to AOT-compile. See the matching comment in
+            // AssemblyDependency/AssemblyInformation.cs for the full mechanism (regression
+            // dotnet/msbuild #13853 / VC P2PReferences.08, HRESULT 0x80131700
+            // CLR_E_SHIM_RUNTIMELOAD when raw CoCreateInstance hits the mscoree shim in a
+            // host where the shim's bound-runtime state is not set up).
+            //
+            // ComClassFactory.TryCreateFromModule calls clr.dll's exported DllGetClassObject
+            // directly, which routes to MetaDataDllGetClassObject and bypasses the shim.
             //
             // OpenScope is asked directly for IMetaDataImport2 — the underlying CLR RegMeta
             // coclass implements every IMetaData* interface, so this saves a QueryInterface
             // round-trip vs. asking for the base IMetaDataImport.
-            Guid clsid = CorMetadata.CLSID_CorMetaDataDispenser;
-            Guid dispenserIid = IID.Get<IMetaDataDispenser>();
-            using ComScope<IMetaDataDispenser> dispenser = new();
-            PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, &dispenserIid, dispenser).ThrowOnFailure();
-
-            Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
-            using ComScope<IMetaDataImport2> import2 = new();
-            HRESULT hr;
-            fixed (char* pPath = path)
+            if (!ComClassFactory.TryCreateFromModule(
+                    "clr.dll",
+                    CorMetadata.CLSID_CorMetaDataDispenser,
+                    ComClassFactory.ClrDllGetClassObjectInternalExportName,
+                    out ComClassFactory factory,
+                    out HRESULT activationHr))
             {
-                hr = dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2);
+                activationHr.ThrowOnFailure();
             }
-            if (hr.Failed || import2.IsNull)
+            using (factory)
             {
-                return;
-            }
-            _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
+                using ComScope<IMetaDataDispenser> dispenser = factory.TryCreateInstance<IMetaDataDispenser>(out HRESULT createHr);
+                createHr.ThrowOnFailure();
 
-            Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
-            using ComScope<IMetaDataAssemblyImport> asmImport = new();
-            import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
-            _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
+                Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
+                using ComScope<IMetaDataImport2> import2 = new();
+                HRESULT hr;
+                fixed (char* pPath = path)
+                {
+                    hr = dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2);
+                }
+                if (hr.Failed || import2.IsNull)
+                {
+                    return;
+                }
+                _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
+
+                Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
+                using ComScope<IMetaDataAssemblyImport> asmImport = new();
+                import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
+                _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
+            }
         }
 
         public static MetadataReader Create(string path)
@@ -339,7 +352,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
             using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
             MdAssembly assemblyScope;
-            asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).ThrowOnFailure();
+            // Tolerate failure: a scope with no mdAssembly token returns CLDB_E_RECORD_NOTFOUND.
+            // The legacy [PreserveSig] RCW code ignored the HR; preserve that contract by
+            // treating any non-S_OK as "attribute not present".
+            if (asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).Failed || assemblyScope.IsNil)
+            {
+                return false;
+            }
 
             // The CLR returns S_OK with pcbData=size when the attribute is present, S_FALSE with
             // pcbData=0 when it is absent, and an error HRESULT otherwise. Treat anything that is

@@ -51,6 +51,7 @@ GetLogicalDrives
 GetLogicalProcessorInformationEx
 GetLongPathName
 GetModuleFileName
+GetModuleHandle
 GetNativeSystemInfo
 GetOEMCP
 GetProcAddress
