@@ -61,6 +61,7 @@
       ".github/**",
       "eng/common/**",
       "eng/cts/**",
+      "src/StringTools.UnitTests/StringTools.UnitTests.csproj",
       "**/*.yml",
       "**/*.yaml",
       "**/package-lock.json",
