@@ -3296,14 +3296,9 @@ namespace Microsoft.Build.UnitTests
         /// Regression test: MSB3030 when copying a long-path file in a multi-targeting build.
         /// devenv.exe is not longPathAware; the net472 test host has the same condition.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact(additionalMessage: "Extended-length path (\\\\?\\) support is Windows-only.")]
         public void CopyFileWithLongPath()
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return;
-            }
-
             // Exact filename from the bug report (%27 = apostrophe in the csproj Include attribute).
             string longFileName = new string('A', 218) + "' [[]] === .binf";
             string tempBase = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -3316,10 +3311,8 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                if (sourcePath.Length <= NativeMethodsShared.MAX_PATH)
-                {
-                    return; // Path not long enough on this machine; nothing to test.
-                }
+                sourcePath.Length.ShouldBeGreaterThan(NativeMethodsShared.MAX_PATH,
+                    $"Test setup error: source path length {sourcePath.Length} should exceed MAX_PATH ({NativeMethodsShared.MAX_PATH}).");
 
                 // Use \\?\ for creation — the net472 test host is not longPathAware.
                 File.WriteAllText(@"\\?\" + sourcePath, "content");
@@ -3341,6 +3334,8 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                // Delete the long files via \\?\ first (TestEnvironment's plain-path cleanup can't);
+                // the remaining short-path directory tree is then safe to delete recursively.
                 try { File.Delete(@"\\?\" + sourcePath); } catch { }
                 try { File.Delete(@"\\?\" + destPath); } catch { }
                 try { Directory.Delete(tempBase, true); } catch { }

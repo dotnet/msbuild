@@ -914,7 +914,7 @@ internal static class NativeMethods
     private static unsafe SafeFileHandle OpenFileThroughSymlinks(string fullPath)
     {
         HANDLE h = PInvoke.CreateFile(
-            fullPath,
+            EnsureExtendedLengthPath(fullPath),
             (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_READ,
             FILE_SHARE_MODE.FILE_SHARE_READ,
             null,
@@ -1327,8 +1327,14 @@ internal static class NativeMethods
 
     internal static string EnsureExtendedLengthPath(string path)
     {
-        if (!IsWindows || path == null || HasMaxPath || path.Length < MAX_PATH ||
+        if (!IsWindows || path is null || HasMaxPath || path.Length < MAX_PATH ||
             path.StartsWith(@"\\?\", StringComparison.Ordinal))
+        {
+            return path;
+        }
+
+        // \\?\ disables path normalization, so it is only valid on a fully-qualified path.
+        if (!Path.IsPathRooted(path))
         {
             return path;
         }
