@@ -29,7 +29,10 @@ jobs:
     - output: artifactsDrop
       sourcePath: '$(Build.SourcesDirectory)\artifacts\official\OptProf\$(BuildConfiguration)\Data'
       dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
-      dropMetadataContainerName: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      toLowerCase: false
+      usePat: true
+      dropMetadataContainerName: 'DropMetadata-OptProf'
       condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
     # Publish bootstrapper info for OptProf data collection run to consume
