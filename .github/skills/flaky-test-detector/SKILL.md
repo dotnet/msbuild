@@ -50,7 +50,7 @@ published pipeline **artifacts** instead:
    - `"<Leg> test logs"` zips contain the **`.trx`** result files (failed test names + error
      message/stack trace).
    - `"<Leg> build logs"` zips (misleadingly named) contain the **full xUnit console `.log`**
-     output and a `.binlog`. The detector does **not** download these; the fixer pulls them on
+     output and a `.binlog`. The scan does **not** download these; the fix phase pulls them on
      demand when it needs stdout for diagnosis.
 5. **TRX parsing** — failed tests come from `//UnitTestResult[@outcome='Failed']/@testName`. The
    `@testName` is fully-qualified and may include a parameterized suffix, e.g.
@@ -121,8 +121,8 @@ filter and existing-issue cross-reference to work.
 
 The detector surfaces evidence; it does **not** by itself prove flakiness. Before acting:
 
-- **`scanComplete` must be `true`.** A truncated scan is biased — never file issues or dispatch
-  a fixer from it. Widen `-MaxBuilds` / `-MaxArtifactDownloads` and re-run.
+- **`scanComplete` must be `true`.** A truncated scan is biased — never file issues, edit sources,
+  or open a PR from it. Widen `-MaxBuilds` / `-MaxArtifactDownloads` and re-run.
 - **Spread over time and sources is the signal.** Prefer tests whose failures span multiple days
   and multiple sources over a burst within one source.
 - **Rolling-only failures may be a real regression.** If a test only fails on consecutive rolling
@@ -176,10 +176,10 @@ text search. Then locate the class/method within that project.
 
 ## Related Workflows
 
-- `.github/workflows/flaky-test-detector.agent.md` — scheduled triage: runs this skill, files /
-  updates `flaky-test` issues, and (optionally) dispatches the fixer.
-- `.github/workflows/flaky-test-fix.agent.md` — dispatched fixer: reproduces locally and either
-  applies a minimal determinism fix or quarantines the test, opening one PR.
+- `.github/workflows/flaky-test-detector.agent.md` — the scheduled **daily** workflow that runs this
+  skill end to end: it scans CI, files/updates `flaky-test` tracking issues, then reproduces and either
+  applies a minimal determinism fix or quarantines each new candidate, opening **one combined draft PR
+  per run** with all of that day's quarantines and fixes.
 - `azure-pipelines/quarantine.yml` — scheduled (twice-daily) AzDO pipeline that runs **only** the
   quarantined (`[ActiveIssue]` / `Category=failing`) tests, so quarantined tests keep producing
   pass/fail signal. A test that has gone consistently green there is a candidate to un-quarantine.
