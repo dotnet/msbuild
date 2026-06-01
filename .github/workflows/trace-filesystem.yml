@@ -1,0 +1,252 @@
+name: Strace Filesystem Tracing
+
+# Linux-only diagnostic workflow that captures every filesystem-mutating
+# syscall produced by the MSBuild build, then post-filters the trace to a
+# small target folder under the repository. The filtered trace is uploaded
+# as a workflow artifact so it can be downloaded and inspected to attribute
+# file operations (open, write, unlink, rename, truncate, ...) to specific
+# process IDs - i.e. "which process deleted/rewrote my file?".
+#
+# Why we do NOT use `strace -P <dir>`:
+#   `-P` is an EXACT path filter. It does NOT recurse into subdirectories,
+#   and it does not always match relative-path syscalls after a process
+#   `chdir()`s into the target. Tracing the full build and post-filtering
+#   the output with `grep` gives true subtree semantics at the cost of a
+#   larger intermediate trace file (which we delete before uploading).
+#
+# Why we include explicit write/close/truncate syscalls in addition to
+# `%file`:
+#   `-e trace=%file` only covers syscalls that take a *path* as an argument
+#   (openat, unlink, rename, stat, ...). It does NOT include writes through
+#   a previously-opened file descriptor. With `-yy` strace decorates fds
+#   with their backing path so `grep` can still attribute those events to
+#   our target folder.
+#
+# strace adds noticeable per-syscall overhead (~2-10x slowdown on
+# syscall-heavy workloads), so this workflow is `workflow_dispatch` only -
+# it is not part of regular PR/CI validation.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tracePath:
+        description: 'Repo-relative path to filter the trace to (absolute path is derived from $GITHUB_WORKSPACE).'
+        required: false
+        default: 'artifacts/bin/Microsoft.Build.Framework/Debug/net10.0'
+      configuration:
+        description: 'Build configuration (Debug or Release).'
+        required: false
+        default: 'Debug'
+      projects:
+        description: 'Optional --projects argument to scope the build (e.g. src/Framework/Microsoft.Build.Framework.csproj). Leave blank to build the full solution.'
+        required: false
+        default: 'src/Framework/Microsoft.Build.Framework.csproj'
+
+permissions:
+  contents: read
+
+jobs:
+  trace-build:
+    name: Trace MSBuild filesystem operations
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    env:
+      TRACE_REL_PATH: ${{ inputs.tracePath }}
+      BUILD_CONFIG: ${{ inputs.configuration }}
+      BUILD_PROJECTS: ${{ inputs.projects }}
+      STRACE_FULL_LOG: ${{ github.workspace }}/artifacts/strace/build-trace-full.log
+      STRACE_FILTERED_LOG: ${{ github.workspace }}/artifacts/strace/build-trace.log
+      STRACE_SUMMARY: ${{ github.workspace }}/artifacts/strace/build-trace-summary.txt
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install strace and build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y strace libxml2
+
+      - name: strace smoke test
+        # Verify the capture-then-grep approach actually records subtree
+        # operations before we sink 20+ minutes into a full build.
+        run: |
+          set -euo pipefail
+          SMOKE_DIR=/tmp/strace-smoke
+          SMOKE_LOG=/tmp/strace-smoke.log
+          rm -rf "$SMOKE_DIR" "$SMOKE_LOG"
+          mkdir -p "$SMOKE_DIR"
+          strace \
+            -f -tt -yy \
+            -e trace=%file,write,close \
+            -o "$SMOKE_LOG" \
+            bash -c '
+              mkdir -p /tmp/strace-smoke/target
+              echo hello > /tmp/strace-smoke/target/sample.txt
+              cat /tmp/strace-smoke/target/sample.txt > /dev/null
+              rm /tmp/strace-smoke/target/sample.txt
+            '
+          if ! grep -qF "$SMOKE_DIR/target" "$SMOKE_LOG"; then
+            echo "::error::strace smoke test failed - no events captured for $SMOKE_DIR/target"
+            tail -200 "$SMOKE_LOG"
+            exit 1
+          fi
+          echo "Smoke test captured the following events:"
+          # `grep -m 10` stops grep itself after 10 matches, avoiding the
+          # SIGPIPE-under-pipefail trap of `grep ... | head -10`.
+          grep -F -m 10 "$SMOKE_DIR/target" "$SMOKE_LOG"
+          rm -rf "$SMOKE_DIR" "$SMOKE_LOG"
+
+      - name: Restore (untraced)
+        # Restore is dominated by NuGet network/disk I/O that never touches
+        # our trace folder. Running it without strace cuts the overall job
+        # time in half without losing any signal in the filtered trace.
+        run: ./eng/common/build.sh --restore --configuration "$BUILD_CONFIG"
+
+      - name: Build under strace
+        id: trace
+        run: |
+          set -uo pipefail
+          mkdir -p "$(dirname "$STRACE_FULL_LOG")"
+          echo "Writing full strace output to: $STRACE_FULL_LOG"
+          BUILD_ARGS=(--build --configuration "$BUILD_CONFIG" --nodeReuse false)
+          if [[ -n "${BUILD_PROJECTS:-}" ]]; then
+            BUILD_ARGS+=(--projects "$BUILD_PROJECTS")
+            echo "Scoping build to: $BUILD_PROJECTS"
+          else
+            echo "Building full solution (no --projects scoping)."
+          fi
+          set +e
+          strace \
+            -f -tt -yy \
+            -e trace=%file,write,writev,pwrite64,close,ftruncate,copy_file_range \
+            -o "$STRACE_FULL_LOG" \
+            ./eng/common/build.sh "${BUILD_ARGS[@]}"
+          build_rc=$?
+          set -e
+          echo "build_rc=$build_rc" >> "$GITHUB_OUTPUT"
+          echo "Build exit code: $build_rc"
+          if [[ -f "$STRACE_FULL_LOG" ]]; then
+            echo "Full trace size: $(du -h "$STRACE_FULL_LOG" | cut -f1)"
+          fi
+
+      - name: Filter trace to target path
+        if: always()
+        run: |
+          set -uo pipefail
+          TRACE_DIR_ABS="$GITHUB_WORKSPACE/$TRACE_REL_PATH"
+          TRACE_REL="$TRACE_REL_PATH"
+          echo "Filtering trace to:"
+          echo "  absolute: $TRACE_DIR_ABS"
+          echo "  relative: $TRACE_REL"
+          if [[ ! -s "$STRACE_FULL_LOG" ]]; then
+            echo "No full trace produced - skipping filter."
+            : > "$STRACE_FILTERED_LOG"
+            exit 0
+          fi
+          # `grep -F` keeps every line that mentions the target path -
+          # this covers both path-arg syscalls (openat, unlink, rename, ...)
+          # and fd-arg syscalls decorated by `-yy` (write, close, ...).
+          # We match three forms because MSBuild/dotnet tools sometimes pass
+          # a path relative to the repo root after `chdir()` into it:
+          #   1. absolute repo-rooted path
+          #   2. repo-relative path (e.g. `artifacts/bin/...`)
+          #   3. ./-prefixed repo-relative path
+          grep -F \
+            -e "$TRACE_DIR_ABS" \
+            -e "\"$TRACE_REL" \
+            -e "\"./$TRACE_REL" \
+            "$STRACE_FULL_LOG" > "$STRACE_FILTERED_LOG" || true
+          echo "Filtered trace size: $(du -h "$STRACE_FILTERED_LOG" | cut -f1)"
+          echo "Filtered trace lines: $(wc -l < "$STRACE_FILTERED_LOG")"
+
+      - name: Summarize trace
+        if: always()
+        run: |
+          # Disable `-e` for the summary so a single failing grep/awk
+          # doesn't abort the whole step before we get to upload.
+          set +e
+          set -uo pipefail
+          TRACE_DIR_ABS="$GITHUB_WORKSPACE/$TRACE_REL_PATH"
+          TRACE_REL="$TRACE_REL_PATH"
+          {
+            echo "Strace filesystem trace summary"
+            echo "==============================="
+            echo "Trace path (absolute): $TRACE_DIR_ABS"
+            echo "Trace path (relative): $TRACE_REL"
+            echo "Build config:          $BUILD_CONFIG"
+            echo "Build projects:        ${BUILD_PROJECTS:-<full solution>}"
+            if [[ -s "$STRACE_FILTERED_LOG" ]]; then
+              echo "Filtered size:         $(du -h "$STRACE_FILTERED_LOG" | cut -f1)"
+              echo "Filtered lines:        $(wc -l < "$STRACE_FILTERED_LOG")"
+              echo
+              echo "Distinct PIDs that touched the path:"
+              # Use `sed -nE` instead of awk's 3-arg `match(str, regex, arr)`
+              # form, which is a gawk extension - Ubuntu's default `/usr/bin/awk`
+              # is mawk and silently drops the capture array. `-f` makes strace
+              # prefix every line with the PID, either as a bare leading number
+              # or as `[pid NNN]`.
+              sed -nE \
+                -e 's/^\[pid[[:space:]]+([0-9]+)\].*/\1/p' \
+                -e 's/^([0-9]+)[[:space:]].*/\1/p' \
+                "$STRACE_FILTERED_LOG" | sort -u
+              echo
+              echo "Top 30 syscalls by frequency:"
+              # `awk 'NR<=30'` consumes the full input from `sort -rn` instead
+              # of closing the pipe early (which would SIGPIPE upstream `sort`
+              # and trip pipefail).
+              grep -oE '[a-z_][a-z_0-9]*\(' "$STRACE_FILTERED_LOG" \
+                | tr -d '(' \
+                | sort | uniq -c | sort -rn \
+                | awk 'NR<=30'
+              echo
+              echo "Files mentioned in the filtered trace (up to 50):"
+              # Use awk's index() so we don't have to regex-escape TRACE_DIR_ABS
+              # (which contains '.' and '/' that would otherwise be regex
+              # metacharacters in grep -oE).
+              awk -v dir="$TRACE_DIR_ABS" '
+                {
+                  i = index($0, dir)
+                  if (i > 0) {
+                    rest = substr($0, i)
+                    sub(/[\"<>) ].*/, "", rest)
+                    print rest
+                  }
+                }
+              ' "$STRACE_FILTERED_LOG" | sort -u | awk 'NR<=50'
+            else
+              echo "(no events recorded for this path)"
+            fi
+          } | tee "$STRACE_SUMMARY"
+
+      - name: Prepare artifact directory
+        if: always()
+        run: |
+          set -uo pipefail
+          ARTIFACT_DIR="$GITHUB_WORKSPACE/artifacts/strace"
+          if [[ -f "$STRACE_FILTERED_LOG" ]]; then
+            gzip -9 -f "$STRACE_FILTERED_LOG" || true
+          fi
+          # Full trace can be multi-GB; do not upload by default.
+          rm -f "$STRACE_FULL_LOG"
+          ls -lh "$ARTIFACT_DIR" || true
+
+      - name: Upload strace artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: msbuild-strace-trace
+          path: artifacts/strace/
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Re-emit build status
+        if: always()
+        run: |
+          rc='${{ steps.trace.outputs.build_rc }}'
+          if [[ -z "$rc" || "$rc" == "0" ]]; then
+            exit 0
+          fi
+          echo "::error::Build failed under strace (exit code: $rc)"
+          exit "$rc"
