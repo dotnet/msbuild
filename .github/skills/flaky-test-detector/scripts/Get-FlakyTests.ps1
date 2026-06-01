@@ -116,7 +116,8 @@ $MaxZipBytes = 200MB
 $MaxTrxBytes = 60MB
 $MaxTrxPerArtifact = 200
 
-# Progress goes to stderr so stdout stays clean machine-readable JSON.
+# Human-readable progress goes to the host/information log stream; the machine-readable
+# JSON result is the only thing written to stdout (via Write-Output), keeping it clean.
 function Write-Log {
     param([string]$Message, [string]$Color = "Gray")
     Write-Host $Message -ForegroundColor $Color
@@ -178,7 +179,11 @@ function Read-TrxFailures {
 function Get-BuildDate {
     param($Build)
     if ($Build.startTime -is [datetime]) { return $Build.startTime.ToString("yyyy-MM-dd") }
-    if ($Build.startTime) { return ([string]$Build.startTime).Substring(0, 10) }
+    if ($Build.startTime) {
+        $s = [string]$Build.startTime
+        if ($s.Length -ge 10) { return $s.Substring(0, 10) }
+        return $s
+    }
     return ""
 }
 
@@ -198,9 +203,10 @@ catch {
 }
 
 $builds = @($buildsResponse.value)
-$buildsAvailable = [int]$buildsResponse.count
-# A scan is complete only if we were not truncated by the $top window.
-$scanComplete = ($builds.Count -lt $MaxBuilds) -or ($buildsAvailable -le $builds.Count)
+# A scan is complete only if we were not truncated by the $top window. The AzDo build-list API
+# does not expose a reliable total-count field, so treat a full page ($MaxBuilds results) as
+# potentially truncated.
+$scanComplete = $builds.Count -lt $MaxBuilds
 
 function Write-EmptyReport {
     param([bool]$Complete = $true)
@@ -391,9 +397,15 @@ try {
                     Invoke-WebRequest -Uri $dlUrl -OutFile $zipPath -UseBasicParsing
                     $fi = Get-Item $zipPath
                     if ($fi.Length -gt $MaxZipBytes) { throw "artifact exceeds size cap ($($fi.Length) bytes)" }
-                    # Guard against an HTML sign-in page masquerading as a zip.
-                    $head = [System.IO.File]::ReadAllBytes($zipPath) | Select-Object -First 2
-                    if (-not ($head.Count -ge 2 -and $head[0] -eq 0x50 -and $head[1] -eq 0x4B)) { throw "not a zip (PK header missing)" }
+                    # Guard against an HTML sign-in page masquerading as a zip. Read only the
+                    # first two bytes (PK header) from a stream to avoid allocating the whole file.
+                    $stream = [System.IO.File]::OpenRead($zipPath)
+                    try {
+                        $head = [byte[]]::new(2)
+                        $bytesRead = $stream.Read($head, 0, 2)
+                    }
+                    finally { $stream.Dispose() }
+                    if (-not ($bytesRead -ge 2 -and $head[0] -eq 0x50 -and $head[1] -eq 0x4B)) { throw "not a zip (PK header missing)" }
                     Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
                 }
                 catch {

@@ -110,8 +110,8 @@ Run the detector script via the `bash` tool:
 pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -TargetBranch main -DaysBack 14 -MinSources 3 -MaxBuilds 60 -JsonOut flaky-report.json
 ```
 
-The script prints a human report to stderr and the structured JSON report to stdout (also written to
-`flaky-report.json`). Parse the JSON.
+The script writes a human-readable progress report to the log/host stream and the structured JSON
+report to stdout (also written to `flaky-report.json`). Parse the JSON.
 
 ## Step 2 — Guard rails (stop conditions)
 

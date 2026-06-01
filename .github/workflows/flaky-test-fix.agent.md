@@ -100,6 +100,14 @@ safe-outputs:
     draft: true
     base-branch: main
     max: 1
+    # Exclusive allowlist: the fixer only ever edits a single test source file (adding an
+    # [ActiveIssue] attribute), so restrict the PR patch to .cs files under src/. Any change to a
+    # root manifest (e.g. NuGet.config, global.json, Directory.Packages.props) or other file is then
+    # refused outright. This is a stronger, casing-independent guard than the gh-aw default
+    # protected-files manifest list (whose hard-coded "NuGet.Config" entry would miss this repo's
+    # lower-cased "NuGet.config" on a case-sensitive filesystem).
+    allowed-files:
+      - "src/**/*.cs"
     # Belt-and-braces enforcement of "never touch .github/**" (also enforced in the prompt + a git diff check).
     excluded-files:
       - ".github/**"
