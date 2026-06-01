@@ -170,7 +170,8 @@ gh issue list --repo dotnet/msbuild --state all --search '"<!-- flaky-test-id: <
     links to `sampleBuildUrl`. Provide the fully-qualified test name and the assembly so a fixer can
     locate it.
   - Add brief guidance: the fix is either a minimal determinism fix (preferred, with proven local
-    reproduction) or quarantine via `[Fact(Skip = "<issue url>")]` / `[Theory(Skip = "<issue url>")]`.
+    reproduction) or quarantine via `[ActiveIssue("<issue url>")]` (from `Microsoft.DotNet.XUnitV3Extensions`,
+    namespace `Xunit`) — not `[Fact(Skip=...)]`.
 
 ## Step 5 — Optionally dispatch the fixer (at most a couple)
 

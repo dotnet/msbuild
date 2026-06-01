@@ -1,6 +1,6 @@
 ---
 name: "Flaky Test Fix"
-description: "Dispatched fixer that re-verifies a flagged flaky test, attempts a local reproduction, and opens a single draft PR with either a minimal determinism fix or a quarantine (Skip) — never both, never touching .github/**."
+description: "Dispatched fixer that re-verifies a flagged flaky test, attempts a local reproduction, and opens a single draft PR with either a minimal determinism fix or a quarantine ([ActiveIssue]) — never both, never touching .github/**."
 on:
   workflow_dispatch:
     inputs:
@@ -17,7 +17,7 @@ on:
         required: false
         type: string
       tracking_issue:
-        description: "Issue number of the flaky-test tracking issue to reference and comment on. Required: the quarantine Skip URL points at this issue."
+        description: "Issue number of the flaky-test tracking issue to reference and comment on. Required: the quarantine [ActiveIssue] URL points at this issue."
         required: true
         type: string
 
@@ -131,7 +131,8 @@ Inputs:
    cause nondeterminism.
 3. Only touch the single failing test, its test project, or — for a determinism fix — the specific
    product code that the reproduction proves is the source of nondeterminism.
-4. If you cannot do better, **quarantine** (skip) the test. Quarantine is the safe default whenever a
+4. If you cannot do better, **quarantine** the test with `[ActiveIssue]` (see Step 4b). Quarantine is
+   the safe default whenever a
    local reproduction is not achievable or the root cause is unclear.
 5. Reference the `tracking_issue` in the PR and post one comment on it summarizing the outcome.
 
@@ -140,7 +141,7 @@ Inputs:
 `tracking_issue` is required. Confirm it is a numeric issue that exists in `dotnet/msbuild` and is
 labeled `flaky-test` (e.g. `gh issue view <tracking_issue> --repo dotnet/msbuild --json number,state,labels`).
 If it is missing, non-numeric, does not exist, or is not a flaky-test tracking issue, **stop and open
-no PR** (a quarantine Skip needs a valid issue URL).
+no PR** (a quarantine [ActiveIssue] needs a valid issue URL).
 
 ## Step 1 — Re-verify the test is still flaky
 
@@ -201,16 +202,36 @@ Do not refactor unrelated code. Do not weaken assertions just to make it pass.
 ### 4b — Quarantine (safe default)
 
 If you could not reproduce, or the root cause is unclear, or the environment blocked the build,
-quarantine the test by adding a `Skip` referencing the tracking issue, using the **exact** msbuild
-syntax:
+quarantine the test with `[ActiveIssue]` from `Microsoft.DotNet.XUnitV3Extensions` (namespace
+`Xunit`, already referenced by every test project and already imported via `using Xunit;`). **Do not
+use `[Fact(Skip=...)]`** — `[ActiveIssue]` is the msbuild/dotnet convention: it stamps the
+`Category=failing` trait, which normal CI excludes (`--filter-not-trait Category=failing`), and which
+the scheduled quarantine pipeline (`azure-pipelines/quarantine.yml`) runs on its own to keep
+collecting signal.
+
+Add the attribute **above** the existing `[Fact]`/`[Theory]` (keep the test method and its `[Fact]`/
+`[Theory]` intact — do not delete or rename it):
 
 ```csharp
-[Fact(Skip = "https://github.com/dotnet/msbuild/issues/<NNNN>")]
-// or
-[Theory(Skip = "https://github.com/dotnet/msbuild/issues/<NNNN>")]
+// Unconditional quarantine (default):
+[ActiveIssue("https://github.com/dotnet/msbuild/issues/<NNNN>")]
+[Fact]
+public void TheTest() { ... }
+
+// Only when the evidence is clearly platform-specific, scope the quarantine so the test keeps
+// running everywhere else (TestPlatforms is in the Xunit namespace):
+[ActiveIssue("https://github.com/dotnet/msbuild/issues/<NNNN>", TestPlatforms.Linux)]
 ```
 
-Use the `tracking_issue` number for `<NNNN>`. Change only the attribute on the single failing test.
+Use the `tracking_issue` number for `<NNNN>`. **Strongly prefer the unconditional form.** The
+scheduled re-validation pipeline (`azure-pipelines/quarantine.yml`) that keeps collecting data on
+quarantined tests currently runs on **Windows only**, so a quarantine scoped to a non-Windows platform
+(`Linux`, `OSX`, `AnyUnix`) would never be re-validated and would silently stop producing signal. Only
+use a platform-scoped `[ActiveIssue("<url>", TestPlatforms.Windows)]` when `affected_sources` plus the
+detector's per-source data show the flake is confined to Windows (the platform the probe covers); for
+any flake that reproduces on (or is not clearly excluded from) a non-Windows platform, use the
+unconditional form so the test is fully quarantined and re-validated. Change only the attributes on the
+single failing test.
 
 ## Step 5 — Open the PR and comment
 

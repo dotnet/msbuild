@@ -1,0 +1,115 @@
+# Quarantined-test re-validation pipeline.
+#
+# Tests quarantined as flaky are marked with [ActiveIssue("<issue-url>", ...)] (from
+# Microsoft.DotNet.XUnitV3Extensions), which stamps the `Category=failing` trait. Normal CI runs
+# EXCLUDE that trait (see src/Directory.Build.targets), so a quarantined test never executes there and
+# therefore stops producing any pass/fail signal.
+#
+# This pipeline runs ONLY the quarantined tests (RunQuarantinedTests=true flips the filter to
+# --filter-trait Category=failing) on a schedule, so we keep collecting fresh data on quarantined
+# tests. A quarantined test that has become consistently green across these runs is a candidate to
+# un-quarantine; one that still fails intermittently should stay quarantined.
+#
+# The build is intentionally NOT failed by quarantined-test outcomes: when RunQuarantinedTests=true,
+# src/Directory.Build.targets passes `--ignore-exit-code 8;2` to the test runner, which treats exit
+# code 8 (zero tests ran -- e.g. nothing is currently quarantined) and exit code 2 (test failures --
+# expected for still-flaky tests) as success. The per-test signal lives in the published test results
+# (the Tests tab / TestResults artifact), not in the overall pipeline status, so a red run means an
+# actual infrastructure problem.
+#
+# ROLLOUT NOTE: committing this YAML does NOT by itself create a scheduled run. An Azure DevOps
+# pipeline definition pointing at this file must be created/enabled once in the relevant project(s)
+# for the cron schedule below to take effect.
+#
+# This pipeline runs on Windows only. A test quarantined with a non-Windows platform scope
+# (e.g. [ActiveIssue("...", TestPlatforms.Linux)]) will NOT be re-validated here; the fixer is
+# instructed to prefer unconditional [ActiveIssue] for that reason. Add Linux/macOS legs here if
+# platform-scoped non-Windows quarantines become common.
+
+# Only run on a schedule (and manual queue); never on PRs or CI pushes.
+trigger: none
+pr: none
+
+schedules:
+- cron: "0 8,20 * * *"
+  displayName: Twice-daily quarantined-test re-validation
+  branches:
+    include:
+    - main
+  # Run even when there have been no commits since the last scheduled run -- the set of quarantined
+  # tests changes rarely, but we still want a fresh data point twice a day.
+  always: true
+
+variables:
+- ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+  - group: AzureDevOps-Artifact-Feeds-Pats
+- name: cfsNugetWarnLevel
+  value: warn
+- name: nugetMultiFeedWarnLevel
+  value: none
+- name: NugetSecurityAnalysisWarningLevel
+  value: none
+
+jobs:
+- job: RunQuarantinedTestsWindows
+  displayName: "Run quarantined tests (Windows)"
+  pool:
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
+  timeoutInMinutes: 120
+  steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
+  - task: BatchScript@1
+    displayName: cibuild_bootstrapped_msbuild.cmd (quarantined tests only)
+    inputs:
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: '-onlyDocChanged 0 -stage2Properties /mt /p:RunQuarantinedTests=true'
+    env:
+      ForceUseXCopyMSBuild: 1
+  - task: PublishTestResults@2
+    displayName: Publish .NET Framework Test Results
+    inputs:
+      testRunTitle: 'Quarantined Full Framework'
+      testRunner: VSTest
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.trx'
+      publishRunAttachments: true
+      mergeTestResults: true
+    continueOnError: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Test Results
+    inputs:
+      testRunTitle: 'Quarantined .NET'
+      testRunner: VSTest
+      testResultsFiles: |
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
+      publishRunAttachments: true
+      mergeTestResults: true
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'Quarantine build logs'
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'Quarantine test logs'
+    continueOnError: true
+    condition: always()

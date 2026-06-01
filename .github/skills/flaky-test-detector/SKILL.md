@@ -137,7 +137,7 @@ The detector surfaces evidence; it does **not** by itself prove flakiness. Befor
 |--------|---------------|
 | Mention in report | ≥ 2 distinct sources |
 | File / update a `flaky-test` tracking issue | ≥ 3 distinct sources |
-| Quarantine (skip) the test | ≥ 5 distinct sources **or** failures spanning multiple days |
+| Quarantine the test (`[ActiveIssue]`) | ≥ 5 distinct sources **or** failures spanning multiple days |
 
 ## Conventions
 
@@ -148,13 +148,23 @@ The detector surfaces evidence; it does **not** by itself prove flakiness. Befor
   <!-- flaky-test-id: Namespace.Class.Method -->
   ```
   Search both open and recently-closed issues for this marker before filing a new one.
-- **Quarantine / skip syntax (use exactly):**
+- **Quarantine syntax (use exactly):** quarantine with `[ActiveIssue]` from
+  `Microsoft.DotNet.XUnitV3Extensions` (namespace `Xunit`, already referenced and imported by every
+  test project) — **not** `[Fact(Skip=...)]`. Add it above the existing `[Fact]`/`[Theory]`, keeping
+  the test method intact:
   ```csharp
-  [Fact(Skip = "https://github.com/dotnet/msbuild/issues/NNNN")]
-  [Theory(Skip = "https://github.com/dotnet/msbuild/issues/NNNN")]
+  [ActiveIssue("https://github.com/dotnet/msbuild/issues/NNNN")]
+  [Fact]
+  // platform-scoped — Windows only, since the re-validation pipeline runs on Windows (see note below):
+  [ActiveIssue("https://github.com/dotnet/msbuild/issues/NNNN", TestPlatforms.Windows)]
   ```
-  Do **not** add a `"Flaky:"` prefix. The `Skip` value is the tracking-issue URL.
-- **Theory granularity:** skipping a `[Theory]` disables *all* rows. Prefer method-level evidence
+  The issue URL is the tracking-issue URL; do **not** add a `"Flaky:"` prefix. `[ActiveIssue]` stamps
+  the `Category=failing` trait, which normal CI excludes and the scheduled `azure-pipelines/quarantine.yml`
+  pipeline runs on its own to keep collecting signal on quarantined tests. **Strongly prefer the
+  unconditional form:** that pipeline is currently **Windows-only**, so a quarantine scoped to a
+  non-Windows platform (`Linux`, `OSX`, `AnyUnix`) would never be re-validated and would silently stop
+  producing signal. Only scope to `TestPlatforms.Windows` when the flake is confined to Windows.
+- **Theory granularity:** quarantining a `[Theory]` disables *all* rows. Prefer method-level evidence
   and note the failing parameter distribution (`rawVariants`) before quarantining a `[Theory]`.
 
 ## Locating a Test's Source
@@ -170,3 +180,6 @@ text search. Then locate the class/method within that project.
   updates `flaky-test` issues, and (optionally) dispatches the fixer.
 - `.github/workflows/flaky-test-fix.agent.md` — dispatched fixer: reproduces locally and either
   applies a minimal determinism fix or quarantines the test, opening one PR.
+- `azure-pipelines/quarantine.yml` — scheduled (twice-daily) AzDO pipeline that runs **only** the
+  quarantined (`[ActiveIssue]` / `Category=failing`) tests, so quarantined tests keep producing
+  pass/fail signal. A test that has gone consistently green there is a candidate to un-quarantine.

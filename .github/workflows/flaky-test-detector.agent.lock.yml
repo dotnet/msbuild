@@ -439,13 +439,14 @@ jobs:
                         "type": "string"
                       },
                       "tracking_issue": {
-                        "description": "Issue number of the flaky-test tracking issue to reference and comment on.",
+                        "description": "Issue number of the flaky-test tracking issue to reference and comment on. Required: the quarantine [ActiveIssue] URL points at this issue.",
                         "type": "string"
                       }
                     },
                     "required": [
                       "failing_test",
-                      "test_assembly"
+                      "test_assembly",
+                      "tracking_issue"
                     ],
                     "type": "object"
                   },
