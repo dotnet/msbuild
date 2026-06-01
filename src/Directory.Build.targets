@@ -44,8 +44,11 @@
     <!-- Enable code coverage -->
     <!-- There are separate runsettings files for Windows and non-Windows. -->
     <!-- Some test projects hang on windows and hence coverage is disabled for these projects. -->
+    <!-- Quarantined-only runs (RunQuarantinedTests=true, the scheduled quarantine pipeline) skip
+         coverage: those runs only collect flaky pass/fail signal via repeated execution, and coverage
+         instrumentation adds overhead and can perturb timing-sensitive flakes. -->
     <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -coverage - -coverage-settings $(RepoRoot)CoverageWindowsFull.config</XunitOptions> -->
-    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
+    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows')) and '$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
