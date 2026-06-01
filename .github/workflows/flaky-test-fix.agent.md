@@ -223,14 +223,13 @@ public void TheTest() { ... }
 [ActiveIssue("https://github.com/dotnet/msbuild/issues/<NNNN>", TestPlatforms.Linux)]
 ```
 
-Use the `tracking_issue` number for `<NNNN>`. **Strongly prefer the unconditional form.** The
-scheduled re-validation pipeline (`azure-pipelines/quarantine.yml`) that keeps collecting data on
-quarantined tests currently runs on **Windows only**, so a quarantine scoped to a non-Windows platform
-(`Linux`, `OSX`, `AnyUnix`) would never be re-validated and would silently stop producing signal. Only
-use a platform-scoped `[ActiveIssue("<url>", TestPlatforms.Windows)]` when `affected_sources` plus the
-detector's per-source data show the flake is confined to Windows (the platform the probe covers); for
-any flake that reproduces on (or is not clearly excluded from) a non-Windows platform, use the
-unconditional form so the test is fully quarantined and re-validated. Change only the attributes on the
+Use the `tracking_issue` number for `<NNNN>`. **Prefer the unconditional form** unless the evidence
+clearly confines the flake to one platform. The scheduled re-validation pipeline
+(`azure-pipelines/quarantine.yml`) that keeps collecting data on quarantined tests runs on **Windows,
+Linux and macOS**, so a platform-scoped quarantine (`TestPlatforms.Windows`, `Linux`, `OSX`,
+`AnyUnix`) is still re-validated on the matching leg. Only scope the quarantine when `affected_sources`
+plus the detector's per-source data show the flake is confined to that platform; otherwise use the
+unconditional form so the test is fully quarantined. Change only the attributes on the
 single failing test.
 
 ## Step 5 — Open the PR and comment

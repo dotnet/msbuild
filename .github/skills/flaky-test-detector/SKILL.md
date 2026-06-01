@@ -155,15 +155,15 @@ The detector surfaces evidence; it does **not** by itself prove flakiness. Befor
   ```csharp
   [ActiveIssue("https://github.com/dotnet/msbuild/issues/NNNN")]
   [Fact]
-  // platform-scoped — Windows only, since the re-validation pipeline runs on Windows (see note below):
-  [ActiveIssue("https://github.com/dotnet/msbuild/issues/NNNN", TestPlatforms.Windows)]
+  // platform-scoped — re-validated on the matching OS leg of the pipeline (see note below):
+  [ActiveIssue("https://github.com/dotnet/msbuild/issues/NNNN", TestPlatforms.Linux)]
   ```
   The issue URL is the tracking-issue URL; do **not** add a `"Flaky:"` prefix. `[ActiveIssue]` stamps
   the `Category=failing` trait, which normal CI excludes and the scheduled `azure-pipelines/quarantine.yml`
-  pipeline runs on its own to keep collecting signal on quarantined tests. **Strongly prefer the
-  unconditional form:** that pipeline is currently **Windows-only**, so a quarantine scoped to a
-  non-Windows platform (`Linux`, `OSX`, `AnyUnix`) would never be re-validated and would silently stop
-  producing signal. Only scope to `TestPlatforms.Windows` when the flake is confined to Windows.
+  pipeline runs on its own to keep collecting signal on quarantined tests. **Prefer the unconditional
+  form** unless the flake is clearly platform-specific: that pipeline runs on **Windows, Linux and
+  macOS**, so a platform-scoped quarantine (`Windows`, `Linux`, `OSX`, `AnyUnix`) is still re-validated
+  on the matching leg. Only scope when the flake is confined to that platform.
 - **Theory granularity:** quarantining a `[Theory]` disables *all* rows. Prefer method-level evidence
   and note the failing parameter distribution (`rawVariants`) before quarantining a `[Theory]`.
 
