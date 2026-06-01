@@ -1,6 +1,6 @@
 ---
 name: "Flaky Test Triage and Fix"
-description: "Scheduled daily workflow that scans recent msbuild CI builds (approved PRs + rolling main builds) for tests that fail across multiple independent sources, files/updates flaky-test tracking issues, then reproduces/fixes-or-quarantines the new candidates and opens ONE combined draft PR per run."
+description: "Scheduled daily workflow that scans recent msbuild CI builds (approved PRs + rolling main builds) for tests that fail across multiple independent sources, files/updates flaky-test tracking issues, then reproduces/fixes-or-quarantines the new candidates. It also scans the quarantine pipeline (definition 344) to un-quarantine tests that have gone consistently green and re-fix tests still flaking there, opening ONE combined draft PR per run."
 on:
   schedule: daily
   workflow_dispatch: # Allow manual triggering
@@ -128,13 +128,15 @@ decision. Follow it.
 
 ## Overall shape
 
-1. Scan CI for flaky candidates (Step 1–2).
+1. Scan CI for **new** flaky candidates (Step 1) and scan the **quarantine pipeline** for backlog
+   signal (Step 1b).
 2. Classify flake vs. regression; never quarantine a regression (Step 3).
 3. File/update one tracking issue per likely-flake (Step 4).
-4. Select the candidates to act on today (Step 5), build the repo **once** (Step 6), and for each
-   selected test apply a determinism fix or a quarantine, accumulating **all** edits in the working
-   tree (Step 7).
-5. Validate the accumulated edits (Step 8) and open **exactly one** combined draft PR (Step 9).
+4. Select the candidates to act on today: new flakes to fix/quarantine (Step 5) **and** backlog
+   actions — un-quarantine consistently-green tests + re-fix still-flaky quarantined tests (Step 5b).
+5. Build the repo **once** (Step 6), and for each selected test apply a determinism fix, a quarantine,
+   or an **un-quarantine**, accumulating **all** edits in the working tree (Step 7).
+6. Validate the accumulated edits (Step 8) and open **exactly one** combined draft PR (Step 9).
 
 ## Step 1 — Run the detector
 
@@ -147,11 +149,52 @@ pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -Target
 The script writes a human-readable progress report to the log/host stream and the structured JSON
 report to stdout (also written to `flaky-report.json`). Parse the JSON.
 
+## Step 1b — Scan the quarantine pipeline (backlog signal)
+
+Also scan the **quarantine pipeline** (AzDO definition **344**, `azure-pipelines/quarantine.yml`),
+which re-runs **only** the already-quarantined (`[ActiveIssue]` / `Category=failing`) tests on
+Windows/Linux/macOS twice daily. This is the signal for **clearing the backlog**: un-quarantining
+tests that have gone consistently green, and re-attempting fixes on tests still flaking there. It uses
+the **same detector** with `-IncludePassed`, which also records passing observations:
+
+```bash
+pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 60 -IncludePassed -JsonOut quarantine-health.json
+```
+
+This emits the usual JSON plus a `passedTests` array (per normalized test: `distinctBuilds`,
+`distinctDays`, `buildIds`, `legs`, `tfms`, `assemblies`, `firstSeen`/`lastSeen`). Interpret it as:
+
+- `flakyTests` = quarantined tests **still flaking** in 344 (failed across ≥ `MinSources` distinct
+  quarantine builds) → **backlog-fix** candidates.
+- `passedTests` = quarantined tests **observed passing** (actually ran and passed) in 344 → potential
+  **un-quarantine** candidates.
+- A test appearing in **both** is still flaky — never un-quarantine it.
+
+Then enumerate what is **currently quarantined on `main`** so each quarantined test can be mapped to its
+tracking issue and source location:
+
+```bash
+grep -rn "ActiveIssue(" src --include=*.cs
+```
+
+Each `[ActiveIssue("https://github.com/dotnet/msbuild/issues/<NNNN>"[, TestPlatforms.X])]` embeds the
+tracking-issue URL (and any platform scope) directly above the test method, so the URL gives the issue
+number and the file:line gives the source to edit. Derive each quarantined test's fully-qualified name
+(`Namespace.Class.Method`) from its source file to match it against `flakyTests`/`passedTests` by
+`testName`.
+
 ## Step 2 — Guard rails (stop conditions)
 
-- If `scanComplete` is `false`, the scan was truncated and is biased. **Do not file issues, do not edit
-  any source, and do not open a PR.** Emit a single `noop` explaining the scan was incomplete, and stop.
-- If `flakyTests` is empty, emit a `noop` ("no flaky tests detected") and stop.
+- If the **new-flake** scan's `scanComplete` (Step 1) is `false`, that scan was truncated and is biased.
+  **Do not file issues, do not quarantine, and do not open a PR from it.** Emit a single `noop`
+  explaining the scan was incomplete, and stop the new-flake flow.
+- If `flakyTests` from Step 1 is empty (and no backlog actions qualify below), emit a `noop` ("no flaky
+  tests detected") and stop.
+- The **backlog** scan (Step 1b) is independent. If **its** `scanComplete` is `false`, do **not** act on
+  the backlog this run (no un-quarantines, no backlog fixes) — biased green/flaky data could wrongly
+  un-quarantine a still-flaky test — but the new-flake flow (Steps 3–9) may still proceed. If def 344 has
+  no builds yet (`buildsScanned == 0`), there is simply no backlog signal — skip the backlog work. Note:
+  if **both** scans yield nothing actionable, emit a `noop` and open no PR.
 
 ## Step 3 — Classify each flagged test (flake vs. regression)
 
@@ -234,7 +277,36 @@ of these hold:
   open-PR body match above.)
 
 From the qualifying set, take **at most 8** tests, strongest first (highest `distinctSources`, then
-failures spanning multiple distinct days). If none qualify, skip to Step 9 (open no PR; emit a `noop`).
+failures spanning multiple distinct days). If none qualify, there is no new-flake work today — continue
+to Step 5b (backlog actions may still apply).
+
+## Step 5b — Select backlog actions from quarantine health (independent caps)
+
+Using the Step 1b data (only if its `scanComplete` is `true`), pick **backlog** actions on the
+**already-quarantined** tests. These have **separate caps** from the new-flake work so the combined PR
+stays reviewable; they still fold into the same single PR.
+
+**Un-quarantine candidates** — a currently-quarantined test `T` (from the `grep`) qualifies only if:
+
+- `T` is in `passedTests` with `distinctBuilds >= 4` **and** `distinctDays >= 3` (genuinely green across
+  many real CI runs spanning multiple days — not a one-off), **and**
+- `T` is **not** in the Step 1b `flakyTests` at all (zero failures in 344 over the window), **and**
+- the green evidence covers the platform scope the `[ActiveIssue]` actually applies to:
+  - **Unconditional** `[ActiveIssue(url)]`: require passing observations on **Windows, Linux, and
+    macOS** legs (`passedTests.legs` spans all three OS families). If green on only some platforms, do
+    **not** fully un-quarantine — at most **narrow** the attribute to the still-untrusted platform(s)
+    (e.g. add `TestPlatforms.Windows`) **only** when that edit drops no existing argument and compiles;
+    otherwise leave it quarantined.
+  - **Platform-scoped** `[ActiveIssue(url, TestPlatforms.X)]`: require green on the leg(s) for `X`.
+
+  Take **at most 5** un-quarantines per run, strongest first (most `distinctBuilds`, then `distinctDays`).
+
+**Backlog-fix candidates** — a currently-quarantined test `T` that is in the Step 1b `flakyTests` (still
+flaking in 344). These are eligible for a **determinism fix attempt** (Step 7), but only succeed if they
+reproduce on this Linux/.NET runner; a Windows-, macOS-, or `net472`-only flake cannot be reproduced or
+verified here, so it stays quarantined. Take **at most 3** per run, strongest first.
+
+If neither new-flake (Step 5) nor backlog (Step 5b) candidates qualify, open no PR and emit a `noop`.
 
 ## Step 6 — Build the repo once
 
@@ -252,12 +324,20 @@ environmental/network reasons (not a test failure), do **not** attempt any deter
 quarantine every selected test (Step 7d) and note in the PR that local reproduction was blocked by the
 environment.
 
-## Step 7 — Reproduce, then fix or quarantine
+## Step 7 — Reproduce, then fix, quarantine, or un-quarantine
 
 Accumulate **all** edits in one working tree — do **not** open a PR per test. The plan: build candidate
-projects once (7a), screen **all** selected candidates for reproducibility **in parallel** (7b), then
-author determinism fixes **sequentially** for the strongest reproducers (7c) and quarantine the rest
-(7d). Reserve wall-clock time for Step 8 validation and Step 9.
+projects once (7a), screen **all** selected reproduction candidates for reproducibility **in parallel**
+(7b), then author determinism fixes **sequentially** for the strongest reproducers (7c) and quarantine
+the rest (7d), and finally **un-quarantine** the consistently-green backlog tests (7e). Reserve
+wall-clock time for Step 8 validation and Step 9.
+
+Treat the **backlog-fix** candidates from Step 5b (still flaking in 344) exactly like new flakes in
+7a–7c: locate, build, screen, and attempt a determinism fix. The only difference is that a backlog test
+is **already quarantined**, so the "quarantine" fallback (7d) is a no-op for it — if you cannot
+reproduce-and-fix it on this runner, **leave its existing `[ActiveIssue]` in place** (no edit). If you
+**do** confirm a fix, additionally **remove** its existing `[ActiveIssue]` attribute (un-quarantine it)
+as part of the fix.
 
 ### 7a — Locate tests and build their projects (sequential)
 
@@ -389,13 +469,31 @@ Use the test's **open** tracking-issue number for `<NNNN>`. **Prefer the uncondi
 per-source data clearly confines the flake to one platform (the quarantine pipeline re-validates on all
 three OS legs, so a platform-scoped quarantine is still re-checked on the matching leg).
 
+### 7e — Un-quarantine consistently-green backlog tests
+
+For each **un-quarantine candidate** selected in Step 5b, locate the test (the Step 1b `grep` already
+gave `file:line`; `assemblies[0]` → project confirms it) and **delete** the `[ActiveIssue(...)]`
+attribute for the scope now proven green — the **whole attribute line** for a full un-quarantine, or the
+single platform-scoped attribute for a narrowing — leaving the `[Fact]`/`[Theory]` and the method body
+intact. For a **narrowing** (green on some platforms only), rewrite the attribute to cover only the
+still-untrusted platform(s) without dropping any existing argument.
+
+**Do not run a local reproduction to "confirm green."** Definition 344 runs the real test in real CI
+across many builds and multiple days and is the authority here; a single local pass (only on this
+Linux/.NET runner) is **weaker** evidence and cannot speak for Windows/macOS/`net472`. Rely on the 344
+`passedTests` evidence (and the absence from 344 `flakyTests`) that Step 5b already gated on.
+
+After editing, the project is rebuilt and the diff re-checked in Step 8.
+
 ## Step 8 — Validate the accumulated edits
 
 Before opening the PR, confirm the working tree is clean and correct:
 
 1. `git diff --name-only` — every changed path **must** be a `.cs` file under `src/`. If **any** path is
    under `.github/`, or outside the selected tests / their projects / the proven nondeterministic product
-   file, **revert that change** (the PR must contain only intended edits).
+   file, **revert that change** (the PR must contain only intended edits). Expected edits are: an added
+   `[ActiveIssue]` (new quarantine, 7d), a determinism fix (7c), or a **removed/narrowed** `[ActiveIssue]`
+   (un-quarantine, 7e) — all in the selected tests' `.cs` files.
 2. Compile the affected test projects (e.g. `dotnet build src/<TestProject>/<TestProject>.csproj
    --no-restore`) so a malformed `[ActiveIssue]` attribute or determinism edit can't ship a broken PR. If
    a project no longer compiles, revert the offending edit (or drop that test from the PR).
@@ -408,20 +506,27 @@ Before opening the PR, confirm the working tree is clean and correct:
 If, after Step 8, no edits remain, open **no** PR and emit a `noop`. Otherwise open **exactly one** draft
 PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accumulated edits:
 
-- Title: e.g. `Quarantine/fix <N> flaky tests` (the `[Flaky Test] ` prefix is added automatically).
+- Title: e.g. `Quarantine/fix/un-quarantine <N> flaky tests` (the `[Flaky Test] ` prefix is added
+  automatically); summarize the mix of actions.
 - Body **must**, for **every** included test, contain its marker on its own line so future runs detect the
   in-flight PR:
   ```
   <!-- flaky-test-id: <testName> -->
   ```
-- Then, per test, a short section stating whether it was a **determinism fix (7c)** or a **quarantine
-  (7d)**, the affected sources/evidence, and the issue reference:
+- Then, per test, a short section stating whether it was a **determinism fix (7c)**, a **quarantine
+  (7d)**, or an **un-quarantine (7e)**, the affected sources/evidence, and the issue reference:
   - **Determinism fix:** `Fixes #<issue>` (closes the tracking issue on merge). Also include the exact
     local repro command + failure output, the root-cause, why a code change (not a quarantine) is
     warranted, and the post-fix repeated-run pass count.
   - **Quarantine:** `Tracked by #<issue>` (must **not** auto-close — the issue stays open until a real
     fix). Be careful never to write a closing keyword (`Fixes`/`Closes`/`Resolves`) before a quarantine
     issue reference.
+  - **Un-quarantine (7e):** state the def-344 evidence (distinct green builds, distinct days, legs, the
+    window) that justifies removing the `[ActiveIssue]`. Use `Fixes #<issue>` **only if** no other
+    `[ActiveIssue(".../issues/<issue>")]` reference remains anywhere in the tree after your edits (i.e.
+    the issue is fully resolved — including any platform-scoped sibling you only **narrowed**). If other
+    tests still reference the same issue, or you only narrowed the scope, use `Tracked by #<issue>`
+    instead and do **not** write a closing keyword. For a **narrowing**, always `Tracked by #<issue>`.
 - Post one `add_comment` on each included test's tracking issue summarizing the action and linking the PR.
 
 ## Important
@@ -430,6 +535,9 @@ PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accum
   tests qualify than the caps allow, prioritize the highest `distinctSources` first. New tracking issues
   are capped at 5/run; tests with a pre-existing open issue do not consume that budget and may still be
   included in the PR (up to the Step 5 cap of 8).
+- **Backlog actions have their own caps** (Step 5b: **at most 5** un-quarantines and **at most 3**
+  backlog fixes per run) and still fold into the **same single** combined PR. If the `add-comment` budget
+  (12) is tight, prioritize comments for new quarantines/fixes over un-quarantine confirmations.
 - **Open at most ONE pull request**, and it must be a **draft** based on `main`.
 - **Never modify anything under `.github/**`** (no workflow, skill, or action edits) and never touch root
   manifests (`NuGet.config`, `global.json`, `Directory.Packages.props`, etc.). Only test sources, their

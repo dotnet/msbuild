@@ -78,6 +78,13 @@
     Bypass the non-draft/approved filter on PR sources (useful for local smoke testing where
     few PRs are approved). Rolling-build sources are unaffected by this switch.
 
+.PARAMETER IncludePassed
+    Also collect PASSED test observations (not just failures) and emit them as a 'passedTests'
+    aggregate in the JSON report. Intended for the quarantine pipeline (definition 344), where
+    most builds finish green: this mode queries all completed builds (not only failed ones),
+    forces -AllLegs, and lets a consumer confirm a quarantined test is genuinely green (ran and
+    passed across distinct builds/days) before un-quarantining it.
+
 .PARAMETER JsonOut
     Optional path. When set, the structured report object is written to this file as JSON.
 
@@ -85,6 +92,8 @@
     ./Get-FlakyTests.ps1
     ./Get-FlakyTests.ps1 -MinSources 2 -DaysBack 7 -NoApprovalFilter
     ./Get-FlakyTests.ps1 -MaxBuilds 100 -DaysBack 30 -JsonOut flaky.json
+    # Quarantine-pipeline health (still-flaky + consistently-green signal) for un-quarantining:
+    ./Get-FlakyTests.ps1 -DefinitionId 344 -MinSources 2 -IncludePassed -JsonOut quarantine-health.json
 #>
 
 [CmdletBinding()]
@@ -100,6 +109,7 @@ param(
     [string]$Repo = "dotnet/msbuild",
     [switch]$AllLegs,
     [switch]$NoApprovalFilter,
+    [switch]$IncludePassed,
     [string]$JsonOut
 )
 
@@ -110,6 +120,10 @@ $baseUrl = "https://dev.azure.com/$Org/$Project"
 $trxNs = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"
 $targetRef = "refs/heads/$TargetBranch"
 $rollingReasons = @('individualCI', 'batchedCI', 'schedule')
+
+# In passed-observation mode (used against the quarantine pipeline, def 344, where most builds
+# are fully green) we cannot rely on failed-leg detection to pick artifacts, so scan every leg.
+if ($IncludePassed) { $AllLegs = $true }
 
 # Hardening limits for untrusted PR-produced artifacts.
 $MaxZipBytes = 200MB
@@ -176,6 +190,34 @@ function Read-TrxFailures {
     return $results
 }
 
+# Parse the names of PASSED tests out of a single TRX file (used in -IncludePassed mode to
+# build a positive "ran and passed" signal, so a quarantined test is only un-quarantined when
+# it was actually observed green on the relevant leg/TFM, not merely absent from failures).
+function Read-TrxPassed {
+    param([string]$Path)
+    $names = @()
+    $settings = New-Object System.Xml.XmlReaderSettings
+    $settings.DtdProcessing = [System.Xml.DtdProcessing]::Prohibit
+    $settings.XmlResolver = $null
+    $settings.IgnoreComments = $true
+    $settings.IgnoreWhitespace = $true
+    $doc = New-Object System.Xml.XmlDocument
+    $doc.XmlResolver = $null
+    $stream = [System.IO.File]::OpenRead($Path)
+    try {
+        $reader = [System.Xml.XmlReader]::Create($stream, $settings)
+        try { $doc.Load($reader) } finally { $reader.Dispose() }
+    }
+    finally { $stream.Dispose() }
+
+    $nsm = New-Object System.Xml.XmlNamespaceManager($doc.NameTable)
+    $nsm.AddNamespace('t', $trxNs)
+    foreach ($node in $doc.SelectNodes('//t:UnitTestResult[@outcome="Passed"]', $nsm)) {
+        if ($node.testName) { $names += $node.testName }
+    }
+    return $names
+}
+
 function Get-BuildDate {
     param($Build)
     if ($Build.startTime -is [datetime]) { return $Build.startTime.ToString("yyyy-MM-dd") }
@@ -191,9 +233,14 @@ function Get-BuildDate {
 # Step 1: Query AzDo for recent failed builds (all reasons), then partition.
 # ---------------------------------------------------------------------------
 $minTime = (Get-Date).ToUniversalTime().AddDays(-$DaysBack).ToString("yyyy-MM-ddTHH:mm:ssZ")
-Write-Log "`n=== Step 1: Fetching failed msbuild builds (last $DaysBack days, up to $MaxBuilds) ===" "Cyan"
+$buildScope = if ($IncludePassed) { "completed" } else { "failed" }
+Write-Log "`n=== Step 1: Fetching $buildScope builds for definition $DefinitionId (last $DaysBack days, up to $MaxBuilds) ===" "Cyan"
 
-$buildsUrl = "$baseUrl/_apis/build/builds?definitions=$DefinitionId&resultFilter=failed&minTime=$minTime&`$top=$MaxBuilds&api-version=7.0"
+# In passed-observation mode we need fully-green builds too (the quarantine pipeline finishes
+# 'succeeded' when no quarantined test fails), so query all completed builds rather than only
+# failed ones. Otherwise scope to failed builds as before.
+$resultClause = if ($IncludePassed) { "statusFilter=completed" } else { "resultFilter=failed" }
+$buildsUrl = "$baseUrl/_apis/build/builds?definitions=$DefinitionId&$resultClause&minTime=$minTime&`$top=$MaxBuilds&api-version=7.0"
 try {
     $buildsResponse = Invoke-RestMethod -Uri $buildsUrl -Method Get -ContentType "application/json"
 }
@@ -213,7 +260,7 @@ function Write-EmptyReport {
     $empty = [PSCustomObject]@{
         scanComplete = $Complete; generatedAt = (Get-Date).ToUniversalTime().ToString("o")
         definitionId = $DefinitionId; targetBranch = $TargetBranch; daysBack = $DaysBack
-        minSources = $MinSources; buildsScanned = 0; prSources = 0; rollingSources = 0; flakyTests = @()
+        minSources = $MinSources; buildsScanned = 0; prSources = 0; rollingSources = 0; flakyTests = @(); passedTests = @()
     }
     $json = $empty | ConvertTo-Json -Depth 8
     if ($JsonOut) { $json | Set-Content -Path $JsonOut }
@@ -323,6 +370,8 @@ Write-Log "`n=== Step 2: Scanning sources for failed tests (via test-logs artifa
 
 # normalizedTestName -> list of failure records
 $testFailures = @{}
+# normalizedTestName -> list of passed-observation records (only populated with -IncludePassed)
+$testPassed = @{}
 $downloads = 0
 $scannedBuilds = 0
 $tmpRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("flaky-" + [Guid]::NewGuid().ToString("N"))
@@ -447,6 +496,21 @@ try {
                         }
                         $legFailures++
                     }
+                    if ($IncludePassed) {
+                        try { $passedNames = Read-TrxPassed -Path $trx.FullName } catch { $passedNames = @() }
+                        foreach ($pName in $passedNames) {
+                            $normalizedP = ($pName -replace '\(.*\)\s*$', '').Trim()
+                            if (-not $testPassed.ContainsKey($normalizedP)) { $testPassed[$normalizedP] = @() }
+                            $testPassed[$normalizedP] += [PSCustomObject]@{
+                                BuildId  = $buildId
+                                Leg      = $leg
+                                Assembly = $assembly
+                                Tfm      = $tfm
+                                Arch     = $arch
+                                Date     = $buildDate
+                            }
+                        }
+                    }
                 }
                 Write-Log "  [${leg}: $legFailures failed result(s) across $($trxFiles.Count) trx]" $(if ($legFailures) { "Yellow" } else { "DarkGreen" })
                 Remove-Item $extractDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -491,6 +555,30 @@ $flakyTests = @($testFailures.GetEnumerator() | ForEach-Object {
         SampleError     = ($failures | Select-Object -First 1).Message
     }
 } | Where-Object { $_.DistinctSources -ge $MinSources } | Sort-Object -Property DistinctSources, TotalFailures -Descending)
+
+# Aggregate passed observations (only in -IncludePassed mode). No source threshold is applied
+# here; the consuming workflow decides how many distinct builds/days constitute "consistently
+# green" before un-quarantining. A test that also appears in $flakyTests is still flaking.
+$passedTests = @()
+if ($IncludePassed) {
+    $passedTests = @($testPassed.GetEnumerator() | ForEach-Object {
+        $obs = $_.Value
+        $distinctBuilds = @($obs | Select-Object -ExpandProperty BuildId -Unique)
+        $dates = @($obs | Where-Object { $_.Date } | Select-Object -ExpandProperty Date -Unique | Sort-Object)
+        [PSCustomObject]@{
+            TestName       = $_.Key
+            TotalPassed    = $obs.Count
+            DistinctBuilds = $distinctBuilds.Count
+            BuildIds       = @($distinctBuilds | Sort-Object)
+            DistinctDays   = $dates.Count
+            Legs           = @($obs | Select-Object -ExpandProperty Leg -Unique | Sort-Object)
+            Tfms           = @($obs | Where-Object { $_.Tfm } | Select-Object -ExpandProperty Tfm -Unique | Sort-Object)
+            Assemblies     = @($obs | Select-Object -ExpandProperty Assembly -Unique | Sort-Object)
+            FirstSeen      = if ($dates.Count) { $dates[0] } else { "" }
+            LastSeen       = if ($dates.Count) { $dates[-1] } else { "" }
+        }
+    } | Sort-Object -Property DistinctBuilds -Descending)
+}
 
 # ---------------------------------------------------------------------------
 # Step 4: Cross-reference existing flaky-test issues (avoid duplicate filing).
@@ -550,6 +638,13 @@ if (-not $scanComplete) {
     Write-Log "Do not file issues or dispatch fixers from this run; widen limits and re-run." "Red"
 }
 
+if ($IncludePassed) {
+    Write-Log "`nPassed-observation summary ($($passedTests.Count) test(s) seen green):" "Green"
+    foreach ($pt in ($passedTests | Select-Object -First 25)) {
+        Write-Log "   $($pt.TestName) | $($pt.DistinctBuilds) builds, $($pt.DistinctDays) days | legs: $($pt.Legs -join '; ')" "DarkGreen"
+    }
+}
+
 $report = [PSCustomObject]@{
     scanComplete        = $scanComplete
     generatedAt         = (Get-Date).ToUniversalTime().ToString("o")
@@ -583,6 +678,20 @@ $report = [PSCustomObject]@{
             sampleBuildUrl  = $_.SampleBuildUrl
             sampleError     = $(if ($_.SampleError -and $_.SampleError.Length -gt 500) { $_.SampleError.Substring(0, 500) + "..." } else { $_.SampleError })
             relatedIssues   = $related
+        }
+    })
+    passedTests         = @($passedTests | ForEach-Object {
+        [PSCustomObject]@{
+            testName       = $_.TestName
+            totalPassed    = $_.TotalPassed
+            distinctBuilds = $_.DistinctBuilds
+            buildIds       = $_.BuildIds
+            distinctDays   = $_.DistinctDays
+            legs           = $_.Legs
+            tfms           = $_.Tfms
+            assemblies     = $_.Assemblies
+            firstSeen      = $_.FirstSeen
+            lastSeen       = $_.LastSeen
         }
     })
 }

@@ -78,6 +78,7 @@ Common options:
 | `-TargetBranch` | `main` | Branch to scope to (PR base + rolling source branch). |
 | `-NoApprovalFilter` | _off_ | Bypass the non-draft/approved PR filter (smoke testing only). |
 | `-AllLegs` | _off_ | Download every "test logs" artifact, not just failed legs. |
+| `-IncludePassed` | _off_ | Also record **passing** observations and emit a `passedTests` aggregate. Forces `-AllLegs` and queries **all completed** builds (not just failed). Used against the quarantine pipeline (def 344) to drive un-quarantining. |
 | `-JsonOut <path>` | — | Also write the structured JSON report to a file. |
 
 The script writes a **human-readable report to stderr** and the **structured JSON report to
@@ -113,9 +114,62 @@ filter and existing-issue cross-reference to work.
       "sampleError": "Assert.Equal() Failure ...",
       "relatedIssues": [ { "number": 1234, "title": "...", "state": "OPEN" } ]
     }
+  ],
+  "passedTests": [               // ONLY populated with -IncludePassed (e.g. def 344)
+    {
+      "testName": "Namespace.Class.Method",   // normalized (no param suffix)
+      "totalPassed": 11,         // total passing UnitTestResults observed in the window
+      "distinctBuilds": 6,       // distinct quarantine builds it was seen green in
+      "buildIds": [1450001, 1450200],
+      "distinctDays": 4,         // distinct calendar days with a green observation
+      "legs": ["CoreOnWindows", "CoreOnLinux", "CoreOnMacOS"],
+      "tfms": ["net472", "net10.0"],
+      "assemblies": ["Microsoft.Build.Engine.UnitTests"],
+      "firstSeen": "2026-05-20",
+      "lastSeen": "2026-05-30"
+    }
   ]
 }
 ```
+
+## Quarantine-Pipeline Health (definition 344)
+
+The same detector, run with `-DefinitionId 344 -IncludePassed`, reads the scheduled **quarantine
+pipeline** (`azure-pipelines/quarantine.yml`), which re-runs **only** the quarantined
+(`[ActiveIssue]` / `Category=failing`) tests on Windows/Linux/macOS twice daily. This is the signal
+for **clearing the quarantine backlog**:
+
+```pwsh
+pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 `
+  -DefinitionId 344 -MinSources 2 -IncludePassed -DaysBack 21 -JsonOut quarantine-health.json
+```
+
+- Because most quarantine builds finish **green** (they succeed unless a quarantined test fails),
+  `-IncludePassed` queries **all completed** builds (`statusFilter=completed`, not `resultFilter=failed`)
+  and forces `-AllLegs` so green legs are scanned too.
+- Each quarantine build runs each quarantined test **once per leg**, so a pass/fail **rate** only emerges
+  by **aggregating across many builds** over the window (twice-daily × N days). `distinctBuilds` /
+  `distinctDays` in `passedTests` are how you gauge that.
+- In this mode: `flakyTests` = quarantined tests **still flaking** in 344; `passedTests` = quarantined
+  tests **observed passing** there. A test in **both** is still flaky.
+
+### Un-quarantine criteria (avoiding false un-quarantines)
+
+A "green" reading must mean the test **ran and passed**, not merely "was absent from failures" (it could
+be absent because a leg did not run or an artifact was missing). Only un-quarantine a test when **all**
+hold:
+
+- `scanComplete == true` for the 344 scan (a truncated scan is biased — do nothing).
+- the test is in `passedTests` with `distinctBuilds >= 4` **and** `distinctDays >= 3`, **and**
+- the test is **not** in the 344 `flakyTests` (zero failures over the window), **and**
+- the green evidence covers the platform scope the `[ActiveIssue]` applies to: an **unconditional**
+  quarantine needs green legs on **Windows, Linux, and macOS**; a **platform-scoped** one needs green on
+  the matching leg(s). When green on only some platforms, **narrow** the attribute rather than removing
+  it — never fully un-quarantine on partial evidence.
+
+Un-quarantining does **not** require local reproduction: def 344 is real CI across many builds/days and
+is stronger evidence than a single local pass on one OS. Removing the attribute = deleting the
+`[ActiveIssue(...)]` line above the test.
 
 ## Interpreting Results — Flake vs Regression
 
@@ -178,8 +232,11 @@ text search. Then locate the class/method within that project.
 
 - `.github/workflows/flaky-test-detector.agent.md` — the scheduled **daily** workflow that runs this
   skill end to end: it scans CI, files/updates `flaky-test` tracking issues, then reproduces and either
-  applies a minimal determinism fix or quarantines each new candidate, opening **one combined draft PR
-  per run** with all of that day's quarantines and fixes.
-- `azure-pipelines/quarantine.yml` — scheduled (twice-daily) AzDO pipeline that runs **only** the
-  quarantined (`[ActiveIssue]` / `Category=failing`) tests, so quarantined tests keep producing
-  pass/fail signal. A test that has gone consistently green there is a candidate to un-quarantine.
+  applies a minimal determinism fix or quarantines each new candidate. It **also** consumes the
+  quarantine-pipeline health (def 344, via `-IncludePassed`) to **un-quarantine** consistently-green
+  tests and **re-fix** tests still flaking there, opening **one combined draft PR per run** with all of
+  that day's quarantines, fixes, and un-quarantines.
+- `azure-pipelines/quarantine.yml` — scheduled (twice-daily) AzDO pipeline (definition **344**) that
+  runs **only** the quarantined (`[ActiveIssue]` / `Category=failing`) tests, so quarantined tests keep
+  producing pass/fail signal. A test that has gone consistently green there is a candidate to
+  un-quarantine (see **Quarantine-Pipeline Health** above for the criteria).
