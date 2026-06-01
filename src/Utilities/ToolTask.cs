@@ -1130,8 +1130,18 @@ namespace Microsoft.Build.Utilities
                 // EOF never arrives because grand child inherited the pipe and keeps it open.
                 const int eofTimeoutSec = 30;
 
-                WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                bool allEOFReceived = WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                // WaitHandle.WaitAll throws NotSupportedException when called on an STA thread
+                // (for example when a task such as AspNetCompiler runs on an STA thread), so wait
+                // on each EOF event individually while honoring the overall timeout.
+                int eofTimeoutMs = eofTimeoutSec * 1000;
+                var eofTimer = Stopwatch.StartNew();
+                bool allEOFReceived = _standardOutputEOF.WaitOne(eofTimeoutMs);
+                if (allEOFReceived)
+                {
+                    int remainingMs = (int)Math.Max(0, eofTimeoutMs - eofTimer.ElapsedMilliseconds);
+                    allEOFReceived = _standardErrorEOF.WaitOne(remainingMs);
+                }
+
                 if (!allEOFReceived)
                 {
                     // Timeout: a grandchild process likely still holds the pipe open.
