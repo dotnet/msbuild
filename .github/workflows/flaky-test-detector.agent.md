@@ -210,13 +210,22 @@ of these hold:
 - It has an **OPEN** `flaky-test` tracking issue (the one created or updated in Step 4). Do **not** use a
   recently-*closed* issue as the quarantine target — an `[ActiveIssue]` URL must point at an open issue.
   If only a closed issue exists, skip the test from today's PR (Step 4 already commented on it).
-- It is **not already covered by an open `flaky-test` PR**. Search open PRs for the test's marker and
-  skip if found (avoids a duplicate edit while a previous run's PR is still open):
+- It is **not already covered by an open `flaky-test` PR** (this is the primary cross-run dedup — a
+  previous run's combined PR may still be open and unmerged, and its quarantines live on **that PR's
+  branch, not `main`**, so they will not show up in your fresh `main` checkout). Fetch the bodies of all
+  open `flaky-test` PRs **once** up front and **exact-string-match** each candidate's marker locally —
+  do **not** rely on GitHub's fuzzy `--search ... in:body`, which strips the HTML-comment punctuation and
+  can miss/over-match the marker:
   ```bash
-  gh pr list --repo dotnet/msbuild --state open --search '"<!-- flaky-test-id: <testName> -->" in:body' --json number
+  # One call; there are only ever a handful of open flaky-test PRs. Keep the JSON for Step 8.
+  gh pr list --repo dotnet/msbuild --state open --label flaky-test --json number,body --limit 100 > open-flaky-prs.json
   ```
+  Treat a candidate as covered if the literal string `<!-- flaky-test-id: <testName> -->` (normalized
+  `testName`, exact) appears in any open PR body. Skip every covered candidate.
 - It is **not already quarantined** in the working tree: after locating the test (Step 7), if the method
-  already carries an `[ActiveIssue]` attribute on `main`, skip it (nothing to do).
+  already carries an `[ActiveIssue]` attribute on `main`, skip it (nothing to do). (Note this only
+  catches tests quarantined by an **already-merged** PR; in-flight unmerged PRs are caught by the
+  open-PR body match above.)
 
 From the qualifying set, take **at most 8** tests, strongest first (highest `distinctSources`, then
 failures spanning multiple distinct days). If none qualify, skip to Step 9 (open no PR; emit a `noop`).
@@ -302,8 +311,9 @@ Before opening the PR, confirm the working tree is clean and correct:
 2. Compile the affected test projects (e.g. `dotnet build src/<TestProject>/<TestProject>.csproj
    --no-restore`) so a malformed `[ActiveIssue]` attribute or determinism edit can't ship a broken PR. If
    a project no longer compiles, revert the offending edit (or drop that test from the PR).
-3. Re-run the open-PR marker search from Step 5 for each remaining test (a concurrent run may have opened
-   a PR in the meantime). Revert and drop any test now covered by an open PR.
+3. Re-fetch the open `flaky-test` PR bodies (re-run the Step 5 `gh pr list ... --label flaky-test`
+   command) and exact-string-match each remaining test's marker against them again — a concurrent run
+   may have opened a combined PR since Step 5. Revert and drop any test now covered by an open PR.
 
 ## Step 9 — Open ONE combined draft PR
 
