@@ -244,45 +244,127 @@ Build the whole repo a single time up front so every subsequent reproduction/val
 ./build.sh
 ```
 
-The whole-repo build takes ~2-3 minutes — **never cancel it**. Network egress is restricted by the
-Agentic Workflow firewall; if NuGet restore or the build fails for environmental/network reasons (not a
-test failure), do **not** attempt any determinism code fix — quarantine every selected test (Step 7b)
-and note in the PR that local reproduction was blocked by the environment.
+The whole-repo build takes ~2-3 minutes — **never cancel it**. `./build.sh` also builds every test
+project, so each test's runnable assembly already exists under
+`artifacts/bin/<TestProject>/Debug/<tfm>/<TestProject>.dll` for the reproduction loops below. Network
+egress is restricted by the Agentic Workflow firewall; if NuGet restore or the build fails for
+environmental/network reasons (not a test failure), do **not** attempt any determinism code fix —
+quarantine every selected test (Step 7d) and note in the PR that local reproduction was blocked by the
+environment.
 
-## Step 7 — For each selected test: determinism fix or quarantine
+## Step 7 — Reproduce, then fix or quarantine
 
-Budget awareness: a reproduction loop is expensive. Attempt a determinism fix only for the **top 3**
-strongest candidates and only while wall-clock budget remains; **quarantine** the rest directly. Reserve
-time for Step 8 validation and Step 9. Accumulate **all** edits in the working tree — do **not** open a
-PR per test.
+Accumulate **all** edits in one working tree — do **not** open a PR per test. The plan: build candidate
+projects once (7a), screen **all** selected candidates for reproducibility **in parallel** (7b), then
+author determinism fixes **sequentially** for the strongest reproducers (7c) and quarantine the rest
+(7d). Reserve wall-clock time for Step 8 validation and Step 9.
 
-Locate the test first: map `assemblies[0]` to its test project using the skill's convention (e.g.
+### 7a — Locate tests and build their projects (sequential)
+
+For each selected test, map `assemblies[0]` to its test project using the skill's convention (e.g.
 `Microsoft.Build.Engine.UnitTests` → `src/Build.UnitTests/Microsoft.Build.Engine.UnitTests.csproj`) and
-find the test method source.
-
-### 7a — Minimal determinism fix (preferred, ONLY if reproduced; top candidates only)
-
-Reproduce the intermittent failure by running the single test repeatedly:
+find the test method source. For each **distinct** candidate project, run one fast incremental build so
+the test assembly is current (no-op if `./build.sh` already built it):
 
 ```bash
-for i in $(seq 1 25); do \
-  dotnet test src/<TestProject>/<TestProject>.csproj --no-restore -- --filter-method "*<ShortMethodName>*" || break; \
-done
+dotnet build src/<TestProject>/<TestProject>.csproj --no-restore
 ```
 
-**Interpreting the loop:** a flake fails only *some* iterations. If the test fails on **every** iteration
-(deterministic N/N failure), it is **not** flaky — treat it as a regression: do **not** quarantine or
-"fix" it, comment on the tracking issue that it reproduces deterministically (likely a real bug), and
-exclude it from the PR.
+### 7b — Screen all candidates for reproducibility (parallel)
 
-If — and only if — you reproduced an intermittent failure **and** identified a concrete, minimal source
-of nondeterminism (test ordering, timing/sleep race, unawaited task, culture/timezone assumption,
-reliance on dictionary/enumeration order, shared static state), make the **smallest** change that removes
-it, then re-run the loop to confirm it now passes consistently. **Prefer test-only fixes.** If a fix would
-require a non-trivial **product-code** change, do **not** attempt it in this combined PR — **quarantine**
-instead (7b) and leave the real fix to a human follow-up. Never weaken assertions just to make it pass.
+Reproduce by running each test's **prebuilt assembly directly** — *not* `dotnet test`. The direct
+assembly skips MSBuild and (on Linux) the auto-injected `--coverage`, so many loops can run at once
+without coverage-file contention. Run the loops under **bounded concurrency (~4)**, one pass/fail tally
+per candidate. A single reproduction is:
 
-### 7b — Quarantine (safe default)
+```bash
+# Resolve the test assembly once per project (TFM-agnostic):
+#   dll=$(ls -1 artifacts/bin/<TestProject>/Debug/net*/<TestProject>.dll | head -n1)
+# Use the FULLY-QUALIFIED test name from the TRX (Namespace.Class.Method), NOT a bare "*Name*",
+# so a same-named method in a different class can't be screened by mistake:
+dotnet "$dll" --filter-method "MyNamespace.MyClass.MyMethod"
+```
+
+Run this **once without redirecting output** first and eyeball it: confirm exactly the intended test
+ran (sane match count, the expected method name) before committing to the bulk loop below.
+
+Screen all candidates concurrently with `xargs -P`. Build a tab-separated manifest (one line per
+candidate: `<id>` TAB `<absolute dll path>` TAB `<fully-qualified method filter>`), then:
+
+```bash
+rm -rf /tmp/repro && mkdir -p /tmp/repro && : > /tmp/repro/candidates.tsv
+# ...append one TAB-separated line per candidate to /tmp/repro/candidates.tsv...
+# <id> must match [A-Za-z0-9_] (e.g. the tracking-issue number) — it names the result file.
+
+xargs -a /tmp/repro/candidates.tsv -P 4 -d '\n' -n 1 -r bash -c '
+  IFS=$'"'"'\t'"'"' read -r id dll method <<< "$0"
+  if [ ! -f "$dll" ]; then
+    printf "%s\tpass=0\tfail=0\tstatus=setup-error\n" "$id" > "/tmp/repro/$id.result"; exit 0
+  fi
+  pass=0; fail=0; status=ok
+  for i in $(seq 1 25); do
+    timeout --kill-after=10s 120s dotnet "$dll" --filter-method "$method" >/dev/null 2>&1
+    rc=$?
+    if   [ "$rc" -eq 0   ]; then pass=$((pass+1))
+    elif [ "$rc" -eq 8   ]; then status=nomatch; break   # MTP exit 8 = filter matched no test
+    elif [ "$rc" -eq 124 ]; then status=timeout; break   # test hung (>120s) — likely a real deadlock
+    else fail=$((fail+1)); fi
+  done
+  printf "%s\tpass=%d\tfail=%d\tstatus=%s\n" "$id" "$pass" "$fail" "$status" > "/tmp/repro/$id.result"
+'
+cat /tmp/repro/*.result
+```
+
+Do **not** use `set -e` around this — a test failure is expected and must not abort the loop. Classify
+each candidate from its result file:
+
+- **`status=setup-error`** (assembly not found): the manifest path is wrong — re-resolve the dll (Step
+  7a) and re-run; do **not** treat a missing assembly as a failing test.
+- **`status=nomatch`** (exit 8 on the first run): the filter located no test — re-check the
+  fully-qualified name from the TRX; if still no match, quarantine it (7d) and note it could not be run.
+- **`status=timeout`** (a run exceeded 120s): the test **hung**, which is a real problem (likely a
+  deadlock), not a flake the quarantine pipeline should keep re-running. Do **not** fix or quarantine —
+  comment on the tracking issue and exclude it from the PR.
+- **`pass>0` and `fail>0`** (intermittent): **reproduced** — a fix candidate for 7c.
+- **`fail=0`** (passed every iteration): could **not** reproduce — quarantine it (7d).
+- **`fail=25`** (failed every iteration): possibly a real regression, **but** parallel CPU pressure can
+  make a load-sensitive test fail deterministically. Re-run it **alone, sequentially** (no other loops
+  running) for 25 iterations before deciding. If it still fails N/N, it is **not** flaky — treat it as a
+  regression: do **not** quarantine or "fix" it, comment on the tracking issue that it reproduces
+  deterministically (likely a real bug), and exclude it from the PR. If it now shows intermittency,
+  treat it as a reproduced flake (7c).
+
+### 7c — Author determinism fixes (sequential, strongest reproducers, time-boxed)
+
+For the reproduced (intermittent) candidates only, author minimal fixes **one at a time** — never with
+screening loops still running, so timing is representative. Attempt at most the **5 strongest**
+reproducers, and **stop early** when less than ~30 minutes of budget remains, or after ~10–15 minutes on
+a single test without a concrete root cause (quarantine that test instead and move on).
+
+**First, re-confirm the candidate alone, sequentially** (no other loops running) with the same 25×
+`timeout`-wrapped loop on just that test. Parallel screening can induce failures via CPU starvation or
+child-process/temp-dir interference between MSBuild tests, so only proceed to a fix if the test **still**
+fails intermittently on its own. If it now passes 25/25 in isolation, you cannot reproduce the cause to
+verify a fix — **quarantine it (7d)** instead of fixing.
+
+A fix is valid only if you identified a concrete, minimal source of nondeterminism (test ordering,
+timing/sleep race, unawaited task, culture/timezone assumption, reliance on dictionary/enumeration order,
+shared static state) and made the **smallest** change that removes it. **Prefer test-only fixes.** Never
+weaken assertions just to make a test pass. If the fix would require a non-trivial **product-code**
+change, do **not** attempt it here — **quarantine** instead (7d) and leave the real fix to a human.
+
+After each fix, **rebuild that project and re-run the loop sequentially** to confirm it now passes
+consistently (a `--no-build` re-run would validate stale binaries):
+
+```bash
+dotnet build src/<TestProject>/<TestProject>.csproj --no-restore
+dll=$(ls -1 artifacts/bin/<TestProject>/Debug/net*/<TestProject>.dll | head -n1)
+for i in $(seq 1 25); do timeout --kill-after=10s 120s dotnet "$dll" --filter-method "MyNamespace.MyClass.MyMethod" >/dev/null 2>&1 || { echo "still failing on iteration $i"; break; }; done
+```
+
+If it still fails intermittently after the fix, revert the edit and quarantine the test instead.
+
+### 7d — Quarantine (safe default for everything not fixed)
 
 If you could not reproduce, the root cause is unclear, the environment blocked the build, or the fix
 would be a non-trivial product-code change, quarantine the test with `[ActiveIssue]` from
@@ -332,8 +414,8 @@ PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accum
   ```
   <!-- flaky-test-id: <testName> -->
   ```
-- Then, per test, a short section stating whether it was a **determinism fix (7a)** or a **quarantine
-  (7b)**, the affected sources/evidence, and the issue reference:
+- Then, per test, a short section stating whether it was a **determinism fix (7c)** or a **quarantine
+  (7d)**, the affected sources/evidence, and the issue reference:
   - **Determinism fix:** `Fixes #<issue>` (closes the tracking issue on merge). Also include the exact
     local repro command + failure output, the root-cause, why a code change (not a quarantine) is
     warranted, and the post-fix repeated-run pass count.
