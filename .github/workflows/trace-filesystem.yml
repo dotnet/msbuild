@@ -38,9 +38,19 @@ on:
         required: false
         default: 'Debug'
       projects:
-        description: 'Optional --projects argument to scope the build (e.g. src/Framework/Microsoft.Build.Framework.csproj). Leave blank to build the full solution.'
+        description: 'Optional --projects argument to scope the build (e.g. src/Framework/Microsoft.Build.Framework.csproj).'
         required: false
         default: 'src/Framework/Microsoft.Build.Framework.csproj'
+  # `pull_request` lets the workflow run on a PR (so an artifact is produced
+  # without needing to merge to main). On this trigger `inputs.*` is null, so
+  # the env vars below use `|| 'default'` to fall back to the same defaults
+  # advertised in the workflow_dispatch UI.
+  #
+  # Tighten later (e.g. add a `paths:` filter to only run when the trace
+  # workflow itself or src/Framework changes) once the workflow is verified.
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -52,9 +62,9 @@ jobs:
     timeout-minutes: 120
 
     env:
-      TRACE_REL_PATH: ${{ inputs.tracePath }}
-      BUILD_CONFIG: ${{ inputs.configuration }}
-      BUILD_PROJECTS: ${{ inputs.projects }}
+      TRACE_REL_PATH: ${{ inputs.tracePath || 'artifacts/bin/Microsoft.Build.Framework/Debug/net10.0' }}
+      BUILD_CONFIG: ${{ inputs.configuration || 'Debug' }}
+      BUILD_PROJECTS: ${{ inputs.projects || 'src/Framework/Microsoft.Build.Framework.csproj' }}
       STRACE_FULL_LOG: ${{ github.workspace }}/artifacts/strace/build-trace-full.log
       STRACE_FILTERED_LOG: ${{ github.workspace }}/artifacts/strace/build-trace.log
       STRACE_SUMMARY: ${{ github.workspace }}/artifacts/strace/build-trace-summary.txt
