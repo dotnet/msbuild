@@ -86,6 +86,12 @@ safe-outputs:
   add-comment:
     target: "*"
     max: 12
+  # When there is nothing to do (incomplete scan, no flakes, or every candidate already tracked/in an
+  # open PR) the agent emits a `noop`. Keep it logged in the run summary for debuggability, but do NOT
+  # file a GitHub issue for it (the gh-aw default is report-as-issue: true) — a daily no-op run should
+  # be silent, not create issue noise.
+  noop:
+    report-as-issue: false
   create-pull-request:
     title-prefix: "[Flaky Test] "
     labels: [flaky-test]
