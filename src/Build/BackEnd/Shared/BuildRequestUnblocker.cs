@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
 
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal BuildRequestUnblocker(int globalRequestIdToResume)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(globalRequestIdToResume != BuildRequest.InvalidGlobalRequestId, nameof(globalRequestIdToResume));
+            ArgumentOutOfRangeException.ThrowIfEqual(globalRequestIdToResume, BuildRequest.InvalidGlobalRequestId);
             _blockedGlobalRequestId = globalRequestIdToResume;
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal BuildRequestUnblocker(BuildResult buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildResult);
+            ArgumentNullException.ThrowIfNull(buildResult);
             _buildResult = buildResult;
             _blockedGlobalRequestId = buildResult.ParentGlobalRequestId;
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestUnblocker(BuildRequest parentRequest, BuildResult buildResult)
             : this(buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parentRequest);
+            ArgumentNullException.ThrowIfNull(parentRequest);
             _blockedGlobalRequestId = parentRequest.GlobalRequestId;
         }
 

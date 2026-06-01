@@ -7,7 +7,6 @@ using System.Reflection;
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
 using System.Linq;
-using Microsoft.Build.Framework;
 #endif
 
 #nullable disable
@@ -133,16 +132,15 @@ namespace Microsoft.Build.Shared
         {
             var cultureTypesType = s_cultureInfoGetCultureMethod?.GetParameters().FirstOrDefault()?.ParameterType;
 
-            FrameworkErrorUtilities.VerifyThrow(cultureTypesType?.Name == "CultureTypes" &&
-                                       Enum.IsDefined(cultureTypesType, "AllCultures"),
-                                       "GetCulture is expected to accept CultureTypes.AllCultures");
+            Assumed.True(cultureTypesType?.Name == "CultureTypes" &&
+                Enum.IsDefined(cultureTypesType, "AllCultures"), "GetCulture is expected to accept CultureTypes.AllCultures");
 
             var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
 
             var cultures = s_cultureInfoGetCultureMethod.Invoke(null, [allCulturesEnumValue]) as CultureInfo[];
 
             // CultureInfo.GetCultures should work if all reflection checks pass
-            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures);
+            Assumed.NotNull(cultures);
 
             return cultures;
         }

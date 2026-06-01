@@ -592,7 +592,8 @@ namespace Microsoft.Build.Shared
                     NativeMethods.ProcessorArchitectures.X86 => CurrentMSBuildToolsDirectory,
                     NativeMethods.ProcessorArchitectures.X64 or NativeMethods.ProcessorArchitectures.ARM64
                         => currentToolsDirectory.Parent?.FullName,
-                    _ => throw new InternalErrorException("Unknown processor architecture " + NativeMethods.ProcessorArchitecture),
+
+                    _ => Assumed.Unreachable<string>($"Unknown processor architecture {NativeMethods.ProcessorArchitecture}"),
                 };
             }
             else

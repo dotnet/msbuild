@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -78,7 +77,7 @@ namespace Microsoft.Build.BackEnd
             TargetConsoleConfiguration consoleConfiguration,
             PartialBuildTelemetry? partialBuildTelemetry)
         {
-            ErrorUtilities.VerifyThrowInternalNull(consoleConfiguration);
+            Assumed.NotNull(consoleConfiguration);
 
             _commandLine = commandLine;
             _startupDirectory = startupDirectory;

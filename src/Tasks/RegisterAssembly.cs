@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security;
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
@@ -38,7 +37,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_assemblies, nameof(Assemblies));
+                ArgumentNullException.ThrowIfNull(_assemblies, nameof(Assemblies));
                 return _assemblies;
             }
             set => _assemblies = value;
@@ -192,7 +191,7 @@ namespace Microsoft.Build.Tasks
         /// </comment>
         public object ResolveRef(Assembly assemblyToResolve)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve);
+            ArgumentNullException.ThrowIfNull(assemblyToResolve);
 
             Log.LogErrorWithCodeFromResources("RegisterAssembly.AssemblyNotRegisteredForComInterop", assemblyToResolve.GetName().FullName);
             _typeLibExportFailed = true;
@@ -208,7 +207,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool Register(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath);
+            ArgumentNullException.ThrowIfNull(typeLibPath);
 
             Log.LogMessageFromResources(MessageImportance.Low, "RegisterAssembly.RegisteringAssembly", assemblyPath);
 
@@ -331,7 +330,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         ///  Helper method - exports a type library for an assembly. Returns true if succeeded.
         /// </summary>
-        private bool ExportTypeLib(Assembly asm, string typeLibFileName)
+        private unsafe bool ExportTypeLib(Assembly asm, string typeLibFileName)
         {
             _typeLibExportFailed = false;
             ITypeLib convertedTypeLib = null;
@@ -347,10 +346,27 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                // Persist the type library
-                ICreateTypeLib createTypeLib = (ICreateTypeLib)convertedTypeLib;
-
-                createTypeLib.SaveAllChanges();
+                // Persist the type library. The RCW returned by the converter wraps the
+                // same object that implements ICreateTypeLib; QueryInterface for that
+                // pointer through struct-based COM and call SaveAllChanges() on it.
+                IntPtr pUnk = Marshal.GetIUnknownForObject(convertedTypeLib);
+                try
+                {
+                    Guid iid = TypeLibInterop.ICreateTypeLib.IID_ICreateTypeLib;
+                    Marshal.ThrowExceptionForHR(Marshal.QueryInterface(pUnk, ref iid, out IntPtr pCreate));
+                    try
+                    {
+                        ((TypeLibInterop.ICreateTypeLib*)pCreate)->SaveAllChanges().ThrowOnFailure();
+                    }
+                    finally
+                    {
+                        Marshal.Release(pCreate);
+                    }
+                }
+                finally
+                {
+                    Marshal.Release(pUnk);
+                }
             }
             finally
             {
