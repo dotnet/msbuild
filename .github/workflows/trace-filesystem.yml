@@ -122,8 +122,18 @@ jobs:
           echo "Writing full strace output to: $STRACE_FULL_LOG"
           BUILD_ARGS=(--build --configuration "$BUILD_CONFIG" --nodeReuse false)
           if [[ -n "${BUILD_PROJECTS:-}" ]]; then
-            BUILD_ARGS+=(--projects "$BUILD_PROJECTS")
-            echo "Scoping build to: $BUILD_PROJECTS"
+            # Arcade's Build.proj lives in the NuGet cache, and the
+            # ProjectToBuild items it generates from $(Projects) resolve
+            # relative paths against the Build.proj directory (the cache),
+            # not the repo root. Make the path absolute so any caller-
+            # supplied path - relative or absolute - works.
+            if [[ "$BUILD_PROJECTS" != /* ]]; then
+              BUILD_PROJECTS_ABS="$GITHUB_WORKSPACE/$BUILD_PROJECTS"
+            else
+              BUILD_PROJECTS_ABS="$BUILD_PROJECTS"
+            fi
+            BUILD_ARGS+=(--projects "$BUILD_PROJECTS_ABS")
+            echo "Scoping build to: $BUILD_PROJECTS_ABS"
           else
             echo "Building full solution (no --projects scoping)."
           fi
