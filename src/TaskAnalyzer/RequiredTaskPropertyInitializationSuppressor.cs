@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -48,7 +47,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     continue;
                 }
 
-                if (!HasAttribute(property, requiredAttributeType))
+                if (!CanBeAssignedByMSBuild(property) || !HasAttribute(property, requiredAttributeType))
                 {
                     continue;
                 }
@@ -98,7 +97,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 if (current is PropertyDeclarationSyntax propertyDeclaration)
                 {
-                    property = semanticModel.GetDeclaredSymbol(propertyDeclaration, context.CancellationToken);
+                    property = semanticModel.GetDeclaredSymbol(propertyDeclaration, context.CancellationToken) as IPropertySymbol;
                     return property is not null;
                 }
             }
@@ -112,6 +111,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             };
 
             return property is not null;
+        }
+
+        private static bool CanBeAssignedByMSBuild(IPropertySymbol property)
+        {
+            IMethodSymbol? setMethod = property.SetMethod;
+            return setMethod is not null && setMethod.DeclaredAccessibility == Accessibility.Public;
         }
 
         private static bool HasAttribute(IPropertySymbol property, INamedTypeSymbol attributeType)

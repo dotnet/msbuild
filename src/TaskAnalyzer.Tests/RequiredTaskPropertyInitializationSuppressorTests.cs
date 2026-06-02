@@ -146,4 +146,24 @@ public class RequiredTaskPropertyInitializationSuppressorTests
 
         diagnostics.ShouldContain(d => d.Id == "CS8618" && !d.IsSuppressed);
     }
+
+    [Fact]
+    public async Task RequiredGetOnlyProperty_InTask_DiagnosticIsNotSuppressed()
+    {
+        var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
+            """
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                [Required]
+                public string IldasmPath { get; }
+
+                public override bool Execute() => true;
+            }
+            """,
+            new RequiredTaskPropertyInitializationSuppressor());
+
+        diagnostics.ShouldContain(d => d.Id == "CS8618" && !d.IsSuppressed);
+    }
 }
