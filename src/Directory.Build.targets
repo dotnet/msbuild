@@ -59,7 +59,7 @@
        so the runner adapter is a clean opt-in. Until then we strip mtp-v1 here.
        NOTE: ExcludeAssets="all" on the xunit.v3.mtp-v1 package itself isn't enough
        because the actual DLL lives in the separate xunit.v3.core.mtp-v1 package. -->
-  <Target Name="_RemoveXunitMtpV1References" AfterTargets="ResolveLockFileReferences;ResolvePackageAssets" BeforeTargets="CoreCompile" Condition="'$(IsUnitTestProject)' == 'true' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+  <Target Name="_RemoveXunitMtpV1References" AfterTargets="ResolveLockFileReferences;ResolvePackageAssets" BeforeTargets="CoreCompile" Condition="'$(IsUnitTestProject)' == 'true' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND '$(IsVSTestForCtsProject)' != 'true'">
     <ItemGroup>
       <Reference Remove="@(Reference)" Condition="'%(FileName)' == 'xunit.v3.mtp-v1'" />
       <ReferencePath Remove="@(ReferencePath)" Condition="'%(FileName)' == 'xunit.v3.mtp-v1'" />
@@ -74,10 +74,10 @@
     <PackageReference Include="Newtonsoft.Json" />
 
     <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(IsVSTestForCtsProject)' != 'true'" />
 
     <!-- Use the MTP v2 xUnit adapter (required by CTS). Replaces the mtp-v1 default brought in by Arcade's XUnitV3 runner. -->
-    <PackageReference Include="xunit.v3.mtp-v2" VersionOverride="$(XUnitV3Version)" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'" />
+    <PackageReference Include="xunit.v3.mtp-v2" VersionOverride="$(XUnitV3Version)" Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' AND '$(IsVSTestForCtsProject)' != 'true'" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
