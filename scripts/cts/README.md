@@ -49,6 +49,18 @@ are run.
 
 If no baseline exists, the script reminds you to run `Collect-Local.ps1`.
 
+### `Demo-Incrementality.ps1` — see CTS in action
+
+Runs collect, then three apply scenarios that prove incremental selection:
+no-change (0 tests), a benign edit inside `StringTools` (impacted tests run),
+a benign edit in unrelated `Tasks/AssemblyDependency/Resolver.cs` (0 tests).
+The script reverts each edit afterwards.
+
+```powershell
+.\scripts\cts\Demo-Incrementality.ps1
+.\scripts\cts\Demo-Incrementality.ps1 -SkipCollect   # reuse existing baseline
+```
+
 ## Notes
 
 * Local cache lives at `<repo>/.cts/` (baseline + logs); gitignored.
