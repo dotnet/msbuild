@@ -36,6 +36,9 @@ permissions:
 imports:
   - shared/review-shared.md
 
+# The agent reads the PR diff via GitHub MCP tools, so the auto-injected checkout is not needed (and can be a security concern)
+checkout: false
+
 timeout-minutes: 60
 ---
 
