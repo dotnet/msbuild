@@ -49,6 +49,10 @@ variables:
   value: none
 - name: NugetSecurityAnalysisWarningLevel
   value: none
+- name: skipComponentGovernanceDetection  # we run CG on internal builds only
+  value: true
+- name: Codeql.Enabled  # we run CodeQL on internal builds only
+  value: false
 
 jobs:
 - job: RunQuarantinedTestsWindows
