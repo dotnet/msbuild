@@ -16,17 +16,6 @@
     <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 
-  <!-- CTS bisection: opt-in via -p:CtsBisectMinimal=true. When set, replaces the real tests
-       with a single tiny fixture used to bisect a CTS hang. Off by default. -->
-  <ItemGroup Condition="'$(CtsBisectMinimal)' == 'true'">
-    <Compile Remove="SpanBasedStringBuilder_Tests.cs" />
-    <Compile Remove="WeakStringCache_Tests.cs" />
-    <Compile Remove="StringTools_Tests.cs" />
-    <Compile Remove="InterningTestData.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(CtsBisectMinimal)' != 'true'">
-    <Compile Remove="BisectTiny_Tests.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />

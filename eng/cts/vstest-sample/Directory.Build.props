@@ -1,7 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <!-- Stop walking up; this project is isolated from the repo's Arcade/MTP conventions.
-         Disable CPM (the repo enables it globally). -->
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-  </PropertyGroup>
-</Project>
