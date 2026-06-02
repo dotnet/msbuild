@@ -7,6 +7,7 @@
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- Don't ship yet, just make it available to partner repositories. -->
     <IsShipping>false</IsShipping>
     <IsTestProject>false</IsTestProject>
