@@ -17,10 +17,6 @@
 # (the Tests tab / TestResults artifact), not in the overall pipeline status, so a red run means an
 # actual infrastructure problem.
 #
-# ROLLOUT NOTE: committing this YAML does NOT by itself create a scheduled run. An Azure DevOps
-# pipeline definition pointing at this file must be created/enabled once in the relevant project(s)
-# for the cron schedule below to take effect.
-#
 # This pipeline runs on Windows, Linux and macOS, closely mirroring the per-OS test legs of
 # .vsts-dotnet-ci.yml, so quarantines scoped to a specific platform (e.g.
 # [ActiveIssue("...", TestPlatforms.Linux)]) are re-validated on that platform. The Windows leg
@@ -41,35 +37,19 @@ schedules:
   always: true
 
 variables:
-- ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-  - group: AzureDevOps-Artifact-Feeds-Pats
-- name: cfsNugetWarnLevel
-  value: warn
-- name: nugetMultiFeedWarnLevel
-  value: none
-- name: NugetSecurityAnalysisWarningLevel
-  value: none
+- name: skipComponentGovernanceDetection
+  value: true
+- name: Codeql.Enabled
+  value: false
 
 jobs:
 - job: RunQuarantinedTestsWindows
   displayName: "Run quarantined tests (Windows)"
   pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEng-MicroBuildVSStable
-      demands: agent.os -equals Windows_NT
+    name: NetCore-Public
+    demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
   timeoutInMinutes: 120
   steps:
-  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-    - task: PowerShell@2
-      displayName: Setup Private Feeds Credentials
-      inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-      env:
-        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd (quarantined tests only)
     inputs:
@@ -117,27 +97,16 @@ jobs:
 - job: RunQuarantinedTestsLinux
   displayName: "Run quarantined tests (Linux)"
   pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      vmImage: 'ubuntu-latest'
+    name: NetCore-Public
+    demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
   timeoutInMinutes: 120
   steps:
-  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-    - task: Bash@3
-      displayName: Setup Private Feeds Credentials
-      inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
-        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
-      env:
-        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
     displayName: CI Build (quarantined tests only)
     env:
-        MSBUILDUSESERVER: "1"
+      MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -171,18 +140,10 @@ jobs:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
   steps:
-  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-    - task: Bash@3
-      displayName: Setup Private Feeds Credentials
-      inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
-        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
-      env:
-        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
     displayName: CI Build (quarantined tests only)
     env:
-        MSBUILDUSESERVER: "1"
+      MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
