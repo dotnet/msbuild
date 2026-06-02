@@ -74,7 +74,7 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd (quarantined tests only)
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: '-onlyDocChanged 0 -stage2Properties /mt /p:RunQuarantinedTests=true'
+      arguments: "-onlyDocChanged 0 -stage2Properties '/mt /p:RunQuarantinedTests=true'"
     env:
       ForceUseXCopyMSBuild: 1
   - task: PublishTestResults@2
