@@ -1,71 +1,63 @@
 # scripts/cts — Local CTS (Clever Test Selection) harness
 
-These scripts run CTS against this repository in **VSTest mode**, which avoids
-the MTP↔CTS JsonRpc hang we hit during the original adoption attempt (see
-`artifacts/cts/bisect/BISECT.md`).
+These scripts run CTS against this repository in **VSTest mode**, which
+avoids the MTP↔CTS JsonRpc hang we hit during the initial adoption attempt.
 
 They drive the **sibling `*.UnitTests.VSTest.csproj`** wrappers next to each
-test project. Each wrapper imports the original `.csproj` so the test surface
-stays in sync; only the runner stack (Microsoft.NET.Test.Sdk +
-`xunit.runner.visualstudio`, no MTP) differs.
+test project. Each wrapper imports the original `.csproj` so the test
+surface stays in sync; only the runner stack differs.
+
+## Layout
+
+| File                       | Role                                                       |
+| -------------------------- | ---------------------------------------------------------- |
+| `projects.json`            | Registry of `*.UnitTests.VSTest` projects + demo files     |
+| `cts.config.json`          | CTS configuration (Modules / SourceCodeFiles / Filter)     |
+| `_Common.ps1`              | Tiny PS helpers (paths, build, registry lookup)            |
+| `Collect-Local.ps1`        | `cts collect vstest --coverage` → baseline in `.cts/`      |
+| `Run-Local.ps1`            | `cts apply vstest --local-development` → impacted-only run |
+| `demos/Demo-NoChange.ps1`    | Apply with no edits (expect 0 impacted)                   |
+| `demos/Demo-NarrowEdit.ps1`  | Touch a narrow source file (expect partial selection)     |
+| `demos/Demo-BroadEdit.ps1`   | Touch a broad source file (expect ~all selected)          |
+| `demos/Demo-UnrelatedEdit.ps1` | Touch a file outside the project (expect 0 impacted)    |
+
+Anything you would tweak as configuration belongs in `projects.json` or
+`cts.config.json`, not in the PowerShell.
 
 ## Prerequisites
 
 ```powershell
-dotnet tool install cts --global --prerelease --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
+dotnet tool install cts --global --prerelease `
+  --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
 ```
 
 The `cts` command must resolve on PATH. A `.cts/` directory at repo root is
 used as the local filesystem cache (gitignored).
 
-## Workflows
-
-### `Collect-Local.ps1` — establish baseline
-
-Builds every `*.UnitTests.VSTest.csproj` and runs `cts collect vstest` against
-each. The result is a baseline keyed off the current `HEAD` SHA, stored in
-`.cts/baseline/`.
+## Workflow
 
 ```powershell
-.\scripts\cts\Collect-Local.ps1                # all projects
-.\scripts\cts\Collect-Local.ps1 -Project Framework    # one project
-.\scripts\cts\Collect-Local.ps1 -SkipBuild     # reuse previous build outputs
+# 1. Collect baseline (clean working tree required)
+.\scripts\cts\Collect-Local.ps1 -Project StringTools
+
+# 2. Make changes, then run only impacted tests
+.\scripts\cts\Run-Local.ps1 -Project StringTools
+
+# 3. See it in action
+.\scripts\cts\demos\Demo-NoChange.ps1     -Project StringTools
+.\scripts\cts\demos\Demo-NarrowEdit.ps1   -Project StringTools
+.\scripts\cts\demos\Demo-BroadEdit.ps1    -Project StringTools
+.\scripts\cts\demos\Demo-UnrelatedEdit.ps1 -Project StringTools
 ```
 
-CTS requires a clean working tree to collect — the script aborts if `git
-status` is dirty.
-
-### `Run-Local.ps1` — incremental test run
-
-Builds the VSTest variants incrementally and asks CTS which tests are
-impacted by your working-tree changes (`cts apply vstest`). Only those tests
-are run.
-
-```powershell
-.\scripts\cts\Run-Local.ps1                    # all impacted tests
-.\scripts\cts\Run-Local.ps1 -Project StringTools     # one project
-.\scripts\cts\Run-Local.ps1 -SkipBuild         # if you just built
-```
-
-If no baseline exists, the script reminds you to run `Collect-Local.ps1`.
-
-### `Demo-Incrementality.ps1` — see CTS in action
-
-Runs collect, then three apply scenarios that prove incremental selection:
-no-change (0 tests), a benign edit inside `StringTools` (impacted tests run),
-a benign edit in unrelated `Tasks/AssemblyDependency/Resolver.cs` (0 tests).
-The script reverts each edit afterwards.
-
-```powershell
-.\scripts\cts\Demo-Incrementality.ps1
-.\scripts\cts\Demo-Incrementality.ps1 -SkipCollect   # reuse existing baseline
-```
+Omit `-Project` to operate on every project registered in `projects.json`.
 
 ## Notes
 
-* Local cache lives at `<repo>/.cts/` (baseline + logs); gitignored.
-* The `*.UnitTests.VSTest.csproj` wrappers output to
+* Baseline + logs live at `<repo>/.cts/` (gitignored).
+* The `.VSTest.csproj` wrappers output to
   `artifacts/bin/<MSBuildProjectName>/Debug/net10.0/` — distinct from the
-  MTP variant produced by the regular build.
-* Filter passed to `cts` is the relative path glob to that DLL, so impact
-  analysis stays scoped to the VSTest binaries only.
+  default MTP variant.
+* Demos hardcode per-project demo files via `projects.json` →
+  `DemoFiles.{Broad,Narrow,Unrelated}`. Projects without `DemoFiles` skip
+  the narrow/broad/unrelated demos.

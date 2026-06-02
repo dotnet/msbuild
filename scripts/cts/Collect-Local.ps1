@@ -1,31 +1,24 @@
 <#
 .SYNOPSIS
-    Collects a CTS baseline against the *.UnitTests.VSTest projects.
+    Collects a CTS baseline for the given test project(s).
 
 .DESCRIPTION
-    For each VSTest variant test project (see scripts/cts/_Common.ps1), this
-    script runs `cts collect vstest`, populating the local filesystem cache
-    under <repo>/.cts/baseline. CTS keys the baseline by HEAD SHA, so the
-    working tree must be clean.
+    Runs `cts collect vstest --coverage` against the *.UnitTests.VSTest
+    wrapper for each project, populating the local filesystem cache under
+    <repo>/.cts/baseline. The baseline is keyed by HEAD SHA, so this script
+    requires a clean working tree.
 
 .PARAMETER Project
-    Optional short key (e.g. StringTools, Framework, Engine) to collect just
-    one project. Default is to collect all.
+    Short key from projects.json (e.g. StringTools). Default: all projects.
 
 .PARAMETER SkipBuild
     Reuse already-built VSTest DLLs.
 
 .PARAMETER TimeoutMinutes
-    Per-project timeout for the CTS collect step. Default 15.
+    Per-project timeout. Default 15.
 
 .PARAMETER Dop
-    Degree of parallelism for CTS. Default 4 (CTS default is 32; lower
-    when running locally to avoid CPU saturation).
-
-.EXAMPLE
-    .\Collect-Local.ps1
-    .\Collect-Local.ps1 -Project StringTools
-    .\Collect-Local.ps1 -SkipBuild
+    Degree of parallelism for CTS. Default 4.
 #>
 [CmdletBinding()]
 param(
@@ -38,7 +31,6 @@ param(
 . (Join-Path $PSScriptRoot '_Common.ps1')
 
 Ensure-Cli
-Ensure-CtsConfig
 Assert-CleanRepo
 
 $projects = Get-Projects -Filter $Project
@@ -50,40 +42,37 @@ $summary = @()
 foreach ($p in $projects) {
     Write-Host "==== Collect $($p.Key) ====" -ForegroundColor Cyan
 
-    if (-not $SkipBuild) {
-        Build-Project $p
-    }
+    if (-not $SkipBuild) { Build-Project $p }
 
     $dll = Get-ProjectDllPath $p
     if (-not (Test-Path $dll)) {
         throw "DLL not found at '$dll'. Did the build run? Drop -SkipBuild."
     }
 
-    $tag      = "local-$($p.Key.ToLower())"
-    $logFile  = Join-Path $script:LogsDir "collect-$($p.Key).log"
-    $errFile  = Join-Path $script:LogsDir "collect-$($p.Key).err.log"
+    $logFile = Join-Path $script:LogsDir "collect-$($p.Key).log"
+    $errFile = Join-Path $script:LogsDir "collect-$($p.Key).err.log"
 
     $ctsArgs = @(
         'collect','vstest',
-        '--rootPath',           $script:RepoRoot,
-        '--config',             $script:ConfigPath,
-        '--storage-type',       'filesystem',
+        '--rootPath',                    $script:RepoRoot,
+        '--config',                      $script:ConfigPath,
+        '--storage-type',                'filesystem',
         '--storage-type-filesystem-dir', $script:BaselineDir,
-        '--tag',                $tag,
-        '--logs-directory',     $script:LogsDir,
-        '--filter',             (Get-ProjectDllFilter $p),
-        '--dop',                $Dop,
+        '--tag',                         (Get-ProjectTag $p),
+        '--logs-directory',              $script:LogsDir,
+        '--filter',                      (Get-ProjectDllFilter $p),
+        '--dop',                         $Dop,
         '--coverage',
         '--print-console-output'
     )
 
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $proc = Start-Process -FilePath cts -ArgumentList $ctsArgs -RedirectStandardOutput $logFile -RedirectStandardError $errFile -PassThru -NoNewWindow
+    $proc = Start-Process -FilePath cts -ArgumentList $ctsArgs `
+        -RedirectStandardOutput $logFile -RedirectStandardError $errFile -PassThru -NoNewWindow
     if (-not $proc.WaitForExit($TimeoutMinutes * 60 * 1000)) {
-        $procId = $proc.Id
-        Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+        Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
         $sw.Stop()
-        Write-Host "  TIMEOUT after $TimeoutMinutes min (pid $procId)" -ForegroundColor Red
+        Write-Host "  TIMEOUT after $TimeoutMinutes min" -ForegroundColor Red
         Get-Content $logFile -Tail 30 | ForEach-Object { Write-Host "    $_" }
         $summary += [pscustomobject]@{ Project = $p.Key; Status = 'TIMEOUT'; Duration = $sw.Elapsed }
         continue

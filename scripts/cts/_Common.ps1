@@ -1,126 +1,42 @@
-# scripts/cts/_Common.ps1 — shared helpers for Collect-Local.ps1 and Run-Local.ps1
+# scripts/cts/_Common.ps1
+#
+# Shared helpers for Collect-Local.ps1, Run-Local.ps1, and the demo scripts.
+# Configuration lives in two JSON files alongside this script:
+#
+#   projects.json    - the registry of *.UnitTests.VSTest projects
+#   cts.config.json  - the CTS configuration (Modules/SourceCodeFiles/Filter/...)
+#
+# This file intentionally contains only paths and functions; nothing that you
+# would tweak as configuration belongs here.
+
 $ErrorActionPreference = 'Stop'
 
-$script:RepoRoot   = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$script:DotnetExe  = Join-Path $script:RepoRoot '.dotnet\dotnet.exe'
-$script:CtsRoot    = Join-Path $script:RepoRoot '.cts'
-$script:BaselineDir= Join-Path $script:CtsRoot 'baseline'
-$script:LogsDir    = Join-Path $script:CtsRoot 'logs'
-$script:ConfigPath = Join-Path $PSScriptRoot 'cts.config.json'
-
-# (short-key, csproj relative path, output DLL name) for every VSTest variant.
-$script:Projects = @(
-    [pscustomobject]@{
-        Key = 'StringTools'
-        CsProj = 'src\StringTools.UnitTests\StringTools.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.NET.StringTools.UnitTests.dll'
-        BinDir = 'StringTools.UnitTests.VSTest'
-    }
-    [pscustomobject]@{
-        Key = 'Framework'
-        CsProj = 'src\Framework.UnitTests\Microsoft.Build.Framework.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.Build.Framework.UnitTests.dll'
-        BinDir = 'Microsoft.Build.Framework.UnitTests.VSTest'
-    }
-    [pscustomobject]@{
-        Key = 'Utilities'
-        CsProj = 'src\Utilities.UnitTests\Microsoft.Build.Utilities.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.Build.Utilities.UnitTests.dll'
-        BinDir = 'Microsoft.Build.Utilities.UnitTests.VSTest'
-    }
-    [pscustomobject]@{
-        Key = 'EngineOM'
-        CsProj = 'src\Build.OM.UnitTests\Microsoft.Build.Engine.OM.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.Build.Engine.OM.UnitTests.dll'
-        BinDir = 'Microsoft.Build.Engine.OM.UnitTests.VSTest'
-    }
-    [pscustomobject]@{
-        Key = 'CommandLine'
-        CsProj = 'src\MSBuild.UnitTests\Microsoft.Build.CommandLine.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.Build.CommandLine.UnitTests.dll'
-        BinDir = 'Microsoft.Build.CommandLine.UnitTests.VSTest'
-    }
-    [pscustomobject]@{
-        Key = 'Engine'
-        CsProj = 'src\Build.UnitTests\Microsoft.Build.Engine.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.Build.Engine.UnitTests.dll'
-        BinDir = 'Microsoft.Build.Engine.UnitTests.VSTest'
-    }
-    [pscustomobject]@{
-        Key = 'Tasks'
-        CsProj = 'src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.Build.Tasks.UnitTests.dll'
-        BinDir = 'Microsoft.Build.Tasks.UnitTests.VSTest'
-    }
-    [pscustomobject]@{
-        Key = 'BuildCheck'
-        CsProj = 'src\BuildCheck.UnitTests\Microsoft.Build.BuildCheck.UnitTests.VSTest.csproj'
-        Dll = 'Microsoft.Build.BuildCheck.UnitTests.dll'
-        BinDir = 'Microsoft.Build.BuildCheck.UnitTests.VSTest'
-    }
-)
+# Paths
+$script:RepoRoot    = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$script:DotnetExe   = Join-Path $script:RepoRoot '.dotnet\dotnet.exe'
+$script:CtsRoot     = Join-Path $script:RepoRoot '.cts'
+$script:BaselineDir = Join-Path $script:CtsRoot 'baseline'
+$script:LogsDir     = Join-Path $script:CtsRoot 'logs'
+$script:ConfigPath  = Join-Path $PSScriptRoot 'cts.config.json'
+$script:ProjectsPath= Join-Path $PSScriptRoot 'projects.json'
 
 function Get-Projects {
     param([string]$Filter)
-    if (-not $Filter) { return $script:Projects }
-    $sel = $script:Projects | Where-Object { $_.Key -ieq $Filter -or $_.CsProj -ieq $Filter }
-    if (-not $sel) {
-        throw "Unknown -Project '$Filter'. Known keys: $($script:Projects.Key -join ', ')"
+    $all = Get-Content $script:ProjectsPath -Raw | ConvertFrom-Json
+    if (-not $Filter) { return $all }
+    $match = $all | Where-Object { $_.Key -ieq $Filter -or $_.CsProj -ieq $Filter }
+    if (-not $match) {
+        throw "Unknown -Project '$Filter'. Known keys: $(($all.Key) -join ', ')"
     }
-    return @($sel)
+    return @($match)
 }
 
 function Ensure-Cli {
     if (-not (Get-Command cts -ErrorAction SilentlyContinue)) {
-        throw @"
-'cts' is not on PATH. Install with:
-  dotnet tool install cts --global --prerelease --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
-"@
+        throw "'cts' is not on PATH. Install with: dotnet tool install cts --global --prerelease --add-source https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json"
     }
     if (-not (Test-Path $script:DotnetExe)) {
         throw "Local dotnet at '$script:DotnetExe' not found. Run .\build.cmd once to bootstrap."
-    }
-}
-
-function Ensure-CtsConfig {
-    if (-not (Test-Path $script:ConfigPath)) {
-        $cfg = [ordered]@{
-            SourceCodeFiles = [ordered]@{
-                Include = @('src/**/*.cs')
-                Exclude = @('**/obj/**', '**/bin/**', '**/TestAssets/**')
-            }
-            Files = [ordered]@{
-                Exclude = @('**/*.md', '**/*.yml', '**/*.yaml', '**/*.png', 'documentation/**')
-            }
-            Modules = [ordered]@{
-                Include = @()
-                Exclude = @(
-                    '**/Microsoft.Testing.*.dll',
-                    '**/Microsoft.TestPlatform*.dll',
-                    '**/Microsoft.VisualStudio.TestPlatform*.dll',
-                    '**/Microsoft.VisualStudio.CodeCoverage*.dll',
-                    '**/Microsoft.DotNet.*.dll',
-                    '**/xunit.*.dll',
-                    '**/Xunit.*.dll',
-                    '**/testhost*',
-                    '**/Microsoft.Bcl.*.dll',
-                    '**/Microsoft.ApplicationInsights.dll',
-                    '**/Newtonsoft.Json.dll',
-                    '**/Shouldly.dll',
-                    '**/AwesomeAssertions.dll',
-                    '**/FakeItEasy.dll',
-                    '**/Verify.*.dll',
-                    '**/System*.dll',
-                    '**/runtimes/**'
-                )
-            }
-            Filter = [ordered]@{
-                Include = @('**/artifacts/bin/*.VSTest/Debug/net10.0/*.UnitTests.dll')
-                Exclude = @('**/*.resources.dll')
-            }
-        }
-        $cfg | ConvertTo-Json -Depth 6 | Set-Content -NoNewline -Path $script:ConfigPath
-        Write-Host "Wrote default CTS config to $script:ConfigPath" -ForegroundColor DarkGray
     }
 }
 
@@ -150,13 +66,15 @@ function Get-ProjectDllFilter {
     return "artifacts/bin/$($Project.BinDir)/Debug/net10.0/$($Project.Dll)"
 }
 
+function Get-ProjectTag {
+    param([Parameter(Mandatory)] $Project)
+    return "local-$($Project.Key.ToLower())"
+}
+
 function Assert-CleanRepo {
     Push-Location $script:RepoRoot
-    try {
-        $dirty = git status --porcelain
-    } finally {
-        Pop-Location
-    }
+    try { $dirty = git status --porcelain }
+    finally { Pop-Location }
     if ($dirty) {
         Write-Host "Working tree is dirty:" -ForegroundColor Red
         $dirty | ForEach-Object { Write-Host "  $_" }
