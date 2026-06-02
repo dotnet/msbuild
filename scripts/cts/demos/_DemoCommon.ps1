@@ -6,10 +6,9 @@
 function Resolve-DemoProject {
     param([Parameter(Mandatory)] [string]$Key)
     $proj = (Get-Projects -Filter $Key)[0]
-    $tag  = Get-ProjectTag $proj
-    $baselinePresent = Test-Path (Join-Path $script:BaselineDir $tag)
-    if (-not $baselinePresent) {
-        throw "No baseline for '$Key' under $script:BaselineDir. Run .\Collect-Local.ps1 -Project $Key first."
+    if (-not (Test-Path $script:BaselineDir) -or
+        -not (Get-ChildItem -Path $script:BaselineDir -Recurse -ErrorAction SilentlyContinue)) {
+        throw "No baseline at $script:BaselineDir. Run .\Collect-Local.ps1 -Project $Key first."
     }
     return $proj
 }
