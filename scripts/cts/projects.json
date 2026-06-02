@@ -16,8 +16,8 @@
     "Dll": "Microsoft.Build.Framework.UnitTests.dll",
     "BinDir": "Microsoft.Build.Framework.UnitTests.VSTest",
     "DemoFiles": {
-      "Broad":     "src/Framework/ILogger.cs",
-      "Narrow":    "src/Framework/BinaryReaderFactory.cs",
+      "Broad":     "src/Framework/BuildEventArgs.cs",
+      "Narrow":    "src/Framework/ProjectStartedEventArgs.cs",
       "Unrelated": "src/Tasks/AssemblyDependency/Resolver.cs"
     }
   },
