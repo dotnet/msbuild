@@ -50,7 +50,15 @@
     <XUnitCoreSettingsFile>$(XUnitDesktopSettingsFile)</XUnitCoreSettingsFile>
   </PropertyGroup>
 
-  <!-- Remove xunit.v3.mtp-v1 from compile/runtime references; we use mtp-v2 instead (for CTS). -->
+  <!-- Suppress xunit.v3.mtp-v1 from compile/runtime references. We use xunit.v3.mtp-v2
+       (required by CTS), but the xunit.v3 meta-package hard-pins mtp-v1 as a transitive
+       dependency, so without intervention both adapter DLLs would ship side-by-side and
+       MTP would non-deterministically load whichever it finds first.
+       The proper fix is upstream — either xunit.v3 should stop hard-pinning mtp-v1, or
+       Arcade's Microsoft.DotNet.XUnitV3Extensions should reference xunit.v3.core directly
+       so the runner adapter is a clean opt-in. Until then we strip mtp-v1 here.
+       NOTE: ExcludeAssets="all" on the xunit.v3.mtp-v1 package itself isn't enough
+       because the actual DLL lives in the separate xunit.v3.core.mtp-v1 package. -->
   <Target Name="_RemoveXunitMtpV1References" AfterTargets="ResolveLockFileReferences;ResolvePackageAssets" BeforeTargets="CoreCompile" Condition="'$(IsUnitTestProject)' == 'true' AND '$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <ItemGroup>
       <Reference Remove="@(Reference)" Condition="'%(FileName)' == 'xunit.v3.mtp-v1'" />
