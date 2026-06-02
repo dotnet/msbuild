@@ -31,13 +31,24 @@
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) --filter-not-trait Category=nonnetcoreapptests</XunitOptions>
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions) --filter-not-trait Category=nonnetfxtests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions) --filter-not-trait Category=failing</XunitOptions>
+    <!-- Normal runs EXCLUDE quarantined tests: tests marked [ActiveIssue(...)] carry the
+         Category=failing trait. The scheduled quarantine pipeline sets RunQuarantinedTests=true to
+         run ONLY those tests instead, so we keep collecting pass/fail signal on quarantined tests
+         (an [ActiveIssue] test never executes in normal CI). See azure-pipelines/quarantine.yml. -->
+    <XunitOptions Condition="'$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --filter-not-trait Category=failing</XunitOptions>
+    <!-- Quarantined tests are expected to be flaky, and most assemblies contain zero quarantined
+         tests; treat exit code 8 (zero tests ran) and 2 (test failures) as success so a red run means
+         an actual infrastructure problem. The per-test signal is the published TRX, not exit code. -->
+    <XunitOptions Condition="'$(RunQuarantinedTests)' == 'true'">$(XunitOptions) --filter-trait Category=failing --ignore-exit-code 8;2</XunitOptions>
     
     <!-- Enable code coverage -->
     <!-- There are separate runsettings files for Windows and non-Windows. -->
     <!-- Some test projects hang on windows and hence coverage is disabled for these projects. -->
+    <!-- Quarantined-only runs (RunQuarantinedTests=true, the scheduled quarantine pipeline) skip
+         coverage: those runs only collect flaky pass/fail signal via repeated execution, and coverage
+         instrumentation adds overhead and can perturb timing-sensitive flakes. -->
     <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -coverage - -coverage-settings $(RepoRoot)CoverageWindowsFull.config</XunitOptions> -->
-    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
+    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows')) and '$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
