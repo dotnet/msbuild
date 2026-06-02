@@ -837,7 +837,7 @@ namespace Microsoft.Build.Shared
             try
             {
                 FileSystemInfo linkTarget = Directory.ResolveLinkTarget(recursionState.BaseDirectory, returnFinalTarget: true);
-                if (linkTarget is not null && recursionState.BaseDirectory.Contains(linkTarget.FullName))
+                if (linkTarget is not null && IsSubdirectoryOf(recursionState.BaseDirectory, linkTarget.FullName, FileUtilities.PathComparison))
                 {
                     return;
                 }
@@ -2647,7 +2647,7 @@ namespace Microsoft.Build.Shared
             return ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException);
         }
 
-        private static bool IsSubdirectoryOf(string possibleChild, string possibleParent)
+        private static bool IsSubdirectoryOf(string possibleChild, string possibleParent, StringComparison pathComparison = StringComparison.OrdinalIgnoreCase)
         {
             if (possibleParent == string.Empty)
             {
@@ -2655,7 +2655,7 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-            bool prefixMatch = possibleChild.StartsWith(possibleParent, StringComparison.OrdinalIgnoreCase);
+            bool prefixMatch = possibleChild.StartsWith(possibleParent, pathComparison);
             if (!prefixMatch)
             {
                 return false;
