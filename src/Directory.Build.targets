@@ -38,8 +38,11 @@
     <XunitOptions Condition="'$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --filter-not-trait Category=failing</XunitOptions>
     <!-- Quarantined tests are expected to be flaky, and most assemblies contain zero quarantined
          tests; treat exit code 8 (zero tests ran) and 2 (test failures) as success so a red run means
-         an actual infrastructure problem. The per-test signal is the published TRX, not exit code. -->
-    <XunitOptions Condition="'$(RunQuarantinedTests)' == 'true'">$(XunitOptions) --filter-trait Category=failing --ignore-exit-code 8;2</XunitOptions>
+         an actual infrastructure problem. The per-test signal is the published TRX, not exit code.
+         The "8;2" value MUST stay quoted: arcade runs the test command through <Exec>, which on
+         non-Windows executes via /bin/sh, where an unquoted ';' is a command separator (it would
+         split the command and the trailing "2 --results-directory ..." fragment fails with code 127). -->
+    <XunitOptions Condition="'$(RunQuarantinedTests)' == 'true'">$(XunitOptions) --filter-trait Category=failing --ignore-exit-code "8;2"</XunitOptions>
     
     <!-- Enable code coverage -->
     <!-- There are separate runsettings files for Windows and non-Windows. -->
