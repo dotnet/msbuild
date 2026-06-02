@@ -279,5 +279,34 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 #endif
+
+        [Fact]
+        public void ResolveNetTaskHostLaunchPath_ReturnsAppHost_WhenAppHostFileExists()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string sdkPath = env.CreateFolder().Path;
+            string appHostPath = Path.Combine(sdkPath, Constants.MSBuildExecutableName);
+            File.WriteAllText(appHostPath, string.Empty);
+            File.WriteAllText(Path.Combine(sdkPath, Constants.MSBuildAssemblyName), string.Empty);
+
+            (string launchPath, bool useAppHost) = NodeProviderOutOfProcTaskHost.ResolveNetTaskHostLaunchPath(sdkPath);
+
+            useAppHost.ShouldBeTrue();
+            launchPath.ShouldBe(appHostPath);
+        }
+
+        [Fact]
+        public void ResolveNetTaskHostLaunchPath_FallsBackToMSBuildDll_WhenAppHostMissing()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string sdkPath = env.CreateFolder().Path;
+            string msbuildDllPath = Path.Combine(sdkPath, Constants.MSBuildAssemblyName);
+            File.WriteAllText(msbuildDllPath, string.Empty);
+
+            (string launchPath, bool useAppHost) = NodeProviderOutOfProcTaskHost.ResolveNetTaskHostLaunchPath(sdkPath);
+
+            useAppHost.ShouldBeFalse();
+            launchPath.ShouldBe(msbuildDllPath);
+        }
     }
 }

@@ -3,7 +3,6 @@
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
@@ -41,14 +40,10 @@ namespace Microsoft.Build.Execution
         public abstract ElementLocation ConditionLocation { get; }
 
         void ITranslatable.Translate(ITranslator translator)
-        {
             // all subclasses should be translateable
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         internal static ProjectTargetInstanceChild FactoryForDeserialization(ITranslator translator)
-        {
-            return translator.FactoryForDeserializingTypeWithName<ProjectTargetInstanceChild>();
-        }
+            => translator.FactoryForDeserializingTypeWithName<ProjectTargetInstanceChild>();
     }
 }

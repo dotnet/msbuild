@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
@@ -14,7 +14,7 @@ public sealed class ErrorUtilities_Tests
     {
         var ex = Assert.Throws<InternalErrorException>(() =>
         {
-            ErrorUtilities.VerifyThrow(false, "msbuild rules");
+            Assumed.True(false, "msbuild rules");
         });
 
         Assert.Contains("msbuild rules", ex.Message);
@@ -24,14 +24,14 @@ public sealed class ErrorUtilities_Tests
     public void VerifyThrowTrue()
     {
         // This shouldn't throw.
-        ErrorUtilities.VerifyThrow(true, "msbuild rules");
+        Assumed.True(true, "msbuild rules");
     }
 
     [Fact]
     public void VerifyThrow_InterpolatedString_DoesNotFormat_WhenConditionIsTrue()
     {
         bool formatted = false;
-        ErrorUtilities.VerifyThrow(true, $"message {FormatSideEffect(ref formatted)}");
+        Assumed.True(true, $"message {FormatSideEffect(ref formatted)}");
         Assert.False(formatted, "Interpolated string should not have been formatted when condition is true");
     }
 
@@ -41,7 +41,7 @@ public sealed class ErrorUtilities_Tests
         bool formatted = false;
         var ex = Assert.Throws<InternalErrorException>(() =>
         {
-            ErrorUtilities.VerifyThrow(false, $"error: {FormatSideEffect(ref formatted)}");
+            Assumed.True(false, $"error: {FormatSideEffect(ref formatted)}");
         });
 
         Assert.True(formatted, "Interpolated string should have been formatted when condition is false");
@@ -53,7 +53,7 @@ public sealed class ErrorUtilities_Tests
     {
         var ex = Assert.Throws<InternalErrorException>(() =>
         {
-            ErrorUtilities.VerifyThrow(false, $"a={1} b={2} c={"three"}");
+            Assumed.True(false, $"a={1} b={2} c={"three"}");
         });
 
         Assert.Contains("a=1 b=2 c=three", ex.Message);

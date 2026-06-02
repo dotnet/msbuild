@@ -47,6 +47,11 @@
         <target state="translated">{0} ("{1}") deve essere diverso da "{2}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="Argument_EmptyCollection">
+        <source>The collection must contain at least one element.</source>
+        <target state="new">The collection must contain at least one element.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
         <target state="translated">Il valore non può essere una stringa vuota o composto interamente da spazi vuoti.</target>
@@ -102,6 +107,11 @@
         <target state="translated">Il parametro '{0}' può solo essere un nome file e non può includere una directory.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogFileOutputPath">
+        <source>{0} wrote to: {1}</source>
+        <target state="new">{0} wrote to: {1}</target>
+        <note>{0} is the logger name. {1} is a list of full file paths separated by the current culture's list separator (followed by a space).</note>
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">Il percorso deve contenere una radice.</target>
@@ -129,12 +139,12 @@
       </trans-unit>
       <trans-unit id="_0_contains_no_elements">
         <source>'{0}' contains no elements.</source>
-        <target state="new">'{0}' contains no elements.</target>
+        <target state="translated">'{0}' non contiene elementi.</target>
         <note />
       </trans-unit>
       <trans-unit id="_0_does_not_contain_matching_element">
         <source>'{0}' does not contain matching element.</source>
-        <target state="new">'{0}' does not contain matching element.</target>
+        <target state="translated">'{0}' non contiene un elemento corrispondente.</target>
         <note />
       </trans-unit>
     </body>

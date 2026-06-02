@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.NodeLauncher);
             return new DetouredNodeLauncher();
         }
 
@@ -57,9 +57,9 @@ namespace Microsoft.Build.BackEnd
         public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(launchData.MSBuildLocation, nameof(launchData.MSBuildLocation));
+            Assumed.NotNullOrEmpty(launchData.MSBuildLocation);
 
-            ErrorUtilities.VerifyThrowInternalNull(_fileAccessManager, nameof(_fileAccessManager));
+            Assumed.NotNull(_fileAccessManager);
 
             if (!FileSystems.Default.FileExists(launchData.MSBuildLocation))
             {

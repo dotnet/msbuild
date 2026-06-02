@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
 #if FEATURE_WINDOWSINTEROP
 using System;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Build.Framework;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 #endif
@@ -17,9 +17,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal class ResourceUpdater
     {
-#if FEATURE_WINDOWSINTEROP
-        private const int ERROR_SHARING_VIOLATION = -2147024864;
-#endif
         private readonly List<StringResource> _stringResources = new List<StringResource>();
         private readonly List<FileResource> _fileResources = new List<FileResource>();
 
@@ -33,7 +30,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             _fileResources.Add(new FileResource(filename, key));
         }
 
-        public bool UpdateResources(string filename, BuildResults results)
+        /// <summary>
+        /// Updates resources on the target binary.
+        /// </summary>
+        /// <param name="filename">
+        /// Absolute path to the binary to update.
+        /// </param>
+        /// <param name="results">Sink for build messages.</param>
+        public bool UpdateResources(AbsolutePath filename, BuildResults results)
         {
 #if FEATURE_WINDOWSINTEROP
 #pragma warning disable CA1416 // Win32 API guarded by FEATURE_WINDOWSINTEROP; bootstrapper resource updates are Windows-only.
@@ -42,8 +46,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             const int beginUpdateRetryInterval = 100; // In milliseconds
             bool endUpdate = false; // Only call EndUpdateResource() if this is true
 
-            // Directory.GetCurrentDirectory() has previously been set to the project location
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), filename);
+            string filePath = filename.Value;
 
             if (_stringResources.Count == 0 && _fileResources.Count == 0)
             {
@@ -54,7 +57,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             try
             {
                 hUpdate = PInvoke.BeginUpdateResource(filePath, false);
-                while (hUpdate == HANDLE.Null && Marshal.GetHRForLastWin32Error() == ERROR_SHARING_VIOLATION && beginUpdateRetries > 0) // If it equals 0x80070020 (ERROR_SHARING_VIOLATION), sleep & retry
+                while (hUpdate == HANDLE.Null && Marshal.GetHRForLastWin32Error() == (int)(HRESULT)WIN32_ERROR.ERROR_SHARING_VIOLATION && beginUpdateRetries > 0) // If it equals 0x80070020 (ERROR_SHARING_VIOLATION), sleep & retry
                 {
                     // This warning can be useful for debugging, but shouldn't be displayed to an actual user
                     // results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.General", String.Format("Unable to begin updating resource for {0} with error {1:X}, trying again after short sleep", filename, Marshal.GetHRForLastWin32Error())));
@@ -66,7 +69,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 if (hUpdate == HANDLE.Null)
                 {
                     results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                        $"Unable to begin updating resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                        $"Unable to begin updating resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                     return false;
                 }
 
@@ -79,7 +82,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     if (!UpdateResource(hUpdate, resource.Type, resource.Name, data))
                     {
                         results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                            $"Unable to update resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                            $"Unable to update resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                         return false;
                     }
                 }
@@ -91,7 +94,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     if (!UpdateResource(hUpdate, 42, "COUNT", countArray))
                     {
                         results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                            $"Unable to update count resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                            $"Unable to update count resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                         return false;
                     }
 
@@ -113,7 +116,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         if (!UpdateResource(hUpdate, 42, dataName, fileContent.AsSpan(0, fileLength)))
                         {
                             results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                                $"Unable to update data resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                                $"Unable to update data resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                             return false;
                         }
 
@@ -123,7 +126,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         if (!UpdateResource(hUpdate, 42, keyName, data))
                         {
                             results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                                $"Unable to update key resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                                $"Unable to update key resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                             return false;
                         }
 
@@ -136,7 +139,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 if (endUpdate && !PInvoke.EndUpdateResource(hUpdate, false))
                 {
                     results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.General",
-                        $"Unable to finish updating resource for {filename} with error {Marshal.GetHRForLastWin32Error():X}"));
+                        $"Unable to finish updating resource for {filename.OriginalValue} with error {Marshal.GetHRForLastWin32Error():X}"));
                     returnValue = false;
                 }
             }
@@ -147,10 +150,19 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             results.AddMessage(BuildMessage.CreateMessage(
                 BuildMessageSeverity.Error,
                 "GenerateBootstrapper.General",
-                $"Unable to update resources for {filename}: bootstrapper resource updates require Windows interop support, which is not available in this build."));
+                $"Unable to update resources for {filename.OriginalValue}: bootstrapper resource updates require Windows interop support, which is not available in this build."));
             return false;
 #endif
         }
+
+        /// <summary>
+        /// Back-compat overload for callers that have not yet been migrated to the AbsolutePath-based API
+        /// (currently <see cref="GenerateBootstrapper"/>). Wraps the input without rooted-path validation
+        /// to preserve the legacy "use the string as-is" semantics; <c>OriginalValue</c> equals <c>Value</c>.
+        /// </summary>
+        // TODO: This can be removed after GenerateBootstrapper is fully migrated to the AbsolutePath-based API.
+        public bool UpdateResources(string filename, BuildResults results)
+            => UpdateResources(new AbsolutePath(filename, ignoreRootedCheck: true), results);
 
 #if FEATURE_WINDOWSINTEROP
         /// <summary>
