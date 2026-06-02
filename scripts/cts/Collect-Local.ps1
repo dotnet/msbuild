@@ -73,6 +73,7 @@ foreach ($p in $projects) {
         '--logs-directory',     $script:LogsDir,
         '--filter',             (Get-ProjectDllFilter $p),
         '--dop',                $Dop,
+        '--coverage',
         '--print-console-output'
     )
 

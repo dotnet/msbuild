@@ -66,6 +66,7 @@ foreach ($p in $projects) {
 
     $logFile  = Join-Path $script:LogsDir "apply-$($p.Key).log"
     $errFile  = Join-Path $script:LogsDir "apply-$($p.Key).err.log"
+    $tag      = "local-$($p.Key.ToLower())"
 
     $ctsArgs = @(
         'apply','vstest',
@@ -73,6 +74,8 @@ foreach ($p in $projects) {
         '--config',             $script:ConfigPath,
         '--storage-type',       'filesystem',
         '--storage-type-filesystem-dir', $script:BaselineDir,
+        '--tag',                $tag,
+        '--local-development',
         '--logs-directory',     $script:LogsDir,
         '--filter',             (Get-ProjectDllFilter $p),
         '--dop',                $Dop,
