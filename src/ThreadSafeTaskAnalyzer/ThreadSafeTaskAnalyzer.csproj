@@ -29,4 +29,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/dotnet/cs/%(FileName)%(Extension)" />
+  </ItemGroup>
+
 </Project>
