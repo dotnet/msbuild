@@ -54,8 +54,10 @@ engine:
     # We cannot use line breaks in this expression as it leads to a syntax error in the compiled workflow
     # If none of the `COPILOT_GITHUB_TOKEN_#` secrets were selected, then the default COPILOT_GITHUB_TOKEN is used
     COPILOT_GITHUB_TOKEN: ${{ case(needs.pre_activation.outputs.copilot_pat_number == '0', secrets.COPILOT_GITHUB_TOKEN, needs.pre_activation.outputs.copilot_pat_number == '1', secrets.COPILOT_GITHUB_TOKEN_1, needs.pre_activation.outputs.copilot_pat_number == '2', secrets.COPILOT_GITHUB_TOKEN_2, needs.pre_activation.outputs.copilot_pat_number == '3', secrets.COPILOT_GITHUB_TOKEN_3, needs.pre_activation.outputs.copilot_pat_number == '4', secrets.COPILOT_GITHUB_TOKEN_4, needs.pre_activation.outputs.copilot_pat_number == '5', secrets.COPILOT_GITHUB_TOKEN_5, needs.pre_activation.outputs.copilot_pat_number == '6', secrets.COPILOT_GITHUB_TOKEN_6, needs.pre_activation.outputs.copilot_pat_number == '7', secrets.COPILOT_GITHUB_TOKEN_7, needs.pre_activation.outputs.copilot_pat_number == '8', secrets.COPILOT_GITHUB_TOKEN_8, needs.pre_activation.outputs.copilot_pat_number == '9', secrets.COPILOT_GITHUB_TOKEN_9, secrets.COPILOT_GITHUB_TOKEN) }}
-    # gh CLI used by the detector script for PR metadata + existing-issue lookups (read-only, public repo).
-    GH_TOKEN: ${{ github.token }}
+    # NOTE: do NOT set GH_TOKEN here. The gh-aw agent entrypoint strips GH_TOKEN/COPILOT_GITHUB_TOKEN
+    # from the agent process ("no secrets in agent runtime"), so an injected GH_TOKEN never reaches the
+    # detector's `gh` calls. The detector's `gh pr view` / `gh issue` lookups instead rely on the
+    # pre-authenticated `gh` provided by `tools.github.mode: gh-proxy` (see the tools block below).
 
 permissions:
   contents: read
@@ -76,6 +78,11 @@ tools:
   # The fix phase builds the repo and runs tests, so the agent needs the full bash toolset.
   bash: [":*"]
   github:
+    # gh-proxy mode mounts a PRE-AUTHENTICATED `gh` CLI inside the agent container, so the detector
+    # script's `gh pr view` (PR approval/draft/base filter) and existing-issue lookups authenticate
+    # with the workflow's read-only token. The default `local` mode only authenticates the GitHub MCP
+    # server, NOT a bash `gh`, which is why the PR approval filter previously kept 0 PRs.
+    mode: gh-proxy
     toolsets: [repos, issues, pull_requests]
 
 safe-outputs:
@@ -143,8 +150,15 @@ decision. Follow it.
 Run the detector script via the `bash` tool:
 
 ```bash
-pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -TargetBranch main -DaysBack 14 -MinSources 3 -MaxBuilds 60 -JsonOut flaky-report.json
+pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -TargetBranch main -DaysBack 14 -MinSources 3 -MaxBuilds 200 -MaxArtifactDownloads 400 -JsonOut flaky-report.json
 ```
+
+`-MaxBuilds` must stay comfortably above the number of failed builds the PR pipeline (definition 75)
+produces in the `-DaysBack` window (~60 in a typical 14 days). The detector flags the scan as
+truncated (`scanComplete: false`) whenever the build-list query comes back as a **full page**
+(`= MaxBuilds`), because the AzDO API exposes no reliable total count — so a value at or just below
+the real volume makes every scan look incomplete and blocks all action. `-MaxArtifactDownloads` is
+raised in step so the larger build set does not re-trip the artifact-download cap.
 
 The script writes a human-readable progress report to the log/host stream and the structured JSON
 report to stdout (also written to `flaky-report.json`). Parse the JSON.
@@ -158,7 +172,7 @@ tests that have gone consistently green, and re-attempting fixes on tests still 
 the **same detector** with `-IncludePassed`, which also records passing observations:
 
 ```bash
-pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 60 -IncludePassed -JsonOut quarantine-health.json
+pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 400 -IncludePassed -JsonOut quarantine-health.json
 ```
 
 This emits the usual JSON plus a `passedTests` array (per normalized test: `distinctBuilds`,
@@ -372,14 +386,14 @@ Screen all candidates concurrently with `xargs -P`. Build a tab-separated manife
 candidate: `<id>` TAB `<absolute dll path>` TAB `<fully-qualified method filter>`), then:
 
 ```bash
-rm -rf /tmp/repro && mkdir -p /tmp/repro && : > /tmp/repro/candidates.tsv
-# ...append one TAB-separated line per candidate to /tmp/repro/candidates.tsv...
+rm -rf /tmp/gh-aw/agent/repro && mkdir -p /tmp/gh-aw/agent/repro && : > /tmp/gh-aw/agent/repro/candidates.tsv
+# ...append one TAB-separated line per candidate to /tmp/gh-aw/agent/repro/candidates.tsv...
 # <id> must match [A-Za-z0-9_] (e.g. the tracking-issue number) — it names the result file.
 
-xargs -a /tmp/repro/candidates.tsv -P 4 -d '\n' -n 1 -r bash -c '
+xargs -a /tmp/gh-aw/agent/repro/candidates.tsv -P 4 -d '\n' -n 1 -r bash -c '
   IFS=$'"'"'\t'"'"' read -r id dll method <<< "$0"
   if [ ! -f "$dll" ]; then
-    printf "%s\tpass=0\tfail=0\tstatus=setup-error\n" "$id" > "/tmp/repro/$id.result"; exit 0
+    printf "%s\tpass=0\tfail=0\tstatus=setup-error\n" "$id" > "/tmp/gh-aw/agent/repro/$id.result"; exit 0
   fi
   pass=0; fail=0; status=ok
   for i in $(seq 1 25); do
@@ -390,9 +404,9 @@ xargs -a /tmp/repro/candidates.tsv -P 4 -d '\n' -n 1 -r bash -c '
     elif [ "$rc" -eq 124 ]; then status=timeout; break   # test hung (>120s) — likely a real deadlock
     else fail=$((fail+1)); fi
   done
-  printf "%s\tpass=%d\tfail=%d\tstatus=%s\n" "$id" "$pass" "$fail" "$status" > "/tmp/repro/$id.result"
+  printf "%s\tpass=%d\tfail=%d\tstatus=%s\n" "$id" "$pass" "$fail" "$status" > "/tmp/gh-aw/agent/repro/$id.result"
 '
-cat /tmp/repro/*.result
+cat /tmp/gh-aw/agent/repro/*.result
 ```
 
 Do **not** use `set -e` around this — a test failure is expected and must not abort the loop. Classify
