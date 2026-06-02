@@ -1,0 +1,29 @@
+{
+  "SourceCodeFiles": {
+    "Include": [ "**/*.cs" ],
+    "Exclude": [ "**/obj/**", "**/bin/**" ]
+  },
+  "Files": {
+    "Exclude": [ "**/*.md", "**/*.yml", "**/*.yaml" ]
+  },
+  "Modules": {
+    "Include": [],
+    "Exclude": [
+      "**/Microsoft.Testing.*.dll",
+      "**/Microsoft.TestPlatform*.dll",
+      "**/Microsoft.VisualStudio.TestPlatform*.dll",
+      "**/Microsoft.VisualStudio.CodeCoverage*.dll",
+      "**/xunit.*.dll",
+      "**/testhost*",
+      "**/Microsoft.Bcl.*.dll",
+      "**/Microsoft.ApplicationInsights.dll",
+      "**/Newtonsoft.Json.dll",
+      "**/System*.dll",
+      "**/runtimes/**"
+    ]
+  },
+  "Filter": {
+    "Include": [ "**/bin/Debug/net10.0/CtsVsTestSample.dll" ],
+    "Exclude": [ "**/*.resources.dll" ]
+  }
+}
