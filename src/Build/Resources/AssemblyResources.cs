@@ -24,8 +24,7 @@ namespace Microsoft.Build.Shared
         /// ResourceUtilities class that uses it. To make this possible, MSBuild.exe registers its resources here and they are
         /// normally consulted last. This assumes that there are no duplicated resource ID's between the Engine and MSBuild.exe.
         /// (Actually there are currently two: LoggerCreationError and LoggerNotFoundError.
-        /// We can't change the resource ID's this late in the cycle and we sometimes want to load the MSBuild.exe ones,
-        /// because they're a little different. So for that purpose we call GetStringLookingInMSBuildExeResourcesFirst() )
+        /// We can't change the resource ID's this late in the cycle.)
         /// </summary>
         internal static void RegisterMSBuildExeResources(ResourceManager manager)
         {
@@ -48,22 +47,6 @@ namespace Microsoft.Build.Shared
             if (resource == null)
             {
                 resource = GetStringFromMSBuildExeResources(name);
-            }
-
-            return resource;
-        }
-
-        /// <summary>
-        /// Loads the specified resource string.
-        /// </summary>
-        /// <returns>The resource string, or null if not found.</returns>
-        internal static string GetStringLookingInMSBuildExeResourcesFirst(string name)
-        {
-            string resource = GetStringFromMSBuildExeResources(name);
-
-            if (resource == null)
-            {
-                resource = GetStringFromEngineResources(name);
             }
 
             return resource;
