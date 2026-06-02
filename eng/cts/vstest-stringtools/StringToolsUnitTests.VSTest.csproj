@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <OutputType>Library</OutputType>
+
+    <!-- Opt out of MTP; use VSTest with xunit.runner.visualstudio. -->
+    <UseMicrosoftTestingPlatformRunner>false</UseMicrosoftTestingPlatformRunner>
+
+    <AssemblyName>Microsoft.NET.StringTools.UnitTests</AssemblyName>
+    <RootNamespace>Microsoft.NET.StringTools.Tests</RootNamespace>
+
+    <!-- Match StringTools' InternalsVisibleTo PublicKey: sign with the repo's MSBuildTest snk. -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\src\Test.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
+    <PublicSign>false</PublicSign>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CS1591;CS8073</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.3" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
+  </ItemGroup>
+
+  <!-- Link the real StringTools.UnitTests source files. We deliberately do NOT include
+       BisectTiny_Tests.cs (it's the bisect probe, not a real test). -->
+  <ItemGroup>
+    <Compile Include="..\..\..\src\StringTools.UnitTests\StringTools_Tests.cs">
+      <Link>StringTools_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\StringTools.UnitTests\SpanBasedStringBuilder_Tests.cs">
+      <Link>SpanBasedStringBuilder_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\StringTools.UnitTests\WeakStringCache_Tests.cs">
+      <Link>WeakStringCache_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\StringTools.UnitTests\InterningTestData.cs">
+      <Link>InterningTestData.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+  <!-- Reference the already-built StringTools.dll. Run build.cmd first if missing. -->
+  <ItemGroup>
+    <Reference Include="Microsoft.NET.StringTools">
+      <HintPath>..\..\..\artifacts\bin\StringTools\Debug\net10.0\Microsoft.NET.StringTools.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\src\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
