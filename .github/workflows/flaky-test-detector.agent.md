@@ -81,10 +81,30 @@ You are an automated maintenance agent for the **dotnet/msbuild** repository. Yo
 track them as GitHub issues, and, in a **single combined draft pull request per run**, either apply a
 minimal determinism fix or quarantine them so CI stops being disrupted.
 
-Read the skill at `.github/skills/flaky-test-detector/SKILL.md` for full background on the data path,
-the "evidence source" model (approved PRs + rolling `main` builds), the JSON schema, thresholds, the
-assembly → test-project mapping, quarantine conventions, and the determinism-fix vs. quarantine
-decision. Follow it.
+## Background — evidence model and detector output
+
+A test is **flaky** when it fails across multiple **independent evidence sources**, where one source
+is either **(a)** a single **approved, non-draft PR targeting `main`** — all of that PR's failed
+validation builds collapse into one source, since a reviewer-approved PR is unlikely to be broken by
+its own diff — or **(b)** a single **failed rolling/CI build on `main`** (`main` is expected green, so
+each such failure is independent evidence). A test failing across many *unrelated* approved PRs and/or
+multiple rolling builds cannot be explained by any one change — the signature of flakiness (vs. a
+regression; see Step 3). **Scope: `main` only.**
+
+The detector script `.github/workflows/scripts/Get-FlakyTests.ps1` reaches the **anonymously
+accessible** public Azure DevOps build APIs (`dnceng-public`/`public`, PR pipeline definition **75**;
+quarantine pipeline definition **344** with `-DefinitionId 344`), downloads only the failed legs'
+test-log artifacts, parses the `.trx` files, and emits one JSON report — the **only** source of truth
+(never invent data). Per flagged test the JSON gives: normalized `testName` (`Namespace.Class.Method`,
+parameter suffix stripped), `distinctSources`/`distinctPRs`/`prNumbers`/`rollingBuildIds`,
+`totalFailures`, `legs`/`tfms`/`assemblies`, `errorHashes` (one short hash per distinct failure
+signature), `rawVariants` (the parameterized `[Theory]` rows that failed), `firstSeen`/`lastSeen`,
+`sampleBuildUrl`, `sampleError`, and `relatedIssues` (existing `flaky-test` issues). `scanComplete:
+false` means the scan was truncated and is biased — **do not act on it** (Step 2).
+
+Map a test's `assemblies[0]` (from the TRX file name, e.g. `Microsoft.Build.Engine.UnitTests`) to its
+project under `src/` (e.g. `src/Build.UnitTests/Microsoft.Build.Engine.UnitTests.csproj`) rather than a
+repo-wide text search, then locate the class/method within it.
 
 ## Overall shape
 
@@ -103,7 +123,7 @@ decision. Follow it.
 Run the detector script via the `bash` tool:
 
 ```bash
-pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -TargetBranch main -DaysBack 14 -MinSources 3 -MaxBuilds 200 -MaxArtifactDownloads 400 -JsonOut flaky-report.json
+pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -TargetBranch main -DaysBack 14 -MinSources 3 -MaxBuilds 200 -MaxArtifactDownloads 400 -JsonOut flaky-report.json
 ```
 
 `-MaxBuilds` must stay comfortably above the number of failed builds the PR pipeline (definition 75)
@@ -133,7 +153,7 @@ tests that have gone consistently green, and re-attempting fixes on tests still 
 the **same detector** with `-IncludePassed`, which also records passing observations:
 
 ```bash
-pwsh -File .github/skills/flaky-test-detector/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 400 -IncludePassed -JsonOut quarantine-health.json
+pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 400 -IncludePassed -JsonOut quarantine-health.json
 ```
 
 This emits the usual JSON plus a `passedTests` array (per normalized test: `distinctBuilds`,
@@ -360,7 +380,8 @@ as part of the fix.
 
 ### 7a — Locate tests and build their projects (sequential)
 
-For each selected test, map `assemblies[0]` to its test project using the skill's convention (e.g.
+For each selected test, map `assemblies[0]` to its test project using the assembly → project mapping
+from the Background section (e.g.
 `Microsoft.Build.Engine.UnitTests` → `src/Build.UnitTests/Microsoft.Build.Engine.UnitTests.csproj`) and
 find the test method source. For each **distinct** candidate project, run one fast incremental build so
 the test assembly is current (no-op if `./build.sh` already built it):
