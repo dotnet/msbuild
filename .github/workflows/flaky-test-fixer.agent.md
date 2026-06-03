@@ -2,7 +2,11 @@
 name: "Flaky Test Auto-Fixer"
 description: "Scheduled daily workflow that proposes evidence-based fixes for tests that are ALREADY quarantined ([ActiveIssue]) but STILL FLAKING in the quarantine pipeline (definition 344). It mines the accumulated over-time failure evidence (consistent error signatures + stack traces), diagnoses a minimal TEST-ONLY root cause without any local reproduction, and opens one individual draft PR per confidently-fixable test. It KEEPS the [ActiveIssue] in place so the quarantine pipeline validates the fix over the following days; the separate detector workflow un-quarantines once green."
 on:
-  schedule: daily
+  # Pinned ~1 hour after the detector (which runs at 11:38 UTC) so the fixer sees the detector's
+  # latest quarantine/un-quarantine state before it proposes fixes. Explicit cron (not `daily`) so
+  # the time stays fixed and is not re-scattered on recompile.
+  schedule:
+    - cron: "38 12 * * *"
   workflow_dispatch: # Allow manual triggering
 
 engine:
