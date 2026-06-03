@@ -19,9 +19,12 @@ if (-not $IsWindows -and $PSVersionTable.PSEdition -ne 'Desktop') {
     throw "scripts/cts/*.ps1 currently target Windows. The CI pipelines call cts directly; for local use on Linux/macOS, invoke cts manually."
 }
 
-# Paths
-$script:RepoRoot    = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$script:DotnetExe   = Join-Path $script:RepoRoot '.dotnet\dotnet.exe'
+# Paths. Use forward slashes everywhere — Join-Path normalises to the host
+# separator on Windows and they are valid as-is on Linux/macOS, so the same
+# helpers will work if the Windows-only guard above is ever relaxed.
+$script:RepoRoot    = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$_dotnetFile        = if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') { 'dotnet.exe' } else { 'dotnet' }
+$script:DotnetExe   = Join-Path (Join-Path $script:RepoRoot '.dotnet') $_dotnetFile
 $script:CtsRoot     = Join-Path $script:RepoRoot '.cts'
 $script:BaselineDir = Join-Path $script:CtsRoot 'baseline'
 $script:LogsDir     = Join-Path $script:CtsRoot 'logs'
@@ -65,7 +68,7 @@ function Build-Project {
 
 function Get-ProjectDllPath {
     param([Parameter(Mandatory)] $Project)
-    return (Join-Path $script:RepoRoot "artifacts\bin\$($Project.BinDir)\Debug\net10.0\$($Project.Dll)")
+    return (Join-Path $script:RepoRoot ("artifacts/bin/{0}/Debug/net10.0/{1}" -f $Project.BinDir, $Project.Dll))
 }
 
 function Get-ProjectDllFilter {

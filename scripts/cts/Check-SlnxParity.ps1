@@ -21,7 +21,7 @@
 param()
 
 $ErrorActionPreference = 'Stop'
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 
 function Get-ProductionProjects([string]$slnx) {
     $xml = [xml](Get-Content (Join-Path $repoRoot $slnx) -Raw)

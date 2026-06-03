@@ -1,7 +1,7 @@
 # scripts/cts/demos/_DemoCommon.ps1
 # Shared helpers for the demo scripts. Keep tiny.
 
-. (Join-Path $PSScriptRoot '..\_Common.ps1')
+. (Join-Path $PSScriptRoot '../_Common.ps1')
 
 function Resolve-DemoProject {
     param([Parameter(Mandatory)] [string]$Key)
@@ -52,7 +52,7 @@ function Invoke-DemoApply {
     }
 
     try {
-        & (Join-Path $PSScriptRoot '..\Run-Local.ps1') -Project $Project.Key -SkipBuild -TimeoutMinutes 5 | Out-Null
+        & (Join-Path $PSScriptRoot '../Run-Local.ps1') -Project $Project.Key -SkipBuild -TimeoutMinutes 5 | Out-Null
         $log = Join-Path $script:LogsDir "apply-$($Project.Key).log"
         Get-Content $log -Tail 30 |
             Where-Object { $_ -match 'impacted test\(s\):|executed:|succeeded:|failed:|reason ' } |
