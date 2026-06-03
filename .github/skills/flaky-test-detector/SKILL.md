@@ -184,6 +184,12 @@ The detector surfaces evidence; it does **not** by itself prove flakiness. Befor
   **regression**, not a flake — that is a `noop` for quarantine; flag it for human attention.
 - **Check `relatedIssues`** to avoid duplicate filing; an existing open issue should be updated,
   not duplicated.
+- **A recently-closed (fixed) issue is not automatically a recurrence.** The look-back window
+  (`-DaysBack`) routinely includes builds from *before* a fix merged. Before commenting "recurred"
+  on a closed/fixed issue, confirm at least one failure's build **start time** is strictly after the
+  fixing PR merged (use the closing PR's merge commit time, not just `closedAt`; prefer build start
+  times over the date-only `lastSeen`). If all evidence predates the fix, it is stale — take no
+  action on that test.
 
 ## Tiered Thresholds (recommended)
 
