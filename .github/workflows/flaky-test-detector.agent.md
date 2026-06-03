@@ -195,8 +195,23 @@ gh issue list --repo dotnet/msbuild --state all --search '"<!-- flaky-test-id: <
 - **If a related issue is OPEN:** post an `add_comment` to that issue number with the **new** evidence
   (latest sources, build URLs, dates, legs/TFMs). Do not open a duplicate.
 - **If a related issue exists but is CLOSED recently** (e.g. within ~30 days): do **not** open a
-  duplicate. Post an `add_comment` on the closed issue noting the flake has recurred so a human can
-  decide whether to reopen, and do not create a new issue.
+  duplicate. **First confirm the flake actually recurred *after* the issue was resolved** — the
+  detector's look-back window (`-DaysBack`) routinely includes builds from *before* a fix landed, so
+  stale pre-fix failures must not be reported as a recurrence. To decide:
+  - Get the issue's `closedAt` and `stateReason`. If it was closed as **completed/fixed**, find when
+    the fix actually merged: get the closing PR with
+    `gh issue view <n> --repo dotnet/msbuild --json closedAt,stateReason,closedByPullRequestsReferences`,
+    then look up that PR's merge time with `gh pr view <pr> --repo dotnet/msbuild --json mergedAt`
+    and use that merge time (this is more accurate than `closedAt`).
+  - Compare that fix/close time against the flake's **latest** failure. Prefer the actual build
+    **start times** of the newest sources (look up `rollingBuildIds` / `sampleBuildUrl`, or the
+    newest PR build) rather than the date-only `lastSeen`, since same-day `lastSeen` is ambiguous.
+  - **Only if at least one failure occurred strictly after the fix merged** is this a genuine
+    recurrence: post an `add_comment` on the closed issue with that post-fix evidence (build URLs +
+    timestamps) so a human can decide whether to reopen. Do not create a new issue.
+  - **If every failure predates the fix/close**, the evidence is stale: do **not** comment, do **not**
+    reopen, and treat the test as already-handled for this run (skip it in Steps 5–7). At most note it
+    under a "stale (pre-fix) — no action" line in the run summary.
 - **Otherwise (no related issue):** create exactly one issue via `create_issue`:
   - Title: the test's short name (the `[Flaky Test] ` prefix is added automatically), e.g.
     `Microsoft.Build.Engine.UnitTests.SomeClass.SomeMethod`.
