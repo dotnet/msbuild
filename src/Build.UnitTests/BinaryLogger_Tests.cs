@@ -434,6 +434,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/13932", TestPlatforms.Linux)]
         [Fact]
         public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
         {

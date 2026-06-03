@@ -524,6 +524,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to High should show up in our log
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/13934", TestPlatforms.Windows)]
         [Fact]
         public void OverrideStdOutImportanceToHigh()
         {
@@ -582,6 +583,7 @@ namespace Microsoft.Build.UnitTests
         /// himself.  This is so that in case the tool doesn't log its errors in canonical
         /// format, the task can still opt to do something reasonable with it.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/13931", TestPlatforms.Windows)]
         [Fact]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
