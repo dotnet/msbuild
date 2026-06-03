@@ -301,6 +301,13 @@ of these hold:
   ```
   Treat a candidate as covered if the literal string `<!-- flaky-test-id: <testName> -->` (normalized
   `testName`, exact) appears in any open PR body. Skip every covered candidate.
+
+  **An empty array (`[]`) is the normal, expected result** — most runs have **no** flaky-test PR in
+  flight, which simply means there are no cross-run duplicates to skip. Do **not** treat `[]` as a tool
+  failure: do not re-run the command, inspect it with `xxd`/`wc`, toggle `2>/dev/null`, or switch to
+  `gh api` to "double-check." Note that flaky-test **issues** are *not* PRs — `gh pr list --label
+  flaky-test` lists only open **pull requests**, so it returning `[]` while open `flaky-test`-labeled
+  *issues* exist (e.g. the tracking issues you act on in Step 4) is correct and consistent, not a bug.
 - It is **not already quarantined** in the working tree: after locating the test (Step 7), if the method
   already carries an `[ActiveIssue]` attribute on `main`, skip it (nothing to do). (Note this only
   catches tests quarantined by an **already-merged** PR; in-flight unmerged PRs are caught by the
