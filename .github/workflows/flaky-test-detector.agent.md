@@ -116,6 +116,14 @@ raised in step so the larger build set does not re-trip the artifact-download ca
 The script writes a human-readable progress report to the log/host stream and the structured JSON
 report to stdout (also written to `flaky-report.json`). Parse the JSON.
 
+**Run it synchronously and wait for it to exit.** At these `-MaxBuilds`/`-MaxArtifactDownloads`
+values the scan downloads and parses many artifacts and can take **several minutes**. It writes the
+JSON to stdout and to `-JsonOut` **only on completion** — there is no partial file mid-run. Do **not**
+background it (no `&`) and do **not** poll-then-bail: a missing `-JsonOut` file or empty stdout while
+the process is still running means *not finished yet*, **not** failure. Read the JSON only after the
+process has exited. Re-running because the file "wasn't there yet" just re-downloads every artifact and
+wastes the run's time and token budget. The same applies to the Step 1b quarantine scan below.
+
 ## Step 1b — Scan the quarantine pipeline (backlog signal)
 
 Also scan the **quarantine pipeline** (AzDO definition **344**, `azure-pipelines/quarantine.yml`),

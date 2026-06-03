@@ -85,6 +85,11 @@ The script writes a **human-readable report to stderr** and the **structured JSO
 stdout** (and `-JsonOut` if given). `gh` must be installed and authenticated for the approval
 filter and existing-issue cross-reference to work.
 
+> **Run it synchronously.** At high `-MaxBuilds`/`-MaxArtifactDownloads` the scan can take several
+> minutes and writes stdout / `-JsonOut` **only on completion**. Wait for the process to exit before
+> reading the JSON — don't background it or treat a not-yet-written `-JsonOut` file as a failure (it
+> just means the scan is still running). Re-running wastefully re-downloads every artifact.
+
 ### JSON report shape
 
 ```jsonc
