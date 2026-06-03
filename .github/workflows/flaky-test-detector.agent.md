@@ -199,9 +199,10 @@ gh issue list --repo dotnet/msbuild --state all --search '"<!-- flaky-test-id: <
   detector's look-back window (`-DaysBack`) routinely includes builds from *before* a fix landed, so
   stale pre-fix failures must not be reported as a recurrence. To decide:
   - Get the issue's `closedAt` and `stateReason`. If it was closed as **completed/fixed**, find when
-    the fix actually merged — inspect the closing event / linked PR, e.g.
-    `gh issue view <n> --repo dotnet/msbuild --json closedAt,stateReason,timelineItems` and use the
-    merge commit time of the PR that closed it (this is more accurate than `closedAt`).
+    the fix actually merged: get the closing PR with
+    `gh issue view <n> --repo dotnet/msbuild --json closedAt,stateReason,closedByPullRequestsReferences`,
+    then look up that PR's merge time with `gh pr view <pr> --repo dotnet/msbuild --json mergedAt`
+    and use that merge time (this is more accurate than `closedAt`).
   - Compare that fix/close time against the flake's **latest** failure. Prefer the actual build
     **start times** of the newest sources (look up `rollingBuildIds` / `sampleBuildUrl`, or the
     newest PR build) rather than the date-only `lastSeen`, since same-day `lastSeen` is ambiguous.
