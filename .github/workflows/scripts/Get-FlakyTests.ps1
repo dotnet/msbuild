@@ -85,6 +85,13 @@
     forces -AllLegs, and lets a consumer confirm a quarantined test is genuinely green (ran and
     passed across distinct builds/days) before un-quarantining it.
 
+.PARAMETER IncludeErrorDetails
+    Also emit, per flagged test, an 'errorSamples' array: the distinct failure signatures grouped
+    by error-message hash, each with a representative (truncated) message + stack excerpt, the
+    number of occurrences, and the distinct builds it was seen in. Intended for the auto-fixer
+    workflow, which diagnoses a quarantined test's root cause from the accumulated def-344 failure
+    evidence. Default OFF, so the detector's output shape is unchanged.
+
 .PARAMETER JsonOut
     Optional path. When set, the structured report object is written to this file as JSON.
 
@@ -110,6 +117,7 @@ param(
     [switch]$AllLegs,
     [switch]$NoApprovalFilter,
     [switch]$IncludePassed,
+    [switch]$IncludeErrorDetails,
     [string]$JsonOut
 )
 
@@ -149,6 +157,25 @@ function Get-ShortHash {
     finally { $sha.Dispose() }
 }
 
+# Build a compact, diagnosis-friendly excerpt of a failure's error message + stack trace for the
+# auto-fixer (-IncludeErrorDetails). Keeps the whole message (truncated) plus the most useful stack
+# frames, preferring frames that carry source-file info (" in ...:line N") over framework noise.
+function Get-ErrorExcerpt {
+    param([string]$Message, [string]$Stack, [int]$MaxMessage = 600, [int]$MaxStack = 1500)
+    $msg = if ($Message) { ($Message -replace '\r', '').Trim() } else { "" }
+    if ($msg.Length -gt $MaxMessage) { $msg = $msg.Substring(0, $MaxMessage) + "..." }
+    $stackExcerpt = ""
+    if ($Stack) {
+        $lines = @(($Stack -replace '\r', '') -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+        # Prefer frames with source info; if none, fall back to the first frames as-is.
+        $withSource = @($lines | Where-Object { $_ -match ' in .+:line \d+' -or $_ -match '\.cs:' })
+        $picked = if ($withSource.Count) { $withSource } else { $lines }
+        $stackExcerpt = ($picked | Select-Object -First 20) -join "`n"
+        if ($stackExcerpt.Length -gt $MaxStack) { $stackExcerpt = $stackExcerpt.Substring(0, $MaxStack) + "..." }
+    }
+    return [PSCustomObject]@{ message = $msg; stack = $stackExcerpt }
+}
+
 # Tokenize a leg/artifact label into a comparable lowercase token set (split on
 # non-alphanumerics and camelCase boundaries; drop generic words).
 function Get-LegTokens {
@@ -185,7 +212,9 @@ function Read-TrxFailures {
         if (-not $fullName) { continue }
         $msgNode = $node.SelectSingleNode('t:Output/t:ErrorInfo/t:Message', $nsm)
         $message = if ($msgNode) { $msgNode.InnerText } else { "" }
-        $results += [PSCustomObject]@{ FullName = $fullName; Message = $message }
+        $stackNode = $node.SelectSingleNode('t:Output/t:ErrorInfo/t:StackTrace', $nsm)
+        $stack = if ($stackNode) { $stackNode.InnerText } else { "" }
+        $results += [PSCustomObject]@{ FullName = $fullName; Message = $message; StackTrace = $stack }
     }
     return $results
 }
@@ -491,6 +520,7 @@ try {
                             Arch       = $arch
                             RawName    = $rawName
                             Message    = $fail.Message
+                            StackTrace = $fail.StackTrace
                             ErrorHash  = (Get-ShortHash $fail.Message)
                             Date       = $buildDate
                         }
@@ -536,6 +566,22 @@ $flakyTests = @($testFailures.GetEnumerator() | ForEach-Object {
     $distinctPRs = @($failures | Where-Object { $_.SourceType -eq 'pr' } | Select-Object -ExpandProperty Pr -Unique)
     $rollingBuildIds = @($failures | Where-Object { $_.SourceType -eq 'rolling' } | Select-Object -ExpandProperty BuildId -Unique)
     $dates = @($failures | Where-Object { $_.Date } | Select-Object -ExpandProperty Date -Unique | Sort-Object)
+    # Distinct failure signatures (grouped by error-message hash), only built when requested by the
+    # auto-fixer. Strongest (most-frequent) signature first, capped to keep the JSON bounded.
+    $errorSamples = @()
+    if ($IncludeErrorDetails) {
+        $errorSamples = @($failures | Group-Object ErrorHash | Sort-Object Count -Descending | Select-Object -First 5 | ForEach-Object {
+            $rep = $_.Group | Select-Object -First 1
+            $excerpt = Get-ErrorExcerpt -Message $rep.Message -Stack $rep.StackTrace
+            [PSCustomObject]@{
+                hash           = $_.Name
+                count          = $_.Count
+                distinctBuilds = @($_.Group | Select-Object -ExpandProperty BuildId -Unique).Count
+                message        = $excerpt.message
+                stack          = $excerpt.stack
+            }
+        })
+    }
     [PSCustomObject]@{
         TestName        = $_.Key
         DistinctSources = $distinctSources.Count
@@ -553,6 +599,7 @@ $flakyTests = @($testFailures.GetEnumerator() | ForEach-Object {
         SampleBuildId   = ($failures | Select-Object -First 1).BuildId
         SampleBuildUrl  = ($failures | Select-Object -First 1).BuildUrl
         SampleError     = ($failures | Select-Object -First 1).Message
+        ErrorSamples    = $errorSamples
     }
 } | Where-Object { $_.DistinctSources -ge $MinSources } | Sort-Object -Property DistinctSources, TotalFailures -Descending)
 
@@ -677,6 +724,7 @@ $report = [PSCustomObject]@{
             sampleBuildId   = $_.SampleBuildId
             sampleBuildUrl  = $_.SampleBuildUrl
             sampleError     = $(if ($_.SampleError -and $_.SampleError.Length -gt 500) { $_.SampleError.Substring(0, 500) + "..." } else { $_.SampleError })
+            errorSamples    = $_.ErrorSamples
             relatedIssues   = $related
         }
     })
