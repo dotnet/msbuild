@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.SdkResolverService, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.SdkResolverService);
 
             return new MainNodeSdkResolverService();
         }
@@ -98,10 +98,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
-            ErrorUtilities.VerifyThrowInternalNull(sdk);
-            ErrorUtilities.VerifyThrowInternalNull(loggingContext);
-            ErrorUtilities.VerifyThrowInternalNull(sdkReferenceLocation);
-            ErrorUtilities.VerifyThrowInternalLength(projectPath, nameof(projectPath));
+            Assumed.NotNull(sdk);
+            Assumed.NotNull(loggingContext);
+            Assumed.NotNull(sdkReferenceLocation);
+            Assumed.NotNullOrEmpty(projectPath);
 
             return _cachedSdkResolver.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
         }

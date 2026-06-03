@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -90,7 +89,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(File.ItemSpec);
+            ArgumentException.ThrowIfNullOrEmpty(File.ItemSpec);
             AbsolutePath filePath = FileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(File.ItemSpec));
             string contentsAsString = string.Empty;
 

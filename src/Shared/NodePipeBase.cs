@@ -249,10 +249,7 @@ namespace Microsoft.Build.Internal
 
         private INodePacket DeserializePacket()
         {
-            if (_packetFactory == null)
-            {
-                throw new InternalErrorException("No packet factory is registered for deserialization.");
-            }
+            Assumed.NotNull(_packetFactory, "No packet factory is registered for deserialization.");
 
             NodePacketType packetType = (NodePacketType)_headerData[0];
             try
@@ -261,7 +258,7 @@ namespace Microsoft.Build.Internal
             }
             catch (Exception e) when (e is not InternalErrorException)
             {
-                throw new InternalErrorException($"Exception while deserializing packet {packetType}: {e}");
+                return InternalError.Throw<INodePacket>($"Exception while deserializing packet {packetType}: {e}");
             }
         }
     }

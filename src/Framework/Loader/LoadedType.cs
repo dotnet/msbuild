@@ -35,9 +35,9 @@ namespace Microsoft.Build.Shared
             string? architecture = null,
             bool loadedViaMetadataLoadContext = false)
         {
-            FrameworkErrorUtilities.VerifyThrow(type != null, "We must have the type.");
-            FrameworkErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
-            FrameworkErrorUtilities.VerifyThrow(loadedAssembly is not null, "The assembly should always be loaded even if only by MetadataLoadContext.");
+            Assumed.NotNull(type, "We must have the type.");
+            Assumed.NotNull(assemblyLoadInfo, "We must have the assembly the type was loaded from.");
+            Assumed.NotNull(loadedAssembly, "The assembly should always be loaded even if only by MetadataLoadContext.");
 
             Type = type;
             Assembly = assemblyLoadInfo;

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
@@ -34,7 +33,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public ProxyTargets(IReadOnlyDictionary<string, string> proxyTargetToRealTargetMap)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(proxyTargetToRealTargetMap);
+            ArgumentException.ThrowIfNullOrEmpty(proxyTargetToRealTargetMap);
 
             _proxyTargetToRealTargetMap = proxyTargetToRealTargetMap.ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.OrdinalIgnoreCase);
         }

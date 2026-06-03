@@ -360,7 +360,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ArgumentNullException.ThrowIfNull(task);
         }
 
         /// <summary>
@@ -858,7 +858,7 @@ namespace Microsoft.Build.Tasks
                         {
                             // This should never happen: we're in out-of-process mode but have a cached entry without a file path.
                             // When in out-of-process mode, _assemblyPath is always set before compilation.
-                            ErrorUtilities.ThrowInternalError("Cached assembly entry has no file path in out-of-process mode");
+                            InternalError.Throw("Cached assembly entry has no file path in out-of-process mode");
                         }
                     }
                     else

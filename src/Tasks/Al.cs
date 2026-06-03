@@ -320,8 +320,8 @@ namespace Microsoft.Build.Tasks
 
                 pathToTool = SdkToolsPathUtility.GeneratePathToTool(
                     f => !string.IsNullOrEmpty(f)
-                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
-                    : SdkToolsPathUtility.FileInfoExists(f),
+                        ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                        : SdkToolsPathUtility.FileInfoExists(f),
                     archToLookFor,
                     SdkToolsPath,
                     ToolExe,
@@ -329,7 +329,7 @@ namespace Microsoft.Build.Tasks
                     true);
             }
 
-            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
+            return TaskEnvironment.GetAbsolutePathOrEmpty(pathToTool);
         }
 
         /// <summary>

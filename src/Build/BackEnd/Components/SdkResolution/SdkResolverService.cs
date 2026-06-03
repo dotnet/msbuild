@@ -191,7 +191,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
                 catch (RegexMatchTimeoutException ex)
                 {
-                    ErrorUtilities.ThrowInternalError($"""Timeout exceeded matching sdk "{sdk.Name}" to <ResolvableSdkPattern> from sdk resolver manifest {manifest.DisplayName}.""", ex);
+                    InternalError.Throw($"""Timeout exceeded matching sdk "{sdk.Name}" to <ResolvableSdkPattern> from sdk resolver manifest {manifest.DisplayName}.""", ex);
                 }
             }
 

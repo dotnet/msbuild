@@ -76,8 +76,7 @@ namespace Microsoft.Build.Execution
         /// <param name="skipReason">The reason why the target was skipped, if applicable.</param>
         internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null, TargetSkipReason skipReason = TargetSkipReason.None)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(items);
-            ErrorUtilities.VerifyThrowArgumentNull(result);
+            ArgumentNullException.ThrowIfNull(items);
             _items = items;
             _result = result;
             _originalBuildEventContext = originalBuildEventContext;
@@ -384,7 +383,7 @@ namespace Microsoft.Build.Execution
 
                 byte[] buffer = null;
                 translator.Translate(ref buffer);
-                ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during translation.");
+                Assumed.NotNull(buffer, "Unexpected null items buffer during translation.");
 
                 using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
                 using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, InterningBinaryReader.PoolingBuffer);

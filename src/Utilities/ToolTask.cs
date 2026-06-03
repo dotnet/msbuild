@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1013,7 +1013,7 @@ namespace Microsoft.Build.Utilities
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError("Unknown tool notification.");
+                            InternalError.Throw("Unknown tool notification.");
                             break;
                     }
                 }
@@ -1049,8 +1049,7 @@ namespace Microsoft.Build.Utilities
 
                 if (!isBeingCancelled)
                 {
-                    ErrorUtilities.VerifyThrow(Timeout != System.Threading.Timeout.Infinite,
-                        "A time-out value must have been specified or the task must be cancelled.");
+                    Assumed.NotEqual(Timeout, System.Threading.Timeout.Infinite, "A time-out value must have been specified or the task must be cancelled.");
 
                     LogShared.LogWarningWithCodeFromResources("Shared.KillingProcess", processName, Timeout);
                 }
@@ -1129,10 +1128,18 @@ namespace Microsoft.Build.Utilities
                 //
                 // Use a bounded timeout as a safety net for the grandchild case where
                 // EOF never arrives because grand child inherited the pipe and keeps it open.
-                const int eofTimeoutSec = 2;
+                const int eofTimeoutSec = 30;
 
                 WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                bool allEOFReceived = WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                if (!allEOFReceived)
+                {
+                    // Timeout: a grandchild process likely still holds the pipe open.
+                    // Drain whatever data has already arrived before returning.
+                    LogMessagesFromStandardError();
+                    LogMessagesFromStandardOutput();
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.PipeEOFTimeout", eofTimeoutSec);
+                }
             }
             else
             {
@@ -1178,8 +1185,7 @@ namespace Microsoft.Build.Utilities
             MessageImportance messageImportance,
             StandardOutputOrErrorQueueType queueType)
         {
-            ErrorUtilities.VerifyThrow(dataQueue != null,
-                "The data queue must be available.");
+            Assumed.NotNull(dataQueue, "The data queue must be available.");
 
             // synchronize access to the queue -- this is a producer-consumer problem
             // NOTE: the synchronization problem here is actually not about the queue
@@ -1211,8 +1217,7 @@ namespace Microsoft.Build.Utilities
                     }
                 }
 
-                ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
-                    "The signalling event must be available.");
+                Assumed.NotNull(dataAvailableSignal, "The signalling event must be available.");
 
                 // the queue is empty, so reset the notification
                 // NOTE: intentionally, do the reset inside the lock, because
@@ -1240,8 +1245,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="unused"></param>
         private void ReceiveTimeoutNotification(object unused)
         {
-            ErrorUtilities.VerifyThrow(_toolTimeoutExpired != null,
-                "The signalling event for tool time-out must be available.");
+            Assumed.NotNull(_toolTimeoutExpired, "The signalling event for tool time-out must be available.");
             lock (_eventCloseLock)
             {
                 if (!_eventsDisposed)
@@ -1260,8 +1264,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="e"></param>
         protected void ReceiveExitNotification(object sender, EventArgs e)
         {
-            ErrorUtilities.VerifyThrow(_toolExited != null,
-                "The signalling event for tool exit must be available.");
+            Assumed.NotNull(_toolExited, "The signalling event for tool exit must be available.");
 
             lock (_eventCloseLock)
             {
@@ -1326,7 +1329,7 @@ namespace Microsoft.Build.Utilities
             }
 
             // NOTE: don't ignore empty string, because we need to log that
-            ErrorUtilities.VerifyThrow(dataQueue != null, "The data queue must be available.");
+            Assumed.NotNull(dataQueue, "The data queue must be available.");
 
             // synchronize access to the queue -- this is a producer-consumer problem
             // NOTE: we lock the entire queue instead of using synchronized queue
@@ -1339,8 +1342,7 @@ namespace Microsoft.Build.Utilities
             {
                 dataQueue.Enqueue(e.Data);
 
-                ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
-                    "The signalling event must be available.");
+                Assumed.NotNull(dataAvailableSignal, "The signalling event must be available.");
 
                 // signal the availability of data
                 // NOTE: intentionally, do the signalling inside the lock, because
@@ -1678,8 +1680,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(nextAction == HostObjectInitializationStatus.UseAlternateToolToExecute,
-                        "Invalid return status");
+                    Assumed.Equal(nextAction, HostObjectInitializationStatus.UseAlternateToolToExecute, "Invalid return status");
 
                     // No host object was provided, or at least not one that supports all of the
                     // switches/parameters we need.  So shell out to the command-line tool.

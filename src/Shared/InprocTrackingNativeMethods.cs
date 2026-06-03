@@ -248,8 +248,8 @@ namespace Microsoft.Build.Shared
             /// </summary>
             private static void InitDelegates()
             {
-                ErrorUtilities.VerifyThrow(s_fileTrackerDllHandle != null, "fileTrackerDllHandle should not be null");
-                ErrorUtilities.VerifyThrow(!s_fileTrackerDllHandle.IsInvalid, "Handle for FileTracker.dll should not be invalid");
+                Assumed.NotNull(s_fileTrackerDllHandle, "fileTrackerDllHandle should not be null");
+                Assumed.False(s_fileTrackerDllHandle.IsInvalid, "Handle for FileTracker.dll should not be invalid");
 
                 startTrackingContextDelegate = CreateDelegate<StartTrackingContextDelegate>("StartTrackingContext");
                 startTrackingContextWithRootDelegate = CreateDelegate<StartTrackingContextWithRootDelegate>("StartTrackingContextWithRoot");

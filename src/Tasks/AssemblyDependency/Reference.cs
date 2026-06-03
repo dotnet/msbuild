@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -618,10 +618,8 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrow(
-                    !(IsPrimary && _primarySourceItem == null), "A primary reference must have a primary source item.");
-                ErrorUtilities.VerifyThrow(
-                    IsPrimary || _primarySourceItem == null, "Only a primary reference can have a primary source item.");
+                Assumed.False((IsPrimary && _primarySourceItem == null), "A primary reference must have a primary source item.");
+                Assumed.True(IsPrimary || _primarySourceItem == null, "Only a primary reference can have a primary source item.");
 
                 return _primarySourceItem;
             }
@@ -744,8 +742,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void AddRemapping(AssemblyNameExtension remappedFrom, AssemblyNameExtension remappedTo)
         {
-            ErrorUtilities.VerifyThrow(remappedFrom.Immutable, " Remapped from is NOT immutable");
-            ErrorUtilities.VerifyThrow(remappedTo.Immutable, " Remapped to is NOT immutable");
+            Assumed.True(remappedFrom.Immutable, " Remapped from is NOT immutable");
+            Assumed.True(remappedTo.Immutable, " Remapped to is NOT immutable");
             _remappedAssemblyNames.Add(new AssemblyRemapping(remappedFrom, remappedTo));
         }
 
@@ -821,6 +819,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns a collection of strings. Each string is the full path to an assembly that was
         /// considered for resolution but then rejected because it wasn't a complete match.
+        /// Note that these paths are not canonicalized — resolvers only absolutize paths, not canonicalize them.
         /// </summary>
         internal List<ResolutionSearchLocation> AssembliesConsideredAndRejected { get; private set; } = new List<ResolutionSearchLocation>();
 
@@ -922,19 +921,43 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string frameworkPath in frameworkPaths)
                 {
-                    if
-                    (
-                        String.Compare(
-                            frameworkPath, 0,
-                            fullPath, 0,
-                            frameworkPath.Length,
-                            StringComparison.OrdinalIgnoreCase) == 0)
+                    if (IsUnderDirectory(fullPath, frameworkPath))
                     {
                         return true;
                     }
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Determine whether the given assembly is an FX assembly.
+        /// </summary>
+        /// <param name="fullPath">The full path to the assembly.</param>
+        /// <param name="frameworkPaths">The path to the frameworks.</param>
+        /// <returns>True if this is a frameworks assembly.</returns>
+        internal static bool IsFrameworkFile(string fullPath, AbsolutePath[] frameworkPaths)
+        {
+            if (frameworkPaths != null)
+            {
+                foreach (var frameworkPath in frameworkPaths)
+                {
+                    if (IsUnderDirectory(fullPath, frameworkPath.Value))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Checks whether <paramref name="fullPath"/> starts with <paramref name="directoryPath"/> (case-insensitive).
+        /// </summary>
+        private static bool IsUnderDirectory(string fullPath, string directoryPath)
+        {
+            return directoryPath is not null &&
+                String.Compare(directoryPath, 0, fullPath, 0, directoryPath.Length, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         /// <summary>

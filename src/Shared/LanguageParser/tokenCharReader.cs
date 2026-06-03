@@ -264,14 +264,14 @@ namespace Microsoft.Build.Shared.LanguageParser
             if (Sink("\xd\xa")) // This sequence is treated as a single new line.
             {
                 ++_currentLine;
-                ErrorUtilities.VerifyThrow(originalPosition != _position, "Expected position to be incremented.");
+                Assumed.NotEqual(originalPosition, _position, "Expected position to be incremented.");
                 return true;
             }
 
             if (TokenChar.IsNewLine(CurrentCharacter))
             {
                 Skip();
-                ErrorUtilities.VerifyThrow(originalPosition != _position, "Expected position to be incremented.");
+                Assumed.NotEqual(originalPosition, _position, "Expected position to be incremented.");
                 return true;
             }
 

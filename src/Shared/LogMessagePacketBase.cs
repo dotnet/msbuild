@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -243,6 +243,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="WorkerNodeTelemetryEventArgs"/>
         /// </summary>
         WorkerNodeTelemetryEvent = 42,
+
+        /// <summary>
+        /// Event is <see cref="LoggersRegisteredEventArgs"/>
+        /// </summary>
+        LoggersRegisteredEvent = 43,
     }
     #endregion
 
@@ -259,7 +264,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
-       /// <summary>
+        /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
         private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
@@ -291,7 +296,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal LogMessagePacketBase(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent)
         {
-            ErrorUtilities.VerifyThrow(nodeBuildEvent != null, "nodeBuildEvent was null");
+            Assumed.NotNull(nodeBuildEvent, "nodeBuildEvent was null");
             _buildEvent = nodeBuildEvent.Value.Value;
             _sinkId = nodeBuildEvent.Value.Key;
             _eventType = GetLoggingEventId(_buildEvent);
@@ -378,7 +383,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void WriteToStream(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(_eventType != LoggingEventType.CustomEvent, "_eventType should not be a custom event");
+            Assumed.NotEqual(_eventType, LoggingEventType.CustomEvent, "_eventType should not be a custom event");
 
             MethodInfo methodInfo = null;
             lock (s_writeMethodCache)
@@ -419,7 +424,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void ReadFromStream(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(_eventType != LoggingEventType.CustomEvent, "_eventType should not be a custom event");
+            Assumed.NotEqual(_eventType, LoggingEventType.CustomEvent, "_eventType should not be a custom event");
 
             _buildEvent = GetBuildEventArgFromId();
 
@@ -440,7 +445,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 _buildEvent = ReadEventFromStream(_eventType, translator);
-                ErrorUtilities.VerifyThrow(_buildEvent is not null, $"Not Supported LoggingEventType {_eventType}");
+                Assumed.NotNull(_buildEvent, $"Not Supported LoggingEventType {_eventType}");
             }
 
             _eventType = GetLoggingEventId(_buildEvent);
@@ -498,8 +503,7 @@ namespace Microsoft.Build.Shared
         /// Takes in a id (LoggingEventType as an int) and creates the correct specific logging class
         /// </summary>
         private BuildEventArgs GetBuildEventArgFromId()
-        {
-            return _eventType switch
+            => _eventType switch
             {
                 LoggingEventType.BuildErrorEvent => new BuildErrorEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
                 LoggingEventType.BuildFinishedEvent => new BuildFinishedEventArgs(null, null, false),
@@ -543,10 +547,10 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
+                LoggingEventType.LoggersRegisteredEvent => new LoggersRegisteredEventArgs(),
 
-                _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
+                _ => Assumed.Unreachable<BuildEventArgs>($"Should not get to the default of GetBuildEventArgFromId ID: {_eventType}")
             };
-        }
 
         /// <summary>
         /// Based on the type of the BuildEventArg to be wrapped
@@ -690,6 +694,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.WorkerNodeTelemetryEvent;
             }
+            else if (eventType == typeof(LoggersRegisteredEventArgs))
+            {
+                return LoggingEventType.LoggersRegisteredEvent;
+            }
             else if (eventType == typeof(TargetStartedEventArgs))
             {
                 return LoggingEventType.TargetStartedEvent;
@@ -768,7 +776,7 @@ namespace Microsoft.Build.Shared
                     WriteBuildWarningEventToStream((BuildWarningEventArgs)buildEvent, translator);
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError($"Not Supported LoggingEventType {eventType}");
+                    InternalError.Throw($"Not Supported LoggingEventType {eventType}");
                     break;
             }
         }

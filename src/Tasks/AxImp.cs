@@ -3,6 +3,8 @@
 
 using System;
 
+using Microsoft.Build.Framework;
+
 #nullable disable
 
 namespace Microsoft.Build.Tasks
@@ -16,6 +18,7 @@ namespace Microsoft.Build.Tasks
         /// Defines the "AxImp" MSBuild task, which enables using AxImp.exe
         /// to generate Windows Forms wrappers for ActiveX controls.
         /// </summary>
+        [MSBuildMultiThreadableTask]
         internal class AxImp : AxTlbBaseTask
         {
             #region Properties

@@ -281,6 +281,58 @@ namespace Microsoft.Build.UnitTests
             result.OriginalValue.ShouldBe(absolutePath.OriginalValue);
         }
 
+        /// <summary>
+        /// Windows rooted-but-not-fully-qualified inputs (root-relative <c>"\foo"</c>, drive-relative <c>"X:foo"</c>)
+        /// must be anchored to the supplied base path, not to process state (current drive, per-drive cwd).
+        /// Required for multithreaded task isolation. Anchoring happens at construction so both
+        /// <see cref="AbsolutePath.Value"/> and the canonical form are deterministic.
+        /// </summary>
+        [WindowsOnlyTheory]
+        // Root-relative — anchored at base path's drive root.
+        [InlineData(@"X:\proj", @"\foo", @"X:\foo")]
+        [InlineData(@"X:\proj", @"\foo\bar", @"X:\foo\bar")]
+        [InlineData(@"X:\proj", @"\sub\dir\file.txt", @"X:\sub\dir\file.txt")]
+        // Drive-relative on the same drive as base path — anchored under base path itself.
+        [InlineData(@"X:\proj", @"X:foo", @"X:\proj\foo")]
+        [InlineData(@"X:\proj", @"X:", @"X:\proj")]
+        [InlineData(@"X:\proj", @"X:sub\file.txt", @"X:\proj\sub\file.txt")]
+        // Drive-relative with a drive different from base path — drive dropped, remainder anchored.
+        [InlineData(@"C:\proj", @"D:foo", @"C:\proj\foo")]
+        // Root-relative against UNC base path — re-rooted under the UNC share.
+        [InlineData(@"\\server\share\base", @"\foo", @"\\server\share\foo")]
+        [InlineData(@"\\server\share\base", @"\sub\file.txt", @"\\server\share\sub\file.txt")]
+        // Drive-relative against UNC base path — drive dropped, remainder anchored.
+        [InlineData(@"\\server\share\base", @"X:foo", @"\\server\share\base\foo")]
+        // Root-relative against DOS device base path (\\?\ and \\.\) — re-rooted under the device root.
+        [InlineData(@"\\?\C:\base", @"\foo", @"\\?\C:\foo")]
+        [InlineData(@"\\.\C:\base", @"\foo", @"\\.\C:\foo")]
+        // Drive-relative against DOS device base path — drive dropped, remainder anchored.
+        [InlineData(@"\\?\C:\base", @"X:foo", @"\\?\C:\base\foo")]
+        [InlineData(@"\\.\C:\base", @"X:foo", @"\\.\C:\base\foo")]
+        // Pass-through: fully qualified inputs win and are not touched by anchoring.
+        [InlineData(@"C:\proj", @"D:\absolute\file.txt", @"D:\absolute\file.txt")]
+        [InlineData(@"C:\proj", @"\\server\share\file.txt", @"\\server\share\file.txt")]
+        [InlineData(@"C:\proj", @"\\?\C:\file.txt", @"\\?\C:\file.txt")]
+        // Plain relative input — anchored to basePath via Path.Combine, never touches CWD.
+        [InlineData(@"C:\proj", @"foo", @"C:\proj\foo")]
+        [InlineData(@"C:\proj", @"sub\file.txt", @"C:\proj\sub\file.txt")]
+        public void AnchorsToBasePath_NotProcessState(string baseDir, string input, string expected)
+        {
+            var basePath = new AbsolutePath(baseDir);
+            var combined = new AbsolutePath(input, basePath);
+
+            // Construction anchors rooted-but-not-fully-qualified inputs to basePath, so Value
+            // is already fully qualified and does not depend on process state.
+            combined.Value.ShouldBe(expected,
+                customMessage: $"Construction leaked process state: '{input}' did not anchor to '{baseDir}'.");
+
+            AbsolutePath canonical = combined.GetCanonicalForm();
+
+            canonical.Value.ShouldBe(expected,
+                customMessage: $"GetCanonicalForm leaked process state: '{input}' did not anchor to '{baseDir}'.");
+            canonical.OriginalValue.ShouldBe(input);
+        }
+
         [Fact]
         public void GetCanonicalForm_InvalidPathCharacters_ShouldThrowSameAsPathGetFullPath()
         {
