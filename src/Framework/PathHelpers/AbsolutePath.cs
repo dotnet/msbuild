@@ -113,6 +113,7 @@ namespace Microsoft.Build.Framework
 
 // Path.IsPathFullyQualified is not available in .NET Standard 2.0
 // in .NET Framework it's provided by package and in .NET it's built-in
+// The netstandard2.0 build of Microsoft.Build.Framework exists only as a compatibility surface
 #if NETFRAMEWORK || NET
             combined = MakeFullyQualifiedRelativeToBasePath(combined, basePath.Value);
 #endif
