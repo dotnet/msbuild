@@ -207,7 +207,16 @@ The detector surfaces evidence; it does **not** by itself prove flakiness. Befor
   ```html
   <!-- flaky-test-id: Namespace.Class.Method -->
   ```
-  Search both open and recently-closed issues for this marker before filing a new one.
+  Copy the marker **exactly**, including the `-id` segment — `<!-- flaky-test: … -->` (no `-id`)
+  will not be found by later searches and orphans the issue, causing duplicates. Search both open
+  and recently-closed issues for this marker before filing a new one; if the marker search finds
+  nothing, fall back to a title search to catch legacy issues created before the marker convention.
+- **Two-run quarantine cadence (file first, quarantine next run):** quarantining a test requires the
+  tracking issue's **number** for the `[ActiveIssue(.../issues/NNNN)]` URL, but the daily workflow
+  files issues with the gh-aw `create_issue` safe output, which is deferred to a **post-run** job and
+  returns **no number during the run**. So a brand-new flake is only filed this run and becomes
+  **quarantine-eligible the next run**, once its issue exists and is open with a readable number. Never
+  poll, guess, or wait for the number of an issue created in the current run.
 - **Quarantine syntax (use exactly):** quarantine with `[ActiveIssue]` from
   `Microsoft.DotNet.XUnitV3Extensions` (namespace `Xunit`, already referenced and imported by every
   test project) — **not** `[Fact(Skip=...)]`. Add it above the existing `[Fact]`/`[Theory]`, keeping
