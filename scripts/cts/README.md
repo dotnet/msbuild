@@ -52,6 +52,49 @@ used as the local filesystem cache (gitignored).
 
 Omit `-Project` to operate on every project registered in `projects.json`.
 
+## Coverage gap vs the regular PR pipeline
+
+The wrappers are pinned to `TargetFrameworks=net10.0`. xunit.v3 rejects
+`net472` when `OutputType=Library` (which CTS needs so it can host the
+test DLL), so we cannot run the .NET Framework leg through CTS today.
+
+What this means in practice:
+
+| TFM            | Regular PR pipeline | CTS pipeline |
+| -------------- | ------------------- | ------------ |
+| `net10.0`      | ✅                  | ✅           |
+| `net472` (Win) | ✅                  | ❌           |
+
+The CTS pipeline is parallel and **non-blocking**; the regular PR
+pipeline continues to provide net472 signal and remains the merge gate.
+CTS adds incrementality for the net10.0 subset only. Closing the gap
+requires either an `OutputType=Exe` net472 wrapper variant (needs
+validation that `cts vstest` works against a .NET Framework Exe host) or
+a legacy-xunit wrapper for net472.
+
+## Local vs CI
+
+These scripts are **local-only** — they use the filesystem cache under
+`<repo>/.cts/` so iterating between collect and apply is instant.
+
+CI runs the same `cts` tool but against Azure DevOps pipeline artifacts as
+the snapshot store. Two pipelines drive it:
+
+* `azure-pipelines/cts-collect.yml` — scheduled daily at 06:00 UTC against
+  `main`; publishes one baseline artifact per OS (`cts-baseline-<sha>-<os>`).
+* `azure-pipelines/cts-apply.yml` — runs in parallel on PRs (non-blocking);
+  picks the most recent baseline whose SHA is an ancestor of the PR HEAD,
+  downloads it, and runs `cts apply vstest` against `MSBuild.VSTest.slnx`.
+
+Both pipelines emit `cts-metrics.json` per OS (schema documented in
+[`METRICS.md`](METRICS.md)) so we can later quantify the incrementality
+CTS achieves.
+
+The CI pipelines do **not** call `Collect-Local.ps1` / `Run-Local.ps1` —
+they invoke `cts` directly because the storage backend differs. They do
+reuse `cts.config.json` verbatim and `Select-Baseline.ps1` for ancestor
+resolution.
+
 ## Notes
 
 * Baseline + logs live at `<repo>/.cts/` (gitignored).

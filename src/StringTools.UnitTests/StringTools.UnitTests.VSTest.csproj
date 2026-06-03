@@ -24,4 +24,10 @@
 
   <Import Project="StringTools.UnitTests.csproj" />
 
+  <!-- Pin to net10.0 *after* the inner Import overrides the multi-TFM list. xunit.v3
+       rejects the net472 TFM because we set OutputType=Library above. -->
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+  </PropertyGroup>
+
 </Project>

@@ -1,0 +1,90 @@
+# azure-pipelines/cts-apply.yml
+#
+# Parallel, non-blocking PR pipeline that exercises Clever Test Selection.
+#
+# Behavior:
+#   1. Checkout the PR with full history (fetch-depth: 0) so we can compute
+#      ancestry against main.
+#   2. Resolve the most recent CTS baseline snapshot (produced by
+#      cts-collect.yml) whose SHA is an ancestor of the PR HEAD; download it.
+#      Falls back gracefully if no ancestor snapshot exists.
+#   3. Restore + build MSBuild.VSTest.slnx in Debug.
+#   4. Run `cts apply vstest` against the wrapped projects.
+#   5. Run the two un-wrapped test projects (ThreadSafeTaskAnalyzer.Tests,
+#      Microsoft.Build.EndToEnd.Tests) through the existing test runner so
+#      the total set of executed tests matches the legacy PR pipeline
+#      (apples-to-apples comparison).
+#   6. Emit cts-metrics.json per OS (schema: scripts/cts/METRICS.md).
+#
+# This pipeline runs in parallel with the existing PR pipeline. It is
+# non-blocking (continueOnError on the critical steps) while we collect
+# data on incrementality.
+
+trigger: none
+
+pr:
+  branches:
+    include:
+      - main
+
+parameters:
+- name: ctsFeed
+  type: string
+  default: https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
+- name: collectPipelineId
+  type: number
+  # TODO(post-onboarding): set this to the numeric id of cts-collect.yml's
+  # pipeline definition once registered in ADO. Until then runs will
+  # fall back to "no-collect-runs" and just exercise the wiring.
+  default: 0
+- name: organization
+  type: string
+  default: https://dev.azure.com/devdiv
+- name: project
+  type: string
+  default: DevDiv
+
+variables:
+  BuildConfiguration: Debug
+  CtsConfigPath: $(Build.SourcesDirectory)/scripts/cts/cts.config.json
+  BaselineDir:   $(Build.SourcesDirectory)/.cts/baseline
+  MetadataPath:  $(Build.SourcesDirectory)/.cts/baseline-selection.json
+
+jobs:
+- job: Apply_Windows
+  displayName: CTS apply (Windows, non-blocking)
+  pool:
+    name: VSEng-MicroBuildVSStable
+    demands:
+    - agent.os -equals Windows_NT
+  timeoutInMinutes: 120
+  continueOnError: true
+  variables:
+    OsTag: windows
+  steps:
+  - template: cts-steps/apply-steps.yml
+    parameters:
+      osTag: windows
+      ctsFeed: ${{ parameters.ctsFeed }}
+      collectPipelineId: ${{ parameters.collectPipelineId }}
+      organization: ${{ parameters.organization }}
+      project: ${{ parameters.project }}
+
+- job: Apply_Linux
+  displayName: CTS apply (Linux, non-blocking)
+  pool:
+    name: AzurePipelines-EO
+    image: 1ESPT-Ubuntu22.04
+    os: linux
+  timeoutInMinutes: 120
+  continueOnError: true
+  variables:
+    OsTag: linux
+  steps:
+  - template: cts-steps/apply-steps.yml
+    parameters:
+      osTag: linux
+      ctsFeed: ${{ parameters.ctsFeed }}
+      collectPipelineId: ${{ parameters.collectPipelineId }}
+      organization: ${{ parameters.organization }}
+      project: ${{ parameters.project }}

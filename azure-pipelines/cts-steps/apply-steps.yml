@@ -1,0 +1,164 @@
+# azure-pipelines/cts-steps/apply-steps.yml
+#
+# Per-OS step list reused by cts-apply.yml.
+#
+# Inputs:
+#   osTag             : "windows" | "linux"
+#   ctsFeed           : NuGet feed URL where the `cts` global tool lives
+#   collectPipelineId : pipeline definition id of cts-collect.yml
+#   organization      : ADO org URL
+#   project           : ADO project name
+
+parameters:
+- name: osTag
+  type: string
+- name: ctsFeed
+  type: string
+- name: collectPipelineId
+  type: number
+- name: organization
+  type: string
+- name: project
+  type: string
+
+steps:
+- checkout: self
+  fetchDepth: 0   # Need full history to walk ancestry against collect snapshots.
+  clean: true
+
+- task: UseDotNet@2
+  displayName: Pin .NET SDK from global.json
+  inputs:
+    packageType: sdk
+    useGlobalJson: true
+
+- pwsh: |
+    $ErrorActionPreference = 'Stop'
+    dotnet tool install cts --global --prerelease --add-source "${{ parameters.ctsFeed }}"
+    if ($LASTEXITCODE -ne 0) { throw "cts install failed" }
+    $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
+    Write-Host "##vso[task.prependpath]$toolsDir"
+  displayName: Install cts tool
+
+- pwsh: |
+    $headSha = git rev-parse HEAD
+    Write-Host "##vso[task.setvariable variable=PrHeadSha]$headSha"
+    Write-Host "PR HEAD SHA: $headSha"
+  displayName: Resolve PR HEAD SHA
+
+- pwsh: |
+    $env:AZURE_DEVOPS_EXT_PAT = '$(System.AccessToken)'
+    & "$(Build.SourcesDirectory)/scripts/cts/Select-Baseline.ps1" `
+        -Organization      '${{ parameters.organization }}' `
+        -Project           '${{ parameters.project }}' `
+        -CollectPipelineId ${{ parameters.collectPipelineId }} `
+        -Os                '${{ parameters.osTag }}' `
+        -DownloadDir       "$(BaselineDir)" `
+        -MetadataPath      "$(MetadataPath)"
+  displayName: Resolve and download CTS baseline
+  env:
+    AZURE_DEVOPS_EXT_PAT: $(System.AccessToken)
+
+- pwsh: |
+    $m = Get-Content "$(MetadataPath)" -Raw | ConvertFrom-Json
+    foreach ($k in 'baselineSha','baselineBuildId','baselineArtifact','baselineAgeMinutes','fallbackReason') {
+      $v = $m.$k
+      if ($null -eq $v) { $v = '' }
+      Write-Host "##vso[task.setvariable variable=$k]$v"
+    }
+  displayName: Export baseline metadata as variables
+
+- pwsh: |
+    dotnet build "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" -c $(BuildConfiguration) --nologo -v:m
+  displayName: Build MSBuild.VSTest.slnx
+
+- pwsh: |
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    $logsDir = "$(Build.SourcesDirectory)/.cts/logs"
+    New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
+    $fallback = '$(fallbackReason)'
+    if ($fallback) {
+      Write-Host "##vso[task.logissue type=warning]Skipping cts apply (fallback: $fallback). Running all wrapped tests instead."
+      dotnet test "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" -c $(BuildConfiguration) --no-build --nologo
+      $exit = $LASTEXITCODE
+    } else {
+      cts apply vstest `
+        --rootPath        "$(Build.SourcesDirectory)" `
+        --config          "$(CtsConfigPath)" `
+        --storage-type    azuredevopsartifact `
+        --tag             "$(baselineSha)" `
+        --logs-directory  "$logsDir" `
+        --coverage `
+        --print-console-output
+      $exit = $LASTEXITCODE
+    }
+    $sw.Stop()
+    Write-Host "##vso[task.setvariable variable=CtsApplyWallTimeMs]$([int]$sw.ElapsedMilliseconds)"
+    Write-Host "##vso[task.setvariable variable=CtsApplyExit]$exit"
+    if ($exit -ne 0 -and -not $fallback) {
+      Write-Host "##vso[task.logissue type=warning]cts apply exit $exit (non-blocking)"
+    }
+  displayName: cts apply vstest
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+  continueOnError: true
+
+- pwsh: |
+    # Apples-to-apples: run the two test projects not under CTS (Roslyn
+    # analyzer infra and out-of-proc e2e) via the existing test runner so
+    # the executed test set matches the legacy PR pipeline.
+    dotnet test "$(Build.SourcesDirectory)/src/ThreadSafeTaskAnalyzer.Tests/ThreadSafeTaskAnalyzer.Tests.csproj" `
+      -c $(BuildConfiguration) --nologo
+    $a = $LASTEXITCODE
+    dotnet test "$(Build.SourcesDirectory)/src/MSBuild.EndToEnd.Tests/Microsoft.Build.EndToEnd.Tests.csproj" `
+      -c $(BuildConfiguration) --nologo
+    $b = $LASTEXITCODE
+    if ($a -ne 0 -or $b -ne 0) {
+      Write-Host "##vso[task.logissue type=warning]Non-CTS test exit codes: analyzer=$a, e2e=$b (non-blocking)"
+    }
+  displayName: Run un-wrapped tests (analyzer + e2e)
+  continueOnError: true
+
+- pwsh: |
+    $version = (& cts --version 2>$null) -join ' '
+    function Box($v) { if ($v -eq '' -or $null -eq $v) { return $null } else { return $v } }
+    $metrics = [ordered]@{
+      schemaVersion           = 1
+      phase                   = 'apply'
+      os                      = '${{ parameters.osTag }}'
+      pipelineRunId           = '$(Build.BuildId)'
+      pipelineRunUrl          = "$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+      repoBranch              = '$(Build.SourceBranch)'
+      wallTimeMs              = [int]'$(CtsApplyWallTimeMs)'
+      ctsToolVersion          = $version
+      timestampUtc            = (Get-Date).ToUniversalTime().ToString('o')
+      prHeadSha               = '$(PrHeadSha)'
+      baselineSha             = Box '$(baselineSha)'
+      baselineAgeCommits      = $null
+      baselineAgeMinutes      = if ('$(baselineAgeMinutes)') { [int]'$(baselineAgeMinutes)' } else { $null }
+      selectedTestCount       = $null
+      totalCandidateTestCount = $null
+      selectionRatio          = $null
+      fallbackReason          = Box '$(fallbackReason)'
+    }
+    if ($metrics.baselineSha) {
+      try {
+        $count = git rev-list --count "$($metrics.baselineSha)..$(PrHeadSha)" 2>$null
+        if ($LASTEXITCODE -eq 0) { $metrics.baselineAgeCommits = [int]$count }
+      } catch { }
+    }
+    $out = "$(Build.ArtifactStagingDirectory)/cts-apply-metrics-${{ parameters.osTag }}/cts-metrics.json"
+    New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
+    $metrics | ConvertTo-Json -Depth 5 | Set-Content -Path $out -Encoding utf8
+    Write-Host "##[group]CTS apply metrics"
+    Get-Content $out | Write-Host
+    Write-Host "##[endgroup]"
+  displayName: Emit cts-metrics.json
+  condition: always()
+
+- task: PublishPipelineArtifact@1
+  displayName: Publish cts-apply-metrics artifact
+  condition: always()
+  inputs:
+    targetPath: $(Build.ArtifactStagingDirectory)/cts-apply-metrics-${{ parameters.osTag }}
+    artifact: cts-apply-metrics-${{ parameters.osTag }}

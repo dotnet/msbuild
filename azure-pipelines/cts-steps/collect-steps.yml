@@ -1,0 +1,104 @@
+# azure-pipelines/cts-steps/collect-steps.yml
+#
+# Per-OS step list reused by cts-collect.yml.
+#
+# Inputs:
+#   osTag   : "windows" | "linux"
+#   ctsFeed : NuGet feed URL where the `cts` global tool lives
+#
+# Outputs (artifacts):
+#   cts-baseline-<sha>-<osTag>       : the snapshot itself
+#   cts-collect-metrics-<osTag>      : cts-metrics.json (schema in scripts/cts/METRICS.md)
+
+parameters:
+- name: osTag
+  type: string
+- name: ctsFeed
+  type: string
+
+steps:
+- checkout: self
+  fetchDepth: 1
+  clean: true
+
+- task: UseDotNet@2
+  displayName: Pin .NET SDK from global.json
+  inputs:
+    packageType: sdk
+    useGlobalJson: true
+
+- pwsh: |
+    $ErrorActionPreference = 'Stop'
+    Write-Host "Installing cts global tool from ${{ parameters.ctsFeed }}"
+    dotnet tool install cts --global --prerelease --add-source "${{ parameters.ctsFeed }}"
+    if ($LASTEXITCODE -ne 0) { throw "cts install failed" }
+    $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
+    Write-Host "##vso[task.prependpath]$toolsDir"
+  displayName: Install cts tool
+
+- pwsh: cts --version
+  displayName: Print cts version
+
+- pwsh: |
+    $sha = git rev-parse HEAD
+    Write-Host "##vso[task.setvariable variable=CtsSha]$sha"
+    Write-Host "Collect baseline SHA: $sha"
+  displayName: Resolve HEAD SHA
+
+- pwsh: |
+    dotnet build "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" -c $(BuildConfiguration) --nologo -v:m
+  displayName: Build MSBuild.VSTest.slnx
+
+- pwsh: |
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    $logsDir = "$(Build.SourcesDirectory)/.cts/logs"
+    New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
+    cts collect vstest `
+      --rootPath        "$(Build.SourcesDirectory)" `
+      --config          "$(CtsConfigPath)" `
+      --storage-type    azuredevopsartifact `
+      --tag             "$(CtsSha)" `
+      --logs-directory  "$logsDir" `
+      --coverage `
+      --print-console-output
+    $exit = $LASTEXITCODE
+    $sw.Stop()
+    Write-Host "##vso[task.setvariable variable=CtsWallTimeMs]$([int]$sw.ElapsedMilliseconds)"
+    if ($exit -ne 0) { throw "cts collect failed with exit $exit" }
+  displayName: cts collect vstest
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+- pwsh: |
+    $version = (& cts --version 2>$null) -join ' '
+    $metrics = [ordered]@{
+      schemaVersion   = 1
+      phase           = 'collect'
+      os              = '${{ parameters.osTag }}'
+      pipelineRunId   = '$(Build.BuildId)'
+      pipelineRunUrl  = "$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+      repoBranch      = '$(Build.SourceBranch)'
+      wallTimeMs      = [int]'$(CtsWallTimeMs)'
+      ctsToolVersion  = $version
+      timestampUtc    = (Get-Date).ToUniversalTime().ToString('o')
+      sha             = '$(CtsSha)'
+      testCount       = $null
+      moduleCount     = $null
+      coverageBytes   = $null
+      artifactName    = "cts-baseline-$(CtsSha)-${{ parameters.osTag }}"
+    }
+    $out = "$(Build.ArtifactStagingDirectory)/cts-collect-metrics-${{ parameters.osTag }}/cts-metrics.json"
+    New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null
+    $metrics | ConvertTo-Json -Depth 5 | Set-Content -Path $out -Encoding utf8
+    Write-Host "##[group]CTS collect metrics"
+    Get-Content $out | Write-Host
+    Write-Host "##[endgroup]"
+  displayName: Emit cts-metrics.json
+  condition: always()
+
+- task: PublishPipelineArtifact@1
+  displayName: Publish cts-collect-metrics artifact
+  condition: always()
+  inputs:
+    targetPath: $(Build.ArtifactStagingDirectory)/cts-collect-metrics-${{ parameters.osTag }}
+    artifact: cts-collect-metrics-${{ parameters.osTag }}
