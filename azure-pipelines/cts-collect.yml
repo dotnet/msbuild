@@ -5,16 +5,21 @@
 # Trigger: scheduled, 06:00 UTC every day, against `main` only. Does not run
 # on PR or push. The published artifacts are consumed by cts-apply.yml.
 #
-# Storage: Azure DevOps pipeline artifacts (`cts --storage-type
-# azuredevopsartifact`). Retention is set to 14 days on the pipeline
-# definition in the ADO UI (not configurable from yaml — keep this comment
-# in sync if the policy changes).
-#
-# Each successful run publishes one artifact per OS:
-#     cts-baseline-<sha>-windows
-#     cts-baseline-<sha>-linux
-# plus a `cts-collect-metrics-<os>` artifact whose contents follow
+# Storage: cts writes a snapshot directory locally; we publish it as a
+# pipeline artifact named `cts-baseline-<osTag>` (one slot per OS,
+# overwritten daily). The collect metadata (SHA, timestamp) lives in a
+# sibling `cts-collect-metrics-<osTag>` artifact whose contents follow
 # scripts/cts/METRICS.md.
+#
+# Retention: 14 days, set on the pipeline definition in the ADO UI
+# (not configurable from yaml).
+#
+# ============================================================
+# TODO(1ES): before registering this pipeline in DevDiv ADO, wrap it in
+# `extends: template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates`
+# and move PublishPipelineArtifact@1 into the templated `outputs:` block.
+# See vs-insertion.yml for the pattern in this repo.
+# ============================================================
 
 trigger: none
 pr: none
@@ -44,8 +49,6 @@ jobs:
     demands:
     - agent.os -equals Windows_NT
   timeoutInMinutes: 180
-  variables:
-    OsTag: windows
   steps:
   - template: cts-steps/collect-steps.yml
     parameters:
@@ -59,8 +62,6 @@ jobs:
     image: 1ESPT-Ubuntu22.04
     os: linux
   timeoutInMinutes: 180
-  variables:
-    OsTag: linux
   steps:
   - template: cts-steps/collect-steps.yml
     parameters:

@@ -75,25 +75,32 @@ a legacy-xunit wrapper for net472.
 ## Local vs CI
 
 These scripts are **local-only** — they use the filesystem cache under
-`<repo>/.cts/` so iterating between collect and apply is instant.
+`<repo>/.cts/` so iterating between collect and apply is instant. They
+target Windows; the CI pipelines invoke `cts` directly and do not source
+`_Common.ps1`, so non-Windows local users should call `cts` themselves.
 
-CI runs the same `cts` tool but against Azure DevOps pipeline artifacts as
-the snapshot store. Two pipelines drive it:
+CI runs the same `cts` tool but against ADO pipeline artifacts as the
+snapshot store. Two pipelines drive it:
 
 * `azure-pipelines/cts-collect.yml` — scheduled daily at 06:00 UTC against
-  `main`; publishes one baseline artifact per OS (`cts-baseline-<sha>-<os>`).
+  `main`; uses `--storage-type filesystem` locally on the agent and
+  publishes the snapshot directory as `cts-baseline-<os>` (one slot per
+  OS, overwritten daily) plus a sibling `cts-collect-metrics-<os>`
+  artifact containing the SHA the baseline was taken at.
 * `azure-pipelines/cts-apply.yml` — runs in parallel on PRs (non-blocking);
-  picks the most recent baseline whose SHA is an ancestor of the PR HEAD,
-  downloads it, and runs `cts apply vstest` against `MSBuild.VSTest.slnx`.
+  downloads the latest `cts-baseline-<os>` from main via
+  `DownloadPipelineArtifact@2`, runs `cts apply vstest` against
+  `MSBuild.VSTest.slnx`. If `collectPipelineId` isn't configured yet (or
+  download fails), the apply step is skipped and only metrics are emitted
+  — we do **not** duplicate the regular PR pipeline's full test run.
 
 Both pipelines emit `cts-metrics.json` per OS (schema documented in
 [`METRICS.md`](METRICS.md)) so we can later quantify the incrementality
 CTS achieves.
 
-The CI pipelines do **not** call `Collect-Local.ps1` / `Run-Local.ps1` —
-they invoke `cts` directly because the storage backend differs. They do
-reuse `cts.config.json` verbatim and `Select-Baseline.ps1` for ancestor
-resolution.
+`Check-SlnxParity.ps1` verifies that `MSBuild.VSTest.slnx`'s production
+project list matches `MSBuild.slnx`'s; wire it as a CI step so additions
+to one solution don't silently skip the other.
 
 ## Notes
 

@@ -6,9 +6,11 @@
 #   osTag   : "windows" | "linux"
 #   ctsFeed : NuGet feed URL where the `cts` global tool lives
 #
-# Outputs (artifacts):
-#   cts-baseline-<sha>-<osTag>       : the snapshot itself
-#   cts-collect-metrics-<osTag>      : cts-metrics.json (schema in scripts/cts/METRICS.md)
+# Published artifacts:
+#   cts-baseline-<osTag>          : the snapshot directory (one slot per OS,
+#                                   overwritten by the latest successful daily run).
+#   cts-collect-metrics-<osTag>   : cts-metrics.json (schema in scripts/cts/METRICS.md);
+#                                   contains the SHA that the baseline was taken at.
 
 parameters:
 - name: osTag
@@ -27,11 +29,15 @@ steps:
     packageType: sdk
     useGlobalJson: true
 
+- task: NuGetAuthenticate@1
+  displayName: Authenticate to internal NuGet feeds
+
 - pwsh: |
     $ErrorActionPreference = 'Stop'
-    Write-Host "Installing cts global tool from ${{ parameters.ctsFeed }}"
-    dotnet tool install cts --global --prerelease --add-source "${{ parameters.ctsFeed }}"
-    if ($LASTEXITCODE -ne 0) { throw "cts install failed" }
+    # `tool update` is idempotent: installs if missing, updates if outdated.
+    # Avoids the "tool already installed" exit on warm self-hosted agents.
+    dotnet tool update cts --global --prerelease --add-source "${{ parameters.ctsFeed }}"
+    if ($LASTEXITCODE -ne 0) { throw "cts install/update failed" }
     $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
     Write-Host "##vso[task.prependpath]$toolsDir"
   displayName: Install cts tool
@@ -51,14 +57,16 @@ steps:
 
 - pwsh: |
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $logsDir = "$(Build.SourcesDirectory)/.cts/logs"
-    New-Item -ItemType Directory -Force -Path $logsDir | Out-Null
+    $baselineDir = "$(Build.SourcesDirectory)/.cts/baseline"
+    $logsDir     = "$(Build.SourcesDirectory)/.cts/logs"
+    New-Item -ItemType Directory -Force -Path $baselineDir, $logsDir | Out-Null
     cts collect vstest `
-      --rootPath        "$(Build.SourcesDirectory)" `
-      --config          "$(CtsConfigPath)" `
-      --storage-type    azuredevopsartifact `
-      --tag             "$(CtsSha)" `
-      --logs-directory  "$logsDir" `
+      --rootPath                    "$(Build.SourcesDirectory)" `
+      --config                      "$(CtsConfigPath)" `
+      --storage-type                filesystem `
+      --storage-type-filesystem-dir "$baselineDir" `
+      --tag                         "$(CtsSha)" `
+      --logs-directory              "$logsDir" `
       --coverage `
       --print-console-output
     $exit = $LASTEXITCODE
@@ -66,8 +74,14 @@ steps:
     Write-Host "##vso[task.setvariable variable=CtsWallTimeMs]$([int]$sw.ElapsedMilliseconds)"
     if ($exit -ne 0) { throw "cts collect failed with exit $exit" }
   displayName: cts collect vstest
-  env:
-    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+- task: PublishPipelineArtifact@1
+  # TODO(1ES): when this pipeline is wrapped in 1ES.Official.PipelineTemplate.yml,
+  # replace this task with a templated `outputs:` entry. See PR description.
+  displayName: Publish cts-baseline-${{ parameters.osTag }}
+  inputs:
+    targetPath: $(Build.SourcesDirectory)/.cts/baseline
+    artifact: cts-baseline-${{ parameters.osTag }}
 
 - pwsh: |
     $version = (& cts --version 2>$null) -join ' '
@@ -78,14 +92,11 @@ steps:
       pipelineRunId   = '$(Build.BuildId)'
       pipelineRunUrl  = "$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
       repoBranch      = '$(Build.SourceBranch)'
-      wallTimeMs      = [int]'$(CtsWallTimeMs)'
+      wallTimeMs      = if ('$(CtsWallTimeMs)' -ne '') { [int]'$(CtsWallTimeMs)' } else { $null }
       ctsToolVersion  = $version
       timestampUtc    = (Get-Date).ToUniversalTime().ToString('o')
       sha             = '$(CtsSha)'
-      testCount       = $null
-      moduleCount     = $null
-      coverageBytes   = $null
-      artifactName    = "cts-baseline-$(CtsSha)-${{ parameters.osTag }}"
+      artifactName    = "cts-baseline-${{ parameters.osTag }}"
     }
     $out = "$(Build.ArtifactStagingDirectory)/cts-collect-metrics-${{ parameters.osTag }}/cts-metrics.json"
     New-Item -ItemType Directory -Force -Path (Split-Path $out) | Out-Null

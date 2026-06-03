@@ -8,8 +8,16 @@
 #
 # This file intentionally contains only paths and functions; nothing that you
 # would tweak as configuration belongs here.
+#
+# These helpers target the local Windows developer workflow. On non-Windows
+# we early-out with a clear message — the CI pipelines invoke `cts` directly
+# and do not source this file.
 
 $ErrorActionPreference = 'Stop'
+
+if (-not $IsWindows -and $PSVersionTable.PSEdition -ne 'Desktop') {
+    throw "scripts/cts/*.ps1 currently target Windows. The CI pipelines call cts directly; for local use on Linux/macOS, invoke cts manually."
+}
 
 # Paths
 $script:RepoRoot    = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
@@ -73,8 +81,9 @@ function Get-ProjectTag {
 
 function Assert-CleanRepo {
     Push-Location $script:RepoRoot
-    try { $dirty = git status --porcelain }
+    try { $dirty = git status --porcelain; $gitExit = $LASTEXITCODE }
     finally { Pop-Location }
+    if ($gitExit -ne 0) { throw "git status failed (exit $gitExit). Is this a git repo with git on PATH?" }
     if ($dirty) {
         Write-Host "Working tree is dirty:" -ForegroundColor Red
         $dirty | ForEach-Object { Write-Host "  $_" }

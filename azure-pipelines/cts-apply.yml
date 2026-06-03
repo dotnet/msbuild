@@ -3,22 +3,28 @@
 # Parallel, non-blocking PR pipeline that exercises Clever Test Selection.
 #
 # Behavior:
-#   1. Checkout the PR with full history (fetch-depth: 0) so we can compute
-#      ancestry against main.
-#   2. Resolve the most recent CTS baseline snapshot (produced by
-#      cts-collect.yml) whose SHA is an ancestor of the PR HEAD; download it.
-#      Falls back gracefully if no ancestor snapshot exists.
-#   3. Restore + build MSBuild.VSTest.slnx in Debug.
-#   4. Run `cts apply vstest` against the wrapped projects.
-#   5. Run the two un-wrapped test projects (ThreadSafeTaskAnalyzer.Tests,
-#      Microsoft.Build.EndToEnd.Tests) through the existing test runner so
-#      the total set of executed tests matches the legacy PR pipeline
-#      (apples-to-apples comparison).
-#   6. Emit cts-metrics.json per OS (schema: scripts/cts/METRICS.md).
+#   1. Download the most recent `cts-baseline-<os>` artifact from the collect
+#      pipeline on `main` (latestFromBranch).
+#   2. Build MSBuild.VSTest.slnx and run `cts apply vstest` against the
+#      wrapped projects.
+#   3. Emit cts-metrics.json per OS (schema: scripts/cts/METRICS.md).
+#
+# Fallback: if `collectPipelineId` is 0 (pipeline not yet registered) or the
+# baseline download fails, the apply step is skipped and only metrics are
+# emitted. We do NOT run a full `dotnet test` as a fallback — the regular PR
+# pipeline keeps providing test signal and duplicating it here just adds CI
+# minutes and confusing duplicate failures.
 #
 # This pipeline runs in parallel with the existing PR pipeline. It is
-# non-blocking (continueOnError on the critical steps) while we collect
-# data on incrementality.
+# non-blocking (continueOnError on jobs) while we collect data on
+# incrementality.
+#
+# ============================================================
+# TODO(1ES): before registering this pipeline in DevDiv ADO, wrap it in
+# `extends: template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates`
+# and move PublishPipelineArtifact@1 into the templated `outputs:` block.
+# See vs-insertion.yml for the pattern in this repo.
+# ============================================================
 
 trigger: none
 
@@ -33,14 +39,10 @@ parameters:
   default: https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
 - name: collectPipelineId
   type: number
-  # TODO(post-onboarding): set this to the numeric id of cts-collect.yml's
-  # pipeline definition once registered in ADO. Until then runs will
-  # fall back to "no-collect-runs" and just exercise the wiring.
+  # 0 disables the apply step. Set this to the numeric id of cts-collect.yml's
+  # pipeline definition once registered in ADO.
   default: 0
-- name: organization
-  type: string
-  default: https://dev.azure.com/devdiv
-- name: project
+- name: collectProject
   type: string
   default: DevDiv
 
@@ -48,7 +50,6 @@ variables:
   BuildConfiguration: Debug
   CtsConfigPath: $(Build.SourcesDirectory)/scripts/cts/cts.config.json
   BaselineDir:   $(Build.SourcesDirectory)/.cts/baseline
-  MetadataPath:  $(Build.SourcesDirectory)/.cts/baseline-selection.json
 
 jobs:
 - job: Apply_Windows
@@ -59,16 +60,13 @@ jobs:
     - agent.os -equals Windows_NT
   timeoutInMinutes: 120
   continueOnError: true
-  variables:
-    OsTag: windows
   steps:
   - template: cts-steps/apply-steps.yml
     parameters:
       osTag: windows
       ctsFeed: ${{ parameters.ctsFeed }}
       collectPipelineId: ${{ parameters.collectPipelineId }}
-      organization: ${{ parameters.organization }}
-      project: ${{ parameters.project }}
+      collectProject: ${{ parameters.collectProject }}
 
 - job: Apply_Linux
   displayName: CTS apply (Linux, non-blocking)
@@ -78,13 +76,10 @@ jobs:
     os: linux
   timeoutInMinutes: 120
   continueOnError: true
-  variables:
-    OsTag: linux
   steps:
   - template: cts-steps/apply-steps.yml
     parameters:
       osTag: linux
       ctsFeed: ${{ parameters.ctsFeed }}
       collectPipelineId: ${{ parameters.collectPipelineId }}
-      organization: ${{ parameters.organization }}
-      project: ${{ parameters.project }}
+      collectProject: ${{ parameters.collectProject }}
