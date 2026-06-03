@@ -21,6 +21,10 @@ network:
     - defaults
     - dotnet
     - dev.azure.com
+    # Legacy AzDO package host used by the dotnet8/dotnet9/dotnet10 feeds in NuGet.config.
+    # Distinct from pkgs.dev.azure.com (covered by `dotnet`); without it, NuGet restore of the
+    # runtime packs is blocked by the firewall and the whole-repo build fails.
+    - dnceng.pkgs.visualstudio.com
 
 tools:
   edit:
@@ -293,6 +297,15 @@ Build the whole repo a single time up front so every subsequent reproduction/val
 ```bash
 ./build.sh
 ```
+
+**Fail fast on an environmental build failure — do not loop.** If this first `./build.sh` fails for
+**environmental/network reasons** (NuGet restore cannot reach a feed, a blocked domain, SDK download
+failure — *not* a compile or test error), **do not retry the build, do not investigate, and do not
+attempt any determinism code fix.** Re-running the build against a blocked feed burns the entire token
+budget on NuGet retries and huge logs, and the run gets cut off before it can open a PR. Instead, go
+**straight to the quarantine fallback (Step 7d) for every selected test**, note in the PR that local
+reproduction was blocked by the environment, and finish the run. One failed build attempt is enough to
+make this determination — a missing/unreachable feed will not fix itself on a second attempt.
 
 The whole-repo build takes ~2-3 minutes — **never cancel it**. `./build.sh` also builds every test
 project, so each test's runnable assembly already exists under
