@@ -1,5 +1,5 @@
 ---
-name: "Flaky Test Triage and Fix"
+name: "Flaky Test Triage"
 description: "Scheduled daily workflow that scans recent msbuild CI builds (approved PRs + rolling main builds) for tests that fail across multiple independent sources, files/updates flaky-test tracking issues, then quarantines the new candidates with [ActiveIssue]. It also scans the quarantine pipeline (definition 344) to un-quarantine tests that have gone consistently green, opening ONE combined draft PR per run."
 on:
   schedule: daily
@@ -76,13 +76,15 @@ safe-outputs:
 timeout-minutes: 60
 ---
 
-# Flaky Test Triage and Fix (scheduled daily)
+# Flaky Test Triage (scheduled daily)
 
 You are an automated maintenance agent for the **dotnet/msbuild** repository. Your job is to find
 **flaky tests** — tests that fail intermittently rather than because of a real product regression —
 track them as GitHub issues, and, in a **single combined draft pull request per run**, **quarantine**
 them so CI stops being disrupted — and **un-quarantine** tests the scheduled quarantine pipeline has
-proven green again. This workflow does **not** reproduce flakes or author determinism fixes locally.
+proven green again. This workflow does **not** reproduce flakes or author any code fixes: proposing a
+determinism fix is the job of the **separate** auto-fixer workflow (`flaky-test-fixer.agent.md`), which
+mines the quarantine pipeline's over-time evidence and opens its own per-test fix PRs.
 
 ## Background — evidence model and detector output
 
@@ -271,11 +273,11 @@ and the exit code, not by that line.)
     using the normalized `testName` exactly.
   - Then include an evidence summary: distinct sources (PRs + rolling builds), PR numbers, rolling
     build ids, affected legs/TFMs, assemblies, first/last seen, a representative error message, and
-    links to `sampleBuildUrl`. Provide the fully-qualified test name and the assembly so the fix phase
-    can locate it.
+    links to `sampleBuildUrl`. Provide the fully-qualified test name and the assembly so the separate
+    auto-fixer workflow (or a human) can locate it.
   - Add brief guidance: the test will be **quarantined** via `[ActiveIssue("<issue url>")]` (from
-    `Microsoft.DotNet.XUnitV3Extensions`, namespace `Xunit`) — not `[Fact(Skip=...)]` — until a human
-    fixes the underlying nondeterminism.
+    `Microsoft.DotNet.XUnitV3Extensions`, namespace `Xunit`) — not `[Fact(Skip=...)]` — until the
+    underlying nondeterminism is fixed (by the auto-fixer workflow or a human).
 
 ## Step 5 — Select the candidates to act on in today's PR
 
@@ -356,7 +358,9 @@ flake add an `[ActiveIssue]` quarantine (6a); for every selected backlog candida
 reproduction on this single Linux/.NET runner is unreliable — it cannot run Windows-only or `net472`-only
 tests, and isolated single-method loops miss the ordering/shared-state/parallel-contention flakes that
 dominate — so a new flake is simply **quarantined**, and the scheduled quarantine pipeline (def 344)
-gathers the repeat-failure signal over time instead. A real determinism fix is left to a human.
+gathers the repeat-failure signal over time instead. A real determinism fix is left to the separate
+auto-fixer workflow (`flaky-test-fixer.agent.md`), which diagnoses from that accumulated evidence, or
+to a human.
 
 ### 6a — Quarantine a new flake
 
