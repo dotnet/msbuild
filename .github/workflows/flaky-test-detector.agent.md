@@ -196,6 +196,13 @@ recently-closed), e.g. via the `github` tools or:
 gh issue list --repo dotnet/msbuild --state all --search '"<!-- flaky-test-id: <testName> -->" in:body' --json number,state,title
 ```
 
+Older tracking issues may **predate the marker convention** and have none, so if the marker search
+finds nothing, also fall back to a **title search** for the test's short name before concluding no
+issue exists (e.g. `gh issue list --repo dotnet/msbuild --state all --search '<shortName> in:title'`)
+— this avoids re-filing a duplicate of a pre-existing issue. (Note: the sandboxed `gh` may print a
+benign `Malformed version:` warning to stderr; it is harmless — judge success by the JSON on stdout
+and the exit code, not by that line.)
+
 - **If a related issue is OPEN:** post an `add_comment` to that issue number with the **new** evidence
   (latest sources, build URLs, dates, legs/TFMs). Do not open a duplicate.
 - **If a related issue exists but is CLOSED recently** (e.g. within ~30 days): do **not** open a
@@ -216,10 +223,15 @@ gh issue list --repo dotnet/msbuild --state all --search '"<!-- flaky-test-id: <
   - **If every failure predates the fix/close**, the evidence is stale: do **not** comment, do **not**
     reopen, and treat the test as already-handled for this run (skip it in Steps 5–7). At most note it
     under a "stale (pre-fix) — no action" line in the run summary.
-- **Otherwise (no related issue):** create exactly one issue via `create_issue`:
+- **Otherwise (no related issue):** create exactly one issue via `create_issue`. **Note:**
+  `create_issue` is a *safe output* — the issue is filed by a post-run job and the tool returns **no
+  issue number** during this run. Do **not** try to look up the number afterward, and do **not**
+  quarantine this test this run (see Step 5 — it becomes quarantine-eligible next run). Just file it:
   - Title: the test's short name (the `[Flaky Test] ` prefix is added automatically), e.g.
     `Microsoft.Build.Engine.UnitTests.SomeClass.SomeMethod`.
-  - Body **must** start with the hidden stable marker on its own line so future runs can find it:
+  - Body **must** start with the hidden stable marker on its own line, copied **exactly** (the
+    `-id` is required — `<!-- flaky-test: ... -->` without `-id` will not be found by future runs and
+    causes duplicate issues):
     ```
     <!-- flaky-test-id: <testName> -->
     ```
@@ -238,9 +250,17 @@ Build the set of tests to fix or quarantine in today's combined PR. A candidate 
 of these hold:
 
 - It was classified as a **likely flake** in Step 3 (never act on a regression).
-- It has an **OPEN** `flaky-test` tracking issue (the one created or updated in Step 4). Do **not** use a
-  recently-*closed* issue as the quarantine target — an `[ActiveIssue]` URL must point at an open issue.
-  If only a closed issue exists, skip the test from today's PR (Step 4 already commented on it).
+- It has a `flaky-test` tracking issue that was **already OPEN before this run started** (a
+  pre-existing issue found in Step 4, with a real issue number you can read **now**). A brand-new
+  issue you filed via `create_issue` **this run does not count** — safe-output issues are created by a
+  post-run job and **return no number during the agent run**, so you cannot reference one in an
+  `[ActiveIssue(".../issues/<NNNN>")]` attribute yet. **Do not** attempt to discover the number of an
+  issue you just created (it does not exist yet — polling `gh issue list` / `gh api` / guessing ranges
+  for it is wasted effort that can exhaust the run's token budget). Such a test was tracked this run
+  and becomes quarantine-eligible on the **next** run, once its issue is open with a real number. Do
+  **not** use a recently-*closed* issue as the quarantine target either — an `[ActiveIssue]` URL must
+  point at an issue that is open and already has a number. If only a just-created or closed issue
+  exists, skip the test from today's PR (Step 4 already filed/commented).
 - It is **not already covered by an open `flaky-test` PR** (this is the primary cross-run dedup — a
   previous run's combined PR may still be open and unmerged, and its quarantines live on **that PR's
   branch, not `main`**, so they will not show up in your fresh `main` checkout). Fetch the bodies of all
