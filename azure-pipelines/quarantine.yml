@@ -22,9 +22,13 @@
 # [ActiveIssue("...", TestPlatforms.Linux)]) are re-validated on that platform. The Windows leg
 # covers .NET Framework (net472) and .NET; the Linux/macOS legs cover .NET only (matching CI).
 
-# Only run on a schedule (and manual queue); never on PRs or CI pushes.
+# Runs on a schedule (and manual queue), and on pull requests targeting `main` (so a fix PR's effect
+# on the quarantined tests is validated on the PR itself). Never on CI pushes.
 trigger: none
-pr: none
+pr:
+  branches:
+    include:
+    - main
 
 schedules:
 - cron: "0 8,20 * * *"
