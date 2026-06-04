@@ -255,6 +255,16 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 // Check for Type.Parse(item.ItemSpec) and Convert.ToType(item.ItemSpec)
                 string? suggestedTypeArg = GetParsedTypeFromMethod(method);
+
+                // Check for TaskEnvironment.GetAbsolutePath(item.ItemSpec)
+                if (suggestedTypeArg is null &&
+                    taskEnvironmentType is not null &&
+                    method.Name == "GetAbsolutePath" &&
+                    SymbolEqualityComparer.Default.Equals(method.ContainingType, taskEnvironmentType))
+                {
+                    suggestedTypeArg = "AbsolutePath";
+                }
+
                 if (suggestedTypeArg is not null)
                 {
                     var (sourceProp, _) = FindItemSpecSource(invocation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
