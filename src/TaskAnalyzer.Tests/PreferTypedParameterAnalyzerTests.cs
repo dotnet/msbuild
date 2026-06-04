@@ -128,6 +128,52 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
     }
 
+    [Fact]
+    public async Task PathCombine_WithStringProp_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string BasePath { get; set; } = "";
+                public override bool Execute()
+                {
+                    var combined = Path.Combine(BasePath, "sub", "file.txt");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
+        diags.Length.ShouldBe(1);
+        diags[0].GetMessage().ShouldContain("BasePath");
+    }
+
+    [Fact]
+    public async Task HelperMethodWrapping_StringProp_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string InputPath { get; set; } = "";
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(FixPath(InputPath));
+                    return true;
+                }
+                private static string FixPath(string p) => p.Replace('/', '\\');
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
+        diags.Length.ShouldBe(1);
+        diags[0].GetMessage().ShouldContain("InputPath");
+    }
+
     // ── Negative cases for MSBuildTask0006 ──
 
     [Fact]
@@ -448,6 +494,52 @@ public class PreferTypedParameterAnalyzerTests
             """);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+    }
+
+    [Fact]
+    public async Task PathCombine_WithItemSpec_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem OutputDir { get; set; } = null!;
+                public ITaskItem OutputFile { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var combined = Path.Combine(OutputDir.ItemSpec, OutputFile.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).Count().ShouldBeGreaterThanOrEqualTo(1);
+    }
+
+    [Fact]
+    public async Task HelperMethodWrapping_ItemSpec_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public ITaskItem FileItem { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var abs = TaskEnvironment.GetAbsolutePath(FixPath(FileItem.ItemSpec));
+                    return true;
+                }
+                private static string FixPath(string p) => p.Replace('/', '\\');
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+        diags.Length.ShouldBe(1);
+        diags[0].GetMessage().ShouldContain("FileItem");
     }
 
     // ── Negative cases for MSBuildTask0007 ──

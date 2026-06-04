@@ -300,6 +300,44 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
                 }
             }
+
+            // Path.Combine(...) with any argument tracing to a task input property
+            if (method.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                method.Name == "Combine" &&
+                invocation.Arguments.Length >= 2)
+            {
+                foreach (var arg in invocation.Arguments)
+                {
+                    // MSBuildTask0006: Path.Combine(stringProp, ...) or Path.Combine(..., stringProp)
+                    if (stringInputProps.Count > 0)
+                    {
+                        var sourceProp = FindSourceProperty(arg.Value, stringInputProps);
+                        if (sourceProp is not null)
+                        {
+                            context.ReportDiagnostic(Diagnostic.Create(
+                                DiagnosticDescriptors.PreferTypedPathParameter,
+                                invocation.Syntax.GetLocation(),
+                                sourceProp.Name, "string", "AbsolutePath"));
+                            break;
+                        }
+                    }
+
+                    // MSBuildTask0007: Path.Combine(item.ItemSpec, ...) or Path.Combine(..., item.ItemSpec)
+                    if (taskItemInputProps.Count > 0 && iTaskItemType is not null)
+                    {
+                        var (itemProp, _) = FindItemSpecSource(arg.Value, taskItemInputProps, iTaskItemType);
+                        if (itemProp is not null)
+                        {
+                            string currentType = itemProp.Type is IArrayTypeSymbol ? "ITaskItem[]" : "ITaskItem";
+                            context.ReportDiagnostic(Diagnostic.Create(
+                                DiagnosticDescriptors.PreferTypedTaskItem,
+                                invocation.Syntax.GetLocation(),
+                                itemProp.Name, currentType, "AbsolutePath"));
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -384,6 +422,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
+            // One level of method call wrapping: SomeMethod(stringProp)
+            // e.g., FileUtilities.FixFilePath(stringProp)
+            if (operation is IInvocationOperation wrappingCall && wrappingCall.Arguments.Length > 0)
+            {
+                foreach (var arg in wrappingCall.Arguments)
+                {
+                    var result = FindSourcePropertyDirect(arg.Value, candidateProps);
+                    if (result is not null)
+                    {
+                        return result;
+                    }
+                }
+            }
+
             return null;
         }
 
@@ -412,6 +464,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// Checks if the given operation is an access to .ItemSpec on an ITaskItem
         /// that traces back to one of the collected task input properties.
         /// Returns the source property and whether it came from an array element.
+        /// Also traces through one level of method call wrapping (e.g., FixFilePath(item.ItemSpec)).
         /// </summary>
         private static (IPropertySymbol? sourceProp, bool fromArray) FindItemSpecSource(
             IOperation operation,
@@ -445,6 +498,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
 
                 return (null, false);
+            }
+
+            // One level of method call wrapping: SomeMethod(item.ItemSpec)
+            // e.g., FileUtilities.FixFilePath(item.ItemSpec)
+            if (operation is IInvocationOperation wrappingCall && wrappingCall.Arguments.Length > 0)
+            {
+                foreach (var arg in wrappingCall.Arguments)
+                {
+                    var result = FindItemSpecSourceDirect(arg.Value, taskItemInputProps, iTaskItemType);
+                    if (result.sourceProp is not null)
+                    {
+                        return result;
+                    }
+                }
             }
 
             return FindItemSpecSourceDirect(operation, taskItemInputProps, iTaskItemType);
