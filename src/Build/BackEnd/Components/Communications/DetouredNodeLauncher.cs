@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd
         /// Creates environment variables with optional overrides for app host bootstrap.
         /// </summary>
 #nullable enable annotations
-        private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string?> environmentOverrides)
+        private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string?>? environmentOverrides)
 #nullable disable annotations
         {
             var envVars = new Dictionary<string, string>();
