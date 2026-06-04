@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -126,19 +127,77 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
 
+                // Collect diagnostics during operation analysis, then deduplicate in SymbolEndAction.
+                // This allows suppressing AbsolutePath suggestions when a more specific
+                // FileInfo/DirectoryInfo suggestion exists for the same property.
+                var pendingDiagnostics = new ConcurrentBag<Diagnostic>();
+
                 symbolStartContext.RegisterOperationAction(ctx =>
                 {
-                    AnalyzeOperation(ctx, stringInputProps, taskItemInputProps,
+                    AnalyzeOperation(ctx, pendingDiagnostics, stringInputProps, taskItemInputProps,
                         absolutePathType, taskEnvironmentType, iTaskItemType,
                         fileInfoType, directoryInfoType);
                 },
                 OperationKind.ObjectCreation,
                 OperationKind.Invocation);
+
+                symbolStartContext.RegisterSymbolEndAction(endCtx =>
+                {
+                    // Group diagnostics by property name + rule ID, then suppress AbsolutePath
+                    // suggestions when a FileInfo/DirectoryInfo suggestion exists for the same property.
+                    var diagnosticsList = pendingDiagnostics.ToList();
+
+                    // Find properties that have FileInfo or DirectoryInfo suggestions
+                    var propsWithSpecificType = new HashSet<string>();
+                    foreach (var diag in diagnosticsList)
+                    {
+                        string message = diag.GetMessage();
+                        if (message.Contains("FileInfo") || message.Contains("DirectoryInfo"))
+                        {
+                            // Extract property name from message format: "... property '{0}' from ..."
+                            int startIdx = message.IndexOf('\'');
+                            if (startIdx >= 0)
+                            {
+                                int endIdx = message.IndexOf('\'', startIdx + 1);
+                                if (endIdx > startIdx)
+                                {
+                                    string propName = message.Substring(startIdx + 1, endIdx - startIdx - 1);
+                                    propsWithSpecificType.Add(diag.Id + "|" + propName);
+                                }
+                            }
+                        }
+                    }
+
+                    foreach (var diag in diagnosticsList)
+                    {
+                        string message = diag.GetMessage();
+                        // Suppress AbsolutePath suggestions when FileInfo/DirectoryInfo exists for same property
+                        if (message.Contains("AbsolutePath") && propsWithSpecificType.Count > 0)
+                        {
+                            int startIdx = message.IndexOf('\'');
+                            if (startIdx >= 0)
+                            {
+                                int endIdx = message.IndexOf('\'', startIdx + 1);
+                                if (endIdx > startIdx)
+                                {
+                                    string propName = message.Substring(startIdx + 1, endIdx - startIdx - 1);
+                                    if (propsWithSpecificType.Contains(diag.Id + "|" + propName))
+                                    {
+                                        continue; // Suppress — more specific type available
+                                    }
+                                }
+                            }
+                        }
+
+                        endCtx.ReportDiagnostic(diag);
+                    }
+                });
             }, SymbolKind.NamedType);
         }
 
         private static void AnalyzeOperation(
             OperationAnalysisContext context,
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
             HashSet<IPropertySymbol> stringInputProps,
             HashSet<IPropertySymbol> taskItemInputProps,
             INamedTypeSymbol? absolutePathType,
@@ -150,12 +209,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             switch (context.Operation)
             {
                 case IObjectCreationOperation creation:
-                    AnalyzeObjectCreation(context, creation, stringInputProps, taskItemInputProps,
+                    AnalyzeObjectCreation(pendingDiagnostics, creation, stringInputProps, taskItemInputProps,
                         absolutePathType, taskEnvironmentType, iTaskItemType, fileInfoType, directoryInfoType);
                     break;
 
                 case IInvocationOperation invocation:
-                    AnalyzeInvocation(context, invocation, stringInputProps, taskItemInputProps,
+                    AnalyzeInvocation(pendingDiagnostics, invocation, stringInputProps, taskItemInputProps,
                         absolutePathType, taskEnvironmentType, iTaskItemType,
                         fileInfoType, directoryInfoType);
                     break;
@@ -163,7 +222,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         private static void AnalyzeObjectCreation(
-            OperationAnalysisContext context,
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
             IObjectCreationOperation creation,
             HashSet<IPropertySymbol> stringInputProps,
             HashSet<IPropertySymbol> taskItemInputProps,
@@ -201,7 +260,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     var sourceProp = FindSourceProperty(creation.Arguments[0].Value, stringInputProps);
                     if (sourceProp is not null)
                     {
-                        context.ReportDiagnostic(Diagnostic.Create(
+                        pendingDiagnostics.Add(Diagnostic.Create(
                             DiagnosticDescriptors.PreferTypedPathParameter,
                             creation.Syntax.GetLocation(),
                             sourceProp.Name, "string", suggestedType));
@@ -235,7 +294,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         bool isArray = sourceProp.Type is IArrayTypeSymbol;
                         string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                        context.ReportDiagnostic(Diagnostic.Create(
+                        pendingDiagnostics.Add(Diagnostic.Create(
                             DiagnosticDescriptors.PreferTypedTaskItem,
                             creation.Syntax.GetLocation(),
                             sourceProp.Name, currentType, suggestedTypeArg, isArray ? "[]" : ""));
@@ -251,7 +310,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             bool isArray = itemProp.Type is IArrayTypeSymbol;
                             string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                            context.ReportDiagnostic(Diagnostic.Create(
+                            pendingDiagnostics.Add(Diagnostic.Create(
                                 DiagnosticDescriptors.PreferTypedTaskItem,
                                 creation.Syntax.GetLocation(),
                                 itemProp.Name, currentType, suggestedTypeArg, isArray ? "[]" : ""));
@@ -262,7 +321,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         private static void AnalyzeInvocation(
-            OperationAnalysisContext context,
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
             IInvocationOperation invocation,
             HashSet<IPropertySymbol> stringInputProps,
             HashSet<IPropertySymbol> taskItemInputProps,
@@ -284,7 +343,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var sourceProp = FindSourceProperty(invocation.Arguments[0].Value, stringInputProps);
                 if (sourceProp is not null)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(
+                    pendingDiagnostics.Add(Diagnostic.Create(
                         DiagnosticDescriptors.PreferTypedPathParameter,
                         invocation.Syntax.GetLocation(),
                         sourceProp.Name, "string", "AbsolutePath"));
@@ -314,7 +373,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         bool isArray = sourceProp.Type is IArrayTypeSymbol;
                         string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                        context.ReportDiagnostic(Diagnostic.Create(
+                        pendingDiagnostics.Add(Diagnostic.Create(
                             DiagnosticDescriptors.PreferTypedTaskItem,
                             invocation.Syntax.GetLocation(),
                             sourceProp.Name, currentType, suggestedTypeArg, isArray ? "[]" : ""));
@@ -335,7 +394,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         var sourceProp = FindSourceProperty(arg.Value, stringInputProps);
                         if (sourceProp is not null)
                         {
-                            context.ReportDiagnostic(Diagnostic.Create(
+                            pendingDiagnostics.Add(Diagnostic.Create(
                                 DiagnosticDescriptors.PreferTypedPathParameter,
                                 invocation.Syntax.GetLocation(),
                                 sourceProp.Name, "string", "AbsolutePath"));
@@ -351,7 +410,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             bool isArray = itemProp.Type is IArrayTypeSymbol;
                             string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                            context.ReportDiagnostic(Diagnostic.Create(
+                            pendingDiagnostics.Add(Diagnostic.Create(
                                 DiagnosticDescriptors.PreferTypedTaskItem,
                                 invocation.Syntax.GetLocation(),
                                 itemProp.Name, currentType, "AbsolutePath", isArray ? "[]" : ""));

@@ -589,11 +589,11 @@ public class PreferTypedParameterAnalyzerTests
             }
             """);
 
-        // Should get MSBuildTask0007 for GetAbsolutePath(item.ItemSpec) AND for new DirectoryInfo(abs)
+        // The AbsolutePath suggestion should be suppressed in favor of DirectoryInfo
         var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
-        task7.Length.ShouldBeGreaterThanOrEqualTo(1);
-        // At least one diagnostic should suggest DirectoryInfo
-        task7.ShouldContain(d => d.GetMessage().Contains("DirectoryInfo"));
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("DirectoryInfo");
+        task7[0].GetMessage().ShouldNotContain("AbsolutePath");
     }
 
     [Fact]
@@ -617,8 +617,9 @@ public class PreferTypedParameterAnalyzerTests
             """);
 
         var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
-        task7.Length.ShouldBeGreaterThanOrEqualTo(1);
-        task7.ShouldContain(d => d.GetMessage().Contains("FileInfo"));
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("FileInfo");
+        task7[0].GetMessage().ShouldNotContain("AbsolutePath");
     }
 
     // ── Negative cases for MSBuildTask0007 ──
