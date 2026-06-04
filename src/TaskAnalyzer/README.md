@@ -147,10 +147,18 @@ public class MyTask : Task
         {
             int v = int.Parse(item.ItemSpec);             // flagged (suggests ITaskItem<int>[])
         }
+
+        // FileInfo/DirectoryInfo through AbsolutePath intermediary:
+        AbsolutePath absPath = TaskEnvironment.GetAbsolutePath(Item.ItemSpec);
+        var fi = new FileInfo(absPath);                   // flagged (suggests ITaskItem<FileInfo>)
+        var di = new DirectoryInfo(absPath);              // flagged (suggests ITaskItem<DirectoryInfo>)
+
         return true;
     }
 }
 ```
+
+**Array properties:** When the source property is `ITaskItem[]`, the suggestion correctly formats as `ITaskItem<T>[]` (brackets outside the angle brackets), e.g., `ITaskItem<AbsolutePath>[]`.
 
 **Not flagged:** Metadata access (`item.GetMetadata(...)`), `[Output]` properties, non-task classes.
 
@@ -299,7 +307,7 @@ dotnet test
 | `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
 | `DiagnosticDescriptors.cs` | Seven diagnostic descriptors in category `MSBuild.TaskAuthoring` |
 | `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0007` |
-| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006 and MSBuildTask0007 — detects manual path construction and ItemSpec parsing |
+| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006 and MSBuildTask0007 — detects manual path construction, ItemSpec parsing, Path.Combine usage, helper method wrapping, and FileInfo/DirectoryInfo construction through AbsolutePath intermediaries |
 
 ### Performance
 
