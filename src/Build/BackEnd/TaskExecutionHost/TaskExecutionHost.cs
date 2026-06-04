@@ -795,7 +795,15 @@ namespace Microsoft.Build.BackEnd
             Type constructedType = typeof(TaskItem<>).MakeGenericType(valueType);
             ConstructorInfo constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
 
-            return constructor.Invoke(new object[] { item });
+            try
+            {
+                return constructor.Invoke(new object[] { item });
+            }
+            catch (TargetInvocationException e) when (e.InnerException is not null)
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                throw;
+            }
         }
 
         /// <summary>
