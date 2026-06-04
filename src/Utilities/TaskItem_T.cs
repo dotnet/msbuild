@@ -6,6 +6,10 @@ using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+// Alias to avoid ambiguity: within TaskItem<T>, "TaskItem" refers to this generic struct;
+// use TaskItemImpl to refer to the non-generic Utilities.TaskItem class.
+using TaskItemImpl = Microsoft.Build.Utilities.TaskItem;
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -36,9 +40,9 @@ namespace Microsoft.Build.Utilities
         {
             Value = value;
 
-            // Create a backing item with the stringified value as ItemSpec
+            // Use a mutable TaskItem as backing so metadata mutations are supported
             string itemSpec = ValueTypeParser.ToString(value);
-            _backingItem = new TaskItemData(itemSpec, null);
+            _backingItem = new TaskItemImpl(itemSpec);
         }
 
         /// <summary>
