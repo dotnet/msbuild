@@ -15,7 +15,6 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class TaskParameterTypeVerifier
     {
-#if !TASKHOST
         /// <summary>
         /// Checks if a type is ITaskItem&lt;T&gt; where T is a value type.
         /// </summary>
@@ -41,7 +40,6 @@ namespace Microsoft.Build.BackEnd
             Type typeArg = genericArguments[0];
             return typeArg.GetTypeInfo().IsValueType || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
         }
-#endif
 
         /// <summary>
         /// Is the parameter type a valid scalar input value
@@ -50,12 +48,10 @@ namespace Microsoft.Build.BackEnd
             parameterType.GetTypeInfo().IsValueType ||
             parameterType == typeof(string) ||
             parameterType == typeof(ITaskItem)
-#if !TASKHOST
             || parameterType == typeof(AbsolutePath)
             || parameterType == typeof(FileInfo)
             || parameterType == typeof(DirectoryInfo)
             || IsTaskItemOfT(parameterType)
-#endif
             ;
 
         /// <summary>
@@ -73,12 +69,10 @@ namespace Microsoft.Build.BackEnd
             bool result = elementType.GetTypeInfo().IsValueType ||
                         parameterType == typeof(string[]) ||
                         parameterType == typeof(ITaskItem[])
-#if !TASKHOST
                         || parameterType == typeof(AbsolutePath[])
                         || parameterType == typeof(FileInfo[])
                         || parameterType == typeof(DirectoryInfo[])
                         || IsTaskItemOfT(elementType)
-#endif
                         ;
             return result;
         }
@@ -92,7 +86,6 @@ namespace Microsoft.Build.BackEnd
             bool result = typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(parameterType.GetTypeInfo()) ||    /* ITaskItem array or derived type, or */
                           typeof(ITaskItem).IsAssignableFrom(parameterType);                                    /* ITaskItem or derived type */
 
-#if !TASKHOST
             // Also check for TaskItem<T> or TaskItem<T>[]
             if (!result)
             {
@@ -105,7 +98,6 @@ namespace Microsoft.Build.BackEnd
                     result = IsTaskItemOfT(parameterType);
                 }
             }
-#endif
 
             return result;
         }
@@ -117,18 +109,14 @@ namespace Microsoft.Build.BackEnd
         {
             bool result = (parameterType.IsArray && parameterType.GetElementType().GetTypeInfo().IsValueType) ||    /* array of value types, or */
                           parameterType == typeof(string[]) ||                                                      /* string array, or */
-#if !TASKHOST
                           parameterType == typeof(AbsolutePath[]) ||                                                /* AbsolutePath array, or */
                           parameterType == typeof(FileInfo[]) ||                                                    /* FileInfo array, or */
                           parameterType == typeof(DirectoryInfo[]) ||                                               /* DirectoryInfo array, or */
-#endif
                           parameterType.GetTypeInfo().IsValueType ||                                                /* value type, or */
                           parameterType == typeof(string)                                                           /* string, or */
-#if !TASKHOST
                           || parameterType == typeof(AbsolutePath)                                                  /* AbsolutePath, or */
                           || parameterType == typeof(FileInfo)                                                      /* FileInfo, or */
                           || parameterType == typeof(DirectoryInfo)                                                 /* DirectoryInfo */
-#endif
                           ;
             return result;
         }
