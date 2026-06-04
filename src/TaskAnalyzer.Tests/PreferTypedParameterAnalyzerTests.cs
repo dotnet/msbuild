@@ -350,6 +350,28 @@ public class PreferTypedParameterAnalyzerTests
     }
 
     [Fact]
+    public async Task GetAbsolutePath_FromItemSpec_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public IBuildEngine BuildEngine { get; set; } = null!;
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+                public ITaskItem PathItem { get; set; } = null!;
+                public bool Execute()
+                {
+                    var abs = TaskEnvironment.GetAbsolutePath(PathItem.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+        diags[0].GetMessage().ShouldContain("AbsolutePath");
+    }
+
+    [Fact]
     public async Task IntParse_FromItemSpec_WithLocalIndirection_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
