@@ -565,9 +565,8 @@ public class PreferTypedParameterAnalyzerTests
 
         var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
         task7.Length.ShouldBeGreaterThanOrEqualTo(1);
-        // Should suggest array type, not singular
-        task7.ShouldContain(d => d.GetMessage().Contains("AbsolutePath[]"));
-        task7.ShouldNotContain(d => d.GetMessage().Contains("'AbsolutePath'") && !d.GetMessage().Contains("[]"));
+        // Should suggest ITaskItem<AbsolutePath>[] — brackets outside the angle brackets
+        task7.ShouldContain(d => d.GetMessage().Contains("ITaskItem<AbsolutePath>[]"));
     }
 
     [Fact]
