@@ -1243,17 +1243,29 @@ namespace Microsoft.Build.Evaluation
                     // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
                     // an exception when we go to actually add the newly created project to the ProjectCollection.
                     // BUT remember that project global properties win -- don't override a property that already exists.
+                    //
+                    // Merge into a per-call copy rather than mutating the caller-owned dictionary. Loads for different
+                    // paths run in parallel (they do not share a path lock), so a caller that passes one shared
+                    // dictionary instance into concurrent LoadProject calls would otherwise race on Dictionary.Add.
+                    // Preserve the caller's comparer so de-duplication and project matching keep identical semantics.
+                    IEqualityComparer<string> comparer = globalProperties is Dictionary<string, string> typedProperties
+                        ? typedProperties.Comparer
+                        : StringComparer.Ordinal;
+                    var mergedProperties = new Dictionary<string, string>(globalProperties, comparer);
+
                     using (_locker.EnterDisposableReadLock())
                     {
                         foreach (ProjectPropertyInstance globalProperty in _globalProperties)
                         {
                             string name = globalProperty.Name;
-                            if (!globalProperties.ContainsKey(name))
+                            if (!mergedProperties.ContainsKey(name))
                             {
-                                globalProperties.Add(name, ((IProperty)globalProperty).EvaluatedValueEscaped);
+                                mergedProperties.Add(name, ((IProperty)globalProperty).EvaluatedValueEscaped);
                             }
                         }
                     }
+
+                    globalProperties = mergedProperties;
                 }
 
                 // We do not control the current directory at this point, but assume that if we were
