@@ -577,6 +577,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Validate that parse failures from TaskItem&lt;T&gt; scalar binding are reported as invalid task parameter values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamInvalidValue()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemIntParam"] = ("not-an-int", ElementLocation.Create("foo.proj"));
+
+            Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+        }
+
+        /// <summary>
         /// Validate that setting the parameter with an empty value does not cause it to be set.
         /// </summary>
         [Fact]
@@ -627,6 +639,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new Microsoft.Build.Utilities.TaskItem<int>(20),
                 new Microsoft.Build.Utilities.TaskItem<int>(30)
             });
+        }
+
+        /// <summary>
+        /// Validate that parse failures from TaskItem&lt;T&gt; array binding are reported as invalid task parameter values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamInvalidValue()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemIntArrayParam"] = ("10;not-an-int", ElementLocation.Create("foo.proj"));
+
+            Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
         }
 
         /// <summary>
