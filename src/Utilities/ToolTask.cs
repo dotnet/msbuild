@@ -768,8 +768,8 @@ namespace Microsoft.Build.Utilities
 
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
-                _standardOutputEOF = new ManualResetEvent(false);
-                _standardErrorEOF = new ManualResetEvent(false);
+                // One count each for the stdout and stderr EOF notifications.
+                _eofCountdown = new CountdownEvent(2);
             }
 
             _toolExited = new ManualResetEvent(false);
@@ -865,8 +865,8 @@ namespace Microsoft.Build.Utilities
                     _standardErrorDataAvailable.Dispose();
                     _standardOutputDataAvailable.Dispose();
 
-                    _standardOutputEOF?.Dispose();
-                    _standardErrorEOF?.Dispose();
+                    _eofCountdown?.Dispose();
+                    _eofCountdown = null;
 
                     _toolExited.Dispose();
                     _toolTimeoutExpired.Dispose();
@@ -1131,8 +1131,11 @@ namespace Microsoft.Build.Utilities
                 // EOF never arrives because grand child inherited the pipe and keeps it open.
                 const int eofTimeoutSec = 30;
 
-                WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                bool allEOFReceived = WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                // CountdownEvent.Wait is STA-safe (it falls back to a single-handle wait),
+                // unlike WaitHandle.WaitAll over multiple handles which throws
+                // NotSupportedException on STA threads (for example when a task such as
+                // AspNetCompiler runs on an STA thread).
+                bool allEOFReceived = _eofCountdown.Wait(TimeSpan.FromSeconds(eofTimeoutSec));
                 if (!allEOFReceived)
                 {
                     // Timeout: a grandchild process likely still holds the pipe open.
@@ -1315,18 +1318,14 @@ namespace Microsoft.Build.Utilities
         {
             if (e.Data == null)
             {
-                // The AsyncStreamReader sends Data=null when the pipe reaches EOF.
-                // Signal the appropriate EOF event so WaitForProcessExit knows
-                // all data from this stream has been delivered.
-                ManualResetEvent eofEvent = (dataQueue == _standardErrorData) ? _standardErrorEOF : _standardOutputEOF;
-                if (eofEvent != null)
+                // The AsyncStreamReader sends Data=null exactly once per stream when the
+                // pipe reaches EOF. Count it down so WaitForProcessExit knows when all
+                // data from both streams has been delivered.
+                lock (_eventCloseLock)
                 {
-                    lock (_eventCloseLock)
+                    if (!_eventsDisposed && _eofCountdown is { IsSet: false })
                     {
-                        if (!_eventsDisposed)
-                        {
-                            eofEvent.Set();
-                        }
+                        _eofCountdown.Signal();
                     }
                 }
 
@@ -1869,16 +1868,11 @@ namespace Microsoft.Build.Utilities
         private bool _eventsDisposed;
 
         /// <summary>
-        /// Signalled when the stdout AsyncStreamReader reaches EOF (sends Data=null).
-        /// Used by WaitForProcessExit to know when all stdout data has been delivered.
+        /// Counts down once for each of stdout/stderr when its AsyncStreamReader reaches
+        /// EOF (sends Data=null). Used by WaitForProcessExit to know when all data from
+        /// both streams has been delivered.
         /// </summary>
-        private ManualResetEvent _standardOutputEOF;
-
-        /// <summary>
-        /// Signalled when the stderr AsyncStreamReader reaches EOF (sends Data=null).
-        /// Used by WaitForProcessExit to know when all stderr data has been delivered.
-        /// </summary>
-        private ManualResetEvent _standardErrorEOF;
+        private CountdownEvent _eofCountdown;
 
         /// <summary>
         /// List of name, value pairs to be passed to the spawned tool's environment.
