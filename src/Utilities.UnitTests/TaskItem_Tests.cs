@@ -472,5 +472,26 @@ namespace Microsoft.Build.UnitTests
             source.CopyMetadataTo(dest);
             dest.GetMetadata("key").ShouldBe("value");
         }
+
+        [Fact]
+        public void FromITaskItem_PathLikeType_UsesFullPathMetadata()
+        {
+            // FullPath is a reserved metadata computed by the MSBuild item system as the absolute path.
+            // TaskItem<FileInfo> should use FullPath so relative ItemSpecs resolve to absolute paths.
+            var backingItem = new TaskItem("relative\\path.txt");
+            string expectedAbsolutePath = backingItem.GetMetadata("FullPath");
+            expectedAbsolutePath.ShouldNotBeNullOrEmpty();
+
+            var item = new TaskItem<System.IO.FileInfo>(backingItem);
+            item.Value.FullName.ShouldBe(expectedAbsolutePath);
+        }
+
+        [Fact]
+        public void FromITaskItem_NonPathType_UsesItemSpec()
+        {
+            var backingItem = new TaskItem("42");
+            var item = new TaskItem<int>(backingItem);
+            item.Value.ShouldBe(42);
+        }
     }
 }
