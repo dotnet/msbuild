@@ -19,6 +19,8 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
+| **MSBuildTask0006** | Info | All `ITask` implementations | Prefer typed path parameter over string |
+| **MSBuildTask0007** | Info | All `ITask` implementations | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -97,16 +99,71 @@ These APIs may cause version conflicts or other issues in a shared task host.
 | `Activator.CreateInstanceFrom` | May cause version conflicts |
 | `AppDomain.Load`, `CreateInstance`, `CreateInstanceFrom` | May cause version conflicts |
 
+### MSBuildTask0006 — Prefer Typed Path Parameters
+
+When a task has a `string` input property and converts it to `AbsolutePath`, `FileInfo`, or `DirectoryInfo` inside the task body, the analyzer suggests changing the property type directly. MSBuild can bind these types automatically.
+
+**Detected patterns:**
+
+```csharp
+// ⚠️ MSBuildTask0006: Consider changing 'InputPath' from 'string' to 'AbsolutePath'
+public class MyTask : Task
+{
+    public string InputPath { get; set; }
+
+    public override bool Execute()
+    {
+        var abs = new AbsolutePath(InputPath);           // flagged
+        var abs2 = TaskEnvironment.GetAbsolutePath(InputPath); // flagged
+        var fi = new FileInfo(InputPath);                 // flagged (suggests FileInfo)
+        var di = new DirectoryInfo(InputPath);            // flagged (suggests DirectoryInfo)
+        return true;
+    }
+}
+```
+
+**Not flagged:** `[Output]` properties, non-public properties, read-only properties, values from method calls or literals.
+
+### MSBuildTask0007 — Prefer `ITaskItem<T>` Over ItemSpec Parsing
+
+When a task has an `ITaskItem` or `ITaskItem[]` input property and parses `ItemSpec` to a value type or path type, the analyzer suggests using `ITaskItem<T>` instead.
+
+**Detected patterns:**
+
+```csharp
+// ⚠️ MSBuildTask0007: Consider changing 'Item' from 'ITaskItem' to 'ITaskItem<int>'
+public class MyTask : Task
+{
+    public ITaskItem Item { get; set; }
+    public ITaskItem[] Items { get; set; }
+
+    public override bool Execute()
+    {
+        int value = int.Parse(Item.ItemSpec);             // flagged
+        bool flag = Convert.ToBoolean(Item.ItemSpec);     // flagged
+        var abs = new AbsolutePath(Item.ItemSpec);        // flagged (suggests ITaskItem<AbsolutePath>)
+
+        foreach (var item in Items)
+        {
+            int v = int.Parse(item.ItemSpec);             // flagged (suggests ITaskItem<int>[])
+        }
+        return true;
+    }
+}
+```
+
+**Not flagged:** Metadata access (`item.GetMetadata(...)`), `[Output]` properties, non-task classes.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005 |
-| Class implementing `IMultiThreadableTask` | All five rules |
-| Class with `[MSBuildMultiThreadableTask]` attribute | All five rules |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | All five rules |
+| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0007 |
+| Class implementing `IMultiThreadableTask` | All seven rules |
+| Class with `[MSBuildMultiThreadableTask]` attribute | All seven rules |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
 The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
@@ -117,6 +174,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0002–MSBuildTask0005** report as **Warning** for all task types.
+- **MSBuildTask0006–MSBuildTask0007** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
 
@@ -223,7 +281,7 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-111 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+135 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
 
 ```
 cd src/TaskAnalyzer.Tests
@@ -238,8 +296,9 @@ dotnet test
 | `MultiThreadableTaskCodeFixProvider.cs` | Code fixes for MSBuildTask0002 and MSBuildTask0003 |
 | `BannedApiDefinitions.cs` | ~50 banned API entries resolved via `DocumentationCommentId` for O(1) symbol lookup |
 | `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
-| `DiagnosticDescriptors.cs` | Five diagnostic descriptors in category `MSBuild.TaskAuthoring` |
-| `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0005` |
+| `DiagnosticDescriptors.cs` | Seven diagnostic descriptors in category `MSBuild.TaskAuthoring` |
+| `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0007` |
+| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006 and MSBuildTask0007 — detects manual path construction and ItemSpec parsing |
 
 ### Performance
 
