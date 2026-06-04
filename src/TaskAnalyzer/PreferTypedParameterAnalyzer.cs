@@ -233,11 +233,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     var (sourceProp, _) = FindItemSpecSource(creation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
                     if (sourceProp is not null)
                     {
-                        string currentType = sourceProp.Type is IArrayTypeSymbol ? "ITaskItem[]" : "ITaskItem";
+                        bool isArray = sourceProp.Type is IArrayTypeSymbol;
+                        string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
+                        string suggested = isArray ? suggestedTypeArg + "[]" : suggestedTypeArg;
                         context.ReportDiagnostic(Diagnostic.Create(
                             DiagnosticDescriptors.PreferTypedTaskItem,
                             creation.Syntax.GetLocation(),
-                            sourceProp.Name, currentType, suggestedTypeArg));
+                            sourceProp.Name, currentType, suggested));
                         return;
                     }
 
@@ -248,11 +250,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                             creation.Arguments[0].Value, taskItemInputProps, iTaskItemType, taskEnvironmentType);
                         if (itemProp is not null)
                         {
-                            string currentType = itemProp.Type is IArrayTypeSymbol ? "ITaskItem[]" : "ITaskItem";
+                            bool isArray = itemProp.Type is IArrayTypeSymbol;
+                            string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
+                            string suggested = isArray ? suggestedTypeArg + "[]" : suggestedTypeArg;
                             context.ReportDiagnostic(Diagnostic.Create(
                                 DiagnosticDescriptors.PreferTypedTaskItem,
                                 creation.Syntax.GetLocation(),
-                                itemProp.Name, currentType, suggestedTypeArg));
+                                itemProp.Name, currentType, suggested));
                         }
                     }
                 }
@@ -310,11 +314,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     var (sourceProp, _) = FindItemSpecSource(invocation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
                     if (sourceProp is not null)
                     {
-                        string currentType = sourceProp.Type is IArrayTypeSymbol ? "ITaskItem[]" : "ITaskItem";
+                        bool isArray = sourceProp.Type is IArrayTypeSymbol;
+                        string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
+                        string suggested = isArray ? suggestedTypeArg + "[]" : suggestedTypeArg;
                         context.ReportDiagnostic(Diagnostic.Create(
                             DiagnosticDescriptors.PreferTypedTaskItem,
                             invocation.Syntax.GetLocation(),
-                            sourceProp.Name, currentType, suggestedTypeArg));
+                            sourceProp.Name, currentType, suggested));
                     }
                 }
             }
@@ -346,11 +352,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         var (itemProp, _) = FindItemSpecSource(arg.Value, taskItemInputProps, iTaskItemType);
                         if (itemProp is not null)
                         {
-                            string currentType = itemProp.Type is IArrayTypeSymbol ? "ITaskItem[]" : "ITaskItem";
+                            bool isArray = itemProp.Type is IArrayTypeSymbol;
+                            string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
+                            string suggested = isArray ? "AbsolutePath[]" : "AbsolutePath";
                             context.ReportDiagnostic(Diagnostic.Create(
                                 DiagnosticDescriptors.PreferTypedTaskItem,
                                 invocation.Syntax.GetLocation(),
-                                itemProp.Name, currentType, "AbsolutePath"));
+                                itemProp.Name, currentType, suggested));
                             break;
                         }
                     }

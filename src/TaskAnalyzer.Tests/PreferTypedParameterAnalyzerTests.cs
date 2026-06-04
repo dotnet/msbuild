@@ -543,6 +543,34 @@ public class PreferTypedParameterAnalyzerTests
     }
 
     [Fact]
+    public async Task ArrayProperty_SuggestsArrayType()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public ITaskItem[] Directories { get; set; } = null!;
+                public override bool Execute()
+                {
+                    foreach (ITaskItem item in Directories)
+                    {
+                        AbsolutePath abs = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+                    }
+                    return true;
+                }
+            }
+            """);
+
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBeGreaterThanOrEqualTo(1);
+        // Should suggest array type, not singular
+        task7.ShouldContain(d => d.GetMessage().Contains("AbsolutePath[]"));
+        task7.ShouldNotContain(d => d.GetMessage().Contains("'AbsolutePath'") && !d.GetMessage().Contains("[]"));
+    }
+
+    [Fact]
     public async Task NewDirectoryInfo_FromAbsolutePathLocal_SuggestsDirectoryInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
