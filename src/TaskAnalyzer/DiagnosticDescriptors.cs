@@ -58,11 +58,31 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             description: "A method called from this task transitively uses an API that is unsafe in multithreaded task execution. Review the call chain and migrate the callee.",
             customTags: WellKnownDiagnosticTags.CompilationEnd);
 
+        public static readonly DiagnosticDescriptor PreferTypedPathParameter = new(
+            id: DiagnosticIds.PreferTypedPathParameter,
+            title: "Prefer typed path parameter over manual path construction",
+            messageFormat: "Consider changing task property '{0}' from '{1}' to '{2}' instead of converting inside the task body",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: true,
+            description: "MSBuild can bind AbsolutePath, FileInfo, and DirectoryInfo task parameters automatically. Using these types avoids manual path construction in the task body.");
+
+        public static readonly DiagnosticDescriptor PreferTypedTaskItem = new(
+            id: DiagnosticIds.PreferTypedTaskItem,
+            title: "Prefer ITaskItem<T> over manual ItemSpec parsing",
+            messageFormat: "Consider changing task property '{0}' from '{1}' to 'ITaskItem<{2}>' instead of parsing ItemSpec manually",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: true,
+            description: "MSBuild can bind ITaskItem<T> task parameters that provide a strongly-typed Value property parsed from ItemSpec. Using ITaskItem<T> avoids manual parsing in the task body.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
             FilePathRequiresAbsolute,
             PotentialIssue,
-            TransitiveUnsafeCall);
+            TransitiveUnsafeCall,
+            PreferTypedPathParameter,
+            PreferTypedTaskItem);
     }
 }

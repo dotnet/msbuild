@@ -50,6 +50,7 @@ internal static class TestHelpers
 
             public struct AbsolutePath
             {
+                public AbsolutePath(string path) { Value = path; OriginalValue = path; }
                 public string Value { get; }
                 public string OriginalValue { get; }
                 public static implicit operator string(AbsolutePath p) => p.Value;
@@ -61,12 +62,24 @@ internal static class TestHelpers
                 string GetMetadata(string metadataName);
             }
 
+            public interface ITaskItem2 : ITaskItem
+            {
+            }
+
+            public interface ITaskItem<T> : ITaskItem2
+            {
+                T Value { get; }
+            }
+
             public class TaskItem : ITaskItem
             {
                 public string ItemSpec { get; set; } = string.Empty;
                 public string GetMetadata(string metadataName) => string.Empty;
                 public string GetMetadataValue(string metadataName) => string.Empty;
             }
+
+            [System.AttributeUsage(System.AttributeTargets.Property)]
+            public sealed class OutputAttribute : System.Attribute { }
 
             [System.AttributeUsage(System.AttributeTargets.Class)]
             public class MSBuildMultiThreadableTaskAnalyzedAttribute : System.Attribute { }
@@ -159,6 +172,21 @@ internal static class TestHelpers
         return allDiagnostics
             .Where(d => d.Location.SourceTree?.FilePath == "Test.cs")
             .ToImmutableArray();
+    }
+
+    /// <summary>
+    /// Runs the PreferTypedParameterAnalyzer on the given source code and returns analyzer diagnostics.
+    /// Source is combined with framework stubs automatically.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetTypedParameterDiagnosticsAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzer = new PreferTypedParameterAnalyzer();
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+
+        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        return allDiags;
     }
 
     /// <summary>
