@@ -142,7 +142,7 @@ namespace Microsoft.Build.Shared
             // AbsolutePath needs special handling because Convert.ChangeType doesn't work with implicit operators
             if (value is AbsolutePath absolutePath)
             {
-                return absolutePath.Value;
+                return absolutePath.Value ?? string.Empty;
             }
 
             // FileInfo and DirectoryInfo need special handling to return their path
