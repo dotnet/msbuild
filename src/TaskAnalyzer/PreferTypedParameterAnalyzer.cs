@@ -36,8 +36,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
+            // The class must implement ITask to be considered a task at all
             var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
             if (iTaskType is null)
+            {
+                return;
+            }
+
+            // Additionally, the task must opt into multithreaded support
+            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
+            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
+            if (iMultiThreadableTaskType is null && multiThreadableTaskAttributeType is null)
             {
                 return;
             }
@@ -52,7 +61,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             compilationContext.RegisterSymbolStartAction(symbolStartContext =>
             {
                 var namedType = (INamedTypeSymbol)symbolStartContext.Symbol;
+
+                // Gate 1: Must be an ITask implementation
                 if (!ImplementsInterface(namedType, iTaskType))
+                {
+                    return;
+                }
+
+                // Gate 2: Must have opted into multithreaded support
+                bool isMultiThreadable =
+                    (iMultiThreadableTaskType is not null && ImplementsInterface(namedType, iMultiThreadableTaskType)) ||
+                    (multiThreadableTaskAttributeType is not null && namedType.GetAttributes().Any(
+                        attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, multiThreadableTaskAttributeType)));
+
+                if (!isMultiThreadable)
                 {
                     return;
                 }
