@@ -151,7 +151,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 case IObjectCreationOperation creation:
                     AnalyzeObjectCreation(context, creation, stringInputProps, taskItemInputProps,
-                        absolutePathType, iTaskItemType, fileInfoType, directoryInfoType);
+                        absolutePathType, taskEnvironmentType, iTaskItemType, fileInfoType, directoryInfoType);
                     break;
 
                 case IInvocationOperation invocation:
@@ -168,6 +168,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             HashSet<IPropertySymbol> stringInputProps,
             HashSet<IPropertySymbol> taskItemInputProps,
             INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? iTaskItemType,
             INamedTypeSymbol? fileInfoType,
             INamedTypeSymbol? directoryInfoType)
@@ -228,6 +229,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 if (suggestedTypeArg is not null)
                 {
+                    // Direct: new FileInfo(item.ItemSpec) or new AbsolutePath(item.ItemSpec)
                     var (sourceProp, _) = FindItemSpecSource(creation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
                     if (sourceProp is not null)
                     {
@@ -236,6 +238,22 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                             DiagnosticDescriptors.PreferTypedTaskItem,
                             creation.Syntax.GetLocation(),
                             sourceProp.Name, currentType, suggestedTypeArg));
+                        return;
+                    }
+
+                    // Indirect via AbsolutePath: new FileInfo(absLocal) where absLocal = GetAbsolutePath(item.ItemSpec)
+                    if (suggestedTypeArg != "AbsolutePath" && taskEnvironmentType is not null)
+                    {
+                        var itemProp = FindItemSpecSourceThroughAbsolutePath(
+                            creation.Arguments[0].Value, taskItemInputProps, iTaskItemType, taskEnvironmentType);
+                        if (itemProp is not null)
+                        {
+                            string currentType = itemProp.Type is IArrayTypeSymbol ? "ITaskItem[]" : "ITaskItem";
+                            context.ReportDiagnostic(Diagnostic.Create(
+                                DiagnosticDescriptors.PreferTypedTaskItem,
+                                creation.Syntax.GetLocation(),
+                                itemProp.Name, currentType, suggestedTypeArg));
+                        }
                     }
                 }
             }
@@ -616,6 +634,58 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return (null, false);
+        }
+
+        /// <summary>
+        /// Traces through an AbsolutePath intermediary to find the original ITaskItem source.
+        /// Handles patterns like:
+        ///   AbsolutePath abs = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+        ///   new FileInfo(abs);  // abs traces back to item.ItemSpec
+        /// </summary>
+        private static IPropertySymbol? FindItemSpecSourceThroughAbsolutePath(
+            IOperation operation,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType,
+            INamedTypeSymbol taskEnvironmentType)
+        {
+            // Unwrap conversions
+            while (operation is IConversionOperation conversion)
+            {
+                operation = conversion.Operand;
+            }
+
+            // Direct: new FileInfo(TaskEnvironment.GetAbsolutePath(item.ItemSpec))
+            if (operation is IInvocationOperation invocation &&
+                invocation.TargetMethod.Name == "GetAbsolutePath" &&
+                SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, taskEnvironmentType) &&
+                invocation.Arguments.Length > 0)
+            {
+                var (sourceProp, _) = FindItemSpecSource(invocation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
+                return sourceProp;
+            }
+
+            // Local indirection: var abs = TaskEnvironment.GetAbsolutePath(item.ItemSpec); new FileInfo(abs);
+            if (operation is ILocalReferenceOperation localRef)
+            {
+                var local = localRef.Local;
+                if (local.DeclaringSyntaxReferences.Length == 1)
+                {
+                    var syntax = local.DeclaringSyntaxReferences[0].GetSyntax();
+                    var semanticModel = operation.SemanticModel;
+                    if (semanticModel is not null)
+                    {
+                        var declOp = semanticModel.GetOperation(syntax);
+                        if (declOp is IVariableDeclaratorOperation declarator &&
+                            declarator.Initializer?.Value is IOperation initValue)
+                        {
+                            return FindItemSpecSourceThroughAbsolutePath(
+                                initValue, taskItemInputProps, iTaskItemType, taskEnvironmentType);
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }
