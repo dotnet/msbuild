@@ -1040,7 +1040,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskHostDetails">
         <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
-        <target state="translated">작업 "{0}"은(는) 호출한 MSBuild 프로세스 {1}(이)가 생성한 TaskHost 프로세스 {2}에서 실행되었습니다. 이 호출에 대해 새 TaskHost가 생성되었습니다: {3}. TaskHost는 재사용 가능한 사이드카입니다: {4}. 노드 재사용: {5}.</target>
+        <target state="translated">작업 "{0}"은(는) 호출한 MSBuild 프로세스 {2}(이)가 생성한 TaskHost 프로세스 {1}에서 실행되었습니다. 이 호출에 대해 새 TaskHost가 생성되었습니다: {3}. TaskHost는 재사용 가능한 사이드카입니다: {4}. 노드 재사용: {5}.</target>
         <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
