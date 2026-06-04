@@ -542,6 +542,58 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("FileItem");
     }
 
+    [Fact]
+    public async Task NewDirectoryInfo_FromAbsolutePathLocal_SuggestsDirectoryInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public ITaskItem SourceDir { get; set; } = null!;
+                public override bool Execute()
+                {
+                    AbsolutePath abs = TaskEnvironment.GetAbsolutePath(SourceDir.ItemSpec);
+                    var dir = new DirectoryInfo(abs);
+                    return true;
+                }
+            }
+            """);
+
+        // Should get MSBuildTask0007 for GetAbsolutePath(item.ItemSpec) AND for new DirectoryInfo(abs)
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBeGreaterThanOrEqualTo(1);
+        // At least one diagnostic should suggest DirectoryInfo
+        task7.ShouldContain(d => d.GetMessage().Contains("DirectoryInfo"));
+    }
+
+    [Fact]
+    public async Task NewFileInfo_FromAbsolutePathLocal_SuggestsFileInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public ITaskItem DestFile { get; set; } = null!;
+                public override bool Execute()
+                {
+                    AbsolutePath abs = TaskEnvironment.GetAbsolutePath(DestFile.ItemSpec);
+                    var fi = new FileInfo(abs);
+                    return true;
+                }
+            }
+            """);
+
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBeGreaterThanOrEqualTo(1);
+        task7.ShouldContain(d => d.GetMessage().Contains("FileInfo"));
+    }
+
     // ── Negative cases for MSBuildTask0007 ──
 
     [Fact]
