@@ -65,8 +65,26 @@ namespace Microsoft.Build.Utilities
                 throw new ArgumentException($"Cannot create TaskItem<{typeof(T).Name}> from an item with empty identity.", nameof(item));
             }
 
-            // Parse the value from ItemSpec
-            Value = ParseValue(itemSpec);
+            // For path-like types, prefer the FullPath metadata (which is always absolute)
+            // over ItemSpec which may be relative.
+            string parseFrom = IsPathLikeType() ? GetFullPathOrItemSpec(item, itemSpec) : itemSpec;
+            Value = ParseValue(parseFrom);
+        }
+
+        /// <summary>Returns true if T is a path-like type that benefits from absolute path resolution.</summary>
+        private static bool IsPathLikeType()
+        {
+            Type t = typeof(T);
+            return t == typeof(System.IO.FileInfo) ||
+                   t == typeof(System.IO.DirectoryInfo) ||
+                   t == typeof(AbsolutePath);
+        }
+
+        /// <summary>Returns the FullPath metadata value if non-empty, otherwise falls back to itemSpec.</summary>
+        private static string GetFullPathOrItemSpec(ITaskItem item, string itemSpec)
+        {
+            string fullPath = item.GetMetadata("FullPath");
+            return !string.IsNullOrEmpty(fullPath) ? fullPath : itemSpec;
         }
 
         /// <summary>
