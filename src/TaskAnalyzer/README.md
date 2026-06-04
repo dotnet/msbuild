@@ -153,10 +153,21 @@ public class MyTask : Task
         var fi = new FileInfo(absPath);                   // flagged (suggests ITaskItem<FileInfo>)
         var di = new DirectoryInfo(absPath);              // flagged (suggests ITaskItem<DirectoryInfo>)
 
+        // System.IO consumption sites infer the most specific type:
+        File.Delete(TaskEnvironment.GetAbsolutePath(Item.ItemSpec));   // flagged (suggests ITaskItem<FileInfo>)
+        Directory.CreateDirectory(absPath);                            // flagged (suggests ITaskItem<DirectoryInfo>)
+        using var s = new FileStream(Item.ItemSpec, FileMode.Open);    // flagged (suggests ITaskItem<FileInfo>)
+
+        var combined = Path.Combine(Item.ItemSpec, "sub");             // flagged (suggests ITaskItem<AbsolutePath>)
+
         return true;
     }
 }
 ```
+
+**Biasing toward `FileInfo`/`DirectoryInfo`:** When a rooted path flows into a `System.IO.File.*` call or a `FileStream`/`StreamReader`/`StreamWriter` constructor, the analyzer suggests `ITaskItem<FileInfo>`; when it flows into a `System.IO.Directory.*` call, it suggests `ITaskItem<DirectoryInfo>`. These more specific suggestions replace the generic `ITaskItem<AbsolutePath>` for the same property. Tracing follows both a direct `item.ItemSpec` and an `AbsolutePath` intermediary, including a local that is declared and then assigned once (the common `AbsolutePath? p = null; try { p = GetAbsolutePath(...); }` pattern). If one property is used as both a file and a directory, the analyzer falls back to `ITaskItem<AbsolutePath>`.
+
+**`Path.Combine`:** A task input flowing into *any* argument position of `Path.Combine` is flagged (each distinct property is reported once per call), since the value is being used to build an absolute path.
 
 **Array properties:** When the source property is `ITaskItem[]`, the suggestion correctly formats as `ITaskItem<T>[]` (brackets outside the angle brackets), e.g., `ITaskItem<AbsolutePath>[]`.
 
@@ -307,7 +318,7 @@ dotnet test
 | `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
 | `DiagnosticDescriptors.cs` | Seven diagnostic descriptors in category `MSBuild.TaskAuthoring` |
 | `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0007` |
-| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006 and MSBuildTask0007 — detects manual path construction, ItemSpec parsing, Path.Combine usage, helper method wrapping, and FileInfo/DirectoryInfo construction through AbsolutePath intermediaries |
+| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006 and MSBuildTask0007 — detects manual path construction, ItemSpec parsing, Path.Combine usage (any argument position), helper method wrapping, FileInfo/DirectoryInfo construction through AbsolutePath intermediaries, and System.IO consumption sites (`File.*`/`Directory.*`/`FileStream`/`StreamReader`/`StreamWriter`) that bias suggestions toward `FileInfo`/`DirectoryInfo` |
 
 ### Performance
 
