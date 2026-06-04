@@ -493,5 +493,47 @@ namespace Microsoft.Build.UnitTests
             var item = new TaskItem<int>(backingItem);
             item.Value.ShouldBe(42);
         }
+
+        [Fact]
+        public void Equals_SameValue_ReturnsTrue()
+        {
+            var a = new TaskItem<int>(42);
+            var b = new TaskItem<int>(42);
+            a.Equals(b).ShouldBeTrue();
+            (a == b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_DifferentValue_ReturnsFalse()
+        {
+            var a = new TaskItem<int>(1);
+            var b = new TaskItem<int>(2);
+            a.Equals(b).ShouldBeFalse();
+            (a != b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_NullStringValue_HandledCorrectly()
+        {
+            // EqualityComparer<string>.Default handles null without boxing or NullReferenceException
+            var a = new TaskItem<string>((string)null!);
+            var b = new TaskItem<string>((string)null!);
+            a.Equals(b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GetHashCode_NullValue_ReturnsZero()
+        {
+            var item = new TaskItem<string>((string)null!);
+            item.GetHashCode().ShouldBe(0);
+        }
+
+        [Fact]
+        public void GetHashCode_ConsistentWithEquality()
+        {
+            var a = new TaskItem<int>(42);
+            var b = new TaskItem<int>(42);
+            a.GetHashCode().ShouldBe(b.GetHashCode());
+        }
     }
 }
