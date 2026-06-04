@@ -515,7 +515,11 @@ public class PreferTypedParameterAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).Count().ShouldBeGreaterThanOrEqualTo(1);
+        // Every argument that flows from a task input is flagged, not just the first.
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(2);
+        task7.ShouldContain(d => d.GetMessage().Contains("OutputDir"));
+        task7.ShouldContain(d => d.GetMessage().Contains("OutputFile"));
     }
 
     [Fact]
@@ -744,5 +748,187 @@ public class PreferTypedParameterAnalyzerTests
             """);
 
         diags.ShouldBeEmpty();
+    }
+
+    // ── System.IO consumption-site inference (File.* => FileInfo, Directory.* => DirectoryInfo) ──
+
+    [Fact]
+    public async Task FileDelete_OnItemSpec_SuggestsFileInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public ITaskItem Target { get; set; } = null!;
+            public override bool Execute()
+            {
+                File.Delete(Target.ItemSpec);
+                return true;
+            }
+        }
+        """);
+
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("FileInfo");
+    }
+
+    [Fact]
+    public async Task DirectoryCreate_OnItemSpec_SuggestsDirectoryInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public ITaskItem DestinationFolder { get; set; } = null!;
+            public override bool Execute()
+            {
+                Directory.CreateDirectory(DestinationFolder.ItemSpec);
+                return true;
+            }
+        }
+        """);
+
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("DirectoryInfo");
+    }
+
+    [Fact]
+    public async Task FileReadAllLines_ThroughAbsolutePath_SuggestsFileInfoAndSuppressesAbsolutePath()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public ITaskItem Input { get; set; } = null!;
+            public override bool Execute()
+            {
+                var lines = File.ReadAllLines(TaskEnvironment.GetAbsolutePath(Input.ItemSpec));
+                return true;
+            }
+        }
+        """);
+
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("FileInfo");
+        task7[0].GetMessage().ShouldNotContain("AbsolutePath");
+    }
+
+    [Fact]
+    public async Task NewFileStream_OnItemSpec_SuggestsFileInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public ITaskItem XmlInputPath { get; set; } = null!;
+            public override bool Execute()
+            {
+                using var stream = new FileStream(XmlInputPath.ItemSpec, FileMode.Open);
+                return true;
+            }
+        }
+        """);
+
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("FileInfo");
+    }
+
+    [Fact]
+    public async Task FileWriteAllText_DoesNotFlagNonPathContentsArgument()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public ITaskItem OutputFile { get; set; } = null!;
+            public ITaskItem Contents { get; set; } = null!;
+            public override bool Execute()
+            {
+                File.WriteAllText(OutputFile.ItemSpec, Contents.ItemSpec);
+                return true;
+            }
+        }
+        """);
+
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("OutputFile");
+        task7[0].GetMessage().ShouldContain("FileInfo");
+    }
+
+    [Fact]
+    public async Task DirectoryCreate_OnReassignedNullableLocal_SuggestsDirectoryInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new();
+                public ITaskItem Directories { get; set; } = null!;
+                public override bool Execute()
+                {
+                    AbsolutePath? absolutePath = null;
+                    absolutePath = TaskEnvironment.GetAbsolutePath(Directories.ItemSpec);
+                    Directory.CreateDirectory(absolutePath);
+                    return true;
+                }
+            }
+            """);
+
+        // The local is declared `= null` then assigned once; the consumption site still resolves to DirectoryInfo.
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("DirectoryInfo");
+        task7[0].GetMessage().ShouldNotContain("AbsolutePath");
+    }
+
+    [Fact]
+    public async Task FileAndDirectoryConflict_FallsBackToAbsolutePath()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public ITaskItem Ambiguous { get; set; } = null!;
+            public override bool Execute()
+            {
+                AbsolutePath abs = TaskEnvironment.GetAbsolutePath(Ambiguous.ItemSpec);
+                File.Delete(abs);
+                Directory.CreateDirectory(abs);
+                return true;
+            }
+        }
+        """);
+
+        // Contradictory file/dir inference for one property: keep the AbsolutePath fallback, drop the specifics.
+        var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("AbsolutePath");
+        task7[0].GetMessage().ShouldNotContain("FileInfo");
+        task7[0].GetMessage().ShouldNotContain("DirectoryInfo");
     }
 }
