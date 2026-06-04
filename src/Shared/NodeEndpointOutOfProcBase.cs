@@ -290,7 +290,7 @@ namespace Microsoft.Build.BackEnd
         protected void ChangeLinkStatus(LinkStatus newStatus)
         {
             ErrorUtilities.VerifyThrow(_status != newStatus, "Attempting to change status to existing status {0}.", _status);
-            CommunicationsUtilities.Trace("Changing link status from {0} to {1}", _status.ToString(), newStatus.ToString());
+            CommunicationsUtilities.Trace($"Changing link status from {_status} to {newStatus}");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
         }
@@ -384,11 +384,11 @@ namespace Microsoft.Build.BackEnd
                     // Wait for a connection
 #if FEATURE_APM
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
+                    CommunicationsUtilities.Trace($"Waiting for connection {waitTimeRemaining} ms...");
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
 #else
                     Task connectionTask = localPipeServer.WaitForConnectionAsync();
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
+                    CommunicationsUtilities.Trace($"Waiting for connection {waitTimeRemaining} ms...");
                     bool connected = connectionTask.Wait(waitTimeRemaining);
 #endif
                     if (!connected)
@@ -428,10 +428,7 @@ namespace Microsoft.Build.BackEnd
                             if (!IsHandshakePartValid(component, result.Value, index))
                             {
                                 CommunicationsUtilities.Trace(
-                                        "Handshake failed. Received {0} from host  for {1} but expected {2}. Probably the host is a different MSBuild build.",
-                                        result.Value,
-                                        component.Key,
-                                        component.Value);
+                                    $"Handshake failed. Received {result.Value} from host for {component.Key} but expected {component.Value}. Probably the host is a different MSBuild build.");
                                 _pipeServer.WriteIntForHandshake(index + 1);
                                 gotValidConnection = false;
                                 break;
@@ -457,7 +454,7 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     _pipeServer.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
                                     _pipeServer.WriteIntForHandshake(NodePacketTypeExtensions.PacketVersion);
-                                    CommunicationsUtilities.Trace("Sent PacketVersion: {0}", NodePacketTypeExtensions.PacketVersion);
+                                    CommunicationsUtilities.Trace($"Sent PacketVersion: {NodePacketTypeExtensions.PacketVersion}");
                                 }
 
                                 CommunicationsUtilities.Trace("Successfully connected to parent.");
@@ -472,7 +469,7 @@ namespace Microsoft.Build.BackEnd
 
                                 if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                                    CommunicationsUtilities.Trace($"Handshake failed. Host user is {(clientIdentity == null ? "<unknown>" : clientIdentity.Name)} but we were created by {currentIdentity.Name}.");
                                     gotValidConnection = false;
                                     continue;
                                 }
@@ -487,7 +484,7 @@ namespace Microsoft.Build.BackEnd
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         // 3. We expected to read the EndOfHandshake signal, but we received something else
-                        CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
+                        CommunicationsUtilities.Trace($"Client connection failed but we will wait for another connection. Exception: {e.Message}");
 
                         gotValidConnection = false;
                     }
@@ -509,7 +506,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
+                    CommunicationsUtilities.Trace($"Client connection failed.  Exiting comm thread. {e}");
                     if (localPipeServer.IsConnected)
                     {
                         localPipeServer.Disconnect();
@@ -575,15 +572,12 @@ namespace Microsoft.Build.BackEnd
 
             if (isAllowedMismatch)
             {
-                CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, component.Key);
+                CommunicationsUtilities.Trace($"Handshake for NET Host. Child host {handshakePart} for {component.Key}.");
                 return true;
             }
 #endif
             CommunicationsUtilities.Trace(
-                "Handshake failed. Received {0} from host for {1} but expected {2}. Probably the host is a different MSBuild build.",
-                handshakePart,
-                component.Key,
-                component.Value);
+                $"Handshake failed. Received {handshakePart} from host for {component.Key} but expected {component.Value}. Probably the host is a different MSBuild build.");
 
             return false;
         }
@@ -663,7 +657,7 @@ namespace Microsoft.Build.BackEnd
                             catch (Exception e)
                             {
                                 // Lost communications.  Abort (but allow node reuse)
-                                CommunicationsUtilities.Trace("Exception reading from server.  {0}", e);
+                                CommunicationsUtilities.Trace($"Exception reading from server.  {e}");
                                 DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Inactive);
                                 exitLoop = true;
@@ -690,7 +684,7 @@ namespace Microsoft.Build.BackEnd
                                 }
                                 else
                                 {
-                                    CommunicationsUtilities.Trace("Incomplete header read from server.  {0} of {1} bytes read", bytesRead, headerByte.Length);
+                                    CommunicationsUtilities.Trace($"Incomplete header read from server.  {bytesRead} of {headerByte.Length} bytes read");
                                     ChangeLinkStatus(LinkStatus.Failed);
                                 }
 
@@ -722,7 +716,7 @@ namespace Microsoft.Build.BackEnd
                             catch (Exception e)
                             {
                                 // Error while deserializing or handling packet.  Abort.
-                                CommunicationsUtilities.Trace("Exception while deserializing packet {0}: {1}", packetType, e);
+                                CommunicationsUtilities.Trace($"Exception while deserializing packet {packetType}: {e}");
                                 DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
@@ -781,7 +775,7 @@ namespace Microsoft.Build.BackEnd
                         catch (Exception e)
                         {
                             // Error while deserializing or handling packet.  Abort.
-                            CommunicationsUtilities.Trace("Exception while serializing packets: {0}", e);
+                            CommunicationsUtilities.Trace($"Exception while serializing packets: {e}");
                             DebugUtils.DumpExceptionToFile(e);
                             ChangeLinkStatus(LinkStatus.Failed);
                             exitLoop = true;

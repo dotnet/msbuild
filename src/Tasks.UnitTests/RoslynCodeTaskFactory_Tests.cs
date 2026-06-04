@@ -25,15 +25,17 @@ using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    [UsesVerify]
     public class RoslynCodeTaskFactory_Tests
     {
         private const string TaskName = "MyInlineTask";
 
         private readonly VerifySettings _verifySettings;
 
-        public RoslynCodeTaskFactory_Tests()
+        private readonly ITestOutputHelper _testOutput;
+
+        public RoslynCodeTaskFactory_Tests(ITestOutputHelper testOutput)
         {
+            _testOutput = testOutput;
             UseProjectRelativeDirectory("TaskFactorySource");
 
             _verifySettings = new();
@@ -162,11 +164,17 @@ Log.LogError(Class1.ToPrint());
         public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 2;
+
+            // Use a unique task name per invocation to isolate the static CompiledAssemblyCache.
+            // Without this, a test retry in the same process would find the cache pre-populated
+            // from the previous run, see 0 "Compiling" messages instead of 1, and fail.
+            string taskName = $"Custom{num}_{Guid.NewGuid():N}";
+
             string text1 = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom{num}""
+    TaskName=""{taskName}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -182,8 +190,8 @@ Log.LogError(Class1.ToPrint());
 
     <Target Name=""Build"">
         <MSBuild Projects=""p2.proj"" Targets=""Build"" />
-        <Custom{num} SayHi=""hello1"" />
-        <Custom{num} SayHi=""hello2"" />
+        <{taskName} SayHi=""hello1"" />
+        <{taskName} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -192,7 +200,7 @@ Log.LogError(Class1.ToPrint());
 <Project>
 
   <UsingTask
-    TaskName=""Custom{num}""
+    TaskName=""{taskName}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -207,8 +215,8 @@ Log.LogError(Class1.ToPrint());
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom{num} SayHi=""hello1"" />
-        <Custom{num} SayHi=""hello2"" />
+        <{taskName} SayHi=""hello1"" />
+        <{taskName} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -782,6 +790,49 @@ namespace InlineTask
                 var logger = proj.BuildProjectExpectFailure();
                 logger.AssertLogContains(errorMessage);
             }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ClassDoesNotInheritFromITask(bool forceOutOfProc)
+        {
+            const string taskName = "ClassDoesNotInheritFromITask";
+            string unformattedMessage = ResourceUtilities.GetResourceString("CodeTaskFactory.NeedsITaskInterface");
+
+            string projectContent = $$"""
+                <Project>
+                  <UsingTask TaskName="{{taskName}}" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class">
+                namespace InlineTask
+                {
+                    public class {{taskName}}
+                    {
+                        public bool Execute()
+                        {
+                            return true;
+                        }
+                    }
+                }
+                      </Code>
+                    </Task>
+                  </UsingTask>
+                  <Target Name="Build">
+                    <{{taskName}} />
+                  </Target>
+                </Project>
+                """;
+
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
+            MockLogger logger = proj.BuildProjectExpectFailure();
+            logger.AssertLogContains(unformattedMessage);
         }
 
         [Fact]
