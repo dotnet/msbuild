@@ -6,7 +6,6 @@ using System;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Experimental.FileAccess;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.FileAccesses
 {
@@ -25,7 +24,7 @@ namespace Microsoft.Build.FileAccesses
 
         public static IBuildComponent CreateComponent(BuildComponentType type, Action<INodePacket> sendPacket)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.FileAccessManager, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.FileAccessManager);
             return new OutOfProcNodeFileAccessManager(sendPacket);
         }
 

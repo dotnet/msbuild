@@ -4,18 +4,22 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
+#if FEATURE_WINDOWSINTEROP
+using Microsoft.Build.Shared;
+using Windows.Win32.System.SystemInformation;
+#endif
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -122,14 +126,21 @@ namespace Microsoft.Build.BackEnd
         private readonly bool _debugDumpState;
 
         /// <summary>
-        /// The path where we will store debug files
+        ///  The directory where we will store debug files.
         /// </summary>
-        private readonly string _debugDumpPath;
+        private readonly string _debugDumpDirectory;
 
+        /// <summary>
+        ///  The file where we will store debug files.
+        /// </summary>
+        private readonly string _debugDumpFilePath;
+
+#if FEATURE_WINDOWSINTEROP
         /// <summary>
         /// Forces caching of all configurations and results.
         /// </summary>
         private readonly bool _debugForceCaching;
+#endif
 
         /// <summary>
         /// Constructor
@@ -137,13 +148,17 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = FrameworkDebugUtils.DebugPath;
+            _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
+#if FEATURE_WINDOWSINTEROP
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
+#endif
 
-            if (String.IsNullOrEmpty(_debugDumpPath))
+            if (string.IsNullOrEmpty(_debugDumpDirectory))
             {
-                _debugDumpPath = FileUtilities.TempFileDirectory;
+                _debugDumpDirectory = FileUtilities.TempFileDirectory;
             }
+
+            _debugDumpFilePath = Path.Combine(_debugDumpDirectory, $"EngineTrace_{EnvironmentUtilities.CurrentProcessId}.txt");
 
             _status = BuildRequestEngineStatus.Uninitialized;
             _nextUnresolvedConfigurationId = -1;
@@ -203,8 +218,8 @@ namespace Microsoft.Build.BackEnd
         /// Called by the Node.  Non-overlapping with other calls from the Node.</remarks>
         public void InitializeForBuild(NodeLoggingContext loggingContext)
         {
-            ErrorUtilities.VerifyThrow(_componentHost != null, "BuildRequestEngine not initialized by component host.");
-            ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, "Engine must be in the Uninitiailzed state, but is {0}", _status);
+            Assumed.NotNull(_componentHost, "BuildRequestEngine not initialized by component host.");
+            Assumed.Equal(_status, BuildRequestEngineStatus.Uninitialized, $"Engine must be in the Uninitiailzed state, but is {_status}");
 
             _nodeLoggingContext = loggingContext;
 
@@ -234,9 +249,9 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Active || _status == BuildRequestEngineStatus.Idle || _status == BuildRequestEngineStatus.Waiting, "Engine must be Active, Idle or Waiting to clean up, but is {0}.", _status);
-                    TraceEngine("CFB: Cleaning up build.  Requests Count {0}  Status {1}", _requests.Count, _status);
-                    ErrorUtilities.VerifyThrow(_nodeLoggingContext != null, "Node logging context not set.");
+                    Assumed.True(_status is BuildRequestEngineStatus.Active or BuildRequestEngineStatus.Idle or BuildRequestEngineStatus.Waiting, $"Engine must be Active, Idle or Waiting to clean up, but is {_status}.");
+                    TraceEngine($"CFB: Cleaning up build.  Requests Count {_requests.Count}  Status {_status}");
+                    Assumed.NotNull(_nodeLoggingContext, "Node logging context not set.");
 
                     // Determine how many requests there are to shut down, then terminate all of their builders.
                     // We will capture the exceptions which happen here (but continue shutting down gracefully.)
@@ -258,7 +273,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         catch (Exception e)
                         {
-                            TraceEngine("CFB: Shutting down request {0}({1}) (nr {2}) failed due to exception: {3}", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, e.ToString());
+                            TraceEngine($"CFB: Shutting down request {entry.Request.GlobalRequestId}({entry.Request.ConfigurationId}) (nr {entry.Request.NodeRequestId}) failed due to exception: {e}");
                             if (ExceptionHandling.IsCriticalException(e))
                             {
                                 throw;
@@ -277,7 +292,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         catch (Exception e)
                         {
-                            TraceEngine("CFB: Shutting down request {0}({1}) (nr {2}) failed due to exception: {3}", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, e.ToString());
+                            TraceEngine($"CFB: Shutting down request {entry.Request.GlobalRequestId}({entry.Request.ConfigurationId}) (nr {entry.Request.NodeRequestId}) failed due to exception: {e}");
                             if (ExceptionHandling.IsCriticalException(e))
                             {
                                 throw;
@@ -292,7 +307,7 @@ namespace Microsoft.Build.BackEnd
                     foreach (BuildRequestEntry entry in requestsToShutdown)
                     {
                         BuildResult result = entry.Result ?? new BuildResult(entry.Request, new BuildAbortedException());
-                        TraceEngine("CFB: Request is now {0}({1}) (nr {2}) has been deactivated.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId);
+                        TraceEngine($"CFB: Request is now {entry.Request.GlobalRequestId}({entry.Request.ConfigurationId}) (nr {entry.Request.NodeRequestId}) has been deactivated.");
                         RaiseRequestComplete(entry.Request, result);
                     }
 
@@ -322,7 +337,7 @@ namespace Microsoft.Build.BackEnd
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 // If we caught an exception during cleanup, we need to log that
-                ErrorUtilities.ThrowInternalError("Failure during engine shutdown.  Exception: {0}", e.ToString());
+                InternalError.Throw($"Failure during engine shutdown.  Exception: {e}");
             }
             finally
             {
@@ -353,11 +368,11 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
-                    TraceEngine("Request {0}({1}) (nr {2}) received and activated.", request.GlobalRequestId, request.ConfigurationId, request.NodeRequestId);
+                    Assumed.True(_status is not (BuildRequestEngineStatus.Shutdown or BuildRequestEngineStatus.Uninitialized), $"Engine loop not yet started, status is {_status}.");
+                    TraceEngine($"Request {request.GlobalRequestId}({request.ConfigurationId}) (nr {request.NodeRequestId}) received and activated.");
 
-                    ErrorUtilities.VerifyThrow(!_requestsByGlobalRequestId.ContainsKey(request.GlobalRequestId), "Request {0} is already known to the engine.", request.GlobalRequestId);
-                    ErrorUtilities.VerifyThrow(_configCache.HasConfiguration(request.ConfigurationId), "Request {0} refers to configuration {1} which is not known to the engine.", request.GlobalRequestId, request.ConfigurationId);
+                    Assumed.False(_requestsByGlobalRequestId.ContainsKey(request.GlobalRequestId), $"Request {request.GlobalRequestId} is already known to the engine.");
+                    Assumed.True(_configCache.HasConfiguration(request.ConfigurationId), $"Request {request.GlobalRequestId} refers to configuration {request.ConfigurationId} which is not known to the engine.");
 
                     if (request.NodeRequestId == BuildRequest.ResultsTransferNodeRequestId)
                     {
@@ -378,7 +393,7 @@ namespace Microsoft.Build.BackEnd
                             resultToReport.ProjectStateAfterBuild = config.Project;
                         }
 
-                        TraceEngine("Request {0}({1}) (nr {2}) retrieved results for configuration {3} from node {4} for transfer.", request.GlobalRequestId, request.ConfigurationId, request.NodeRequestId, request.ConfigurationId, _componentHost.BuildParameters.NodeId);
+                        TraceEngine($"Request {request.GlobalRequestId}({request.ConfigurationId}) (nr {request.NodeRequestId}) retrieved results for configuration {request.ConfigurationId} from node {_componentHost.BuildParameters.NodeId} for transfer.");
 
                         // If this is the inproc node, we've already set the configuration's ResultsNodeId to the correct value in
                         // HandleRequestBlockedOnResultsTransfer, and don't want to set it again, because we actually have less
@@ -438,15 +453,15 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
-                    ErrorUtilities.VerifyThrow(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), "Request {0} is not known to the engine.", unblocker.BlockedRequestId);
+                    Assumed.True(_status is not (BuildRequestEngineStatus.Shutdown or BuildRequestEngineStatus.Uninitialized), $"Engine loop not yet started, status is {_status}.");
+                    Assumed.True(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), $"Request {unblocker.BlockedRequestId} is not known to the engine.");
                     BuildRequestEntry entry = _requestsByGlobalRequestId[unblocker.BlockedRequestId];
 
                     // Are we resuming execution or reporting results?
                     if (unblocker.Result == null)
                     {
                         // We are resuming execution.
-                        TraceEngine("Request {0}({1}) (nr {2}) is now proceeding from current state {3}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, entry.State);
+                        TraceEngine($"Request {entry.Request.GlobalRequestId}({entry.Request.ConfigurationId}) (nr {entry.Request.NodeRequestId}) is now proceeding from current state {entry.State}.");
 
                         // UNDONE: (Refactor) This is a bit icky because we still have the concept of blocking on an in-progress request
                         // versus blocking on requests waiting for results.  They come to the same thing, and its been rationalized correctly in
@@ -467,7 +482,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (result.NodeRequestId == BuildRequest.ResultsTransferNodeRequestId)
                         {
-                            TraceEngine("Request {0}({1}) (nr {2}) has retrieved the results for configuration {3} and cached them on node {4} (UBR).", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, entry.Request.ConfigurationId, _componentHost.BuildParameters.NodeId);
+                            TraceEngine($"Request {entry.Request.GlobalRequestId}({entry.Request.ConfigurationId}) (nr {entry.Request.NodeRequestId}) has retrieved the results for configuration {entry.Request.ConfigurationId} and cached them on node {_componentHost.BuildParameters.NodeId} (UBR).");
 
                             IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
                             IConfigCache configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
@@ -494,7 +509,7 @@ namespace Microsoft.Build.BackEnd
                             // PERF: Explicitly check the debug flag here so that we don't pay the cost for getting OverallResult
                             if (_debugDumpState)
                             {
-                                TraceEngine("Request {0}({1}) (nr {2}) is no longer waiting on nr {3} (UBR).  Results are {4}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, result.NodeRequestId, result.OverallResult);
+                                TraceEngine($"Request {entry.Request.GlobalRequestId}({entry.Request.ConfigurationId}) (nr {entry.Request.NodeRequestId}) is no longer waiting on nr {result.NodeRequestId} (UBR).  Results are {result.OverallResult}.");
                             }
 
                             // Update the configuration with targets information, if we received any and didn't already have it.
@@ -543,10 +558,10 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
+                    Assumed.True(_status is not (BuildRequestEngineStatus.Shutdown or BuildRequestEngineStatus.Uninitialized), $"Engine loop not yet started, status is {_status}.");
 
-                    TraceEngine("Received configuration response for node config {0}, now global config {1}.", response.NodeConfigurationId, response.GlobalConfigurationId);
-                    ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
+                    TraceEngine($"Received configuration response for node config {response.NodeConfigurationId}, now global config {response.GlobalConfigurationId}.");
+                    Assumed.NotNull(_componentHost, "No host object set");
 
                     // Remove the unresolved configuration entry from the unresolved cache.
                     BuildRequestConfiguration config = _unresolvedConfigurationsById[response.NodeConfigurationId];
@@ -595,11 +610,7 @@ namespace Microsoft.Build.BackEnd
                                         // We have a result, give it back to this request.
                                         currentEntry.ReportResult(cacheResponse.Results);
 
-                                        TraceEngine(
-                                            "Request {0} (node request {1}) with targets ({2}) satisfied from cache",
-                                            request.GlobalRequestId,
-                                            request.NodeRequestId,
-                                            string.Join(";", request.Targets));
+                                        TraceEngine($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) with targets ({string.Join(";", request.Targets)}) satisfied from cache");
                                     }
                                     else
                                     {
@@ -636,8 +647,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
-            ErrorUtilities.VerifyThrow(_componentHost == null, "BuildRequestEngine already initialized!");
+            ArgumentNullException.ThrowIfNull(host);
+            Assumed.Null(_componentHost, "BuildRequestEngine already initialized!");
             _componentHost = host;
             _configCache = (IConfigCache)host.GetComponent(BuildComponentType.ConfigCache);
 
@@ -654,7 +665,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, "Cleanup wasn't called, status is {0}", _status);
+            Assumed.Equal(_status, BuildRequestEngineStatus.Uninitialized, $"Cleanup wasn't called, status is {_status}");
             _componentHost = null;
 
             ChangeStatus(BuildRequestEngineStatus.Shutdown);
@@ -667,7 +678,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.RequestEngine, "Cannot create component of type {0}", type);
+            Assumed.Equal(type, BuildComponentType.RequestEngine, $"Cannot create component of type {type}");
             return new BuildRequestEngine();
         }
 
@@ -693,7 +704,7 @@ namespace Microsoft.Build.BackEnd
             RequestCompleteDelegate requestComplete = OnRequestComplete;
             if (requestComplete != null)
             {
-                TraceEngine("RRC: Reporting result for request {0}({1}) (nr {2}).", request.GlobalRequestId, request.ConfigurationId, request.NodeRequestId);
+                TraceEngine($"RRC: Reporting result for request {request.GlobalRequestId}({request.ConfigurationId}) (nr {request.NodeRequestId}).");
                 requestComplete(request, result);
             }
         }
@@ -776,15 +787,15 @@ namespace Microsoft.Build.BackEnd
                 {
                     // This request is currently being built
                     case BuildRequestEntryState.Active:
-                        ErrorUtilities.VerifyThrow(activeEntry == null, "Multiple active requests");
+                        Assumed.Null(activeEntry, "Multiple active requests");
                         activeEntry = currentEntry;
-                        TraceEngine("ERS: Active request is now {0}({1}) (nr {2}).", currentEntry.Request.GlobalRequestId, currentEntry.Request.ConfigurationId, currentEntry.Request.NodeRequestId);
+                        TraceEngine($"ERS: Active request is now {currentEntry.Request.GlobalRequestId}({currentEntry.Request.ConfigurationId}) (nr {currentEntry.Request.NodeRequestId}).");
                         break;
 
                     // This request is now complete.
                     case BuildRequestEntryState.Complete:
                         completedEntries.Add(currentEntry);
-                        TraceEngine("ERS: Request {0}({1}) (nr {2}) is marked as complete.", currentEntry.Request.GlobalRequestId, currentEntry.Request.ConfigurationId, currentEntry.Request.NodeRequestId);
+                        TraceEngine($"ERS: Request {currentEntry.Request.GlobalRequestId}({currentEntry.Request.ConfigurationId}) (nr {currentEntry.Request.NodeRequestId}) is marked as complete.");
                         break;
 
                     // This request is waiting for configurations or results
@@ -802,7 +813,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected BuildRequestEntry state " + currentEntry.State);
+                        Assumed.Unreachable($"Unexpected BuildRequestEntry state {currentEntry.State}");
                         break;
                 }
             }
@@ -810,7 +821,7 @@ namespace Microsoft.Build.BackEnd
             // Remove completed requests
             foreach (BuildRequestEntry completedEntry in completedEntries)
             {
-                TraceEngine("ERS: Request {0}({1}) (nr {2}) is being removed from the requests list.", completedEntry.Request.GlobalRequestId, completedEntry.Request.ConfigurationId, completedEntry.Request.NodeRequestId);
+                TraceEngine($"ERS: Request {completedEntry.Request.GlobalRequestId}({completedEntry.Request.ConfigurationId}) (nr {completedEntry.Request.NodeRequestId}) is being removed from the requests list.");
                 _requests.Remove(completedEntry);
                 _requestsByGlobalRequestId.Remove(completedEntry.Request.GlobalRequestId);
             }
@@ -864,7 +875,7 @@ namespace Microsoft.Build.BackEnd
                     completedEntry.Result.ProjectTargets = configuration.ProjectTargets;
                 }
 
-                TraceEngine("ERS: Request is now {0}({1}) (nr {2}) has had its builder cleaned up.", completedEntry.Request.GlobalRequestId, completedEntry.Request.ConfigurationId, completedEntry.Request.NodeRequestId);
+                TraceEngine($"ERS: Request is now {completedEntry.Request.GlobalRequestId}({completedEntry.Request.ConfigurationId}) (nr {completedEntry.Request.NodeRequestId}) has had its builder cleaned up.");
                 RaiseRequestComplete(completedEntry.Request, completedEntry.Result);
             }
         }
@@ -885,6 +896,7 @@ namespace Microsoft.Build.BackEnd
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "We're trying to get rid of memory because we're running low, so we need to collect NOW in order to free it up ASAP")]
         private void CheckMemoryUsage()
         {
+#if FEATURE_WINDOWSINTEROP
             if (!NativeMethodsShared.IsWindows || BuildEnvironmentHelper.Instance.RunningInVisualStudio)
             {
                 // Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
@@ -901,24 +913,20 @@ namespace Microsoft.Build.BackEnd
             // Jeffrey Richter suggests that when the memory load in the system exceeds 80% it is a good
             // idea to start finding ways to unload unnecessary data to prevent memory starvation.  We use this metric in
             // our calculations below.
-            NativeMethodsShared.MemoryStatus memoryStatus = NativeMethodsShared.GetMemoryStatus();
-            if (memoryStatus != null)
+            if (NativeMethodsShared.TryGetMemoryStatus(out MEMORYSTATUSEX memoryStatus))
             {
                 try
                 {
                     // The minimum limit must be no more than 80% of the virtual memory limit to reduce the chances of a single unfortunately
                     // large project resulting in allocations which exceed available VM space between calls to this function.  This situation
                     // is more likely on 32-bit machines where VM space is only 2 gigs.
-                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.TotalVirtual * 0.8);
+                    ulong memoryUseLimit = Convert.ToUInt64(memoryStatus.ullTotalVirtual * 0.8);
 
                     // See how much memory we are using and compart that to our limit.
-                    ulong memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
+                    ulong memoryInUse = memoryStatus.ullTotalVirtual - memoryStatus.ullAvailVirtual;
                     while ((memoryInUse > memoryUseLimit) || _debugForceCaching)
                     {
-                        TraceEngine(
-                            "Memory usage at {0}, limit is {1}.  Caching configurations and results cache and collecting.",
-                            memoryInUse,
-                            memoryUseLimit);
+                        TraceEngine($"Memory usage at {memoryInUse}, limit is {memoryUseLimit}.  Caching configurations and results cache and collecting.");
                         IResultsCache resultsCache =
                             _componentHost.GetComponent(BuildComponentType.ResultsCache) as IResultsCache;
 
@@ -936,9 +944,14 @@ namespace Microsoft.Build.BackEnd
                             break;
                         }
 
-                        memoryStatus = NativeMethodsShared.GetMemoryStatus();
-                        memoryInUse = memoryStatus.TotalVirtual - memoryStatus.AvailableVirtual;
-                        TraceEngine("Memory usage now at {0}", memoryInUse);
+                        if (!NativeMethodsShared.TryGetMemoryStatus(out memoryStatus))
+                        {
+                            TraceEngine("Failed to get memory status.");
+                            break;
+                        }
+
+                        memoryInUse = memoryStatus.ullTotalVirtual - memoryStatus.ullAvailVirtual;
+                        TraceEngine($"Memory usage now at {memoryInUse}");
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -949,6 +962,7 @@ namespace Microsoft.Build.BackEnd
                     throw new BuildAbortedException(e.Message, e);
                 }
             }
+#endif
         }
 
         /// <summary>
@@ -957,7 +971,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to activate.</param>
         private void ActivateBuildRequest(BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
+            Assumed.NotNull(_componentHost, "No host object set");
 
             entry.RequestConfiguration.RetrieveFromCache();
 
@@ -1157,7 +1171,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private void IssueBuildRequests(BuildRequestEntry issuingEntry, FullyQualifiedBuildRequest[] newRequests)
         {
-            ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
+            Assumed.NotNull(_componentHost, "No host object set");
 
             // For each request, we need to determine if we have a local configuration in the
             // configuration cache.  If we do, we can issue the build request immediately.
@@ -1231,12 +1245,7 @@ namespace Microsoft.Build.BackEnd
                         if (matchingConfig == null)
                         {
                             // Issue the config resolution request
-                            TraceEngine(
-                                "Request {0}({1}) (nr {2}) is waiting on configuration {3} (IBR)",
-                                issuingEntry.Request.GlobalRequestId,
-                                issuingEntry.Request.ConfigurationId,
-                                issuingEntry.Request.NodeRequestId,
-                                request.Config.ConfigurationId);
+                            TraceEngine($"Request {issuingEntry.Request.GlobalRequestId}({issuingEntry.Request.ConfigurationId}) (nr {issuingEntry.Request.NodeRequestId}) is waiting on configuration {request.Config.ConfigurationId} (IBR)");
                             issuingEntry.WaitForConfiguration(request.Config);
                         }
                     }
@@ -1271,11 +1280,7 @@ namespace Microsoft.Build.BackEnd
                             // Log the fact that we handled this from the cache.
                             _nodeLoggingContext.LogRequestHandledFromCache(newRequest, _configCache[newRequest.ConfigurationId], response.Results);
 
-                            TraceEngine(
-                                "Request {0} (node request {1}) with targets ({2}) satisfied from cache",
-                                newRequest.GlobalRequestId,
-                                newRequest.NodeRequestId,
-                                string.Join(",", request.Targets));
+                            TraceEngine($"Request {newRequest.GlobalRequestId} (node request {newRequest.NodeRequestId}) with targets ({string.Join(",", request.Targets)}) satisfied from cache");
 
                             // Can't report the result directly here, because that could cause the request to go from
                             // Waiting to Ready.
@@ -1338,7 +1343,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (issuingEntry.State == BuildRequestEntryState.Ready)
                 {
-                    ErrorUtilities.VerifyThrow((requestsToIssue == null) || (requestsToIssue.Count == 0), "Entry shouldn't be ready if we also issued requests.");
+                    Assumed.True((requestsToIssue == null) || (requestsToIssue.Count == 0), "Entry shouldn't be ready if we also issued requests.");
                     ActivateBuildRequest(issuingEntry);
                 }
             }
@@ -1391,10 +1396,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to be mapped.</param>
         private void IssueConfigurationRequest(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrow(config.WasGeneratedByNode, "InvalidConfigurationId");
-            ErrorUtilities.VerifyThrowArgumentNull(config);
-            ErrorUtilities.VerifyThrow(_unresolvedConfigurationsById.ContainsKey(config.ConfigurationId), "NoUnresolvedConfiguration");
-            TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
+            ArgumentNullException.ThrowIfNull(config);
+            Assumed.True(config.WasGeneratedByNode, "InvalidConfigurationId");
+            Assumed.True(_unresolvedConfigurationsById.ContainsKey(config.ConfigurationId), "NoUnresolvedConfiguration");
+            TraceEngine($"Issuing configuration request for node config {config.ConfigurationId}");
             RaiseNewConfigurationRequest(config);
         }
 
@@ -1404,18 +1409,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="blocker">The information about why the request is blocked.</param>
         private void IssueBuildRequest(BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker);
+            ArgumentNullException.ThrowIfNull(blocker);
 
             if (blocker.BuildRequests == null)
             {
                 // This is the case when we aren't blocking on new requests, but rather an in-progress request which is executing a target for which we need results.
-                TraceEngine("Blocking global request {0} on global request {1} because it is already executing target {2}", blocker.BlockedRequestId, blocker.BlockingRequestId, blocker.BlockingTarget);
+                TraceEngine($"Blocking global request {blocker.BlockedRequestId} on global request {blocker.BlockingRequestId} because it is already executing target {blocker.BlockingTarget}");
             }
             else
             {
                 foreach (BuildRequest blockingRequest in blocker.BuildRequests)
                 {
-                    TraceEngine("Sending node request {0} (configuration {1}) with parent {2} to Build Manager", blockingRequest.NodeRequestId, blockingRequest.ConfigurationId, blocker.BlockedRequestId);
+                    TraceEngine($"Sending node request {blockingRequest.NodeRequestId} (configuration {blockingRequest.ConfigurationId}) with parent {blocker.BlockedRequestId} to Build Manager");
                 }
             }
 
@@ -1444,7 +1449,7 @@ namespace Microsoft.Build.BackEnd
                             }
                             catch (Exception e)
                             {
-                                TraceEngine("EL: EXCEPTION caught in engine: {0} - {1}", e.GetType(), e.Message);
+                                TraceEngine($"EL: EXCEPTION caught in engine: {e.GetType()} - {e.Message}");
 
                                 // Dump all engine exceptions to a temp file
                                 // so that we have something to go on in the
@@ -1459,7 +1464,7 @@ namespace Microsoft.Build.BackEnd
                                 // Let the critical ones melt down the system.
                                 if (ExceptionHandling.IsCriticalException(e))
                                 {
-                                    ErrorUtilities.ThrowInternalError(e.Message, e);
+                                    InternalError.Throw(e.Message, e);
                                 }
 
                                 // This is fatal to the execution of the ActionBlock.  No more messages will be processed, and the
@@ -1477,119 +1482,69 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void TraceEngine(string format, ulong arg)
+        private void TraceEngine(string message)
         {
-            if (_debugDumpState)
+            if (!_debugDumpState)
             {
-                TraceEngine(format, [arg]);
+                return;
             }
-        }
 
-        private void TraceEngine(string format, int arg)
-        {
-            if (_debugDumpState)
+            lock (s_traceLock)
             {
-                TraceEngine(format, [arg]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, BuildRequestEngineStatus arg2)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2.Box()]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, int arg2)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2]);
-            }
-        }
-
-        private void TraceEngine(string format, ulong arg1, ulong arg2)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, int arg2, int arg3)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2, arg3]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, int arg2, string arg3)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2, arg3]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, int arg2, int arg3, string arg4)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2, arg3, arg4]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, int arg2, int arg3, BuildRequestEntryState arg4)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2, arg3, arg4]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, int arg5)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
-            }
-        }
-
-        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, BuildResultCode arg5)
-        {
-            if (_debugDumpState)
-            {
-                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
-            }
-        }
-
-        private void TraceEngine(string format, params object[] stuff)
-        {
-            if (_debugDumpState)
-            {
-                lock (s_traceLock)
+                try
                 {
-                    try
-                    {
-                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                    FileUtilities.EnsureDirectoryExists(_debugDumpDirectory);
 
-                        using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
-                        {
-                            string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                            file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
-                            file.Flush();
-                        }
-                    }
-                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    using (StreamWriter file = FileUtilities.OpenWrite(_debugDumpFilePath, append: true))
                     {
-                        // Trace file failures must never crash the build engine.
-                        // Matches the defensive pattern used by Scheduler.TraceScheduler.
-                        _nodeLoggingContext?.LogCommentFromText(MessageImportance.Low, $"Failed to write to engine trace file: {e}");
+                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
+                        file.Flush();
                     }
                 }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Trace file failures must never crash the build engine.
+                    // Matches the defensive pattern used by Scheduler.TraceScheduler.
+                    _nodeLoggingContext?.LogCommentFromText(MessageImportance.Low, $"Failed to write to engine trace file: {e}");
+                }
             }
+        }
+
+        private void TraceEngine([InterpolatedStringHandlerArgument("")] ref TraceInterpolatedStringHandler handler)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(handler.GetFormattedText());
+            }
+        }
+
+        /// <summary>
+        ///  Interpolated string handler used by <see cref="TraceEngine(ref TraceInterpolatedStringHandler)"/>
+        ///  to defer string formatting unless tracing is enabled.
+        /// </summary>
+        [InterpolatedStringHandler]
+        private ref struct TraceInterpolatedStringHandler
+        {
+            private StringBuilderHelper _builder;
+
+            public TraceInterpolatedStringHandler(int literalLength, int formattedCount, BuildRequestEngine engine, out bool isEnabled)
+            {
+                isEnabled = engine._debugDumpState;
+                _builder = isEnabled ? new(literalLength) : default;
+            }
+
+            public readonly void AppendLiteral(string value)
+                => _builder.AppendLiteral(value);
+
+            public readonly void AppendFormatted<TValue>(TValue value)
+                => _builder.AppendFormatted(value);
+
+            public readonly void AppendFormatted<TValue>(TValue value, string format)
+                where TValue : IFormattable
+                => _builder.AppendFormatted(value, format);
+
+            public string GetFormattedText()
+                => _builder.GetFormattedText();
         }
 
         /// <summary>

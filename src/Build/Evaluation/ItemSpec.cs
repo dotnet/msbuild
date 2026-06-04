@@ -395,7 +395,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (var fragment in Fragments)
             {
-                if (fragment is ValueFragment || fragment is GlobFragment)
+                if (fragment is ValueFragment or GlobFragment)
                 {
                     yield return fragment.TextFragment;
                 }
@@ -408,7 +408,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
         }

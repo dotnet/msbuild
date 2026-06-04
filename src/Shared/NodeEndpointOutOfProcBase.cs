@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -169,8 +169,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            Assumed.Equal(_status, LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
+            ArgumentNullException.ThrowIfNull(factory);
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -182,7 +182,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.ThrowInternalError("Connect() not valid on the out of proc endpoint.");
+            InternalError.Throw("Connect() not valid on the out of proc endpoint.");
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         protected void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, "Attempting to change status to existing status {0}.", _status);
+            Assumed.NotEqual(_status, newStatus, $"Attempting to change status to existing status {_status}.");
             CommunicationsUtilities.Trace($"Changing link status from {_status} to {newStatus}");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
@@ -312,7 +312,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void InternalDisconnect()
         {
-            ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
+            Assumed.NotEqual(_packetPump.ManagedThreadId, Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
             _terminatePacketPump.Dispose();
@@ -329,9 +329,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
-            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
+            ArgumentNullException.ThrowIfNull(packet);
+            Assumed.NotNull(_packetQueue, "packetQueue is null");
+            Assumed.NotNull(_packetAvailable, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
         }
@@ -792,7 +792,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("waitId {0} out of range.", waitId);
+                        InternalError.Throw($"waitId {waitId} out of range.");
                         break;
                 }
             }

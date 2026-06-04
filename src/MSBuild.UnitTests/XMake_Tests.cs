@@ -1571,6 +1571,48 @@ namespace Microsoft.Build.UnitTests
             successfulExit.ShouldBeTrue();
         }
 
+        [Fact]
+        public void ResponseFileNoticeIsPrintedOnSwitchError()
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("foo.proj", content);
+            var projectPath = directory.CreateFile("bar.proj", content).Path;
+            var rspPath = directory.CreateFile("Directory.Build.rsp", "foo.proj").Path;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
+
+            successfulExit.ShouldBeFalse();
+            int noticeIndex = output.IndexOf("Some command line switches were read from", StringComparison.OrdinalIgnoreCase);
+            int errorIndex = output.IndexOf("MSB1008", StringComparison.OrdinalIgnoreCase);
+            noticeIndex.ShouldBeGreaterThanOrEqualTo(0);
+            errorIndex.ShouldBeGreaterThanOrEqualTo(0);
+            noticeIndex.ShouldBeLessThan(errorIndex);
+            output.ShouldContain(rspPath);
+        }
+
+        [Fact]
+        public void ExplicitResponseFileNoticeIsPrintedOnSwitchError()
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("foo.proj", content);
+            var projectPath = directory.CreateFile("bar.proj", content).Path;
+            var rspPath = directory.CreateFile("explicit.rsp", "foo.proj").Path;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\" @\"{rspPath}\" -noAutoResponse", out var successfulExit, _output);
+
+            successfulExit.ShouldBeFalse();
+            int noticeIndex = output.IndexOf("Some command line switches were read from", StringComparison.OrdinalIgnoreCase);
+            int errorIndex = output.IndexOf("MSB1008", StringComparison.OrdinalIgnoreCase);
+            noticeIndex.ShouldBeGreaterThanOrEqualTo(0);
+            errorIndex.ShouldBeGreaterThanOrEqualTo(0);
+            noticeIndex.ShouldBeLessThan(errorIndex);
+            output.ShouldContain(rspPath);
+        }
+
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files. Sanity test when there isn't one.
@@ -3137,6 +3179,42 @@ EndGlobal
             string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
 
             MSBuildApp.Execute([@"c:\bin\msbuild.exe", project, "/m:257 /mt"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableEnablesMultiThreadedMode()
+        {
+            // When MSBUILDFORCEMULTITHREADED=1 is set, IsMultiThreadedEnabled should return true
+            // even when the -multiThreaded / -mt switch is not passed on the command line.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded).ShouldBeFalse();
+
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()
+        {
+            // When the env var is not set and the switch is not passed, IsMultiThreadedEnabled should return false.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableNonOneValueDoesNotEnableMultiThreadedMode()
+        {
+            // The env var is only honored when set to exactly "1", matching other MSBUILDFORCE* flags.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "true");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
         }
 
         private string CopyMSBuild()

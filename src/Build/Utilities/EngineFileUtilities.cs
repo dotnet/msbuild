@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Internal
             string? buildEventFileInfoFullPath = null,
             bool disableExcludeDriveEnumerationWarning = false)
         {
-            ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
+            Assumed.NotNullOrEmpty(filespecEscaped);
 
             string[] fileList = [];
 
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Internal
             {
                 if (Traits.Instance.LogExpandedWildcards)
                 {
-                    ErrorUtilities.DebugTraceMessage("Expanding wildcard for file spec {0}", filespecEscaped);
+                    ErrorUtilities.DebugTraceMessage("EngineFileUtilities", $"Expanding wildcard for file spec {filespecEscaped}");
                 }
 
                 // Unescape before handing it to the filesystem.
@@ -283,10 +283,12 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                 "UnknownLoggingType",
                                 loggingMechanism?.GetType(),
                                 nameof(GetFileList)));
+
+                            break;
                     }
                 }
 
@@ -324,10 +326,12 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                 "UnknownLoggingType",
                                 loggingMechanism?.GetType(),
                                 nameof(GetFileList)));
+
+                            break;
                     }
                 }
                 else
@@ -354,15 +358,16 @@ namespace Microsoft.Build.Internal
                                 evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
                                 break;
                             default:
-                                throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                     "UnknownLoggingType",
                                     loggingMechanism.GetType(),
                                     nameof(GetFileList)));
+
+                                break;
                         }
                     }
 
-
-                    ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
+                    Assumed.NotNull(fileList, "We must have a list of files here, even if it's empty.");
 
                     // Before actually returning the file list, we sort them alphabetically.  This
                     // provides a certain amount of extra determinism and reproducability.  That is,

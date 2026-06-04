@@ -301,7 +301,7 @@ namespace Microsoft.Build.Execution
         private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
             ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile);
+            ArgumentException.ThrowIfNullOrEmpty(projectFile);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
 
             // We do not control the current directory at this point, but assume that if we were
@@ -375,7 +375,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public ProjectInstance(Project project, ProjectInstanceSettings settings)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project);
+            Assumed.NotNull(project);
 
             var projectPath = project.FullPath;
             _directory = Path.GetDirectoryName(projectPath);
@@ -428,7 +428,7 @@ namespace Microsoft.Build.Execution
         /// <param name="fastItemLookupNeeded">Whether the fast item lookup cache is required.</param>
         private ProjectInstance(Project linkedProject, bool fastItemLookupNeeded)
         {
-            ErrorUtilities.VerifyThrowInternalNull(linkedProject);
+            Assumed.NotNull(linkedProject);
 
             var projectPath = linkedProject.FullPath;
             _directory = Path.GetDirectoryName(projectPath);
@@ -644,9 +644,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId, ProjectLoadSettings? projectLoadSettings)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile);
+            ArgumentException.ThrowIfNullOrEmpty(projectFile);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters);
+            ArgumentNullException.ThrowIfNull(buildParameters);
 
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
 
@@ -660,9 +660,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xml);
+            ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters);
+            ArgumentNullException.ThrowIfNull(buildParameters);
             Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
@@ -672,8 +672,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(Evaluation.Project.Data data, string directory, string fullPath, HostServices hostServices, PropertyDictionary<ProjectPropertyInstance> environmentVariableProperties, ProjectInstanceSettings settings)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data);
-            ErrorUtilities.VerifyThrowInternalLength(directory, nameof(directory));
+            Assumed.NotNull(data);
+            Assumed.NotNullOrEmpty(directory);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(fullPath, nameof(fullPath));
 
             _directory = directory;
@@ -738,8 +738,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectInstance(ProjectInstance that, bool isImmutable, RequestedProjectState filter = null)
         {
-            ErrorUtilities.VerifyThrow(filter == null || isImmutable,
-                "The result of a filtered ProjectInstance clone must be immutable.");
+            Assumed.True(filter == null || isImmutable, "The result of a filtered ProjectInstance clone must be immutable.");
 
             _directory = that._directory;
             _projectFileLocation = that._projectFileLocation;
@@ -1396,8 +1395,8 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         public void AddSdkResolvedEnvironmentVariable(string name, string value)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
-            ErrorUtilities.VerifyThrowArgumentNull(value);
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            ArgumentNullException.ThrowIfNull(value);
 
             // If another SDK already set it, we do not overwrite it.
             if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
@@ -1553,13 +1552,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         Dictionary<string, List<string>> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ConditionedProperties
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
-        }
+            => Assumed.Unreachable<Dictionary<string, List<string>>>();
 
         /// <summary>
         /// Whether evaluation should collect items ignoring condition,
@@ -1710,7 +1703,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IItem is an internal interface; this is less confusing to outside customers. ")]
         public static string GetEvaluatedItemIncludeEscaped(ProjectItemInstance item)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item);
+            ArgumentNullException.ThrowIfNull(item);
 
             return ((IItem)item).EvaluatedIncludeEscaped;
         }
@@ -1720,7 +1713,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public static string GetEvaluatedItemIncludeEscaped(ProjectItemDefinitionInstance item)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item);
+            ArgumentNullException.ThrowIfNull(item);
 
             return ((IItem)item).EvaluatedIncludeEscaped;
         }
@@ -1730,7 +1723,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectMetadataInstance metadatum)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadatum);
+            ArgumentNullException.ThrowIfNull(metadatum);
 
             return metadatum.EvaluatedValueEscaped;
         }
@@ -1741,7 +1734,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IItem is an internal interface; this is less confusing to outside customers. ")]
         public static string GetMetadataValueEscaped(ProjectItemInstance item, string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item);
+            ArgumentNullException.ThrowIfNull(item);
 
             return ((IItem)item).GetMetadataValueEscaped(name);
         }
@@ -1751,7 +1744,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectItemDefinitionInstance item, string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item);
+            ArgumentNullException.ThrowIfNull(item);
 
             return ((IItem)item).GetMetadataValueEscaped(name);
         }
@@ -1762,7 +1755,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IProperty is an internal interface; this is less confusing to outside customers. ")]
         public static string GetPropertyValueEscaped(ProjectPropertyInstance property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(property);
+            ArgumentNullException.ThrowIfNull(property);
 
             return ((IProperty)property).EvaluatedValueEscaped;
         }
@@ -1815,9 +1808,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddItemIgnoringCondition(ProjectItemInstance item)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Adds a new item definition
@@ -1842,9 +1833,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddToAllEvaluatedPropertiesList(ProjectPropertyInstance property)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
@@ -1856,9 +1845,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddToAllEvaluatedItemDefinitionMetadataList(ProjectMetadataInstance itemDefinitionMetadatum)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Items encountered during evaluation. These are read during the third evaluation pass.
@@ -1870,9 +1857,7 @@ namespace Microsoft.Build.Execution
         /// Because ShouldEvaluateForDesignTime returns false, this should not be called.
         /// </remarks>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.AddToAllEvaluatedItemsList(ProjectItemInstance item)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         /// <summary>
         /// Retrieves an existing item definition, if any.
@@ -2453,9 +2438,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void LateInitialize(ProjectRootElementCacheBase projectRootElementCache, HostServices hostServices)
         {
-            ErrorUtilities.VerifyThrow(ProjectRootElementCache == null, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
-            ErrorUtilities.VerifyThrow(_hostServices == null, $"{nameof(HostServices)} is already set. Cannot set again");
-            ErrorUtilities.VerifyThrow(TaskRegistry != null, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
+            Assumed.Null(ProjectRootElementCache, $"{nameof(ProjectRootElementCache)} is already set. Cannot set again");
+            Assumed.Null(_hostServices, $"{nameof(HostServices)} is already set. Cannot set again");
+            Assumed.NotNull(TaskRegistry, $"{nameof(TaskRegistry)} Cannot be null after {nameof(ProjectInstance)} object creation.");
 
             ProjectRootElementCache = projectRootElementCache;
             _taskRegistry.RootElementCache = projectRootElementCache;
@@ -2647,11 +2632,11 @@ namespace Microsoft.Build.Execution
             ISdkResolverService sdkResolverService,
             int submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile);
-            ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances);
+            ArgumentException.ThrowIfNullOrEmpty(projectFile);
+            ArgumentNullException.ThrowIfNull(globalPropertiesInstances);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters);
-            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(projectFile), "Project file {0} is not a solution.", projectFile);
+            ArgumentNullException.ThrowIfNull(buildParameters);
+            Assumed.True(FileUtilities.IsSolutionFilename(projectFile), $"Project file {projectFile} is not a solution.");
 
             ProjectInstance[] projectInstances = null;
 
@@ -2928,8 +2913,8 @@ namespace Microsoft.Build.Execution
         {
             VerifyThrowNotImmutable();
 
-            ErrorUtilities.VerifyThrowInternalLength(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), "Target {0} already exists.", targetName);
+            Assumed.NotNullOrEmpty(targetName);
+            Assumed.False(_actualTargets.ContainsKey(targetName), $"Target {targetName} already exists.");
 
             ProjectTargetInstance target = new ProjectTargetInstance(
                 targetName,
@@ -3201,9 +3186,9 @@ namespace Microsoft.Build.Execution
             EvaluationContext evaluationContext = null,
             IDirectoryCacheFactory directoryCacheFactory = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xml);
+            ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters);
+            ArgumentNullException.ThrowIfNull(buildParameters);
 
             _directory = xml.DirectoryPath;
             _projectFileLocation = xml.ProjectFileLocation ?? ElementLocation.EmptyLocation;
@@ -3284,7 +3269,7 @@ namespace Microsoft.Build.Execution
                 Trace.WriteLine($"MSBUILD: Creating a ProjectInstance from an unevaluated state [{FullPath}]");
             }
 
-            ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
+            Assumed.Equal(EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
             evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
@@ -3307,7 +3292,7 @@ namespace Microsoft.Build.Execution
                 evaluationContext,
                 interactive: buildParameters.Interactive);
 
-            ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
+            Assumed.NotEqual(EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }
 
         /// <summary>

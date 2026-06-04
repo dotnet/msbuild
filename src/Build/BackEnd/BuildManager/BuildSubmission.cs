@@ -35,7 +35,7 @@ namespace Microsoft.Build.Execution
         protected internal BuildSubmissionBase(BuildManager buildManager, int submissionId, TRequestData requestData)
             : base(buildManager, submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestData);
+            ArgumentNullException.ThrowIfNull(requestData);
             BuildRequestData = requestData;
         }
 
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CompleteResults(TResultData result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(result);
+            ArgumentNullException.ThrowIfNull(result);
             CheckResultValidForCompletion(result);
 
             BuildResult ??= result;
@@ -196,8 +196,7 @@ namespace Microsoft.Build.Execution
 
             legacyThreadingData.UnregisterSubmissionForLegacyThread(SubmissionId);
 
-            ErrorUtilities.VerifyThrow(BuildResult != null,
-                "BuildResult is not populated after Execute is done.");
+            Assumed.NotNull(BuildResult, "BuildResult is not populated after Execute is done.");
 
             return BuildResult!;
         }
@@ -214,8 +213,7 @@ namespace Microsoft.Build.Execution
 
         protected internal override BuildResult CreateFailedResult(Exception exception)
         {
-            ErrorUtilities.VerifyThrow(BuildRequest != null,
-                "BuildRequest is not populated while reporting failed result.");
+            Assumed.NotNull(BuildRequest, "BuildRequest is not populated while reporting failed result.");
             return new(BuildRequest!, exception);
         }
 
@@ -227,8 +225,7 @@ namespace Microsoft.Build.Execution
             // this one.)
             if (result.ConfigurationId != BuildRequest?.ConfigurationId)
             {
-                ErrorUtilities.ThrowInternalError("BuildResult configuration ({0}) doesn't match BuildRequest configuration ({1})",
-                    result.ConfigurationId, BuildRequest?.ConfigurationId);
+                InternalError.Throw($"BuildResult configuration ({result.ConfigurationId}) doesn't match BuildRequest configuration ({BuildRequest?.ConfigurationId})");
             }
         }
 

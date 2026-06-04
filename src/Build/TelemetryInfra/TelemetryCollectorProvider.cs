@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,7 +6,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.TelemetryInfra;
 
@@ -28,13 +27,13 @@ internal class TelemetryCollectorProvider : IBuildComponent
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
-        ErrorUtilities.VerifyThrow(type == BuildComponentType.TelemetryCollector, "Cannot create components of type {0}", type);
+        Assumed.Equal(type, BuildComponentType.TelemetryCollector, $"Cannot create components of type {type}");
         return new TelemetryCollectorProvider();
     }
 
     public void InitializeComponent(IBuildComponentHost host)
     {
-        ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
+        Assumed.NotNull(host, "BuildComponentHost was null");
         _telemetryEnabled = host!.BuildParameters.IsTelemetryEnabled;
     }
 

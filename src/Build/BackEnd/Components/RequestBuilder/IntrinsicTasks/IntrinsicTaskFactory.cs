@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -47,10 +46,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
-            if (!String.Equals(taskName, TaskType.Name, StringComparison.OrdinalIgnoreCase))
-            {
-                ErrorUtilities.ThrowInternalError("Unexpected task name {0}.  Expected {1}", taskName, TaskType.Name);
-            }
+            Assumed.Equal(taskName, TaskType.Name, StringComparison.OrdinalIgnoreCase, $"Unexpected task name {taskName}.  Expected {TaskType.Name}");
 
             return true;
         }
@@ -84,8 +80,7 @@ namespace Microsoft.Build.BackEnd
                 return new CallTarget();
             }
 
-            ErrorUtilities.ThrowInternalError("Unexpected intrinsic task type {0}", TaskType);
-            return null;
+            return InternalError.Throw<ITask>($"Unexpected intrinsic task type {TaskType}");
         }
 
         /// <summary>

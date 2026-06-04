@@ -490,8 +490,8 @@
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
-        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="translated">MSB3071: Wszystkie litery dysków od A: do Z: są obecnie zajęte. Ponieważ katalog roboczy „{0}” jest ścieżką UNC, zadanie „Exec” potrzebuje wolnej litery dysku do zamapowania ścieżki UNC. Odłącz się od co najmniej jednego zasobu udostępnionego, aby zwolnić litery dysków, lub określ lokalny katalog roboczy przed ponownym użyciem tego polecenia.</target>
+        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
+        <target state="translated">MSB3071: Wszystkie litery dysków od A: do Z: są obecnie zajęte. Ponieważ katalog roboczy „{0}” (rozpoznany jako ścieżka UNC „{1}”) wymaga mapowania UNC, zadanie „Exec” wymaga wolnej litery dysku, aby zamapować ścieżkę UNC. Odłącz się od co najmniej jednego zasobu udostępnionego, aby zwolnić litery dysków, lub określ lokalny katalog roboczy przed ponownym użyciem tego polecenia.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -564,6 +564,11 @@
         <target state="translated">MSB3541: {0} zawiera nieprawidłową wartość „{1}”. {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
       </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="new">MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</target>
+        <note>{StrBegin="MSB4311: "}</note>
+      </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
         <target state="translated">MSB3102: Nie można usunąć pliku stanu „{0}”. {1}</target>
@@ -617,6 +622,11 @@
       <trans-unit id="General.ExpectedFileMissing">
         <source>Expected file "{0}" does not exist.</source>
         <target state="translated">Oczekiwany plik „{0}” nie istnieje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="translated">Nie można znormalizować ścieżki „{0}”, rozpoznając segmenty „.” i „.”: {1}. Ścieżka będzie używana w stanie, w jakim jest.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1982,6 +1992,11 @@
         <source>MSB3249: Application Configuration file "{0}" is invalid. {1}</source>
         <target state="translated">MSB3249: Plik konfiguracyjny aplikacji „{0}” jest nieprawidłowy. {1}</target>
         <note>{StrBegin="MSB3249: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="translated">Ścieżka pliku konfiguracji aplikacji nie może być pusta.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>

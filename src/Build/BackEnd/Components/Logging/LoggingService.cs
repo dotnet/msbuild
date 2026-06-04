@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -891,8 +891,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(buildComponentHost != null, "BuildComponentHost was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(buildComponentHost, "BuildComponentHost was null");
 
                 _componentHost = buildComponentHost;
 
@@ -930,7 +930,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
 
                 // Set the state to indicate we are starting the shutdown process.
                 _serviceState = LoggingServiceState.ShuttingDown;
@@ -1000,19 +1000,15 @@ namespace Microsoft.Build.BackEnd.Logging
         public void PacketReceived(int node, INodePacket packet)
         {
             // The packet cannot be null
-            ErrorUtilities.VerifyThrow(packet != null, "packet was null");
+            Assumed.NotNull(packet, "packet was null");
 
             // Expected the packet type to be a logging message packet
-            // PERF: Not using VerifyThrow to avoid allocations for enum.ToString (boxing of NodePacketType) in the non-error case.
-            if (packet.Type != NodePacketType.LogMessage)
-            {
-                ErrorUtilities.ThrowInternalError("Expected packet type \"{0}\" but instead got packet type \"{1}\".", nameof(NodePacketType.LogMessage), packet.Type.ToString());
-            }
+            Assumed.Equal(packet.Type, NodePacketType.LogMessage, $"""Expected packet type "{nameof(NodePacketType.LogMessage)}" but instead got packet type "{packet.Type}".""");
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
 
-            ErrorUtilities.VerifyThrow(loggingPacket.EventType != LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
+            Assumed.NotEqual(loggingPacket.EventType, LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
 
             ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }
@@ -1029,8 +1025,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(logger != null, "logger was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(logger, "logger was null");
 
                 // If the logger is already in the list it should not be registered again.
                 if (_loggers.Contains(logger))
@@ -1118,8 +1114,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(forwardingLogger != null, "forwardingLogger was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(forwardingLogger, "forwardingLogger was null");
                 if (centralLogger == null)
                 {
                     centralLogger = new NullCentralLogger();
@@ -1185,10 +1181,10 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(forwardingLoggerSink != null, "forwardingLoggerSink was null");
-                ErrorUtilities.VerifyThrow(descriptions != null, "loggerDescriptions was null");
-                ErrorUtilities.VerifyThrow(descriptions.Count > 0, "loggerDescriptions was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(forwardingLoggerSink, "forwardingLoggerSink was null");
+                Assumed.NotNull(descriptions, "loggerDescriptions was null");
+                Assumed.Positive(descriptions.Count, "loggerDescriptions was null");
 
                 bool sinkAlreadyRegistered = false;
                 int sinkId = -1;
@@ -1240,7 +1236,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void LogBuildEvent(BuildEventArgs buildEvent)
         {
-            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+            Assumed.NotNull(buildEvent, "buildEvent is null");
 
             BuildWarningEventArgs warningEvent = null;
             BuildErrorEventArgs errorEvent = null;
@@ -1302,7 +1298,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return;
             }
 
-            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+            Assumed.NotNull(buildEvent, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
                 // Capture local references to prevent race with CleanLoggingEventProcessing
@@ -1374,7 +1370,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (loggingPacket.NodeBuildEvent.Value.Value is ProjectStartedEventArgs projectStartedEventArgs && _configCache.Value != null)
                 {
-                    ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
+                    Assumed.True(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
 
                     // Always log GlobalProperties on ProjectStarted for compatibility.
@@ -1596,10 +1592,8 @@ namespace Microsoft.Build.BackEnd.Logging
         private void RouteBuildEvent(object loggingEvent)
         {
             BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
-            if (buildEventArgs is null)
-            {
-                ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
-            }
+
+            Assumed.NotNull(buildEventArgs, $"Unknown logging item in queue: {loggingEvent.GetType().FullName}");
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)
             {
@@ -1984,13 +1978,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext context = eventArgs.BuildEventContext!;
             _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
 
-            // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
-            if (projectFile == null && !allowCacheMiss)
-            {
-                ErrorUtilities.ThrowInternalError(
-                    "ContextID {0} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{1}'",
-                    context.ProjectContextId, eventArgs.Message);
-            }
+            Assumed.True(projectFile != null || allowCacheMiss, $"ContextID {context.ProjectContextId} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{eventArgs.Message}'");
 
             return projectFile;
         }

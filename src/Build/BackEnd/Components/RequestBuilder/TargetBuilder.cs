@@ -107,13 +107,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The target's outputs and result codes</returns>
         public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry);
-            ErrorUtilities.VerifyThrowArgumentNull(callback, "requestBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames);
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup);
-            ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
-            ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
+            ArgumentNullException.ThrowIfNull(loggingContext, "projectLoggingContext");
+            ArgumentNullException.ThrowIfNull(entry);
+            ArgumentNullException.ThrowIfNull(callback, "requestBuilderCallback");
+            ArgumentNullException.ThrowIfNull(targetNames);
+            ArgumentNullException.ThrowIfNull(baseLookup);
+            Assumed.Positive(targetNames.Length, "List of targets must be non-empty");
+            Assumed.NotNull(_componentHost, "InitializeComponent must be called before building targets.");
 
             _requestEntry = entry;
             _requestBuilderCallback = callback;
@@ -217,7 +217,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
             _componentHost = host;
             _isTelemetryRequested = host.BuildParameters.IsTelemetryEnabled;
         }
@@ -283,7 +283,7 @@ namespace Microsoft.Build.BackEnd
 
                         // We push the targets one at a time to emulate the original CallTarget behavior.
                         bool pushed = await PushTargets(targetToPush, currentTargetEntry, callTargetLookup, false, true, TargetBuiltReason.None);
-                        ErrorUtilities.VerifyThrow(pushed, "Failed to push any targets onto the stack.  Target: {0} Current Target: {1}", targets[i], currentTargetEntry.Target.Name);
+                        Assumed.True(pushed, $"Failed to push any targets onto the stack.  Target: {targets[i]} Current Target: {currentTargetEntry.Target.Name}");
                         await ProcessTargetStack(taskBuilder);
 
                         if (!_cancellationToken.IsCancellationRequested)
@@ -335,10 +335,7 @@ namespace Microsoft.Build.BackEnd
         /// Required for interface - this should never be called.
         /// </summary>
         Task IRequestBuilderCallback.BlockOnTargetInProgress(int blockingGlobalBuildRequestId, string blockingTarget, BuildResult partialBuildResult)
-        {
-            ErrorUtilities.ThrowInternalError("This method should never be called by anyone except the TargetBuilder.");
-            return Task.FromResult(false);
-        }
+            => InternalError.Throw<Task>("This method should never be called by anyone except the TargetBuilder.");
 
         /// <summary>
         /// Yields the node.
@@ -397,7 +394,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.TargetBuilder, "Cannot create components of type {0}", type);
+            Assumed.Equal(type, BuildComponentType.TargetBuilder, $"Cannot create components of type {type}");
             return new TargetBuilder();
         }
 
@@ -482,7 +479,7 @@ namespace Microsoft.Build.BackEnd
                         // actually built this target while we were waiting, so that by the time we get here, it's already been finished.  In this case, just blow it away.
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
-                            ErrorUtilities.VerifyThrow(!wasActivelyBuilding, "Target {0} was actively building and waited on but we are attempting to build it again.", currentTargetEntry.Name);
+                            Assumed.False(wasActivelyBuilding, $"Target {currentTargetEntry.Name} was actively building and waited on but we are attempting to build it again.");
 
                             // This target is now actively building.
                             _requestEntry.RequestConfiguration.ActivelyBuildingTargets[currentTargetEntry.Name] = _requestEntry.Request.GlobalRequestId;
@@ -545,7 +542,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected target state {0}", currentTargetEntry.State);
+                        Assumed.Unreachable($"Unexpected target state {currentTargetEntry.State}");
                         break;
                 }
             }
@@ -559,7 +556,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (_buildResult.TryGetResultsForTarget(currentTargetEntry.Name, out TargetResult targetResult))
             {
-                ErrorUtilities.VerifyThrowInternalNull(targetResult, "targetResult");
+                Assumed.NotNull(targetResult);
 
                 if (targetResult.ResultCode != TargetResultCode.Skipped)
                 {

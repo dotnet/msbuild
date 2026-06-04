@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -73,13 +72,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AddConfiguration(BuildRequestConfiguration config, Configurations configurations)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config);
-            ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
+            ArgumentNullException.ThrowIfNull(config);
 
-            if (!configurations.ById.TryAdd(config.ConfigurationId, config))
-            {
-                ErrorUtilities.ThrowInternalError("Configuration {0} already cached", config.ConfigurationId);
-            }
+            Assumed.True(config.ConfigurationId != 0, "Invalid configuration ID");
+            Assumed.True(configurations.ById.TryAdd(config.ConfigurationId, config), $"Configuration {config.ConfigurationId} already cached");
 
             _ = configurations.ByMetadata[new ConfigurationMetadata(config)] = config;
         }
@@ -91,7 +87,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config);
+            ArgumentNullException.ThrowIfNull(config);
             return GetMatchingConfiguration(new ConfigurationMetadata(config));
         }
 
@@ -102,7 +98,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configMetadata);
+            ArgumentNullException.ThrowIfNull(configMetadata);
             if (!_configurations.ByMetadata.TryGetValue(configMetadata, out BuildRequestConfiguration config))
             {
                 return null;
@@ -120,7 +116,7 @@ namespace Microsoft.Build.BackEnd
             Configurations configurations = _configurations;
 
             // If there is no matching configuration, let the caller create one.
-            ErrorUtilities.VerifyThrowArgumentNull(configMetadata);
+            ArgumentNullException.ThrowIfNull(configMetadata);
             if (!configurations.ByMetadata.TryGetValue(configMetadata, out BuildRequestConfiguration configuration))
             {
                 configuration = callback(null, loadProject);
@@ -145,7 +141,7 @@ namespace Microsoft.Build.BackEnd
             // In either case, make sure the project is loaded if it was requested.
             if (loadProject)
             {
-                ErrorUtilities.VerifyThrow(configuration.IsLoaded, "Request to create configuration did not honor request to also load project.");
+                Assumed.True(configuration.IsLoaded, "Request to create configuration did not honor request to also load project.");
             }
 
             return configuration;
@@ -183,7 +179,7 @@ namespace Microsoft.Build.BackEnd
         public int GetSmallestConfigId()
         {
             Configurations configurations = _configurations;
-            ErrorUtilities.VerifyThrow(!configurations.ById.IsEmpty, "No configurations exist from which to obtain the smallest configuration id.");
+            Assumed.False(configurations.ById.IsEmpty, "No configurations exist from which to obtain the smallest configuration id.");
 
             int smallestId = int.MaxValue;
             foreach (KeyValuePair<int, BuildRequestConfiguration> kvp in configurations.ById)
@@ -315,7 +311,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The build component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ArgumentNullException.ThrowIfNull(host);
         }
 
         /// <summary>
@@ -338,7 +334,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ConfigCache, "Cannot create components of type {0}", componentType);
+            Assumed.Equal(componentType, BuildComponentType.ConfigCache, $"Cannot create components of type {componentType}");
             return new ConfigCache();
         }
 

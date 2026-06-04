@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -22,7 +21,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_directories, nameof(Directories));
+                ArgumentNullException.ThrowIfNull(_directories, nameof(Directories));
                 return _directories;
             }
 

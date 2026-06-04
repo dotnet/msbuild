@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -121,14 +120,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int node, INodePacket packet)
         {
-            if (!_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider))
-            {
-                ErrorUtilities.ThrowInternalError("Node {0} does not have a provider.", node);
-            }
-            else
-            {
-                provider.SendData(node, packet);
-            }
+            Assumed.True(_nodeIdToProvider.TryGetValue(node, out INodeProvider? provider), $"Node {node} does not have a provider.");
+
+            provider.SendData(node, packet);
         }
 
         /// <summary>
@@ -137,7 +131,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            ErrorUtilities.VerifyThrow(!_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
+            Assumed.False(_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
 
             if (_nodesShutdown)
             {
@@ -168,8 +162,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrow(_componentHost == null, "NodeManager already initialized.");
-            ErrorUtilities.VerifyThrow(host != null, "We can't create a NodeManager with a null componentHost");
+            Assumed.Null(_componentHost, "NodeManager already initialized.");
+            Assumed.NotNull(host, "We can't create a NodeManager with a null componentHost");
             _componentHost = host!;
 
             _inProcNodeProvider = _componentHost.GetComponent(BuildComponentType.InProcNodeProvider) as INodeProvider;
@@ -287,7 +281,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.NodeManager, "Cannot create component of type {0}", type);
+            Assumed.Equal(type, BuildComponentType.NodeManager, $"Cannot create component of type {type}");
             return new NodeManager();
         }
 
@@ -314,16 +308,12 @@ namespace Microsoft.Build.BackEnd
         private IList<NodeInfo> AttemptCreateNode(INodeProvider nodeProvider, NodeConfiguration nodeConfiguration, int numberOfNodesToCreate)
         {
             // If no provider was passed in, we obviously can't create a node.
-            if (nodeProvider == null)
-            {
-                ErrorUtilities.ThrowInternalError("No node provider provided.");
-                return new List<NodeInfo>();
-            }
+            Assumed.NotNull(nodeProvider, "No node provider provided.");
 
             // Are there any free slots on this provider?
             if (nodeProvider.AvailableNodes == 0)
             {
-                return new List<NodeInfo>();
+                return [];
             }
 
             // Assign a global ID to the node we are about to create.

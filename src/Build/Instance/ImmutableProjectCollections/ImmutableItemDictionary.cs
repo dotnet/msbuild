@@ -182,7 +182,7 @@ namespace Microsoft.Build.Instance
 
             public void CopyTo(T[] array, int arrayIndex)
             {
-                ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), _list.Count);
+                ErrorUtilities.VerifyCollectionCopyToArguments(array, arrayIndex, _list.Count);
 
                 int currentIndex = arrayIndex;
                 foreach (var item in _list)

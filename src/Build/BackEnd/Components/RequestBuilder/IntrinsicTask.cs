@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -66,21 +65,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="logTaskInputs"><code>true</code> to log task inputs, otherwise <code>false</code>.</param>
         /// <returns>An instantiated intrinsic task.</returns>
         internal static IntrinsicTask InstantiateTask(ProjectTargetInstanceChild taskInstance, TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs)
-        {
-            if (taskInstance is ProjectPropertyGroupTaskInstance propertyGroupTaskInstance)
+            => taskInstance switch
             {
-                return new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
-            }
-            else if (taskInstance is ProjectItemGroupTaskInstance itemGroupTaskInstance)
-            {
-                return new ItemGroupIntrinsicTask(itemGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
-            }
-            else
-            {
-                ErrorUtilities.ThrowInternalError("Unhandled intrinsic task type {0}", taskInstance.GetType().GetTypeInfo().BaseType);
-                return null;
-            }
-        }
+                ProjectPropertyGroupTaskInstance propertyGroupTaskInstance => new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs),
+                ProjectItemGroupTaskInstance itemGroupTaskInstance => new ItemGroupIntrinsicTask(itemGroupTaskInstance, loggingContext, projectInstance, logTaskInputs),
+
+                _ => InternalError.Throw<IntrinsicTask>($"Unhandled intrinsic task type {taskInstance.GetType().GetTypeInfo().BaseType}"),
+            };
 
         /// <summary>
         /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.

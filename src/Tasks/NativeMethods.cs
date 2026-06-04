@@ -6,8 +6,15 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_WINDOWSINTEROP
+using Microsoft.Build.Tasks.Fusion;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+#endif
 
+#if !NET
 using System.Text;
+#endif
 using System.Reflection;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
@@ -20,7 +27,9 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 #endif
 using System.Text.RegularExpressions;
+#if FEATURE_WINDOWSINTEROP
 using System.Runtime.Versioning;
+#endif
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -28,521 +37,11 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// The original ITypeInfo interface in the CLR has incorrect definitions for GetRefTypeOfImplType and GetRefTypeInfo.
-    /// It uses ints for marshalling handles which will result in a crash on 64 bit systems. This is a temporary interface
-    /// for use until the one in the CLR is fixed. When it is we can go back to using ITypeInfo.
-    /// </summary>
-    [Guid("00020401-0000-0000-C000-000000000046")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [ComImport]
-    public interface IFixedTypeInfo
-    {
-        void GetTypeAttr(out IntPtr ppTypeAttr);
-        void GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp);
-        void GetFuncDesc(int index, out IntPtr ppFuncDesc);
-        void GetVarDesc(int index, out IntPtr ppVarDesc);
-        void GetNames(int memid, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2), Out] String[] rgBstrNames, int cMaxNames, out int pcNames);
-        void GetRefTypeOfImplType(int index, out IntPtr href);
-        void GetImplTypeFlags(int index, out System.Runtime.InteropServices.ComTypes.IMPLTYPEFLAGS pImplTypeFlags);
-        void GetIDsOfNames([MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 1), In] String[] rgszNames, int cNames, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1), Out] int[] pMemId);
-        void Invoke([MarshalAs(UnmanagedType.IUnknown)] Object pvInstance, int memid, Int16 wFlags, ref System.Runtime.InteropServices.ComTypes.DISPPARAMS pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, out int puArgErr);
-        void GetDocumentation(int index, out String strName, out String strDocString, out int dwHelpContext, out String strHelpFile);
-        void GetDllEntry(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, IntPtr pBstrDllName, IntPtr pBstrName, IntPtr pwOrdinal);
-        void GetRefTypeInfo(IntPtr hRef, out IFixedTypeInfo ppTI);
-        void AddressOfMember(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, out IntPtr ppv);
-        void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] Object pUnkOuter, [In] ref Guid riid, [MarshalAs(UnmanagedType.IUnknown), Out] out Object ppvObj);
-        void GetMops(int memid, out String pBstrMops);
-        void GetContainingTypeLib(out System.Runtime.InteropServices.ComTypes.ITypeLib ppTLB, out int pIndex);
-        [PreserveSig]
-        void ReleaseTypeAttr(IntPtr pTypeAttr);
-        [PreserveSig]
-        void ReleaseFuncDesc(IntPtr pFuncDesc);
-        [PreserveSig]
-        void ReleaseVarDesc(IntPtr pVarDesc);
-    }
-
-    [GuidAttribute("00020406-0000-0000-C000-000000000046")]
-    [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
-    [ComImport]
-    internal interface ICreateTypeLib
-    {
-        void CreateTypeInfo();
-        void SetName();
-        void SetVersion();
-        void SetGuid();
-        void SetDocString();
-        void SetHelpFileName();
-        void SetHelpContext();
-        void SetLcid();
-        void SetLibFlags();
-        void SaveAllChanges();
-    }
-
-    [ComImport]
-    [Guid("E5CB7A31-7512-11d2-89CE-0080C792E5D8")]
-#if !NETSTANDARD2_0_OR_GREATER // NS2.0 doesn't have COM so this can't appear in the ref assembly
-    [TypeLibType(TypeLibTypeFlags.FCanCreate)]
-#endif
-    [ClassInterface(ClassInterfaceType.None)]
-    internal class CorMetaDataDispenser
-    {
-    }
-
-    [ComImport]
-    [Guid("809c652e-7396-11d2-9771-00a0c9b4d50c")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown /*0x0001*/)]
-#if !NETSTANDARD2_0_OR_GREATER // NS2.0 doesn't have COM so this can't appear in the ref assembly
-    [TypeLibType(TypeLibTypeFlags.FRestricted /*0x0200*/)]
-#endif
-    internal interface IMetaDataDispenser
-    {
-        [return: MarshalAs(UnmanagedType.Interface)]
-        object DefineScope([In] ref Guid rclsid, [In] UInt32 dwCreateFlags, [In] ref Guid riid);
-
-        [return: MarshalAs(UnmanagedType.Interface)]
-        object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
-
-        [return: MarshalAs(UnmanagedType.Interface)]
-        object OpenScopeOnMemory([In] IntPtr pData, [In] UInt32 cbData, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
-    }
-
-    [ComImport]
-    [Guid("7DAC8207-D3AE-4c75-9B67-92801A497D44")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IMetaDataImport
-    {
-        // PreserveSig because this method is an exception that
-        // actually returns void, not HRESULT.
-        [PreserveSig]
-        void CloseEnum();
-        void CountEnum(IntPtr iRef, ref UInt32 ulCount);
-        void ResetEnum();
-        void EnumTypeDefs();
-        void EnumInterfaceImpls();
-        void EnumTypeRefs();
-        void FindTypeDefByName();
-        void GetScopeProps();
-        void GetModuleFromScope();
-        void GetTypeDefProps();
-        void GetInterfaceImplProps();
-        void GetTypeRefProps();
-        void ResolveTypeRef();
-        void EnumMembers();
-        void EnumMembersWithName();
-        void EnumMethods();
-        void EnumMethodsWithName();
-        void EnumFields();
-        void EnumFieldsWithName();
-        void EnumParams();
-        void EnumMemberRefs();
-        void EnumMethodImpls();
-        void EnumPermissionSets();
-        void FindMember();
-        void FindMethod();
-        void FindField();
-        void FindMemberRef();
-        void GetMethodProps();
-        void GetMemberRefProps();
-        void EnumProperties();
-        void EnumEvents();
-        void GetEventProps();
-        void EnumMethodSemantics();
-        void GetMethodSemantics();
-        void GetClassLayout();
-        void GetFieldMarshal();
-        void GetRVA();
-        void GetPermissionSetProps();
-        void GetSigFromToken();
-        void GetModuleRefProps();
-        void EnumModuleRefs();
-        void GetTypeSpecFromToken();
-        void GetNameFromToken();
-        void EnumUnresolvedMethods();
-        void GetUserString();
-        void GetPinvokeMap();
-        void EnumSignatures();
-        void EnumTypeSpecs();
-        void EnumUserStrings();
-        void GetParamForMethodIndex();
-        void EnumCustomAttributes();
-        void GetCustomAttributeProps();
-        void FindTypeRef();
-        void GetMemberProps();
-        void GetFieldProps();
-        void GetPropertyProps();
-        void GetParamProps();
-        void GetCustomAttributeByName();
-        void IsValidToken();  // Note: Need preservesig for this if ever going to be used.
-        void GetNestedClassProps();
-        void GetNativeCallConvFromSig();
-        void IsGlobal();
-    }
-
-    [ComImport]
-    [Guid("FCE5EFA0-8BBA-4f8e-A036-8F2022B08466")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IMetaDataImport2
-    {
-        void CloseEnum();
-        void CountEnum();
-        void ResetEnum();
-        void EnumTypeDefs();
-        void EnumInterfaceImpls();
-        void EnumTypeRefs();
-        void FindTypeDefByName();
-        void GetScopeProps();
-        void GetModuleFromScope();
-        void GetTypeDefProps();
-        void GetInterfaceImplProps();
-        void GetTypeRefProps();
-        void ResolveTypeRef();
-        void EnumMembers();
-        void EnumMembersWithName();
-        void EnumMethods();
-        void EnumMethodsWithName();
-        void EnumFields();
-        void EnumFieldsWithName();
-        void EnumParams();
-        void EnumMemberRefs();
-        void EnumMethodImpls();
-        void EnumPermissionSets();
-        void FindMember();
-        void FindMethod();
-        void FindField();
-        void FindMemberRef();
-        void GetMethodProps();
-        void GetMemberRefProps();
-        void EnumProperties();
-        void EnumEvents();
-        void GetEventProps();
-        void EnumMethodSemantics();
-        void GetMethodSemantics();
-        void GetClassLayout();
-        void GetFieldMarshal();
-        void GetRVA();
-        void GetPermissionSetProps();
-        void GetSigFromToken();
-        void GetModuleRefProps();
-        void EnumModuleRefs();
-        void GetTypeSpecFromToken();
-        void GetNameFromToken();
-        void EnumUnresolvedMethods();
-        void GetUserString();
-        void GetPinvokeMap();
-        void EnumSignatures();
-        void EnumTypeSpecs();
-        void EnumUserStrings();
-        void GetParamForMethodIndex();
-        void EnumCustomAttributes();
-        void GetCustomAttributeProps();
-        void FindTypeRef();
-        void GetMemberProps();
-        void GetFieldProps();
-        void GetPropertyProps();
-        void GetParamProps();
-        [PreserveSig]
-        int GetCustomAttributeByName(UInt32 mdTokenObj, [MarshalAs(UnmanagedType.LPWStr)] string szName, out IntPtr ppData, out uint pDataSize);
-        void IsValidToken();
-        void GetNestedClassProps();
-        void GetNativeCallConvFromSig();
-        void IsGlobal();
-        void EnumGenericParams();
-        void GetGenericParamProps();
-        void GetMethodSpecProps();
-        void EnumGenericParamConstraints();
-        void GetGenericParamConstraintProps();
-        void GetPEKind(out UInt32 pdwPEKind, out UInt32 pdwMachine);
-        void GetVersionString([MarshalAs(UnmanagedType.LPArray)] char[] pwzBuf, UInt32 ccBufSize, out UInt32 pccBufSize);
-    }
-
-    // Flags for OpenScope
-    internal enum CorOpenFlags
-    {
-        ofRead = 0x00000000,     // Open scope for read
-        ofWrite = 0x00000001,     // Open scope for write.
-        ofCopyMemory = 0x00000002,     // Open scope with memory. Ask metadata to maintain its own copy of memory.
-        ofCacheImage = 0x00000004,     // EE maps but does not do relocations or verify image
-        ofNoTypeLib = 0x00000080,     // Don't OpenScope on a typelib.
-    };
-
-    [ComImport]
-    [Guid("EE62470B-E94B-424e-9B7C-2F00C9249F93")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IMetaDataAssemblyImport
-    {
-        void GetAssemblyProps(UInt32 mdAsm, out IntPtr pPublicKeyPtr, out UInt32 ucbPublicKeyPtr, out UInt32 uHashAlg, [MarshalAs(UnmanagedType.LPArray)] char[] strName, UInt32 cchNameIn, out UInt32 cchNameRequired, IntPtr amdInfo, out UInt32 dwFlags);
-        void GetAssemblyRefProps(UInt32 mdAsmRef, out IntPtr ppbPublicKeyOrToken, out UInt32 pcbPublicKeyOrToken, [MarshalAs(UnmanagedType.LPArray)] char[] strName, UInt32 cchNameIn, out UInt32 pchNameOut, IntPtr amdInfo, out IntPtr ppbHashValue, out UInt32 pcbHashValue, out UInt32 pdwAssemblyRefFlags);
-        void GetFileProps([In] UInt32 mdFile, [MarshalAs(UnmanagedType.LPArray)] char[] strName, UInt32 cchName, out UInt32 cchNameRequired, out IntPtr bHashData, out UInt32 cchHashBytes, out UInt32 dwFileFlags);
-        void GetExportedTypeProps();
-        void GetManifestResourceProps();
-        void EnumAssemblyRefs([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] asmRefs, UInt32 asmRefCount, out UInt32 iFetched);
-        void EnumFiles([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] fileRefs, UInt32 fileRefCount, out UInt32 iFetched);
-        void EnumExportedTypes();
-        void EnumManifestResources();
-        void GetAssemblyFromScope(out UInt32 mdAsm);
-        void FindExportedTypeByName();
-        void FindManifestResourceByName();
-        // PreserveSig because this method is an exception that
-        // actually returns void, not HRESULT.
-        [PreserveSig]
-        void CloseEnum([In] IntPtr phEnum);
-        void FindAssembliesByName();
-    }
-
-    [ComImport]
-    [Guid("00000001-0000-0000-c000-000000000046")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IClassFactory
-    {
-        void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter, ref Guid riid, [MarshalAs(UnmanagedType.IUnknown), Out] out object ppvObject);
-        void LockServer(bool fLock);
-    }
-
-    // Subset of CorAssemblyFlags from corhdr.h
-    internal enum CorAssemblyFlags : uint
-    {
-        afPublicKey = 0x0001,            // The assembly ref holds the full (unhashed) public key.
-        afRetargetable = 0x0100            // The assembly can be retargeted (at runtime) to an
-                                           //  assembly from a different publisher.
-    };
-
-    /*
-    From cor.h:
-        typedef struct
-        {
-            USHORT      usMajorVersion;         // Major Version.
-            USHORT      usMinorVersion;         // Minor Version.
-            USHORT      usBuildNumber;          // Build Number.
-            USHORT      usRevisionNumber;       // Revision Number.
-            LPWSTR      szLocale;               // Locale.
-            ULONG       cbLocale;               // [IN/OUT] Size of the buffer in wide chars/Actual size.
-            DWORD       *rProcessor;            // Processor ID array.
-            ULONG       ulProcessor;            // [IN/OUT] Size of the Processor ID array/Actual # of entries filled in.
-            OSINFO      *rOS;                   // OSINFO array.
-            ULONG       ulOS;                   // [IN/OUT]Size of the OSINFO array/Actual # of entries filled in.
-        } ASSEMBLYMETADATA;
-    */
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct ASSEMBLYMETADATA
-    {
-        public UInt16 usMajorVersion;
-        public UInt16 usMinorVersion;
-        public UInt16 usBuildNumber;
-        public UInt16 usRevisionNumber;
-        public IntPtr rpLocale;
-        public UInt32 cchLocale;
-        public IntPtr rpProcessors;
-        public UInt32 cProcessors;
-        public IntPtr rOses;
-        public UInt32 cOses;
-    }
-
-    internal enum ASSEMBLYINFO_FLAG
-    {
-        VALIDATE = 1,
-        GETSIZE = 2
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct ASSEMBLY_INFO
-    {
-        public uint cbAssemblyInfo;
-        public uint dwAssemblyFlags;
-        public ulong uliAssemblySizeInKB;
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszCurrentAssemblyPathBuf;
-        public uint cchBuf;
-    }
-
-    [ComImport]
-    [Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IAssemblyCache
-    {
-        /* Unused.
-        [PreserveSig]
-        int UninstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, IntPtr pvReserved, int pulDisposition);
-         */
-        int UninstallAssembly();
-
-        [PreserveSig]
-        uint QueryAssemblyInfo(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, ref ASSEMBLY_INFO pAsmInfo);
-
-        /* Unused.
-        [PreserveSig]
-        int CreateAssemblyCacheItem(uint dwFlags, IntPtr pvReserved, out object ppAsmItem, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName);
-         */
-        int CreateAssemblyCacheItem();
-
-        /* Unused.
-        [PreserveSig]
-        int CreateAssemblyScavenger(out object ppAsmScavenger);
-         */
-        int CreateAssemblyScavenger();
-
-        /* Unused.
-        [PreserveSig]
-        int InstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszManifestFilePath, IntPtr pvReserved);
-         */
-        int InstallAssembly();
-    }
-
-    [Flags]
-    internal enum AssemblyCacheFlags
-    {
-        ZAP = 1,
-        GAC = 2,
-        DOWNLOAD = 4
-    }
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
-    internal interface IAssemblyName
-    {
-        [PreserveSig]
-        int SetProperty(
-                int PropertyId,
-                IntPtr pvProperty,
-                int cbProperty);
-
-        [PreserveSig]
-        int GetProperty(
-                int PropertyId,
-                IntPtr pvProperty,
-                ref int pcbProperty);
-
-        [PreserveSig]
-        int Finalize();
-
-        [PreserveSig]
-        int GetDisplayName(
-                StringBuilder pDisplayName,
-                ref int pccDisplayName,
-                int displayFlags);
-
-        [PreserveSig]
-        int Reserved(ref Guid guid,
-            Object obj1,
-            Object obj2,
-            String string1,
-            Int64 llFlags,
-            IntPtr pvReserved,
-            int cbReserved,
-            out IntPtr ppv);
-
-        [PreserveSig]
-        int GetName(
-                ref int pccBuffer,
-                StringBuilder pwzName);
-
-        [PreserveSig]
-        int GetVersion(
-                out int versionHi,
-                out int versionLow);
-        [PreserveSig]
-        int IsEqual(
-                IAssemblyName pAsmName,
-                int cmpFlags);
-
-        [PreserveSig]
-        int Clone(out IAssemblyName pAsmName);
-    }// IAssemblyName
-
-    [ComImport]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
-    internal interface IAssemblyEnum
-    {
-        [PreserveSig]
-        int GetNextAssembly(
-                IntPtr pvReserved,
-                out IAssemblyName ppName,
-                int flags);
-        [PreserveSig]
-        int Reset();
-        [PreserveSig]
-        int Clone(out IAssemblyEnum ppEnum);
-    }// IAssemblyEnum
-
-    internal enum CreateAssemblyNameObjectFlags
-    {
-        CANOF_DEFAULT = 0,
-        CANOF_PARSE_DISPLAY_NAME = 1,
-    }
-
-    [Flags]
-    internal enum AssemblyNameDisplayFlags
-    {
-        VERSION = 0x01,
-        CULTURE = 0x02,
-        PUBLIC_KEY_TOKEN = 0x04,
-        PROCESSORARCHITECTURE = 0x20,
-        RETARGETABLE = 0x80,
-        // This enum will change in the future to include
-        // more attributes.
-        ALL = VERSION
-                                    | CULTURE
-                                    | PUBLIC_KEY_TOKEN
-                                    | PROCESSORARCHITECTURE
-                                    | RETARGETABLE
-    }
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    internal struct STARTUPINFO
-    {
-        internal Int32 cb;
-        internal string lpReserved;
-        internal string lpDesktop;
-        internal string lpTitle;
-        internal Int32 dwX;
-        internal Int32 dwY;
-        internal Int32 dwXSize;
-        internal Int32 dwYSize;
-        internal Int32 dwXCountChars;
-        internal Int32 dwYCountChars;
-        internal Int32 dwFillAttribute;
-        internal Int32 dwFlags;
-        internal Int16 wShowWindow;
-        internal Int16 cbReserved2;
-        internal IntPtr lpReserved2;
-        internal IntPtr hStdInput;
-        internal IntPtr hStdOutput;
-        internal IntPtr hStdError;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct PROCESS_INFORMATION
-    {
-        public IntPtr hProcess;
-        public IntPtr hThread;
-        public int dwProcessId;
-        public int dwThreadId;
-    }
-
-    /// <summary>
     /// Interop methods.
     /// </summary>
     internal static partial class NativeMethods
     {
         #region Constants
-
-        internal static readonly IntPtr NullPtr = IntPtr.Zero;
-        internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
-
-        internal const uint NORMAL_PRIORITY_CLASS = 0x0020;
-        internal const uint CREATE_NO_WINDOW = 0x08000000;
-        internal const Int32 STARTF_USESTDHANDLES = 0x00000100;
-        internal const int ERROR_SUCCESS = 0;
-
-        internal const int TYPE_E_REGISTRYACCESS = -2147319780;
-        internal const int TYPE_E_CANTLOADLIBRARY = -2147312566;
-
-        internal const int HRESULT_E_CLASSNOTREGISTERED = -2147221164;
-
-        internal const int ERROR_INVALID_FILENAME = -2147024773; // Illegal characters in name
-        internal const int ERROR_ACCESS_DENIED = -2147024891; // ACL'd or r/o
-        internal const int ERROR_SHARING_VIOLATION = -2147024864; // File locked by another use
 
         internal static Guid GUID_TYPELIB_NAMESPACE = new Guid("{0F21F359-AB84-41E8-9A78-36D110E6D2F9}");
         internal static Guid GUID_ExportedFromComPlus = new Guid("{90883f05-3d28-11d2-8f17-00a0c9a6186d}");
@@ -576,49 +75,7 @@ namespace Microsoft.Build.Tasks
         internal const UInt16 IMAGE_FILE_MACHINE_ARM64 = 0xAA64; // ARM64 Little-Endian
         internal const UInt16 IMAGE_FILE_MACHINE_R4000 = 0x166; // Used to test a architecture we do not expect to reference
 
-        internal const uint GENERIC_READ = 0x80000000;
-
-        internal const uint PAGE_READONLY = 0x02;
-
-        internal const uint FILE_MAP_READ = 0x04;
-
-        internal const uint FILE_TYPE_DISK = 0x01;
-
         internal const int SE_ERR_ACCESSDENIED = 5;
-
-        // CryptoApi flags and constants
-        [Flags]
-        internal enum CryptFlags
-        {
-            Exportable = 0x1,
-            UserProtected = 0x2,
-            MachineKeySet = 0x20,
-            UserKeySet = 0x1000
-        }
-
-        internal enum KeySpec
-        {
-            AT_KEYEXCHANGE = 1,
-            AT_SIGNATURE = 2
-        }
-
-        internal enum BlobType
-        {
-            SIMPLEBLOB = 0x1,
-            PUBLICKEYBLOB = 0x6,
-            PRIVATEKEYBLOB = 0x7,
-            PLAINTEXTKEYBLOB = 0x8,
-            OPAQUEKEYBLOB = 0x9,
-            PUBLICKEYBLOBEX = 0xA,
-            SYMMETRICWRAPKEYBLOB = 0xB,
-        }
-
-        [Flags]
-        internal enum CertStoreClose
-        {
-            CERT_CLOSE_STORE_FORCE_FLAG = 0x00000001,
-            CERT_CLOSE_STORE_CHECK_FLAG = 0x00000002,
-        }
 
         [Flags]
         internal enum MoveFileFlags
@@ -633,172 +90,11 @@ namespace Microsoft.Build.Tasks
 
         #endregion
 
-        #region NT header stuff
-
-        internal const uint IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b;
-        internal const uint IMAGE_NT_OPTIONAL_HDR64_MAGIC = 0x20b;
-
-        internal const uint IMAGE_DIRECTORY_ENTRY_COMHEADER = 14;
-
-        internal const uint COMIMAGE_FLAGS_STRONGNAMESIGNED = 0x08;
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_FILE_HEADER
-        {
-            internal ushort Machine;
-            internal ushort NumberOfSections;
-            internal uint TimeDateStamp;
-            internal uint PointerToSymbolTable;
-            internal uint NumberOfSymbols;
-            internal ushort SizeOfOptionalHeader;
-            internal ushort Characteristics;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_DATA_DIRECTORY
-        {
-            internal uint VirtualAddress;
-            internal uint Size;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_OPTIONAL_HEADER32
-        {
-            internal ushort Magic;
-            internal byte MajorLinkerVersion;
-            internal byte MinorLinkerVersion;
-            internal uint SizeOfCode;
-            internal uint SizeOfInitializedData;
-            internal uint SizeOfUninitializedData;
-            internal uint AddressOfEntryPoint;
-            internal uint BaseOfCode;
-            internal uint BaseOfData;
-            internal uint ImageBase;
-            internal uint SectionAlignment;
-            internal uint FileAlignment;
-            internal ushort MajorOperatingSystemVersion;
-            internal ushort MinorOperatingSystemVersion;
-            internal ushort MajorImageVersion;
-            internal ushort MinorImageVersion;
-            internal ushort MajorSubsystemVersion;
-            internal ushort MinorSubsystemVersion;
-            internal uint Win32VersionValue;
-            internal uint SizeOfImage;
-            internal uint SizeOfHeaders;
-            internal uint CheckSum;
-            internal ushort Subsystem;
-            internal ushort DllCharacteristics;
-            internal uint SizeOfStackReserve;
-            internal uint SizeOfStackCommit;
-            internal uint SizeOfHeapReserve;
-            internal uint SizeOfHeapCommit;
-            internal uint LoaderFlags;
-            internal uint NumberOfRvaAndSizes;
-
-            // should be:
-            // [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] internal IMAGE_DATA_DIRECTORY[] DataDirectory;
-            // but fixed size arrays only work with simple types, so I have to use ulongs and convert them to IMAGE_DATA_DIRECTORY structs
-            // Fortunately, IMAGE_DATA_DIRECTORY is only 8 bytes long... (whew)
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            internal ulong[] DataDirectory;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_OPTIONAL_HEADER64
-        {
-            internal ushort Magic;
-            internal byte MajorLinkerVersion;
-            internal byte MinorLinkerVersion;
-            internal uint SizeOfCode;
-            internal uint SizeOfInitializedData;
-            internal uint SizeOfUninitializedData;
-            internal uint AddressOfEntryPoint;
-            internal uint BaseOfCode;
-            internal ulong ImageBase;
-            internal uint SectionAlignment;
-            internal uint FileAlignment;
-            internal ushort MajorOperatingSystemVersion;
-            internal ushort MinorOperatingSystemVersion;
-            internal ushort MajorImageVersion;
-            internal ushort MinorImageVersion;
-            internal ushort MajorSubsystemVersion;
-            internal ushort MinorSubsystemVersion;
-            internal uint Win32VersionValue;
-            internal uint SizeOfImage;
-            internal uint SizeOfHeaders;
-            internal uint CheckSum;
-            internal ushort Subsystem;
-            internal ushort DllCharacteristics;
-            internal ulong SizeOfStackReserve;
-            internal ulong SizeOfStackCommit;
-            internal ulong SizeOfHeapReserve;
-            internal ulong SizeOfHeapCommit;
-            internal uint LoaderFlags;
-            internal uint NumberOfRvaAndSizes;
-
-            // should be:
-            // [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] internal IMAGE_DATA_DIRECTORY[] DataDirectory;
-            // but fixed size arrays only work with simple types, so I have to use ulongs and convert them to IMAGE_DATA_DIRECTORY structs
-            // Fortunately, IMAGE_DATA_DIRECTORY is only 8 bytes long... (whew)
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            internal ulong[] DataDirectory;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_NT_HEADERS32
-        {
-            internal uint signature;
-            internal IMAGE_FILE_HEADER fileHeader;
-            internal IMAGE_OPTIONAL_HEADER32 optionalHeader;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_NT_HEADERS64
-        {
-            internal uint signature;
-            internal IMAGE_FILE_HEADER fileHeader;
-            internal IMAGE_OPTIONAL_HEADER64 optionalHeader;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct IMAGE_COR20_HEADER
-        {
-            internal uint cb;
-            internal ushort MajorRuntimeVersion;
-            internal ushort MinorRuntimeVersion;
-            internal IMAGE_DATA_DIRECTORY MetaData;
-            internal uint Flags;
-            internal uint EntryPointTokenOrEntryPointRVA;
-            internal IMAGE_DATA_DIRECTORY Resources;
-            internal IMAGE_DATA_DIRECTORY StrongNameSignature;
-            internal IMAGE_DATA_DIRECTORY CodeManagerTable;
-            internal IMAGE_DATA_DIRECTORY VTableFixups;
-            internal IMAGE_DATA_DIRECTORY ExportAddressTableJumps;
-            internal IMAGE_DATA_DIRECTORY ManagedNativeHeader;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct CRYPTOAPI_BLOB
-        {
-            internal uint cbData;
-            internal IntPtr pbData;
-        }
-
-        #endregion
-
         #region PInvoke
-        private const string Crypt32DLL = "crypt32.dll";
-        private const string Advapi32DLL = "advapi32.dll";
-#if !RUNTIME_TYPE_NETCORE
-        private const string MscoreeDLL = "mscoree.dll";
-#endif
 
         //------------------------------------------------------------------------------
         // CreateHardLink
         //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern bool CreateHardLink(string newFileName, string exitingFileName, IntPtr securityAttributes);
-
         [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
@@ -807,8 +103,13 @@ namespace Microsoft.Build.Tasks
             bool hardLinkCreated;
             if (NativeMethodsShared.IsWindows)
             {
-                hardLinkCreated = CreateHardLink(newFileName, exitingFileName, IntPtr.Zero /* reserved, must be NULL */);
+#if FEATURE_WINDOWSINTEROP
+                hardLinkCreated = Windows.Win32.PInvoke.CreateHardLink(newFileName, exitingFileName);
                 errorMessage = hardLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
+#else
+                hardLinkCreated = false;
+                errorMessage = "CreateHardLink is not supported in this build (FEATURE_WINDOWSINTEROP is disabled).";
+#endif
             }
             else
             {
@@ -822,11 +123,13 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         // MoveFileEx
         //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "MoveFileEx")]
-        internal static extern bool MoveFileExWindows(
-            [In] string existingFileName,
-            [In] string newFileName,
-            [In] MoveFileFlags flags);
+#if FEATURE_WINDOWSINTEROP
+        [SupportedOSPlatform("windows5.1.2600")]
+        internal static bool MoveFileExWindows(string existingFileName, string newFileName, MoveFileFlags flags)
+            => Windows.Win32.PInvoke.MoveFileEx(existingFileName, newFileName, (Windows.Win32.Storage.FileSystem.MOVE_FILE_FLAGS)flags);
+#else
+        internal static bool MoveFileExWindows(string existingFileName, string newFileName, MoveFileFlags flags) => false;
+#endif
 
         /// <summary>
         /// Add implementation of this function when not running on windows. The implementation is
@@ -913,202 +216,21 @@ namespace Microsoft.Build.Tasks
         [return: MarshalAs(UnmanagedType.BStr)]
         internal static extern string QueryPathOfRegTypeLib([In] ref Guid clsid, [In] short majorVersion, [In] short minorVersion, [In] int lcid);
 
-        //------------------------------------------------------------------------------
-        // CreateFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, FileShare dwShareMode,
-            IntPtr lpSecurityAttributes, FileMode dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
-
-        //------------------------------------------------------------------------------
-        // GetFileType
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern uint GetFileType(IntPtr hFile);
-
-        //------------------------------------------------------------------------------
-        // CloseHandle
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CloseHandle(IntPtr hObject);
-
-        //------------------------------------------------------------------------------
-        // CreateFileMapping
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern IntPtr CreateFileMapping(IntPtr hFile, IntPtr lpFileMappingAttributes, uint flProtect,
-            uint dwMaximumSizeHigh, uint dwMaximumSizeLow, string lpName);
-
-        //------------------------------------------------------------------------------
-        // MapViewOfFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern IntPtr MapViewOfFile(IntPtr hFileMapping, uint dwDesiredAccess, uint dwFileOffsetHigh, uint dwFileOffsetLow, IntPtr dwNumberOfBytesToMap);
-
-        //------------------------------------------------------------------------------
-        // UnmapViewOfFile
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool UnmapViewOfFile(IntPtr lpBaseAddress);
-
-        //------------------------------------------------------------------------------
-        // CreateProcess
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess(
-            string lpApplicationName,
-            string lpCommandLine,
-            IntPtr lpProcessAttributes,
-            IntPtr lpThreadAttributes,
-            [In, MarshalAs(UnmanagedType.Bool)]
-            bool bInheritHandles,
-            uint dwCreationFlags,
-            IntPtr lpEnvironment,
-            string lpCurrentDirectory,
-            [In] ref STARTUPINFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation);
-
-        //------------------------------------------------------------------------------
-        // ImageNtHeader
-        //------------------------------------------------------------------------------
-        [DllImport("dbghelp.dll", SetLastError = true)]
-        internal static extern IntPtr ImageNtHeader(IntPtr imageBase);
-
-        //------------------------------------------------------------------------------
-        // ImageRvaToVa
-        //------------------------------------------------------------------------------
-        [DllImport("dbghelp.dll", SetLastError = true)]
-        internal static extern IntPtr ImageRvaToVa(IntPtr ntHeaders, IntPtr imageBase, uint Rva, out IntPtr LastRvaSection);
-
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern uint GetLogicalDrives();
-
         internal static bool AllDrivesMapped()
         {
+#if FEATURE_WINDOWSINTEROP
             const uint AllDriveMask = 0x0cffffff;
             if (NativeMethodsShared.IsWindows)
             {
-                var driveMask = GetLogicalDrives();
+                var driveMask = Windows.Win32.PInvoke.GetLogicalDrives();
                 // All drives are taken if the value has all 26 bits set
                 return driveMask >= AllDriveMask;
             }
+#endif
 
             return false;
         }
 
-        //------------------------------------------------------------------------------
-        // CreateAssemblyCache
-        //------------------------------------------------------------------------------
-        [DllImport("fusion.dll")]
-        [SupportedOSPlatform("windows")]
-        internal static extern uint CreateAssemblyCache(out IAssemblyCache ppAsmCache, uint dwReserved);
-
-        [DllImport("fusion.dll")]
-        internal static extern int CreateAssemblyEnum(
-                out IAssemblyEnum ppEnum,
-                IntPtr pUnkReserved,
-                IAssemblyName pName,
-                AssemblyCacheFlags flags,
-                IntPtr pvReserved);
-
-        [DllImport("fusion.dll")]
-        [SupportedOSPlatform("windows")]
-        internal static extern int CreateAssemblyNameObject(
-                out IAssemblyName ppAssemblyNameObj,
-                [MarshalAs(UnmanagedType.LPWStr)]
-                String szAssemblyName,
-                CreateAssemblyNameObjectFlags flags,
-                IntPtr pvReserved);
-
-        /// <summary>
-        /// GetCachePath from fusion.dll.
-        /// A common design pattern in unmanaged C++ is calling a function twice, once to determine the length of the string
-        /// and then again to pass the client-allocated character buffer.
-        /// </summary>
-        /// <param name="cacheFlags">Value that indicates the source of the cached assembly.</param>
-        /// <param name="cachePath">The returned pointer to the path.</param>
-        /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
-        ///
-        [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        [SupportedOSPlatform("windows")]
-        internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
-
-        //------------------------------------------------------------------------------
-        // PFXImportCertStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern IntPtr PFXImportCertStore([In] IntPtr blob, [In] string password, [In] CryptFlags flags);
-
-        //------------------------------------------------------------------------------
-        // CertCloseStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertCloseStore([In] IntPtr CertStore, CertStoreClose Flags);
-
-        //------------------------------------------------------------------------------
-        // CertEnumCertificatesInStore
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        internal static extern IntPtr CertEnumCertificatesInStore([In] IntPtr CertStore, [In] IntPtr PrevCertContext);
-
-        //------------------------------------------------------------------------------
-        // CryptAcquireCertificatePrivateKey
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptAcquireCertificatePrivateKey([In] IntPtr CertContext, [In] uint flags, [In] IntPtr reserved, [In, Out] ref IntPtr CryptProv, [In, Out] ref KeySpec KeySpec, [In, Out, MarshalAs(UnmanagedType.Bool)] ref bool CallerFreeProv);
-
-        //------------------------------------------------------------------------------
-        // CryptGetUserKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptGetUserKey([In] IntPtr CryptProv, [In] KeySpec KeySpec, [In, Out] ref IntPtr Key);
-
-        //------------------------------------------------------------------------------
-        // CryptExportKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptExportKey([In] IntPtr Key, [In] IntPtr ExpKey, [In] BlobType type, [In] uint Flags, [In] IntPtr Data, [In, Out] ref uint DataLen);
-
-        //------------------------------------------------------------------------------
-        // CryptDestroyKey
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptDestroyKey(IntPtr hKey);
-
-        //------------------------------------------------------------------------------
-        // CryptReleaseContext
-        //------------------------------------------------------------------------------
-        [DllImport(Advapi32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CryptReleaseContext([In] IntPtr Prov, [In] uint Flags);
-
-        //------------------------------------------------------------------------------
-        // CertFreeCertificateContext
-        //------------------------------------------------------------------------------
-        [DllImport(Crypt32DLL, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertFreeCertificateContext(IntPtr CertContext);
-
-#if FEATURE_MSCOREE
-        /// <summary>
-        /// Get the runtime version for a given file.
-        /// </summary>
-        /// <param name="szFileName">The path of the file to be examined.</param>
-        /// <param name="szBuffer">The buffer allocated for the version information that is returned.</param>
-        /// <param name="cchBuffer">The size, in wide characters, of szBuffer.</param>
-        /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
-        /// <returns>HResult.</returns>
-        [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern unsafe uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
-#endif
         #endregion
 
         #region Methods
@@ -1257,10 +379,13 @@ namespace Microsoft.Build.Tasks
             private static Regex AssemblyVersionRegex { get; } = new Regex(AssemblyVersionPattern, RegexOptions.CultureInvariant | RegexOptions.Compiled);
 #endif
 
+#if FEATURE_WINDOWSINTEROP
             /// <summary>
-            /// The IAssemblyEnum interface which allows us to ask for the next assembly from the GAC enumeration.
+            /// Agile wrapper around the IAssemblyEnum COM pointer from fusion.dll. Provides
+            /// thread-agile access and finalizer-driven release if the enum is never iterated.
             /// </summary>
-            private IAssemblyEnum _assemblyEnum;
+            private AgileComPointer<IAssemblyEnum> _agileAssemblyEnum;
+#endif
 
             /// <summary>
             /// For non-Windows implementation, we need assembly name
@@ -1272,11 +397,6 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private IEnumerable<string> _gacDirectories;
 
-            /// <summary>
-            /// Are we done going through the enumeration.
-            /// </summary>
-            private bool _done;
-
             // null means enumerate all the assemblies
             internal AssemblyCacheEnum(String assemblyName)
             {
@@ -1287,44 +407,48 @@ namespace Microsoft.Build.Tasks
             /// Initialize the GAC Enum
             /// </summary>
             /// <param name="assemblyName"></param>
-            private void InitializeEnum(String assemblyName)
+            private unsafe void InitializeEnum(String assemblyName)
             {
                 if (NativeMethodsShared.IsWindows)
                 {
-                    IAssemblyName fusionName = null;
+#if !FEATURE_WINDOWSINTEROP
+                    throw new PlatformNotSupportedException();
+#else
+                    using ComScope<IAssemblyName> fusionName = new(null);
+                    using ComScope<IAssemblyEnum> assemblyEnum = new(null);
 
-                    int hr = 0;
-                    try
+                    HRESULT hr = HRESULT.S_OK;
+                    if (assemblyName != null)
                     {
-                        if (assemblyName != null)
+                        fixed (char* pAssemblyName = assemblyName)
                         {
-                            hr = CreateAssemblyNameObject(
-                                out fusionName,
-                                assemblyName,
+                            hr = Fusion.NativeMethods.CreateAssemblyNameObject(
+                                fusionName,
+                                pAssemblyName,
                                 CreateAssemblyNameObjectFlags.CANOF_PARSE_DISPLAY_NAME
                                 /* parse components assuming the assemblyName is a fusion name, this does not have to be a full fusion name*/,
-                                IntPtr.Zero);
-                        }
-
-                        if (hr >= 0)
-                        {
-                            hr = CreateAssemblyEnum(
-                                out _assemblyEnum,
-                                IntPtr.Zero,
-                                fusionName,
-                                AssemblyCacheFlags.GAC,
-                                IntPtr.Zero);
+                                null);
                         }
                     }
-                    catch (Exception e)
+
+                    if (hr.Succeeded)
                     {
-                        hr = e.HResult;
+                        hr = Fusion.NativeMethods.CreateAssemblyEnum(
+                            assemblyEnum,
+                            null,
+                            fusionName.Pointer,
+                            AssemblyCacheFlags.GAC,
+                            null);
                     }
 
-                    if (hr < 0)
+                    if (hr.Succeeded && !assemblyEnum.IsNull)
                     {
-                        _assemblyEnum = null;
+                        // AgileComPointer registers in the GIT (which AddRefs). takeOwnership: false
+                        // because the ComScope owns our reference and will Release deterministically
+                        // when this method returns.
+                        _agileAssemblyEnum = new AgileComPointer<IAssemblyEnum>(assemblyEnum.Pointer, takeOwnership: false);
                     }
+#endif
                 }
                 else
                 {
@@ -1351,37 +475,33 @@ namespace Microsoft.Build.Tasks
             {
                 if (NativeMethodsShared.IsWindows)
                 {
-                    if (_assemblyEnum == null)
+#if !FEATURE_WINDOWSINTEROP
+                    yield break;
+#else
+                    if (_agileAssemblyEnum is null)
                     {
                         yield break;
                     }
 
-                    if (_done)
+                    try
                     {
-                        yield break;
-                    }
-
-                    while (!_done)
-                    {
-                        // Now get next IAssemblyName from m_AssemblyEnum
-                        int hr = _assemblyEnum.GetNextAssembly((IntPtr)0, out IAssemblyName fusionName, 0);
-
-                        if (hr < 0)
+                        while (true)
                         {
-                            Marshal.ThrowExceptionForHR(hr);
-                        }
+                            string assemblyFusionName = GetNextAssemblyFusionName();
+                            if (assemblyFusionName is null)
+                            {
+                                yield break;
+                            }
 
-                        if (fusionName != null)
-                        {
-                            string assemblyFusionName = GetFullName(fusionName);
                             yield return new AssemblyNameExtension(assemblyFusionName);
                         }
-                        else
-                        {
-                            _done = true;
-                            yield break;
-                        }
                     }
+                    finally
+                    {
+                        _agileAssemblyEnum?.Dispose();
+                        _agileAssemblyEnum = null;
+                    }
+#endif
                 }
                 else
                 {
@@ -1436,18 +556,65 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            private static string GetFullName(IAssemblyName fusionAsmName)
+#if FEATURE_WINDOWSINTEROP
+            [SupportedOSPlatform("windows5.0")]
+            private unsafe string GetNextAssemblyFusionName()
             {
-                int ilen = 1024;
-                StringBuilder sDisplayName = new StringBuilder(ilen);
-                int hr = fusionAsmName.GetDisplayName(sDisplayName, ref ilen, (int)AssemblyNameDisplayFlags.ALL);
-                if (hr < 0)
+                using ComScope<IAssemblyEnum> assemblyEnum = _agileAssemblyEnum.GetInterface();
+                using ComScope<IAssemblyName> fusionName = new(null);
+
+                assemblyEnum.Pointer->GetNextAssembly(null, fusionName, 0).ThrowOnFailure();
+
+                if (fusionName.IsNull)
                 {
-                    Marshal.ThrowExceptionForHR(hr);
+                    return null;
                 }
 
-                return sDisplayName.ToString();
+                return GetFullName(fusionName.Pointer);
             }
+#endif
+
+#if FEATURE_WINDOWSINTEROP
+            private static unsafe string GetFullName(IAssemblyName* fusionAsmName)
+            {
+#if DEBUG
+                // Small initial buffer in DEBUG so the insufficient-buffer retry path is exercised by tests.
+                const int InitialBufferSize = 16;
+#else
+                const int InitialBufferSize = 256;
+#endif
+
+                using BufferScope<char> buffer = new(stackalloc char[InitialBufferSize]);
+                int ilen = buffer.Length;
+                HRESULT hr;
+                fixed (char* pBuffer = buffer)
+                {
+                    hr = fusionAsmName->GetDisplayName(pBuffer, &ilen, AssemblyNameDisplayFlags.ALL);
+                }
+
+                // Fusion writes the required size (wide chars including null terminator) to *pccDisplayName
+                // and returns HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) when the buffer is too small.
+                if (hr == (HRESULT)WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER)
+                {
+                    buffer.EnsureCapacity(ilen);
+                    fixed (char* pBuffer = buffer)
+                    {
+                        hr = fusionAsmName->GetDisplayName(pBuffer, &ilen, AssemblyNameDisplayFlags.ALL);
+                    }
+                }
+
+                hr.ThrowOnFailure();
+
+                // ilen now holds the actual char count including null terminator.
+                int length = ilen;
+                if (length > 0 && buffer[length - 1] == '\0')
+                {
+                    length--;
+                }
+
+                return buffer.Slice(0, length).ToString();
+            }
+#endif
 
             IEnumerator IEnumerable.GetEnumerator()
             {

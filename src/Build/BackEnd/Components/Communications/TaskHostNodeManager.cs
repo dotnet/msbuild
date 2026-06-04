@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -65,7 +64,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            ErrorUtilities.VerifyThrow(!_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
+            Assumed.False(_componentShutdown, "We should never be calling ShutdownNodes after ShutdownComponent has been called");
             _outOfProcTaskHostNodeProvider?.ShutdownConnectedNodes(enableReuse);
         }
 
@@ -86,8 +85,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrow(_componentHost == null, "TaskHostNodeManager already initialized.");
-            ErrorUtilities.VerifyThrow(host != null, "We can't create a TaskHostNodeManager with a null componentHost");
+            Assumed.Null(_componentHost, "TaskHostNodeManager already initialized.");
+            Assumed.NotNull(host, "We can't create a TaskHostNodeManager with a null componentHost");
 
             _componentHost = host;
             _outOfProcTaskHostNodeProvider = _componentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider) as INodeProvider;
@@ -176,7 +175,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskHostNodeManager, "Cannot create component of type {0}", type);
+            Assumed.Equal(type, BuildComponentType.TaskHostNodeManager, $"Cannot create component of type {type}");
             return new TaskHostNodeManager();
         }
 

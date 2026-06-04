@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Tasks
         {
             // Throw an internal error, since this method should only ever get called by other aspects of this task, not
             // anything that the user touches.
-            ErrorUtilities.VerifyThrowInternalNull(resGenCommand);
+            Assumed.NotNull(resGenCommand);
 
             // append the /useSourcePath flag if requested.
             if (UseSourcePath)
@@ -808,7 +808,7 @@ namespace Microsoft.Build.Tasks
                                        typeof(ProcessResourceFiles).FullName);
 
                                 Type processType = obj.GetType();
-                                ErrorUtilities.VerifyThrow(processType == typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
+                                Assumed.Equal(processType, typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
 
                                 process = (ProcessResourceFiles)obj;
 
@@ -1145,8 +1145,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool TransformResourceFilesUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count != 0, "There should be resource files to process");
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count == outputsToProcess.Count, "The number of inputs and outputs should be equal");
+            Assumed.True(inputsToProcess.Count != 0, "There should be resource files to process");
+            Assumed.Equal(inputsToProcess.Count, outputsToProcess.Count, "The number of inputs and outputs should be equal");
 
             bool succeeded = true;
 
@@ -1266,7 +1266,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool GenerateStronglyTypedResourceUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count == 1 && outputsToProcess.Count == 1, "For STR, there should only be one input and one output.");
+            Assumed.True(inputsToProcess.Count == 1 && outputsToProcess.Count == 1, "For STR, there should only be one input and one output.");
 
             ResGen resGen = CreateResGenTaskWithDefaultParameters();
 
@@ -2099,7 +2099,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            ErrorUtilities.VerifyThrow(OutputResources != null && OutputResources.Length != 0, "Should be at least one output resource");
+            Assumed.True(OutputResources != null && OutputResources.Length != 0, "Should be at least one output resource");
 
             // We only get here if there was at least one resource generation error.
             ITaskItem[] temp = new ITaskItem[OutputResources.Length - _unsuccessfullyCreatedOutFiles.Count];
@@ -2183,7 +2183,7 @@ namespace Microsoft.Build.Tasks
 
             // This method eats IO Exceptions
             _cache = ResGenDependencies.DeserializeCache(StateFile?.ItemSpec, UseSourcePath, Log);
-            ErrorUtilities.VerifyThrow(_cache != null, "We did not create a cache!");
+            Assumed.NotNull(_cache, "We did not create a cache!");
         }
 
         /// <summary>
@@ -2715,9 +2715,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     currentOutputFile = outFileOrDir;
-                    ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                        "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                        _readers.Count);
+                    Assumed.Equal(_readers.Count, 1, $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2725,9 +2723,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                            "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                            _readers.Count);
+                        Assumed.Equal(_readers.Count, 1, $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
