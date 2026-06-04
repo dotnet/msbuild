@@ -235,11 +235,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         bool isArray = sourceProp.Type is IArrayTypeSymbol;
                         string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                        string suggested = isArray ? suggestedTypeArg + "[]" : suggestedTypeArg;
                         context.ReportDiagnostic(Diagnostic.Create(
                             DiagnosticDescriptors.PreferTypedTaskItem,
                             creation.Syntax.GetLocation(),
-                            sourceProp.Name, currentType, suggested));
+                            sourceProp.Name, currentType, suggestedTypeArg, isArray ? "[]" : ""));
                         return;
                     }
 
@@ -252,11 +251,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             bool isArray = itemProp.Type is IArrayTypeSymbol;
                             string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                            string suggested = isArray ? suggestedTypeArg + "[]" : suggestedTypeArg;
                             context.ReportDiagnostic(Diagnostic.Create(
                                 DiagnosticDescriptors.PreferTypedTaskItem,
                                 creation.Syntax.GetLocation(),
-                                itemProp.Name, currentType, suggested));
+                                itemProp.Name, currentType, suggestedTypeArg, isArray ? "[]" : ""));
                         }
                     }
                 }
@@ -316,11 +314,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         bool isArray = sourceProp.Type is IArrayTypeSymbol;
                         string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                        string suggested = isArray ? suggestedTypeArg + "[]" : suggestedTypeArg;
                         context.ReportDiagnostic(Diagnostic.Create(
                             DiagnosticDescriptors.PreferTypedTaskItem,
                             invocation.Syntax.GetLocation(),
-                            sourceProp.Name, currentType, suggested));
+                            sourceProp.Name, currentType, suggestedTypeArg, isArray ? "[]" : ""));
                     }
                 }
             }
@@ -354,11 +351,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             bool isArray = itemProp.Type is IArrayTypeSymbol;
                             string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
-                            string suggested = isArray ? "AbsolutePath[]" : "AbsolutePath";
                             context.ReportDiagnostic(Diagnostic.Create(
                                 DiagnosticDescriptors.PreferTypedTaskItem,
                                 invocation.Syntax.GetLocation(),
-                                itemProp.Name, currentType, suggested));
+                                itemProp.Name, currentType, "AbsolutePath", isArray ? "[]" : ""));
                             break;
                         }
                     }
