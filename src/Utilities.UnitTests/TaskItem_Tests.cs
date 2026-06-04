@@ -439,4 +439,38 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
     }
+
+    /// <summary>
+    /// Tests for the generic <see cref="TaskItem{T}"/> struct.
+    /// </summary>
+    public class TaskItemOfTTests
+    {
+        [Fact]
+        public void SetMetadata_DoesNotThrow()
+        {
+            var item = new TaskItem<int>(42);
+            // Should not throw - backing is a mutable TaskItem, not TaskItemData
+            item.SetMetadata("key", "value");
+            item.GetMetadata("key").ShouldBe("value");
+        }
+
+        [Fact]
+        public void RemoveMetadata_DoesNotThrow()
+        {
+            var item = new TaskItem<int>(42);
+            item.SetMetadata("key", "value");
+            item.RemoveMetadata("key");
+            item.GetMetadata("key").ShouldBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void CopyMetadataTo_DoesNotThrow()
+        {
+            var source = new TaskItem<int>(42);
+            source.SetMetadata("key", "value");
+            var dest = new TaskItem("dest");
+            source.CopyMetadataTo(dest);
+            dest.GetMetadata("key").ShouldBe("value");
+        }
+    }
 }
