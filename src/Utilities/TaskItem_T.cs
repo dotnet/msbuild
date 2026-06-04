@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -177,13 +178,13 @@ namespace Microsoft.Build.Utilities
 
         /// <inheritdoc/>
         public bool Equals(TaskItem<T> other) =>
-            Value?.Equals(other.Value) ?? (other.Value == null);
+            EqualityComparer<T>.Default.Equals(Value, other.Value);
 
         /// <inheritdoc/>
         public override bool Equals(object? obj) => obj is TaskItem<T> other && Equals(other);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+        public override int GetHashCode() => Value is null ? 0 : EqualityComparer<T>.Default.GetHashCode(Value);
 
         /// <summary>
         /// Determines whether two <see cref="TaskItem{T}"/> instances are equal.
