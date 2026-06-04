@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -66,7 +65,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
             _toolsets.TryGetValue(toolsVersion, out var toolset);
 
             return toolset;

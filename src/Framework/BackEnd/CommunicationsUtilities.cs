@@ -85,13 +85,6 @@ internal static class CommunicationsUtilities
 
 #if NETFRAMEWORK
     /// <summary>
-    ///  Set environment variable P/Invoke.
-    /// </summary>
-    [DllImport("kernel32.dll", EntryPoint = "SetEnvironmentVariable", SetLastError = true, CharSet = CharSet.Unicode)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool SetEnvironmentVariableNative(string name, string? value);
-
-    /// <summary>
     ///  Sets an environment variable using P/Invoke to workaround the .NET Framework BCL implementation.
     /// </summary>
     /// <remarks>
@@ -100,7 +93,7 @@ internal static class CommunicationsUtilities
     /// </remarks>
     internal static void SetEnvironmentVariable(string name, string? value)
     {
-        if (!SetEnvironmentVariableNative(name, value))
+        if (!PInvoke.SetEnvironmentVariable(name, value))
         {
             throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
         }
@@ -130,7 +123,7 @@ internal static class CommunicationsUtilities
         // The FrameworkDebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
         // Need to ensure that constructor is called before this method returns in order to capture its env var write.
         // Otherwise the env var is not captured and thus gets deleted when RequestBuilder resets the environment based on the cached results of this method.
-        FrameworkErrorUtilities.VerifyThrowInternalNull(FrameworkDebugUtils.ProcessInfoString, nameof(FrameworkDebugUtils.DebugPath));
+        Assumed.NotNull(FrameworkDebugUtils.ProcessInfoString);
 
         unsafe
         {
@@ -364,7 +357,7 @@ internal static class CommunicationsUtilities
             Array.Reverse(bytes);
         }
 
-        FrameworkErrorUtilities.VerifyThrow(bytes.Length == 4, "Int should be 4 bytes");
+        Assumed.Equal(bytes.Length, 4, "Int should be 4 bytes");
 
         stream.Write(bytes, 0, bytes.Length);
     }
@@ -563,8 +556,8 @@ internal static class CommunicationsUtilities
             }
             else // Figure out flags based on parameters given
             {
-                FrameworkErrorUtilities.VerifyThrow(taskHostParameters.Runtime != null, "Should always have an explicit runtime when we call this method.");
-                FrameworkErrorUtilities.VerifyThrow(taskHostParameters.Architecture != null, "Should always have an explicit architecture when we call this method.");
+                Assumed.NotNull(taskHostParameters.Runtime, "Should always have an explicit runtime when we call this method.");
+                Assumed.NotNull(taskHostParameters.Architecture, "Should always have an explicit architecture when we call this method.");
 
                 if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
                 {
@@ -580,7 +573,7 @@ internal static class CommunicationsUtilities
                 }
                 else
                 {
-                    FrameworkErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
 
                 architectureFlagToSet = taskHostParameters.Architecture;
@@ -614,7 +607,7 @@ internal static class CommunicationsUtilities
                 context |= HandshakeOptions.NET;
                 break;
             default:
-                FrameworkErrorUtilities.ThrowInternalErrorUnreachable();
+                Assumed.Unreachable();
                 break;
         }
 

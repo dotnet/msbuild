@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, "EvaluatedInclude");
+                ArgumentException.ThrowIfNullOrEmpty(value, "EvaluatedInclude");
                 _project.VerifyThrowNotImmutable();
 
                 _taskItem.ItemSpec = value;
@@ -734,8 +734,8 @@ namespace Microsoft.Build.Execution
             string definingFileEscaped,
             bool useItemDefinitionsWithoutModification)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
-            ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
+            ArgumentNullException.ThrowIfNull(projectToUse, "project");
+            ArgumentException.ThrowIfNullOrEmpty(itemTypeToUse, "itemType");
             XmlUtilities.VerifyThrowArgumentValidElementName(itemTypeToUse);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(itemTypeToUse), "OM_ReservedName", itemTypeToUse);
 
@@ -863,8 +863,8 @@ namespace Microsoft.Build.Execution
                               bool immutable,
                               string definingFileEscaped) // the actual project file (or import) that defines this item.
             {
-                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped);
-                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped);
+                ArgumentException.ThrowIfNullOrEmpty(includeEscaped);
+                ArgumentException.ThrowIfNullOrEmpty(includeBeforeWildcardExpansionEscaped);
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
@@ -933,7 +933,7 @@ namespace Microsoft.Build.Execution
                     ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
                     // Historically empty string was allowed
-                    ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
+                    ArgumentNullException.ThrowIfNull(value, "ItemSpec");
 
                     _includeEscaped = value;
                     _cachedModifiers.Clear(); // Clear cached values
@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.Execution
                 {
                     ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                    ErrorUtilities.VerifyThrowArgumentLength(value, "IncludeEscaped");
+                    ArgumentException.ThrowIfNullOrEmpty(value, "IncludeEscaped");
                     _includeEscaped = value;
                     _cachedModifiers.Clear(); // Clear cached values
                 }
@@ -1394,19 +1394,13 @@ namespace Microsoft.Build.Execution
             /// Evaluation never creates ITaskItems, so this should never be called.
             /// </remarks>
             ProjectMetadataInstance IItem<ProjectMetadataInstance>.GetMetadata(string name)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                => Assumed.Unreachable<ProjectMetadataInstance>();
 
             /// <summary>
             /// Set metadata
             /// </summary>
             ProjectMetadataInstance IItem<ProjectMetadataInstance>.SetMetadata(ProjectMetadataElement metadataElement, string evaluatedInclude)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                => Assumed.Unreachable<ProjectMetadataInstance>();
 
             /// <summary>
             /// ITaskItem implementation which returns the specified metadata value, unescaped.
@@ -1430,7 +1424,7 @@ namespace Microsoft.Build.Execution
             {
                 if (string.IsNullOrEmpty(metadataName))
                 {
-                    ErrorUtilities.VerifyThrowArgumentLength(metadataName);
+                    ArgumentException.ThrowIfNullOrEmpty(metadataName);
                 }
 
                 if (_directMetadata?.TryGetValue(metadataName, out string escapedValue) == true && escapedValue != null)
@@ -1519,7 +1513,7 @@ namespace Microsoft.Build.Execution
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
+                ArgumentNullException.ThrowIfNull(destinationItem);
 
                 string originalItemSpec = null;
                 if (addOriginalItemSpec)
@@ -2232,7 +2226,7 @@ namespace Microsoft.Build.Execution
                 internal ProjectItemInstanceFactory(ProjectInstance project, string itemType)
                     : this(project)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
+                    Assumed.NotNullOrEmpty(itemType);
                     this.ItemType = itemType;
                 }
 
@@ -2262,7 +2256,7 @@ namespace Microsoft.Build.Execution
                 /// <returns>A new instance item.</returns>
                 public ProjectItemInstance CreateItem(string include, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+                    Assumed.NotNullOrEmpty(ItemType);
 
                     ProjectItemInstance item = new ProjectItemInstance(_project, ItemType, include, definingProject);
 
@@ -2295,7 +2289,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ProjectItemInstance CreateItem(string evaluatedInclude, string evaluatedIncludeBeforeWildcardExpansion, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+                    Assumed.NotNullOrEmpty(ItemType);
 
                     return new ProjectItemInstance(_project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion, definingProject);
                 }
@@ -2324,8 +2318,8 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
-                    ErrorUtilities.VerifyThrowInternalNull(source);
+                    Assumed.NotNullOrEmpty(ItemType);
+                    Assumed.NotNull(source);
 
                     // The new item inherits any metadata originating in item definitions, which
                     // takes precedence over its own item definition metadata.
@@ -2474,7 +2468,7 @@ namespace Microsoft.Build.Execution
                 public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<TaskItem> destinationItems)
                 {
                     // Not difficult to implement, but we do not expect to go here.
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
 

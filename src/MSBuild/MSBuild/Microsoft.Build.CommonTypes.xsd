@@ -1818,13 +1818,14 @@ elementFormDefault="qualified">
     <xs:element name="IgnoreImportLibrary" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="ImplicitUsings" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="ImplicitUsings" _locComment="" -->Enable implicit global usings for the C# project. Possible values are enable, true, and disable.</xs:documentation>
+        <xs:documentation><!-- _locID_text="ImplicitUsings" _locComment="" -->Enable implicit global usings for the C# project. Possible values are enable, true, disable and false.</xs:documentation>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
           <xs:enumeration value="enable" />
           <xs:enumeration value="true" />
           <xs:enumeration value="disable" />
+          <xs:enumeration value="false" />
         </xs:restriction>
       </xs:simpleType>
     </xs:element>

@@ -59,7 +59,7 @@ namespace Microsoft.Build.CommandLine
             StreamingContext context) :
             base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info);
+            ArgumentNullException.ThrowIfNull(info);
 
             invalidSwitch = info.GetString("invalidSwitch");
         }
@@ -142,7 +142,7 @@ namespace Microsoft.Build.CommandLine
         {
             string errorMessage = AssemblyResources.GetString(messageResourceName);
 
-            ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
+            Assumed.NotNull(errorMessage, "The resource string must exist.");
 
             if (showStackTrace && e != null)
             {
@@ -164,7 +164,7 @@ namespace Microsoft.Build.CommandLine
         {
             string errorMessage = AssemblyResources.GetString(messageResourceName);
 
-            ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
+            Assumed.NotNull(errorMessage, "The resource string must exist.");
 
             // the exception message can contain a format item i.e.
             // "{0}" to hold the logger name
@@ -188,7 +188,7 @@ namespace Microsoft.Build.CommandLine
             {
                 string errorMessage = AssemblyResources.GetString(messageResourceName);
 
-                ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
+                Assumed.NotNull(errorMessage, "The resource string must exist.");
 
                 errorMessage = ResourceUtilities.FormatString(errorMessage, args);
 
@@ -205,7 +205,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="showStackTrace"></param>
         internal static void Throw(string message, string invalidSwitch)
         {
-            ErrorUtilities.VerifyThrow(message != null, "The string must exist.");
+            Assumed.NotNull(message, "The string must exist.");
             throw new InitializationException(message, invalidSwitch);
         }
     }

@@ -36,6 +36,10 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(FeatureMSIORedist)' == 'true'">
+    <PackageReference Include="Microsoft.IO.Redist" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
@@ -121,6 +125,8 @@
   <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true'">
     <Compile Remove="Windows\Win32\System\Com\ComScope.cs" />
     <Compile Remove="Windows\Win32\System\Com\ComClassFactory.cs" />
+    <Compile Remove="Windows\Win32\System\Com\GlobalInterfaceTable.cs" />
+    <Compile Remove="Windows\Win32\System\Com\AgileComPointer.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true' OR '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <Compile Remove="Utilities\Wmi\*.cs" />

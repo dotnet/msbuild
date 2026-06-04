@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Client
 {
@@ -65,8 +64,8 @@ namespace Microsoft.Build.BackEnd.Client
 
         public MSBuildClientPacketPump(Stream stream, Func<NodePacketType, ITranslator, INodePacket> packetFactoryMethod)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stream);
-            ErrorUtilities.VerifyThrowArgumentNull(packetFactoryMethod);
+            ArgumentNullException.ThrowIfNull(stream);
+            ArgumentNullException.ThrowIfNull(packetFactoryMethod);
 
             _stream = stream;
             _shutdownTokenSource = new CancellationTokenSource();
@@ -112,11 +111,11 @@ namespace Microsoft.Build.BackEnd.Client
                                 break;
                             }
 
-                            ErrorUtilities.ThrowInternalError("Server disconnected abruptly");
+                            InternalError.Throw("Server disconnected abruptly");
                         }
                         else
                         {
-                            ErrorUtilities.ThrowInternalError($"Incomplete header read.  {headerBytesRead} of {headerByte.Length} bytes read");
+                            InternalError.Throw($"Incomplete header read.  {headerBytesRead} of {headerByte.Length} bytes read");
                         }
                     }
 
@@ -136,11 +135,8 @@ namespace Microsoft.Build.BackEnd.Client
 #else
                         int bytesRead = await _stream.ReadAsync(packetData, packetBytesRead, packetLength - packetBytesRead, shutdownToken).ConfigureAwait(false);
 #endif
-                        if (bytesRead == 0)
-                        {
-                            // Incomplete read.  Abort.
-                            ErrorUtilities.ThrowInternalError($"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
-                        }
+
+                        Assumed.NotEqual(bytesRead, 0, $"Incomplete packet read. {packetBytesRead} of {packetLength} bytes read");
 
                         packetBytesRead += bytesRead;
                     }

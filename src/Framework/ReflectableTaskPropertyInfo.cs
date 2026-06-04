@@ -77,7 +77,7 @@ namespace Microsoft.Build.Execution
                 if (_propertyInfo == null)
                 {
                     _propertyInfo = _taskType.GetProperty(Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
-                    FrameworkErrorUtilities.VerifyThrow(_propertyInfo != null, $"Could not find property {Name} on type {_taskType.FullName} that the task factory indicated should exist.");
+                    Assumed.NotNull(_propertyInfo, $"Could not find property {Name} on type {_taskType.FullName} that the task factory indicated should exist.");
                 }
 
                 return _propertyInfo;

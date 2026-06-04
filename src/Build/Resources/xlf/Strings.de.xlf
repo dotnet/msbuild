@@ -590,6 +590,11 @@
         <target state="translated">Folgendes Projektcache-Plug-In wird geladen: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="new">Enabled loggers: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Die Ausführlichkeit der Protokollierung ist auf "{0}" festgelegt.</target>
@@ -604,7 +609,7 @@
       </trans-unit>
       <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
         <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
-        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <target state="translated">SkipNonexistentTargets="true" wurde vom Aufrufer über die Metaprojektgrenze geerbt.</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -1035,7 +1040,7 @@ Fehler: {3}</target>
       </trans-unit>
       <trans-unit id="TaskHostDetails">
         <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
-        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <target state="translated">Die Aufgabe „{0}“ wurde im TaskHost-Prozess {1} ausgeführt und wurde vom Aufruferprozess {2} erzeugt. Für diesen Aufruf wurde ein neuer TaskHost erzeugt: {3}. TaskHost ist ein wiederverwendbarer Sidecar: {4}. Knotenwiederverwendung: {5}.</target>
         <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

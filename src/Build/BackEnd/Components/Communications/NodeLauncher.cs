@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd
     {
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.NodeLauncher);
             return new NodeLauncher();
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.BackEnd
             static void ValidateMSBuildLocation(string msbuildLocation)
             {
                 // Should always have been set already.
-                ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
+                Assumed.NotNullOrEmpty(msbuildLocation);
 
                 if (!FileSystems.Default.FileExists(msbuildLocation))
                 {

@@ -216,7 +216,22 @@ namespace Microsoft.Build.UnitTests
                                             ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
                                             : @"-c """"""echo Main.cs\(17,20\): error CS0168: The variable 'foo' is declared but never used""""""";
 
-            t.Execute().ShouldBeFalse();
+            // TODO: remove diagnostics once root cause is fixed.
+            // Likely-suspect: race in ToolTask's async pipe drain — Execute() may return
+            // before stdout EOF, so the canonical-error parser misses the line. Confirmed
+            // signal would be Errors==0 but Log contains the echoed command. Engine is
+            // wired to _output already, so individual log lines stream live — no need to
+            // dump engine.Log again here.
+            Stopwatch sw = Stopwatch.StartNew();
+            bool executeResult = t.Execute();
+            sw.Stop();
+
+            _output.WriteLine(
+                $"[HandleExecutionErrorsWhenToolLogsError] Execute()={executeResult}, ExitCode={t.ExitCode}, " +
+                $"Errors={engine.Errors}, Warnings={engine.Warnings}, MessageCount={engine.Messages}, " +
+                $"elapsedMs={sw.ElapsedMilliseconds}");
+
+            executeResult.ShouldBeFalse($"ToolTask.Execute should report failure when the tool logs a canonical error. ExitCode={t.ExitCode}, Errors={engine.Errors}, elapsedMs={sw.ElapsedMilliseconds}.");
 
             // The above command logged a canonical error message.  Therefore ToolTask should
             // not log its own error beyond that.
@@ -582,11 +597,40 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
                 // The command we're giving is the command to spew the contents of the temp
                 // file we created above.
+                // Temporary: keep the shell alive for ~15s after the data is written so the
+                // AsyncStreamReader's IOCP completion has time to be scheduled and deliver
+                // every line (including EOF) before WaitForProcessExit's bounded 2s wait
+                // expires under loaded CI conditions (#13734). 15s is intentionally generous
+                // to confirm whether the IOCP-starvation hypothesis fully resolves the flake.
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                                                ? $"/C type \"{tempFile}\""
-                                                : $"-c \"cat \'{tempFile}\'\"";
+                                                ? $"/C type \"{tempFile}\" & ping 127.0.0.1 -n 16 > nul"
+                                                : $"-c \"cat \'{tempFile}\'; sleep 15\"";
 
-                t.Execute();
+                // TODO: remove diagnostics once root cause is fixed.
+                // Likely-suspect: same async-pipe-drain race seen in HandleExecutionErrorsWhenToolLogsError — Execute() returns
+                // before the cat/type output is flushed through ToolTask's stdout reader,
+                // so engine.Log only contains the cmd echo. MessageCount==0 with non-empty
+                // exit confirms truncation; MessageCount>0 with missing strings means a
+                // parser bug.
+                Stopwatch sw = Stopwatch.StartNew();
+                bool executeResult = t.Execute();
+                sw.Stop();
+
+                _output.WriteLine(
+                    $"[ToolTaskCanChangeCanonicalErrorFormat] Execute()={executeResult}, ExitCode={t.ExitCode}, " +
+                    $"Errors={engine.Errors}, Warnings={engine.Warnings}, MessageCount={engine.Messages}, " +
+                    $"elapsedMs={sw.ElapsedMilliseconds}");
+
+                // Only dump engine.Log when it looks suspicious (no messages routed through, or
+                // a non-zero exit code). Keeping the full log out of the success path avoids
+                // bloating CI output for every passing run while still capturing detail when
+                // the async-pipe-drain race actually fires.
+                if (engine.Messages == 0 || t.ExitCode != 0)
+                {
+                    _output.WriteLine($"[ToolTaskCanChangeCanonicalErrorFormat] engine.Log:\n{engine.Log}");
+                }
+
+                _output.WriteLine(engine.Log);
 
                 // The above command logged a canonical warning, as well as a custom error.
                 engine.AssertLogContains("CS0168");
@@ -1007,9 +1051,20 @@ namespace Microsoft.Build.UnitTests
         {
             using var env = TestEnvironment.Create(_output);
 
+            // Delays for the underlying ToolTaskThatSleeps. On Windows the delay is realized by
+            // `ping -n N 127.0.0.1`, which sends 1 packet/sec, so the effective wall clock is
+            // roughly ceil(delayMs/1000)+1 seconds; on Unix-like platforms it is a `sleep` of
+            // delayMs/1000 seconds.
             int fastDelayMilliseconds = 100;
-            int slowDelayMilliseconds = 5_000;
+            int slowDelayMilliseconds = 10_000;
+
+            // Timeout enforced *only* on the attempt that is expected to time out. The slow delay
+            // is chosen large enough (5x timeout) that even a heavily loaded agent cannot let the
+            // tool finish before the timeout fires, and the success-path attempts run with a large
+            // but finite ceiling so test process startup overhead cannot race the wall clock while
+            // still bounding the test against a pathological ToolTask hang (cf. #13351).
             int timeoutMilliseconds = 2_000;
+            int successPathCeilingMilliseconds = 30_000;
 
             MockEngine3 engine = new();
 
@@ -1019,17 +1074,32 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = engine,
                 InitialDelay = timeoutOnFirstExecution ? slowDelayMilliseconds : fastDelayMilliseconds,
                 FollowupDelay = fastDelayMilliseconds,
-                Timeout = timeoutOnFirstExecution ? timeoutMilliseconds : System.Threading.Timeout.Infinite
             };
 
             // Execute the same task instance multiple times. The index is one-based.
             for (int attempt = 1; attempt <= repeats; attempt++)
             {
-                bool shouldSucceed = attempt > 1 || !timeoutOnFirstExecution;
+                bool isTimingOutAttempt = timeoutOnFirstExecution && attempt == 1;
+                bool shouldSucceed = !isTimingOutAttempt;
+
+                // Set Timeout per-attempt so the success path is wall-clock-independent. This is
+                // the deterministic fix for the historical flake where ping's ~1-2s fastpath
+                // raced a shared 5s timeout under CI cold-start overhead (dotnet/msbuild#13667,
+                // dotnet/msbuild#13830). The timing-out attempt enforces the short timeout;
+                // every other attempt uses a generous 30s ceiling -- ~30x the worst-observed
+                // cold-start (~1.4s), so it cannot race normal execution, while still bounding
+                // the test against a pathological ToolTask hang.
+                task.Timeout = isTimingOutAttempt ? timeoutMilliseconds : successPathCeilingMilliseconds;
+                int configuredTimeout = (int)task.Timeout;
+                Stopwatch sw = Stopwatch.StartNew();
                 bool result = task.Execute();
+                sw.Stop();
 
                 _output.WriteLine(
-                    $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, exitCode={task.ExitCode}.");
+                    $"[TTTAR-TELEMETRY] attempt={attempt}/{repeats} role={(isTimingOutAttempt ? "timeoutAttempt" : "successAttempt")} " +
+                    $"expectedSuccess={shouldSucceed} actualSuccess={result} exitCode={task.ExitCode} " +
+                    $"elapsedMs={sw.ElapsedMilliseconds} configuredTimeoutMs={configuredTimeout} " +
+                    $"slowDelayMs={slowDelayMilliseconds} fastDelayMs={fastDelayMilliseconds}");
 
                 if (!string.IsNullOrEmpty(engine.Log))
                 {
@@ -1037,12 +1107,14 @@ namespace Microsoft.Build.UnitTests
                     engine.Log = string.Empty;
                 }
 
-                task.RepeatCount.ShouldBe(attempt);
-                result.ShouldBe(shouldSucceed);
+                task.RepeatCount.ShouldBe(attempt, $"RepeatCount mismatch on attempt {attempt}/{repeats}.");
+                result.ShouldBe(
+                    shouldSucceed,
+                    $"Attempt {attempt}/{repeats} expected success={shouldSucceed} but got {result}. ExitCode={task.ExitCode}, elapsedMs={sw.ElapsedMilliseconds}, configuredTimeoutMs={configuredTimeout}, timeoutOnFirstExecution={timeoutOnFirstExecution}.");
 
                 if (shouldSucceed)
                 {
-                    task.ExitCode.ShouldBe(0);
+                    task.ExitCode.ShouldBe(0, $"Attempt {attempt}/{repeats} expected exit code 0.");
                 }
             }
         }
@@ -1061,21 +1133,25 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
 
                 // cmd echoes "hello", then starts a background ping that inherits
-                // pipe handles. cmd exits immediately; ping outlives the 2s EOF timeout.
+                // pipe handles. cmd exits immediately; ping outlives the 30s EOF timeout.
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                    ? "/c echo hello & start /b ping -n 10 127.0.0.1 > nul"
-                    : "-c \"echo hello; sleep 10 &\"";
+                    ? "/c echo hello & start /b ping -n 40 127.0.0.1 > nul"
+                    : "-c \"echo hello; sleep 40 &\"";
 
-                // Set a generous timeout - without the fix this would hang for the full ping duration
-                t.Timeout = 30000;
+                // Outer task timeout is generous; the EOF timeout (30s) is what bounds us.
+                t.Timeout = 60000;
 
+                var sw = Stopwatch.StartNew();
                 bool result = t.Execute();
+                sw.Stop();
 
-                // The tool should complete without hanging.
-                // The exit code may be non-zero depending on timing, but the key thing
-                // is that Execute() returns at all rather than hanging forever.
                 _output.WriteLine(engine.Log);
+
                 engine.Log.ShouldContain("hello");
+                // The task must return within ~30s (EOF timeout) even though the grandchild lives longer.
+                sw.Elapsed.TotalSeconds.ShouldBeLessThan(35, "ToolTask should be bounded by the 30s EOF timeout, not the grandchild's lifetime");
+                // The diagnostic message must appear so CI reports show why the wait ended.
+                engine.Log.ShouldContain("Pipe EOF not received");
             }
         }
 

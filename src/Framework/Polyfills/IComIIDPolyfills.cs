@@ -42,4 +42,9 @@ internal partial struct IErrorInfo : IComIID
     readonly Guid IComIID.Guid => IID_Guid;
 }
 
+internal partial struct IGlobalInterfaceTable : IComIID
+{
+    readonly Guid IComIID.Guid => IID_Guid;
+}
+
 #endif

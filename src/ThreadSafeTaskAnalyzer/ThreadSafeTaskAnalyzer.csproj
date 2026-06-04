@@ -6,7 +6,10 @@
     <AssemblyName>Microsoft.Build.TaskAuthoring.Analyzer</AssemblyName>
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- Don't ship yet, just make it available to partner repositories. -->
+    <IsShipping>false</IsShipping>
     <IsTestProject>false</IsTestProject>
     <!-- Suppress RS2001: our analyzer rules use custom severities -->
     <NoWarn>$(NoWarn);NU5128;RS1038;RS2001</NoWarn>
@@ -25,6 +28,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/dotnet/cs/%(FileName)%(Extension)" />
   </ItemGroup>
 
 </Project>
