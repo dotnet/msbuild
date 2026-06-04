@@ -25,6 +25,8 @@ internal static class TestHelpers
         {
             public interface IBuildEngine { }
 
+            public sealed class BuildEngineStub : IBuildEngine { }
+
             public interface ITask
             {
                 IBuildEngine BuildEngine { get; set; }
@@ -38,12 +40,12 @@ internal static class TestHelpers
 
             public class TaskEnvironment
             {
-                public string ProjectDirectory { get; }
-                public string GetEnvironmentVariable(string name) => null;
-                public void SetEnvironmentVariable(string name, string value) { }
-                public System.Collections.IDictionary GetEnvironmentVariables() => null;
+                public AbsolutePath ProjectDirectory => default;
+                public string? GetEnvironmentVariable(string name) => null;
+                public void SetEnvironmentVariable(string name, string? value) { }
+                public System.Collections.Generic.IReadOnlyDictionary<string, string> GetEnvironmentVariables() => new System.Collections.Generic.Dictionary<string, string>();
                 public AbsolutePath GetAbsolutePath(string path) => default;
-                public System.Diagnostics.ProcessStartInfo GetProcessStartInfo() => null;
+                public System.Diagnostics.ProcessStartInfo GetProcessStartInfo() => new();
             }
 
             public struct AbsolutePath
@@ -61,9 +63,9 @@ internal static class TestHelpers
 
             public class TaskItem : ITaskItem
             {
-                public string ItemSpec { get; set; }
-                public string GetMetadata(string metadataName) => null;
-                public string GetMetadataValue(string metadataName) => null;
+                public string ItemSpec { get; set; } = string.Empty;
+                public string GetMetadata(string metadataName) => string.Empty;
+                public string GetMetadataValue(string metadataName) => string.Empty;
             }
 
             [System.AttributeUsage(System.AttributeTargets.Class)]
@@ -71,13 +73,22 @@ internal static class TestHelpers
 
             [System.AttributeUsage(System.AttributeTargets.Class)]
             public class MSBuildMultiThreadableTaskAttribute : System.Attribute { }
+
+            [System.AttributeUsage(System.AttributeTargets.Property)]
+            public sealed class RequiredAttribute : System.Attribute { }
+        }
+
+        namespace System.ComponentModel.DataAnnotations
+        {
+            [System.AttributeUsage(System.AttributeTargets.Property)]
+            public sealed class RequiredAttribute : System.Attribute { }
         }
 
         namespace Microsoft.Build.Utilities
         {
             public abstract class Task : Microsoft.Build.Framework.ITask
             {
-                public Microsoft.Build.Framework.IBuildEngine BuildEngine { get; set; }
+                public Microsoft.Build.Framework.IBuildEngine BuildEngine { get; set; } = new Microsoft.Build.Framework.BuildEngineStub();
                 public abstract bool Execute();
             }
 
@@ -124,6 +135,30 @@ internal static class TestHelpers
 
         var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
         return allDiags;
+    }
+
+    /// <summary>
+    /// Runs compiler diagnostics together with analyzers and suppressors and returns
+    /// diagnostics reported for the primary test source file.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetCompilerAndAnalyzerDiagnosticsAsync(
+        string source,
+        params DiagnosticAnalyzer[] analyzers)
+    {
+        var compilation = CreateCompilation(source);
+        var options = new CompilationWithAnalyzersOptions(
+            new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty),
+            onAnalyzerException: null,
+            concurrentAnalysis: true,
+            logAnalyzerExecutionTime: false,
+            reportSuppressedDiagnostics: true);
+
+        var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzers), options);
+        var allDiagnostics = await compilationWithAnalyzers.GetAllDiagnosticsAsync();
+
+        return allDiagnostics
+            .Where(d => d.Location.SourceTree?.FilePath == "Test.cs")
+            .ToImmutableArray();
     }
 
     /// <summary>

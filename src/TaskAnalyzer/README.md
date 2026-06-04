@@ -2,6 +2,8 @@
 
 A Roslyn analyzer that detects unsafe API usage in MSBuild task implementations. It guides task authors toward thread-safe patterns required for MSBuild's multithreaded task execution mode, where multiple tasks may run concurrently in the same process.
 
+The package also includes a Roslyn diagnostic suppressor for nullable warning `CS8618` on task properties marked with `Microsoft.Build.Framework.RequiredAttribute`, since MSBuild guarantees those inputs are initialized before task execution.
+
 ## Background
 
 MSBuild is introducing multithreaded task execution via `IMultiThreadableTask`. Tasks opting into this mode share a process and can no longer safely use process-global state like environment variables, the current directory, or `Console` output. The `TaskEnvironment` abstraction provides per-task isolated access to these resources.
@@ -132,6 +134,16 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 
 The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
 
+## Compiler Diagnostic Suppressions
+
+The analyzer package suppresses `CS8618` for non-nullable properties when all of the following are true:
+
+- The property is marked with `Microsoft.Build.Framework.RequiredAttribute`
+- The containing type implements `Microsoft.Build.Framework.ITask` (including via `Microsoft.Build.Utilities.Task`)
+- The warning is the nullable initialization warning emitted by the C# compiler
+
+This lets task authors omit manual `= null!;` initializers for required MSBuild task inputs.
+
 ## Installation
 
 ### Project Reference (development)
@@ -140,7 +152,7 @@ Reference the analyzer project directly:
 
 ```xml
 <ItemGroup>
-  <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj"
+  <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
                     OutputItemType="Analyzer"
                     ReferenceOutputAssembly="false" />
 </ItemGroup>
@@ -211,10 +223,10 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-109 tests covering all rules, safe patterns, edge cases, and code fixes:
+111 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
 
 ```
-cd src/ThreadSafeTaskAnalyzer.Tests
+cd src/TaskAnalyzer.Tests
 dotnet test
 ```
 
