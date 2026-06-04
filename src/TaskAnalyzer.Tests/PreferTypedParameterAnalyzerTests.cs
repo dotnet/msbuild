@@ -23,6 +23,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string InputPath { get; set; } = "";
@@ -45,6 +46,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using System.IO;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string FilePath { get; set; } = "";
@@ -66,6 +68,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using System.IO;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string DirPath { get; set; } = "";
@@ -109,6 +112,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string InputPath { get; set; } = "";
@@ -131,6 +135,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public override bool Execute()
@@ -149,6 +154,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string InputPath { get; set; } = "";
@@ -170,6 +176,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 [Output]
@@ -190,6 +197,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 private string InternalPath { get; set; } = "";
@@ -209,6 +217,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string ComputedPath { get; } = "/fixed";
@@ -250,6 +259,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem Item { get; set; } = null!;
@@ -272,6 +282,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem Flag { get; set; } = null!;
@@ -293,6 +304,7 @@ public class PreferTypedParameterAnalyzerTests
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem Count { get; set; } = null!;
@@ -313,6 +325,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem PathItem { get; set; } = null!;
@@ -334,6 +347,7 @@ public class PreferTypedParameterAnalyzerTests
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using System.IO;
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem FileItem { get; set; } = null!;
@@ -376,6 +390,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem Item { get; set; } = null!;
@@ -396,6 +411,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem[] Items { get; set; } = null!;
@@ -419,6 +435,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem[] Items { get; set; } = null!;
@@ -440,6 +457,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public ITaskItem Item { get; set; } = null!;
@@ -459,6 +477,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public string CountStr { get; set; } = "0";
@@ -479,6 +498,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 [Output]
@@ -505,6 +525,48 @@ public class PreferTypedParameterAnalyzerTests
                 public void DoWork()
                 {
                     int value = int.Parse(Item.ItemSpec);
+                }
+            }
+            """);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task NonMultiThreadableTask_NoDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string InputPath { get; set; } = "";
+                public ITaskItem FileItem { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(InputPath);
+                    int value = int.Parse(FileItem.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task MultiThreadableAttribute_ButNotITask_NoDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class NotATask
+            {
+                public string InputPath { get; set; } = "";
+                public ITaskItem FileItem { get; set; } = null!;
+                public void DoWork()
+                {
+                    var abs = new AbsolutePath(InputPath);
+                    int value = int.Parse(FileItem.ItemSpec);
                 }
             }
             """);

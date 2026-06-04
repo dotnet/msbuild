@@ -65,7 +65,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
-            description: "MSBuild can bind AbsolutePath, FileInfo, and DirectoryInfo task parameters automatically. Using these types avoids manual path construction in the task body.");
+            description: "MSBuild can bind AbsolutePath, FileInfo, and DirectoryInfo task parameters automatically for tasks that opt into multithreaded support. Using these types avoids manual path construction in the task body.");
 
         public static readonly DiagnosticDescriptor PreferTypedTaskItem = new(
             id: DiagnosticIds.PreferTypedTaskItem,
@@ -74,7 +74,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
-            description: "MSBuild can bind ITaskItem<T> task parameters that provide a strongly-typed Value property parsed from ItemSpec. Using ITaskItem<T> avoids manual parsing in the task body.");
+            description: "MSBuild can bind ITaskItem<T> task parameters that provide a strongly-typed Value property parsed from ItemSpec for tasks that opt into multithreaded support. Using ITaskItem<T> avoids manual parsing in the task body.");
 
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
