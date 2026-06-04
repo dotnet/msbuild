@@ -70,7 +70,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         public static readonly DiagnosticDescriptor PreferTypedTaskItem = new(
             id: DiagnosticIds.PreferTypedTaskItem,
             title: "Prefer ITaskItem<T> over manual ItemSpec parsing",
-            messageFormat: "Consider changing task property '{0}' from '{1}' to 'ITaskItem<{2}>' instead of parsing ItemSpec manually",
+            messageFormat: "Consider changing task property '{0}' from '{1}' to 'ITaskItem<{2}>{3}' instead of parsing ItemSpec manually",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
