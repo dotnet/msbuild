@@ -19,8 +19,8 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
-| **MSBuildTask0006** | Info | All `ITask` implementations | Prefer typed path parameter over string |
-| **MSBuildTask0007** | Info | All `ITask` implementations | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
+| **MSBuildTask0006** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer typed path parameter over string |
+| **MSBuildTask0007** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -160,7 +160,8 @@ The analyzer determines what to check based on the type declaration:
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0007 |
+| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005 |
+| Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | MSBuildTask0006–MSBuildTask0007 |
 | Class implementing `IMultiThreadableTask` | All seven rules |
 | Class with `[MSBuildMultiThreadableTask]` attribute | All seven rules |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
