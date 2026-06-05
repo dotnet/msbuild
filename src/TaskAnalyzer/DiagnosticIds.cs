@@ -29,5 +29,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task input property should use ITaskItem&lt;T&gt; instead of ITaskItem with manual ItemSpec parsing.</summary>
         public const string PreferTypedTaskItem = "MSBuildTask0007";
+
+        /// <summary>Task property uses ITaskItem&lt;T&gt; with a type argument not supported by ValueTypeParser.</summary>
+        public const string UnsupportedTaskItemType = "MSBuildTask0008";
     }
 }
