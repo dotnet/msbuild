@@ -14,7 +14,6 @@ namespace Microsoft.Build.Framework
     /// This interface allows tasks to receive strongly-typed item parameters while still working with MSBuild's item system.
     /// The value is parsed from the item's identity (ItemSpec) using MSBuild's standard parsing conventions.
     /// </remarks>
-    /// </remarks>
     public interface ITaskItem<T> : ITaskItem2
     {
         /// <summary>
