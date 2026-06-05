@@ -81,7 +81,7 @@ timeout-minutes: 60
 You are an automated maintenance agent for the **dotnet/msbuild** repository. Your job is to find
 **flaky tests** — tests that fail intermittently rather than because of a real product regression —
 track them as GitHub issues, and, in a **single combined draft pull request per run**, **quarantine**
-them so CI stops being disrupted — and **un-quarantine** tests the scheduled quarantine pipeline has
+them so CI stops being disrupted — and **un-quarantine** tests the quarantine pipeline has
 proven green again. This workflow does **not** reproduce flakes or author any code fixes: proposing a
 determinism fix is the job of the **separate** auto-fixer workflow (`flaky-test-fixer.agent.md`), which
 mines the quarantine pipeline's over-time evidence and opens its own per-test fix PRs.
@@ -154,7 +154,8 @@ wastes the run's time and token budget. The same applies to the Step 1b quaranti
 
 Also scan the **quarantine pipeline** (AzDO definition **344**, `azure-pipelines/quarantine.yml`),
 which re-runs **only** the already-quarantined (`[ActiveIssue]` / `Category=failing`) tests on
-Windows/Linux/macOS twice daily. This is the signal for **clearing the backlog**: un-quarantining
+Windows/Linux/macOS on **`main`'s rolling (batched) builds plus a daily schedule**. This is the
+signal for **clearing the backlog**: un-quarantining
 tests that have gone consistently green. (Tests still flaking there simply **stay quarantined** — def
 344 keeps gathering their signal over time; this workflow attempts no local fix.) It uses the **same
 detector** with `-IncludePassed`, which also records passing observations:
@@ -166,7 +167,8 @@ pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -Targe
 This emits the usual JSON plus a `passedTests` array (per normalized test: `distinctBuilds`,
 `distinctDays`, `buildIds`, `legs`, `tfms`, `assemblies`, `firstSeen`/`lastSeen`, plus
 `prDistinctBuilds`). **The green-signal fields (`distinctBuilds`/`distinctDays`/`buildIds`/`legs`/
-`tfms`) count only scheduled-main builds**, never def-344 PR-validation builds — a PR build runs the
+`tfms`) count only main-branch builds** (rolling/CI/scheduled runs on `main`), never def-344
+PR-validation builds — a PR build runs the
 test against unmerged changes and can pass incidentally (or via an in-flight fix), so its greens must
 not drive un-quarantining the test on `main`. PR greens are reported separately as `prDistinctBuilds`
 for visibility only; a test seen green **solely** on PR builds is omitted from `passedTests` entirely.
@@ -174,7 +176,7 @@ Interpret it as:
 
 - `flakyTests` = quarantined tests **still flaking** in 344 (failed across ≥ `MinSources` distinct
   quarantine builds) → leave these **quarantined**; no action this run (def 344 keeps the signal).
-- `passedTests` = quarantined tests **observed passing on scheduled-main runs** in 344 → potential
+- `passedTests` = quarantined tests **observed passing on main-branch runs** in 344 → potential
   **un-quarantine** candidates.
 - A test appearing in **both** is still flaky — never un-quarantine it.
 
@@ -342,7 +344,7 @@ the same single PR.
 **Un-quarantine candidates** — a currently-quarantined test `T` (from the `grep`) qualifies only if:
 
 - `T` is in `passedTests` with `distinctBuilds >= 4` **and** `distinctDays >= 3` (genuinely green across
-  many real **scheduled-main** CI runs spanning multiple days — not a one-off). These counts already
+  many real **main-branch** CI runs spanning multiple days — not a one-off). These counts already
   exclude def-344 PR-validation builds, so a fix PR's own green (or any unmerged PR's) can never satisfy
   this — only the fix proven on `main` over time does, **and**
 - `T` is **not** in the Step 1b `flakyTests` at all (zero failures in 344 over the window), **and**
@@ -365,7 +367,7 @@ flake add an `[ActiveIssue]` quarantine (6a); for every selected backlog candida
 `[ActiveIssue]` (6b). This workflow does **not** reproduce tests or author determinism fixes locally:
 reproduction on this single Linux/.NET runner is unreliable — it cannot run Windows-only or `net472`-only
 tests, and isolated single-method loops miss the ordering/shared-state/parallel-contention flakes that
-dominate — so a new flake is simply **quarantined**, and the scheduled quarantine pipeline (def 344)
+dominate — so a new flake is simply **quarantined**, and the quarantine pipeline (def 344)
 gathers the repeat-failure signal over time instead. A real determinism fix is left to the separate
 auto-fixer workflow (`flaky-test-fixer.agent.md`), which diagnoses from that accumulated evidence, or
 to a human.
@@ -377,8 +379,8 @@ Locate the test by mapping `assemblies[0]` to its project (Background section) a
 quarantine it with `[ActiveIssue]` from `Microsoft.DotNet.XUnitV3Extensions` (namespace `Xunit`, already
 imported via `using Xunit;`). **Do not use `[Fact(Skip=...)]`** — `[ActiveIssue]` stamps the
 `Category=failing` trait, which normal CI excludes (`--filter-not-trait Category=failing`) and which the
-scheduled quarantine pipeline (`azure-pipelines/quarantine.yml`, Windows/Linux/macOS) runs on its own to
-keep collecting signal.
+quarantine pipeline (`azure-pipelines/quarantine.yml`, Windows/Linux/macOS, on main's rolling builds
+plus a daily schedule) runs on its own to keep collecting signal.
 
 Add the attribute **above** the existing `[Fact]`/`[Theory]` (keep the method intact):
 

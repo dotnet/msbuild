@@ -83,7 +83,7 @@ timeout-minutes: 60
 
 You are an automated maintenance agent for the **dotnet/msbuild** repository. Your job is to take
 tests that are **already quarantined** with `[ActiveIssue]` but are **still flaking** in the
-scheduled quarantine pipeline, diagnose the root cause **from the accumulated failure evidence**
+quarantine pipeline, diagnose the root cause **from the accumulated failure evidence**
 (error messages + stack traces gathered over many builds and days — **not** from local
 reproduction), and, when you are **highly confident** of a **minimal, test-only** fix, open **one
 individual draft pull request per fixed test**.
@@ -101,7 +101,8 @@ A quarantined test carries `[ActiveIssue("https://github.com/dotnet/msbuild/issu
 (from `Microsoft.DotNet.XUnitV3Extensions`, namespace `Xunit`), which stamps the `Category=failing`
 trait. Normal CI excludes that trait, so the only place these tests still run is the **quarantine
 pipeline** — AzDO definition **344** (`azure-pipelines/quarantine.yml`) — which runs **only** the
-`Category=failing` tests on **Windows/Linux/macOS twice daily**. Over time it accumulates a rich
+`Category=failing` tests on **Windows/Linux/macOS on main's rolling builds plus a daily schedule**.
+Over time it accumulates a rich
 record of *how* each quarantined test fails (or passes), which is exactly the signal you diagnose
 from.
 
@@ -199,8 +200,8 @@ qualifies **only if all** of these hold:
 - **It is not trending green.** `T` is **not** in `passedTests` with a strong recent green window
   (e.g. `distinctBuilds >= 3` over recent days). A test both failing and passing a lot is unstable;
   prefer to leave it for the detector to keep watching. (`passedTests` green counts are
-  scheduled-main only — def-344 PR-build greens, including a fix PR's own, are excluded — so this
-  exclusion reflects real `main` stability, not an in-flight PR.)
+  main-branch (rolling + scheduled) only — def-344 PR-build greens, including a fix PR's own, are
+  excluded — so this exclusion reflects real `main` stability, not an in-flight PR.)
 - **It is not already covered by an open PR.** Fetch the bodies of all open `flaky-test` PRs **once**
   up front and dedup locally against **three** signals — this catches the detector's quarantine/
   un-quarantine PRs **and** this workflow's own prior fix PRs:

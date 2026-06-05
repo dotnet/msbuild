@@ -84,10 +84,11 @@
     most builds finish green: this mode queries all completed builds (not only failed ones),
     forces -AllLegs, and lets a consumer confirm a quarantined test is genuinely green (ran and
     passed across distinct builds/days) before un-quarantining it. The un-quarantine signal fields
-    (distinctBuilds/buildIds/distinctDays/legs/tfms) count ONLY scheduled-main (rolling) builds, not
-    PR-validation builds: a PR build runs the test against unmerged changes and can pass incidentally
-    (or via an in-flight fix), so its greens must not drive un-quarantining the test on `main`. PR
-    greens are surfaced separately as 'prDistinctBuilds' for transparency only.
+    (distinctBuilds/buildIds/distinctDays/legs/tfms) count ONLY main-branch builds (rolling/CI/
+    scheduled runs on `main`, i.e. reasons batchedCI/individualCI/schedule), not PR-validation builds:
+    a PR build runs the test against unmerged changes and can pass incidentally (or via an in-flight
+    fix), so its greens must not drive un-quarantining the test on `main`. PR greens are surfaced
+    separately as 'prDistinctBuilds' for transparency only.
 
 .PARAMETER IncludeErrorDetails
     Also emit, per flagged test, an 'errorSamples' array: the distinct failure signatures grouped
@@ -613,13 +614,14 @@ $flakyTests = @($testFailures.GetEnumerator() | ForEach-Object {
 # green" before un-quarantining. A test that also appears in $flakyTests is still flaking.
 #
 # The un-quarantine SIGNAL fields below (DistinctBuilds/BuildIds/DistinctDays/Legs/Tfms) count ONLY
-# scheduled-main (rolling) observations. Un-quarantining removes [ActiveIssue], re-enabling the test
-# in normal CI on `main`, so it must be proven green on `main` AS-IS. A def-344 PR build runs the
-# test against an unmerged PR's changes and can pass incidentally (or via an in-flight fix) before
-# that change is on `main`; counting those greens would un-quarantine prematurely. PR greens are
-# surfaced as PrDistinctBuilds (informational) only. Tests seen green ONLY on PR builds (no
-# scheduled-main green) are dropped from passedTests, so they neither drive an un-quarantine nor look
-# "trending green" to the fixer.
+# main-branch (rolling) observations -- builds whose source is `main` with reason batchedCI/
+# individualCI/schedule, captured here as SourceType 'rolling'. Un-quarantining removes [ActiveIssue],
+# re-enabling the test in normal CI on `main`, so it must be proven green on `main` AS-IS. A def-344
+# PR build runs the test against an unmerged PR's changes and can pass incidentally (or via an
+# in-flight fix) before that change is on `main`; counting those greens would un-quarantine
+# prematurely. PR greens are surfaced as PrDistinctBuilds (informational) only. Tests seen green ONLY
+# on PR builds (no main-branch green) are dropped from passedTests, so they neither drive an
+# un-quarantine nor look "trending green" to the fixer.
 $passedTests = @()
 if ($IncludePassed) {
     $passedTests = @($testPassed.GetEnumerator() | ForEach-Object {
