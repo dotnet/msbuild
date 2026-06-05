@@ -1,6 +1,6 @@
 ---
 name: "Flaky Test Auto-Fixer"
-description: "Scheduled daily workflow that proposes evidence-based fixes for tests that are ALREADY quarantined ([ActiveIssue]) but STILL FLAKING in the quarantine pipeline (definition 344). It mines the accumulated over-time failure evidence (consistent error signatures + stack traces), diagnoses a minimal TEST-ONLY root cause without any local reproduction, and opens one individual draft PR per confidently-fixable test. By default it KEEPS the [ActiveIssue] in place so the quarantine pipeline validates the fix over the following days and the separate detector workflow un-quarantines once green. When confidence is VERY high (a fully-explained deterministic root cause with a complete fix), it ALSO removes the [ActiveIssue] in the same PR so normal PR CI runs the test as additional pre-merge validation, and says so in the PR body."
+description: "Scheduled daily workflow that proposes evidence-based fixes for tests that are ALREADY quarantined ([ActiveIssue]) but STILL FLAKING in the quarantine pipeline (definition 344). It mines the accumulated over-time failure evidence (consistent error signatures + stack traces), diagnoses a minimal TEST-ONLY root cause without any local reproduction, and opens one individual ready-for-review PR per confidently-fixable test. By default it KEEPS the [ActiveIssue] in place so the quarantine pipeline validates the fix over the following days and the separate detector workflow un-quarantines once green. When confidence is VERY high (a fully-explained deterministic root cause with a complete fix), it ALSO removes the [ActiveIssue] in the same PR so normal PR CI runs the test as additional pre-merge validation, and says so in the PR body."
 on:
   # Pinned ~1 hour after the detector (which runs at 11:38 UTC) so the fixer sees the detector's
   # latest quarantine/un-quarantine state before it proposes fixes. Explicit cron (not `daily`) so
@@ -55,21 +55,20 @@ safe-outputs:
   create-pull-request:
     title-prefix: "[Flaky Test Fix] "
     labels: [flaky-test]
-    draft: true
+    draft: false
     base-branch: main
-    # One INDEPENDENT draft PR per fixed test (not a combined PR). `max` above 1 lets the agent emit
+    # One INDEPENDENT ready-for-review PR per fixed test (not a combined PR). `max` above 1 lets the agent emit
     # several create_pull_request outputs in one run, each captured as its own branch/bundle.
     max: 3
     # Do not append a closing `Fixes #N` to the PR — the quarantine is intentionally retained and the
     # tracking issue must stay open until the detector un-quarantines after def 344 proves it green.
     auto-close-issue: false
-    # Exclusive allowlist: this workflow only ever edits TEST sources (all msbuild xUnit test projects
-    # live under `*UnitTests*` / `*.Tests` directories). Product code, root manifests, and `.github/**`
-    # are all refused outright — a far stronger guard than `src/**/*.cs`, which would also permit
-    # product code. Combined with the per-fix "edit only the test's own file" rule in the body.
-    allowed-files:
-      - "src/**/*UnitTests*/**/*.cs"
-      - "src/**/*.Tests/**/*.cs"
+    # This workflow only ever edits TEST sources. There is intentionally **no** `allowed-files`
+    # allowlist: a directory-glob allowlist produced false negatives on valid test files (e.g.
+    # `src/Build.UnitTests/.../Preprocessor_Tests.cs`), silently blocking legitimate fixes and failing
+    # the run. The product-code guard is instead provided by `excluded-files` + `protected-files`, the
+    # body's "edit only the test's own file" rule (+ a git diff check), and mandatory human review
+    # before any PR can merge.
     # Belt-and-braces enforcement of "never touch .github/**" (also enforced in the prompt + a git diff check).
     excluded-files:
       - ".github/**"
@@ -86,7 +85,7 @@ tests that are **already quarantined** with `[ActiveIssue]` but are **still flak
 quarantine pipeline, diagnose the root cause **from the accumulated failure evidence**
 (error messages + stack traces gathered over many builds and days — **not** from local
 reproduction), and, when you are **highly confident** of a **minimal, test-only** fix, open **one
-individual draft pull request per fixed test**.
+individual ready-for-review pull request per fixed test**.
 
 **By default you keep the `[ActiveIssue]` quarantine in place.** In that case this PR is a *candidate
 fix*, not a validated one: normal PR CI still excludes the quarantined test, so the only thing that
@@ -139,7 +138,7 @@ repo-wide text search, then locate the class/method within it.
 6. Apply each fix; by default **keep** the `[ActiveIssue]`, but at **very high confidence** also
    remove it in the same file (Step 6 / Step 5b).
 7. Build the whole repo **once** to validate the fixes compile (Step 7).
-8. Open **one individual draft PR per fixed test** (Step 8).
+8. Open **one individual ready-for-review PR per fixed test** (Step 8).
 
 ## Step 1 — Scan the quarantine pipeline (definition 344)
 
@@ -350,16 +349,16 @@ The whole-repo build takes ~2-3 minutes — **never cancel it**. Interpret the r
   the other, compiling fixes.
 - **Build fails for environmental/network reasons** (NuGet restore cannot reach a feed, a blocked
   domain, an SDK-download failure — *not* a compile error): **do not retry the build and do not
-  loop.** The PRs are drafts, so their own CI is the first real compile; **open them anyway** and
+  loop.** The PR opens ready-for-review, so its own CI is the first real compile; **open them anyway** and
   note in each PR body that the local validation build was blocked by the environment. One failed
   attempt is enough to decide this.
 
 Because each fix is confined to its **own** test file (Step 5b) and the fixes are independent, a clean
 union build means each individual fix compiles too.
 
-## Step 8 — Open one individual draft PR per fixed test
+## Step 8 — Open one individual ready-for-review PR per fixed test
 
-Each fix becomes its **own** draft PR (not a combined PR). First re-check dedup: re-run the Step 3
+Each fix becomes its **own** ready-for-review PR (not a combined PR). First re-check dedup: re-run the Step 3
 `gh pr list ... --label flaky-test` query — a concurrent detector or fixer run may have opened a PR
 for one of your tests since Step 3; **drop** any test now covered (by marker, issue number, or file).
 
@@ -429,7 +428,7 @@ Each PR:
   line on the fixed test. This workflow **never** files or closes issues, and **never** edits product
   code, shared test helpers, `.github/**`, or root manifests. Each PR edits exactly **one** test source
   file.
-- Every PR is a **draft** based on `main`, and is a **candidate** fix pending human review — validated
+- Every PR is a **ready-for-review** PR based on `main`, and is a **candidate** fix pending human review — validated
   by def 344 after merge (default), or additionally by the PR's own CI when you un-quarantined (Step
   5b). Never write a closing keyword before the tracking-issue reference.
 - The JSON report is the **only** source of truth — never invent failures, evidence, or test names.
