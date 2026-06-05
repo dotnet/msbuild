@@ -82,6 +82,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsAssignableToITaskItem(Type parameterType)
         {
+            if (parameterType.IsArray && typeof(ITaskItem).IsAssignableFrom(parameterType.GetElementType()))
+            {
+                return true;
+            }
+
             // Check if it's directly assignable
             bool result = typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(parameterType.GetTypeInfo()) ||    /* ITaskItem array or derived type, or */
                           typeof(ITaskItem).IsAssignableFrom(parameterType);                                    /* ITaskItem or derived type */

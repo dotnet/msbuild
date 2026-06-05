@@ -4,6 +4,8 @@
 using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -357,6 +359,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void IsValidOutputParameter_ITaskItemOfTArray_ReturnsTrue()
         {
             Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<int>[])));
+        }
+
+        [Fact]
+        public void IsAssignableToITaskItem_TaskItemOfTArray_ReturnsTrue()
+        {
+            typeof(ITaskItem[]).IsAssignableFrom(typeof(TaskItem<int>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(TaskItem<int>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_TaskItemOfTArray_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<int>[])).ShouldBeTrue();
         }
 
         #endregion
