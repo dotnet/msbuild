@@ -1,6 +1,6 @@
 ---
 name: "Flaky Test Triage"
-description: "Scheduled daily workflow that scans recent msbuild CI builds (approved PRs + rolling main builds) for tests that fail across multiple independent sources, files/updates flaky-test tracking issues, then quarantines the new candidates with [ActiveIssue]. It also scans the quarantine pipeline (definition 344) to un-quarantine tests that have gone consistently green, opening ONE combined draft PR per run."
+description: "Scheduled daily workflow that scans recent msbuild CI builds (approved PRs + rolling main builds) for tests that fail across multiple independent sources, files/updates flaky-test tracking issues, then quarantines the new candidates with [ActiveIssue]. It also scans the quarantine pipeline (definition 344) to un-quarantine tests that have gone consistently green, opening ONE combined ready-for-review PR per run."
 on:
   schedule: daily
   workflow_dispatch: # Allow manual triggering
@@ -56,7 +56,7 @@ safe-outputs:
   create-pull-request:
     title-prefix: "[Flaky Test] "
     labels: [flaky-test]
-    draft: true
+    draft: false
     base-branch: main
     max: 1
     # Exclusive allowlist: this workflow only ever edits test sources under src/ (adding or removing an
@@ -80,7 +80,7 @@ timeout-minutes: 60
 
 You are an automated maintenance agent for the **dotnet/msbuild** repository. Your job is to find
 **flaky tests** — tests that fail intermittently rather than because of a real product regression —
-track them as GitHub issues, and, in a **single combined draft pull request per run**, **quarantine**
+track them as GitHub issues, and, in a **single combined ready-for-review pull request per run**, **quarantine**
 them so CI stops being disrupted — and **un-quarantine** tests the quarantine pipeline has
 proven green again. This workflow does **not** reproduce flakes or author any code fixes: proposing a
 determinism fix is the job of the **separate** auto-fixer workflow (`flaky-test-fixer.agent.md`), which
@@ -122,7 +122,7 @@ repo-wide text search, then locate the class/method within it.
 5. For each selected test apply a **quarantine** or an **un-quarantine**, accumulating **all** `.cs`
    edits in the working tree (Step 6).
 6. Build the whole repo **once** to validate the edits compile (Step 7), then open **exactly one**
-   combined draft PR (Step 8).
+   combined PR (Step 8).
 
 ## Step 1 — Run the detector
 
@@ -433,15 +433,15 @@ The whole-repo build takes ~2-3 minutes — **never cancel it**. Interpret the r
 - **Build fails for environmental/network reasons** — NuGet restore cannot reach a feed, a blocked
   domain, or an SDK-download failure, *not* a compile error: **do not retry the build and do not loop.**
   Re-running against a blocked feed burns the entire token budget on NuGet retries and huge logs. The
-  edits are mechanical attribute add/removes and are low-risk, so **open the PR anyway** — it is a draft,
-  so its own CI is the first real compile of these edits — and note in the PR body that the local
+  edits are mechanical attribute add/removes and are low-risk, so **open the PR anyway** — it opens
+  ready-for-review, so its own CI is the first real compile of these edits — and note in the PR body that the local
   validation build was blocked by the environment. One failed build attempt is enough to decide this.
 
 Only treat a failure as environmental when it is clearly about restore/feed/SDK access. If the log
 contains C# compiler errors (`error CS...`), malformed-attribute syntax, or test-project compile errors,
 it is **not** environmental — fix or drop the offending edit per the second bullet.
 
-## Step 8 — Validate the diff and open ONE combined draft PR
+## Step 8 — Validate the diff and open ONE combined PR
 
 First confirm the diff is **limited and correct**:
 
@@ -453,8 +453,8 @@ First confirm the diff is **limited and correct**:
    command) and exact-string-match each remaining test's marker against them again — a concurrent run
    may have opened a combined PR since Step 5. Revert and drop any test now covered by an open PR.
 
-If, after this, no edits remain, open **no** PR and emit a `noop`. Otherwise open **exactly one** draft
-PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accumulated edits:
+If, after this, no edits remain, open **no** PR and emit a `noop`. Otherwise open **exactly one**
+ready-for-review PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accumulated edits:
 
 - Title: e.g. `Quarantine/un-quarantine <N> flaky tests` (the `[Flaky Test] ` prefix is added
   automatically); summarize the mix of actions.
@@ -476,6 +476,11 @@ PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accum
     instead and do **not** write a closing keyword. For a **narrowing**, always `Tracked by #<issue>`.
 - If the local validation build (Step 7) was blocked by the environment, say so in the PR body so a
   reviewer knows CI is the first real compile of these edits.
+- **Do NOT add a "new flaky test issues filed this run" (or similar) section listing the tracking issues
+  you filed via `create_issue`.** Those newly-filed issues are **not acted on by this PR** (they become
+  quarantine-eligible only on a future run), so referencing their `#<number>` here creates a misleading
+  issue↔PR cross-link. The PR body must reference **only** the issues for tests it actually quarantines or
+  un-quarantines this run. Newly-filed issues stand on their own.
 - Post one `add_comment` on each included test's tracking issue summarizing the action and linking the PR.
 
 ## Important
@@ -487,7 +492,7 @@ PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accum
 - **Un-quarantines have their own cap** (Step 5b: **at most 5** per run) and still fold into the **same
   single** combined PR. If the `add-comment` budget (12) is tight, prioritize comments for new
   quarantines over un-quarantine confirmations.
-- **Open at most ONE pull request**, and it must be a **draft** based on `main`.
+- **Open at most ONE pull request**, and it must be a **non-draft (ready-for-review)** PR based on `main`.
 - **Never modify anything under `.github/**`** (no workflow, skill, or action edits) and never touch root
   manifests (`NuGet.config`, `global.json`, `Directory.Packages.props`, etc.). This workflow only ever
   edits **test sources** under `src/` — adding or removing an `[ActiveIssue]` attribute — and **never**
