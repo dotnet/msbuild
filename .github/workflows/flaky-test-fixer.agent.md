@@ -186,10 +186,19 @@ name (`Namespace.Class.Method`) from its source file to match it against `flakyT
 From `flakyTests`, build the set of tests to attempt a fix on. A still-flaking quarantined test `T`
 qualifies **only if all** of these hold:
 
-- **It is genuinely quarantined now.** `T` appears in the Step 1 `grep` with a live `[ActiveIssue]`
-  on `main`, and that attribute's issue number maps to an issue that is **currently OPEN** (verify
-  with `gh issue view <NNNN> --repo dotnet/msbuild --json state`). If the issue is closed, skip `T`
-  (a human likely already handled it; you must not reference a closed issue).
+- **It is genuinely quarantined now, and the tracking issue does not already explain it as a product
+  change.** `T` appears in the Step 1 `grep` with a live `[ActiveIssue]` on `main`, and that
+  attribute's issue number maps to an issue that is **currently OPEN**. Read the issue's **state,
+  title, body, and most recent comments** (`gh issue view <NNNN> --repo dotnet/msbuild --json
+  state,title,body,comments`), not just its state. If the issue is closed, skip `T` (a human likely
+  already handled it; you must not reference a closed issue). **Critically, treat the maintainer's
+  written diagnosis as authoritative**: if the body or a comment attributes the failure to a **product
+  behavior change**, a specific **product PR/commit**, or says the new behavior is **expected / "by
+  design" / "probably ok"** (i.e. the test — not the product — is what is now wrong), then this is
+  **not** a test-only-fixable flake — **skip `T` and leave it quarantined** for a human. Authoring a
+  test-assertion change here would silently **mask a documented product regression**, which is
+  forbidden. (Example: an issue saying "PR #NNNN regresses this test because X is no longer Y" means
+  the fix, if any, belongs in product code or human judgement — never in this workflow.)
 - **It has enough over-time history.** `distinctSources >= 2` **and** the failures span **at least 2
   distinct days** (look at `firstSeen`/`lastSeen` and the spread). For a flake seen on only **one**
   OS family (all `legs`/`tfms` on a single platform), require **≥ 3 distinct days** — a single
@@ -203,6 +212,15 @@ qualifies **only if all** of these hold:
   unrelated hashes, or the dominant one is **timeout-only / has no usable stack / looks like
   infrastructure** (agent lost, disk full, port in use, OOM) — those are not test-logic bugs you can
   fix here.
+- **It actually looks nondeterministic — not a 100%-consistent break.** A test that fails on
+  **essentially every** def-344 run with **no** interleaved greens (a deterministic ~100% failure) is
+  almost never *flaky*; it is far more likely a **real regression** (often a product behavior change)
+  that merely got quarantined. Only treat such a test as fixable here if the dominant signature
+  **unambiguously matches a known test-side nondeterminism pattern** (an un-awaited task/race, an
+  ordering/culture/temp-path/port-collision/shared-state leak — see Step 4). If a near-100% failure has
+  **no** such nondeterminism story (e.g. a plain assertion that the produced output no longer contains
+  something), **skip `T` and leave it quarantined** — re-deriving a "test-only" cause for a
+  consistent break risks papering over a product regression.
 - **It is not trending green.** `T` is **not** in `passedTests` with a strong recent green window
   (e.g. `distinctBuilds >= 3` over recent days). A test both failing and passing a lot is unstable;
   prefer to leave it for the detector to keep watching. (`passedTests` green counts are
