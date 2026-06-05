@@ -1,6 +1,6 @@
 ---
 name: "Flaky Test Auto-Fixer"
-description: "Scheduled daily workflow that proposes evidence-based fixes for tests that are ALREADY quarantined ([ActiveIssue]) but STILL FLAKING in the quarantine pipeline (definition 344). It mines the accumulated over-time failure evidence (consistent error signatures + stack traces), diagnoses a minimal TEST-ONLY root cause without any local reproduction, and opens one individual draft PR per confidently-fixable test. It KEEPS the [ActiveIssue] in place so the quarantine pipeline validates the fix over the following days; the separate detector workflow un-quarantines once green."
+description: "Scheduled daily workflow that proposes evidence-based fixes for tests that are ALREADY quarantined ([ActiveIssue]) but STILL FLAKING in the quarantine pipeline (definition 344). It mines the accumulated over-time failure evidence (consistent error signatures + stack traces), diagnoses a minimal TEST-ONLY root cause without any local reproduction, and opens one individual draft PR per confidently-fixable test. By default it KEEPS the [ActiveIssue] in place so the quarantine pipeline validates the fix over the following days and the separate detector workflow un-quarantines once green. When confidence is VERY high (a fully-explained deterministic root cause with a complete fix), it ALSO removes the [ActiveIssue] in the same PR so normal PR CI runs the test as additional pre-merge validation, and says so in the PR body."
 on:
   # Pinned ~1 hour after the detector (which runs at 11:38 UTC) so the fixer sees the detector's
   # latest quarantine/un-quarantine state before it proposes fixes. Explicit cron (not `daily`) so
@@ -88,12 +88,18 @@ quarantine pipeline, diagnose the root cause **from the accumulated failure evid
 reproduction), and, when you are **highly confident** of a **minimal, test-only** fix, open **one
 individual draft pull request per fixed test**.
 
-**You keep the `[ActiveIssue]` quarantine in place.** This PR is a *candidate fix*, not a validated
-one: normal PR CI still excludes the quarantined test, so the only thing that proves the fix works
-is the quarantine pipeline (definition 344) re-running the **merged** test on `main` over the
-following days. Once it has gone consistently green there, the **separate** detector workflow
-(`flaky-test-detector.agent.md`) removes the `[ActiveIssue]`. So you never un-quarantine, never file
-or close issues, and never edit product code.
+**By default you keep the `[ActiveIssue]` quarantine in place.** In that case this PR is a *candidate
+fix*, not a validated one: normal PR CI still excludes the quarantined test, so the only thing that
+proves the fix works is the quarantine pipeline (definition 344) re-running the **merged** test on
+`main` over the following days. Once it has gone consistently green there, the **separate** detector
+workflow (`flaky-test-detector.agent.md`) removes the `[ActiveIssue]`.
+
+**Only when your confidence is VERY high** (Step 5b) do you **also remove the single `[ActiveIssue]`
+line** in the same PR. Removing it clears the `Category=failing` trait, so the test re-enters normal
+CI **on the PR itself** — the PR's own CI now runs the test and gives **additional pre-merge
+validation** (it does **not** replace def 344's multi-day, multi-platform bar; treat it as extra
+confidence, not final proof). You **never** file or close issues, and **never** edit product code,
+shared helpers, or anything outside the one test's own file.
 
 ## Background — the quarantine pipeline and the evidence
 
@@ -130,7 +136,8 @@ repo-wide text search, then locate the class/method within it.
    not already covered by an open PR, recent activity (Step 3). Cap **3**.
 4. For each candidate, **diagnose** a concrete **test-only** root cause from `errorSamples` (Step 4).
 5. **Decide** per candidate: a confident minimal test-only fix, or leave it quarantined (Step 5).
-6. Apply each fix, **keeping** the `[ActiveIssue]` in place (Step 6).
+6. Apply each fix; by default **keep** the `[ActiveIssue]`, but at **very high confidence** also
+   remove it in the same file (Step 6 / Step 5b).
 7. Build the whole repo **once** to validate the fixes compile (Step 7).
 8. Open **one individual draft PR per fixed test** (Step 8).
 
@@ -264,7 +271,8 @@ if a candidate would need any of these, do **not** fix it, leave it quarantined:
 - replacing a real wait/synchronization with `Thread.Sleep`/retries, or simply **increasing a
   timeout** as the only change;
 - swallowing or broadening caught exceptions to hide the failure;
-- removing or altering `[Fact]`/`[Theory]`/`[ActiveIssue]`/trait attributes, or the test data;
+- removing or altering `[Fact]`/`[Theory]`/trait attributes, or the test data (removing the
+  `[ActiveIssue]` line is **only** permitted in the very-high-confidence un-quarantine path of Step 5b);
 - editing product (non-test) code, a shared helper/fixture, or anything outside the test's own file;
 - touching anything under `.github/**` or any root manifest (`NuGet.config`, `global.json`,
   `Directory.Packages.props`, etc.).
@@ -280,12 +288,44 @@ noise); only note it in the run summary.
 
 If **no** candidate is confidently fixable, emit a `noop` and stop.
 
-## Step 6 — Apply each confident fix (keep the quarantine)
+## Step 5b — Decide whether this fix is ALSO a very-high-confidence un-quarantine
 
-For each candidate you decided to fix, apply the minimal edit to its test file. **Leave the
-`[ActiveIssue]` attribute exactly as it is** — do not remove or narrow it. The quarantine stays so
-def 344 validates the fix on real CI over the next days; un-quarantining is the detector's job once
-the test is proven green across platforms. Make sure each fix changes **only that one test file**.
+For a candidate you are fixing (Step 5), additionally choose to **remove its `[ActiveIssue]`** in the
+same PR **only if EVERY** condition below holds. If any is uncertain, **keep the `[ActiveIssue]`** and
+take the default path — un-quarantining is normally the detector's job, so the bar here is deliberately
+high.
+
+- **Fully-explained failures.** Your single dominant signature explains **essentially all** of the
+  test's current def-344 failures. If there is **any** unexplained residual signature (a different
+  message/stack that your fix does not address), do **not** un-quarantine — a "dominant" cause is not
+  enough.
+- **Deterministic, textbook root cause with a complete fix.** The cause is a well-understood test-side
+  nondeterminism (unawaited task, order-dependent assertion, culture/timezone, per-test temp/working-dir
+  isolation, shared-state reset) and your change **fully** removes it. **Never** un-quarantine on a
+  partial mitigation, a timeout/retry/sleep change, or a "makes it less likely" tweak.
+- **Full-scope coverage.** The fix addresses the **entire** scope of the attribute, and standard PR CI
+  will actually exercise that scope. If the attribute is platform-scoped
+  (`[ActiveIssue(url, TestPlatforms.X)]`), the fix must cover platform `X` **and** normal PR CI must run
+  that platform/TFM; removing an unconditional `[ActiveIssue]` re-enables the test on **all** legs, so
+  every affected leg/TFM in the evidence must be one normal PR CI runs. State, in the PR body, which CI
+  legs cover the affected `legs`/`tfms`. If you cannot confirm that coverage, keep the quarantine.
+- **Cleanly-removable attribute.** The `[ActiveIssue]` is an isolated attribute on **this** test method
+  only, so removing exactly its line leaves the rest of the file (and any other tests/attributes)
+  untouched. If the formatting is ambiguous or the attribute could be shared, keep the quarantine.
+
+When you un-quarantine, you still do **not** close the tracking issue (Step 8 keeps `Tracked by #N`).
+
+## Step 6 — Apply each fix (keep, or at very high confidence remove, the quarantine)
+
+For each candidate you decided to fix, apply the minimal edit to its test file. Then:
+
+- **Default (Step 5b not met):** **Leave the `[ActiveIssue]` attribute exactly as it is** — do not
+  remove or narrow it. The quarantine stays so def 344 validates the fix on real CI over the next days;
+  un-quarantining is then the detector's job once the test is proven green across platforms.
+- **Very high confidence (Step 5b met):** **also delete the single `[ActiveIssue]` line** for this
+  test, in the **same** file as the fix.
+
+Either way, each fix (plus an optional attribute removal) changes **only that one test file**.
 
 ## Step 7 — Build the whole repo once to validate the fixes compile
 
@@ -343,10 +383,11 @@ Each PR:
   `Microsoft.Build.Engine.UnitTests.SomeClass.SomeMethod`.
 - **Body must** start with the stable marker on its own line (so the detector and future fixer runs
   detect this in-flight PR and don't double-act on the test), copied exactly with the normalized
-  `testName`:
+  `testName` (add the third line **only** when you removed the `[ActiveIssue]` via Step 5b):
   ```
   <!-- flaky-test-id: <testName> -->
   <!-- flaky-test-fix -->
+  <!-- flaky-test-unquarantine -->
   ```
 - Then:
   - **Root cause:** the concrete test-only nondeterminism you identified.
@@ -354,12 +395,20 @@ Each PR:
     frame), how often / over how many builds and days it recurred, and the affected legs/TFMs.
   - **The fix:** what the minimal change does and **why it preserves exactly what the test verifies**.
   - **`Tracked by #<NNNN>`** (never a closing keyword — `Fixes`/`Closes`/`Resolves` are forbidden
-    here; the issue must stay open).
-  - A clear caveat: **"This is a candidate fix. The `[ActiveIssue]` quarantine is intentionally
-    retained: normal PR CI does not run this test, so this PR does not prove the test is green. After
-    merge, the quarantine pipeline (definition 344) validates it over the following days, and the
-    flaky-test detector un-quarantines it once it is consistently green across platforms. Please do
-    not merge until a reviewer agrees the test's semantics are preserved."**
+    here; the tracking issue must stay open even when you un-quarantine).
+  - **The quarantine caveat — pick the variant matching what you did:**
+    - **Kept `[ActiveIssue]` (default):** **"This is a candidate fix. The `[ActiveIssue]` quarantine is
+      intentionally retained: normal PR CI does not run this test, so this PR does not prove the test is
+      green. After merge, the quarantine pipeline (definition 344) validates it over the following days,
+      and the flaky-test detector un-quarantines it once it is consistently green across platforms.
+      Please do not merge until a reviewer agrees the test's semantics are preserved."**
+    - **Removed `[ActiveIssue]` (very high confidence, Step 5b):** **"High-confidence fix: the
+      `[ActiveIssue]` quarantine has been removed in this PR, so normal PR CI now runs this test and its
+      result here is *additional* pre-merge validation — list the CI legs/TFMs expected to cover the
+      affected legs above. This is extra confidence, not final proof: it does not replace definition
+      344's multi-day, multi-platform signal. Please confirm CI is green across the relevant legs and
+      that the test's semantics are preserved before merging. The tracking issue is left open for
+      follow-up."**
   - If the Step 7 build was blocked by the environment, say so.
 - After opening the PR, post **one** `add_comment` on that test's tracking issue (`#<NNNN>`)
   summarizing the proposed fix and linking the PR.
@@ -369,9 +418,12 @@ Each PR:
 - Respect the caps: at most **3** fix PRs per run (`create-pull-request` max 3), at most **3**
   issue comments (`add-comment`, one per fix PR). Prioritize the strongest, most consistently-failing
   candidates.
-- **Keep every `[ActiveIssue]` in place.** This workflow **never** un-quarantines, **never** files or
-  closes issues, and **never** edits product code, shared test helpers, `.github/**`, or root
-  manifests. Each PR edits exactly **one** test source file.
-- Every PR is a **draft** based on `main`, and is a **candidate** fix pending human review and def-344
-  validation — never write a closing keyword before the tracking-issue reference.
+- **Quarantine handling.** By default **keep every `[ActiveIssue]` in place**; remove one **only** in
+  the very-high-confidence un-quarantine path (Step 5b), and even then only the single `[ActiveIssue]`
+  line on the fixed test. This workflow **never** files or closes issues, and **never** edits product
+  code, shared test helpers, `.github/**`, or root manifests. Each PR edits exactly **one** test source
+  file.
+- Every PR is a **draft** based on `main`, and is a **candidate** fix pending human review — validated
+  by def 344 after merge (default), or additionally by the PR's own CI when you un-quarantined (Step
+  5b). Never write a closing keyword before the tracking-issue reference.
 - The JSON report is the **only** source of truth — never invent failures, evidence, or test names.
