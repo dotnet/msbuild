@@ -32,7 +32,6 @@ internal static class TaskParameterTypeVerifier
         => parameterType.IsValueType ||
             parameterType == typeof(string) ||
             parameterType == typeof(ITaskItem) ||
-            parameterType == typeof(AbsolutePath) ||
             parameterType == typeof(FileInfo) ||
             parameterType == typeof(DirectoryInfo) ||
             IsPathLikeITaskItemOfT(parameterType);
@@ -52,7 +51,6 @@ internal static class TaskParameterTypeVerifier
         return elementType.IsValueType ||
                parameterType == typeof(string[]) ||
                parameterType == typeof(ITaskItem[]) ||
-               parameterType == typeof(AbsolutePath[]) ||
                parameterType == typeof(FileInfo[]) ||
                parameterType == typeof(DirectoryInfo[]) ||
                IsPathLikeITaskItemOfT(elementType);
@@ -86,12 +84,10 @@ internal static class TaskParameterTypeVerifier
     internal static bool IsValueTypeOutputParameter(Type parameterType)
         => (parameterType.IsArray && parameterType.GetElementType().IsValueType) ||
             parameterType == typeof(string[]) ||
-            parameterType == typeof(AbsolutePath[]) ||
             parameterType == typeof(FileInfo[]) ||
             parameterType == typeof(DirectoryInfo[]) ||
             parameterType.IsValueType ||
             parameterType == typeof(string) ||
-            parameterType == typeof(AbsolutePath) ||
             parameterType == typeof(FileInfo) ||
             parameterType == typeof(DirectoryInfo);
 

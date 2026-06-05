@@ -10,6 +10,12 @@ namespace Microsoft.Build.Shared
 {
     internal static class TaskItemTypeHelper
     {
+        private const string AbsolutePathFullName = "Microsoft.Build.Framework.AbsolutePath";
+        private const string GenericITaskItemFullName = "Microsoft.Build.Framework.ITaskItem`1";
+
+        internal static bool IsAbsolutePathType(Type type)
+            => string.Equals(type.FullName, AbsolutePathFullName, StringComparison.Ordinal);
+
         internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
         {
             if (!parameterType.IsGenericType)
@@ -30,11 +36,11 @@ namespace Microsoft.Build.Shared
             }
 
             Type typeArg = genericArguments[0];
-            return typeArg == typeof(AbsolutePath) || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
+            return IsAbsolutePathType(typeArg) || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
         }
 
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)
-            => IsPathLikeTaskItemOfT(parameterType, typeof(ITaskItem<>).FullName ?? string.Empty);
+            => IsPathLikeTaskItemOfT(parameterType, GenericITaskItemFullName);
 
         internal static object CreateTaskItemOfT(Type taskItemType, ITaskItem item, Type taskItemImplementationGenericType)
         {
@@ -42,7 +48,7 @@ namespace Microsoft.Build.Shared
             Type valueType = genericArguments[0];
 
             Type genericTypeDefinition = taskItemType.GetGenericTypeDefinition();
-            Type constructedType = genericTypeDefinition == typeof(ITaskItem<>)
+            Type constructedType = string.Equals(genericTypeDefinition.FullName, GenericITaskItemFullName, StringComparison.Ordinal)
                 ? taskItemImplementationGenericType.MakeGenericType(valueType)
                 : genericTypeDefinition.MakeGenericType(valueType);
             ConstructorInfo? constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
@@ -57,8 +63,7 @@ namespace Microsoft.Build.Shared
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
-                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(e.InnerException).Throw();
-                throw;
+                throw e.InnerException;
             }
         }
     }
