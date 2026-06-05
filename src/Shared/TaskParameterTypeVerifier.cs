@@ -16,7 +16,7 @@ namespace Microsoft.Build.BackEnd
     internal static class TaskParameterTypeVerifier
     {
         /// <summary>
-        /// Checks if a type is ITaskItem&lt;T&gt; where T is a value type.
+        /// Checks if a type is ITaskItem&lt;T&gt; where T is a path-like type (AbsolutePath, FileInfo, or DirectoryInfo).
         /// </summary>
         private static bool IsTaskItemOfT(Type parameterType)
         {
@@ -38,7 +38,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type typeArg = genericArguments[0];
-            return typeArg.GetTypeInfo().IsValueType || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
+            return typeArg == typeof(AbsolutePath) || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
         }
 
         /// <summary>
