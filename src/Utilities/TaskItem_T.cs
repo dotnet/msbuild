@@ -25,7 +25,7 @@ namespace Microsoft.Build.Utilities
     /// </remarks>
     public readonly struct TaskItem<T> : ITaskItem<T>, IEquatable<TaskItem<T>>
     {
-        private readonly ITaskItem _backingItem;
+        private readonly ITaskItem? _backingItem;
 
         /// <summary>
         /// Gets the strongly-typed value parsed from the item's identity.
@@ -103,42 +103,42 @@ namespace Microsoft.Build.Utilities
         #region ITaskItem Implementation
 
         /// <inheritdoc/>
-        public string ItemSpec
+        public string? ItemSpec
         {
-            get => _backingItem.ItemSpec;
+            get => _backingItem?.ItemSpec;
             set => throw new NotSupportedException("TaskItem<T> ItemSpec is read-only. Create a new instance to change the value.");
         }
 
         /// <inheritdoc/>
-        public ICollection MetadataNames => _backingItem.MetadataNames;
+        public ICollection? MetadataNames => _backingItem?.MetadataNames;
 
         /// <inheritdoc/>
-        public int MetadataCount => _backingItem.MetadataCount;
+        public int MetadataCount => _backingItem?.MetadataCount ?? 0;
 
         /// <inheritdoc/>
-        public string GetMetadata(string metadataName) => _backingItem.GetMetadata(metadataName);
+        public string? GetMetadata(string metadataName) => _backingItem?.GetMetadata(metadataName);
 
         /// <inheritdoc/>
         public void SetMetadata(string metadataName, string metadataValue) =>
-            _backingItem.SetMetadata(metadataName, metadataValue);
+            _backingItem?.SetMetadata(metadataName, metadataValue);
 
         /// <inheritdoc/>
         public void RemoveMetadata(string metadataName) =>
-            _backingItem.RemoveMetadata(metadataName);
+            _backingItem?.RemoveMetadata(metadataName);
 
         /// <inheritdoc/>
         public void CopyMetadataTo(ITaskItem destinationItem) =>
-            _backingItem.CopyMetadataTo(destinationItem);
+            _backingItem?.CopyMetadataTo(destinationItem);
 
         /// <inheritdoc/>
-        public IDictionary CloneCustomMetadata() => _backingItem.CloneCustomMetadata();
+        public IDictionary? CloneCustomMetadata() => _backingItem?.CloneCustomMetadata();
 
         #endregion
 
         #region ITaskItem2 Implementation
 
         /// <inheritdoc/>
-        public string EvaluatedIncludeEscaped
+        public string? EvaluatedIncludeEscaped
         {
             get => (_backingItem as ITaskItem2)?.EvaluatedIncludeEscaped ?? ItemSpec;
             set => throw new NotSupportedException("TaskItem<T> EvaluatedIncludeEscaped is read-only. Create a new instance to change the value.");
@@ -157,10 +157,10 @@ namespace Microsoft.Build.Utilities
             {
                 taskItem2.SetMetadataValueLiteral(metadataName, metadataValue);
             }
-            else
+            else if (_backingItem is ITaskItem taskItem)
             {
                 var escapedValue = EscapingUtilities.Escape(metadataValue);
-                _backingItem.SetMetadata(metadataName, escapedValue);
+                taskItem.SetMetadata(metadataName, escapedValue);
             }
         }
 
