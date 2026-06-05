@@ -23,7 +23,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
@@ -767,7 +766,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (genericTypeDefinition != typeof(ITaskItem<>) && genericTypeDefinition != typeof(TaskItem<>))
+            if (genericTypeDefinition != typeof(ITaskItem<>) && genericTypeDefinition != typeof(Microsoft.Build.Utilities.TaskItem<>))
             {
                 return false;
             }
@@ -792,7 +791,7 @@ namespace Microsoft.Build.BackEnd
             Type valueType = genericArguments[0];
 
             // Create TaskItem<T> using the constructor that takes ITaskItem
-            Type constructedType = typeof(TaskItem<>).MakeGenericType(valueType);
+            Type constructedType = typeof(Microsoft.Build.Utilities.TaskItem<>).MakeGenericType(valueType);
             ConstructorInfo constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
 
             try
