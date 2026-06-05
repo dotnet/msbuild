@@ -658,8 +658,11 @@ if ($flakyTests.Count -gt 0 -and $ghAvailable) {
         $found = @()
         foreach ($q in @("flaky-test-id: $($test.TestName)", (($test.TestName -split '\.')[-1]))) {
             if ($q.Length -lt 5) { continue }
+            # Wrap the value in double quotes so GitHub treats it as a literal phrase; otherwise the
+            # colon in "flaky-test-id:" is parsed as a (nonexistent) search qualifier and ignored.
+            $searchExpr = '"' + $q + '" in:body,title'
             try {
-                $json = gh issue list --repo $Repo --state all --search "$q in:body,title" --limit 5 --json number,title,state 2>$null
+                $json = gh issue list --repo $Repo --state all --search $searchExpr --limit 5 --json number,title,state 2>$null
                 if ($json) { $found += ($json | ConvertFrom-Json) }
             }
             catch { }
