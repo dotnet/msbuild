@@ -34,8 +34,6 @@
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
@@ -335,7 +333,6 @@
     <Compile Include="BackEnd\Node\InProcNode.cs" />
     <Compile Include="BackEnd\Node\NodeConfiguration.cs" />
     <Compile Include="BackEnd\Node\OutOfProcNode.cs" />
-    <Compile Include="BackEnd\Node\NativeMethods.cs" />
     <Compile Include="BackEnd\Shared\BuildAbortedException.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IRequestBuilderCallback.cs" />
@@ -575,6 +572,7 @@
     <Compile Include="Logging\SimpleErrorLogger.cs" />
     <Compile Include="Logging\ParallelLogger\ConsoleOutputAligner.cs" />
     <Compile Include="Logging\FileLogger.cs" />
+    <Compile Include="Logging\IFileOutputLogger.cs" />
     <Compile Include="Logging\LogFormatter.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectPropertyLink.cs" />

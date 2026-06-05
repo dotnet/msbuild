@@ -308,7 +308,7 @@ namespace Microsoft.Build.Tasks
                     ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Latest));
             }
 
-            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
+            return TaskEnvironment.GetAbsolutePathOrEmpty(pathToTool);
         }
         /// <summary>
         /// Validate the task arguments, log any warnings/errors

@@ -277,10 +277,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void GlobalProperties_UseBuildLevelWhenChangeWaveDisabled()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
-            string testDir = env.CreateFolder().Path;
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+                string testDir = env.CreateFolder().Path;
 
-            string projectContents = $@"
+                string projectContents = $@"
 <Project>
     <UsingTask TaskName=""{nameof(GetGlobalPropertiesTask)}"" AssemblyFile=""{typeof(GetGlobalPropertiesTask).Assembly.Location}"" />
     <Target Name=""Test"">
@@ -290,32 +293,37 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>";
 
-            string projectFile = Path.Combine(testDir, "Test.proj");
-            File.WriteAllText(projectFile, projectContents);
+                string projectFile = Path.Combine(testDir, "Test.proj");
+                File.WriteAllText(projectFile, projectContents);
 
-            // These request-level properties should NOT be forwarded when the wave is disabled
-            var requestGlobalProperties = new Dictionary<string, string?>
-            {
-                ["TestRequestProperty"] = "RequestValue",
-            };
-
-            var logger = new MockLogger(_output);
-            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
-                new BuildParameters
+                // These request-level properties should NOT be forwarded when the wave is disabled
+                var requestGlobalProperties = new Dictionary<string, string?>
                 {
-                    MultiThreaded = true,
-                    MaxNodeCount = 4,
-                    Loggers = [logger],
-                    EnableNodeReuse = false,
-                },
-                new BuildRequestData(projectFile, requestGlobalProperties, null, ["Test"], null));
+                    ["TestRequestProperty"] = "RequestValue",
+                };
 
-            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+                var logger = new MockLogger(_output);
+                BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                    new BuildParameters
+                    {
+                        MultiThreaded = true,
+                        MaxNodeCount = 4,
+                        Loggers = [logger],
+                        EnableNodeReuse = false,
+                    },
+                    new BuildRequestData(projectFile, requestGlobalProperties, null, ["Test"], null));
 
-            // With wave disabled, build-level properties are used (empty in this test),
-            // so request-level properties should NOT appear
-            logger.FullLog.ShouldNotContain("GlobalProperty: TestRequestProperty=RequestValue");
-            logger.FullLog.ShouldContain("GlobalPropertyCount = 0");
+                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                // With wave disabled, build-level properties are used (empty in this test),
+                // so request-level properties should NOT appear
+                logger.FullLog.ShouldNotContain("GlobalProperty: TestRequestProperty=RequestValue");
+                logger.FullLog.ShouldContain("GlobalPropertyCount = 0");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
         }
 
         /// <summary>
