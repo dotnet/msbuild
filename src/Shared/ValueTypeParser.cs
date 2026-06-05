@@ -22,29 +22,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static bool ParseBool(string value)
         {
-            // MSBuild boolean true values
-            if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "on", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "yes", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "!false", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "!off", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "!no", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            // MSBuild boolean false values
-            if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "off", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "no", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "!true", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "!on", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(value, "!yes", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            throw new ArgumentException($"Cannot parse '{value}' as a boolean value.");
+            // Reuse MSBuild's canonical boolean parsing (true/false, on/off, yes/no, and '!' negation)
+            return ConversionUtilities.ConvertStringToBool(value);
         }
 
         /// <summary>
