@@ -16,9 +16,10 @@ namespace Microsoft.Build.BackEnd
     internal static class TaskParameterTypeVerifier
     {
         /// <summary>
-        /// Checks if a type is ITaskItem&lt;T&gt; where T is a path-like type (AbsolutePath, FileInfo, or DirectoryInfo).
+        /// Checks if a type is the provided generic TaskItem type where T is a path-like type
+        /// (AbsolutePath, FileInfo, or DirectoryInfo).
         /// </summary>
-        private static bool IsTaskItemOfT(Type parameterType)
+        internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
         {
             if (!parameterType.GetTypeInfo().IsGenericType)
             {
@@ -26,7 +27,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (genericTypeDefinition != typeof(ITaskItem<>))
+            if (!string.Equals(genericTypeDefinition.FullName, genericTaskItemTypeDefinitionFullName, StringComparison.Ordinal))
             {
                 return false;
             }
@@ -42,6 +43,43 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Checks if a type is ITaskItem&lt;T&gt; where T is path-like.
+        /// </summary>
+        internal static bool IsPathLikeITaskItemOfT(Type parameterType)
+            => IsPathLikeTaskItemOfT(parameterType, typeof(ITaskItem<>).FullName);
+
+        /// <summary>
+        /// Creates an instance of TaskItem&lt;T&gt; (or a provided TaskItem implementation for ITaskItem&lt;T&gt;)
+        /// from an <see cref="ITaskItem"/>.
+        /// </summary>
+        internal static object CreateTaskItemOfT(Type taskItemType, ITaskItem item, Type taskItemImplementationGenericType)
+        {
+            // Get the T from TaskItem<T> / ITaskItem<T>.
+            Type[] genericArguments = taskItemType.GetGenericArguments();
+            Type valueType = genericArguments[0];
+
+            Type genericTypeDefinition = taskItemType.GetGenericTypeDefinition();
+            Type constructedType = genericTypeDefinition == typeof(ITaskItem<>)
+                ? taskItemImplementationGenericType.MakeGenericType(valueType)
+                : genericTypeDefinition.MakeGenericType(valueType);
+            ConstructorInfo constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
+            if (constructor is null)
+            {
+                throw new InvalidOperationException($"Type '{constructedType.FullName}' does not have a constructor that takes ITaskItem.");
+            }
+
+            try
+            {
+                return constructor.Invoke(new object[] { item });
+            }
+            catch (TargetInvocationException e) when (e.InnerException is not null)
+            {
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>
@@ -51,7 +89,7 @@ namespace Microsoft.Build.BackEnd
             || parameterType == typeof(AbsolutePath)
             || parameterType == typeof(FileInfo)
             || parameterType == typeof(DirectoryInfo)
-            || IsTaskItemOfT(parameterType)
+            || IsPathLikeITaskItemOfT(parameterType)
             ;
 
         /// <summary>
@@ -72,7 +110,7 @@ namespace Microsoft.Build.BackEnd
                         || parameterType == typeof(AbsolutePath[])
                         || parameterType == typeof(FileInfo[])
                         || parameterType == typeof(DirectoryInfo[])
-                        || IsTaskItemOfT(elementType)
+                        || IsPathLikeITaskItemOfT(elementType)
                         ;
             return result;
         }
@@ -96,11 +134,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (parameterType.IsArray)
                 {
-                    result = IsTaskItemOfT(parameterType.GetElementType());
+                    result = IsPathLikeITaskItemOfT(parameterType.GetElementType());
                 }
                 else
                 {
-                    result = IsTaskItemOfT(parameterType);
+                    result = IsPathLikeITaskItemOfT(parameterType);
                 }
             }
 
