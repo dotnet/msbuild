@@ -220,7 +220,7 @@ bug — so be conservative and treat the following as **likely regression, NOT f
 - failures are clustered in time (recent `firstSeen`, not spread sporadically across the window).
 
 For a **likely regression**: do **not** create a `flaky-test` issue, do **not** add the
-`<!-- flaky-test-id: -->` marker, and do **not** edit/quarantine the test (quarantining would mask the
+`flaky-test-id` key, and do **not** edit/quarantine the test (quarantining would mask the
 bug). If an open related issue already exists (`relatedIssues`), post one `add_comment` noting the test
 now looks like a **possible regression needing human investigation**. Otherwise emit a `noop` line in
 your report flagging it for human triage. Then move on.
@@ -232,17 +232,29 @@ proceed to track and quarantine it.
 ## Step 4 — File or update the tracking issue
 
 For each likely-flake test to track, first establish whether an issue already exists. Use
-`relatedIssues` from the JSON **and** explicitly search issues for the stable marker (open and
-recently-closed), e.g. via the `github` tools or:
+`relatedIssues` from the JSON **and** explicitly search issues (open and recently-closed) for the
+test's fully-qualified name. Match on **both** the visible `flaky-test-id` body key **and** the title,
+and treat a hit in **either** as "already exists" — so that a human re-titling the issue (or editing
+the body) cannot by itself cause a duplicate:
 
 ```bash
-gh issue list --repo dotnet/msbuild --state all --search '"<!-- flaky-test-id: <testName> -->" in:body' --json number,state,title
+# Visible body key (a plain token, so — unlike a hidden HTML comment — it survives gh-aw sanitization).
+gh issue list --repo dotnet/msbuild --state all --search '"flaky-test-id: <testName>" in:body' --json number,state,title
+# Plus the fully-qualified name in the title — restricted to flaky-test-labeled issues so an
+# unrelated issue that merely mentions the method name cannot suppress a real new flake.
+gh issue list --repo dotnet/msbuild --state all --label flaky-test --search '"<testName>" in:title' --json number,state,title
 ```
 
-Older tracking issues may **predate the marker convention** and have none, so if the marker search
-finds nothing, also fall back to a **title search** for the test's short name before concluding no
-issue exists (e.g. `gh issue list --repo dotnet/msbuild --state all --search '<shortName> in:title'`)
-— this avoids re-filing a duplicate of a pre-existing issue. (Note: the sandboxed `gh` may print a
+A raw search hit is only a **candidate**: GitHub full-text search tokenizes `.`/`_` and matches
+prefixes, so confirm each candidate genuinely covers **this** test before skipping it — the body must
+contain `flaky-test-id: <testName>` as a **complete line** (an exact whole-line match, so a longer
+name such as `<testName>Extended` does **not** count), **or** the title must be exactly the
+fully-qualified `<testName>`. Discard candidates that only match as a substring/prefix.
+
+Older tracking issues may **predate this convention** and contain neither — so if both searches come
+up empty, also fall back to a **short-name title search** before concluding no issue exists (e.g.
+`gh issue list --repo dotnet/msbuild --state all --search '<shortName> in:title'`); this avoids
+re-filing a duplicate of a pre-existing hand-filed issue. (Note: the sandboxed `gh` may print a
 benign `Malformed version:` warning to stderr; it is harmless — judge success by the JSON on stdout
 and the exit code, not by that line.)
 
@@ -273,13 +285,17 @@ and the exit code, not by that line.)
   quarantine this test this run (see Step 5 — it becomes quarantine-eligible next run). Just file it:
   - Title: the test's short name (the `[Flaky Test] ` prefix is added automatically), e.g.
     `Microsoft.Build.Engine.UnitTests.SomeClass.SomeMethod`.
-  - Body **must** start with the hidden stable marker on its own line, copied **exactly** (the
-    `-id` is required — `<!-- flaky-test: ... -->` without `-id` will not be found by future runs and
-    causes duplicate issues):
+  - Body **must** include the visible **flaky-test key** so future runs can de-duplicate. Unlike the
+    old hidden `<!-- ... -->` marker (which gh-aw's output sanitizer strips, causing duplicate issues),
+    a **visible** token survives. Put it near the top of the body as a bold label followed by a fenced
+    code block — the code block signals "machine key, do not edit" — containing **exactly** one line
+    with the normalized `testName` (the format the scan engine searches for, verbatim):
+    ````
+    **Flaky-test key** (automated de-duplication — do not edit):
+    ```text
+    flaky-test-id: <testName>
     ```
-    <!-- flaky-test-id: <testName> -->
-    ```
-    using the normalized `testName` exactly.
+    ````
   - Then include an evidence summary: distinct sources (PRs + rolling builds), PR numbers, rolling
     build ids, affected legs/TFMs, assemblies, first/last seen, a representative error message, and
     links to `sampleBuildUrl`. **Render every rolling build id as a markdown link** to its AzDO build
@@ -312,15 +328,16 @@ of these hold:
 - It is **not already covered by an open `flaky-test` PR** (this is the primary cross-run dedup — a
   previous run's combined PR may still be open and unmerged, and its quarantines live on **that PR's
   branch, not `main`**, so they will not show up in your fresh `main` checkout). Fetch the bodies of all
-  open `flaky-test` PRs **once** up front and **exact-string-match** each candidate's marker locally —
-  do **not** rely on GitHub's fuzzy `--search ... in:body`, which strips the HTML-comment punctuation and
-  can miss/over-match the marker:
+  open `flaky-test` PRs **once** up front and **match each candidate locally** against the PR title and
+  body — local matching avoids GitHub search-index latency for very recently opened PRs:
   ```bash
   # One call; there are only ever a handful of open flaky-test PRs. Keep the JSON for Step 8.
-  gh pr list --repo dotnet/msbuild --state open --label flaky-test --json number,body --limit 100 > open-flaky-prs.json
+  gh pr list --repo dotnet/msbuild --state open --label flaky-test --json number,title,body --limit 100 > open-flaky-prs.json
   ```
-  Treat a candidate as covered if the literal string `<!-- flaky-test-id: <testName> -->` (normalized
-  `testName`, exact) appears in any open PR body. Skip every covered candidate.
+  Treat a candidate as covered if `flaky-test-id: <testName>` (the visible key, normalized `testName`)
+  appears as a **complete line** in any open PR body — a whole-line match, so a longer test name such
+  as `<testName>Extended` does **not** spuriously cover `<testName>` — **or** the normalized
+  `<testName>` appears in a PR title. Skip every covered candidate.
 
   **An empty array (`[]`) is the normal, expected result** — most runs have **no** flaky-test PR in
   flight, which simply means there are no cross-run duplicates to skip. Do **not** treat `[]` as a tool
@@ -454,20 +471,25 @@ First confirm the diff is **limited and correct**:
    **test source file for one of the tests you selected this run**. If **any** path is under `.github/`,
    is a root manifest, is product (non-test) code, or is a `.cs` file you did not intend to edit,
    **revert that change** — the PR must contain only the intended `[ActiveIssue]` add/remove edits.
-2. Re-fetch the open `flaky-test` PR bodies (re-run the Step 5 `gh pr list ... --label flaky-test`
-   command) and exact-string-match each remaining test's marker against them again — a concurrent run
-   may have opened a combined PR since Step 5. Revert and drop any test now covered by an open PR.
+2. Re-fetch the open `flaky-test` PRs (re-run the Step 5 `gh pr list ... --label flaky-test`
+   command) and match each remaining test's `flaky-test-id` key against their bodies (as a complete
+   line, not a substring) — or its `<testName>` against their titles — again; a concurrent run may
+   have opened a combined PR since Step 5. Revert and drop any test now covered by an open PR.
 
 If, after this, no edits remain, open **no** PR and emit a `noop`. Otherwise open **exactly one**
 ready-for-review PR (`create_pull_request`, base `main`, label `flaky-test`) containing all accumulated edits:
 
 - Title: e.g. `Quarantine/un-quarantine <N> flaky tests` (the `[Flaky Test] ` prefix is added
   automatically); summarize the mix of actions.
-- Body **must**, for **every** included test, contain its marker on its own line so future runs detect the
-  in-flight PR:
+- Body **must**, for **every** included test, contain its visible **flaky-test key** so future runs
+  detect the in-flight PR (a visible token survives gh-aw sanitization; the old hidden `<!-- -->` marker
+  did not). Render it in that test's section as a bold label followed by a fenced code block:
+  ````
+  **Flaky-test key** (automated de-duplication — do not edit):
+  ```text
+  flaky-test-id: <testName>
   ```
-  <!-- flaky-test-id: <testName> -->
-  ```
+  ````
 - Then, per test, a short section stating whether it was a **quarantine (6a)** or an **un-quarantine
   (6b)**, the affected sources/evidence, and the issue reference:
   - **Quarantine:** `Tracked by #<issue>` (must **not** auto-close — the issue stays open until a real
