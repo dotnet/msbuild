@@ -1,10 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Microsoft.Build.Experimental
+namespace Microsoft.Build.Server
 {
     /// <summary>
-    /// Enumeration of the various ways in which the MSBuildClient execution can exit.
+    /// Describes how an <see cref="MSBuildClient"/> execution finished, and — when the build ran on
+    /// the server — the exit type the build itself produced.
     /// </summary>
     public sealed class MSBuildClientExitResult
     {
