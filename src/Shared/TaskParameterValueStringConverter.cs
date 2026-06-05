@@ -4,22 +4,21 @@
 using System;
 using System.Globalization;
 using System.IO;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
     internal static class TaskParameterValueStringConverter
     {
-        internal static string ToString(object value)
+        internal static string ToString(object? value)
         {
             if (value == null)
             {
                 return string.Empty;
             }
 
-            if (value is AbsolutePath absolutePath)
+            if (TryGetAbsolutePathValue(value, out string absolutePathValue))
             {
-                return absolutePath.Value ?? string.Empty;
+                return absolutePathValue;
             }
 
             if (value is FileInfo fileInfo)
@@ -33,6 +32,20 @@ namespace Microsoft.Build.Shared
             }
 
             return Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
+        }
+
+        private static bool TryGetAbsolutePathValue(object value, out string absolutePathValue)
+        {
+            absolutePathValue = string.Empty;
+
+            if (!TaskItemTypeHelper.IsAbsolutePathType(value.GetType()))
+            {
+                return false;
+            }
+
+            object? rawValue = value.GetType().GetProperty("Value")?.GetValue(value, null);
+            absolutePathValue = rawValue as string ?? string.Empty;
+            return true;
         }
     }
 }
