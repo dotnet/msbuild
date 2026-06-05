@@ -321,6 +321,44 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.False(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object[])));
         }
 
+        // ─── ITaskItem<T> and ITaskItem<T>[] coverage ───────────────────────────
+
+        [Fact]
+        public void IsValidScalarInputParameter_ITaskItemOfT_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<int>)));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_ITaskItemOfTArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem<int>[])));
+        }
+
+        [Fact]
+        public void IsAssignableToITaskItem_ITaskItemOfT_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<int>)));
+        }
+
+        [Fact]
+        public void IsAssignableToITaskItem_ITaskItemOfTArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<int>[])));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_ITaskItemOfT_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<int>)));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_ITaskItemOfTArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<int>[])));
+        }
+
         #endregion
     }
 }
