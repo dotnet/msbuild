@@ -198,7 +198,9 @@ qualifies **only if all** of these hold:
   fix here.
 - **It is not trending green.** `T` is **not** in `passedTests` with a strong recent green window
   (e.g. `distinctBuilds >= 3` over recent days). A test both failing and passing a lot is unstable;
-  prefer to leave it for the detector to keep watching.
+  prefer to leave it for the detector to keep watching. (`passedTests` green counts are
+  scheduled-main only — def-344 PR-build greens, including a fix PR's own, are excluded — so this
+  exclusion reflects real `main` stability, not an in-flight PR.)
 - **It is not already covered by an open PR.** Fetch the bodies of all open `flaky-test` PRs **once**
   up front and dedup locally against **three** signals — this catches the detector's quarantine/
   un-quarantine PRs **and** this workflow's own prior fix PRs:

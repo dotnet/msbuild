@@ -164,11 +164,17 @@ pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -Targe
 ```
 
 This emits the usual JSON plus a `passedTests` array (per normalized test: `distinctBuilds`,
-`distinctDays`, `buildIds`, `legs`, `tfms`, `assemblies`, `firstSeen`/`lastSeen`). Interpret it as:
+`distinctDays`, `buildIds`, `legs`, `tfms`, `assemblies`, `firstSeen`/`lastSeen`, plus
+`prDistinctBuilds`). **The green-signal fields (`distinctBuilds`/`distinctDays`/`buildIds`/`legs`/
+`tfms`) count only scheduled-main builds**, never def-344 PR-validation builds — a PR build runs the
+test against unmerged changes and can pass incidentally (or via an in-flight fix), so its greens must
+not drive un-quarantining the test on `main`. PR greens are reported separately as `prDistinctBuilds`
+for visibility only; a test seen green **solely** on PR builds is omitted from `passedTests` entirely.
+Interpret it as:
 
 - `flakyTests` = quarantined tests **still flaking** in 344 (failed across ≥ `MinSources` distinct
   quarantine builds) → leave these **quarantined**; no action this run (def 344 keeps the signal).
-- `passedTests` = quarantined tests **observed passing** (actually ran and passed) in 344 → potential
+- `passedTests` = quarantined tests **observed passing on scheduled-main runs** in 344 → potential
   **un-quarantine** candidates.
 - A test appearing in **both** is still flaky — never un-quarantine it.
 
@@ -336,7 +342,9 @@ the same single PR.
 **Un-quarantine candidates** — a currently-quarantined test `T` (from the `grep`) qualifies only if:
 
 - `T` is in `passedTests` with `distinctBuilds >= 4` **and** `distinctDays >= 3` (genuinely green across
-  many real CI runs spanning multiple days — not a one-off), **and**
+  many real **scheduled-main** CI runs spanning multiple days — not a one-off). These counts already
+  exclude def-344 PR-validation builds, so a fix PR's own green (or any unmerged PR's) can never satisfy
+  this — only the fix proven on `main` over time does, **and**
 - `T` is **not** in the Step 1b `flakyTests` at all (zero failures in 344 over the window), **and**
 - the green evidence covers the platform scope the `[ActiveIssue]` actually applies to:
   - **Unconditional** `[ActiveIssue(url)]`: require passing observations on **Windows, Linux, and

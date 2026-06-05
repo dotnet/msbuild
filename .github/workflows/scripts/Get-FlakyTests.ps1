@@ -83,7 +83,11 @@
     aggregate in the JSON report. Intended for the quarantine pipeline (definition 344), where
     most builds finish green: this mode queries all completed builds (not only failed ones),
     forces -AllLegs, and lets a consumer confirm a quarantined test is genuinely green (ran and
-    passed across distinct builds/days) before un-quarantining it.
+    passed across distinct builds/days) before un-quarantining it. The un-quarantine signal fields
+    (distinctBuilds/buildIds/distinctDays/legs/tfms) count ONLY scheduled-main (rolling) builds, not
+    PR-validation builds: a PR build runs the test against unmerged changes and can pass incidentally
+    (or via an in-flight fix), so its greens must not drive un-quarantining the test on `main`. PR
+    greens are surfaced separately as 'prDistinctBuilds' for transparency only.
 
 .PARAMETER IncludeErrorDetails
     Also emit, per flagged test, an 'errorSamples' array: the distinct failure signatures grouped
@@ -532,6 +536,7 @@ try {
                             $normalizedP = ($pName -replace '\(.*\)\s*$', '').Trim()
                             if (-not $testPassed.ContainsKey($normalizedP)) { $testPassed[$normalizedP] = @() }
                             $testPassed[$normalizedP] += [PSCustomObject]@{
+                                SourceType = $source.Type
                                 BuildId  = $buildId
                                 Leg      = $leg
                                 Assembly = $assembly
@@ -606,25 +611,37 @@ $flakyTests = @($testFailures.GetEnumerator() | ForEach-Object {
 # Aggregate passed observations (only in -IncludePassed mode). No source threshold is applied
 # here; the consuming workflow decides how many distinct builds/days constitute "consistently
 # green" before un-quarantining. A test that also appears in $flakyTests is still flaking.
+#
+# The un-quarantine SIGNAL fields below (DistinctBuilds/BuildIds/DistinctDays/Legs/Tfms) count ONLY
+# scheduled-main (rolling) observations. Un-quarantining removes [ActiveIssue], re-enabling the test
+# in normal CI on `main`, so it must be proven green on `main` AS-IS. A def-344 PR build runs the
+# test against an unmerged PR's changes and can pass incidentally (or via an in-flight fix) before
+# that change is on `main`; counting those greens would un-quarantine prematurely. PR greens are
+# surfaced as PrDistinctBuilds (informational) only. Tests seen green ONLY on PR builds (no
+# scheduled-main green) are dropped from passedTests, so they neither drive an un-quarantine nor look
+# "trending green" to the fixer.
 $passedTests = @()
 if ($IncludePassed) {
     $passedTests = @($testPassed.GetEnumerator() | ForEach-Object {
         $obs = $_.Value
-        $distinctBuilds = @($obs | Select-Object -ExpandProperty BuildId -Unique)
-        $dates = @($obs | Where-Object { $_.Date } | Select-Object -ExpandProperty Date -Unique | Sort-Object)
+        $mainObs = @($obs | Where-Object { $_.SourceType -eq 'rolling' })
+        $prObs   = @($obs | Where-Object { $_.SourceType -eq 'pr' })
+        $distinctBuilds = @($mainObs | Select-Object -ExpandProperty BuildId -Unique)
+        $dates = @($mainObs | Where-Object { $_.Date } | Select-Object -ExpandProperty Date -Unique | Sort-Object)
         [PSCustomObject]@{
-            TestName       = $_.Key
-            TotalPassed    = $obs.Count
-            DistinctBuilds = $distinctBuilds.Count
-            BuildIds       = @($distinctBuilds | Sort-Object)
-            DistinctDays   = $dates.Count
-            Legs           = @($obs | Select-Object -ExpandProperty Leg -Unique | Sort-Object)
-            Tfms           = @($obs | Where-Object { $_.Tfm } | Select-Object -ExpandProperty Tfm -Unique | Sort-Object)
-            Assemblies     = @($obs | Select-Object -ExpandProperty Assembly -Unique | Sort-Object)
-            FirstSeen      = if ($dates.Count) { $dates[0] } else { "" }
-            LastSeen       = if ($dates.Count) { $dates[-1] } else { "" }
+            TestName         = $_.Key
+            TotalPassed      = $mainObs.Count
+            DistinctBuilds   = $distinctBuilds.Count
+            BuildIds         = @($distinctBuilds | Sort-Object)
+            DistinctDays     = $dates.Count
+            Legs             = @($mainObs | Select-Object -ExpandProperty Leg -Unique | Sort-Object)
+            Tfms             = @($mainObs | Where-Object { $_.Tfm } | Select-Object -ExpandProperty Tfm -Unique | Sort-Object)
+            Assemblies       = @($mainObs | Select-Object -ExpandProperty Assembly -Unique | Sort-Object)
+            FirstSeen        = if ($dates.Count) { $dates[0] } else { "" }
+            LastSeen         = if ($dates.Count) { $dates[-1] } else { "" }
+            PrDistinctBuilds = @($prObs | Select-Object -ExpandProperty BuildId -Unique).Count
         }
-    } | Sort-Object -Property DistinctBuilds -Descending)
+    } | Where-Object { $_.DistinctBuilds -ge 1 } | Sort-Object -Property DistinctBuilds -Descending)
 }
 
 # ---------------------------------------------------------------------------
@@ -730,16 +747,17 @@ $report = [PSCustomObject]@{
     })
     passedTests         = @($passedTests | ForEach-Object {
         [PSCustomObject]@{
-            testName       = $_.TestName
-            totalPassed    = $_.TotalPassed
-            distinctBuilds = $_.DistinctBuilds
-            buildIds       = $_.BuildIds
-            distinctDays   = $_.DistinctDays
-            legs           = $_.Legs
-            tfms           = $_.Tfms
-            assemblies     = $_.Assemblies
-            firstSeen      = $_.FirstSeen
-            lastSeen       = $_.LastSeen
+            testName         = $_.TestName
+            totalPassed      = $_.TotalPassed
+            distinctBuilds   = $_.DistinctBuilds
+            buildIds         = $_.BuildIds
+            distinctDays     = $_.DistinctDays
+            legs             = $_.Legs
+            tfms             = $_.Tfms
+            assemblies       = $_.Assemblies
+            firstSeen        = $_.FirstSeen
+            lastSeen         = $_.LastSeen
+            prDistinctBuilds = $_.PrDistinctBuilds
         }
     })
 }
