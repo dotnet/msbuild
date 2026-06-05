@@ -76,6 +76,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "MSBuild can bind ITaskItem<T> task parameters that provide a strongly-typed Value property parsed from ItemSpec for tasks that opt into multithreaded support. Using ITaskItem<T> avoids manual parsing in the task body.");
 
+        public static readonly DiagnosticDescriptor UnsupportedTaskItemType = new(
+            id: DiagnosticIds.UnsupportedTaskItemType,
+            title: "ITaskItem<T> used with unsupported type argument",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}> but '{1}' is not supported by MSBuild's ValueTypeParser. Supported types are: bool, char, byte, sbyte, short, ushort, int, uint, long, ulong, float, double, decimal, string, AbsolutePath, FileInfo, DirectoryInfo.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "MSBuild can only parse ITaskItem<T> properties when T is a type supported by ValueTypeParser. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -83,6 +92,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             PotentialIssue,
             TransitiveUnsafeCall,
             PreferTypedPathParameter,
-            PreferTypedTaskItem);
+            PreferTypedTaskItem,
+            UnsupportedTaskItemType);
     }
 }

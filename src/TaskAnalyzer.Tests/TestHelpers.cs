@@ -190,6 +190,21 @@ internal static class TestHelpers
     }
 
     /// <summary>
+    /// Runs the UnsupportedTaskItemTypeAnalyzer on the given source code and returns analyzer diagnostics.
+    /// Source is combined with framework stubs automatically.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetUnsupportedTaskItemTypeDiagnosticsAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzer = new UnsupportedTaskItemTypeAnalyzer();
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+
+        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        return allDiags;
+    }
+
+    /// <summary>
     /// Creates a compilation with the given source code and framework stubs.
     /// </summary>
     public static CSharpCompilation CreateCompilation(string source)
