@@ -9,11 +9,11 @@ namespace Microsoft.Build.Framework
     /// A strongly-typed task item interface that wraps a value of type <typeparamref name="T"/>
     /// and provides access to it along with standard task item functionality.
     /// </summary>
-    /// <typeparam name="T">The type of the value. Can be a value type, FileInfo, or DirectoryInfo.</typeparam>
+    /// <typeparam name="T">The type of the value. Supported types are <see cref="AbsolutePath"/>, <see cref="System.IO.FileInfo"/>, and <see cref="System.IO.DirectoryInfo"/>.</typeparam>
     /// <remarks>
-    /// This interface allows tasks to receive strongly-typed parameters while still working with MSBuild's item system.
+    /// This interface allows tasks to receive strongly-typed item parameters while still working with MSBuild's item system.
     /// The value is parsed from the item's identity (ItemSpec) using MSBuild's standard parsing conventions.
-    /// Supported types include primitive value types (int, bool, etc.), AbsolutePath, FileInfo, and DirectoryInfo.
+    /// </remarks>
     /// </remarks>
     public interface ITaskItem<T> : ITaskItem2
     {
