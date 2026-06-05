@@ -17,6 +17,7 @@
     <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
 
     <AppConfig>..\Shared\UnitTests\App.config</AppConfig>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
