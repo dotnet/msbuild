@@ -328,50 +328,62 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void IsValidScalarInputParameter_ITaskItemOfT_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<int>)));
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<AbsolutePath>)));
         }
 
         [Fact]
         public void IsValidVectorInputParameter_ITaskItemOfTArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem<int>[])));
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem<AbsolutePath>[])));
         }
 
         [Fact]
         public void IsAssignableToITaskItem_ITaskItemOfT_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<int>)));
+            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>)));
         }
 
         [Fact]
         public void IsAssignableToITaskItem_ITaskItemOfTArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<int>[])));
+            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>[])));
         }
 
         [Fact]
         public void IsValidOutputParameter_ITaskItemOfT_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<int>)));
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>)));
         }
 
         [Fact]
         public void IsValidOutputParameter_ITaskItemOfTArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<int>[])));
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>[])));
         }
 
         [Fact]
         public void IsAssignableToITaskItem_TaskItemOfTArray_ReturnsTrue()
         {
-            typeof(ITaskItem[]).IsAssignableFrom(typeof(TaskItem<int>[])).ShouldBeFalse();
-            TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(TaskItem<int>[])).ShouldBeTrue();
+            typeof(ITaskItem[]).IsAssignableFrom(typeof(TaskItem<AbsolutePath>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
         }
 
         [Fact]
         public void IsValidOutputParameter_TaskItemOfTArray_ReturnsTrue()
         {
-            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<int>[])).ShouldBeTrue();
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_ITaskItemOfUnsupportedType_ReturnsFalse()
+        {
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<int>)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_TaskItemOfUnsupportedTypeArray_ReturnsFalse()
+        {
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<int>[])).ShouldBeFalse();
         }
 
         #endregion

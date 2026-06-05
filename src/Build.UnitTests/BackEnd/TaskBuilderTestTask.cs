@@ -249,12 +249,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The value for the TaskItemIntOutput.
         /// </summary>
-        private ITaskItem<int> _taskItemIntOutput;
+        private ITaskItem<AbsolutePath> _taskItemIntOutput;
 
         /// <summary>
         /// The value for the TaskItemIntArrayOutput.
         /// </summary>
-        private ITaskItem<int>[] _taskItemIntArrayOutput;
+        private ITaskItem<AbsolutePath>[] _taskItemIntArrayOutput;
 
         /// <summary>
         /// The value for the FileInfoOutput.
@@ -714,9 +714,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;int&gt; parameter.
+        /// A TaskItem&lt;AbsolutePath&gt; parameter.
         /// </summary>
-        public ITaskItem<int> TaskItemIntParam
+        public ITaskItem<AbsolutePath> TaskItemIntParam
         {
             set
             {
@@ -726,9 +726,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;int&gt; array parameter.
+        /// A TaskItem&lt;AbsolutePath&gt; array parameter.
         /// </summary>
-        public ITaskItem<int>[] TaskItemIntArrayParam
+        public ITaskItem<AbsolutePath>[] TaskItemIntArrayParam
         {
             set
             {
@@ -1406,10 +1406,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;int&gt; output.
+        /// A TaskItem&lt;AbsolutePath&gt; output.
         /// </summary>
         [Output]
-        public ITaskItem<int> TaskItemIntOutput
+        public ITaskItem<AbsolutePath> TaskItemIntOutput
         {
             get
             {
@@ -1419,10 +1419,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;int&gt; array output.
+        /// A TaskItem&lt;AbsolutePath&gt; array output.
         /// </summary>
         [Output]
-        public ITaskItem<int>[] TaskItemIntArrayOutput
+        public ITaskItem<AbsolutePath>[] TaskItemIntArrayOutput
         {
             get
             {

@@ -15,30 +15,75 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class TaskParameterTypeVerifier
     {
+        private static bool IsSupportedTaskItemTypeArgument(Type typeArg) =>
+            typeArg == typeof(AbsolutePath) ||
+            typeArg == typeof(FileInfo) ||
+            typeArg == typeof(DirectoryInfo);
+
+        private static bool IsTaskItemGenericType(Type type)
+        {
+            if (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ITaskItem<>))
+            {
+                return true;
+            }
+
+            if (type.GetTypeInfo().IsGenericType &&
+                string.Equals(type.GetGenericTypeDefinition().FullName, "Microsoft.Build.Utilities.TaskItem`1", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            foreach (Type implementedInterface in type.GetTypeInfo().ImplementedInterfaces)
+            {
+                if (implementedInterface.GetTypeInfo().IsGenericType &&
+                    implementedInterface.GetGenericTypeDefinition() == typeof(ITaskItem<>))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
-        /// Checks if a type is ITaskItem&lt;T&gt; where T is a value type.
+        /// Checks if a type is ITaskItem&lt;T&gt; or TaskItem&lt;T&gt; where T is supported by MSBuild task binding.
         /// </summary>
         private static bool IsTaskItemOfT(Type parameterType)
         {
-            if (!parameterType.GetTypeInfo().IsGenericType)
+            if (!IsTaskItemGenericType(parameterType))
             {
                 return false;
             }
 
-            Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (genericTypeDefinition != typeof(ITaskItem<>))
+            Type taskItemType = parameterType;
+            if (!(taskItemType.GetTypeInfo().IsGenericType && taskItemType.GetGenericTypeDefinition() == typeof(ITaskItem<>)))
             {
-                return false;
+                if (taskItemType.GetTypeInfo().IsGenericType &&
+                    string.Equals(taskItemType.GetGenericTypeDefinition().FullName, "Microsoft.Build.Utilities.TaskItem`1", StringComparison.Ordinal))
+                {
+                    return IsSupportedTaskItemTypeArgument(taskItemType.GetGenericArguments()[0]);
+                }
+
+                taskItemType = null;
+
+                foreach (Type implementedInterface in parameterType.GetTypeInfo().ImplementedInterfaces)
+                {
+                    if (implementedInterface.GetTypeInfo().IsGenericType &&
+                        implementedInterface.GetGenericTypeDefinition() == typeof(ITaskItem<>))
+                    {
+                        taskItemType = implementedInterface;
+                        break;
+                    }
+                }
+
+                if (taskItemType is null)
+                {
+                    return false;
+                }
             }
 
-            Type[] genericArguments = parameterType.GetGenericArguments();
-            if (genericArguments.Length != 1)
-            {
-                return false;
-            }
-
-            Type typeArg = genericArguments[0];
-            return typeArg.GetTypeInfo().IsValueType || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
+            Type[] genericArguments = taskItemType.GetGenericArguments();
+            return genericArguments.Length == 1 && IsSupportedTaskItemTypeArgument(genericArguments[0]);
         }
 
         /// <summary>
@@ -82,29 +127,24 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsAssignableToITaskItem(Type parameterType)
         {
-            if (parameterType.IsArray && typeof(ITaskItem).IsAssignableFrom(parameterType.GetElementType()))
+            if (parameterType.IsArray)
             {
-                return true;
+                Type elementType = parameterType.GetElementType();
+
+                if (IsTaskItemGenericType(elementType))
+                {
+                    return IsTaskItemOfT(elementType);
+                }
+
+                return typeof(ITaskItem).IsAssignableFrom(elementType);
             }
 
-            // Check if it's directly assignable
-            bool result = typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(parameterType.GetTypeInfo()) ||    /* ITaskItem array or derived type, or */
-                          typeof(ITaskItem).IsAssignableFrom(parameterType);                                    /* ITaskItem or derived type */
-
-            // Also check for TaskItem<T> or TaskItem<T>[]
-            if (!result)
+            if (IsTaskItemGenericType(parameterType))
             {
-                if (parameterType.IsArray)
-                {
-                    result = IsTaskItemOfT(parameterType.GetElementType());
-                }
-                else
-                {
-                    result = IsTaskItemOfT(parameterType);
-                }
+                return IsTaskItemOfT(parameterType);
             }
 
-            return result;
+            return typeof(ITaskItem).IsAssignableFrom(parameterType);
         }
 
         /// <summary>
@@ -139,6 +179,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsValidOutputParameter(Type parameterType)
         {
+            if (parameterType.IsArray)
+            {
+                Type elementType = parameterType.GetElementType();
+                if (IsTaskItemGenericType(elementType) && !IsTaskItemOfT(elementType))
+                {
+                    return false;
+                }
+            }
+            else if (IsTaskItemGenericType(parameterType) && !IsTaskItemOfT(parameterType))
+            {
+                return false;
+            }
+
             return IsValueTypeOutputParameter(parameterType) || IsAssignableToITaskItem(parameterType);
         }
     }

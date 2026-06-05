@@ -756,30 +756,58 @@ namespace Microsoft.Build.BackEnd
 
         #region Local Methods
 
+        private static bool IsSupportedTaskItemTypeArgument(Type typeArg) =>
+            typeArg == typeof(AbsolutePath) ||
+            typeArg == typeof(FileInfo) ||
+            typeArg == typeof(DirectoryInfo);
+
         /// <summary>
-        /// Checks if a type is TaskItem&lt;T&gt; where T is a value type, FileInfo, or DirectoryInfo.
+        /// Checks if a type is ITaskItem&lt;T&gt; or TaskItem&lt;T&gt; where T is supported by MSBuild task binding.
         /// </summary>
         private static bool IsTaskItemOfT(Type parameterType)
         {
             if (!parameterType.GetTypeInfo().IsGenericType)
             {
+                foreach (Type implementedInterface in parameterType.GetTypeInfo().ImplementedInterfaces)
+                {
+                    if (implementedInterface.GetTypeInfo().IsGenericType &&
+                        implementedInterface.GetGenericTypeDefinition() == typeof(ITaskItem<>))
+                    {
+                        return IsSupportedTaskItemTypeArgument(implementedInterface.GetGenericArguments()[0]);
+                    }
+                }
+
                 return false;
             }
 
             Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (genericTypeDefinition != typeof(ITaskItem<>) && genericTypeDefinition != typeof(TaskItem<>))
+            if (genericTypeDefinition == typeof(ITaskItem<>))
             {
-                return false;
+                Type[] genericArguments = parameterType.GetGenericArguments();
+                if (genericArguments.Length != 1)
+                {
+                    return false;
+                }
+
+                return IsSupportedTaskItemTypeArgument(genericArguments[0]);
             }
 
-            Type[] genericArguments = parameterType.GetGenericArguments();
-            if (genericArguments.Length != 1)
+            if (string.Equals(genericTypeDefinition.FullName, "Microsoft.Build.Utilities.TaskItem`1", StringComparison.Ordinal))
             {
-                return false;
+                Type[] genericArguments = parameterType.GetGenericArguments();
+                return genericArguments.Length == 1 && IsSupportedTaskItemTypeArgument(genericArguments[0]);
             }
 
-            Type typeArg = genericArguments[0];
-            return typeArg.GetTypeInfo().IsValueType || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
+            foreach (Type implementedInterface in parameterType.GetTypeInfo().ImplementedInterfaces)
+            {
+                if (implementedInterface.GetTypeInfo().IsGenericType &&
+                    implementedInterface.GetGenericTypeDefinition() == typeof(ITaskItem<>))
+                {
+                    return IsSupportedTaskItemTypeArgument(implementedInterface.GetGenericArguments()[0]);
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -792,7 +820,7 @@ namespace Microsoft.Build.BackEnd
             Type valueType = genericArguments[0];
 
             // Create TaskItem<T> using the constructor that takes ITaskItem
-            Type constructedType = typeof(TaskItem<>).MakeGenericType(valueType);
+            Type constructedType = typeof(Microsoft.Build.Utilities.TaskItem<>).MakeGenericType(valueType);
             ConstructorInfo constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
 
             return constructor.Invoke(new object[] { item });

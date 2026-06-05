@@ -568,12 +568,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region TaskItem<T> Params
 
         /// <summary>
-        /// Validate that setting a TaskItem&lt;int&gt; parameter with a valid integer works.
+        /// Validate that setting a TaskItem&lt;AbsolutePath&gt; parameter with a valid path works.
         /// </summary>
         [Fact]
         public void TestSetTaskItemIntParam()
         {
-            ValidateTaskParameter("TaskItemIntParam", "42", new Microsoft.Build.Utilities.TaskItem<int>(42));
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item.txt" : "/tmp/typed-item.txt";
+            ValidateTaskParameter("TaskItemIntParam", absolutePath, new Microsoft.Build.Utilities.TaskItem<AbsolutePath>(new AbsolutePath(absolutePath)));
         }
 
         /// <summary>
@@ -608,25 +609,37 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region TaskItem<T> Array Params
 
         /// <summary>
-        /// Validate that setting a TaskItem&lt;int&gt; array with a single value sets the correct value.
+        /// Validate that setting a TaskItem&lt;AbsolutePath&gt; array with a single value sets the correct value.
         /// </summary>
         [Fact]
         public void TestSetTaskItemIntArrayParam()
         {
-            ValidateTaskParameterArray("TaskItemIntArrayParam", "42", new Microsoft.Build.Utilities.TaskItem<int>[] { new Microsoft.Build.Utilities.TaskItem<int>(42) });
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item.txt" : "/tmp/typed-item.txt";
+            ValidateTaskParameterArray(
+                "TaskItemIntArrayParam",
+                absolutePath,
+                new Microsoft.Build.Utilities.TaskItem<AbsolutePath>[] { new Microsoft.Build.Utilities.TaskItem<AbsolutePath>(new AbsolutePath(absolutePath)) });
         }
 
         /// <summary>
-        /// Validate that setting a TaskItem&lt;int&gt; array with multiple values sets the correct values.
+        /// Validate that setting a TaskItem&lt;AbsolutePath&gt; array with multiple values sets the correct values.
         /// </summary>
         [Fact]
         public void TestSetTaskItemIntArrayParamMultiple()
         {
-            ValidateTaskParameterArray("TaskItemIntArrayParam", "10;20;30", new Microsoft.Build.Utilities.TaskItem<int>[] {
-                new Microsoft.Build.Utilities.TaskItem<int>(10),
-                new Microsoft.Build.Utilities.TaskItem<int>(20),
-                new Microsoft.Build.Utilities.TaskItem<int>(30)
-            });
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-1.txt" : "/tmp/typed-item-1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-2.txt" : "/tmp/typed-item-2.txt";
+            string path3 = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-3.txt" : "/tmp/typed-item-3.txt";
+
+            ValidateTaskParameterArray(
+                "TaskItemIntArrayParam",
+                $"{path1};{path2};{path3}",
+                new Microsoft.Build.Utilities.TaskItem<AbsolutePath>[]
+                {
+                    new Microsoft.Build.Utilities.TaskItem<AbsolutePath>(new AbsolutePath(path1)),
+                    new Microsoft.Build.Utilities.TaskItem<AbsolutePath>(new AbsolutePath(path2)),
+                    new Microsoft.Build.Utilities.TaskItem<AbsolutePath>(new AbsolutePath(path3))
+                });
         }
 
         /// <summary>
@@ -1461,38 +1474,44 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestOutputTaskItemIntToItem()
         {
-            SetTaskParameter("TaskItemIntParam", "42");
-            ValidateOutputItem("TaskItemIntOutput", "42");
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-output.txt" : "/tmp/typed-item-output.txt";
+            SetTaskParameter("TaskItemIntParam", absolutePath);
+            ValidateOutputItem("TaskItemIntOutput", absolutePath);
         }
 
         /// <summary>
-        /// Validate that a TaskItem&lt;int&gt; output to a property produces the correct evaluated value.
+        /// Validate that a TaskItem&lt;AbsolutePath&gt; output to a property produces the correct evaluated value.
         /// </summary>
         [Fact]
         public void TestOutputTaskItemIntToProperty()
         {
-            SetTaskParameter("TaskItemIntParam", "42");
-            ValidateOutputProperty("TaskItemIntOutput", "42");
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-output.txt" : "/tmp/typed-item-output.txt";
+            SetTaskParameter("TaskItemIntParam", absolutePath);
+            ValidateOutputProperty("TaskItemIntOutput", absolutePath);
         }
 
         /// <summary>
-        /// Validate that a TaskItem&lt;int&gt; array output to items produces the correct evaluated includes.
+        /// Validate that a TaskItem&lt;AbsolutePath&gt; array output to items produces the correct evaluated includes.
         /// </summary>
         [Fact]
         public void TestOutputTaskItemIntArrayToItems()
         {
-            SetTaskParameter("TaskItemIntArrayParam", "42;99");
-            ValidateOutputItems("TaskItemIntArrayOutput", new string[] { "42", "99" });
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-output-1.txt" : "/tmp/typed-item-output-1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-output-2.txt" : "/tmp/typed-item-output-2.txt";
+            SetTaskParameter("TaskItemIntArrayParam", $"{path1};{path2}");
+            ValidateOutputItems("TaskItemIntArrayOutput", [path1, path2]);
         }
 
         /// <summary>
-        /// Validate that a TaskItem&lt;int&gt; array output to a property produces the correct semi-colon-delimited evaluated value.
+        /// Validate that a TaskItem&lt;AbsolutePath&gt; array output to a property produces the correct semi-colon-delimited evaluated value.
         /// </summary>
         [Fact]
         public void TestOutputTaskItemIntArrayToProperty()
         {
-            SetTaskParameter("TaskItemIntArrayParam", "42;99");
-            ValidateOutputProperty("TaskItemIntArrayOutput", "42;99");
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-output-1.txt" : "/tmp/typed-item-output-1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\typed-item-output-2.txt" : "/tmp/typed-item-output-2.txt";
+            SetTaskParameter("TaskItemIntArrayParam", $"{path1};{path2}");
+            ValidateOutputProperty("TaskItemIntArrayOutput", $"{path1};{path2}");
         }
 
         #endregion
