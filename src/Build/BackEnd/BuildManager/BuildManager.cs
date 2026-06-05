@@ -1421,7 +1421,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            Experimental.MSBuildClient.ShutdownServer(CancellationToken.None);
+            Microsoft.Build.Server.MSBuildClient.ShutdownServer(CancellationToken.None);
 
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();

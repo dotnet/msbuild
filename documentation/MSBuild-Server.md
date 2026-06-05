@@ -7,6 +7,8 @@ MSBuild Server nodes accept build requests from clients and use worker nodes in 
 The primary ways to use MSBuild are via Visual Studio and via the CLI using the `dotnet build`/`dotnet msbuild` commands. MSBuild Server is not supported in Visual Studio because Visual Studio itself works like MSBuild Server. For the CLI, the server functionality is enabled by default and can be disabled by setting the `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER` environment variable to value `1`.
 To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
+The public entry points for hosting the server live in the `Microsoft.Build.Server` namespace (`MSBuildClient`, `MSBuildClientExitResult`, `MSBuildClientExitType`, and `OutOfProcServerNode`). These were previously in `Microsoft.Build.Experimental`.
+
 ## Communication protocol
 
 The server node uses same IPC approach as current worker nodes - named pipes. This solution allows to reuse existing code. When process starts, pipe with deterministic name is opened and waiting for commands. Client has following worfklow:

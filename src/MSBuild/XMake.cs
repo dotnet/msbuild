@@ -24,7 +24,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental;
+using Microsoft.Build.Server;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;

@@ -15,7 +15,7 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental
+namespace Microsoft.Build.Server
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
