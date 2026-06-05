@@ -670,7 +670,8 @@ public class EndToEndTests : IDisposable
                 },
                 checkCandidatePath));
 
-            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+            string projectCheckBuildLog = ExecBootstrapedMSBuildWithTestAttachments(
+                checkCandidatePath,
                 $"{Path.Combine(checkCandidatePath, $"CheckCandidate.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success, timeoutMilliseconds: 1200_0000);
             success.ShouldBeTrue();
 
@@ -838,7 +839,8 @@ public class EndToEndTests : IDisposable
             var checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
             AddCustomDataSourceToNugetConfig(checkCandidatePath);
 
-            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+            string projectCheckBuildLog = ExecBootstrapedMSBuildWithTestAttachments(
+                checkCandidatePath,
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n",
                 out bool successBuild, timeoutMilliseconds: timeoutInMilliseconds);
 
@@ -878,7 +880,8 @@ public class EndToEndTests : IDisposable
                 ruleToCustomConfig: null,
                 checkCandidatePath));
 
-            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+            string projectCheckBuildLog = ExecBootstrapedMSBuildWithTestAttachments(
+                checkCandidatePath,
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _, timeoutMilliseconds: timeoutInMilliseconds);
 
             projectCheckBuildLog.ShouldContain(expectedMessage);
@@ -907,7 +910,8 @@ public class EndToEndTests : IDisposable
                 ruleToCustomConfig: null,
                 checkCandidatePath));
 
-            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+            string projectCheckBuildLog = ExecBootstrapedMSBuildWithTestAttachments(
+                checkCandidatePath,
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
 
             success.ShouldBeTrue();
@@ -1005,6 +1009,42 @@ public class EndToEndTests : IDisposable
             doc.DocumentElement.AppendChild(packageSourceMapping);
 
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
+        }
+    }
+
+    private string ExecBootstrapedMSBuildWithTestAttachments(string workingDirectory, string msbuildParameters, out bool success, int timeoutMilliseconds)
+    {
+        string logDirectory = Path.Combine(workingDirectory, ".buildcheck-testlogs");
+        Directory.CreateDirectory(logDirectory);
+
+        string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
+        string logPrefix = $"BuildCheck_{timestamp}_{Guid.NewGuid():N}";
+        string binlogPath = Path.Combine(logDirectory, $"{logPrefix}.binlog");
+        string fullLogPath = Path.Combine(logDirectory, $"{logPrefix}.full.log");
+        string errorLogPath = Path.Combine(logDirectory, $"{logPrefix}.errors.log");
+
+        string commandLine = $"{msbuildParameters}" +
+            $" /bl:\"{binlogPath}\"" +
+            $" -flp:\"LogFile={fullLogPath};Verbosity=diagnostic;Encoding=UTF-8\"" +
+            $" -flp1:\"LogFile={errorLogPath};Verbosity=normal;ErrorsOnly\"";
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(commandLine, out success, timeoutMilliseconds: timeoutMilliseconds);
+
+        AttachFileToCurrentTest(binlogPath);
+        AttachFileToCurrentTest(fullLogPath);
+        AttachFileToCurrentTest(errorLogPath);
+
+        _env.Output.WriteLine($"Attached diagnostic logs:{Environment.NewLine}{binlogPath}{Environment.NewLine}{fullLogPath}{Environment.NewLine}{errorLogPath}");
+
+        return output;
+    }
+
+    private static void AttachFileToCurrentTest(string filePath)
+    {
+        if (File.Exists(filePath))
+        {
+            string mediaType = filePath.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase) ? "application/octet-stream" : "text/plain";
+            Xunit.TestContext.Current.AddAttachment(Path.GetFileName(filePath), File.ReadAllBytes(filePath), mediaType);
         }
     }
 
