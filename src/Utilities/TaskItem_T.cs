@@ -159,10 +159,8 @@ namespace Microsoft.Build.Utilities
             }
             else
             {
-                // For ITaskItem (non-ITaskItem2), we need to escape the value manually
-                // Since we don't have access to EscapingUtilities in Framework, we'll just set it directly
-                // This is acceptable because TaskItem<T> is primarily used with ITaskItem2 implementations
-                _backingItem.SetMetadata(metadataName, metadataValue);
+                var escapedValue = EscapingUtilities.Escape(metadataValue);
+                _backingItem.SetMetadata(metadataName, escapedValue);
             }
         }
 
