@@ -654,7 +654,7 @@ if ($flakyTests.Count -gt 0 -and $ghAvailable) {
     Write-Log "`n=== Step 4: Cross-referencing existing flaky-test issues ===" "Cyan"
     $savedPager = $env:GH_PAGER; $env:GH_PAGER = ""
     foreach ($test in $flakyTests) {
-        # Prefer the stable hidden marker, then fall back to the short test name.
+        # Prefer the stable visible key, then fall back to the short test name.
         $found = @()
         foreach ($q in @("flaky-test-id: $($test.TestName)", (($test.TestName -split '\.')[-1]))) {
             if ($q.Length -lt 5) { continue }

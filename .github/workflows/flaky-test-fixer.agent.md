@@ -214,9 +214,12 @@ qualifies **only if all** of these hold:
   ```bash
   gh pr list --repo dotnet/msbuild --state open --label flaky-test --json number,title,body,files --limit 100 > open-flaky-prs.json
   ```
-  Skip `T` if **any** of these appears in an open PR: the exact marker `<!-- flaky-test-id: <testName> -->`
-  (normalized `testName`); the string `#<NNNN>` referencing `T`'s tracking issue; or the **test
-  source file** you would edit (a path under `files`). An empty array (`[]`) is the **normal,
+  Skip `T` if **any** of these appears in an open PR: the visible key `flaky-test-id: <testName>`
+  (normalized `testName`) as a **complete line** in the body — a whole-line match, so a longer name
+  such as `<testName>Extended` does **not** spuriously cover `<testName>` — **or** the normalized
+  `<testName>` in the title; the string
+  `#<NNNN>` referencing `T`'s tracking issue; or the **test source file** you would edit (a path under
+  `files`). An empty array (`[]`) is the **normal,
   expected** result — most runs have no flaky-test PR in flight; do not treat `[]` as a failure or
   re-run the command to "double-check".
 
@@ -386,14 +389,18 @@ Each PR:
 
 - **Title:** the test's short name (the `[Flaky Test Fix] ` prefix is added automatically), e.g.
   `Microsoft.Build.Engine.UnitTests.SomeClass.SomeMethod`.
-- **Body must** start with the stable marker on its own line (so the detector and future fixer runs
-  detect this in-flight PR and don't double-act on the test), copied exactly with the normalized
-  `testName` (add the third line **only** when you removed the `[ActiveIssue]` via Step 5b):
+- **Body must** include the visible **flaky-test key** near the top (so the detector and future fixer
+  runs detect this in-flight PR and don't double-act on the test). A visible token survives gh-aw's
+  output sanitization; the old hidden `<!-- -->` markers did not. Render it as a bold label followed by
+  a fenced code block, using the normalized `testName` exactly:
+  ````
+  **Flaky-test key** (automated de-duplication — do not edit):
+  ```text
+  flaky-test-id: <testName>
   ```
-  <!-- flaky-test-id: <testName> -->
-  <!-- flaky-test-fix -->
-  <!-- flaky-test-unquarantine -->
-  ```
+  ````
+  If you removed the `[ActiveIssue]` via Step 5b, state that explicitly in the PR body prose (see
+  below) — do not rely on any hidden marker to convey it.
 - Then:
   - **Root cause:** the concrete test-only nondeterminism you identified.
   - **Evidence:** the def-344 data that supports it — the dominant signature (message + the key stack
