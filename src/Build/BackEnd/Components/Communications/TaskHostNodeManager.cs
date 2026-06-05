@@ -59,6 +59,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Not used - task host nodes are not tracked in this manager's node-to-provider map.
+        /// </summary>
+        public void RemoveNode(int nodeId)
+        {
+            throw new NotSupportedException("not used");
+        }
+
+        /// <summary>
         /// Shuts down all of the connected managed nodes.
         /// </summary>
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>

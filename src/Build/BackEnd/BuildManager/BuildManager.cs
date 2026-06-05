@@ -2738,6 +2738,12 @@ namespace Microsoft.Build.Execution
             Assumed.True(_activeNodes.Contains(node), $"Unexpected shutdown from node {node} which shouldn't exist.");
             _activeNodes.Remove(node);
 
+            // Remove the node's provider mapping and context here, on the serialized work-queue thread under
+            // _syncLock, rather than eagerly on the pipe read/IO thread. This guarantees node teardown never
+            // races a concurrent scheduler SendData (which also runs under _syncLock), eliminating the
+            // "Invalid node id specified" / "does not have a provider" internal errors. See dotnet/msbuild#12438.
+            _nodeManager!.RemoveNode(node);
+
             if (shutdownPacket.Reason != NodeShutdownReason.Requested)
             {
                 if (shutdownPacket.Reason == NodeShutdownReason.ConnectionFailed)
