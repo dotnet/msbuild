@@ -931,4 +931,73 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldNotContain("FileInfo");
         task7[0].GetMessage().ShouldNotContain("DirectoryInfo");
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Fix #5: Restrict to ValueTypeParser-supported types only
+    // ═══════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task GuidParse_FromItemSpec_NoDiagnostic()
+    {
+        // Guid is not supported by ValueTypeParser, so no diagnostic should be emitted.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public ITaskItem Item { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var id = Guid.Parse(Item.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+    }
+
+    [Fact]
+    public async Task TimeSpanParse_FromItemSpec_NoDiagnostic()
+    {
+        // TimeSpan is not supported by ValueTypeParser, so no diagnostic should be emitted.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public ITaskItem Item { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var ts = TimeSpan.Parse(Item.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+    }
+
+    [Fact]
+    public async Task IntParse_FromItemSpec_StillProducesDiagnostic()
+    {
+        // int is supported by ValueTypeParser, so the diagnostic should still fire.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public ITaskItem Item { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var n = int.Parse(Item.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+    }
 }

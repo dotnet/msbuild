@@ -534,16 +534,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// <summary>
         /// Determines the parsed target type from a Parse/TryParse/Convert method call.
         /// Returns the simple type name suitable for ITaskItem&lt;T&gt; suggestion, or null if not a recognized parse call.
+        /// Only returns suggestions for types supported by ValueTypeParser.
         /// </summary>
         private static string? GetParsedTypeFromMethod(IMethodSymbol method)
         {
             // Static Parse/TryParse on value types: int.Parse, bool.Parse, etc.
+            // Restrict to types supported by ValueTypeParser to avoid suggesting unsupported types like Guid.
             if ((method.Name == "Parse" || method.Name == "TryParse") &&
                 method.IsStatic &&
                 method.ContainingType is not null &&
                 method.ContainingType.IsValueType)
             {
-                return method.ContainingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+                string typeName = method.ContainingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+                return s_supportedValueTypeNames.Contains(typeName) ? typeName : null;
             }
 
             // Convert.ToXxx methods
@@ -571,6 +574,28 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             return null;
         }
+
+        /// <summary>
+        /// Value type names (as minimal C# names) that ValueTypeParser supports.
+        /// Only these types should be suggested by the analyzer.
+        /// </summary>
+        private static readonly System.Collections.Generic.HashSet<string> s_supportedValueTypeNames =
+            new(System.StringComparer.Ordinal)
+            {
+                "bool",
+                "char",
+                "byte",
+                "sbyte",
+                "short",
+                "ushort",
+                "int",
+                "uint",
+                "long",
+                "ulong",
+                "float",
+                "double",
+                "decimal",
+            };
 
         /// <summary>
         /// Checks if the given operation traces back (with at most one level of local indirection)
