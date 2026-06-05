@@ -32,5 +32,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task input property has a relative default path that should be initialized in Execute() where TaskEnvironment can root it.</summary>
         public const string InitializeRelativeDefaultInExecute = "MSBuildTask0008";
+
+        /// <summary>Task property uses ITaskItem&lt;T&gt; with a type argument not supported by ValueTypeParser.</summary>
+        public const string UnsupportedTaskItemType = "MSBuildTask0009";
     }
 }

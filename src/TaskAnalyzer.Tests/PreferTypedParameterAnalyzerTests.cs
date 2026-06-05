@@ -1424,4 +1424,27 @@ public class PreferTypedParameterAnalyzerTests
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
+
+    [Fact]
+    public async Task DateTimeParse_FromItemSpec_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+            {
+                public ITaskItem Item { get; set; } = null!;
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var timestamp = DateTime.Parse(Item.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+        diags[0].GetMessage().ShouldContain("DateTime");
+    }
 }

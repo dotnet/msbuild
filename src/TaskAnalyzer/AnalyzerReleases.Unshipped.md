@@ -10,3 +10,4 @@ MSBuildTask0005 | MSBuild.TaskAuthoring | Warning | Transitive unsafe API usage 
 MSBuildTask0006 | MSBuild.TaskAuthoring | Info | Prefer typed path parameter (AbsolutePath/FileInfo/DirectoryInfo) over string (code fix available)
 MSBuildTask0007 | MSBuild.TaskAuthoring | Info | Prefer ITaskItem<T> over manual ItemSpec parsing (code fix available)
 MSBuildTask0008 | MSBuild.TaskAuthoring | Info | Initialize a relative default path in Execute() so TaskEnvironment can root it when the property is retyped (code fix available)
+MSBuildTask0009 | MSBuild.TaskAuthoring | Warning | ITaskItem<T> used with a type argument T that ValueTypeParser cannot parse at runtime
