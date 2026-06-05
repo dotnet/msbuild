@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -19,64 +20,20 @@ namespace Microsoft.Build.BackEnd
         /// (AbsolutePath, FileInfo, or DirectoryInfo).
         /// </summary>
         internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
-        {
-            if (!parameterType.IsGenericType)
-            {
-                return false;
-            }
-
-            Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (!string.Equals(genericTypeDefinition.FullName, genericTaskItemTypeDefinitionFullName, StringComparison.Ordinal))
-            {
-                return false;
-            }
-
-            Type[] genericArguments = parameterType.GetGenericArguments();
-            if (genericArguments.Length != 1)
-            {
-                return false;
-            }
-
-            Type typeArg = genericArguments[0];
-            return typeArg == typeof(AbsolutePath) || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
-        }
+            => TaskItemTypeHelper.IsPathLikeTaskItemOfT(parameterType, genericTaskItemTypeDefinitionFullName);
 
         /// <summary>
         /// Checks if a type is ITaskItem&lt;T&gt; where T is path-like.
         /// </summary>
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)
-            => IsPathLikeTaskItemOfT(parameterType, typeof(ITaskItem<>).FullName);
+            => TaskItemTypeHelper.IsPathLikeITaskItemOfT(parameterType);
 
         /// <summary>
         /// Creates an instance of TaskItem&lt;T&gt; (or a provided TaskItem implementation for ITaskItem&lt;T&gt;)
         /// from an <see cref="ITaskItem"/>.
         /// </summary>
         internal static object CreateTaskItemOfT(Type taskItemType, ITaskItem item, Type taskItemImplementationGenericType)
-        {
-            // Get the T from TaskItem<T> / ITaskItem<T>.
-            Type[] genericArguments = taskItemType.GetGenericArguments();
-            Type valueType = genericArguments[0];
-
-            Type genericTypeDefinition = taskItemType.GetGenericTypeDefinition();
-            Type constructedType = genericTypeDefinition == typeof(ITaskItem<>)
-                ? taskItemImplementationGenericType.MakeGenericType(valueType)
-                : genericTypeDefinition.MakeGenericType(valueType);
-            ConstructorInfo constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
-            if (constructor is null)
-            {
-                throw new InvalidOperationException($"Type '{constructedType.FullName}' does not have a constructor that takes ITaskItem.");
-            }
-
-            try
-            {
-                return constructor.Invoke(new object[] { item });
-            }
-            catch (TargetInvocationException e) when (e.InnerException is not null)
-            {
-                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(e.InnerException).Throw();
-                throw;
-            }
-        }
+            => TaskItemTypeHelper.CreateTaskItemOfT(taskItemType, item, taskItemImplementationGenericType);
 
         /// <summary>
         /// Is the parameter type a valid scalar input value

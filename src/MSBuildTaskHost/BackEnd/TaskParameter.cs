@@ -5,8 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Security;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.TaskHost.Resources;
 using Microsoft.Build.TaskHost.Utilities;
 
@@ -33,12 +35,14 @@ internal enum TaskParameterType
     PrimitiveTypeArray,
 
     /// <summary>
-    /// Parameter is a value type.  Note:  Must be <see cref="IConvertible"/>.
+    /// Parameter is a non-primitive value serialized as a string (for example a value type
+    /// such as <see cref="AbsolutePath"/>, or <see cref="FileInfo"/>/<see cref="DirectoryInfo"/>).
     /// </summary>
     ValueType,
 
     /// <summary>
-    /// Parameter is an array of value types.  Note:  Must be <see cref="IConvertible"/>.
+    /// Parameter is an array of non-primitive values serialized as strings (for example an array
+    /// of value types, or <see cref="FileInfo"/>[]/<see cref="DirectoryInfo"/>[]).
     /// </summary>
     ValueTypeArray,
 
@@ -129,7 +133,9 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
 
                 _wrappedParameter = taskItemArrayParameter;
             }
-            else if (wrappedParameterType.GetElementType().IsValueType)
+            else if (wrappedParameterType.GetElementType().IsValueType
+                || wrappedParameterType.GetElementType() == typeof(FileInfo)
+                || wrappedParameterType.GetElementType() == typeof(DirectoryInfo))
             {
                 _parameterType = TaskParameterType.ValueTypeArray;
                 _wrappedParameter = wrappedParameter;
@@ -164,7 +170,9 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
                 _parameterType = TaskParameterType.ITaskItem;
                 _wrappedParameter = new TaskParameterTaskItem((ITaskItem)wrappedParameter);
             }
-            else if (wrappedParameterType.IsValueType)
+            else if (wrappedParameterType.IsValueType
+                || wrappedParameterType == typeof(FileInfo)
+                || wrappedParameterType == typeof(DirectoryInfo))
             {
                 _parameterType = TaskParameterType.ValueType;
                 _wrappedParameter = wrappedParameter;
@@ -452,9 +460,8 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
     /// Serializes or deserializes the value type instance wrapped by this <see cref="TaskParameter"/>.
     /// </summary>
     /// <remarks>
-    /// The value type is converted to/from string using the <see cref="Convert"/> class. Note that we require
-    /// task parameter types to be <see cref="IConvertible"/> so this conversion is guaranteed to work for parameters
-    /// that have made it this far.
+    /// The value is converted to a string on the write side using <see cref="TaskParameterValueStringConverter.ToString"/>,
+    /// the same canonical conversion used by the in-process engine for out-of-proc parity.
     /// </remarks>
     private void TranslateValueType(ITranslator translator)
     {
@@ -462,7 +469,7 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
 
         if (translator.Mode == TranslationDirection.WriteToStream)
         {
-            valueString = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+            valueString = TaskParameterValueStringConverter.ToString(_wrappedParameter);
         }
 
         translator.Translate(ref valueString);
@@ -493,7 +500,7 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
 
             for (int i = 0; i < length; i++)
             {
-                string? valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                string? valueString = TaskParameterValueStringConverter.ToString(array.GetValue(i));
                 translator.Translate(ref valueString);
             }
         }

@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd
         /// Serializes or deserializes the value instance wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
         /// <remarks>
-        /// The value is converted to a string on the write side using <see cref="ValueTypeParser.ToString"/>,
+        /// The value is converted to a string on the write side using <see cref="TaskParameterValueStringConverter.ToString"/>,
         /// the same canonical conversion the in-process engine uses when gathering task outputs
         /// (see TaskExecutionHost.GetValueOutputs). This guarantees identical string output across the
         /// in-process and out-of-process task host paths. The value is not converted back to its original
@@ -491,7 +491,7 @@ namespace Microsoft.Build.BackEnd
             string valueString = null;
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                valueString = ValueTypeParser.ToString(_wrappedParameter);
+                valueString = TaskParameterValueStringConverter.ToString(_wrappedParameter);
             }
 
             translator.Translate(ref valueString);
@@ -507,7 +507,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <remarks>
         /// The array is assumed to be non-null. Each element is converted to a string on the write side
-        /// using <see cref="ValueTypeParser.ToString"/>, the same canonical conversion the in-process engine
+        /// using <see cref="TaskParameterValueStringConverter.ToString"/>, the same canonical conversion the in-process engine
         /// uses when gathering task outputs.
         /// </remarks>
         private void TranslateValueTypeArray(ITranslator translator)
@@ -521,7 +521,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < length; i++)
                 {
-                    string valueString = ValueTypeParser.ToString(array.GetValue(i));
+                    string valueString = TaskParameterValueStringConverter.ToString(array.GetValue(i));
                     translator.Translate(ref valueString);
                 }
             }
