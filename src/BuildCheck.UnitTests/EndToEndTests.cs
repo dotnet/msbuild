@@ -945,7 +945,7 @@ public class EndToEndTests : IDisposable
         var nugetTemplateName = "nugetTemplate.config";
         var nugetTemplatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate", nugetTemplateName);
         File.Copy(nugetTemplatePath, Path.Combine(workFolder.Path, nugetTemplateName));
-        AddCustomDataSourceToNugetConfig(workFolder.Path);
+        AddCustomDataSourceToNugetConfig(workFolder.Path, isolateGlobalPackages: false);
 
         var ExecuteDotnetCommand = (string parameters) =>
         {
@@ -966,7 +966,7 @@ public class EndToEndTests : IDisposable
     }
 #endif
 
-    private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
+    private void AddCustomDataSourceToNugetConfig(string checkCandidatePath, bool isolateGlobalPackages = true)
     {
         var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
 
@@ -980,6 +980,7 @@ public class EndToEndTests : IDisposable
         if (doc.DocumentElement != null)
         {
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
+            XmlNode? configNode = doc.SelectSingleNode("//configuration/config");
 
             // The test packages are generated during the test project build and saved in CustomChecks folder.
             string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomChecks");
@@ -987,6 +988,14 @@ public class EndToEndTests : IDisposable
 
             // MSBuild packages are placed in a separate folder, so we need to add it as a package source.
             AddPackageSource(doc, packageSourcesNode, "MSBuildTestPackagesSource", RunnerUtilities.ArtifactsLocationAttribute.ArtifactsLocation);
+
+            if (isolateGlobalPackages)
+            {
+                // Use a test-local package cache to avoid stale global cache collisions for fixed-version custom test packages.
+                string localPackagesPath = Path.Combine(checkCandidatePath, ".packages");
+                Directory.CreateDirectory(localPackagesPath);
+                AddConfigSetting(doc, configNode, "globalPackagesFolder", localPackagesPath);
+            }
 
             // PackageSourceMapping is enabled at the repository level. For the test packages we need to add the PackageSourceMapping as well.
             XmlNode? packageSourceMapping = doc.CreateElement("packageSourceMapping");
@@ -997,6 +1006,16 @@ public class EndToEndTests : IDisposable
 
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
         }
+    }
+
+    private void AddConfigSetting(XmlDocument doc, XmlNode? configNode, string key, string value)
+    {
+        configNode ??= doc.DocumentElement?.AppendChild(doc.CreateElement("config"));
+
+        XmlElement addNode = doc.CreateElement("add");
+        PopulateXmlAttribute(doc, addNode, "key", key);
+        PopulateXmlAttribute(doc, addNode, "value", value);
+        configNode!.AppendChild(addNode);
     }
 
     private void AddPackageSourceMapping(XmlDocument doc, XmlNode? packageSourceMapping, string key, string[] packagePatterns)
