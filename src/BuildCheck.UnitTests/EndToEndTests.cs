@@ -1014,11 +1014,16 @@ public class EndToEndTests : IDisposable
 
     private string ExecBootstrapedMSBuildWithTestAttachments(string workingDirectory, string msbuildParameters, out bool success, int timeoutMilliseconds)
     {
-        string logDirectory = Path.Combine(workingDirectory, ".buildcheck-testlogs");
+        string logDirectory = Path.Combine(
+            BuildCheckUnitTestsConstants.RepoRoot,
+            "artifacts",
+            "TestResults",
+            "BuildCheckAttachments");
         Directory.CreateDirectory(logDirectory);
 
         string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
-        string logPrefix = $"BuildCheck_{timestamp}_{Guid.NewGuid():N}";
+        string workingDirectoryName = Path.GetFileName(workingDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        string logPrefix = $"BuildCheck_{workingDirectoryName}_{timestamp}_{Guid.NewGuid():N}";
         string binlogPath = Path.Combine(logDirectory, $"{logPrefix}.binlog");
         string fullLogPath = Path.Combine(logDirectory, $"{logPrefix}.full.log");
         string errorLogPath = Path.Combine(logDirectory, $"{logPrefix}.errors.log");
