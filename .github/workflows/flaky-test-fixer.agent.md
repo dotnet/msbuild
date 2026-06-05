@@ -63,13 +63,12 @@ safe-outputs:
     # Do not append a closing `Fixes #N` to the PR — the quarantine is intentionally retained and the
     # tracking issue must stay open until the detector un-quarantines after def 344 proves it green.
     auto-close-issue: false
-    # Exclusive allowlist: this workflow only ever edits TEST sources (all msbuild xUnit test projects
-    # live under `*UnitTests*` / `*.Tests` directories). Product code, root manifests, and `.github/**`
-    # are all refused outright — a far stronger guard than `src/**/*.cs`, which would also permit
-    # product code. Combined with the per-fix "edit only the test's own file" rule in the body.
-    allowed-files:
-      - "src/**/*UnitTests*/**/*.cs"
-      - "src/**/*.Tests/**/*.cs"
+    # This workflow only ever edits TEST sources. There is intentionally **no** `allowed-files`
+    # allowlist: a directory-glob allowlist produced false negatives on valid test files (e.g.
+    # `src/Build.UnitTests/.../Preprocessor_Tests.cs`), silently blocking legitimate fixes and failing
+    # the run. The product-code guard is instead provided by `excluded-files` + `protected-files`, the
+    # body's "edit only the test's own file" rule (+ a git diff check), and mandatory human review
+    # before any PR can merge.
     # Belt-and-braces enforcement of "never touch .github/**" (also enforced in the prompt + a git diff check).
     excluded-files:
       - ".github/**"
