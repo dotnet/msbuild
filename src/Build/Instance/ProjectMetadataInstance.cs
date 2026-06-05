@@ -62,7 +62,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal ProjectMetadataInstance(string name, string escapedValue, bool allowItemSpecModifiers)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             if (allowItemSpecModifiers)
             {
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Execution
         void ITranslatable.Translate(ITranslator translator)
         {
             // Read implementation is directly in the constructor so that fields can be read-only
-            ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
+            Assumed.Equal(translator.Mode, TranslationDirection.WriteToStream, "write only");
 
             string mutableName = _name;
             string mutableValue = _escapedValue;
@@ -256,7 +256,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal static void VerifyThrowReservedNameAllowItemSpecModifiers(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
             foreach (string reservedName in XMakeElements.ReservedItemNames)
             {
                 if (reservedName.Length == name.Length && reservedName[0] == name[0])

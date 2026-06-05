@@ -192,7 +192,7 @@ internal static partial class FileUtilities
 
             string file = Path.Combine(directory, $"{fileName}{extension}");
 
-            FrameworkErrorUtilities.VerifyThrow(!FileSystems.Default.FileExists(file), "Guid should be unique");
+            Assumed.False(FileSystems.Default.FileExists(file), "Guid should be unique");
 
             if (createFile)
             {

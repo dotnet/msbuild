@@ -18,7 +18,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     {
         private ProjectCacheException()
         {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
+            Assumed.Unreachable();
         }
 
         private ProjectCacheException(
@@ -28,8 +28,8 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string errorCode)
             : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
+            Assumed.NotNullOrEmpty(message, "Need error message.");
+            Assumed.NotNullOrEmpty(errorCode, "Must specify the error message code.");
 
             HasBeenLoggedByProjectCache = hasBeenLoggedByProjectCache;
             ErrorCode = errorCode;
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string messageResourceName,
             params string[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
+            Assumed.NotNull(messageResourceName, "Need error message.");
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
 
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string messageResourceName,
             params string[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
+            Assumed.NotNull(messageResourceName, "Need error message.");
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
 
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string messageResourceName,
             params string[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
+            Assumed.NotNull(messageResourceName, "Need error message.");
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out var errorCode, out _, messageResourceName, messageArgs);
 

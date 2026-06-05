@@ -91,6 +91,50 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        [RequiresSymbolicLinksFact]
+        public void ShouldNotSkipSymlinkDirectoryWhenProjectDirectoryIsPrefixedWithSymlinkTargetName()
+        {
+            TransientTestFolder rootFolder = _env.CreateFolder();
+
+            string targetFolderName = "target";
+            string fileAName = "A.cs";
+            string targetSubFolderName = "foo";
+            string fileBName = "B.cs";
+            TransientTestFolder targetFolder = _env.CreateFolder(Path.Combine(rootFolder.Path, targetFolderName));
+            _env.CreateFile(targetFolder, fileName: fileAName);
+            TransientTestFolder targetSubFolder = _env.CreateFolder(Path.Combine(targetFolder.Path, targetSubFolderName));
+            _env.CreateFile(targetSubFolder, fileName: fileBName);
+
+            TransientTestFolder projectFolder = _env.CreateFolder(Path.Combine(rootFolder.Path, $"{targetFolderName}Test"));
+            string symlinkName = "mySymlink";
+            string symlinkPath = Path.Combine(projectFolder.Path, symlinkName);
+            string include = Path.Combine(symlinkName, "**", "*.cs");
+
+            string[] expectedFiles =
+            [
+                Path.Combine(symlinkName, fileAName),
+                Path.Combine(symlinkName, targetSubFolderName, fileBName)
+            ];
+
+            try
+            {
+                Directory.CreateSymbolicLink(symlinkPath, targetFolder.Path);
+                string[] fileMatches = FileMatcher.Default.GetFiles(projectFolder.Path, include).FileList;
+                fileMatches.Length.ShouldBe(expectedFiles.Length);
+                foreach (var item in fileMatches)
+                {
+                    expectedFiles.ShouldContain(item);
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(symlinkPath))
+                {
+                    Directory.Delete(symlinkPath);
+                }
+            }
+        }
 #endif
 
         [Theory]

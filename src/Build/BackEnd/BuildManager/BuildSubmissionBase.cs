@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
@@ -36,7 +35,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         protected internal BuildSubmissionBase(BuildManager buildManager, int submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildManager);
+            ArgumentNullException.ThrowIfNull(buildManager);
 
             BuildManager = buildManager;
             SubmissionId = submissionId;

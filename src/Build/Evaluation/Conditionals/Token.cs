@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 #nullable disable
 
@@ -90,16 +89,16 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal Token(TokenType type, string tokenString, bool expandable)
         {
-            ErrorUtilities.VerifyThrow(
-                type == TokenType.Property ||
-                type == TokenType.String ||
-                type == TokenType.Numeric ||
-                type == TokenType.ItemList ||
-                type == TokenType.ItemMetadata ||
-                type == TokenType.Function,
+            Assumed.True(
+                type is TokenType.Property or
+                        TokenType.String or
+                        TokenType.Numeric or
+                        TokenType.ItemList or
+                        TokenType.ItemMetadata or
+                        TokenType.Function,
                 "Unexpected token type");
 
-            ErrorUtilities.VerifyThrowInternalNull(tokenString);
+            Assumed.NotNull(tokenString);
 
             _tokenType = type;
             _tokenString = tokenString;
@@ -127,49 +126,22 @@ namespace Microsoft.Build.Evaluation
         }
 
         internal string String
-        {
-            get
+            => _tokenString ?? _tokenType switch
             {
-                if (_tokenString != null)
-                {
-                    return _tokenString;
-                }
-
-                // Return a token string for
-                // an error message.
-                switch (_tokenType)
-                {
-                    case TokenType.Comma:
-                        return ",";
-                    case TokenType.LeftParenthesis:
-                        return "(";
-                    case TokenType.RightParenthesis:
-                        return ")";
-                    case TokenType.LessThan:
-                        return "<";
-                    case TokenType.GreaterThan:
-                        return ">";
-                    case TokenType.LessThanOrEqualTo:
-                        return "<=";
-                    case TokenType.GreaterThanOrEqualTo:
-                        return ">=";
-                    case TokenType.And:
-                        return "and";
-                    case TokenType.Or:
-                        return "or";
-                    case TokenType.EqualTo:
-                        return "==";
-                    case TokenType.NotEqualTo:
-                        return "!=";
-                    case TokenType.Not:
-                        return "!";
-                    case TokenType.EndOfInput:
-                        return null;
-                    default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        return null;
-                }
-            }
-        }
+                TokenType.Comma => ",",
+                TokenType.LeftParenthesis => "(",
+                TokenType.RightParenthesis => ")",
+                TokenType.LessThan => "<",
+                TokenType.GreaterThan => ">",
+                TokenType.LessThanOrEqualTo => "<=",
+                TokenType.GreaterThanOrEqualTo => ">=",
+                TokenType.And => "and",
+                TokenType.Or => "or",
+                TokenType.EqualTo => "==",
+                TokenType.NotEqualTo => "!=",
+                TokenType.Not => "!",
+                TokenType.EndOfInput => null,
+                _ => Assumed.Unreachable<string>(),
+            };
     }
 }
