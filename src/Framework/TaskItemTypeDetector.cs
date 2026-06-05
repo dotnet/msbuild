@@ -25,6 +25,11 @@ namespace Microsoft.Build.Shared
         internal static bool IsSupportedPathType(Type type)
             => type == typeof(AbsolutePath) || type == typeof(FileInfo) || type == typeof(DirectoryInfo);
 
+        /// <summary>
+        /// Checks if <paramref name="parameterType"/> is the generic TaskItem type identified by
+        /// <paramref name="genericTaskItemTypeDefinitionFullName"/> where <c>T</c> is a supported value
+        /// type (including <see cref="AbsolutePath"/>) or <see cref="FileInfo"/>/<see cref="DirectoryInfo"/>.
+        /// </summary>
         internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
         {
             if (!parameterType.IsGenericType)
@@ -45,7 +50,7 @@ namespace Microsoft.Build.Shared
             }
 
             Type typeArg = genericArguments[0];
-            return IsSupportedPathType(typeArg);
+            return typeArg.IsValueType || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
         }
 
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)
