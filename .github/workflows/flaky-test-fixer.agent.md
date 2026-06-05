@@ -295,6 +295,12 @@ same PR **only if EVERY** condition below holds. If any is uncertain, **keep the
 take the default path — un-quarantining is normally the detector's job, so the bar here is deliberately
 high.
 
+- **Mechanistic fix, not a pattern-match.** You can state the **exact causal chain** from your change
+  to *why the dominant signature can no longer occur* (e.g. "the assert ran before the writer task
+  completed; awaiting it makes the value observed-after-write, so the `Expected X, got null` can't
+  recur"). The change targets that **mechanism**, not a symptom or a mask, and **preserves the test's
+  coverage**. If the best you can say is that it "should help", "is more robust", or merely matches a
+  known category, that is **not** enough — keep the quarantine.
 - **Fully-explained failures.** Your single dominant signature explains **essentially all** of the
   test's current def-344 failures. If there is **any** unexplained residual signature (a different
   message/stack that your fix does not address), do **not** un-quarantine — a "dominant" cause is not
