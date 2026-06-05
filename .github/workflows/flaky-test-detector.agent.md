@@ -247,7 +247,8 @@ benign `Malformed version:` warning to stderr; it is harmless — judge success 
 and the exit code, not by that line.)
 
 - **If a related issue is OPEN:** post an `add_comment` to that issue number with the **new** evidence
-  (latest sources, build URLs, dates, legs/TFMs). Do not open a duplicate.
+  (latest sources, build URLs, dates, legs/TFMs), rendering rolling build ids as markdown links to their
+  AzDO build results pages as described below. Do not open a duplicate.
 - **If a related issue exists but is CLOSED recently** (e.g. within ~30 days): do **not** open a
   duplicate. **First confirm the flake actually recurred *after* the issue was resolved** — the
   detector's look-back window (`-DaysBack`) routinely includes builds from *before* a fix landed, so
@@ -281,7 +282,11 @@ and the exit code, not by that line.)
     using the normalized `testName` exactly.
   - Then include an evidence summary: distinct sources (PRs + rolling builds), PR numbers, rolling
     build ids, affected legs/TFMs, assemblies, first/last seen, a representative error message, and
-    links to `sampleBuildUrl`. Provide the fully-qualified test name and the assembly so the separate
+    links to `sampleBuildUrl`. **Render every rolling build id as a markdown link** to its AzDO build
+    results page rather than as plain text — e.g. `[1430301](https://dev.azure.com/dnceng-public/public/_build/results?buildId=1430301)`.
+    Build the URL by taking the `sampleBuildUrl` form and substituting each build id into its
+    `buildId=<id>` query parameter, so the org/project path always matches the detector's own data.
+    Provide the fully-qualified test name and the assembly so the separate
     auto-fixer workflow (or a human) can locate it.
   - Add brief guidance: the test will be **quarantined** via `[ActiveIssue("<issue url>")]` (from
     `Microsoft.DotNet.XUnitV3Extensions`, namespace `Xunit`) — not `[Fact(Skip=...)]` — until the
