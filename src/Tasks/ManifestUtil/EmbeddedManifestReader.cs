@@ -4,6 +4,12 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+#if FEATURE_WINDOWSINTEROP
+using System.Runtime.Versioning;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.LibraryLoader;
+#endif
 
 #nullable disable
 
@@ -11,51 +17,76 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal class EmbeddedManifestReader
     {
-        private static readonly IntPtr s_id1 = new IntPtr(1);
         private Stream _manifest;
 
-        private EmbeddedManifestReader(string path)
+#if FEATURE_WINDOWSINTEROP
+        // The Win32 RT_MANIFEST resource type and the application-manifest resource id (1).
+        private const ushort RT_MANIFEST = 24;
+        private const nint Id1 = 1;
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private delegate BOOL EnumResNameDelegate(HMODULE hModule, PCWSTR lpType, PWSTR lpName, nint lParam);
+
+        private unsafe EmbeddedManifestReader(string path)
         {
-            IntPtr hModule = IntPtr.Zero;
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+
+            HMODULE hModule = default;
             try
             {
-                hModule = NativeMethods.LoadLibraryExW(path, IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
-                if (hModule == IntPtr.Zero)
+                hModule = PInvoke.LoadLibraryEx(path, LOAD_LIBRARY_FLAGS.LOAD_LIBRARY_AS_DATAFILE);
+                if (hModule.IsNull)
                 {
                     return;
                 }
-                NativeMethods.EnumResNameProc callback = EnumResNameCallback;
-                NativeMethods.EnumResourceNames(hModule, NativeMethods.RT_MANIFEST, callback, IntPtr.Zero);
+
+                // EnumResourceNames takes an unmanaged stdcall callback. Bridge a managed delegate to a
+                // function pointer (works on both .NET Framework and .NET Core) and keep it alive across the call.
+                EnumResNameDelegate callback = EnumResNameCallback;
+                var pCallback = (delegate* unmanaged[Stdcall]<HMODULE, PCWSTR, PWSTR, nint, BOOL>)Marshal.GetFunctionPointerForDelegate(callback);
+                PInvoke.EnumResourceNames(hModule, new PCWSTR((char*)RT_MANIFEST), pCallback, 0);
+                GC.KeepAlive(callback);
             }
             finally
             {
-                if (hModule != IntPtr.Zero)
+                if (!hModule.IsNull)
                 {
-                    NativeMethods.FreeLibrary(hModule);
+                    PInvoke.FreeLibrary(hModule);
                 }
             }
         }
 
-        private bool EnumResNameCallback(IntPtr hModule, IntPtr pType, IntPtr pName, IntPtr param)
+        [SupportedOSPlatform("windows6.1")]
+        private unsafe BOOL EnumResNameCallback(HMODULE hModule, PCWSTR lpType, PWSTR lpName, nint lParam)
         {
-            if (pName != s_id1)
+            if ((nint)lpName.Value != Id1)
             {
                 return false; // only look for resources with ID=1
             }
-            IntPtr hResInfo = NativeMethods.FindResource(hModule, pName, NativeMethods.RT_MANIFEST);
-            if (hResInfo == IntPtr.Zero)
+            HRSRC hResInfo = PInvoke.FindResource(hModule, lpName, (PCWSTR)(char*)RT_MANIFEST);
+            if (hResInfo.IsNull)
             {
                 return false; // continue looking
             }
-            IntPtr hResource = NativeMethods.LoadResource(hModule, hResInfo);
-            NativeMethods.LockResource(hResource);
-            uint bufsize = NativeMethods.SizeofResource(hModule, hResInfo);
+            HGLOBAL hResource = PInvoke.LoadResource(hModule, hResInfo);
+            void* pData = PInvoke.LockResource(hResource);
+            uint bufsize = PInvoke.SizeofResource(hModule, hResInfo);
             var buffer = new byte[bufsize];
 
-            Marshal.Copy(hResource, buffer, 0, buffer.Length);
+            Marshal.Copy((IntPtr)pData, buffer, 0, buffer.Length);
             _manifest = new MemoryStream(buffer, false);
             return false; // found what we are looking for
         }
+#else
+        // Reading embedded Win32 manifest resources requires Windows interop, which is unavailable in
+        // source build. There is nothing to read here, so _manifest stays null and Read returns null.
+        private EmbeddedManifestReader(string path)
+        {
+        }
+#endif
 
         public static Stream Read(string path)
         {

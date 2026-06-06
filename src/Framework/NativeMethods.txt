@@ -24,6 +24,7 @@ DEBUG_PROC_DESC_NO_SESSION_ID
 DEBUG_PROC_DESC_NO_USER_NAME
 DefineDosDevice
 EndUpdateResource
+EnumResourceNames
 EOLE_AUTHENTICATION_CAPABILITIES
 FACILITY_CODE
 FILE_ACCESS_RIGHTS
@@ -130,9 +131,11 @@ S_OK
 SECURITY_ATTRIBUTES
 SetConsoleMode
 SetCurrentDirectory
+SetDllDirectory
 SetEnvironmentVariable
 SetFileTime
 SetThreadErrorMode
+SfcIsFileProtected
 SHGetKnownFolderPath
 SizeofResource
 STARTUPINFOW
