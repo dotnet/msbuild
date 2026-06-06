@@ -14,11 +14,18 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
+using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
+using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
+#endif
+
+// The CsWin32-generated COM types (ComScope, ITypeLib, TLIBATTR) only exist when
+// FEATURE_WINDOWSINTEROP is defined. That is implied by FEATURE_APPDOMAIN (net4x), but not by
+// the netstandard2.0 source-build leg, which compiles the !FEATURE_APPDOMAIN stub instead.
+#if FEATURE_APPDOMAIN
 using Windows.Win32.System.Com;
 
 using TYPELIBATTR = Windows.Win32.System.Com.TLIBATTR;
-using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
-using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 #endif
 
 using Microsoft.Build.Framework;
