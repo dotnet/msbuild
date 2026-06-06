@@ -1,13 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Runtime.Versioning;
+#if FEATURE_WINDOWSINTEROP
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Resources;
-using System.Runtime.Versioning;
-#if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
@@ -21,6 +21,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [SupportedOSPlatform("windows")]
     internal class ComImporter
     {
+#if FEATURE_WINDOWSINTEROP
         private readonly OutputMessageCollection _outputMessages;
         private readonly string _outputDisplayName;
         private readonly ResourceManager _resources = new ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", System.Reflection.Assembly.GetExecutingAssembly());
@@ -41,13 +42,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             "Version",
             "VersionIndependentProgID",
         };
+#endif
 
         public unsafe ComImporter(string path, OutputMessageCollection outputMessages, string outputDisplayName)
         {
+#if FEATURE_WINDOWSINTEROP
             _outputMessages = outputMessages;
             _outputDisplayName = outputDisplayName;
 
-#if FEATURE_WINDOWSINTEROP
             // ComImporter relies on Windows-only type-library COM APIs. This guard short-circuits non-Windows
             // runs and raises the platform-compatibility analyzer floor to windows6.1 for the CsWin32 calls
             // below. The sole caller, FileReference.ImportComComponent, is [SupportedOSPlatform("windows")].
@@ -132,6 +134,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
         }
 
+#if FEATURE_WINDOWSINTEROP
         private void CheckForUnknownSubKeys(RegistryKey key)
         {
             CheckForUnknownSubKeys(key, []);
@@ -274,12 +277,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             info = new ClassInfo(progid, threadingModel);
             return succeeded;
         }
+#endif
 
         public bool Success { get; } = true;
 
         public ComClass[] ComClasses { get; }
         public TypeLib TypeLib { get; }
 
+#if FEATURE_WINDOWSINTEROP
         private class ClassInfo
         {
             internal readonly string Progid;
@@ -290,5 +295,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 ThreadingModel = threadingModel;
             }
         }
+#endif
     }
 }

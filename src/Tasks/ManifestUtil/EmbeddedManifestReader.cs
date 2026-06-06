@@ -1,10 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.IO;
-using System.Runtime.InteropServices;
 #if FEATURE_WINDOWSINTEROP
+using System;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -17,9 +17,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal class EmbeddedManifestReader
     {
+#if FEATURE_WINDOWSINTEROP
         private Stream _manifest;
 
-#if FEATURE_WINDOWSINTEROP
         // The Win32 RT_MANIFEST resource type and the application-manifest resource id (1).
         private const ushort RT_MANIFEST = 24;
         private const nint Id1 = 1;
@@ -80,13 +80,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             _manifest = new MemoryStream(buffer, false);
             return false; // found what we are looking for
         }
-#else
-        // Reading embedded Win32 manifest resources requires Windows interop, which is unavailable in
-        // source build. There is nothing to read here, so _manifest stays null and Read returns null.
-        private EmbeddedManifestReader(string path)
-        {
-        }
-#endif
 
         public static Stream Read(string path)
         {
@@ -107,5 +100,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Util.WriteLog($"EmbeddedManifestReader.Read t={Environment.TickCount - t1}");
             return r._manifest;
         }
+#else
+        // Reading embedded Win32 manifest resources requires Windows interop, which is unavailable in
+        // source build (no CsWin32-generated PInvoke surface), so there is nothing to read.
+        public static Stream Read(string path) => null;
+#endif
     }
 }
