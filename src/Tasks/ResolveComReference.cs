@@ -14,9 +14,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Windows.Win32.System.Com;
 
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+using TYPELIBATTR = Windows.Win32.System.Com.TLIBATTR;
 using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 #endif
@@ -363,7 +363,7 @@ namespace Microsoft.Build.Tasks
                 var moduleList = new List<ITaskItem>();
                 var resolvedReferenceList = new List<ITaskItem>();
 
-                var dependencyWalker = new ComDependencyWalker(Marshal.ReleaseComObject);
+                var dependencyWalker = new ComDependencyWalker();
                 bool allReferencesResolvedSuccessfully = true;
                 for (int pass = 0; pass < 4; pass++)
                 {
@@ -1666,7 +1666,11 @@ namespace Microsoft.Build.Tasks
                 Log.LogMessageFromResources(MessageImportance.Low, "ResolveComReference.ScanningDependencies", reference.SourceItemSpec);
             }
 
-            dependencyWalker.AnalyzeTypeLibrary(reference.typeLibPointer);
+            unsafe
+            {
+                using ComScope<ITypeLib> typeLibScope = reference.typeLibPointer.GetInterface();
+                dependencyWalker.AnalyzeTypeLibrary(typeLibScope.Pointer);
+            }
 
             if (!Silent)
             {
@@ -1745,15 +1749,15 @@ namespace Microsoft.Build.Tasks
             var attr = new TYPELIBATTR
             {
                 guid = new Guid(taskItem.GetMetadata(ComReferenceItemMetadataNames.guid)),
-                wMajorVerNum = short.Parse(
+                wMajorVerNum = ushort.Parse(
                     taskItem.GetMetadata(ComReferenceItemMetadataNames.versionMajor),
                     NumberStyles.Integer,
                     CultureInfo.InvariantCulture),
-                wMinorVerNum = short.Parse(
+                wMinorVerNum = ushort.Parse(
                     taskItem.GetMetadata(ComReferenceItemMetadataNames.versionMinor),
                     NumberStyles.Integer,
                     CultureInfo.InvariantCulture),
-                lcid = int.Parse(
+                lcid = uint.Parse(
                     taskItem.GetMetadata(ComReferenceItemMetadataNames.lcid),
                     NumberStyles.Integer,
                     CultureInfo.InvariantCulture)
