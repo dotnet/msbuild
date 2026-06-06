@@ -946,8 +946,10 @@ namespace Microsoft.Build.Tasks
 
         // Lazily-activated InternetSecurityManager COM object. Stored agile so the same
         // pointer can be reused from any thread within the build; one CoCreate per
-        // process is enough.
-        private static AgileComPointer<IInternetSecurityManager> s_internetSecurityManager;
+        // process is enough. volatile gives the double-checked lock in IsDangerous safe
+        // publication, so a second thread cannot observe the reference before the GIT
+        // cookie set in the AgileComPointer constructor is visible.
+        private static volatile AgileComPointer<IInternetSecurityManager> s_internetSecurityManager;
         private static readonly object s_internetSecurityManagerLock = new();
 #endif
 #endif

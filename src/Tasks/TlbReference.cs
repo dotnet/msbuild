@@ -230,6 +230,12 @@ namespace Microsoft.Build.Tasks
 
                 GetAndValidateStrongNameKey(out StrongNameKeyPair keyPair, out byte[] publicKey);
 
+                // Marshal the agile ITypeLib pointer back to a runtime-callable wrapper, since the BCL
+                // TypeLibConverter operates on the managed RCW rather than a raw struct-based COM pointer.
+                // Released deterministically in the finally so the RCW does not linger (holding a COM
+                // reference on the type library) until GC in long-lived MSBuild processes (server / node reuse).
+                object typeLibObject = null;
+
                 try
                 {
                     TypeLibImporterFlags flags = TypeLibImporterFlags.SafeArrayAsSystemArray | TypeLibImporterFlags.TransformDispRetVals;
@@ -261,9 +267,6 @@ namespace Microsoft.Build.Tasks
                             break;
                     }
 
-                    // Marshal the agile ITypeLib pointer back to a runtime-callable wrapper, since the BCL
-                    // TypeLibConverter operates on the managed RCW rather than a raw struct-based COM pointer.
-                    object typeLibObject;
                     unsafe
                     {
                         using ComScope<ITypeLib> typeLibScope = ReferenceInfo.typeLibPointer.GetInterface();
@@ -282,6 +285,13 @@ namespace Microsoft.Build.Tasks
                     }
 
                     throw new ComReferenceResolutionException(ex);
+                }
+                finally
+                {
+                    if (typeLibObject is not null)
+                    {
+                        Marshal.ReleaseComObject(typeLibObject);
+                    }
                 }
 
                 // if we're done, and this is not a temporary wrapper, write it out to disk
