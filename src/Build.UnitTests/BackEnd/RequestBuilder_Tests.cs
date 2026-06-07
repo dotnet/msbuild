@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -25,6 +27,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     public class RequestBuilder_Tests : IDisposable
     {
+        private readonly ITestOutputHelper _output;
         private AutoResetEvent _newBuildRequestsEvent;
         private BuildRequestEntry _newBuildRequests_Entry;
         private FullyQualifiedBuildRequest[] _newBuildRequests_FQRequests;
@@ -51,8 +54,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #pragma warning restore xUnit1013
 
-        public RequestBuilder_Tests()
+        public RequestBuilder_Tests(ITestOutputHelper output)
         {
+            _output = output;
             _originalWorkingDirectory = Directory.GetCurrentDirectory();
             _nodeRequestId = 1;
             _host = new MockHost();
@@ -240,6 +244,80 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(entry, _buildRequestCompleted_Entry);
             Assert.Equal(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
             Assert.Equal(typeof(InvalidProjectFileException), _buildRequestCompleted_Entry.Result.Exception.GetType());
+        }
+
+        [Fact]
+        public void RequestThreadProcEventsIncludeRequestContext()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            using var eventSourceTestListener = new EventSourceTestHelper();
+
+            TransientTestProjectWithFiles testProject = env.CreateTestProjectWithFiles(
+                """
+                <Project>
+                    <Target Name="Build" />
+                </Project>
+                """);
+
+            TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            string defaultToolsVersion = FrameworkLocationHelper.PathToDotNetFrameworkV20 == null
+                ? ObjectModelHelpers.MSBuildDefaultToolsVersion
+                : "2.0";
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(
+                1,
+                new BuildRequestData(
+                    testProject.ProjectFile,
+                    new Dictionary<string, string>(),
+                    ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                    Array.Empty<string>(),
+                    null),
+                defaultToolsVersion);
+            configCache.AddConfiguration(configuration);
+
+            BuildRequest request = CreateNewBuildRequest(configuration.ConfigurationId, ["Build"]);
+            request.GlobalRequestId = 42;
+
+            BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("Build", GetEmptySuccessfulTargetResult());
+            targetBuilder.SetResultsToReturn(result);
+
+            _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
+
+            WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
+
+            var requestThreadProcEvents = eventSourceTestListener
+                .GetEvents()
+                .Where(static eventData => eventData.EventId is 37 or 38)
+                .ToArray();
+
+            requestThreadProcEvents.Length.ShouldBe(2);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
+
+            Directory.SetCurrentDirectory(_originalWorkingDirectory);
+        }
+
+        private static void AssertRequestThreadProcEvent(
+            System.Diagnostics.Tracing.EventWrittenEventArgs eventData,
+            int expectedEventId,
+            string expectedProjectPath,
+            int expectedConfigurationId,
+            int expectedGlobalRequestId,
+            int expectedNodeRequestId,
+            bool expectedSetThreadParameters)
+        {
+            eventData.EventId.ShouldBe(expectedEventId);
+            eventData.PayloadNames.ShouldNotBeNull();
+            eventData.Payload.ShouldNotBeNull();
+            eventData.PayloadNames.ToArray().ShouldBe(["projectPath", "configurationId", "globalRequestId", "nodeRequestId", "setThreadParameters"]);
+            eventData.Payload.Count.ShouldBe(5);
+            eventData.Payload[0].ShouldBe(expectedProjectPath);
+            eventData.Payload[1].ShouldBe(expectedConfigurationId);
+            eventData.Payload[2].ShouldBe(expectedGlobalRequestId);
+            eventData.Payload[3].ShouldBe(expectedNodeRequestId);
+            eventData.Payload[4].ShouldBe(expectedSetThreadParameters);
         }
 
         private BuildRequestConfiguration CreateTestProject(int configId)

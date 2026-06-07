@@ -774,6 +774,12 @@ namespace Microsoft.Build.BackEnd
         {
             Exception thrownException = null;
             BuildResult result = null;
+            BuildRequest request = _requestEntry.Request;
+            BuildRequestConfiguration requestConfiguration = _requestEntry.RequestConfiguration;
+            string projectPath = requestConfiguration.ProjectFullPath;
+            int configurationId = requestConfiguration.ConfigurationId;
+            int globalRequestId = request.GlobalRequestId;
+            int nodeRequestId = request.NodeRequestId;
 
             try
             {
@@ -781,10 +787,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                MSBuildEventSource.Log.RequestThreadProcStart();
+                MSBuildEventSource.Log.RequestThreadProcStart(projectPath, configurationId, globalRequestId, nodeRequestId, setThreadParameters);
                 VerifyEntryInActiveState();
                 result = await BuildProject();
-                MSBuildEventSource.Log.RequestThreadProcStop();
+                MSBuildEventSource.Log.RequestThreadProcStop(projectPath, configurationId, globalRequestId, nodeRequestId, setThreadParameters);
             }
             catch (InvalidProjectFileException ex)
             {
