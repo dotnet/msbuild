@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="Argument_EmptyCollection">
         <source>The collection must contain at least one element.</source>
-        <target state="new">The collection must contain at least one element.</target>
+        <target state="translated">Kolekce musí obsahovat nejméně jeden prvek.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">

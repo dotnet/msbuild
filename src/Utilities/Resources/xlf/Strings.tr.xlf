@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.PipeEOFTimeout">
         <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
-        <target state="new">Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</target>
+        <target state="translated">Kanal EOF’si {0} saniye içinde alınmadı. Bir torun işlem kanalı hala açık tutuyor olabilir. Daha önce teslim edilen çıktı günlüğe kaydedildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
