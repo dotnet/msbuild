@@ -118,7 +118,7 @@ jobs:
 
       - name: Restore skill-validator from cache
         id: cache-sv
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: skill-validator-bin
           key: skill-validator-linux-x64-${{ steps.cache-date.outputs.date }}
@@ -141,7 +141,7 @@ jobs:
 
       - name: Save skill-validator to cache
         if: steps.cache-sv.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: skill-validator-bin
           key: skill-validator-linux-x64-${{ steps.cache-date.outputs.date }}
