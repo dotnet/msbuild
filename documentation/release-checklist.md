@@ -4,6 +4,21 @@
      Replace ALL {{PLACEHOLDERS}} before starting work.
      See release.md for background on how MSBuild releases flow into VS. -->
 
+## Release Output
+
+Artifacts produced over the course of the release. Record each URL here as the corresponding phase completes so this issue serves as the single index back into every PR / build / tag that defines `{{THIS_RELEASE_EXACT_VERSION}}`.
+
+| Artifact | URL |
+|---|---|
+| Phase 1.2d — maestro-configuration PR (channels for `{{THIS_RELEASE_VERSION}}` / `{{NEXT_VERSION}}`) | {{URL_OF_PHASE1_DARC_PR}} |
+| Phase 2.3h — maestro-configuration PR (main subscriptions retargeted to `VS {{NEXT_VERSION}}`, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
+| Phase 3.4 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
+| Phase 4.3 — `vs{{THIS_RELEASE_VERSION}}` final branding PR | {{URL_OF_FINAL_BRANDING_PR}} |
+| Phase 4.6 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
+| Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
+
+---
+
 ## Inputs
 
 Fill in these values before starting. Version increments are irregular — they must be specified explicitly.
@@ -18,31 +33,7 @@ Fill in these values before starting. Version increments are irregular — they 
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{STABLE_SNAP_DATE}}` | Date VS snaps `rel/insiders` → `rel/stable`. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{VS_SHIP_DATE}}` | Date VS ships publicly (GA). Post-GA tasks (nuget.org, docs) happen after this. | |
-| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild build whose source commit in in history of `vs{{THIS_RELEASE_VERSION}}` branch. Used as the ApiCompat baseline for the bumped `main`. See [How to determine `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`](#how-to-determine-package_validation_baseline_version) below. | |
-
-### How to determine `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`
-
-**The value is the latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild package that is both:**
-
-1. **Published on the public [dotnet-tools feed](https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools)** — this is the feed `darc publish` pushes to and that ApiCompat restores baselines from. If the version isn't here, ApiCompat fails with `NU1102`.
-2. **Produced from a commit reachable from `vs{{THIS_RELEASE_VERSION}}`** — i.e. a `vs{{THIS_RELEASE_VERSION}}` commit prior to [stabilization (Phase 4.2)](#phase-4-final-branding--vs-insertion), or the `main` commit `vs{{THIS_RELEASE_VERSION}}` was branched from.
-
-**Two tempting wrong answers — and why they're wrong:**
-
-| Wrong pick | Why it fails |
-|---|---|
-| ❌ The `{{THIS_RELEASE_VERSION}}.X` package that actually ships in VS (e.g. `18.7.1`) | After Phase 4.2 `Stabilize-Release.ps1` runs, builds become **final-versioned**. So such package is not resolvable from public CI. |
-| ❌ Blindly the most recent `{{THIS_RELEASE_VERSION}}.0-preview-*` on `dotnet-tools` | After `vs{{THIS_RELEASE_VERSION}}` branches, `main` keeps producing `{{THIS_RELEASE_VERSION}}.0-preview-*` until **this** main-bump PR merges — so the most recent feed entries may be `{{NEXT_VERSION}}`-content builds wearing `{{THIS_RELEASE_VERSION}}` branding. Picking one drifts the API baseline forward and silently hides real compat breaks. |
-
-**Procedure:**
-
-1. Open [MSBuild official build pipeline 9434](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434).
-2. Filter runs to branch `vs{{THIS_RELEASE_VERSION}}`. Find the run that final-branded the release (it produces `{{THIS_RELEASE_VERSION}}.X` — no `-preview-` — corresponding to the commit that ran `Stabilize-Release.ps1`; see [Phase 4.2 + 4.3](#phase-4-final-branding--vs-insertion)). Anything successful **before** that on `vs{{THIS_RELEASE_VERSION}}` is a candidate.
-3. If `vs{{THIS_RELEASE_VERSION}}` has no successful pre-stabilization preview runs (common — the branch sees little churn before stabilization), fall back to the most recent successful `main` run whose commit is the branch-point ancestor: \
-`git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}` gives the SHA — find a `main` run at or before that SHA in pipeline 9434.
-4. Read the package version from that run's `Pack` step output: `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` (example: `18.7.0-preview-26230-02`).
-5. Verify the exact version is on the [dotnet-tools feed](https://dev.azure.com/dnceng/public/_artifacts/feed/dotnet-tools) (search `Microsoft.Build`). If not, fall back to the next-older eligible run.
-6. Use that version. Do **not** include any `+sha` suffix.
+| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild build reachable from `vs{{THIS_RELEASE_VERSION}}`. Used as the ApiCompat baseline for the bumped `main`. **How to determine it:** see the [release skill](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version). | |
 
 **Derived values** (do not edit — computed from inputs):
 - Release branch: `vs{{THIS_RELEASE_VERSION}}`
@@ -61,7 +52,7 @@ Fill in these values before starting. Version increments are irregular — they 
   `darc get-channels`\
   If missing, it should have been created during the previous release (Phase 1.2b "create next channel" step). Create it now: `darc add-channel --name "VS {{THIS_RELEASE_VERSION}}"`
 - [ ] Create this tracking issue in dotnet/msbuild with all `{{PLACEHOLDERS}}` replaced
-- [ ] As phases complete, record artifact URLs in the **Release Output** table at the bottom of this checklist.
+- [ ] As phases complete, record artifact URLs in the **Release Output** table at the top of this checklist.
 
 ---
 
@@ -72,7 +63,7 @@ Fill in these values before starting. Version increments are irregular — they 
 Steps are **sequential** — complete in order.
 
 - [ ] **1.0** **Pre-snap team check.** Before snapping the branch, ping the MSBuild team to confirm there is nothing they still need to merge into `main` that should ship in `{{THIS_RELEASE_VERSION}}`. Anything that lands in `main` after Phase 1.1 will go into `{{NEXT_VERSION}}` instead.
-- [ ] **1.1** Create branch `vs{{THIS_RELEASE_VERSION}}` from HEAD of `main` (**requires repo admin rights** — `git push` to `refs/heads/vs*` is restricted): \
+- [ ] **1.1** Create branch `vs{{THIS_RELEASE_VERSION}}` from HEAD of `main` (**requires repo admin rights** — `git push` to `refs/heads/vs*` is restricted; if you don't have permission, ping [@rainersigwald](https://github.com/rainersigwald)): \
 `git push upstream HEAD:refs/heads/vs{{THIS_RELEASE_VERSION}}`
   - _If branched too early_ (main has commits that shouldn't be in the release): fast-forward the branch to the correct commit (the one currently inserted into VS main): \
   `git push upstream <correct_sha>:refs/heads/vs{{THIS_RELEASE_VERSION}}`
@@ -150,11 +141,11 @@ Verifications (**parallel** — read-only, no ordering dependency):
 Create **one PR in `main`** containing all of the following changes:
 
 - [ ] **3.1** `eng/Versions.props`: Update `VersionPrefix` to `{{NEXT_VERSION}}.0`
-- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` (see [How to determine `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`](#how-to-determine-package_validation_baseline_version) in the Inputs section above).
+- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` (see [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill).
 - [ ] **3.3** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
 `dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true` \
 See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for details.
-- [ ] **3.4** Merge branding PR: {{URL_OF_NEXT_VERSION_BRANDING_PR}}
+- [ ] **3.4** Merge main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
 
 ---
 
@@ -228,6 +219,7 @@ Steps are **mostly parallel** unless noted.
 - [ ] **5.3** Create GitHub release:
   - [ ] **5.3a** **Precondition — confirm the previous release tag exists on `upstream`.** \
   `git fetch upstream --tags && git tag --list 'v{{PREVIOUS_RELEASE_EXACT_VERSION}}'` \
+  _(Assumes `upstream` is configured as the `dotnet/msbuild` remote. If not: `git remote add upstream https://github.com/dotnet/msbuild.git`.)_ \
   If the tag is missing (e.g. the previous release was never tagged), create and push it **first**.
   - [ ] **5.3b** **Identify the commit to tag.** It is the source commit of the build identified in **5.1b** (the build that produced `{{THIS_RELEASE_EXACT_VERSION}}`). Find the SHA in that build run's "Source version" field on the pipeline page.
   - [ ] **5.3c** Tag this release and push:
@@ -250,18 +242,3 @@ Steps are **mostly parallel** unless noted.
   - [`src/Shared/BuildEnvironmentHelper.cs`](https://github.com/dotnet/msbuild/blob/main/src/Shared/BuildEnvironmentHelper.cs)
   - [`src/Shared/Constants.cs`](https://github.com/dotnet/msbuild/blob/main/src/Shared/Constants.cs)
   - [`src/Framework/Telemetry/TelemetryConstants.cs`](https://github.com/dotnet/msbuild/blob/main/src/Framework/Telemetry/TelemetryConstants.cs)
-
----
-
-## Release Output
-
-Artifacts produced over the course of the release. Record each URL here as the corresponding phase completes so this issue serves as the single index back into every PR / build / tag that defines `{{THIS_RELEASE_EXACT_VERSION}}`.
-
-| Artifact | URL |
-|---|---|
-| Phase 1.2d — maestro-configuration PR (channels for `{{THIS_RELEASE_VERSION}}` / `{{NEXT_VERSION}}`) | {{URL_OF_PHASE1_DARC_PR}} |
-| Phase 2.3h — maestro-configuration PR (main subscriptions retargeted to `VS {{NEXT_VERSION}}`, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
-| Phase 3.5 — `main` next-version branding PR | {{URL_OF_NEXT_VERSION_BRANDING_PR}} |
-| Phase 4.3 — `vs{{THIS_RELEASE_VERSION}}` final branding PR | {{URL_OF_FINAL_BRANDING_PR}} |
-| Phase 4.6 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
-| Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
