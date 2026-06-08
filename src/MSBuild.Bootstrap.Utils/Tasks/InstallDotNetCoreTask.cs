@@ -154,11 +154,30 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         {
             string scriptExtension = IsWindows ? "ps1" : "sh";
             string scriptPath = Path.Combine(DotNetInstallScriptRootPath, $"{ScriptName}.{scriptExtension}");
+            // On Windows the native command-line parser treats a backslash before the closing quote as
+            // escaping it (e.g. "C:\dir\" becomes C:\dir"), so trim a trailing separator before quoting.
+            string installDir = TrimTrailingDirectorySeparators(InstallDir);
             string scriptArgs = IsWindows
-                ? $"-NoProfile -ExecutionPolicy Bypass -File {scriptPath} -Version {Version} -InstallDir {InstallDir}"
-                : $"{scriptPath} --version {Version} --install-dir {InstallDir}";
+                ? $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" -Version {Version} -InstallDir \"{installDir}\""
+                : $"\"{scriptPath}\" --version {Version} --install-dir \"{installDir}\"";
 
             return new ScriptExecutionSettings($"{ScriptName}.{scriptExtension}", scriptPath, scriptArgs);
+        }
+
+        /// <summary>
+        /// Trims trailing directory separators while preserving a path root (e.g. "C:\").
+        /// </summary>
+        private static string TrimTrailingDirectorySeparators(string path)
+        {
+            string root = Path.GetPathRoot(path) ?? string.Empty;
+            while (path.Length > root.Length &&
+                   (path[path.Length - 1] == Path.DirectorySeparatorChar ||
+                    path[path.Length - 1] == Path.AltDirectorySeparatorChar))
+            {
+                path = path.Substring(0, path.Length - 1);
+            }
+
+            return path;
         }
 
         /// <summary>
