@@ -580,25 +580,19 @@ internal static class CommunicationsUtilities
             }
         }
 
-        // For the NET task host, the launched child process's architecture is determined by
-        // what the .NET SDK shipped (x64 today, arm64 in the future), not by the parent's
-        // process architecture. Emitting the parent's arch bit here creates a wire-level
-        // mismatch with already-shipped SDK children whose arch differs (e.g. arm64 VS
-        // launching an x64 SDK MSBuild.dll). Suppress the arch bit so the child's existing
-        // IsAllowedBitnessMismatch tolerance ("parent sent no arch bit") accepts the
-        // connection regardless of either side's process architecture.
-        //
-        // Only the parent suppresses — i.e. when GetHandshakeOptions is invoked with concrete
-        // taskHostParameters describing a specific runtime/architecture to launch. The child
-        // (which calls GetHandshakeOptions with TaskHostParameters.Empty) keeps its own arch
-        // bit so that already-deployed parents that still emit an arch bit continue to match
-        // (or fall through to IsAllowedBitnessMismatch's tolerance).
-        bool isNetTaskHostParent =
+        // For a NET task host the launched TaskHost node runs whatever architecture the .NET
+        // SDK shipped, which the worker node cannot know. Suppress the worker node's arch bit
+        // so the handshake stays architecture-agnostic: any architecture of worker node may
+        // connect to any architecture of the resolved SDK TaskHost node (the TaskHost node
+        // tolerates a missing arch bit via IsAllowedBitnessMismatch). Only the worker node
+        // suppresses; the TaskHost node itself (TaskHostParameters.Empty) keeps its arch bit so
+        // already-deployed worker nodes that still emit one continue to connect.
+        bool isNetTaskHostWorkerNode =
             taskHost &&
             !taskHostParameters.IsEmpty &&
             XMakeAttributes.MSBuildRuntimeValues.net.Equals(taskHostParameters.Runtime, StringComparison.OrdinalIgnoreCase);
 
-        if (!isNetTaskHostParent && !string.IsNullOrEmpty(architectureFlagToSet))
+        if (!isNetTaskHostWorkerNode && !string.IsNullOrEmpty(architectureFlagToSet))
         {
             if (architectureFlagToSet!.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
             {

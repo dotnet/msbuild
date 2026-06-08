@@ -10,10 +10,11 @@ using Xunit;
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for <see cref="CommunicationsUtilities.GetHandshakeOptions"/> covering the parent
-    /// side of NET task host launches: the parent must suppress its own architecture bit on
-    /// the wire so already-shipped SDK children (whose <c>IsAllowedBitnessMismatch</c> tolerates
-    /// "parent sent no arch bit") accept the connection regardless of either process arch.
+    /// Tests for <see cref="CommunicationsUtilities.GetHandshakeOptions"/> covering the worker
+    /// node side of NET task host launches: the worker node must suppress its own architecture
+    /// bit on the wire so already-shipped SDK TaskHost nodes (whose <c>IsAllowedBitnessMismatch</c>
+    /// tolerates "worker node sent no arch bit") accept the connection regardless of either
+    /// process arch.
     /// </summary>
     public sealed class CommunicationsUtilities_Tests
     {
@@ -21,11 +22,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData(XMakeAttributes.MSBuildArchitectureValues.x64)]
         [InlineData(XMakeAttributes.MSBuildArchitectureValues.arm64)]
         [InlineData(XMakeAttributes.MSBuildArchitectureValues.x86)]
-        public void GetHandshakeOptions_NetTaskHostParent_SuppressesArchBit(string parentArchitecture)
+        public void GetHandshakeOptions_NetTaskHostWorkerNode_SuppressesArchBit(string workerArchitecture)
         {
             var parameters = new TaskHostParameters(
                 runtime: XMakeAttributes.MSBuildRuntimeValues.net,
-                architecture: parentArchitecture);
+                architecture: workerArchitecture);
 
             HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
                 taskHost: true,
@@ -37,7 +38,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void GetHandshakeOptions_NonNetTaskHostParent_KeepsX64ArchBit()
+        public void GetHandshakeOptions_NonNetTaskHostWorkerNode_KeepsX64ArchBit()
         {
             var parameters = new TaskHostParameters(
                 runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
@@ -51,7 +52,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void GetHandshakeOptions_NonNetTaskHostParent_KeepsArm64ArchBit()
+        public void GetHandshakeOptions_NonNetTaskHostWorkerNode_KeepsArm64ArchBit()
         {
             var parameters = new TaskHostParameters(
                 runtime: XMakeAttributes.MSBuildRuntimeValues.clr4,
@@ -65,12 +66,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void GetHandshakeOptions_NetTaskHostChild_KeepsArchBit()
+        public void GetHandshakeOptions_NetTaskHostNode_KeepsArchBit()
         {
-            // The child invokes GetHandshakeOptions with TaskHostParameters.Empty; the helper
-            // then derives architectureFlagToSet from GetCurrentMSBuildArchitecture(). The
-            // suppression must not apply: the child needs to keep its own arch bit so
-            // already-deployed parents that still emit one continue to match.
+            // The TaskHost node invokes GetHandshakeOptions with TaskHostParameters.Empty; the
+            // helper then derives architectureFlagToSet from GetCurrentMSBuildArchitecture(). The
+            // suppression must not apply: the TaskHost node needs to keep its own arch bit so
+            // already-deployed worker nodes that still emit one continue to match.
             HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
                 taskHost: true,
                 taskHostParameters: TaskHostParameters.Empty);
@@ -86,7 +87,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
             else
             {
-                // x86 or unknown: no arch bit is expected on the child side either.
+                // x86 or unknown: no arch bit is expected on the TaskHost node side either.
                 options.HasFlag(HandshakeOptions.X64).ShouldBeFalse();
                 options.HasFlag(HandshakeOptions.Arm64).ShouldBeFalse();
             }

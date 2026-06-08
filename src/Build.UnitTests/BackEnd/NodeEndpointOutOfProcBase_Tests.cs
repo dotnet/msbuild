@@ -12,15 +12,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for <see cref="NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch"/>, the .NET task
-    /// host child-side tolerance that lets a parent which did not emit an architecture bit
-    /// (e.g. a .NET Framework MSBuild) connect to an SDK child running on x64 or arm64.
+    /// host (TaskHost node) side tolerance that lets a worker node which did not emit an
+    /// architecture bit (e.g. a .NET Framework MSBuild) connect to an SDK TaskHost node running
+    /// on x64 or arm64.
     /// </summary>
     public sealed class NodeEndpointOutOfProcBase_Tests
     {
         private const HandshakeOptions BaseNet = HandshakeOptions.TaskHost | HandshakeOptions.NET;
 
         [Fact]
-        public void NoArchBitParent_X64Child_IsTolerated()
+        public void NoArchBitWorkerNode_X64TaskHost_IsTolerated()
         {
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
                 expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
@@ -28,7 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void NoArchBitParent_Arm64Child_IsTolerated()
+        public void NoArchBitWorkerNode_Arm64TaskHost_IsTolerated()
         {
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
                 expectedOptions: (int)(BaseNet | HandshakeOptions.Arm64),
@@ -36,26 +37,26 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void X64Parent_X64Child_NotConsideredMismatch()
+        public void X64WorkerNode_X64TaskHost_NotConsideredMismatch()
         {
             // Equal handshakes never hit IsAllowedBitnessMismatch in production; verify it
-            // still returns false so the tolerance is scoped to the no-arch-bit parent only.
+            // still returns false so the tolerance is scoped to the no-arch-bit worker node only.
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
                 expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
                 receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
         }
 
         [Fact]
-        public void X64Parent_Arm64Child_NotTolerated()
+        public void X64WorkerNode_Arm64TaskHost_NotTolerated()
         {
-            // True architecture mismatch (parent sent X64, child expects Arm64) is rejected.
+            // True architecture mismatch (worker node sent X64, TaskHost node expects Arm64) is rejected.
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
                 expectedOptions: (int)(BaseNet | HandshakeOptions.Arm64),
                 receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
         }
 
         [Fact]
-        public void Arm64Parent_X64Child_NotTolerated()
+        public void Arm64WorkerNode_X64TaskHost_NotTolerated()
         {
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
                 expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
@@ -63,10 +64,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void NoArchBitParent_NoArchBitChild_NotTolerated()
+        public void NoArchBitWorkerNode_NoArchBitTaskHost_NotTolerated()
         {
-            // The tolerance is scoped to x64/arm64 children; an x86-equivalent (no arch bit)
-            // child must not silently accept any handshake.
+            // The tolerance is scoped to x64/arm64 TaskHost nodes; an x86-equivalent (no arch bit)
+            // TaskHost node must not silently accept any handshake.
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
                 expectedOptions: (int)BaseNet,
                 receivedOptions: (int)BaseNet).ShouldBeFalse();

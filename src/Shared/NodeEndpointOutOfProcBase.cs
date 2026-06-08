@@ -561,8 +561,8 @@ namespace Microsoft.Build.BackEnd
 
             if (component.Key == nameof(HandshakeComponents.Options))
             {
-                // NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
-                // 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+                // NET task host tolerates a worker node connecting with an architecture mismatch.
+                // The lower 24 bits carry the HandshakeOptions flags; the upper byte is the handshake version.
                 isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
             }
             else
@@ -584,14 +584,15 @@ namespace Microsoft.Build.BackEnd
 
 #if NET
         /// <summary>
-        /// The .NET task host child tolerates a parent that did not emit an architecture bit
-        /// on the wire (which is indistinguishable from x86) when the child itself is x64 or
-        /// arm64. This is the .NET Framework parent → .NET SDK child scenario: the parent
-        /// typically cannot describe the SDK child's architecture, but the launched task host
-        /// process is whatever the SDK ships (x64 on Windows-x64, arm64 on Windows-arm64).
+        /// The .NET task host (TaskHost node) tolerates a worker node that did not emit an
+        /// architecture bit on the wire (indistinguishable from x86) when the TaskHost node
+        /// itself is x64 or arm64. This is the .NET Framework worker node → .NET SDK TaskHost
+        /// node scenario: the worker node typically cannot describe the TaskHost node's
+        /// architecture, but the launched process is whatever the SDK ships (x64 on
+        /// Windows-x64, arm64 on Windows-arm64).
         ///
-        /// True cross-arch mismatches (e.g. parent sent X64 but child expects Arm64, or vice
-        /// versa) remain rejected.
+        /// True cross-arch mismatches (e.g. worker node sent X64 but TaskHost node expects
+        /// Arm64, or vice versa) remain rejected.
         ///
         /// The lower 24 bits (mask 0x00FFFFFF) carry the HandshakeOptions flags; the upper
         /// byte carries the handshake version and is ignored here.
