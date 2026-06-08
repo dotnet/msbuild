@@ -299,6 +299,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.SetCurrentDirectory(_originalWorkingDirectory);
         }
 
+        [Fact]
+        public void RequestThreadProcStopEventIsEmittedWhenBuildThrows()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output, ignoreBuildErrorFiles: true);
+            using var eventSourceTestListener = new EventSourceTestHelper();
+
+            string missingProjectPath = Path.Combine(env.DefaultTestDirectory.Path, "missing.proj");
+            IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(
+                1,
+                new BuildRequestData(missingProjectPath, new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null),
+                "2.0");
+            configCache.AddConfiguration(configuration);
+
+            BuildRequest request = CreateNewBuildRequest(configuration.ConfigurationId, ["target1"]);
+            request.GlobalRequestId = 43;
+
+            BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
+            _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
+
+            WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
+
+            var requestThreadProcEvents = eventSourceTestListener
+                .GetEvents()
+                .Where(eventData => IsRequestThreadProcEventForRequest(eventData, missingProjectPath, request.GlobalRequestId))
+                .ToArray();
+
+            requestThreadProcEvents.Length.ShouldBe(2);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
+            entry.State.ShouldBe(BuildRequestEntryState.Complete);
+            _buildRequestCompleted_Entry.ShouldBe(entry);
+            _buildRequestCompleted_Entry.Result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            _buildRequestCompleted_Entry.Result.Exception.ShouldBeOfType<InvalidProjectFileException>();
+        }
+
         private static void AssertRequestThreadProcEvent(
             System.Diagnostics.Tracing.EventWrittenEventArgs eventData,
             int expectedEventId,
