@@ -82,7 +82,9 @@ namespace Microsoft.Build.Tasks
                     // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
                     // Also ensure that relative segments in the path are resolved and throw on illegal characters in Path.GetFullPath to preserve pre-existing behavior.
                     fullRootPathString = 
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
                         Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(RootFolder)));
+#pragma warning restore MSBuildTask0002
 
                     // Ensure trailing slash for comparison. Current directory is already canonical, so we don't need to call GetCanonicalForm on it.
                     AbsolutePath currentDirectory = FileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory);
@@ -143,7 +145,9 @@ namespace Microsoft.Build.Tasks
                             else 
                             {
                                 string itemSpecFullFileNamePath = 
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
                                     Path.GetFullPath(TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec));
+#pragma warning restore MSBuildTask0002
 
                                 if (String.Compare(fullRootPathString, 0, itemSpecFullFileNamePath, 0, fullRootPathString.Length, StringComparison.CurrentCultureIgnoreCase) == 0)
                                 {

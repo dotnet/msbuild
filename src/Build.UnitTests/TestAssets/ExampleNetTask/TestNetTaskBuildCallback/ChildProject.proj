@@ -1,0 +1,11 @@
+<Project>
+  <ItemGroup>
+    <OutputItem Include="ItemFromChildProject">
+      <CustomMetadata>MetadataValue</CustomMetadata>
+    </OutputItem>
+  </ItemGroup>
+
+  <Target Name="GetOutputs" Returns="@(OutputItem)">
+    <Message Text="ChildProject: GetOutputs target executed" Importance="high" />
+  </Target>
+</Project>

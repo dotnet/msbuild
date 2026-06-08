@@ -140,6 +140,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _savedCurrentDirectory;
 
+        /// <summary>
+        /// Saves the evaluation ID for the project so that it's accessible even when the underlying Project becomes cached.
+        /// </summary>
+        private int _projectEvaluationId = BuildEventContext.InvalidEvaluationId;
+
         #endregion
 
         /// <summary>
@@ -186,6 +191,7 @@ namespace Microsoft.Build.BackEnd
                 _projectInitialTargets = data.ProjectInstance.InitialTargets;
                 _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
                 _projectTargets = GetProjectTargets(data.ProjectInstance.Targets);
+                _projectEvaluationId = data.ProjectInstance.EvaluationId;
                 if (data.PropertiesToTransfer != null)
                 {
                     _transferredProperties = new List<ProjectPropertyInstance>();
@@ -223,6 +229,7 @@ namespace Microsoft.Build.BackEnd
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
             _projectTargets = GetProjectTargets(instance.Targets);
+            _projectEvaluationId = instance.EvaluationId;
             IsCacheable = false;
         }
 
@@ -247,6 +254,7 @@ namespace Microsoft.Build.BackEnd
             IsCacheable = other.IsCacheable;
             _configId = configId;
             RequestedTargets = other.RequestedTargets;
+            _projectEvaluationId = other._projectEvaluationId;
         }
 
         /// <summary>
@@ -288,6 +296,15 @@ namespace Microsoft.Build.BackEnd
         /// Flag indicating if the configuration is cached or not.
         /// </summary>
         public bool IsCached { get; private set; }
+
+        /// <summary>
+        /// The evaluation ID for this project, persisted so it remains available even when the project is cached.
+        /// </summary>
+        public int ProjectEvaluationId
+        {
+            get => _projectEvaluationId;
+            internal set => _projectEvaluationId = value;
+        }
 
         /// <summary>
         /// Flag indicating if this configuration represents a traversal project.  Traversal projects
@@ -424,6 +441,7 @@ namespace Microsoft.Build.BackEnd
             _projectInitialTargets = null;
             _projectTargets = null;
 
+            _projectEvaluationId = _project.EvaluationId;
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
             ProjectTargets = GetProjectTargets(_project.Targets);
@@ -941,6 +959,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
+            translator.Translate(ref _projectEvaluationId);
 
             // if the  entire state is translated, then the transferred state represents the full evaluation data
             if (translator.Mode == TranslationDirection.ReadFromStream && _transferredState?.TranslateEntireState == true)
@@ -959,6 +978,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectInitialTargets);
             translator.Translate(ref _projectTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _projectEvaluationId);
         }
 
         /// <summary>

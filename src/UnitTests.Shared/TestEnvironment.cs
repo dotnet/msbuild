@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -17,7 +18,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
@@ -396,6 +396,15 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class DefaultOutput : ITestOutputHelper
         {
+            // Probably unreachable. Don't bother implementing it unless we hit this exception.
+            public string Output => throw new InvalidOperationException();
+
+            public void Write(string message)
+                => Console.Write(message);
+
+            public void Write(string format, params object[] args)
+                => Console.Write(format, args);
+
             public void WriteLine(string message)
             {
                 Console.WriteLine(message);

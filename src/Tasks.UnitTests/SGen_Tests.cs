@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
@@ -14,13 +17,19 @@ namespace Microsoft.Build.UnitTests
 {
     public class SGen_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public SGen_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
 #if RUNTIME_TYPE_NETCORE
         [Fact]
         public void TaskFailsOnCore()
         {
-            using (TestEnvironment testenv = TestEnvironment.Create())
-            {
-                MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@$"
+            using TestEnvironment testenv = TestEnvironment.Create(_output);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@$"
 <Project>
     <Target Name=""MyTarget"">
         <SGen
@@ -40,9 +49,8 @@ namespace Microsoft.Build.UnitTests
         />
     </Target>
 </Project>");
-                logger.ErrorCount.ShouldBe(1);
-                logger.Errors.First().Code.ShouldBe("MSB3474");
-            }
+            logger.ErrorCount.ShouldBe(1);
+            logger.Errors.First().Code.ShouldBe("MSB3474");
         }
 #else
         internal sealed class SGenExtension : SGen
@@ -272,6 +280,94 @@ namespace Microsoft.Build.UnitTests
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /reference:\"C:\\SomeFolder\\reference1.dll,C:\\SomeFolder\\reference2.dll\"";
 
             Assert.Equal(targetCommandLine, commandLine);
+        }
+
+        /// <summary>
+        /// Verifies that GenerateFullPathToTool resolves SdkToolsPath relative to the
+        /// TaskEnvironment's project directory and returns an absolute path, validating
+        /// the TaskEnvironment.GetAbsolutePath() integration.
+        /// </summary>
+        [Fact]
+        public void GenerateFullPathToTool_ResolvesRelativeSdkToolsPathViaTaskEnvironment()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectDir = env.CreateFolder().Path;
+            string sdkSubDir = "sdk";
+            string sdkFullDir = Path.Combine(projectDir, sdkSubDir);
+            Directory.CreateDirectory(sdkFullDir);
+            string fakeTool = Path.Combine(sdkFullDir, "sgen.exe");
+            File.WriteAllBytes(fakeTool, []);
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableSGen t = new TestableSGen();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine(_output);
+            t.SdkToolsPath = sdkSubDir; // relative path — must resolve via TaskEnvironment
+
+            string result = t.CallGenerateFullPathToTool();
+
+            result.ShouldNotBeNull("GenerateFullPathToTool should find the tool via SdkToolsPath");
+            result.ShouldBe(fakeTool);
+        }
+
+        /// <summary>
+        /// Verifies that in GetProcessStartInfo
+        /// working directory comes from the TaskEnvironment.
+        /// </summary>
+        [Fact]
+        public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string expectedWorkingDir = env.DefaultTestDirectory.Path;
+            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableSGen t = new TestableSGen();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine(_output);
+
+            ProcessStartInfo startInfo = t.CallGetProcessStartInfo(Path.Combine(expectedWorkingDir, "sgen.exe"), "/nologo", null);
+
+            startInfo.WorkingDirectory.ShouldBe(expectedWorkingDir);
+        }
+
+        /// <summary>
+        /// Verifies that BuildAssemblyPath uses TaskEnvironment.GetAbsolutePath
+        /// instead of Path.GetFullPath, by providing a relative path that resolves
+        /// correctly against the TaskEnvironment's project directory.
+        /// </summary>
+        [Fact]
+        public void BuildAssemblyPath_UsesTaskEnvironmentGetAbsolutePath()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectDir = env.CreateFolder().Path;
+            string subDir = "output";
+            Directory.CreateDirectory(Path.Combine(projectDir, subDir));
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableSGen t = new TestableSGen();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine(_output);
+            t.BuildAssemblyPath = subDir; // relative path
+
+            string result = t.BuildAssemblyPath;
+
+            result.ShouldBe(Path.Combine(projectDir, subDir));
+        }
+
+        /// <summary>
+        /// Subclass that exposes protected methods for testing without reflection.
+        /// </summary>
+        private sealed class TestableSGen : SGen
+        {
+            public string CallGenerateFullPathToTool() => GenerateFullPathToTool();
+
+            public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
+                => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
 #endif
     }

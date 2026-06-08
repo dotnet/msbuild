@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
@@ -42,7 +43,7 @@ public class MultiThreadableTaskCodeFixProviderTests
         DiagnosticIds.FilePathRequiresAbsolute => new DiagnosticResult(DiagnosticDescriptors.FilePathRequiresAbsolute),
         DiagnosticIds.PotentialIssue => new DiagnosticResult(DiagnosticDescriptors.PotentialIssue),
         DiagnosticIds.TransitiveUnsafeCall => new DiagnosticResult(DiagnosticDescriptors.TransitiveUnsafeCall),
-        _ => new DiagnosticResult(id, Microsoft.CodeAnalysis.DiagnosticSeverity.Warning),
+        _ => new DiagnosticResult(id, DiagnosticSeverity.Warning),
     };
 
     [Fact]
@@ -76,8 +77,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Environment.GetEnvironmentVariable(string)", "use TaskEnvironment.GetEnvironmentVariable instead")
-        ).RunAsync();
+                .WithArguments("Environment.GetEnvironmentVariable(string)", "use TaskEnvironment.GetEnvironmentVariable instead")).RunAsync();
     }
 
     [Fact]
@@ -111,8 +111,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Environment.SetEnvironmentVariable(string, string?)", "use TaskEnvironment.SetEnvironmentVariable instead")
-        ).RunAsync();
+                .WithArguments("Environment.SetEnvironmentVariable(string, string?)", "use TaskEnvironment.SetEnvironmentVariable instead")).RunAsync();
     }
 
     [Fact]
@@ -146,8 +145,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Path.GetFullPath(string)", "use TaskEnvironment.GetAbsolutePath instead")
-        ).RunAsync();
+                .WithArguments("Path.GetFullPath(string)", "use TaskEnvironment.GetAbsolutePath instead")).RunAsync();
     }
 
     [Fact]
@@ -181,8 +179,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Environment.CurrentDirectory", "use TaskEnvironment.ProjectDirectory instead")
-        ).RunAsync();
+                .WithArguments("Environment.CurrentDirectory", "use TaskEnvironment.ProjectDirectory instead")).RunAsync();
     }
 
     [Fact]
@@ -216,8 +213,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
-                .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")
-        ).RunAsync();
+                .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
     }
 
     [Fact]
@@ -251,7 +247,6 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
-                .WithArguments("new FileInfo(...)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")
-        ).RunAsync();
+                .WithArguments("new FileInfo(...)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
     }
 }

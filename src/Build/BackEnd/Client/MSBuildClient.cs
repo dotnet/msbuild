@@ -154,7 +154,7 @@ namespace Microsoft.Build.Experimental
             // Command line in one string used only in human readable content.
             string descriptiveCommandLine = string.Join(" ", _commandLine);
 
-            CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
+            CommunicationsUtilities.Trace($"Executing build with command line '{descriptiveCommandLine}'");
 
             try
             {
@@ -192,8 +192,8 @@ namespace Microsoft.Build.Experimental
             {
                 // For unknown root cause, Mutex.TryOpenExisting can sometimes throw 'Connection timed out' exception preventing to obtain the build server state through it (Running or not, Busy or not).
                 // See: https://github.com/dotnet/msbuild/issues/7993
-                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
-                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
+                CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return _exitResult;
             }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("MSBuild client error: problem during packet handling occurred: {0}.", ex);
+                CommunicationsUtilities.Trace($"MSBuild client error: problem during packet handling occurred: {ex}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
         }
@@ -376,7 +376,7 @@ namespace Microsoft.Build.Experimental
             {
                 // on Win8 machines while in IDE Console.BufferWidth will throw (while it talks to native console it gets "operation aborted" native error)
                 // this is probably temporary workaround till we understand what is the reason for that exception
-                CommunicationsUtilities.Trace("MSBuild client warning: problem during querying console buffer width.", ex);
+                CommunicationsUtilities.Trace($"MSBuild client warning: problem during querying console buffer width: {ex}");
             }
 
             return consoleBufferWidth;
@@ -409,11 +409,11 @@ namespace Microsoft.Build.Experimental
             {
                 packet = packetResolver();
                 WritePacket(_nodeStream, packet);
-                CommunicationsUtilities.Trace("Command packet of type '{0}' sent...", packet.Type);
+                CommunicationsUtilities.Trace($"Command packet of type '{packet.Type}' sent...");
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Failed to send command packet of type '{0}' to server: {1}", packet?.Type.ToString() ?? "Unknown", ex);
+                CommunicationsUtilities.Trace($"Failed to send command packet of type '{packet?.Type.ToString() ?? "Unknown"}' to server: {ex}");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
                 return false;
             }
@@ -444,8 +444,8 @@ namespace Microsoft.Build.Experimental
             }
             catch (IOException ex) when (ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace("Failed to obtain the current build server state: {0}", ex);
-                CommunicationsUtilities.Trace("HResult: {0}.", ex.HResult);
+                CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
+                CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
             }
@@ -460,11 +460,11 @@ namespace Microsoft.Build.Experimental
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 using Process msbuildProcess = nodeLauncher.Start(new NodeLaunchData(_msbuildLocation, string.Join(" ", msBuildServerOptions)), nodeId: 0);
-                CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
+                CommunicationsUtilities.Trace($"Server started with PID: {msbuildProcess?.Id}");
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Failed to launch the msbuild server: {0}", ex);
+                CommunicationsUtilities.Trace($"Failed to launch the msbuild server: {ex}");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.LaunchError;
                 return false;
             }
@@ -541,7 +541,7 @@ namespace Microsoft.Build.Experimental
         {
             if (packetPump.PacketPumpException != null)
             {
-                CommunicationsUtilities.Trace("MSBuild client error: packet pump unexpectedly shut down: {0}", packetPump.PacketPumpException);
+                CommunicationsUtilities.Trace($"MSBuild client error: packet pump unexpectedly shut down: {packetPump.PacketPumpException}");
                 throw packetPump.PacketPumpException ?? new InternalErrorException("Packet pump unexpectedly shut down");
             }
 
@@ -586,7 +586,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleServerNodeBuildResult(ServerNodeBuildResult response)
         {
-            CommunicationsUtilities.Trace("Build response received: exit code '{0}', exit type '{1}'", response.ExitCode, response.ExitType);
+            CommunicationsUtilities.Trace($"Build response received: exit code '{response.ExitCode}', exit type '{response.ExitType}'");
             _exitResult.MSBuildClientExitType = MSBuildClientExitType.Success;
             _exitResult.MSBuildAppExitTypeString = response.ExitType;
             _buildFinished = true;
@@ -615,7 +615,7 @@ namespace Microsoft.Build.Experimental
                 {
                     if (result.Status is not HandshakeStatus.Timeout && sw.ElapsedMilliseconds < timeoutMilliseconds)
                     {
-                        CommunicationsUtilities.Trace("Retrying to connect to server after {0} ms", sw.ElapsedMilliseconds);
+                        CommunicationsUtilities.Trace($"Retrying to connect to server after {sw.ElapsedMilliseconds} ms");
                         // This solves race condition for time in which server started but have not yet listen on pipe or
                         // when it just finished build request and is recycling pipe.
                         tryAgain = true;
@@ -623,7 +623,7 @@ namespace Microsoft.Build.Experimental
                     }
                     else
                     {
-                        CommunicationsUtilities.Trace("Failed to connect to server: {0}", result.ErrorMessage);
+                        CommunicationsUtilities.Trace($"Failed to connect to server: {result.ErrorMessage}");
                         _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
                         return false;
                     }
