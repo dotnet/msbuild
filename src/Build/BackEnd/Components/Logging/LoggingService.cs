@@ -1386,6 +1386,17 @@ namespace Microsoft.Build.BackEnd.Logging
                         _projectFileMap[projectStartedEventArgs.BuildEventContext.ProjectContextId] = projectStartedEventArgs.ProjectFile;
                     }
                 }
+                else if (loggingPacket.NodeBuildEvent.Value.Value is TaskParameterEventArgs taskParameterEventArgs &&
+                         string.Equals(taskParameterEventArgs.ItemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase) &&
+                         string.IsNullOrEmpty(taskParameterEventArgs.ProjectFile) &&
+                         taskParameterEventArgs.BuildEventContext != null &&
+                         taskParameterEventArgs.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+                {
+                    // ProjectFile is not serialized across nodes for perf reasons, but the binary logger needs it to
+                    // resolve relative EmbedInBinlog item paths against the originating project's directory (#13789).
+                    // Restore it from the project context map, mirroring what LogBuildEvent does for in-proc events.
+                    taskParameterEventArgs.ProjectFile = GetAndVerifyProjectFileFromContext(taskParameterEventArgs, allowCacheMiss: true);
+                }
             }
         }
 
