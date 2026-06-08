@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var requestThreadProcEvents = eventSourceTestListener
                 .GetEvents()
-                .Where(static eventData => eventData.EventId is 37 or 38)
+                .Where(eventData => IsRequestThreadProcEventForRequest(eventData, testProject.ProjectFile, request.GlobalRequestId))
                 .ToArray();
 
             requestThreadProcEvents.Length.ShouldBe(2);
@@ -318,6 +318,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             eventData.Payload[2].ShouldBe(expectedGlobalRequestId);
             eventData.Payload[3].ShouldBe(expectedNodeRequestId);
             eventData.Payload[4].ShouldBe(expectedSetThreadParameters);
+        }
+
+        private static bool IsRequestThreadProcEventForRequest(
+            System.Diagnostics.Tracing.EventWrittenEventArgs eventData,
+            string expectedProjectPath,
+            int expectedGlobalRequestId)
+        {
+            return eventData.EventId is 37 or 38
+                && eventData.Payload is not null
+                && eventData.Payload.Count == 5
+                && eventData.Payload[0] is string projectPath
+                && eventData.Payload[2] is int globalRequestId
+                && projectPath == expectedProjectPath
+                && globalRequestId == expectedGlobalRequestId;
         }
 
         private BuildRequestConfiguration CreateTestProject(int configId)
