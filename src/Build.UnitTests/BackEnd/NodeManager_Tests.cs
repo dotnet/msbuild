@@ -85,6 +85,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static ConcurrentDictionary<int, INodeProvider> GetNodeIdToProvider(NodeManager manager)
         {
             FieldInfo field = typeof(NodeManager).GetField("_nodeIdToProvider", BindingFlags.NonPublic | BindingFlags.Instance);
+            field.ShouldNotBeNull("NodeManager._nodeIdToProvider field not found; the field may have been renamed.");
             return (ConcurrentDictionary<int, INodeProvider>)field.GetValue(manager);
         }
 

@@ -346,7 +346,9 @@ namespace Microsoft.Build.BackEnd
 
             foreach (NodeInfo node in nodes)
             {
-                _nodeIdToProvider[node.NodeId] = nodeProvider;
+                // Node ids are unique within a build, so this must be a fresh mapping. Use TryAdd + assert
+                // (rather than the indexer) to preserve the original Dictionary.Add fail-fast on duplicates.
+                Assumed.True(_nodeIdToProvider.TryAdd(node.NodeId, nodeProvider), $"Node {node.NodeId} already has a provider.");
             }
 
             return nodes;

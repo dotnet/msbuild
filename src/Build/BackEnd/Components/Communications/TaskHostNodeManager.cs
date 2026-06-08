@@ -59,11 +59,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Not used - task host nodes are not tracked in this manager's node-to-provider map.
+        /// Not used - task host nodes are not tracked in this manager's node-to-provider map; their lifetime
+        /// is managed by the build <see cref="NodeManager"/>.
         /// </summary>
         public void RemoveNode(int nodeId)
         {
-            throw new NotSupportedException("not used");
+            throw new NotSupportedException("RemoveNode is not supported on TaskHostNodeManager: task host nodes are not tracked in a node-to-provider map.");
         }
 
         /// <summary>
