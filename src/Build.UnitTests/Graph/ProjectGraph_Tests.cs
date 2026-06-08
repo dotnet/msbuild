@@ -34,10 +34,19 @@ namespace Microsoft.Build.Graph.UnitTests
                                                                                <ProjectReferenceTargets Include='A' Targets='AHelperInner;A' />
                                                                                <ProjectReferenceTargets Include='A' Targets='AHelperOuter' OuterBuild='true' />
                                                                            </ItemGroup>";
+
+        private const string ProjectReferenceTargetsWithMultitargetingDifferentInnerTargets = @"<ItemGroup>
+                                                                               <!-- Item order is important to ensure outer build targets are put in front of inner build ones -->
+                                                                               <ProjectReferenceTargets Include='A' Targets='AHelperInner' InnerBuild='true' />
+                                                                               <ProjectReferenceTargets Include='A' Targets='AHelperOuter' OuterBuild='true' />
+                                                                           </ItemGroup>";
+
         private static string[] NonOuterBuildTargets = { "AHelperOuter", "AHelperInner", "A" };
         private static string[] OuterBuildTargets = { "AHelperOuter" };
+        private static string[] InnerBuildTargets = { "AHelperInner" };
 
         private const string OuterBuildSpecificationWithProjectReferenceTargets = MultitargetingSpecificationPropertyGroup + ProjectReferenceTargetsWithMultitargeting;
+        private const string OuterBuildSpecificationWithProjectReferenceTargetsAndDifferentInnerBuildTargets = MultitargetingSpecificationPropertyGroup + ProjectReferenceTargetsWithMultitargetingDifferentInnerTargets;
 
         public ProjectGraphTests(ITestOutputHelper outputHelper)
         {
@@ -1379,6 +1388,51 @@ $@"
                 foreach (var innerBuild in GetInnerBuilds(projectGraph, projectNumber))
                 {
                     targetLists[innerBuild].ShouldBe(nonOuterBuildTargets);
+                }
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsSupportsDifferentTargetsForOuterAndInnerBuilds()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var root1 = CreateProjectFile(
+                    env: env,
+                    projectNumber: 1,
+                    projectReferences: new[] { 2 },
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: ProjectReferenceTargetsWithMultitargetingDifferentInnerTargets).Path;
+                
+                CreateProjectFile(
+                    env: env,
+                    projectNumber: 2,
+                    projectReferences: null,
+                    projectReferenceTargets: null,
+                    defaultTargets: null,
+                    extraContent: OuterBuildSpecificationWithProjectReferenceTargetsAndDifferentInnerBuildTargets);
+
+                var projectGraph = new ProjectGraph(root1);
+
+                var dot = projectGraph.ToDot();
+
+                projectGraph.ProjectNodes.Count.ShouldBe(4);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new List<string> { "A" });
+
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                var root = GetFirstNodeWithProjectNumber(projectGraph, 1);
+
+                var outerBuild = GetOuterBuild(projectGraph, 2);
+                var innerBuilds = GetInnerBuilds(projectGraph, 2).ToArray();
+
+                targetLists[root].ShouldBe(new[] { "A" });
+                targetLists[outerBuild].ShouldBe(OuterBuildTargets);
+
+                foreach (var innerBuild in innerBuilds)
+                {
+                    targetLists[innerBuild].ShouldBe(InnerBuildTargets);
                 }
             }
         }
