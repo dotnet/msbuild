@@ -80,6 +80,7 @@ When asked to execute a specific phase:
 4. For DARC commands: batch writes into one configuration PR per phase
 5. Record all output URLs in the tracking issue's artifact table
 6. Mark checkboxes as completed in the tracking issue
+7. In **Phase 5**: if `documentation/wiki/ChangeWaves.md` is changed for this release, update the public Learn page at `https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio` (or track the required update with an explicit issue/link in the release artifacts).
 
 ## Key Files
 
@@ -87,6 +88,8 @@ When asked to execute a specific phase:
 |---|---|
 | [`documentation/release-checklist.md`](../../../documentation/release-checklist.md) | **Operational checklist** — the source of truth |
 | [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, public API, major version steps |
+| [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc whose release-cycle updates may require a Learn page sync |
+| [MSBuild Change Waves Learn page](https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio) | Public docs target to update/track during Phase 5 docs work |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
 | [`.config/git-merge-flow-config.jsonc`](../../../.config/git-merge-flow-config.jsonc) | Branch merge chain — update each release |
 | [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
@@ -104,6 +107,7 @@ After completing all phases, verify:
 4. VS insertion PR merged
 5. Packages published to nuget.org
 6. GitHub release created with tag `v{{THIS_RELEASE_EXACT_VERSION}}`
+7. If `documentation/wiki/ChangeWaves.md` is changed, the corresponding Learn page update at `https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio` is completed or explicitly tracked
 
 ## Error Recovery
 
