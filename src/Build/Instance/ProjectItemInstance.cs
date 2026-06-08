@@ -1760,7 +1760,7 @@ namespace Microsoft.Build.Execution
                 // the set of metadata names on 'this', to avoid computing the full metadata collection
                 // of both 'this' and 'other'. Once we have the names for 'this', we enumerate 'other'
                 // and ensure the names we see there are set-equal to the names we produce here.
-                int capacity = _itemDefinitions?.Count ?? 0 + _directMetadata?.Count ?? 0;
+                int capacity = (_itemDefinitions?.Count ?? 0) + (_directMetadata?.Count ?? 0);
                 var thisNames = new HashSet<string>(capacity, MSBuildNameIgnoreCaseComparer.Default);
 
                 if (_itemDefinitions is not null)
