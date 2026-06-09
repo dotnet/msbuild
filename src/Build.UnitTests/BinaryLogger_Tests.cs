@@ -470,10 +470,13 @@ namespace Microsoft.Build.UnitTests
             // relative Include path emitted by child projects must still be embedded. The binary
             // logger runs on the entrypoint node, so a relative path coming from a child project
             // (built on another node) has to be resolved against that child's directory, otherwise
-            // it is silently dropped. A parallel multi-node build forces the items onto worker nodes.
+            // it is silently dropped.
             //
             // The generated file is written via an absolute path so its creation is deterministic;
             // only the EmbedInBinlog Include uses a relative path, which is the behavior under test.
+            // MSBUILDNOINPROCNODE forces every project onto an out-of-proc worker node so the
+            // forwarded-event path (where ProjectFile is not serialized) is always exercised.
+            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
             TransientTestFolder rootFolder = _env.CreateFolder();
 
             const string childProjectContents = @"
