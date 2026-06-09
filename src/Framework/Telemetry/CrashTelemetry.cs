@@ -434,7 +434,14 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         // trimming- and Native AOT-safe.
         if (exception is IBuildEventArgsTelemetryProvider buildEventArgsProvider)
         {
-            LoggerEventType = buildEventArgsProvider.BuildEventArgsTypeName;
+            try
+            {
+                LoggerEventType = buildEventArgsProvider.BuildEventArgsTypeName;
+            }
+            catch
+            {
+                // Best effort: a provider must never cause a secondary failure while collecting crash telemetry.
+            }
         }
     }
 
