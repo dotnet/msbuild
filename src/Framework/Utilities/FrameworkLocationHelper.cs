@@ -1436,9 +1436,14 @@ namespace Microsoft.Build.Shared
 #endif
 
                 // We're installed and we haven't found this framework path yet -- so find it!
+                // FrameworkCurrentPath is the directory of the currently-running runtime's core library
+                // (the same value as typeof(object).Module's directory, but via an accessor that is
+                // single-file/Native AOT safe). On .NET Framework this points at the framework we want
+                // to locate; on .NET (Core) it points at the shared runtime, where the heuristic below
+                // finds no v4.x sibling and returns null.
                 string generatedPathToDotNetFramework =
                                 FindDotNetFrameworkPath(
-                                    Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
+                                    NativeMethods.FrameworkCurrentPath,
                                     this.DotNetFrameworkFolderPrefix,
                                     FileSystems.Default.DirectoryExists,
                                     Directory.GetDirectories,
