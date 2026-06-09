@@ -65,9 +65,20 @@ internal sealed class OutOfProcTaskAppDomainWrapper : IDisposable
                 [taskName, taskLocation, string.Empty]);
         }
 
+        // TypeLoader.Load returns null (rather than throwing) when the requested type cannot be
+        // found in the assembly. Guard against that here so we surface an actionable diagnostic
+        // instead of crashing later with an opaque NullReferenceException.
+        if (taskType == null)
+        {
+            return OutOfProcTaskHostTaskResult.CrashedDuringInitialization(
+                new TypeLoadException($"The \"{taskName}\" task could not be instantiated from \"{taskLocation}\"."),
+                "TaskInstantiationFailureError",
+                [taskName, taskLocation, string.Empty]);
+        }
+
         return InstantiateAndExecuteTask(
             buildEngine,
-            taskType!,
+            taskType,
             taskName,
             taskLocation,
             taskFile,
