@@ -72,6 +72,11 @@
         <target state="translated">Невозможно пропустить задачу, поскольку она не обновлена.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">Конец файла канала не получен в течение {0} с. Возможно, внучатый процесс все еще удерживает канал открытым. Уже переданные выходные данные зарегистрированы в журнале.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: "{0}" завершилась с кодом {1}.</target>

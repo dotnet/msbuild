@@ -24,10 +24,6 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' and '$(DotNetBuildSourceOnly)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
-  </ItemGroup>
-
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
