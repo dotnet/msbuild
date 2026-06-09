@@ -462,17 +462,37 @@ namespace Microsoft.Build.Graph
 
         public readonly struct TargetsToPropagate
         {
-            private readonly ImmutableList<TargetSpecification> _outerBuildTargets;
-            private readonly ImmutableList<TargetSpecification> _allTargets;
+            // Outer build targets occupy the first _outerBuildTargetCount entries of _allTargets,
+            // followed by inner build (non-outer-build) targets. Non-multitargeting projects use
+            // the full array because they act as both outer and inner builds.
+            private readonly TargetSpecification[] _allTargets;
+            private readonly int _outerBuildTargetCount;
 
-            private TargetsToPropagate(ImmutableList<TargetSpecification> outerBuildTargets, ImmutableList<TargetSpecification> nonOuterBuildTargets)
+            private TargetsToPropagate(List<TargetSpecification> outerBuildTargets, List<TargetSpecification> nonOuterBuildTargets)
             {
-                _outerBuildTargets = outerBuildTargets;
+                int outerCount = outerBuildTargets?.Count ?? 0;
+                int innerCount = nonOuterBuildTargets?.Count ?? 0;
+                int total = outerCount + innerCount;
 
-                // This is used as the list of entry targets for both inner builds and non-multitargeting projects.
-                // It represents the concatenation of outer build targets and non outer build targets, in this order.
-                // Non-multitargeting projects use these targets because they act as both outer and inner builds.
-                _allTargets = outerBuildTargets.AddRange(nonOuterBuildTargets);
+                _outerBuildTargetCount = outerCount;
+
+                if (total == 0)
+                {
+                    _allTargets = [];
+                    return;
+                }
+
+                // Single backing array; each source list is copied exactly once.
+                TargetSpecification[] combined = new TargetSpecification[total];
+                if (outerCount > 0)
+                {
+                    outerBuildTargets.CopyTo(combined, 0);
+                }
+                if (innerCount > 0)
+                {
+                    nonOuterBuildTargets.CopyTo(combined, outerCount);
+                }
+                _allTargets = combined;
             }
 
             /// <summary>
@@ -485,10 +505,10 @@ namespace Microsoft.Build.Graph
             /// <param name="project">Project containing the PRT protocol</param>
             /// <param name="entryTargets">Targets with which <paramref name="project"/> will get called</param>
             /// <returns></returns>
-            public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, ImmutableList<string> entryTargets)
+            public static TargetsToPropagate FromProjectAndEntryTargets(ProjectInstance project, string[] entryTargets)
             {
-                ImmutableList<TargetSpecification>.Builder targetsForOuterBuild = ImmutableList.CreateBuilder<TargetSpecification>();
-                ImmutableList<TargetSpecification>.Builder targetsForInnerBuild = ImmutableList.CreateBuilder<TargetSpecification>();
+                List<TargetSpecification> targetsForOuterBuild = null;
+                List<TargetSpecification> targetsForInnerBuild = null;
 
                 ICollection<ProjectItemInstance> projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
 
@@ -501,41 +521,66 @@ namespace Microsoft.Build.Graph
                             string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                             bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets"));
                             bool targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
-                            TargetSpecification[] targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue)
-                                .Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
-                            if (targetsAreForOuterBuild)
+
+                            // Append directly into the destination list. SemiColonTokenizer is a
+                            // struct enumerator, so foreach avoids boxing it through IEnumerable<string>.
+                            // This skips the LINQ Select state machine, its captured-locals closure,
+                            // and an intermediate TargetSpecification[] vs the previous
+                            // .Select(...).ToArray() + AddRange pattern.
+                            ref List<TargetSpecification> dest = ref targetsAreForOuterBuild ? ref targetsForOuterBuild : ref targetsForInnerBuild;
+                            foreach (string target in ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue))
                             {
-                                targetsForOuterBuild.AddRange(targets);
-                            }
-                            else
-                            {
-                                targetsForInnerBuild.AddRange(targets);
+                                dest ??= [];
+                                dest.Add(new TargetSpecification(target, skipNonexistentTargets));
                             }
                         }
                     }
                 }
 
-                return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable());
+                return new TargetsToPropagate(targetsForOuterBuild, targetsForInnerBuild);
             }
 
-            public ImmutableList<string> GetApplicableTargetsForReference(ProjectGraphNode projectGraphNode)
+            public string[] GetApplicableTargetsForReference(ProjectGraphNode projectGraphNode)
             {
-                ImmutableList<string> RemoveNonexistentTargetsIfSkippable(ImmutableList<TargetSpecification> targets)
+                int end = projectGraphNode.ProjectType switch
                 {
-                    // Keep targets that are non-skippable or that exist but are skippable.
-                    return targets
-                        .Where(t => !t.SkipIfNonexistent || projectGraphNode.ProjectInstance.Targets.ContainsKey(t.Target))
-                        .Select(t => t.Target)
-                        .ToImmutableList();
-                }
-
-                return projectGraphNode.ProjectType switch
-                {
-                    ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_allTargets),
-                    ProjectType.OuterBuild => RemoveNonexistentTargetsIfSkippable(_outerBuildTargets),
-                    ProjectType.NonMultitargeting => RemoveNonexistentTargetsIfSkippable(_allTargets),
+                    ProjectType.OuterBuild => _outerBuildTargetCount,
+                    ProjectType.InnerBuild => _allTargets.Length,
+                    ProjectType.NonMultitargeting => _allTargets.Length,
                     _ => throw new ArgumentOutOfRangeException(),
                 };
+
+                if (end == 0)
+                {
+                    return [];
+                }
+
+                // Keep targets that are non-skippable or that exist but are skippable. The common
+                // case is "every target passes the filter", so pre-size a string[] and trim only
+                // if something was actually skipped.
+                string[] result = new string[end];
+                int writeIndex = 0;
+                for (int i = 0; i < end; i++)
+                {
+                    TargetSpecification t = _allTargets[i];
+                    if (!t.SkipIfNonexistent || projectGraphNode.ProjectInstance.Targets.ContainsKey(t.Target))
+                    {
+                        result[writeIndex++] = t.Target;
+                    }
+                }
+
+                if (writeIndex == end)
+                {
+                    return result;
+                }
+
+                if (writeIndex == 0)
+                {
+                    return [];
+                }
+
+                Array.Resize(ref result, writeIndex);
+                return result;
             }
         }
 
