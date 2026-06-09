@@ -1085,14 +1085,15 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Resolves an <c>EmbedInBinlog</c> item spec to an absolute path. Items created on a
-        /// non-entrypoint node carry an Include path relative to their own project directory, but
-        /// the binary logger runs on the entrypoint node, so a relative path would otherwise be
-        /// resolved against the wrong working directory and silently dropped (issue #13789).
-        /// Resolve it against the project's directory when we have that context.
+        /// Resolves a relative <c>EmbedInBinlog</c> item spec against its declaring project's directory.
+        /// The logger runs on the entrypoint node, so an unresolved relative path from a child project
+        /// would be looked up against the wrong directory and silently dropped (issue #13789).
+        /// Separators are normalized so the existence check is consistent cross-platform.
         /// </summary>
         private static string ResolveEmbedPath(string itemSpec, string projectFile)
         {
+            itemSpec = FileUtilities.FixFilePath(itemSpec);
+
             if (Path.IsPathRooted(itemSpec) || string.IsNullOrEmpty(projectFile))
             {
                 return itemSpec;
@@ -1103,11 +1104,11 @@ namespace Microsoft.Build.Logging
                 string projectDirectory = Path.GetDirectoryName(projectFile);
                 return string.IsNullOrEmpty(projectDirectory)
                     ? itemSpec
-                    : Path.Combine(projectDirectory, itemSpec);
+                    : FileUtilities.GetFullPathNoThrow(Path.Combine(projectDirectory, itemSpec));
             }
             catch (ArgumentException)
             {
-                // Invalid characters in the path; fall back to the raw item spec.
+                // Malformed path; fall back to the raw item spec.
                 return itemSpec;
             }
         }

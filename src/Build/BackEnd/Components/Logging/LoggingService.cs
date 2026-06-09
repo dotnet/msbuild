@@ -1392,9 +1392,8 @@ namespace Microsoft.Build.BackEnd.Logging
                          taskParameterEventArgs.BuildEventContext != null &&
                          taskParameterEventArgs.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
-                    // ProjectFile is not serialized across nodes for perf reasons, but the binary logger needs it to
-                    // resolve relative EmbedInBinlog item paths against the originating project's directory (#13789).
-                    // Restore it from the project context map, mirroring what LogBuildEvent does for in-proc events.
+                    // ProjectFile isn't serialized across nodes (perf), but the binary logger needs it to resolve
+                    // relative EmbedInBinlog paths (#13789). Restore it like LogBuildEvent does for in-proc events.
                     taskParameterEventArgs.ProjectFile = GetAndVerifyProjectFileFromContext(taskParameterEventArgs, allowCacheMiss: true);
                 }
             }
