@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests
             const string childProjectContents = @"
 <Project>
     <Target Name=""Build"">
-        <WriteLinesToFile File=""$(MSBuildProjectDirectory)\generated.txt"" Lines=""generated"" Overwrite=""true"" />
+        <WriteLinesToFile File=""$(MSBuildProjectDirectory)/generated.txt"" Lines=""generated"" Overwrite=""true"" />
         <CreateItem Include=""generated.txt"">
             <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
         </CreateItem>
