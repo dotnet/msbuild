@@ -161,7 +161,7 @@ tests that have gone consistently green. (Tests still flaking there simply **sta
 detector** with `-IncludePassed`, which also records passing observations:
 
 ```bash
-pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 400 -IncludePassed -JsonOut quarantine-health.json
+pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 30 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 600 -IncludePassed -JsonOut quarantine-health.json
 ```
 
 This emits the usual JSON plus a `passedTests` array (per normalized test: `distinctBuilds`,
@@ -365,8 +365,9 @@ the same single PR.
 
 **Un-quarantine candidates** — a currently-quarantined test `T` (from the `grep`) qualifies only if:
 
-- `T` is in `passedTests` with `distinctBuilds >= 4` **and** `distinctDays >= 3` (genuinely green across
-  many real **main-branch** CI runs spanning multiple days — not a one-off). These counts already
+- `T` is in `passedTests` with `distinctBuilds >= 50` **and** `distinctDays >= 14` (genuinely green across
+  a large number of real **main-branch** CI runs spanning at least two weeks — not a short green streak).
+  These counts already
   exclude def-344 PR-validation builds, so a fix PR's own green (or any unmerged PR's) can never satisfy
   this — only the fix proven on `main` over time does, **and**
 - `T` is **not** in the Step 1b `flakyTests` at all (zero failures in 344 over the window), **and**
