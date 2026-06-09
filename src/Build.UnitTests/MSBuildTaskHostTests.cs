@@ -25,7 +25,6 @@ public class MSBuildTaskHostTests(ITestOutputHelper testOutput) : IDisposable
     public void Dispose()
         => _environment.Dispose();
 
-    [ActiveIssue("https://github.com/dotnet/msbuild/issues/13933", TestPlatforms.Windows)]
     [WindowsNet35OnlyFact]
     public void CompileNet35WinFormsApp()
     {
