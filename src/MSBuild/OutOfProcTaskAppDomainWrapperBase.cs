@@ -150,7 +150,7 @@ namespace Microsoft.Build.CommandLine
             {
                 return new OutOfProcTaskHostTaskResult(
                                 TaskCompleteType.CrashedDuringInitialization,
-                                new TypeLoadException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskInstantiationFailureError", taskName, taskLocation, String.Empty)),
+                                new TypeLoadException($"The \"{taskName}\" task could not be instantiated from \"{taskLocation}\"."),
                                 "TaskInstantiationFailureError",
                                 [taskName, taskLocation, String.Empty]);
             }
