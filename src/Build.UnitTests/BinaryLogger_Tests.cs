@@ -508,7 +508,7 @@ namespace Microsoft.Build.UnitTests
             File.WriteAllText(parentProjectPath, parentProjectContents);
 
             RunnerUtilities.ExecMSBuild(
-                $"\"{parentProjectPath}\" -m -bl:\"{_logFile};ProjectImports=ZipFile\"",
+                $"\"{parentProjectPath}\" -m:2 -bl:\"{_logFile};ProjectImports=ZipFile\"",
                 out bool success);
             success.ShouldBeTrue();
 

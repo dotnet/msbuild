@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="new">MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</target>
+        <target state="translated">MSB3071: A: ile Z: arasındaki tüm sürücü harfleri şu anda kullanımda. "{0}" çalışma dizini (UNC yolu "{1}" olarak çözülür) UNC eşlemesi gerektirdiğinden, "Exec" görevinin UNC yolunu eşleyeceği serbest bir sürücü harfi gerekiyor. Sürücü harflerini serbest bırakmak üzere bir veya birden çok paylaşılan kaynağın bağlantısını kesin veya bu komutu yeniden denemeden önce yerel bir çalışma dizini belirtin.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -566,7 +566,7 @@
       </trans-unit>
       <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
         <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
-        <target state="new">MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</target>
+        <target state="translated">MSB4311: '{0}' InputUrl değeri, yalnızca boşluk karakterlerinden oluştuğundan Windows'da geçerli bir yol değil.</target>
         <note>{StrBegin="MSB4311: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">

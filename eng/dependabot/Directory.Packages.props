@@ -72,7 +72,7 @@
     <PackageVersion Update="PolySharp" Condition="'$(PolySharpVersion)' != ''" Version="$(PolySharpVersion)" />
   </ItemGroup>
 
-  <!-- Roslyn analyzer authoring packages (used by ThreadSafeTaskAnalyzer) -->
+  <!-- Roslyn analyzer authoring packages (used by TaskAnalyzer) -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />

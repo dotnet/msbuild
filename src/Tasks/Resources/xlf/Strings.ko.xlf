@@ -566,7 +566,7 @@
       </trans-unit>
       <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
         <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
-        <target state="new">MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</target>
+        <target state="translated">MSB4311: InputUrl 값 '{0}'은(는) 공백 문자로만 구성되어 있으므로 Windows에서 유효한 경로가 아닙니다.</target>
         <note>{StrBegin="MSB4311: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">

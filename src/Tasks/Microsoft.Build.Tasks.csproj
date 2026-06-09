@@ -617,7 +617,7 @@
   </ItemGroup>
   <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
   <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
-    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
     <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
@@ -646,9 +646,6 @@
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
