@@ -71,7 +71,7 @@ internal sealed class OutOfProcTaskAppDomainWrapper : IDisposable
         if (taskType == null)
         {
             return OutOfProcTaskHostTaskResult.CrashedDuringInitialization(
-                new TypeLoadException($"The \"{taskName}\" task could not be instantiated from \"{taskLocation}\"."),
+                new TypeLoadException(),
                 "TaskInstantiationFailureError",
                 [taskName, taskLocation, string.Empty]);
         }

@@ -18,8 +18,7 @@ namespace Microsoft.Build.UnitTests
         /// When the requested task type cannot be found in the assembly, the underlying
         /// <c>TypeLoader.Load</c> returns <see langword="null"/> rather than throwing. In that case
         /// ExecuteTask must report a graceful initialization failure instead of crashing with a
-        /// <see cref="System.NullReferenceException"/> (see dotnet/msbuild issue about NRE in
-        /// OutOfProcTaskAppDomainWrapperBase.ExecuteTask).
+        /// <see cref="System.NullReferenceException"/>.
         /// </summary>
         [Fact]
         public void ExecuteTaskReturnsInitializationFailureWhenTaskTypeNotFound()
