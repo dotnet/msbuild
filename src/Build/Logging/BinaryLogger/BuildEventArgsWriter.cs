@@ -1094,21 +1094,21 @@ namespace Microsoft.Build.Logging
         {
             itemSpec = FileUtilities.FixFilePath(itemSpec);
 
-            if (Path.IsPathRooted(itemSpec) || string.IsNullOrEmpty(projectFile))
-            {
-                return itemSpec;
-            }
-
             try
             {
+                if (Path.IsPathRooted(itemSpec) || string.IsNullOrEmpty(projectFile))
+                {
+                    return itemSpec;
+                }
+
                 string projectDirectory = Path.GetDirectoryName(projectFile);
                 return string.IsNullOrEmpty(projectDirectory)
                     ? itemSpec
                     : FileUtilities.GetFullPathNoThrow(Path.Combine(projectDirectory, itemSpec));
             }
-            catch (ArgumentException)
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
             {
-                // Malformed path; fall back to the raw item spec.
+                // Malformed path; fall back to the raw item spec, matching the pre-existing pass-through behavior.
                 return itemSpec;
             }
         }
