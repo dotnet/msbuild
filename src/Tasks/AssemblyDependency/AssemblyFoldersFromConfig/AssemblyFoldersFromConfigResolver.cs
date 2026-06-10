@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                                 _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);
                             }
                         }
-                        catch (SerializationException e)
+                        catch (XmlException e)
                         {
                             _taskLogger.LogError(ResourceUtilities.GetResourceString("ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed"), _assemblyFolderConfigFile, e.Message);
                             return;

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
@@ -381,6 +382,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Writes the logging packet to the translator.
         /// </summary>
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2075:UnrecognizedReflectionPattern",
+            Justification = "Every BuildEventArgs-derived type that flows through logging defines a non-public WriteToStream method; this reflective lookup is the established serialization contract and the method is preserved on the concrete event types.")]
         internal void WriteToStream(ITranslator translator)
         {
             Assumed.NotEqual(_eventType, LoggingEventType.CustomEvent, "_eventType should not be a custom event");

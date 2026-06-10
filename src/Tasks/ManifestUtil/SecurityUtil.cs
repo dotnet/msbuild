@@ -11,9 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Deployment.Internal.CodeSigning;
 using System.Diagnostics;
-#if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics.CodeAnalysis;
-#endif
 using System.Globalization;
 using System.IO;
 #if !RUNTIME_TYPE_NETCORE
@@ -47,6 +45,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public static class SecurityUtilities
     {
+        private const string SignFileRequiresUnreferencedCodeMessage = "Signing a ClickOnce manifest reads and writes it with XmlSerializer and resolves SignedXml algorithms by name; members may be trimmed.";
+        private const string SignFileRequiresDynamicCodeMessage = "Signing a ClickOnce manifest uses XmlSerializer, XslCompiledTransform, and SignedXml, all of which require runtime code generation not supported with Native AOT.";
+
 #if RUNTIME_TYPE_NETCORE
         // Partial trust and permission sets are not supported by .NET Core.
 #else
@@ -500,6 +501,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
             SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion: null, targetFrameworkIdentifier: null);
@@ -513,6 +516,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -530,6 +535,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -549,6 +556,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
         /// <param name="disallowMansignTimestampFallback">Disallow fallback to legacy timestamping when RFC3161 timestamping fails during manifest signing</param>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -608,6 +617,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function is only for signing a manifest, not a PE file.</remarks>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
             using X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
@@ -633,6 +644,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <remarks>This function can only sign a PE file if the X509Certificate2 parameter represents a certificate in the
         /// current user's personal certificate store.</remarks>
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
@@ -641,6 +654,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         [SupportedOSPlatform("windows")]
+        [RequiresUnreferencedCode(SignFileRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignFileRequiresDynamicCodeMessage)]
         private static void SignFileInternal(X509Certificate2 cert,
                                             Uri timestampUrl,
                                             string path,

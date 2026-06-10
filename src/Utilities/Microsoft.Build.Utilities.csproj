@@ -5,6 +5,9 @@
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <RootNamespace>Microsoft.Build.Utilities</RootNamespace>
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
     <EnableDocumentationFile>true</EnableDocumentationFile>

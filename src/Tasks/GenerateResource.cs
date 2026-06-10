@@ -257,7 +257,9 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return (ITaskItem[])_filesWritten.ToArray(typeof(ITaskItem));
+                ITaskItem[] filesWritten = new ITaskItem[_filesWritten.Count];
+                _filesWritten.CopyTo(filesWritten);
+                return filesWritten;
             }
         }
 

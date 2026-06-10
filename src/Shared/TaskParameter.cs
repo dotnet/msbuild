@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -390,6 +391,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serializes or deserializes an array of primitive type values wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "The element type is always one of the primitive value types selected by the TypeCode switch below, so Array.CreateInstance does not need to generate code for an unknown type.")]
         private void TranslatePrimitiveTypeArray(ITranslator translator)
         {
             translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
