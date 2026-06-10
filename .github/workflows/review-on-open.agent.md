@@ -8,9 +8,10 @@ description: "Automatically runs the expert-reviewer agent when a non-draft PR i
 # write permissions (see the compiled lock file for the gating logic).
 #
 # Uses pull_request_target (not pull_request) so that fork PRs have
-# access to the repo secret needed for the Copilot token. This is safe
-# because the agent reads the diff via GitHub MCP tools — it does not
-# check out or execute code from the PR branch.
+# access to the repo secret needed for the Copilot token. To keep that
+# safe, the workflow checks out only the trusted base repo (see `checkout:`
+# below) and the agent reviews the diff via GitHub MCP tools; it never
+# executes PR code.
 #
 # NOTE: The gh-aw compiler does not support `ready_for_review` as a
 # type for pull_request_target. Only `opened` is used here; for PRs
@@ -50,8 +51,13 @@ imports:
   - shared/pat_pool.md
   - shared/review-shared.md
 
-# The agent reads the PR diff via GitHub MCP tools, so the auto-injected checkout is not needed (and can be a security concern)
-checkout: false
+# The agent reads the PR diff via GitHub MCP tools, so it never needs the
+# untrusted PR head checked out. Because pull_request_target runs with secret
+# access, check out only the trusted base repository (never the PR head) to
+# satisfy the framework's git operations without the "pwn request" risk.
+checkout:
+  repository: ${{ github.repository }}
+  ref: ${{ github.event.pull_request.base.sha }}
 
 timeout-minutes: 60
 ---
