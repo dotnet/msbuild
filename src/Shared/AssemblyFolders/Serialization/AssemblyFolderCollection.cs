@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -20,7 +21,9 @@ namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
         /// </summary>
         /// <param name="filePath">Path to the AssemblyFolders config file.</param>
         /// <returns>A collection populated from the file.</returns>
-        /// <exception cref="XmlException">The file is not well-formed XML.</exception>
+        /// <exception cref="XmlException">The file is not well-formed XML, has an unexpected root element, or an AssemblyFolder is missing a required element.</exception>
+        /// <exception cref="IOException">The file could not be read.</exception>
+        /// <exception cref="UnauthorizedAccessException">The caller does not have permission to read the file.</exception>
         internal static AssemblyFolderCollection Load(string filePath)
         {
             // The expected document shape is:
