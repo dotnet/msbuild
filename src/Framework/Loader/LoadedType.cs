@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
@@ -27,6 +28,7 @@ namespace Microsoft.Build.Shared
         /// <param name="architecture">Assembly architecture extracted from PE flags</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         internal LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
             Type type,
             AssemblyLoadInfo assemblyLoadInfo,
             Assembly loadedAssembly,
