@@ -27,7 +27,7 @@ Fill in these values before starting. Version increments are irregular — they 
 |---|---|---|
 | `{{PREVIOUS_RELEASE_VERSION}}` | Version being replaced as latest | |
 | `{{THIS_RELEASE_VERSION}}` | Version being released now | |
-| `{{THIS_RELEASE_EXACT_VERSION}}` | Full `VersionPrefix` from `eng/Versions.props` on the release branch after final branding (e.g. `18.6.0`). For non-patch releases this is always `{{THIS_RELEASE_VERSION}}.0`. | |
+| `{{THIS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` that **actually shipped** to customers — read it from VS `rel/stable` (see Phase 5.1a), **not** assumed. It is usually `{{THIS_RELEASE_VERSION}}.0`, but an OptProf-driven insertion bump can make the shipped version `{{THIS_RELEASE_VERSION}}.1` or higher (e.g. 18.7 shipped as `18.7.1`). | |
 | `{{NEXT_VERSION}}` | Version that main will be bumped to | |
 | `{{BRANCH_SNAP_DATE}}` | Date we create `vs{{THIS_RELEASE_VERSION}}` from `main`. | |
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
@@ -63,7 +63,7 @@ Fill in these values before starting. Version increments are irregular — they 
 Steps are **sequential** — complete in order.
 
 - [ ] **1.0** **Pre-snap team check.** Before snapping the branch, ping the MSBuild team to confirm there is nothing they still need to merge into `main` that should ship in `{{THIS_RELEASE_VERSION}}`. Anything that lands in `main` after Phase 1.1 will go into `{{NEXT_VERSION}}` instead.
-- [ ] **1.1** Create branch `vs{{THIS_RELEASE_VERSION}}` from HEAD of `main` (**requires repo admin rights** — `git push` to `refs/heads/vs*` is restricted; if you don't have permission, ping [@rainersigwald](https://github.com/rainersigwald)): \
+- [ ] **1.1** Create branch `vs{{THIS_RELEASE_VERSION}}` from HEAD of `main` (**requires repo admin rights** — `git push` to `refs/heads/vs*` is restricted; if you don't have permission, ask a repo admin with `vs*` push rights to do it): \
 `git push upstream HEAD:refs/heads/vs{{THIS_RELEASE_VERSION}}`
   - _If branched too early_ (main has commits that shouldn't be in the release): fast-forward the branch to the correct commit (the one currently inserted into VS main): \
   `git push upstream <correct_sha>:refs/heads/vs{{THIS_RELEASE_VERSION}}`
@@ -198,7 +198,7 @@ Steps are **mostly parallel** unless noted.
 
   - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers.
     - **If this release is coupled with an SDK release: use the SDK as the source of truth**. Look up the MSBuild version baked into the shipped SDK build.
-    - Otherwise: look at the MSBuild version inserted into the corresponding VS build. Confirm against the actual VS insertion PR.
+    - Otherwise, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
   - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`).
   - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`artifacts-shipping`** drop. Verify the Shipping folder contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
