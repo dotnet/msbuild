@@ -989,7 +989,7 @@ namespace Microsoft.Build.Tasks
                             // We only want to parse data nodes,
                             // the mimetype attribute gives the serializer
                             // that's requested.
-                            if (reader.LocalName.Equals("data") || reader.LocalName.Equals("metadata"))
+                            if (s.Equals("data") || s.Equals("metadata"))
                             {
                                 if (reader["mimetype"] != null)
                                 {
@@ -1013,6 +1013,12 @@ namespace Microsoft.Build.Tasks
                                     }
                                 }
                             }
+                        }
+
+                        // The result is already determined; no need to keep parsing the rest of the file.
+                        if (dangerous)
+                        {
+                            break;
                         }
                     }
                 }
