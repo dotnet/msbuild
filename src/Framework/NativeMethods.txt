@@ -16,12 +16,13 @@ CreateItemMoniker
 CreatePipe
 CreateProcess
 CreateSymbolicLink
+DebugCreate
 DEBUG_PROC_DESC_NO_MTS_PACKAGES
 DEBUG_PROC_DESC_NO_PATHS
 DEBUG_PROC_DESC_NO_SERVICES
 DEBUG_PROC_DESC_NO_SESSION_ID
 DEBUG_PROC_DESC_NO_USER_NAME
-DebugCreate
+DefineDosDevice
 EndUpdateResource
 EOLE_AUTHENTICATION_CAPABILITIES
 FACILITY_CODE
@@ -31,6 +32,10 @@ FILE_FLAGS_AND_ATTRIBUTES
 FILE_MAP
 FILE_SHARE_MODE
 FILETIME
+FindClose
+FindFirstFile
+FindNextFile
+FindResource
 FreeEnvironmentStrings
 FreeEnvironmentStringsW
 FreeLibrary
@@ -71,7 +76,11 @@ INVALID_FILE_ATTRIBUTES
 INVALID_HANDLE_VALUE
 IRunningObjectTable
 KNOWN_FOLDER_FLAG
+LOAD_LIBRARY_FLAGS
 LoadLibrary
+LoadLibraryEx
+LoadResource
+LockResource
 MapViewOfFile
 MAX_PATH
 MEMORYSTATUSEX
@@ -80,6 +89,7 @@ MoveFileEx
 NtQueryInformationProcess
 OpenProcess
 PAGE_PROTECTION_FLAGS
+PathMatchSpecEx
 PROCESS_ACCESS_RIGHTS
 PROCESS_BASIC_INFORMATION
 PROCESS_CREATION_FLAGS
@@ -87,6 +97,8 @@ PROCESS_INFORMATION
 PropVariantClear
 PWSTR
 PCWSTR
+PCSTR
+QueryDosDevice
 ReadFile
 REGDB_E_CLASSNOTREG
 RM_APP_TYPE
@@ -108,8 +120,10 @@ SECURITY_ATTRIBUTES
 SetConsoleMode
 SetCurrentDirectory
 SetEnvironmentVariable
+SetFileTime
 SetThreadErrorMode
 SHGetKnownFolderPath
+SizeofResource
 STARTUPINFOW
 STARTUPINFOW_FLAGS
 SYMBOLIC_LINK_FLAGS

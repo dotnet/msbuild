@@ -6,6 +6,7 @@
     <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Microsoft.Build.Utilities.UnitTests</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,9 +30,6 @@
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
-    <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs">
-      <Link>NativeMethods.cs</Link>
-    </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>

@@ -469,11 +469,10 @@ namespace Microsoft.Build.Experimental
                 // Set DOTNET_ROOT so the apphost server child can locate the runtime; this
                 // override is replaced by the client's environment on the first build command
                 // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
-                // The `!` works around dotnet/msbuild#13761.
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
                     CommandLineArgs: string.Join(" ", msBuildServerOptions),
-                    EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides()!);
+                    EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
 
                 using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
                 _launchedServerPid = msbuildProcess.Id;

@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           sparse-checkout: |
             .github/skills
@@ -118,7 +118,7 @@ jobs:
 
       - name: Restore skill-validator from cache
         id: cache-sv
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@https://github.com/actions/download-artifact/commit/3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v5.0.5
         with:
           path: skill-validator-bin
           key: skill-validator-linux-x64-${{ steps.cache-date.outputs.date }}
@@ -141,7 +141,7 @@ jobs:
 
       - name: Save skill-validator to cache
         if: steps.cache-sv.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@https://github.com/actions/download-artifact/commit/3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v5.0.5
         with:
           path: skill-validator-bin
           key: skill-validator-linux-x64-${{ steps.cache-date.outputs.date }}
