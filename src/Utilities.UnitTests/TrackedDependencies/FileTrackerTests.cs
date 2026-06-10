@@ -19,6 +19,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 
+using Shouldly;
 using Xunit;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -250,14 +251,9 @@ namespace Microsoft.Build.UnitTests.FileTracking
             FileTrackerTestHelper.CleanTlogs();
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void CompileCSharpExecutable_CompilesSimpleProgram()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // This test is Windows-only
-            }
-
             string outputFile = Path.Combine(Path.GetTempPath(), $"TestCompile_{Guid.NewGuid()}.exe");
             try
             {
@@ -270,9 +266,8 @@ class Program
         Console.WriteLine(""Hello from compiled code!"");
     }
 }";
-                bool compileSucceeded = FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
-                Assert.True(compileSucceeded, "Compilation should succeed");
-                Assert.True(File.Exists(outputFile), "Output executable should exist");
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
+                File.Exists(outputFile).ShouldBeTrue("Output executable should exist");
             }
             finally
             {
@@ -509,8 +504,7 @@ namespace ConsoleApplication4
 
             try
             {
-                bool compileSucceeded = FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
-                Assert.True(compileSucceeded);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -607,8 +601,7 @@ namespace ConsoleApplication4
             {
                 string inputPath = Path.GetFullPath("test.in");
                 string codeContent = @"using System.IO; class X { static void Main() { File.ReadAllText(@""" + inputPath + @"""); File.ReadAllText(@""" + inputPath + @"""); }}";
-                bool compileSucceeded = FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
-                Assert.True(compileSucceeded);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -662,8 +655,7 @@ class X
     }
 }";
 
-                bool compileSucceeded = FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
-                Assert.True(compileSucceeded);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -2443,8 +2435,7 @@ namespace ConsoleApplication4
 
                 File.Delete(outputFile);
 
-                bool compileSucceeded = FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile, "x86");
-                Assert.True(compileSucceeded);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile, "x86");
 
                 // Item1: appname
                 // Item2: command line
@@ -2727,8 +2718,8 @@ namespace ConsoleApplication4
         /// <param name="sourceCode">The C# source code to compile.</param>
         /// <param name="outputPath">The path where the executable will be written.</param>
         /// <param name="platform">Optional platform target (e.g., "x86", "x64", "AnyCpu"). Defaults to AnyCpu.</param>
-        /// <returns>True if compilation succeeded, false otherwise.</returns>
-        public static bool CompileCSharpExecutable(string sourceCode, string outputPath, string platform = null)
+        /// <exception cref="InvalidOperationException">Thrown when compilation fails; the message contains the compiler diagnostics.</exception>
+        public static void CompileCSharpExecutable(string sourceCode, string outputPath, string platform = null)
         {
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
@@ -2753,23 +2744,14 @@ namespace ConsoleApplication4
             }
 
             // Determine platform
-            Platform targetPlatform = Platform.AnyCpu;
-            if (!string.IsNullOrEmpty(platform))
-            {
-                switch (platform.ToLowerInvariant())
+            Platform targetPlatform = string.IsNullOrEmpty(platform)
+                ? Platform.AnyCpu
+                : platform.ToLowerInvariant() switch
                 {
-                    case "x86":
-                        targetPlatform = Platform.X86;
-                        break;
-                    case "x64":
-                        targetPlatform = Platform.X64;
-                        break;
-                    case "anycpu":
-                    default:
-                        targetPlatform = Platform.AnyCpu;
-                        break;
-                }
-            }
+                    "x86" => Platform.X86,
+                    "x64" => Platform.X64,
+                    _ => Platform.AnyCpu,
+                };
 
             CSharpCompilationOptions options = new CSharpCompilationOptions(
                 OutputKind.ConsoleApplication,
@@ -2778,7 +2760,7 @@ namespace ConsoleApplication4
 
             CSharpCompilation compilation = CSharpCompilation.Create(
                 assemblyName,
-                syntaxTrees: new[] { syntaxTree },
+                syntaxTrees: [syntaxTree],
                 references: references,
                 options: options);
 
@@ -2786,13 +2768,15 @@ namespace ConsoleApplication4
 
             if (!result.Success)
             {
-                foreach (Diagnostic diagnostic in result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error))
-                {
-                    Console.WriteLine($"Compilation error: {diagnostic.GetMessage()}");
-                }
-            }
+                string diagnostics = string.Join(
+                    Environment.NewLine,
+                    result.Diagnostics
+                        .Where(d => d.Severity == DiagnosticSeverity.Error)
+                        .Select(d => $"Compilation error: {d.GetMessage()}"));
 
-            return result.Success;
+                throw new InvalidOperationException(
+                    $"Compilation failed for '{outputPath}'.{Environment.NewLine}{diagnostics}");
+            }
         }
     }
 }
