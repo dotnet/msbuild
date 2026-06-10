@@ -54,6 +54,15 @@ namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
                 document.Load(reader);
             }
 
+            // Validate the root element. The previous DataContractSerializer (with verifyObjectName)
+            // rejected documents whose root was not <AssemblyFoldersConfig>; preserve that so a file
+            // with an unexpected root (or stray <AssemblyFolder> nodes under an unrelated root) is
+            // reported as malformed rather than silently changing assembly resolution.
+            if (document.DocumentElement?.LocalName != "AssemblyFoldersConfig")
+            {
+                throw new XmlException("The AssemblyFolders config file is missing the expected root element 'AssemblyFoldersConfig'.");
+            }
+
             List<AssemblyFolderItem> assemblyFolders = [];
             foreach (XmlNode folder in document.GetElementsByTagName("AssemblyFolder"))
             {
@@ -75,6 +84,15 @@ namespace Microsoft.Build.Shared.AssemblyFoldersFromConfig
                             item.Platform = child.InnerText;
                             break;
                     }
+                }
+
+                // FrameworkVersion and Path were [DataMember(IsRequired = true)] under the previous
+                // serializer; Name and Platform were optional. Downstream code dereferences both
+                // required values, so treat a folder missing either as a malformed config rather than
+                // letting it surface later as a NullReferenceException.
+                if (item.FrameworkVersion is null || item.Path is null)
+                {
+                    throw new XmlException("An 'AssemblyFolder' element is missing the required 'FrameworkVersion' or 'Path' element.");
                 }
 
                 assemblyFolders.Add(item);

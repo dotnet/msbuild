@@ -168,15 +168,62 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             LoadXml("<AssemblyFoldersConfig><AssemblyFolders></AssemblyFolders></AssemblyFoldersConfig>").AssemblyFolders.ShouldBeEmpty();
 
         [Fact]
-        public void SelfClosingAssemblyFolder_YieldsItemWithNullFields()
+        public void SelfClosingAssemblyFolder_ThrowsXmlException()
         {
+            // FrameworkVersion and Path are required; a folder missing them is a malformed config.
+            // Downstream code dereferences both, and the resolver expects malformed configs to surface
+            // as XmlException.
             string xml = "<AssemblyFoldersConfig><AssemblyFolders><AssemblyFolder /></AssemblyFolders></AssemblyFoldersConfig>";
 
-            AssemblyFolderItem folder = LoadXml(xml).AssemblyFolders.ShouldHaveSingleItem();
-            folder.Name.ShouldBeNull();
-            folder.FrameworkVersion.ShouldBeNull();
-            folder.Path.ShouldBeNull();
-            folder.Platform.ShouldBeNull();
+            Should.Throw<XmlException>(() => LoadXml(xml));
+        }
+
+        [Fact]
+        public void MissingFrameworkVersion_ThrowsXmlException()
+        {
+            string xml = @"
+<AssemblyFoldersConfig>
+  <AssemblyFolders>
+    <AssemblyFolder>
+      <Path>C:\folder</Path>
+    </AssemblyFolder>
+  </AssemblyFolders>
+</AssemblyFoldersConfig>";
+
+            Should.Throw<XmlException>(() => LoadXml(xml));
+        }
+
+        [Fact]
+        public void MissingPath_ThrowsXmlException()
+        {
+            string xml = @"
+<AssemblyFoldersConfig>
+  <AssemblyFolders>
+    <AssemblyFolder>
+      <FrameworkVersion>v4.5</FrameworkVersion>
+    </AssemblyFolder>
+  </AssemblyFolders>
+</AssemblyFoldersConfig>";
+
+            Should.Throw<XmlException>(() => LoadXml(xml));
+        }
+
+        [Fact]
+        public void WrongRootElement_ThrowsXmlException()
+        {
+            // A document with stray <AssemblyFolder> nodes under an unexpected root must be rejected,
+            // not silently parsed (which would change assembly resolution).
+            string xml = @"
+<SomethingElse>
+  <AssemblyFolders>
+    <AssemblyFolder>
+      <FrameworkVersion>v4.5</FrameworkVersion>
+      <Path>C:\folder</Path>
+    </AssemblyFolder>
+  </AssemblyFolders>
+</SomethingElse>";
+
+            Should.Throw<XmlException>(() => LoadXml(xml));
         }
 
         [Fact]
