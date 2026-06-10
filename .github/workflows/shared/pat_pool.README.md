@@ -130,8 +130,8 @@ There are several details of this implementation that keep our workflows and rep
    `case` statement acting as a very simple secret store.
 1. **The `select-pat-number` step does not require any permissions.** It
    reads only the `COPILOT_PAT_#` environment variables passed to it and writes
-   only to `GITHUB_OUTPUT`. The job that hosts it sets `permissions:` to the
-   workflow defaults (no elevated scopes).
+   only to `GITHUB_OUTPUT`. The `pat_pool` job sets `permissions: {}`
+   explicitly so it never inherits elevated scopes from the consuming workflow.
 1. **The implementation uses supported Agentic Workflow extensibility hooks.**
    Defining a custom job inside an [imported workflow file][imports] is
    supported by `gh aw compile`. Declaring `pat_pool` in the consuming

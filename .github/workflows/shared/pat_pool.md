@@ -4,6 +4,10 @@ description: Agentic workflow import to integrate the Copilot PAT Pool
 jobs:
   pat_pool:
     runs-on: ubuntu-slim
+    # This job only selects a pool index; it never needs repository scopes.
+    # Set no permissions explicitly so it cannot inherit elevated defaults
+    # from a consuming workflow.
+    permissions: {}
     outputs:
       pat_number: ${{ steps.select-pat-number.outputs.copilot_pat_number }}
     steps:
@@ -44,10 +48,13 @@ jobs:
             exit 0
           fi
 
-          # Select a random index using the seed if specified
-          if [ -n "$RANDOM_SEED" ]; then
-            RANDOM=$RANDOM_SEED
-          fi
+          # Select a random index using the seed if specified. Only honor an
+          # integer seed; ignore any other value so a malformed seed (e.g. a
+          # non-integer) can never abort the job under `set -e`.
+          case "$RANDOM_SEED" in
+            '' | *[!0-9]*) ;; # empty or non-integer: leave RANDOM unseeded
+            *) RANDOM=$RANDOM_SEED ;;
+          esac
 
           PAT_INDEX=$(( RANDOM % ${#PAT_NUMBERS[@]} ))
           PAT_NUMBER="${PAT_NUMBERS[$PAT_INDEX]}"
@@ -98,9 +105,9 @@ import-schema:
     required: false
     default: ${{ secrets.COPILOT_GITHUB_TOKEN_8 }}
   random_seed:
-    type: number
+    type: string
     required: false
     description: >-
-      A seed number to use for the random PAT number selection,
-      for deterministic selection if needed.
+      An integer seed for the random PAT number selection, for deterministic
+      selection if needed. Non-integer values are ignored.
 ---
