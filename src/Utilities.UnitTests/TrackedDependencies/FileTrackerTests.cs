@@ -2772,7 +2772,7 @@ namespace ConsoleApplication4
                     Environment.NewLine,
                     result.Diagnostics
                         .Where(d => d.Severity == DiagnosticSeverity.Error)
-                        .Select(d => $"Compilation error: {d.GetMessage()}"));
+                        .Select(d => d.ToString()));
 
                 throw new InvalidOperationException(
                     $"Compilation failed for '{outputPath}'.{Environment.NewLine}{diagnostics}");
