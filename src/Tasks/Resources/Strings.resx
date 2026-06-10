@@ -1160,7 +1160,7 @@
     <comment>{StrBegin="MSB3820: "}</comment>
   </data>
   <data name="GenerateResource.MOTW">
-    <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</value>
+    <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</value>
     <comment>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</comment>
   </data>
   <data name="GenerateResource.PreserializedResourcesRequiresExtensions">
