@@ -20,31 +20,60 @@
 
 using System;
 
-namespace Windows.Win32.System.Com;
-
-internal partial struct IUnknown : IComIID
+namespace Windows.Win32.System.Com
 {
-    readonly Guid IComIID.Guid => IID_Guid;
+    internal partial struct IUnknown : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct IRunningObjectTable : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct IMoniker : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct IErrorInfo : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct IGlobalInterfaceTable : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct ITypeLib : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct ITypeLib2 : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct ITypeInfo : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
+
+    internal partial struct ITypeComp : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
 }
 
-internal partial struct IRunningObjectTable : IComIID
+namespace Windows.Win32.System.Com.Urlmon
 {
-    readonly Guid IComIID.Guid => IID_Guid;
-}
-
-internal partial struct IMoniker : IComIID
-{
-    readonly Guid IComIID.Guid => IID_Guid;
-}
-
-internal partial struct IErrorInfo : IComIID
-{
-    readonly Guid IComIID.Guid => IID_Guid;
-}
-
-internal partial struct IGlobalInterfaceTable : IComIID
-{
-    readonly Guid IComIID.Guid => IID_Guid;
+    internal partial struct IInternetSecurityManager : IComIID
+    {
+        readonly Guid IComIID.Guid => IID_Guid;
+    }
 }
 
 #endif

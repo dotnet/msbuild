@@ -31,6 +31,11 @@ using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
+#if RUNTIME_TYPE_NETCORE && FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.LibraryLoader;
+#endif
 
 #nullable disable
 
@@ -674,7 +679,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             else
             {
 #if RUNTIME_TYPE_NETCORE
-                IntPtr hModule = IntPtr.Zero;
+#if FEATURE_WINDOWSINTEROP
+                HMODULE hModule = default;
+#endif
 
                 using (RSA rsa = cert.GetRSAPrivateKey())
 #else
@@ -710,19 +717,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                             signer = new CmiManifestSigner2(rsa, cert, useSha256);
                         }
 
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE && FEATURE_WINDOWSINTEROP
                         // Manifest signing uses .NET FX APIs, implemented in clr.dll.
                         // Load the library explicitly.
+                        if (NativeMethodsShared.IsWindows)
+                        {
+                            string clrDllDir = Path.Combine(
+                                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                                    "Microsoft.NET",
+                                    Environment.Is64BitProcess ? "Framework64" : "Framework",
+                                    "v4.0.30319");
 
-                        string clrDllDir = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                                "Microsoft.NET",
-                                Environment.Is64BitProcess ? "Framework64" : "Framework",
-                                "v4.0.30319");
-
-                        NativeMethods.SetDllDirectoryW(clrDllDir);
-                        hModule = NativeMethods.LoadLibraryExW(Path.Combine(clrDllDir, "clr.dll"), IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
-                        // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
+                            PInvoke.SetDllDirectory(clrDllDir);
+                            hModule = PInvoke.LoadLibraryEx(Path.Combine(clrDllDir, "clr.dll"), LOAD_LIBRARY_FLAGS.LOAD_LIBRARY_AS_DATAFILE);
+                            // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
+                        }
 #endif
                         if (timestampUrl == null)
                         {
@@ -744,15 +753,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         throw new ApplicationException(ex.Message, ex);
                     }
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE && FEATURE_WINDOWSINTEROP
                     finally
                     {
-                        if (hModule != IntPtr.Zero)
+                        if (NativeMethodsShared.IsWindows)
                         {
-                            NativeMethods.FreeLibrary(hModule);
-                        }
+                            if (!hModule.IsNull)
+                            {
+                                PInvoke.FreeLibrary(hModule);
+                            }
 
-                        NativeMethods.SetDllDirectoryW(null);
+                            PInvoke.SetDllDirectory((string)null);
+                        }
                     }
 #endif
                 }

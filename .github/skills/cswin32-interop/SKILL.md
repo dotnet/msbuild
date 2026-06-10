@@ -110,6 +110,8 @@ Windows-only files are excluded via `<Compile Remove>` instead — no `#if` insi
 
 Cast `int`/`uint` return codes via `(WIN32_ERROR)res` for `switch` and equality. Add the enum to `NativeMethods.txt` if not yet generated, then check `obj/.../generated/Microsoft.Windows.CsWin32/.../Windows.Win32.<EnumName>.g.cs`.
 
+**Some flag values are standalone constants, not enum members.** A Win32 `#define` outside a `typedef enum` generates as an `internal const` on `PInvoke`. Example: the `LoadTypeLibEx` flags are `PInvoke.LOAD_TLB_AS_32BIT` / `_64BIT` (`uint`), **not** members of `REGKIND` (which has only `REGKIND_DEFAULT/REGISTER/NONE`). Add the *constant name* to `NativeMethods.txt` like any API. OR it onto an enum at the constant's width and cast back: `(REGKIND)((uint)REGKIND.REGKIND_NONE | PInvoke.LOAD_TLB_AS_32BIT)`. Don't reintroduce a local `const` CsWin32 already emits.
+
 **Match local types to the CsWin32 type.** Instead of `int res = (int)PInvoke.RmStartSession(...)` and casting at every comparison, declare `WIN32_ERROR res = PInvoke.RmStartSession(...)` and let helpers like `GetException(WIN32_ERROR res, ...)` take the typed value. Cast to `int`/`uint` only at the boundary where a non-CsWin32 API needs it (e.g. `new Win32Exception((int)res, ...)`). The same applies to `HRESULT`, `BOOL`, `HANDLE`, `PROCESS_CREATION_FLAGS`, etc.
 
 **Delete local mirror enums** that exist solely to mirror the Win32 one. The generated CsWin32 type is the source of truth.

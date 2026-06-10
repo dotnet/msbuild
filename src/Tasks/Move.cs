@@ -8,6 +8,9 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32.Storage.FileSystem;
+#endif
 
 #nullable disable
 
@@ -24,14 +27,6 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class Move : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
-        /// <summary>
-        /// Flags for MoveFileEx.
-        ///
-        /// </summary>
-        private const NativeMethods.MoveFileFlags Flags = NativeMethods.MoveFileFlags.MOVEFILE_WRITE_THROUGH |    // Do not return until the Move is complete
-                                                          NativeMethods.MoveFileFlags.MOVEFILE_REPLACE_EXISTING | // Replace any existing target
-                                                          NativeMethods.MoveFileFlags.MOVEFILE_COPY_ALLOWED;      // Moving across volumes is allowed
-
         /// <summary>
         /// Whether we should cancel.
         /// </summary>
@@ -256,7 +251,7 @@ namespace Microsoft.Build.Tasks
             // We cannot simply delete the destination file first because possibly it is also the source!
             // Nor do we want to just do a Copy followed by a Delete, because for large files that will be slow.
             // We are forced to use Win32's MoveFileEx.
-            bool result = NativeMethods.MoveFileEx(sourceFile, destinationFile, Flags);
+            bool result = MoveFileEx(sourceFile, destinationFile);
 
             if (!result)
             {
@@ -283,6 +278,55 @@ namespace Microsoft.Build.Tasks
                 MakeWriteableIfReadOnly(destinationFile);
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Moves <paramref name="existingFileName"/> onto <paramref name="newFileName"/>, replacing the
+        /// destination if it already exists. On Windows this defers to the Win32 <c>MoveFileEx</c> API, which
+        /// can move across volumes and writes through to disk. On other platforms it falls back to a managed
+        /// delete-then-move; that fallback is not a complete emulation but handles the common cases.
+        /// </summary>
+        private static bool MoveFileEx(AbsolutePath existingFileName, AbsolutePath newFileName)
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+#if FEATURE_WINDOWSINTEROP
+                return Windows.Win32.PInvoke.MoveFileEx(
+                    existingFileName,
+                    newFileName,
+                    // Do not return until the move is complete, and allow moving across volumes
+                    MOVE_FILE_FLAGS.MOVEFILE_WRITE_THROUGH
+                        | MOVE_FILE_FLAGS.MOVEFILE_REPLACE_EXISTING
+                        | MOVE_FILE_FLAGS.MOVEFILE_COPY_ALLOWED);
+#else
+                return false;
+#endif
+            }
+
+            if (!FileSystems.Default.FileExists(existingFileName))
+            {
+                return false;
+            }
+
+            var targetExists = FileSystems.Default.FileExists(newFileName);
+
+            if (targetExists && (File.GetAttributes(newFileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+            {
+                throw new IOException("Moving target is read-only");
+            }
+
+            if (existingFileName == newFileName)
+            {
+                return true;
+            }
+
+            if (targetExists)
+            {
+                File.Delete(newFileName);
+            }
+
+            File.Move(existingFileName, newFileName);
             return true;
         }
     }

@@ -188,7 +188,6 @@
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
-    <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs" />
     <Compile Include="FileIO\ReadLinesFromFile.cs" />

@@ -51,6 +51,11 @@ namespace Windows.Win32.System.Com
     }
 
     [CLSCompliant(false)]
+    internal partial struct ITypeLib2
+    {
+    }
+
+    [CLSCompliant(false)]
     internal partial struct IRunningObjectTable
     {
     }
@@ -94,6 +99,24 @@ namespace Windows.Win32.System.Com
     internal partial struct IGlobalInterfaceTable
     {
     }
+
+    [CLSCompliant(false)]
+    internal partial struct IServiceProvider
+    {
+    }
+}
+
+namespace Windows.Win32.System.Com.Urlmon
+{
+    [CLSCompliant(false)]
+    internal partial struct IInternetSecurityManager
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IInternetSecurityMgrSite
+    {
+    }
 }
 
 namespace Windows.Win32.System.Com.StructuredStorage
@@ -111,6 +134,16 @@ namespace Windows.Win32.System.Com.StructuredStorage
 
 namespace Windows.Win32.System.Ole
 {
+    [CLSCompliant(false)]
+    internal partial struct IDispatchEx
+    {
+    }
+
+    [CLSCompliant(false)]
+    internal partial struct IEnumVARIANT
+    {
+    }
+
     [CLSCompliant(false)]
     internal partial struct IRecordInfo
     {
