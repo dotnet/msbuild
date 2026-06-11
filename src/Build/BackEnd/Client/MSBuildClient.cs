@@ -469,10 +469,37 @@ namespace Microsoft.Build.Experimental
                 // Set DOTNET_ROOT so the apphost server child can locate the runtime; this
                 // override is replaced by the client's environment on the first build command
                 // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
+                IDictionary<string, string?>? environmentOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+
+                // Launch the long-lived server (build orchestrator) process with Server GC. The server
+                // hosts the build itself - under a multithreaded (/mt) build it runs all project work on
+                // threads in this single process - so Server GC's higher throughput pays off here. GC mode
+                // is fixed at CLR startup, so it must be set in the child's launch environment via
+                // DOTNET_gcServer (which only affects .NET/CoreCLR and, since .NET 9, takes precedence over
+                // runtimeconfig.json).
+                //
+                // This is scoped to the server process only. Sidecar TaskHost (nodemode 2) and worker
+                // (nodemode 1) nodes are launched through other code paths that never set this knob, and
+                // the server resets its own environment to the client's on the first build command (so
+                // DOTNET_gcServer is removed before it ever spawns children). Those nodes therefore keep
+                // the default Workstation GC.
+                //
+                // An explicit user-set DOTNET_gcServer (e.g. "0" to force Workstation GC) is honored, and
+                // MSBUILDDISABLESERVERGC=1 opts out. CreateDotnetRootEnvironmentOverrides returns a shared
+                // cached dictionary reused by other node launches, so copy it before adding the override.
+                if (Environment.GetEnvironmentVariable("DOTNET_gcServer") is null &&
+                    Environment.GetEnvironmentVariable("MSBUILDDISABLESERVERGC") != "1")
+                {
+                    environmentOverrides = environmentOverrides is null
+                        ? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+                        : new Dictionary<string, string?>(environmentOverrides, StringComparer.OrdinalIgnoreCase);
+                    environmentOverrides["DOTNET_gcServer"] = "1";
+                }
+
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
                     CommandLineArgs: string.Join(" ", msBuildServerOptions),
-                    EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
+                    EnvironmentOverrides: environmentOverrides);
 
                 using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
                 _launchedServerPid = msbuildProcess.Id;

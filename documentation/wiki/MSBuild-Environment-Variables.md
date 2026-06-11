@@ -36,5 +36,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
   - Set this to force all inline tasks to run out of process. It is not compatible with custom TaskFactories.
 - `MSBUILDFORCEMULTITHREADED=1`
   - Set this to force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build), equivalent to passing `-multiThreaded` / `-mt` on the command line. Useful for opting in without modifying command lines.
+- `MSBUILDDISABLESERVERGC=1`
+  - By default the MSBuild server (the long-lived build process used when `MSBUILDUSESERVER=1`) is launched with Server GC, which improves throughput for the build orchestrator (especially under multi-threaded `/mt` builds). Set this to launch the server with the default Workstation GC instead - for example in memory-constrained environments. Only affects newly launched servers (GC mode is fixed at process startup); shut down an already-running server for the change to take effect. An explicit `DOTNET_gcServer` setting is honored over this default. Sidecar TaskHosts and worker nodes are never launched with Server GC.
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
   - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.
