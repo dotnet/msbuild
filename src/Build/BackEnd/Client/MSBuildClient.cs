@@ -484,17 +484,12 @@ namespace Microsoft.Build.Experimental
                 // DOTNET_gcServer is removed before it ever spawns children). Those nodes therefore keep
                 // the default Workstation GC.
                 //
-                // An explicit user-set DOTNET_gcServer (e.g. "0" to force Workstation GC) is honored, and
-                // MSBUILDDISABLESERVERGC=1 opts out. CreateDotnetRootEnvironmentOverrides returns a shared
-                // cached dictionary reused by other node launches, so copy it before adding the override.
-                if (Environment.GetEnvironmentVariable("DOTNET_gcServer") is null &&
-                    Environment.GetEnvironmentVariable("MSBUILDDISABLESERVERGC") != "1")
-                {
-                    environmentOverrides = environmentOverrides is null
-                        ? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
-                        : new Dictionary<string, string?>(environmentOverrides, StringComparer.OrdinalIgnoreCase);
-                    environmentOverrides["DOTNET_gcServer"] = "1";
-                }
+                // CreateDotnetRootEnvironmentOverrides returns a shared cached dictionary reused by other
+                // node launches, so copy it before adding the GC override.
+                environmentOverrides = environmentOverrides is null
+                    ? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+                    : new Dictionary<string, string?>(environmentOverrides, StringComparer.OrdinalIgnoreCase);
+                environmentOverrides["DOTNET_gcServer"] = "1";
 
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,

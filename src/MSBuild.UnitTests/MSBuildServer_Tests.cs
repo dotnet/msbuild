@@ -379,10 +379,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
         /// <summary>
         /// Isolates a server-related test: a unique handshake salt guarantees a freshly launched server
-        /// (so no leftover server from another test or local run is reused with a different GC mode), and
-        /// a clean GC environment ensures the test - not an ambient CI/user setting - controls Server GC.
+        /// (so no leftover server from another test or local run is reused), and a clean GC environment
+        /// ensures the server's Server GC comes from the launch injection rather than an ambient
+        /// CI/user setting leaking into child nodes.
         /// </summary>
-        private void PrepareIsolatedServerEnv(bool useServer = true, bool disableServerGC = false)
+        private void PrepareIsolatedServerEnv(bool useServer = true)
         {
             // Child node launches (TaskHost, worker) need DOTNET_HOST_PATH to locate the runtime.
             RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(_env);
@@ -390,7 +391,6 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.SetEnvironmentVariable("DOTNET_gcServer", null);
             _env.SetEnvironmentVariable("COMPlus_gcServer", null);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", useServer ? "1" : null);
-            _env.SetEnvironmentVariable("MSBUILDDISABLESERVERGC", disableServerGC ? "1" : null);
         }
 
         /// <summary>
@@ -463,24 +463,6 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.WithTransientProcess(workerPid);
             workerPid.ShouldNotBe(clientPid, "The build should run in an out-of-proc worker node, not the entry process.");
             output.ShouldContain("TaskNodeServerGC=False", customMessage: "A worker node must use the default Workstation GC.");
-        }
-
-        /// <summary>
-        /// MSBUILDDISABLESERVERGC=1 opts the server process out of Server GC.
-        /// </summary>
-        [Fact]
-        public void ServerProcessServerGCCanBeDisabled()
-        {
-            PrepareIsolatedServerEnv(disableServerGC: true);
-            TransientTestFile project = _env.CreateFile("serverGcOptOut.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
-
-            success.ShouldBeTrue();
-            int clientPid = ParseNumber(output, "Process ID is ");
-            int serverPid = ParseNumber(output, "TaskRanInPID=");
-            _env.WithTransientProcess(serverPid);
-            serverPid.ShouldNotBe(clientPid, "The build should run in the server node, not the entry process.");
-            output.ShouldContain("TaskNodeServerGC=False", customMessage: "MSBUILDDISABLESERVERGC=1 should keep the server process on Workstation GC.");
         }
 #endif
 
