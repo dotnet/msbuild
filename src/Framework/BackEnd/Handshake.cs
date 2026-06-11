@@ -94,7 +94,7 @@ internal class Handshake
         int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{normalizedToolsDirectory}");
 
         CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
-        CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
+        CommunicationsUtilities.Trace($"Tools directory root is {normalizedToolsDirectory}");
 
         // Get session ID if needed (expensive call)
         int sessionId = 0;
