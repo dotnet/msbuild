@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
@@ -155,6 +156,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="assemblyPath">The path to the assembly to load.</param>
         /// <returns>The loaded assembly.</returns>
+        [RequiresUnreferencedCode("Loads a task assembly from disk; the trimmer cannot statically determine which types the assembly contributes.")]
         public static Assembly LoadTaskAssembly(string assemblyPath)
         {
             if (string.IsNullOrEmpty(assemblyPath))
@@ -174,6 +176,7 @@ namespace Microsoft.Build.Shared
         /// during TaskFactory initialization.
         /// </summary>
         /// <param name="taskLocation">The path to the task assembly.</param>
+        [RequiresUnreferencedCode("Registers handlers that load task dependency assemblies from disk, which is incompatible with trimming.")]
         public static void RegisterAssemblyResolveHandlersFromManifest(string taskLocation)
         {
             if (string.IsNullOrEmpty(taskLocation))
@@ -206,6 +209,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="searchDirectories">The directories to search for assemblies.</param>
         /// <returns>A ResolveEventHandler that can be used with AppDomain.CurrentDomain.AssemblyResolve.</returns>
+        [RequiresUnreferencedCode("The returned handler loads task dependency assemblies from disk, which is incompatible with trimming.")]
         public static ResolveEventHandler CreateAssemblyResolver(List<string> searchDirectories)
         {
             if (searchDirectories == null)
@@ -245,6 +249,7 @@ namespace Microsoft.Build.Shared
         /// <param name="directories">The directories to search in.</param>
         /// <param name="assemblyName">The name of the assembly to load.</param>
         /// <returns>The loaded assembly if found, otherwise null.</returns>
+        [RequiresUnreferencedCode("Loads a task dependency assembly from disk; the trimmer cannot statically determine which types the assembly contributes.")]
         private static Assembly? TryLoadAssembly(List<string> directories, AssemblyName assemblyName)
         {
             foreach (string directory in directories)

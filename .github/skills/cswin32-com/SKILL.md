@@ -153,6 +153,25 @@ Struct-based COM returns raw `HRESULT`; `[ComImport]` and built-in activation th
 
 **Don't throw when the caller swallows it.** If the top-level consumer wraps the whole chain in `catch (COMException) { }`, inner helpers must return `default` / `false` / empty instead of constructing a `COMException` only to have it discarded. Throwing here allocates the exception, walks the stack, and hides the HRESULT for no benefit. See [`VisualStudioLocationHelper.AcquireSetupConfiguration2`](../../../src/Framework/VisualStudioLocationHelper.cs).
 
+## Mocking Struct-Based COM in Tests
+
+Struct-based COM calls go through raw vtable pointers, so a managed mock can't be passed where a `T*` is expected. Bridge with the **built-in COM marshaller**: the mock implements the *managed* interface (BCL `System.Runtime.InteropServices.ComTypes.*` when ABI-compatible — true for `ITypeLib` / `ITypeInfo` — else CsWin32's nested `[ComImport] internal interface Interface`), and the test passes a **CCW** (COM-callable wrapper) pointer to the code under test:
+
+```csharp
+// MockTypeLib : ComTypes.ITypeLib   (a normal managed class)
+IntPtr ccw = Marshal.GetComInterfaceForObject(mock, typeof(ComTypes.ITypeLib));
+try { walker.AnalyzeTypeLibrary((ITypeLib*)ccw); }   // struct API; real QueryInterface works
+finally { Marshal.Release(ccw); }
+```
+
+The CCW exposes a real vtable, so no hand-rolled native vtable is needed and the managed mock framework stays intact. But the mock must now behave like real COM, not a managed object:
+
+- **All `[out]` params are written**, even ones the caller ignores. Passing `null` for a trailing out-param (`GetDocumentation(-1, &name, null, null, null)`) faults the marshaller — supply a real pointer for each.
+- **Exception identity is lost.** An HRESULT-returning method resurfaces a thrown exception as a *new* `COMException` (HRESULT preserved, instance not); a `uint`/`void` method with no HRESULT channel (`GetTypeInfoCount`, the `Release*` methods) **swallows it silently** and returns garbage. Assert on type/count, not the injected instance, and don't rely on `void`/`uint` methods to propagate.
+- **Throw `COMException` on bad input, don't `Assert`.** An `Assert` throws an `XunitException` that escapes the SUT's `catch (COMException)`; a `COMException` becomes a failing HRESULT the SUT handles normally. (Matters because a swallowed `GetTypeInfoCount` failure can feed an out-of-range index to the next call.)
+
+See [`MockTypeLib.cs`](../../../src/Tasks.UnitTests/MockTypeLib.cs) / [`MockTypeInfo.cs`](../../../src/Tasks.UnitTests/MockTypeInfo.cs) and the CCW bridge in [`ComReferenceWalker_Tests.cs`](../../../src/Tasks.UnitTests/ComReferenceWalker_Tests.cs).
+
 ## Strongly-typed handle / token wrappers
 
 When the native side `typedef`s a primitive into a family of "same shape, different meaning" aliases (`corhdr.h`'s `typedef ULONG32 mdToken; typedef mdToken mdAssembly; ...`), mirror that hierarchy with distinct `readonly struct` wrappers holding the single underlying primitive — same pattern as CsWin32's `HANDLE` / `HWND` / `HMODULE`. Stays blittable; `delegate*` casts and arrays marshal at zero cost.
@@ -199,3 +218,5 @@ Both files gated `#if !NET`. When you start using a new CsWin32-generated COM ty
 ## CS3016 CLS Compliance
 
 CsWin32 COM structs trigger CS3016 under `[assembly: CLSCompliant(true)]`. Handled via `[CLSCompliant(false)]` partial declarations in `GeneratedInteropClsCompliance.cs`; CS3019 suppressed in `.editorconfig` for `{**/Windows/**/*.cs}`. Don't add per-file suppressions. See https://github.com/dotnet/roslyn/issues/68526.
+
+A new interface in `NativeMethods.txt` can surface CS3016 on the new struct **and on interfaces it transitively pulls in** (`IDispatchEx` drags in `IServiceProvider`) — add a `[CLSCompliant(false)]` partial for each flagged type in its namespace block. Check **every** TFM: the warning can fire on one (e.g. net10) but not another (net472).

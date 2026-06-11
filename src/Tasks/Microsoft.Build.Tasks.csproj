@@ -6,6 +6,9 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
@@ -188,7 +191,6 @@
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
-    <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs" />
     <Compile Include="FileIO\ReadLinesFromFile.cs" />

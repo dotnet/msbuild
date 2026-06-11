@@ -2,6 +2,9 @@
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <!-- Do not create Tlbs when building in source-build mode (no net472 TFM available).
          In VMR Windows builds and VS builds, generate the .tlb from the net472 output. -->
