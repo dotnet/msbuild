@@ -94,7 +94,8 @@ When this happens, the cost of JITting `Microsoft.Build.NuGetSdkResolver` will b
 ## NuGet.Frameworks
 
 When evaluating certain property functions, MSBuild requires functionality from `NuGet.Frameworks.dll`, which is not part of MSBuild proper.
-The assembly is loaded lazily from a path calculated based on the environment where MSBuild is running and the functionality is invoked
+
+On .NET Framework, the assembly is loaded lazily from a path calculated based on the environment where MSBuild is running and the functionality is invoked
 via reflection. Similar to the NuGet resolver, the version is changing and it is not easy to know it statically at MSBuild's build time.
 But, since there are only a handful of APIs used by MSBuild and they take simple types such as strings and versions, this has been
 addressed by loading the assembly into a separate AppDomain. The AppDomain's config file is created in memory on the fly to contain the
@@ -105,6 +106,10 @@ of cross-domain calls. The former is orders of magnitude smaller that the startu
 the types moved across the AppDomain boundary do not require expensive marshaling. Additionally, the requirement to execute code in multiple
 AppDomains necessitates the use of `LoaderOptimization.MultiDomain` for loading all assemblies domain-neutral. This may come with run-time
 cost for certain code patterns, although none has been measured in MSBuild scenarios.
+
+On .NET (Core), MSBuild takes a direct compile-time reference to `NuGet.Frameworks` and calls it through strongly-typed APIs, avoiding both
+the reflection overhead and the AppDomain machinery. .NET SDK construction deploys `NuGet.Frameworks.dll` next to `MSBuild.dll` and
+makes `MSBuild.deps.json` conherent.
 
 ## Task assemblies
 

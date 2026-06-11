@@ -1,11 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
+#if NETFRAMEWORK
 
 using System;
 using System.Collections.Generic;
-#if FEATURE_APPDOMAIN
 using System.Globalization;
-#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,12 +18,9 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Wraps the NuGet.Frameworks assembly, which is referenced by reflection and optionally loaded into a separate AppDomain for performance.
+    /// Wraps the NuGet.Frameworks assembly, which is referenced by reflection and loaded into a separate AppDomain for performance.
     /// </summary>
-    internal sealed partial class NuGetFrameworkWrapper
-#if FEATURE_APPDOMAIN
-        : MarshalByRefObject
-#endif
+    internal sealed partial class NuGetFrameworkWrapper : MarshalByRefObject
     {
         private const string NuGetFrameworksAssemblyName = "NuGet.Frameworks";
         private const string NuGetFrameworksFileName = NuGetFrameworksAssemblyName + ".dll";
@@ -109,12 +106,6 @@ namespace Microsoft.Build.Evaluation
             return Convert.ToBoolean(IsCompatibleMethod.Invoke(DefaultCompatibilityProvider, [Parse(target), Parse(candidate)]));
         }
 
-        private string GetNonZeroVersionParts(Version version, int minVersionPartCount)
-        {
-            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
-            return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
-        }
-
         public string FilterTargetFrameworks(string incoming, string filter)
         {
             IEnumerable<(string originalTfm, object parsedTfm)> incomingFrameworks = ParseTfms(incoming);
@@ -152,7 +143,6 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// A null-returning InitializeLifetimeService to give the proxy an infinite lease time.
         /// </summary>
@@ -196,7 +186,6 @@ namespace Microsoft.Build.Evaluation
             appDomainSetup.SetConfigurationBytes(Encoding.UTF8.GetBytes(configuration));
             return appDomainSetup;
         }
-#endif
 
         public static NuGetFrameworkWrapper CreateInstance()
         {
@@ -209,7 +198,6 @@ namespace Microsoft.Build.Evaluation
 
             NuGetFrameworkWrapper instance = null;
             AssemblyName assemblyName = null;
-#if FEATURE_APPDOMAIN
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) &&
                 (BuildEnvironmentHelper.Instance.RunningInMSBuildExe || BuildEnvironmentHelper.Instance.RunningInVisualStudio))
             {
@@ -237,7 +225,6 @@ namespace Microsoft.Build.Evaluation
                     assemblyName = null;
                 }
             }
-#endif
             try
             {
                 instance ??= new NuGetFrameworkWrapper();
@@ -252,3 +239,81 @@ namespace Microsoft.Build.Evaluation
         }
     }
 }
+
+#else
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using NuGet.Frameworks;
+
+namespace Microsoft.Build.Evaluation
+{
+    /// <summary>
+    /// Wraps the NuGet.Frameworks assembly. On .NET (Core), <see cref="NuGet.Frameworks"/>
+    /// is referenced directly at compile time and called without reflection, avoiding the
+    /// per-call <c>MethodInfo.Invoke</c> cost incurred by the .NET Framework code path.
+    /// </summary>
+    internal sealed partial class NuGetFrameworkWrapper
+    {
+        private NuGetFrameworkWrapper()
+        { }
+
+        public static NuGetFrameworkWrapper CreateInstance() => new();
+
+        private static NuGetFramework Parse(string tfm) => NuGetFramework.Parse(tfm);
+
+        public string GetTargetFrameworkIdentifier(string tfm) => Parse(tfm).Framework;
+
+        public string GetTargetFrameworkVersion(string tfm, int minVersionPartCount) =>
+            GetNonZeroVersionParts(Parse(tfm).Version, minVersionPartCount);
+
+        public string GetTargetPlatformIdentifier(string tfm) => Parse(tfm).Platform;
+
+        public string GetTargetPlatformVersion(string tfm, int minVersionPartCount) =>
+            GetNonZeroVersionParts(Parse(tfm).PlatformVersion, minVersionPartCount);
+
+        public bool IsCompatible(string target, string candidate) =>
+            DefaultCompatibilityProvider.Instance.IsCompatible(Parse(target), Parse(candidate));
+
+        public string FilterTargetFrameworks(string incoming, string filter)
+        {
+            IEnumerable<(string originalTfm, NuGetFramework parsedTfm)> incomingFrameworks = ParseTfms(incoming);
+            IEnumerable<(string originalTfm, NuGetFramework parsedTfm)> filterFrameworks = ParseTfms(filter);
+            StringBuilder tfmList = new StringBuilder();
+
+            // An incoming target framework from 'incoming' is kept if it is compatible with any of the desired target frameworks on 'filter'
+            foreach (var l in incomingFrameworks)
+            {
+                if (filterFrameworks.Any(r =>
+                        l.parsedTfm.Framework.Equals(r.parsedTfm.Framework, StringComparison.OrdinalIgnoreCase) &&
+                        ((l.parsedTfm.AllFrameworkVersions && r.parsedTfm.AllFrameworkVersions) ||
+                         l.parsedTfm.Version == r.parsedTfm.Version)))
+                {
+                    if (tfmList.Length == 0)
+                    {
+                        tfmList.Append(l.originalTfm);
+                    }
+                    else
+                    {
+                        tfmList.Append($";{l.originalTfm}");
+                    }
+                }
+            }
+
+            return tfmList.ToString();
+
+            static IEnumerable<(string originalTfm, NuGetFramework parsedTfm)> ParseTfms(string desiredTargetFrameworks)
+            {
+                return desiredTargetFrameworks.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
+                {
+                    (string originalTfm, NuGetFramework parsedTfm) parsed = (tfm, Parse(tfm));
+                    return parsed;
+                });
+            }
+        }
+    }
+}
+
+#endif

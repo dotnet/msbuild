@@ -78,6 +78,23 @@
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <!-- On .NET Core, take a direct compile-time reference to NuGet.Frameworks so that
+         property functions in NuGetFrameworkWrapper can call into it without reflection.
+
+         Note that this is intentionally a compile-time reference only. At run time MSBuild
+         always loads the NuGet.Frameworks.dll that ships in the host SDK directory next to
+         MSBuild.dll, which is typically a NEWER version than the one we reference here,
+         because the MSBuild repo updates NuGet only weekly, and should consume the same
+         NuGet channel that is flowing to SDK. That's similar to the old reflection-based
+         path. This introduces some risk of version drift, but the members we call have been
+         stable in NuGet.Frameworks for many years.
+
+         On .NET Framework we still load NuGet.Frameworks dynamically into a secondary
+         AppDomain for NGEN reasons; see documentation/NETFramework-NGEN.md. -->
+    <PackageReference Include="NuGet.Frameworks" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
@@ -197,6 +214,7 @@
     <Compile Include="Logging\TargetConsoleConfiguration.cs" />
     <Compile Include="Utilities\ImmutableCollectionsExtensions.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
+    <Compile Include="Utilities\NuGetFrameworkWrapper.Shared.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
     <Compile Include="ObjectModelRemoting\LinkedObjectFactory.cs" />
