@@ -109,7 +109,7 @@ cost for certain code patterns, although none has been measured in MSBuild scena
 
 On .NET (Core), MSBuild takes a direct compile-time reference to `NuGet.Frameworks` and calls it through strongly-typed APIs, avoiding both
 the reflection overhead and the AppDomain machinery. .NET SDK construction deploys `NuGet.Frameworks.dll` next to `MSBuild.dll` and
-makes `MSBuild.deps.json` conherent.
+makes `MSBuild.deps.json` coherent.
 
 ## Task assemblies
 
