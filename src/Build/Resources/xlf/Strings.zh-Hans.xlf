@@ -617,6 +617,11 @@
         <target state="translated">正在加载以下项目缓存插件: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="translated">启用的记录器: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">日志记录详细程度设置为: {0}。</target>
@@ -631,7 +636,7 @@
       </trans-unit>
       <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
         <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
-        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <target state="translated">SkipNonexistentTargets="true" 从调用方跨元项目边界继承。</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -1062,7 +1067,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskHostDetails">
         <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
-        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <target state="translated">任务“{0}”在调用方进程 {2} 生成的 TaskHost 进程 {1} 中运行。为此调用生成了新的 TaskHost: {3}。TaskHost 是可重用的挎斗: {4}。节点重用: {5}。</target>
         <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

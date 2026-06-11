@@ -421,7 +421,7 @@ namespace Microsoft.Build.Graph
             int degreeOfParallelism,
             CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             var measurementInfo = BeginMeasurement();
 
@@ -498,7 +498,7 @@ namespace Microsoft.Build.Graph
             Func<ProjectGraphNode, string> nodeIdProvider,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider);
+            ArgumentNullException.ThrowIfNull(nodeIdProvider);
 
             var nodeIds = new ConcurrentDictionary<ProjectGraphNode, string>();
 
@@ -584,7 +584,7 @@ namespace Microsoft.Build.Graph
                 }
             }
 
-            ErrorUtilities.VerifyThrow(toposort.Count == graphNodes.Count, "sorted node count must be equal to total node count");
+            Assumed.Equal(toposort.Count, graphNodes.Count, "sorted node count must be equal to total node count");
 
             toposort.Reverse();
 
@@ -621,7 +621,7 @@ namespace Microsoft.Build.Graph
                 // If no targets were specified, use every project's default targets.
                 foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                 {
-                    var entryTargets = ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets);
+                    string[] entryTargets = entryPointNode.ProjectInstance.DefaultTargets.ToArray();
                     var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
                     encounteredEdges.Add(entryEdge);
                     edgesToVisit.Enqueue(entryEdge);
@@ -636,7 +636,7 @@ namespace Microsoft.Build.Graph
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
-                            var entryTargets = ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets);
+                            string[] entryTargets = entryPointNode.ProjectInstance.DefaultTargets.ToArray();
                             var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
@@ -663,7 +663,7 @@ namespace Microsoft.Build.Graph
                             {
                                 // Build a specific project with its default targets.
                                 ProjectGraphNode node = GetNodeForProject(project);
-                                ProjectGraphBuildRequest entryEdge = new(node, ImmutableList.CreateRange(node.ProjectInstance.DefaultTargets));
+                                ProjectGraphBuildRequest entryEdge = new(node, node.ProjectInstance.DefaultTargets.ToArray());
                                 encounteredEdges.Add(entryEdge);
                                 edgesToVisit.Enqueue(entryEdge);
                                 isSolutionTraversalTarget = true;
@@ -725,14 +725,14 @@ namespace Microsoft.Build.Graph
                 // Queue the project references for visitation, if the edge hasn't already been traversed.
                 foreach (var referenceNode in node.ProjectReferences)
                 {
-                    var applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(referenceNode);
+                    string[] applicableTargets = targetsToPropagate.GetApplicableTargetsForReference(referenceNode);
 
-                    if (applicableTargets.IsEmpty)
+                    if (applicableTargets.Length == 0)
                     {
                         continue;
                     }
 
-                    var expandedTargets = ExpandDefaultTargets(
+                    string[] expandedTargets = ExpandDefaultTargets(
                         applicableTargets,
                         referenceNode.ProjectInstance.DefaultTargets,
                         Edges[(node, referenceNode)]);
@@ -797,39 +797,143 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private static ImmutableList<string> ExpandDefaultTargets(ImmutableList<string> targets, List<string> defaultTargets, ProjectItemInstance graphEdge)
+        internal static string[] ExpandDefaultTargets(string[] targets, List<string> defaultTargets, ProjectItemInstance graphEdge)
         {
-            var i = 0;
-            while (i < targets.Count)
+            // Dedup the BFS-edge target list. The N^depth graph-explosion behavior this
+            // function defends against has two sources: (1) marker expansion injecting a
+            // duplicate-bearing payload — including markers from a previously-deduped hop
+            // re-expanding against the next hop's PRT shape; and (2) literal duplicates in
+            // the input list propagating through FromProjectAndEntryTargets, where each
+            // duplicated entry target re-matches the same PRT items at the next hop and
+            // multiplies the propagated count. Bounding the result here breaks the chain
+            // at the source for both, so we dedup unconditionally rather than only on
+            // marker expansion.
+            //
+            // The outer post-BFS dedup in GetTargetLists still runs and collapses each
+            // per-node final list, so the publicly-observable result is unchanged. The
+            // benefit of dedup here is purely structural: smaller per-edge requestedTargets
+            // means fewer distinct ProjectGraphBuildRequest entries in encounteredEdges
+            // and far less BFS thrash.
+            //
+            // Fast path: for small inputs (the typical post-first-hop BFS shape — count
+            // 1-3 in real .NET builds) do an inline O(n^2) scan that detects markers and
+            // duplicates in place. If neither is present, return targets unchanged with
+            // zero allocation. Above the threshold we fall through to the HashSet-backed
+            // slow path; the O(n^2) cost would dominate the HashSet allocation otherwise.
+            int count = targets.Length;
+            if (count == 0)
             {
-                if (targets[i].Equals(MSBuildConstants.DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+                return targets;
+            }
+
+            const int InlineScanThreshold = 8;
+            if (count <= InlineScanThreshold)
+            {
+                for (int i = 0; i < count; i++)
                 {
-                    targets = targets
-                        .RemoveAt(i)
-                        .InsertRange(i, defaultTargets);
-                    i += defaultTargets.Count;
+                    string target = targets[i];
+                    if (target.Equals(MSBuildConstants.DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase) ||
+                        target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ExpandDefaultTargetsSlow(targets, defaultTargets, graphEdge);
+                    }
+
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (string.Equals(targets[j], target, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return ExpandDefaultTargetsSlow(targets, defaultTargets, graphEdge);
+                        }
+                    }
                 }
-                else if (targets[i].Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+
+                return targets;
+            }
+
+            return ExpandDefaultTargetsSlow(targets, defaultTargets, graphEdge);
+        }
+
+        private static string[] ExpandDefaultTargetsSlow(string[] targets, List<string> defaultTargets, ProjectItemInstance graphEdge)
+        {
+            // Slow path. Reached when (a) input contains at least one marker or duplicate
+            // and was small enough for the fast path to detect it, or (b) input is larger
+            // than the inline-scan threshold and we go straight here.
+            //
+            // The lazy buffer pattern keeps allocations to the minimum necessary: if the
+            // input turns out to be marker-and-dup-free (only possible in the large-count
+            // case (b)) we never allocate the result List<string>, only the HashSet.
+            int count = targets.Length;
+            var seen = new HashSet<string>(count, StringComparer.OrdinalIgnoreCase);
+            List<string> result = null;
+
+            for (int i = 0; i < count; i++)
+            {
+                string target = targets[i];
+
+                if (target.Equals(MSBuildConstants.DefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
                 {
-                    var targetsString = graphEdge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
-
-                    var expandedTargets = string.IsNullOrEmpty(targetsString)
-                        ? defaultTargets
-                        : ExpressionShredder.SplitSemiColonSeparatedList(targetsString).ToList();
-
-                    targets = targets
-                        .RemoveAt(i)
-                        .InsertRange(i, expandedTargets);
-
-                    i += expandedTargets.Count;
+                    EnsureBuffer(targets, i, ref result);
+                    foreach (string defaultTarget in defaultTargets)
+                    {
+                        if (seen.Add(defaultTarget))
+                        {
+                            result.Add(defaultTarget);
+                        }
+                    }
+                }
+                else if (target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker, StringComparison.OrdinalIgnoreCase))
+                {
+                    EnsureBuffer(targets, i, ref result);
+                    string targetsString = graphEdge.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                    if (string.IsNullOrEmpty(targetsString))
+                    {
+                        foreach (string defaultTarget in defaultTargets)
+                        {
+                            if (seen.Add(defaultTarget))
+                            {
+                                result.Add(defaultTarget);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (string expandedTarget in ExpressionShredder.SplitSemiColonSeparatedList(targetsString))
+                        {
+                            if (seen.Add(expandedTarget))
+                            {
+                                result.Add(expandedTarget);
+                            }
+                        }
+                    }
+                }
+                else if (seen.Add(target))
+                {
+                    result?.Add(target);
                 }
                 else
                 {
-                    i++;
+                    // First duplicate in plain-target territory. Materialize the verbatim
+                    // unique prefix into the buffer; subsequent unique entries will be added
+                    // through the buffer above.
+                    EnsureBuffer(targets, i, ref result);
                 }
             }
 
-            return targets;
+            return result?.ToArray() ?? targets;
+
+            static void EnsureBuffer(string[] targets, int currentIndex, ref List<string> result)
+            {
+                if (result is not null)
+                {
+                    return;
+                }
+
+                result = new List<string>(targets.Length);
+                for (int k = 0; k < currentIndex; k++)
+                {
+                    result.Add(targets[k]);
+                }
+            }
         }
 
         internal ProjectInstance DefaultProjectInstanceFactory(
@@ -863,7 +967,7 @@ namespace Microsoft.Build.Graph
 
         private struct ProjectGraphBuildRequest : IEquatable<ProjectGraphBuildRequest>
         {
-            public ProjectGraphBuildRequest(ProjectGraphNode node, ImmutableList<string> targets)
+            public ProjectGraphBuildRequest(ProjectGraphNode node, string[] targets)
             {
                 Node = node ?? throw new ArgumentNullException(nameof(node));
                 RequestedTargets = targets ?? throw new ArgumentNullException(nameof(targets));
@@ -871,18 +975,18 @@ namespace Microsoft.Build.Graph
 
             public ProjectGraphNode Node { get; }
 
-            public ImmutableList<string> RequestedTargets { get; }
+            public string[] RequestedTargets { get; }
 
             public readonly bool Equals(ProjectGraphBuildRequest other)
             {
                 if (Node != other.Node
-                    || RequestedTargets.Count != other.RequestedTargets.Count)
+                    || RequestedTargets.Length != other.RequestedTargets.Length)
                 {
                     return false;
                 }
 
                 // Target order is important
-                for (var i = 0; i < RequestedTargets.Count; i++)
+                for (int i = 0; i < RequestedTargets.Length; i++)
                 {
                     if (!RequestedTargets[i].Equals(other.RequestedTargets[i], StringComparison.OrdinalIgnoreCase))
                     {
@@ -895,7 +999,7 @@ namespace Microsoft.Build.Graph
 
             public override readonly bool Equals(object obj)
             {
-                return !(obj is null) && obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
+                return obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
             }
 
             public override readonly int GetHashCode()
@@ -903,8 +1007,8 @@ namespace Microsoft.Build.Graph
                 unchecked
                 {
                     const int salt = 397;
-                    var hashCode = Node.GetHashCode() * salt;
-                    for (var i = 0; i < RequestedTargets.Count; i++)
+                    int hashCode = Node.GetHashCode() * salt;
+                    for (int i = 0; i < RequestedTargets.Length; i++)
                     {
                         hashCode *= salt;
                         hashCode ^= StringComparer.OrdinalIgnoreCase.GetHashCode(RequestedTargets[i]);

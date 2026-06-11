@@ -4,222 +4,229 @@
 #if FEATURE_FILE_TRACKER
 
 using System;
+using System.Buffers;
 using System.IO;
 using System.Runtime.InteropServices;
-#if FEATURE_CONSTRAINED_EXECUTION
-using System.Runtime.ConstrainedExecution;
-#endif
 using System.Security;
+using System.Text;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_RESOURCE_EXPOSURE
-using System.Runtime.Versioning;
-#endif
+using Windows.Win32;
+using Windows.Win32.Foundation;
 
 #nullable disable
 
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// Methods that are invoked on FileTracker.dll in order to handle inproc tracking
+    /// Managed shim over <c>FileTracker.dll</c> — the native Detours-based file-access tracker
+    /// shipped alongside MSBuild on .NET Framework.
     /// </summary>
-    /// <comments>
-    /// We want to P/Invoke to the FileTracker methods, but FileTracker.dll is not guaranteed to be on PATH (since it's
-    /// in the MSBuild directory), and there is no DefaultDllImportSearchPath that explicitly points to us. Thus, we
-    /// are sneaking around P/Invoke by manually acquiring the method pointers and calling them ourselves. The vast
-    /// majority of this code was lifted from ndp\fx\src\CLRCompression\ZLibNative.cs, which does the same thing for
-    /// that assembly.
-    /// </comments>
-    internal static class InprocTrackingNativeMethods
+    /// <remarks>
+    /// FileTracker.dll is not on PATH (it lives in the MSBuild tools directory) and there is
+    /// no <c>DllImportSearchPath</c> that explicitly points to it, so the module is loaded by
+    /// absolute path via <c>LoadLibrary</c> and each export is resolved through
+    /// <c>GetProcAddress</c> into a typed <c>delegate* unmanaged[Stdcall]</c> function pointer.
+    /// Slot table from <c>FileTracker.def</c>: <c>StartTrackingContext</c> @2,
+    /// <c>StartTrackingContextWithRoot</c> @3, <c>EndTrackingContext</c> @4,
+    /// <c>StopTrackingAndCleanup</c> @5, <c>SuspendTracking</c> @6, <c>ResumeTracking</c> @7,
+    /// <c>WriteAllTLogs</c> @8, <c>WriteContextTLogs</c> @9, <c>SetThreadCount</c> @10.
+    /// All exports are <c>HRESULT WINAPI Name(...)</c> with Unicode <c>LPCTSTR</c> arguments
+    /// (FileTracker.dll is built <c>UNICODE</c>), so the function-pointer signatures take
+    /// <see cref="PCWSTR"/> and return <see cref="HRESULT"/>.
+    /// </remarks>
+    internal static unsafe class InprocTrackingNativeMethods
     {
-#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
-        #region Delegates for the tracking functions
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int StartTrackingContextDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string taskName);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int StartTrackingContextWithRootDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string taskName, [In, MarshalAs(UnmanagedType.LPWStr)] string rootMarker);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int EndTrackingContextDelegate();
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int StopTrackingAndCleanupDelegate();
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int SuspendTrackingDelegate();
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int ResumeTrackingDelegate();
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int WriteAllTLogsDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string tlogRootName);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int WriteContextTLogsDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string tlogRootName);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-#if FEATURE_SECURITY_PERMISSIONS
-        [SuppressUnmanagedCodeSecurity]
-#endif
-        private delegate int SetThreadCountDelegate(int threadCount);
-
-        #endregion // Delegates for the tracking functions
-
         #region Public API
 
-        internal static void StartTrackingContext([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string taskName)
+        /// <summary>
+        /// Begin a new tracking context on the current thread. File accesses on this thread
+        /// (and any worker threads pre-allocated via <see cref="SetThreadCount"/>) will
+        /// accumulate into per-context read/write/delete TLog lists keyed by
+        /// <paramref name="taskName"/> until <see cref="EndTrackingContext"/> is called.
+        /// </summary>
+        /// <param name="intermediateDirectory">Directory in which TLog files for this context will be written when <see cref="WriteContextTLogs"/> / <see cref="WriteAllTLogs"/> is called.</param>
+        /// <param name="taskName">Logical task name; used as the TLog file-name prefix and as the key in the context stack.</param>
+        internal static void StartTrackingContext(string intermediateDirectory, string taskName)
         {
-            int hresult = FileTrackerDllStub.startTrackingContextDelegate(intermediateDirectory, taskName);
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            fixed (char* pDir = intermediateDirectory)
+            {
+                fixed (char* pTask = taskName)
+                {
+                    FileTrackerDllStub.StartTrackingContext(new PCWSTR(pDir), new PCWSTR(pTask)).ThrowOnFailure();
+                }
+            }
         }
 
-        internal static void StartTrackingContextWithRoot([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string taskName, [In, MarshalAs(UnmanagedType.LPWStr)] string rootMarker)
+        /// <summary>
+        /// Same as <see cref="StartTrackingContext"/> but also supplies a response file from
+        /// which the rooting marker (the canonical "this is the build root" identifier
+        /// embedded in TLog headers) is read.
+        /// </summary>
+        /// <param name="intermediateDirectory">Output directory for TLogs.</param>
+        /// <param name="taskName">Logical task name (TLog file-name prefix).</param>
+        /// <param name="rootMarker">Path to a response file containing the rooting-marker string.</param>
+        internal static void StartTrackingContextWithRoot(string intermediateDirectory, string taskName, string rootMarker)
         {
-            int hresult = FileTrackerDllStub.startTrackingContextWithRootDelegate(intermediateDirectory, taskName, rootMarker);
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            fixed (char* pDir = intermediateDirectory)
+            {
+                fixed (char* pTask = taskName)
+                {
+                    fixed (char* pRoot = rootMarker)
+                    {
+                        FileTrackerDllStub.StartTrackingContextWithRoot(new PCWSTR(pDir), new PCWSTR(pTask), new PCWSTR(pRoot)).ThrowOnFailure();
+                    }
+                }
+            }
         }
 
+        /// <summary>
+        /// Pop the top-most tracking context off the current thread's context stack. After
+        /// this returns, file accesses on the thread fall through to the next context on the
+        /// stack (if any) or stop being tracked.
+        /// </summary>
         internal static void EndTrackingContext()
         {
-            int hresult = FileTrackerDllStub.endTrackingContextDelegate();
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            FileTrackerDllStub.EndTrackingContext().ThrowOnFailure();
         }
 
+        /// <summary>
+        /// Tear down every tracking context on every tracked thread and release the
+        /// process-wide tracking data structures. Tracking is fully disabled after this call
+        /// until a fresh <see cref="StartTrackingContext"/> reactivates it. The FileTracker
+        /// module itself remains loaded (it must — see remarks on the class).
+        /// </summary>
         internal static void StopTrackingAndCleanup()
         {
-            int hresult = FileTrackerDllStub.stopTrackingAndCleanupDelegate();
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            FileTrackerDllStub.StopTrackingAndCleanup().ThrowOnFailure();
         }
 
+        /// <summary>
+        /// Temporarily pause recording into the current thread's active tracking context.
+        /// File accesses between this call and <see cref="ResumeTracking"/> are not added to
+        /// the context's TLog lists.
+        /// </summary>
         internal static void SuspendTracking()
         {
-            int hresult = FileTrackerDllStub.suspendTrackingDelegate();
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            FileTrackerDllStub.SuspendTracking().ThrowOnFailure();
         }
 
+        /// <summary>
+        /// Resume recording into the current thread's active tracking context after a prior
+        /// <see cref="SuspendTracking"/>.
+        /// </summary>
         internal static void ResumeTracking()
         {
-            int hresult = FileTrackerDllStub.resumeTrackingDelegate();
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            FileTrackerDllStub.ResumeTracking().ThrowOnFailure();
         }
 
-        internal static void WriteAllTLogs([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string tlogRootName)
+        /// <summary>
+        /// Flush the accumulated read/write/delete TLogs for every tracking context across
+        /// every tracked thread to disk under <paramref name="intermediateDirectory"/>, using
+        /// <paramref name="tlogRootName"/> as the file-name prefix. The contexts remain live
+        /// and continue to accumulate entries after this call.
+        /// </summary>
+        /// <param name="intermediateDirectory">Output directory for the TLogs.</param>
+        /// <param name="tlogRootName">File-name prefix for the produced <c>*.read.tlog</c> / <c>*.write.tlog</c> / <c>*.delete.tlog</c> files.</param>
+        internal static void WriteAllTLogs(string intermediateDirectory, string tlogRootName)
         {
-            int hresult = FileTrackerDllStub.writeAllTLogsDelegate(intermediateDirectory, tlogRootName);
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            fixed (char* pDir = intermediateDirectory)
+            {
+                fixed (char* pRoot = tlogRootName)
+                {
+                    FileTrackerDllStub.WriteAllTLogs(new PCWSTR(pDir), new PCWSTR(pRoot)).ThrowOnFailure();
+                }
+            }
         }
 
-        internal static void WriteContextTLogs([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string tlogRootName)
+        /// <summary>
+        /// Flush the read/write/delete TLogs for just the current thread's active tracking
+        /// context to disk and clear those in-memory lists (so subsequent activity in the same
+        /// context is recorded into freshly empty lists).
+        /// </summary>
+        /// <param name="intermediateDirectory">Output directory for the TLogs.</param>
+        /// <param name="tlogRootName">File-name prefix for the produced TLog files.</param>
+        internal static void WriteContextTLogs(string intermediateDirectory, string tlogRootName)
         {
-            int hresult = FileTrackerDllStub.writeContextTLogsDelegate(intermediateDirectory, tlogRootName);
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            fixed (char* pDir = intermediateDirectory)
+            {
+                fixed (char* pRoot = tlogRootName)
+                {
+                    FileTrackerDllStub.WriteContextTLogs(new PCWSTR(pDir), new PCWSTR(pRoot)).ThrowOnFailure();
+                }
+            }
         }
 
+        /// <summary>
+        /// Declare to FileTracker how many worker threads the host intends to use. FileTracker
+        /// pre-allocates per-thread TLS slots / counters from this value so that worker
+        /// threads can attach their own tracking contexts without taking a global lock at
+        /// runtime.
+        /// </summary>
+        /// <param name="threadCount">Maximum concurrent worker-thread count.</param>
         internal static void SetThreadCount(int threadCount)
         {
-            int hresult = FileTrackerDllStub.setThreadCountDelegate(threadCount);
-            Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+            FileTrackerDllStub.SetThreadCount(threadCount).ThrowOnFailure();
         }
 
         #endregion // Public API
-#pragma warning restore format
+
         private static class FileTrackerDllStub
         {
-            private static readonly Lazy<string> fileTrackerDllName = new Lazy<string>(() => RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? "FileTrackerA4.dll" : (IntPtr.Size == sizeof(Int32)) ? "FileTracker32.dll" : "FileTracker64.dll");
+            // Architecture-specific FileTracker DLL name. The native module is built per
+            // architecture (x86 / x64 / arm64); the host process must load the variant whose
+            // bitness and ISA match its own so that Detours can hook the right import table.
+            private static readonly Lazy<string> s_fileTrackerDllName = new(() =>
+                RuntimeInformation.ProcessArchitecture == Architecture.Arm64
+                    ? "FileTrackerA4.dll"
+                    : IntPtr.Size == sizeof(int)
+                        ? "FileTracker32.dll"
+                        : "FileTracker64.dll");
 
-            // Handle for FileTracker.dll itself
+            // Handle for FileTracker.dll itself. The HMODULE is intentionally never freed:
+            // FileTracker detours ExitProcess and forcibly unloading it would corrupt CLR
+            // shutdown (matching the historical SafeLibraryHandle.ReleaseHandle no-op).
             [SecurityCritical]
-            private static SafeHandle s_fileTrackerDllHandle;
-#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
-            #region Function pointers to native functions
+            private static HMODULE s_fileTrackerDllHandle;
 
-            internal static StartTrackingContextDelegate startTrackingContextDelegate;
-
-            internal static StartTrackingContextWithRootDelegate startTrackingContextWithRootDelegate;
-
-            internal static EndTrackingContextDelegate endTrackingContextDelegate;
-
-            internal static StopTrackingAndCleanupDelegate stopTrackingAndCleanupDelegate;
-
-            internal static SuspendTrackingDelegate suspendTrackingDelegate;
-
-            internal static ResumeTrackingDelegate resumeTrackingDelegate;
-
-            internal static WriteAllTLogsDelegate writeAllTLogsDelegate;
-
-            internal static WriteContextTLogsDelegate writeContextTLogsDelegate;
-
-            internal static SetThreadCountDelegate setThreadCountDelegate;
-
-            #endregion  // Function pointers to native functions
-
-            #region Declarations of Windows API needed to load the native library
-
-            [DllImport("kernel32.dll", CharSet = CharSet.Ansi, BestFitMapping = false)]
-#if FEATURE_RESOURCE_EXPOSURE
-            [ResourceExposure(ResourceScope.Process)]
-#endif
-            [SecurityCritical]
-            private static extern IntPtr GetProcAddress(SafeHandle moduleHandle, String procName);
-
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-#if FEATURE_RESOURCE_EXPOSURE
-            [ResourceExposure(ResourceScope.Machine)]
-#endif
-            [SecurityCritical]
-            private static extern SafeLibraryHandle LoadLibrary(String libPath);
-
-            #endregion // Declarations of Windows API needed to load the native library
-
-            #region Initialization code
+            // Function-pointer slots, populated by InitDelegates() from the LoadLibrary'd
+            // module via GetProcAddress. Signatures track the native exports verbatim:
+            // every export is __stdcall HRESULT-returning and takes Unicode LPCWSTR arguments
+            // (FileTracker.dll is built UNICODE).
+            internal static delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, HRESULT> StartTrackingContext;
+            internal static delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, PCWSTR, HRESULT> StartTrackingContextWithRoot;
+            internal static delegate* unmanaged[Stdcall]<HRESULT> EndTrackingContext;
+            internal static delegate* unmanaged[Stdcall]<HRESULT> StopTrackingAndCleanup;
+            internal static delegate* unmanaged[Stdcall]<HRESULT> SuspendTracking;
+            internal static delegate* unmanaged[Stdcall]<HRESULT> ResumeTracking;
+            internal static delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, HRESULT> WriteAllTLogs;
+            internal static delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, HRESULT> WriteContextTLogs;
+            internal static delegate* unmanaged[Stdcall]<int, HRESULT> SetThreadCount;
 
             /// <summary>
-            /// Loads FileTracker.dll into a handle that we can use subsequently to grab the exported methods we're interested in.
+            /// Loads FileTracker.dll from the MSBuild tools directory into
+            /// <see cref="s_fileTrackerDllHandle"/>.
             /// </summary>
             private static void LoadFileTrackerDll()
             {
-                // Get the FileTracker in our directory that matches the currently running process
                 string buildToolsPath = FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(MSBuildConstants.CurrentToolsVersion, DotNetFrameworkArchitecture.Current);
-                string fileTrackerPath = Path.Combine(buildToolsPath, fileTrackerDllName.Value);
+                string fileTrackerPath = Path.Combine(buildToolsPath, s_fileTrackerDllName.Value);
 
                 if (!FileSystems.Default.FileExists(fileTrackerPath))
                 {
-                    throw new DllNotFoundException(fileTrackerDllName.Value);
+                    throw new DllNotFoundException(s_fileTrackerDllName.Value);
                 }
 
-                SafeLibraryHandle handle = LoadLibrary(fileTrackerPath);
-
-                if (handle.IsInvalid)
+                HMODULE handle;
+                fixed (char* pPath = fileTrackerPath)
                 {
-                    Int32 hresult = Marshal.GetHRForLastWin32Error();
-                    Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
+                    handle = PInvoke.LoadLibrary(new PCWSTR(pPath));
+                }
 
-                    // If Marshal.ThrowExceptionForHR did not throw, we still need to make sure to throw:
+                if (handle.IsNull)
+                {
+                    Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error(), new IntPtr(-1));
+
+                    // If Marshal.ThrowExceptionForHR did not throw, force a throw here.
                     throw new InvalidOperationException();
                 }
 
@@ -227,44 +234,70 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// Generic code to grab the function pointer for a function exported by FileTracker.dll, given
-            /// that function's name, and transform that function pointer into a callable delegate.
+            /// Resolve <paramref name="entryPointName"/> from the loaded FileTracker module
+            /// and return its address as an unmanaged function pointer.
             /// </summary>
             [SecurityCritical]
-            private static DT CreateDelegate<DT>(String entryPointName)
+            private static void* GetExport(string entryPointName)
             {
-                IntPtr entryPoint = GetProcAddress(s_fileTrackerDllHandle, entryPointName);
-
-                if (IntPtr.Zero == entryPoint)
+                // GetProcAddress takes a system-default-code-page (ANSI) string. Encode through
+                // the real encoder so DBCS / multi-byte characters in an unusual export name
+                // are handled correctly. Rent from ArrayPool to avoid a per-call allocation.
+                //
+                // Encoding.Default returns the system ANSI code page on .NET Framework
+                // (correct for GetProcAddress) but UTF-8 on .NET (Core). FEATURE_FILE_TRACKER
+                // is only defined for net472 so this branch is correct as-is; if the #if
+                // guard ever broadens to .NET (Core), switch to a CodePagesEncodingProvider
+                // ANSI encoding instead.
+                Encoding ansi = Encoding.Default;
+                int maxByteCount = ansi.GetMaxByteCount(entryPointName.Length) + 1;
+                byte[] buffer = ArrayPool<byte>.Shared.Rent(maxByteCount);
+                try
                 {
-                    throw new EntryPointNotFoundException(fileTrackerDllName.Value + "!" + entryPointName);
-                }
+                    int written = ansi.GetBytes(entryPointName, 0, entryPointName.Length, buffer, 0);
+                    buffer[written] = 0;
 
-                return (DT)(Object)Marshal.GetDelegateForFunctionPointer(entryPoint, typeof(DT));
+                    FARPROC entryPoint;
+                    fixed (byte* pName = buffer)
+                    {
+                        entryPoint = PInvoke.GetProcAddress(s_fileTrackerDllHandle, new PCSTR(pName));
+                    }
+
+                    if (entryPoint.IsNull)
+                    {
+                        throw new EntryPointNotFoundException(s_fileTrackerDllName.Value + "!" + entryPointName);
+                    }
+
+                    return (void*)entryPoint.Value;
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
 
             /// <summary>
-            /// Actually generate all of the delegates that will be called by our public (or rather, internal) surface area methods.
+            /// Resolve every export FileTracker.dll publishes that the managed shim cares
+            /// about, populating the function-pointer fields.
             /// </summary>
             private static void InitDelegates()
             {
-                ErrorUtilities.VerifyThrow(s_fileTrackerDllHandle != null, "fileTrackerDllHandle should not be null");
-                ErrorUtilities.VerifyThrow(!s_fileTrackerDllHandle.IsInvalid, "Handle for FileTracker.dll should not be invalid");
+                Assumed.False(s_fileTrackerDllHandle.IsNull, "Handle for FileTracker.dll should not be null");
 
-                startTrackingContextDelegate = CreateDelegate<StartTrackingContextDelegate>("StartTrackingContext");
-                startTrackingContextWithRootDelegate = CreateDelegate<StartTrackingContextWithRootDelegate>("StartTrackingContextWithRoot");
-                endTrackingContextDelegate = CreateDelegate<EndTrackingContextDelegate>("EndTrackingContext");
-                stopTrackingAndCleanupDelegate = CreateDelegate<StopTrackingAndCleanupDelegate>("StopTrackingAndCleanup");
-                suspendTrackingDelegate = CreateDelegate<SuspendTrackingDelegate>("SuspendTracking");
-                resumeTrackingDelegate = CreateDelegate<ResumeTrackingDelegate>("ResumeTracking");
-                writeAllTLogsDelegate = CreateDelegate<WriteAllTLogsDelegate>("WriteAllTLogs");
-                writeContextTLogsDelegate = CreateDelegate<WriteContextTLogsDelegate>("WriteContextTLogs");
-                setThreadCountDelegate = CreateDelegate<SetThreadCountDelegate>("SetThreadCount");
+                StartTrackingContext         = (delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, HRESULT>)GetExport(nameof(StartTrackingContext));
+                StartTrackingContextWithRoot = (delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, PCWSTR, HRESULT>)GetExport(nameof(StartTrackingContextWithRoot));
+                EndTrackingContext           = (delegate* unmanaged[Stdcall]<HRESULT>)GetExport(nameof(EndTrackingContext));
+                StopTrackingAndCleanup       = (delegate* unmanaged[Stdcall]<HRESULT>)GetExport(nameof(StopTrackingAndCleanup));
+                SuspendTracking              = (delegate* unmanaged[Stdcall]<HRESULT>)GetExport(nameof(SuspendTracking));
+                ResumeTracking               = (delegate* unmanaged[Stdcall]<HRESULT>)GetExport(nameof(ResumeTracking));
+                WriteAllTLogs                = (delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, HRESULT>)GetExport(nameof(WriteAllTLogs));
+                WriteContextTLogs            = (delegate* unmanaged[Stdcall]<PCWSTR, PCWSTR, HRESULT>)GetExport(nameof(WriteContextTLogs));
+                SetThreadCount               = (delegate* unmanaged[Stdcall]<int, HRESULT>)GetExport(nameof(SetThreadCount));
             }
 
             /// <summary>
-            /// Static constructor -- generates the delegates for all of the export methods from
-            /// FileTracker.dll that we care about.
+            /// Type initializer: loads the native module and resolves every export once
+            /// before any of the function-pointer fields are read.
             /// </summary>
             [SecuritySafeCritical]
             static FileTrackerDllStub()
@@ -272,35 +305,6 @@ namespace Microsoft.Build.Shared
                 LoadFileTrackerDll();
                 InitDelegates();
             }
-
-            #endregion  // Initialization code
-#pragma warning restore format
-            // Specialized handle to make sure we free FileTracker.dll
-            [SecurityCritical]
-            private class SafeLibraryHandle : SafeHandle
-            {
-                internal SafeLibraryHandle()
-                    : base(IntPtr.Zero, true)
-                {
-                }
-
-                public override bool IsInvalid
-                {
-                    [SecurityCritical]
-                    get
-                    { return IntPtr.Zero == handle; }
-                }
-#if FEATURE_CONSTRAINED_EXECUTION
-                [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-#endif
-                [SecurityCritical]
-                protected override bool ReleaseHandle()
-                {
-                    // FileTracker expects to continue to exist even through ExitProcess -- if we forcibly unload it now,
-                    // bad things can happen when the CLR attempts to call the (still detoured?) ExitProcess.
-                    return true;
-                }
-            }  // private class SafeLibraryHandle
         }
     }
 }

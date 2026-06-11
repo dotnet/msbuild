@@ -6,6 +6,9 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
@@ -187,7 +190,6 @@
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
-    <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs" />
     <Compile Include="FileIO\ReadLinesFromFile.cs" />
@@ -224,10 +226,9 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="AssemblyDependency\Fusion\Fusion.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
-    <Compile Include="AssemblyDependency\Fusion\IAssemblyCache.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
-    <Compile Include="AssemblyDependency\Fusion\IAssemblyEnum.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
-    <Compile Include="AssemblyDependency\Fusion\IAssemblyName.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Fusion\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Metadata\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="TypeLib\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
     <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="AddToWin32Manifest.cs" />
@@ -617,14 +618,13 @@
   </ItemGroup>
   <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
   <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
-    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
     <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
     <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005</WarningsNotAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
@@ -647,9 +647,6 @@
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>

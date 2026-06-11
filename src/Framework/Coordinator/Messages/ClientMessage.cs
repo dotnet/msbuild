@@ -16,10 +16,7 @@ internal abstract record ClientMessage
     {
         byte version = reader.ReadByte();
 
-        if (version != Protocol.Version)
-        {
-            FrameworkErrorUtilities.ThrowInternalError($"Unsupported coordinator protocol version: {version} (expected {Protocol.Version})");
-        }
+        Assumed.Equal(version, Protocol.Version, $"Unsupported coordinator protocol version: {version} (expected {Protocol.Version})");
 
         var messageType = (ClientMessageType)reader.ReadByte();
 
@@ -29,7 +26,7 @@ internal abstract record ClientMessage
             ClientMessageType.ReleaseNodes => ReleaseNodesMessage.Instance,
             ClientMessageType.Heartbeat => HeartbeatMessage.Instance,
 
-            _ => FrameworkErrorUtilities.ThrowInternalError<ClientMessage>($"Unknown client message type: {messageType}"),
+            _ => Assumed.Unreachable<ClientMessage>($"Unknown client message type: {messageType}"),
         };
     }
 

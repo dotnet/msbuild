@@ -13,6 +13,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         internal const string TaskEnvironmentFullName = "Microsoft.Build.Framework.TaskEnvironment";
         internal const string AbsolutePathFullName = "Microsoft.Build.Framework.AbsolutePath";
         internal const string ITaskItemFullName = "Microsoft.Build.Framework.ITaskItem";
+        internal const string RequiredAttributeFullName = "Microsoft.Build.Framework.RequiredAttribute";
         internal const string AnalyzedAttributeFullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAnalyzedAttribute";
         internal const string MultiThreadableTaskAttributeFullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute";
         internal const string ConsoleFullName = "System.Console";

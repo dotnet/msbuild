@@ -8,70 +8,20 @@ argument-hint: 'Describe the COM interface or activation pattern you are working
 
 Struct-based COM interop using CsWin32 patterns — AOT-compatible, no `[ComImport]` or built-in marshalling.
 
+**Paired skill:** [cswin32-interop](../cswin32-interop/SKILL.md) covers general P/Invoke and the blittable signature rules that apply to both `[DllImport]` and COM vtables. This file covers only the COM-specific layer.
+
 ## Workflow
 
-1. **Determine if the interface is in Win32 metadata.** If yes, add the name to `src/Framework/NativeMethods.txt` — CsWin32 generates it. If no (e.g. WMI), define a manual struct (see below).
-2. **Create a `ComScope<T>`** for lifetime management: `using ComScope<T> scope = new();`
-3. **Activate the COM object** via `ComClassFactory.TryCreate(CLSID, ...)` or `PInvoke.CoCreateInstance` with `IID.Get<T>()`.
-4. **Call methods** via `scope.Pointer->Method(...)`. Pass `ComScope<T>` directly as `T**` output parameters.
-5. **Guard with `#if FEATURE_WINDOWSINTEROP`** (or `&& NET` for manual structs needing `delegate* unmanaged`).
-
-## COM Interfaces in Win32 Metadata
-
-Add the interface name to `src/Framework/NativeMethods.txt` → CsWin32 generates it → use `ComScope<T>`:
-
-```csharp
-#if FEATURE_WINDOWSINTEROP
-using ComScope<IRunningObjectTable> rot = new();
-HRESULT hr = PInvoke.GetRunningObjectTable(0, rot);
-if (hr.Failed) return;
-rot.Pointer->SomeMethod(...);
-#endif
-```
+1. **Interface in Win32 metadata?** Add the name to `src/Framework/NativeMethods.txt` → CsWin32 generates it. Not in metadata (WMI, Fusion, Setup Configuration) → define a manual struct under its own folder, excluded from source builds via `<Compile Remove>`.
+2. **Lifetime: `using ComScope<T> scope = new();`** for every transient COM pointer (`CoCreateInstance`, `QueryInterface`, `IEnumXxx::Next`, factory output, app-local `STDAPI Get*`, etc.). Never write `T* local; try { ... } finally { local->Release(); }` — that's the pre-`ComScope` shape that leaks on every early return. Same for `BSTR` out-params: `using BSTR x = default;`.
+3. **Activate** via `ComClassFactory.TryCreate(CLSID, ...)` (AOT-compatible) or `PInvoke.CoCreateInstance` with `IID.Get<T>()` — not `&localGuid`.
+4. **Call** via `scope.Pointer->Method(...)`. Pass `ComScope<T>` directly where the API expects `T**` / `void**` — the implicit operator does the address-of.
+5. **Match the caller's error contract.** If the top-level consumer swallows COM failure ("no result" == "absent"), helpers return `default` / `false` instead of throwing a `COMException` that's immediately discarded. `ThrowOnFailure` only when the exception will actually propagate or assert a should-never-happen.
+6. **Guard with `#if FEATURE_WINDOWSINTEROP`** — add `&& NET` only when the struct uses the static-abstract `IComIID` form exclusively (no net472 dual-target).
 
 ## Manual COM Structs (Not in Metadata)
 
-For interfaces not in Win32 metadata (e.g. WMI, Fusion), define struct-based implementations in their own files, excluded via `<Compile Remove>` in source builds. Guard with `#if FEATURE_WINDOWSINTEROP && NET` when the struct uses **only** the static-abstract `IComIID` member (only emitted on .NET 7+). If the struct needs to compile on net472, provide **both** the static-abstract member (gated `#if NET`) and an instance member (gated `#else`) so the right one binds against the per-target `IComIID` shape — see Fusion structs in `src/Tasks/AssemblyDependency/Fusion/` for this pattern.
-
-```csharp
-[SupportedOSPlatform("windows6.1")]
-internal unsafe struct IWbemLocator : IComIID
-{
-    public static Guid Guid { get; } = new(0xDC12A687, ...);
-
-    // .NET 7+ static abstract IComIID implementation
-    static ref readonly Guid IComIID.Guid
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            ReadOnlySpan<byte> data = [ /* 16 GUID bytes */ ];
-            return ref Unsafe.As<byte, Guid>(ref MemoryMarshal.GetReference(data));
-        }
-    }
-
-    private readonly void** _lpVtbl;
-
-    // IUnknown (vtable 0-2) + interface methods at correct indices
-    public HRESULT ConnectServer(char* strNetworkResource, ...) {
-        fixed (IWbemLocator* pThis = &this)
-            return ((delegate* unmanaged[Stdcall]<IWbemLocator*, char*, ..., HRESULT>)_lpVtbl[3])(pThis, ...);
-    }
-
-    public static Guid CLSID { get; } = new(0x4590F811, ...);
-}
-```
-
-**Requirements:**
-- `delegate* unmanaged[Stdcall]` — C# 9 / IL `calli`, works on net472 too
-- Static-abstract `IComIID` on .NET 7+ (gate manual structs with `#if NET`); the net472 polyfill is instance-based and is **not** attached to CsWin32-generated structs, so `ComScope<T>` over generated COM types is .NET-only
-- Exact vtable indices — unused slots can be omitted as long as used method indices are correct
-- Use the CsWin32-generated `PCWSTR` / `PWSTR` for wide string parameters (add the type to `NativeMethods.txt`). Use raw `char*` only when no typed equivalent exists.
-- CS0592 prevents `[SupportedOSPlatform]` on structs — put on individual methods instead
-
-### Dual-target manual structs (net472 + .NET)
-
-When a manual COM struct must compile on both net472 and .NET, declare both forms of the `IComIID` member in the same struct so the right one binds against the per-target `IComIID` shape (CsWin32-generated static-abstract on .NET, polyfill instance member on net472):
+Define each interface in its own file under e.g. `src/Tasks/AssemblyDependency/Fusion/`, `src/Framework/Shared/VisualStudio/`, `src/Framework/Utilities/Wmi/`. Exclude from source builds. Pattern (dual-target — works on net472 + .NET):
 
 ```csharp
 internal unsafe struct IAssemblyCache : IComIID
@@ -89,86 +39,184 @@ internal unsafe struct IAssemblyCache : IComIID
 #endif
 
     private readonly void** _lpVtbl;
-    // ... IUnknown + interface methods
+
+    // IUnknown at indices 0-2, then interface methods at 3+
+    public HRESULT QueryInterface(Guid* riid, void** ppvObject)
+    {
+        fixed (IAssemblyCache* pThis = &this)
+            return ((delegate* unmanaged[Stdcall]<IAssemblyCache*, Guid*, void**, HRESULT>)_lpVtbl[0])(pThis, riid, ppvObject);
+    }
+    // AddRef @1, Release @2, then interface methods at correct slot indices.
 }
 ```
 
-See `src/Tasks/AssemblyDependency/Fusion/` for the full pattern.
+**Rules:**
+- `delegate* unmanaged[Stdcall]` for the function-pointer cast — IDL `STDMETHODCALLTYPE` ⇒ `__stdcall` on Win32. Picking the wrong convention silently corrupts the stack.
+- Static-abstract `IComIID` is .NET 7+ only. For .NET-only structs (WMI), drop the `#else` branch and gate the whole file `#if NET`. For dual-target structs (Fusion), keep both as shown — see `src/Tasks/AssemblyDependency/Fusion/` for the canonical example.
+- Use CsWin32-generated `PCWSTR` / `PWSTR` for wide strings (add to `NativeMethods.txt`); raw `char*` only when no typed equivalent exists.
+- Vtable slots are exact: index 0 = `QueryInterface`, 1 = `AddRef`, 2 = `Release`, 3+ = interface methods in IDL order. When inheriting, **add the parent interface's method count** before counting your own (e.g. `ISetupConfiguration2.EnumAllInstances` is at slot 6 = 3 IUnknown + 3 v1 + 0).
+- CS0592 prevents `[SupportedOSPlatform]` on structs — put it on individual methods.
 
-### Blittable signatures — no marshalling
+## Lifetime & Access
 
-Manual COM structs and their `[DllImport]`s must be effectively blittable so the runtime does no marshalling work:
+**A raw `T*` (COM struct) is forbidden as a field on a non-`ref` type.** Allowed locations: locals in `unsafe` methods, parameters, fields of a `ref struct`. Anywhere else (instance fields of `class` / non-`ref` `struct`) → use `AgileComPointer<T>` — a raw pointer field is an apartment-agility hazard and leaks on finalize-without-Dispose.
 
-- **Return `HRESULT`, not `int`**, from COM vtable methods and `[DllImport]`s that return an HRESULT. `HRESULT` is blittable (single `int` field) and exposes `.Succeeded` / `.Failed` / `.Value` / `.ThrowOnFailure()`. Use `HRESULT.S_OK` instead of `0`; cast `e.HResult` to `(HRESULT)` when wrapping. `AddRef` / `Release` return `uint` (IUnknown contract).
-- **Throwing on failure: use `hr.ThrowOnFailure()`** instead of `if (hr.Failed) Marshal.ThrowExceptionForHR(hr)`. It is the idiomatic CsWin32 helper, produces the same exception (with proper IErrorInfo enrichment), and reads cleanly at call sites: `someInterface->SomeMethod(...).ThrowOnFailure();`. Reserve manual `.Failed` checks for cases where you need to handle specific HRESULTs (e.g. `ERROR_INSUFFICIENT_BUFFER`) before throwing.
-- **No `out T*` on signatures** — use `T**`. `out` triggers marshaling + a `fixed` round-trip at every call site.
-- **No `IntPtr` for opaque/reserved params** — use `void*` and pass `null`. Inside `unsafe` there is no reason to round-trip through `IntPtr.Zero`.
-- **Prefer `nint` / `nuint` over `IntPtr` / `UIntPtr`** for native-sized integers — better cast semantics, no boxing surprises.
-- **Use `PCWSTR` / `PWSTR` (CsWin32) for wide strings**, never managed `string`. The caller side pins with `fixed (char* p = managedString) ... new PCWSTR(p)` (implicit on most overloads).
-- **No managed reference types** (`string`, `StringBuilder`, arrays) in COM vtable signatures.
-- **Do not specify `PreserveSig = true` on `[DllImport]`** — it is the default. Only specify `PreserveSig = false` if you want the marshaller to throw on failure HRESULTs (rare; prefer returning `HRESULT` and calling `.ThrowOnFailure()` at the call site). Note `PreserveSig` defaults the opposite way for `[ComImport]` interfaces (where it defaults to `false`), but struct-based COM here uses raw `delegate*` invocations and isn't affected.
+### `ComScope<T>` — transient pointers
+
+`ref struct`, `using`'d, calls `Release` on dispose. **The default for everything that doesn't survive the current method.** Implicitly converts to `T**` and `void**`, so out-params write into the scope directly:
+
+```csharp
+using ComScope<ISomeInterface> scope = new();
+Guid clsid = SomeStruct.CLSID;
+Guid iid = IID.Get<ISomeInterface>();
+PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, &iid, scope).ThrowOnFailure();
+scope.Pointer->DoThing(...);
+
+using ComScope<IOther> other = new();
+Guid otherIid = IOther.IID_IOther;
+scope.Pointer->QueryInterface(&otherIid, other).ThrowOnFailure();
+```
+
+- Access methods via `scope.Pointer->Method(...)`. Null-check with `scope.IsNull`.
+- Applies to *every* COM out-param: `CoCreateInstance`, `QueryInterface`, `IEnumXxx::Next`, factory methods, app-local `STDAPI Get*` (declare the `[DllImport]` with `T** pp`, not `out T*`, so the implicit operator binds).
+
+**Ownership transfer out of a helper.** A helper that acquires a COM pointer can return `ComScope<T>` directly; intermediate pointers stay in their own `using` scopes and Release on the helper's `return`. `default` `ComScope<T>` is null and its `Dispose` is a no-op, so callers don't need an extra null guard:
+
+```csharp
+private static ComScope<ISetupConfiguration2> AcquireSetupConfig()
+{
+    Guid clsid = SetupConfiguration.CLSID_SetupConfiguration;
+    Guid iid = ISetupConfiguration2.IID_ISetupConfiguration2;
+
+    ComScope<ISetupConfiguration2> config = new();
+    HRESULT hr = PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, &iid, config);
+    if (hr.Succeeded) return config;                 // ownership flows to caller
+    if (hr != HRESULT.REGDB_E_CLASSNOTREG) return default;
+
+    using ComScope<ISetupConfiguration> v1 = new();  // intermediate, Released on return
+    if (SetupConfiguration.GetSetupConfiguration(v1, IntPtr.Zero) < 0 || v1.IsNull) return default;
+    return v1.Pointer->QueryInterface(&iid, config).Succeeded ? config : default;
+}
+
+// caller:
+using ComScope<ISetupConfiguration2> config = AcquireSetupConfig();
+if (!config.IsNull) { /* use config.Pointer */ }
+```
+
+### `BSTR` — COM strings
+
+CsWin32-generated; extended in [`Windows/Win32/Foundation/BSTR.cs`](../../../src/Framework/Windows/Win32/Foundation/BSTR.cs) with `IDisposable`. `Dispose` calls `SysFreeString` and zeroes the field in place. **Scope every COM `BSTR` out-param with `using BSTR x = default;`** — no manual `try/finally + SysFreeString`:
+
+```csharp
+using BSTR versionBstr = default;
+if (instance->GetInstallationVersion(&versionBstr).Failed) return false;
+string version = versionBstr.ToString();
+// SysFreeString runs at scope exit.
+```
+
+In-place-only: `BSTR.Dispose` writes through `Unsafe.AsRef(in this)`, so `using` must be on the storage location, not on a method-returned copy. Same rule as `ComScope<T>`.
+
+### `AgileComPointer<T>` — fields outliving a method
+
+Finalizable managed class. Use whenever a COM pointer is stored in a class field (the only legal way — raw `T*` fields are forbidden, see top of section).
+
+- Registers in the Global Interface Table (thread-agile); finalizer releases if `Dispose` is missed.
+- Access via `using ComScope<T> scope = agile.GetInterface();` then `scope.Pointer->Method(...)`. `GetInterface()` round-trips through the GIT — hoist a single scope to the top of a method when several calls share it.
+- Constructor `takeOwnership`: pass `false` when the raw pointer is also held by a `ComScope<T>` that will Release (GIT AddRefs independently); pass `true` only when no other code path will Release.
+- Dispose via the owner's `Dispose` / `DisposeManagedResources` (`AgileComPointer` is managed, not unmanaged — its finalizer is the safety net, not the primary cleanup).
 
 ## Activation
 
 ```csharp
-// Via ComClassFactory (AOT-compatible)
+// AOT-compatible
 if (ComClassFactory.TryCreate(IWbemLocator.CLSID, out var factory, out HRESULT hr))
     using ComScope<IWbemLocator> instance = factory.TryCreateInstance<IWbemLocator>(out hr);
 
-// Via CoCreateInstance — use IID.Get<T>() for the IID
+// CoCreateInstance — IID.Get<T>(), not &localGuid
 Guid clsid = IWbemLocator.CLSID;
 using ComScope<IWbemLocator> locator = new();
 hr = PInvoke.CoCreateInstance(&clsid, null, CLSCTX.CLSCTX_INPROC_SERVER, IID.Get<IWbemLocator>(), locator);
 ```
 
-**Key points:**
-- Use `IID.Get<T>()` — do not take `&localGuid`
-- Initialize `ComScope<T>` with `new()`. It implicitly converts to `T**` / `void**` output parameters
+## Error-Handling Parity When Migrating
 
-## IComIID Polyfill (.NET Framework / netstandard2.0)
+Struct-based COM returns raw `HRESULT`; `[ComImport]` and built-in activation threw automatically. Preserve the old throw-vs-return at each call site:
 
-CsWin32 emits `IComIID` (with static-abstract `Guid`) and attaches it to every generated COM struct **only on .NET 7+**. On older targets:
+| Old shape | Threw via | Migrated shape |
+|---|---|---|
+| `new SomeCoClass()` | built-in activation | `PInvoke.CoCreateInstance(...).ThrowOnFailure()` |
+| `(IFoo)rcw` cast | `InvalidCastException` on QI | `QueryInterface(&iid, scope).ThrowOnFailure()` |
+| `[ComImport]` method, default `PreserveSig=false` | marshaller throws on `FAILED(hr)` | `.ThrowOnFailure()` at the call site |
+| `[ComImport]` method with `[PreserveSig]` | caller inspects return | mirror the existing `hr` branch — don't start throwing |
 
-- The `IComIID` interface itself is missing — provide an instance-based version at `src/Framework/Polyfills/IComIID.cs`.
-- Generated COM structs do not have `IComIID` in their base list — provide a partial struct that adds it.
+**Factory-method exception:** when the old contract was "return null for invalid input" (e.g. `Create(path)`), keep null-return only for the legitimate-rejection path; activation / QI failures still throw. See [`MetadataReader.cs`](../../../src/Tasks/ManifestUtil/MetadataReader.cs) (throws on activation/QI, returns null on `OpenScope`).
 
-This is a **known case that always requires polyfilling** for .NET Framework support. Pattern in [`src/Framework/Polyfills/IComIIDPolyfills.cs`](../../../src/Framework/Polyfills/IComIIDPolyfills.cs):
+**Don't throw when the caller swallows it.** If the top-level consumer wraps the whole chain in `catch (COMException) { }`, inner helpers must return `default` / `false` / empty instead of constructing a `COMException` only to have it discarded. Throwing here allocates the exception, walks the stack, and hides the HRESULT for no benefit. See [`VisualStudioLocationHelper.AcquireSetupConfiguration2`](../../../src/Framework/VisualStudioLocationHelper.cs).
+
+## Mocking Struct-Based COM in Tests
+
+Struct-based COM calls go through raw vtable pointers, so a managed mock can't be passed where a `T*` is expected. Bridge with the **built-in COM marshaller**: the mock implements the *managed* interface (BCL `System.Runtime.InteropServices.ComTypes.*` when ABI-compatible — true for `ITypeLib` / `ITypeInfo` — else CsWin32's nested `[ComImport] internal interface Interface`), and the test passes a **CCW** (COM-callable wrapper) pointer to the code under test:
 
 ```csharp
-namespace Windows.Win32.System.Com;
-
-internal partial struct IRunningObjectTable : IComIID
-{
-    readonly Guid IComIID.Guid => IID_Guid; // CsWin32-emitted field, always present
-}
+// MockTypeLib : ComTypes.ITypeLib   (a normal managed class)
+IntPtr ccw = Marshal.GetComInterfaceForObject(mock, typeof(ComTypes.ITypeLib));
+try { walker.AnalyzeTypeLibrary((ITypeLib*)ccw); }   // struct API; real QueryInterface works
+finally { Marshal.Release(ccw); }
 ```
 
-When a new CsWin32-generated COM type is used through `ComScope<T>`, add a partial entry to that file. Modeled after [winforms `IDataObject.cs`](https://github.com/dotnet/winforms/blob/main/src/System.Private.Windows.Core/src/Framework/Windows/Win32/System/Com/IDataObject.cs).
+The CCW exposes a real vtable, so no hand-rolled native vtable is needed and the managed mock framework stays intact. But the mock must now behave like real COM, not a managed object:
 
-Both polyfill files are gated with `#if !NET` so they compile on net472/netstandard2.0 and become empty on .NET (where CsWin32 emits its own static-abstract `IComIID` and attaches it to generated structs).
+- **All `[out]` params are written**, even ones the caller ignores. Passing `null` for a trailing out-param (`GetDocumentation(-1, &name, null, null, null)`) faults the marshaller — supply a real pointer for each.
+- **Exception identity is lost.** An HRESULT-returning method resurfaces a thrown exception as a *new* `COMException` (HRESULT preserved, instance not); a `uint`/`void` method with no HRESULT channel (`GetTypeInfoCount`, the `Release*` methods) **swallows it silently** and returns garbage. Assert on type/count, not the injected instance, and don't rely on `void`/`uint` methods to propagate.
+- **Throw `COMException` on bad input, don't `Assert`.** An `Assert` throws an `XunitException` that escapes the SUT's `catch (COMException)`; a `COMException` becomes a failing HRESULT the SUT handles normally. (Matters because a swallowed `GetTypeInfoCount` failure can feed an out-of-range index to the next call.)
 
-For manual COM structs (WMI, Setup Configuration, etc.) that already use the static-abstract `IComIID` form, the polyfill approach won't compile on net472 — those structs stay .NET-only via `<Compile Remove>`.
+See [`MockTypeLib.cs`](../../../src/Tasks.UnitTests/MockTypeLib.cs) / [`MockTypeInfo.cs`](../../../src/Tasks.UnitTests/MockTypeInfo.cs) and the CCW bridge in [`ComReferenceWalker_Tests.cs`](../../../src/Tasks.UnitTests/ComReferenceWalker_Tests.cs).
 
-## Lifetime & Access
+## Strongly-typed handle / token wrappers
 
-- `ComScope<T>` — `ref struct`, use with `using`. Releases on dispose. Use for **all local-scope COM pointers**, including transient locals during initialization (don't declare a raw `T* p = null;` to receive an `out` — use `ComScope<T>` and pass it as `T**`).
-- `AgileComPointer<T>` — finalizable managed class. Use for COM pointers stored in **managed class fields**.
-  - **Never store a raw `T*` in a managed class field.** Raw fields leak ref counts if the owner is GC'd undisposed and are an apartment-agility hazard.
-  - Access via `using ComScope<T> scope = agile.GetInterface();`
-  - **Pairing with `ComScope`**: when the source is a `ComScope<T>` that already owns the reference, construct with `takeOwnership: false` — the GIT AddRefs on registration and the `ComScope` Releases deterministically on scope exit. Use `takeOwnership: true` only when handing off a raw pointer that has no other owner (rare).
-- Access methods via `scope.Pointer->Method(...)`.
-- Pass `ComScope<T>` directly as `T**` or `void**` output parameter (implicit conversion).
+When the native side `typedef`s a primitive into a family of "same shape, different meaning" aliases (`corhdr.h`'s `typedef ULONG32 mdToken; typedef mdToken mdAssembly; ...`), mirror that hierarchy with distinct `readonly struct` wrappers holding the single underlying primitive — same pattern as CsWin32's `HANDLE` / `HWND` / `HMODULE`. Stays blittable; `delegate*` casts and arrays marshal at zero cost.
+
+Conversions follow the typedef hierarchy: **implicit** widening to the base (`MdAssembly` → `MdToken`, always safe), **explicit** narrowing (`(MdAssembly)token`, opt-in because the C side can't enforce the kind at the cast site).
+
+**Check the native header for the canonical validation primitives** before defining `IsNil` / `IsValid`. Encoding details often hide in macros that don't grep cleanly. For `mdToken` the encoding is `(TableType << 24) | Rid`:
+
+| C macro | Meaning |
+|---|---|
+| `TypeFromToken(tk) = tk & 0xff000000` | Table-type tag (high byte) → `CorTokenType` |
+| `RidFromToken(tk) = tk & 0x00ffffff`  | Row id (low 24 bits) |
+| `IsNilToken(tk) = RidFromToken(tk) == 0` | Nil check — **rid half, not the whole value** |
+| `mdAssemblyNil = mdtAssembly = 0x20000000` | Per-type nil is the table-type tag, **not 0** |
+
+A naive `IsNil => Value == 0` would misclassify the `0x20000000` "no assembly in this scope" return from `GetAssemblyFromScope`. Mirror the macro: `IsNil => Rid == 0`. Reference: [`Tokens.cs`](../../../src/Tasks/AssemblyDependency/Metadata/Tokens.cs), [`CorTokenType.cs`](../../../src/Tasks/AssemblyDependency/Metadata/CorTokenType.cs).
+
+## IComIID Polyfill for net472
+
+CsWin32 emits `IComIID` (static-abstract `Guid`) and attaches it to generated COM structs **only on .NET 7+**. On net472 / netstandard2.0:
+
+- The interface is provided instance-based at [`src/Framework/Polyfills/IComIID.cs`](../../../src/Framework/Polyfills/IComIID.cs).
+- Generated structs do **not** carry `IComIID` in their base list — add a partial in [`src/Framework/Polyfills/IComIIDPolyfills.cs`](../../../src/Framework/Polyfills/IComIIDPolyfills.cs):
+
+  ```csharp
+  namespace Windows.Win32.System.Com;
+  internal partial struct IRunningObjectTable : IComIID
+  {
+      readonly Guid IComIID.Guid => IID_Guid; // CsWin32-emitted field
+  }
+  ```
+
+Both files gated `#if !NET`. When you start using a new CsWin32-generated COM type through `ComScope<T>`, add a partial. Manual structs (WMI, Setup Configuration) that already use the static-abstract form stay .NET-only via `<Compile Remove>` — the polyfill won't compile against them.
 
 ## File Organization
 
 | Location | Contents |
-|----------|----------|
-| `src/Framework/Windows/Win32/System/Com/` | `ComScope.cs`, `ComClassFactory.cs`, `AgileComPointer.cs`, `GlobalInterfaceTable.cs` |
+|---|---|
+| `src/Framework/Windows/Win32/System/Com/` | `ComScope`, `ComClassFactory`, `AgileComPointer`, `GlobalInterfaceTable` |
 | `src/Framework/Windows/Win32/IID.cs` | Generic IID lookup |
-| `src/Framework/Utilities/Wmi/` | Manual WMI structs (.NET-only — use static-abstract `IComIID`) |
-| `src/Framework/Polyfills/IComIID.cs` | net472/netstandard2.0 instance-based `IComIID` polyfill (`#if !NET`) |
-| `src/Framework/Polyfills/IComIIDPolyfills.cs` | Per-struct partials attaching `IComIID` to CsWin32-generated COM types on net472/netstandard2.0 |
+| `src/Framework/Polyfills/IComIID*.cs` | net472 / netstandard2.0 polyfills (`#if !NET`) |
+| `src/Framework/Utilities/Wmi/`, `src/Framework/Shared/VisualStudio/`, `src/Tasks/AssemblyDependency/Fusion/`, `src/Tasks/AssemblyDependency/Metadata/`, `src/Tasks/TypeLib/` | Manual COM struct interfaces — own folder per API surface |
 
 ## CS3016 CLS Compliance
 
-CsWin32 COM structs trigger CS3016 under `[assembly: CLSCompliant(true)]`. Handled via `[CLSCompliant(false)]` partial declarations in `GeneratedInteropClsCompliance.cs`. CS3019 warnings suppressed in `.editorconfig` for `{**/Windows/**/*.cs}` — do not add per-file suppressions. See https://github.com/dotnet/roslyn/issues/68526.
+CsWin32 COM structs trigger CS3016 under `[assembly: CLSCompliant(true)]`. Handled via `[CLSCompliant(false)]` partial declarations in `GeneratedInteropClsCompliance.cs`; CS3019 suppressed in `.editorconfig` for `{**/Windows/**/*.cs}`. Don't add per-file suppressions. See https://github.com/dotnet/roslyn/issues/68526.
+
+A new interface in `NativeMethods.txt` can surface CS3016 on the new struct **and on interfaces it transitively pulls in** (`IDispatchEx` drags in `IServiceProvider`) — add a `[CLSCompliant(false)]` partial for each flagged type in its namespace block. Check **every** TFM: the warning can fire on one (e.g. net10) but not another (net472).

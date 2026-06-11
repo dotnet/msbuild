@@ -617,6 +617,11 @@
         <target state="translated">Carregando o seguinte plug-in de cache do projeto: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="translated">Registradores habilitados: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">O detalhamento do log está definido como: {0}.</target>
@@ -631,7 +636,7 @@
       </trans-unit>
       <trans-unit id="MSBuildTaskInheritedSkipNonexistentTargets">
         <source>SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</source>
-        <target state="new">SkipNonexistentTargets="true" inherited from caller across the metaproject boundary.</target>
+        <target state="translated">SkipNonexistentTargets="true" herdado do chamador no limite de metaprojeto.</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
@@ -1062,7 +1067,7 @@ Erros: {3}</target>
       </trans-unit>
       <trans-unit id="TaskHostDetails">
         <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
-        <target state="new">Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</target>
+        <target state="translated">A tarefa "{0}" foi executada no processo TaskHost {1}, gerado pelo processo chamador {2}. Novo TaskHost gerado para esta invocação: {3}. TaskHost é um sidecar reutilizável: {4}. Reutilização do nó: {5}.</target>
         <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

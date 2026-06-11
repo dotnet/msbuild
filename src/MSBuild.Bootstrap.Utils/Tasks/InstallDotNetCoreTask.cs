@@ -36,7 +36,9 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         public string InstallDir { get; set; }
 
         /// <summary>
-        /// Gets or sets the root path where the .NET Core installation script is located. This property is required.
+        /// Gets or sets the repo-local root path where the .NET Core installation script is downloaded to and run from.
+        /// This must be a writable directory; it is intentionally independent of where the SDK itself is installed so the
+        /// script is never written into a machine-global location such as "C:\Program Files\dotnet\". This property is required.
         /// </summary>
         [Required]
         public string DotNetInstallScriptRootPath { get; set; }
@@ -71,6 +73,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
             ScriptExecutionSettings executionSettings = SetupScriptsExecutionSettings();
             if (!File.Exists(executionSettings.ScriptsFullPath))
             {
+                // The script root is repo-local and may not exist yet, so make sure it is there before downloading into it.
+                Directory.CreateDirectory(DotNetInstallScriptRootPath);
                 AsyncTasks.Task.Run(() => DownloadScriptAsync(executionSettings.ScriptName, executionSettings.ScriptsFullPath)).GetAwaiter().GetResult();
             }
 
@@ -154,11 +158,30 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         {
             string scriptExtension = IsWindows ? "ps1" : "sh";
             string scriptPath = Path.Combine(DotNetInstallScriptRootPath, $"{ScriptName}.{scriptExtension}");
+            // On Windows the native command-line parser treats a backslash before the closing quote as
+            // escaping it (e.g. "C:\dir\" becomes C:\dir"), so trim a trailing separator before quoting.
+            string installDir = TrimTrailingDirectorySeparators(InstallDir);
             string scriptArgs = IsWindows
-                ? $"-NoProfile -ExecutionPolicy Bypass -File {scriptPath} -Version {Version} -InstallDir {InstallDir}"
-                : $"{scriptPath} --version {Version} --install-dir {InstallDir}";
+                ? $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\" -Version {Version} -InstallDir \"{installDir}\""
+                : $"\"{scriptPath}\" --version {Version} --install-dir \"{installDir}\"";
 
             return new ScriptExecutionSettings($"{ScriptName}.{scriptExtension}", scriptPath, scriptArgs);
+        }
+
+        /// <summary>
+        /// Trims trailing directory separators while preserving a path root (e.g. "C:\").
+        /// </summary>
+        private static string TrimTrailingDirectorySeparators(string path)
+        {
+            string root = Path.GetPathRoot(path) ?? string.Empty;
+            while (path.Length > root.Length &&
+                   (path[path.Length - 1] == Path.DirectorySeparatorChar ||
+                    path[path.Length - 1] == Path.AltDirectorySeparatorChar))
+            {
+                path = path.Substring(0, path.Length - 1);
+            }
+
+            return path;
         }
 
         /// <summary>

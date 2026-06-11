@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -265,7 +265,7 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration during a BuildEngine callback!");
                 return EffectiveConfiguration.ContinueOnError;
             }
         }
@@ -277,7 +277,7 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration during a BuildEngine callback!");
                 return EffectiveConfiguration.LineNumberOfTask;
             }
         }
@@ -289,7 +289,7 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration during a BuildEngine callback!");
                 return EffectiveConfiguration.ColumnNumberOfTask;
             }
         }
@@ -301,7 +301,7 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration during a BuildEngine callback!");
                 return EffectiveConfiguration.ProjectFileOfTask;
             }
         }
@@ -512,9 +512,7 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
-            ErrorUtilities.VerifyThrow(
-                targetOutputsPerProject is null || projectFileNames.Length == targetOutputsPerProject.Length,
-                $"projectFileNames has {projectFileNames.Length} entries but targetOutputsPerProject has {targetOutputsPerProject?.Length ?? 0} -- lengths must match.");
+            Assumed.True(targetOutputsPerProject is null || projectFileNames.Length == targetOutputsPerProject.Length, $"projectFileNames has {projectFileNames.Length} entries but targetOutputsPerProject has {targetOutputsPerProject?.Length ?? 0} -- lengths must match.");
 
             bool includeTargetOutputs = targetOutputsPerProject is not null;
 
@@ -689,7 +687,7 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(requestedCores);
 
             if (!CallbacksSupported)
             {
@@ -705,7 +703,7 @@ namespace Microsoft.Build.CommandLine
 
         public void ReleaseCores(int coresToRelease)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(coresToRelease);
 
             if (!CallbacksSupported)
             {
@@ -740,7 +738,7 @@ namespace Microsoft.Build.CommandLine
             {
                 get
                 {
-                    ErrorUtilities.VerifyThrow(_taskHost.EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                    Assumed.NotNull(_taskHost.EffectiveConfiguration, "We should never have a null configuration during a BuildEngine callback!");
                     return _taskHost.EffectiveConfiguration.IsTaskInputLoggingEnabled;
                 }
             }
@@ -941,7 +939,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (packet is not ITaskHostCallbackPacket callbackPacket)
             {
-                ErrorUtilities.ThrowInternalError($"HandleCallbackResponse called with non-callback packet type: {packet.GetType().Name}");
+                InternalError.Throw($"HandleCallbackResponse called with non-callback packet type: {packet.GetType().Name}");
                 return;
             }
 
@@ -963,7 +961,7 @@ namespace Microsoft.Build.CommandLine
 
             // No pending request matched -- this is a protocol bug (duplicate response,
             // corrupted request ID, or race with shutdown). Crash to surface the issue.
-            ErrorUtilities.ThrowInternalError($"TaskHost received callback response with no pending request. RequestId={callbackPacket.RequestId}, Type={packet.Type}");
+            InternalError.Throw($"TaskHost received callback response with no pending request. RequestId={callbackPacket.RequestId}, Type={packet.Type}");
         }
 
         /// <summary>
@@ -1100,7 +1098,7 @@ namespace Microsoft.Build.CommandLine
             if (!_taskContexts.TryAdd(taskId, context))
             {
                 context.Dispose();
-                ErrorUtilities.ThrowInternalError($"Task ID {taskId} already exists in TaskHost.");
+                InternalError.Throw($"Task ID {taskId} already exists in TaskHost.");
             }
 
             return context;
@@ -1123,7 +1121,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void SaveOperatingEnvironment(TaskExecutionContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+            ArgumentNullException.ThrowIfNull(context);
 
             context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
             context.SavedEnvironment = new Dictionary<string, string>(
@@ -1141,7 +1139,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void RestoreOperatingEnvironment(TaskExecutionContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+            ArgumentNullException.ThrowIfNull(context);
 
             if (context.SavedCurrentDirectory is null || context.SavedEnvironment is null)
             {
@@ -1168,8 +1166,7 @@ namespace Microsoft.Build.CommandLine
         {
             // Only _activeTaskCount must be zero — blocked tasks (waiting on BuildProjectFile
             // callbacks) don't prevent accepting a new nested task configuration.
-            ErrorUtilities.VerifyThrow(_activeTaskCount == 0,
-                $"Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={_activeTaskCount}");
+            Assumed.Zero(_activeTaskCount, $"Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={_activeTaskCount}");
 
             if (_blockedTaskCount > 0)
             {
@@ -1258,7 +1255,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
         {
-            ErrorUtilities.VerifyThrow(_activeTaskCount == 0, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
+            Assumed.Zero(_activeTaskCount, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
             // Sidecar TaskHost will persist after the build is done.
             if (_nodeReuse)
@@ -1484,9 +1481,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     // BlockForCallback/ResumeAfterCallback are always paired, so a task
                     // should never be in BlockedOnCallback state when it completes.
-                    ErrorUtilities.VerifyThrow(
-                        taskContext is null || taskContext.State != TaskExecutionState.BlockedOnCallback,
-                        "Task completed while still in BlockedOnCallback state.");
+                    Assumed.True(taskContext is null || taskContext.State != TaskExecutionState.BlockedOnCallback, "Task completed while still in BlockedOnCallback state.");
 
                     Interlocked.Decrement(ref _activeTaskCount);
 
@@ -1561,7 +1556,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void SetTaskHostEnvironment(IDictionary<string, string> environment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(s_mismatchedEnvironmentValues, "mismatchedEnvironmentValues");
+            Assumed.NotNull(s_mismatchedEnvironmentValues);
             IDictionary<string, string> updatedEnvironment = null;
 
             if (_updateEnvironment)
@@ -1624,7 +1619,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private IDictionary<string, string> UpdateEnvironmentForMainNode(IDictionary<string, string> environment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(s_mismatchedEnvironmentValues, "mismatchedEnvironmentValues");
+            Assumed.NotNull(s_mismatchedEnvironmentValues);
             IDictionary<string, string> updatedEnvironment = null;
 
             if (_updateEnvironment)
@@ -1752,7 +1747,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void LogMessageFromResource(MessageImportance importance, string messageResource, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration when we're trying to log messages!");
+            Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration when we're trying to log messages!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
             BuildMessageEventArgs message = new BuildMessageEventArgs(
@@ -1769,7 +1764,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void LogWarningFromResource(string messageResource, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration when we're trying to log warnings!");
+            Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration when we're trying to log warnings!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
             BuildWarningEventArgs warning = new BuildWarningEventArgs(
@@ -1792,7 +1787,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void LogErrorFromResource(string messageResource)
         {
-            ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration when we're trying to log errors!");
+            Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration when we're trying to log errors!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
             BuildErrorEventArgs error = new BuildErrorEventArgs(
