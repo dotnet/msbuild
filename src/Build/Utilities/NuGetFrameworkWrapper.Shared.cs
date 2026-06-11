@@ -50,7 +50,7 @@ internal sealed partial class NuGetFrameworkWrapper
         where TAdapter : struct, ITfmAdapter<TParsed>
     {
         IEnumerable<(string originalTfm, TParsed parsedTfm)> incomingFrameworks = ParseTfms(incoming, adapter);
-        IEnumerable<(string originalTfm, TParsed parsedTfm)> filterFrameworks = ParseTfms(filter, adapter);
+        IEnumerable<(string originalTfm, TParsed parsedTfm)> filterFrameworks = [..ParseTfms(filter, adapter)];
         StringBuilder tfmList = new StringBuilder();
 
         // An incoming target framework from 'incoming' is kept if it is compatible with any of the desired target frameworks on 'filter'.
