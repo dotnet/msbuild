@@ -13,8 +13,8 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
-    // .NET Framework partial: NuGet.Frameworks is loaded by reflection into a separate AppDomain
-    // for NGEN reasons. See documentation/NETFramework-NGEN.md.
+    // Reflection-based partial: NuGet.Frameworks is loaded by reflection into a separate
+    // AppDomain for NGEN reasons. See documentation/NETFramework-NGEN.md.
     internal sealed partial class NuGetFrameworkWrapper : MarshalByRefObject
     {
         private const string NuGetFrameworksAssemblyName = "NuGet.Frameworks";

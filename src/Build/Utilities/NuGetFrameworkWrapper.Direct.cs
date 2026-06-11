@@ -6,8 +6,8 @@ using NuGet.Frameworks;
 
 namespace Microsoft.Build.Evaluation;
 
-// .NET (Core) partial: NuGet.Frameworks is referenced directly at compile time and called
-// without reflection, avoiding the per-call MethodInfo.Invoke cost of the .NET Framework path.
+// Direct-reference partial: NuGet.Frameworks is referenced at compile time and called
+// without reflection, avoiding the per-call MethodInfo.Invoke cost of the reflection path.
 internal sealed partial class NuGetFrameworkWrapper
 {
     private NuGetFrameworkWrapper()
