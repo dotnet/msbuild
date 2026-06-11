@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -316,35 +317,36 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         ///
         /// On the .NET Framework → .NET task host path the parent passes the SDK directory
         /// ($(NetCoreSdkRoot)) as toolsDirectory while the child re-resolves it from its own
-        /// process location. These come from independent sources, so on Windows they can differ
-        /// only in casing. Because Windows paths are case-insensitive, the case-sensitive salt
-        /// hash must normalize casing so both sides still produce the same handshake key.
+        /// process location using the canonical on-disk casing. To keep the case-sensitive salt
+        /// hash in agreement without changing the child (which may be an older SDK), the host
+        /// normalizes the launch path to its canonical on-disk casing. This must be idempotent
+        /// and independent of the input casing, so a path supplied with any drive-letter casing
+        /// resolves to the exact same string the child observes.
         /// </summary>
+#if NETFRAMEWORK
         [WindowsOnlyFact]
-        public void Handshake_ToolsDirectoryCasingDoesNotAffectKey()
+        public void NormalizePathCasing_IsIndependentOfInputCasing()
         {
-            // Use explicit NET runtime and current architecture so the NET HandshakeOptions
-            // flag is set, which is required for passing toolsDirectory to the constructor.
-            var netTaskHostParams = new TaskHostParameters(
-                runtime: XMakeAttributes.MSBuildRuntimeValues.net,
-                architecture: XMakeAttributes.GetCurrentMSBuildArchitecture(),
-                dotnetHostPath: null,
-                msBuildAssemblyPath: null);
+            // LoadLibraryEx requires a real PE image; use this test assembly's own location.
+            string realPath = Assembly.GetExecutingAssembly().Location;
+            string driveLetter = realPath.Substring(0, 1);
 
-            HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
-                taskHost: true,
-                taskHostParameters: netTaskHostParams,
-                nodeReuse: false);
+            string upperVariant = driveLetter.ToUpperInvariant() + realPath.Substring(1);
+            string lowerVariant = driveLetter.ToLowerInvariant() + realPath.Substring(1);
 
-            const string upperCase = @"D:\a\_work\1\s\.dotnet\sdk\11.0.100-preview.5.26227.104";
-            const string lowerCase = @"d:\a\_work\1\s\.dotnet\sdk\11.0.100-preview.5.26227.104";
+            string fromUpper = NodeProviderOutOfProcTaskHost.NormalizePathCasing(upperVariant);
+            string fromLower = NodeProviderOutOfProcTaskHost.NormalizePathCasing(lowerVariant);
 
-            var upperHandshake = new Handshake(options, upperCase);
-            var lowerHandshake = new Handshake(options, lowerCase);
+            // Both inputs differ only by drive-letter casing and must canonicalize to the exact
+            // same string - the value the child task host derives from its own process path.
+            // This is what keeps the case-sensitive handshake salt in agreement across the two ends.
+            fromUpper.ShouldBe(fromLower,
+                "Paths differing only by casing must canonicalize to the same string; otherwise a " +
+                ".NET Framework host and a .NET task host can fail to connect with MSB4216.");
 
-            upperHandshake.GetKey().ShouldBe(lowerHandshake.GetKey(),
-                "On Windows, paths differing only by casing must produce identical handshake keys; " +
-                "otherwise a .NET Framework host and a .NET task host can fail to connect with MSB4216.");
+            // The canonical result must still point at the same file (case-insensitively).
+            fromUpper.ShouldBe(realPath, StringCompareShould.IgnoreCase);
         }
+#endif
     }
 }
