@@ -308,5 +308,43 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             useAppHost.ShouldBeFalse();
             launchPath.ShouldBe(msbuildDllPath);
         }
+
+        /// <summary>
+        /// Regression test for MSB4216 caused by drive-letter casing differences (e.g. on
+        /// hosted CI agents the SDK-resolved path is "D:\..." while the child .NET task host
+        /// resolves its own location as "d:\...").
+        ///
+        /// On the .NET Framework → .NET task host path the parent passes the SDK directory
+        /// ($(NetCoreSdkRoot)) as toolsDirectory while the child re-resolves it from its own
+        /// process location. These come from independent sources, so on Windows they can differ
+        /// only in casing. Because Windows paths are case-insensitive, the case-sensitive salt
+        /// hash must normalize casing so both sides still produce the same handshake key.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void Handshake_ToolsDirectoryCasingDoesNotAffectKey()
+        {
+            // Use explicit NET runtime and current architecture so the NET HandshakeOptions
+            // flag is set, which is required for passing toolsDirectory to the constructor.
+            var netTaskHostParams = new TaskHostParameters(
+                runtime: XMakeAttributes.MSBuildRuntimeValues.net,
+                architecture: XMakeAttributes.GetCurrentMSBuildArchitecture(),
+                dotnetHostPath: null,
+                msBuildAssemblyPath: null);
+
+            HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: true,
+                taskHostParameters: netTaskHostParams,
+                nodeReuse: false);
+
+            const string upperCase = @"D:\a\_work\1\s\.dotnet\sdk\11.0.100-preview.5.26227.104";
+            const string lowerCase = @"d:\a\_work\1\s\.dotnet\sdk\11.0.100-preview.5.26227.104";
+
+            var upperHandshake = new Handshake(options, upperCase);
+            var lowerHandshake = new Handshake(options, lowerCase);
+
+            upperHandshake.GetKey().ShouldBe(lowerHandshake.GetKey(),
+                "On Windows, paths differing only by casing must produce identical handshake keys; " +
+                "otherwise a .NET Framework host and a .NET task host can fail to connect with MSB4216.");
+        }
     }
 }

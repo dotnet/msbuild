@@ -80,7 +80,18 @@ internal class Handshake
         // Calculate salt from environment and tools directory
         string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
 
-        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
+        // For the .NET task host the tools directory is derived differently by the host and the child:
+        // the .NET Framework host passes the SDK directory ($(NetCoreSdkRoot)) as an explicit string,
+        // while the child re-resolves it from its own process location. On Windows these may differ only
+        // in casing (notably the drive letter), and because the salt hash is case-sensitive that would
+        // cause an otherwise valid handshake to fail with MSB4216. Normalize the casing on Windows, where
+        // paths are case-insensitive, so both sides compute the same salt. Other node types resolve the
+        // tools directory the same way on both ends, so their salt is intentionally left unchanged.
+        string normalizedToolsDirectory = NativeMethods.IsWindows && IsNetTaskHost
+            ? toolsDirectory.ToUpperInvariant()
+            : toolsDirectory;
+
+        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{normalizedToolsDirectory}");
 
         CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
         CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
