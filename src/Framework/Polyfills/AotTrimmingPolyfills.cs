@@ -73,6 +73,20 @@ namespace System.Diagnostics.CodeAnalysis
     }
 
     /// <summary>
+    /// Indicates that the specified method requires the ability to generate new code at runtime,
+    /// for example, through <see cref="System.Reflection"/>. This is incompatible with Native AOT.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method, Inherited = false)]
+    internal sealed class RequiresDynamicCodeAttribute : Attribute
+    {
+        public RequiresDynamicCodeAttribute(string message) => Message = message;
+
+        public string Message { get; }
+
+        public string? Url { get; set; }
+    }
+
+    /// <summary>
     /// Suppresses reporting of a specific rule violation, allowing multiple suppressions on a single code artifact.
     /// Unlike <see cref="SuppressMessageAttribute"/>, this attribute is preserved in metadata and applied by the trimmer.
     /// </summary>
