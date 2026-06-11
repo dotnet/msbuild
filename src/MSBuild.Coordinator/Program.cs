@@ -3,6 +3,9 @@
 
 using Microsoft.Build.Coordinator;
 using Microsoft.Build.Framework.Coordinator;
+using Microsoft.Build.Framework.Telemetry;
+
+TelemetryManager.Instance.Initialize(isStandalone: true);
 
 CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
 
@@ -40,6 +43,8 @@ catch (OperationCanceledException)
 {
     // Normal shutdown.
 }
+
+TelemetryManager.Instance.Dispose();
 
 Console.WriteLine("MSBuild Coordinator shut down.");
 return 0;
