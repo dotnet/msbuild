@@ -281,6 +281,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     {
         var reader = new BinaryReader(pipeStream, Encoding.UTF8, leaveOpen: true);
         var writer = new BinaryWriter(pipeStream, Encoding.UTF8, leaveOpen: true);
+        var pipe = pipeStream;
 
         try
         {
@@ -324,6 +325,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                     // Ownership transferred to client
                     reader = null;
                     writer = null;
+                    pipe = null;
 
                     return client;
 
@@ -353,6 +355,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                             // Ownership transferred to deferred client
                             reader = null;
                             writer = null;
+                            pipe = null;
 
                             return deferredClient;
                         }
@@ -380,17 +383,12 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
         finally
         {
-            // On success paths, reader/writer are set to null to indicate ownership
-            // was transferred to the CoordinatorClient instance, which will dispose them.
+            // On success, all three are set to null to indicate ownership was
+            // transferred to the CoordinatorClient instance. On failure, dispose
+            // whatever remains.
             reader?.Dispose();
             writer?.Dispose();
-
-            // If either reader or writer is still non-null, negotiation failed and
-            // no CoordinatorClient took ownership of the pipe stream.
-            if (reader is not null || writer is not null)
-            {
-                pipeStream.Dispose();
-            }
+            pipe?.Dispose();
         }
     }
 
