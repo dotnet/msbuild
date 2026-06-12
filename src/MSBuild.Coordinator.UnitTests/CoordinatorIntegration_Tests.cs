@@ -6,6 +6,7 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
+using Constants = Microsoft.Build.Framework.Coordinator.Constants;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
@@ -20,9 +21,9 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         using var env = TestEnvironment.Create(outputHelper);
 
         env.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
-        env.SetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName, pipeName);
-        env.SetEnvironmentVariable(Traits.CoordinatorNodeBudgetEnvVarName, "4");
-        env.SetEnvironmentVariable(Traits.CoordinatorShutdownTimeoutEnvVarName, "5000");
+        env.SetEnvironmentVariable(Constants.PipeNameEnvVarName, pipeName);
+        env.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, "4");
+        env.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "5000");
 
         // Enable comm tracing so we can verify coordinator participation.
         env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
@@ -80,9 +81,9 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         using var env = TestEnvironment.Create(outputHelper);
 
         env.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
-        env.SetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName, pipeName);
-        env.SetEnvironmentVariable(Traits.CoordinatorNodeBudgetEnvVarName, "2");
-        env.SetEnvironmentVariable(Traits.CoordinatorShutdownTimeoutEnvVarName, "5000");
+        env.SetEnvironmentVariable(Constants.PipeNameEnvVarName, pipeName);
+        env.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, "2");
+        env.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "5000");
         env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
 
         // This project logs the effective MaxNodeCount via the reserved property.

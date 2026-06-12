@@ -146,26 +146,6 @@ namespace Microsoft.Build.Framework
         public const string UseCoordinatorEnvVarName = "MSBUILDUSECOORDINATOR";
 
         /// <summary>
-        /// Name of environment variable that overrides coordinator heartbeat interval in milliseconds.
-        /// </summary>
-        public const string CoordinatorHeartbeatIntervalEnvVarName = "MSBUILDCOORDINATORHEARTBEAT";
-
-        /// <summary>
-        /// Name of environment variable that overrides coordinator total node budget.
-        /// </summary>
-        public const string CoordinatorNodeBudgetEnvVarName = "MSBUILDCOORDINATORNODEBUDGET";
-
-        /// <summary>
-        /// Name of environment variable that overrides coordinator auto-shutdown timeout in milliseconds.
-        /// </summary>
-        public const string CoordinatorShutdownTimeoutEnvVarName = "MSBUILDCOORDINATORSHUTDOWNTIMEOUT";
-
-        /// <summary>
-        /// Name of environment variable that overrides coordinator pipe name.
-        /// </summary>
-        public const string CoordinatorPipeNameEnvVarName = "MSBUILDCOORDINATORPIPENAME";
-
-        /// <summary>
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";

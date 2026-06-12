@@ -99,7 +99,7 @@ internal sealed record class CoordinatorSettings()
 
     public static CoordinatorSettings FromEnvironment()
     {
-        string? pipeNameOverride = Environment.GetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName);
+        string? pipeNameOverride = Environment.GetEnvironmentVariable(Constants.PipeNameEnvVarName);
         string pipeName = !string.IsNullOrEmpty(pipeNameOverride)
             ? pipeNameOverride
             : DefaultPipeName;
@@ -108,14 +108,14 @@ internal sealed record class CoordinatorSettings()
         {
             PipeName = pipeName,
             HeartbeatIntervalMs = EnvironmentUtilities.GetValueAsInt32OrDefault(
-                Traits.CoordinatorHeartbeatIntervalEnvVarName,
+                Constants.HeartbeatIntervalEnvVarName,
                 DefaultHeartbeatIntervalMs),
             MissedHeartbeatsThreshold = DefaultMissedHeartbeatsThreshold,
             TotalNodeBudget = EnvironmentUtilities.GetValueAsInt32OrDefault(
-                Traits.CoordinatorNodeBudgetEnvVarName,
+                Constants.NodeBudgetEnvVarName,
                 Environment.ProcessorCount),
             ShutdownTimeoutMs = EnvironmentUtilities.GetValueAsInt32OrDefault(
-                Traits.CoordinatorShutdownTimeoutEnvVarName,
+                Constants.ShutdownTimeoutEnvVarName,
                 DefaultShutdownTimeoutMs),
             ConnectionTimeoutMs = DefaultConnectionTimeoutMs,
             ProcessId = EnvironmentUtilities.CurrentProcessId,

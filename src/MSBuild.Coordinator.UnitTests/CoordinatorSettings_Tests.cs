@@ -6,6 +6,7 @@ using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
+using Constants = Microsoft.Build.Framework.Coordinator.Constants;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
@@ -53,10 +54,10 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
-        env.SetEnvironmentVariable(Traits.CoordinatorPipeNameEnvVarName, "coordinator-env-test-pipe");
-        env.SetEnvironmentVariable(Traits.CoordinatorHeartbeatIntervalEnvVarName, "1234");
-        env.SetEnvironmentVariable(Traits.CoordinatorNodeBudgetEnvVarName, "7");
-        env.SetEnvironmentVariable(Traits.CoordinatorShutdownTimeoutEnvVarName, "9876");
+        env.SetEnvironmentVariable(Constants.PipeNameEnvVarName, "coordinator-env-test-pipe");
+        env.SetEnvironmentVariable(Constants.HeartbeatIntervalEnvVarName, "1234");
+        env.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, "7");
+        env.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "9876");
 
         CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
 
