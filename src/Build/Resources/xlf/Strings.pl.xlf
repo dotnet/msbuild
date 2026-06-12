@@ -422,13 +422,18 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CoordinatorFailedToConnect">
-        <source>Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</source>
-        <target state="new">Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</target>
+        <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
         <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorFailedToNegotiate">
+        <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">

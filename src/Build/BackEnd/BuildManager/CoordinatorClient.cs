@@ -158,11 +158,18 @@ internal sealed partial class CoordinatorClient : IDisposable
 
             CoordinatorClient? client = TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService);
             pipeStream = null; // Ownership transferred unconditionally; TryNegotiate disposes on failure.
+
+            if (client is null)
+            {
+                loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToNegotiate");
+            }
+
             return client;
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
             output.WriteLine($"CoordinatorClient: Exception during connect: {ex.Message}");
+            loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToConnect");
 
             // Any failure in coordinator communication should not break the build.
             pipeStream?.Dispose();
@@ -350,9 +357,20 @@ internal sealed partial class CoordinatorClient : IDisposable
                             return deferredClient;
                         }
 
-                        output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
+                        if (grantAfterWait is ErrorMessage waitError)
+                        {
+                            output.WriteLine($"CoordinatorClient: Server error while waiting: {waitError.Message} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
+                        }
+                        else
+                        {
+                            output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
+                        }
                     }
 
+                    return null;
+
+                case ErrorMessage requestError:
+                    output.WriteLine($"CoordinatorClient: Server error: {requestError.Message}");
                     return null;
 
                 default:

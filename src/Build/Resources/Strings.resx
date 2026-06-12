@@ -2181,7 +2181,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>The BuildCheck is enabled for this build.</value>
   </data>
   <data name="CoordinatorFailedToConnect" xml:space="preserve">
-    <value>Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</value>
+    <value>Failed to connect to the build coordinator. The build will proceed without node coordination.</value>
+  </data>
+  <data name="CoordinatorFailedToNegotiate" xml:space="preserve">
+    <value>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</value>
   </data>
   <data name="CoordinatorFailedToLaunch" xml:space="preserve">
     <value>Failed to launch the build coordinator. The build will proceed without node coordination.</value>
