@@ -496,10 +496,9 @@ namespace Microsoft.Build.Experimental
                 IDictionary<string, string?>? environmentOverrides = baseOverrides;
 
                 // When this build is multithreaded (/mt), launch the long-lived server (build
-                // orchestrator) process with Server GC. Under /mt the server runs all project work on
-                // threads in this single process, so Server GC's higher throughput pays off; without
-                // /mt the server only orchestrates and delegates project work to separate worker nodes,
-                // so Server GC on the server would add memory cost for no benefit. GC mode is fixed at
+                // orchestrator) process with Server GC. Other processes may get higher throughput
+                // with Server GC, but we want to enable it only for the highest-impact one where
+                // most of the work of the actual build will happen in MT mode. GC mode is fixed at
                 // CLR startup, so it must be set in the child's launch environment via DOTNET_gcServer
                 // (which only affects .NET/CoreCLR and, since .NET 9, takes precedence over
                 // runtimeconfig.json). The decision is made from this (launch-time) invocation's command
