@@ -316,6 +316,37 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void ServerStartsWhenMtPresentEvenWithoutEnvVar()
+        {
+            // Regression test for the "-mt implies MSBuild Server" routing decision
+            // (investigation #9379, ShouldUseMSBuildServer / IsMultiThreadedRequested).
+            // When MSBUILDUSESERVER is unset and the user passes -mt, the client should engage
+            // the server automatically. Verified by running two builds back-to-back and asserting
+            // the server process PID is the SAME for both — server reuse is the unique signature
+            // of MSBuild server engagement (a non-server build would always get a fresh worker PID).
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            // Explicitly clear MSBUILDUSESERVER so we test the -mt-implies-server path.
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
+
+            // Make sure we start with no server running.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success1, false, _output);
+            success1.ShouldBeTrue();
+            int serverPid1 = ParseNumber(output1, "Server ID is ");
+
+            string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success2, false, _output);
+            success2.ShouldBeTrue();
+            int serverPid2 = ParseNumber(output2, "Server ID is ");
+
+            serverPid1.ShouldBe(serverPid2, "When -mt implies server, two consecutive builds should reuse the same server process. PIDs were " + serverPid1 + " and " + serverPid2 + ".");
+
+            _env.WithTransientProcess(serverPid1);
+            // Clean up the server we spun up.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+        }
+
+        [Fact]
         public void PropertyMSBuildStartupDirectoryOnServer()
         {
             // This test seems to be flaky, lets enable better logging to investigate it next time

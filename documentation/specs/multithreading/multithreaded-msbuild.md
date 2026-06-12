@@ -293,3 +293,17 @@ deactivate Thread1_Project1
 ## MSBuild Server integration
 
 To avoid regressing CLI incremental build performance, it is essential to fully support the MSBuild server feature in multithreaded mode. Out-of-process nodes offer significant benefits by preserving caches across build command executions when node reuse is enabled. However, caches in the entry process are lost at the end of each build unless the MSBuild server feature is used. In multiprocess execution, that is a fraction of the caches and processes, but with multithreading, it is the entire process. As a result, opting into multithreading on the command line should automatically enable MSBuild server.
+
+### `-mt` implies MSBuild Server
+
+When `-mt` (`-multithreaded`) is on the command line and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Explicit `MSBUILDUSESERVER=0` opts out and takes precedence over the implicit `-mt` opt-in.
+
+| `MSBUILDUSESERVER` | `-mt` build | Server engaged? | Telemetry `ServerEnableReason` |
+|---|---|---|---|
+| `1` | (any) | Yes | `EnvVar` |
+| `0` | (any) | No (explicit opt-out) | — |
+| unset | yes | **Yes** | `ImpliedByMt` |
+| unset | no | No | — |
+
+The multithreaded determination is computed once (a lightweight command-line scan plus the `MSBUILDFORCEMULTITHREADED` opt-in) and drives both this server opt-in and, when the server is engaged for a multithreaded build, the server process's [Server GC](../../MSBuild-Server.md#garbage-collection) selection.
+

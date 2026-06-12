@@ -62,6 +62,16 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? ServerFallbackReason { get; set; }
 
         /// <summary>
+        /// Why MSBuild server was engaged for this invocation. One of:
+        ///   "EnvVar"      — MSBUILDUSESERVER=1 was set (explicit opt-in)
+        ///   "ImpliedByMt" — this is a multithreaded (-mt) build and MSBUILDUSESERVER was unset
+        ///   null          — server was not engaged
+        /// Lets dashboards measure adoption of the implicit -mt-implies-server path separately
+        /// from the explicit env-var path.
+        /// </summary>
+        public string? ServerEnableReason { get; set; }
+
+        /// <summary>
         /// Version of MSBuild.
         /// </summary>
         public Version? BuildEngineVersion { get; set; }
@@ -200,6 +210,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(InitialMSBuildServerState);
             AddIfNotNull(ProjectPath != null ? Path.GetFileName(ProjectPath) : null, nameof(ProjectPath));
             AddIfNotNull(ServerFallbackReason);
+            AddIfNotNull(ServerEnableReason);
             AddIfNotNull(SanitizeBuildTarget(BuildTarget), nameof(BuildTarget));
             AddIfNotNull(BuildEngineVersion?.ToString(), nameof(BuildEngineVersion));
             AddIfNotNull(BuildSuccess?.ToString(), nameof(BuildSuccess));
