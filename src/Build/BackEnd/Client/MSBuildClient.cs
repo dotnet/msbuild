@@ -19,7 +19,7 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental
+namespace Microsoft.Build.Server
 {
     /// <summary>
     /// This class is the public entry point for executing builds in msbuild server.
