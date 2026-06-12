@@ -9,17 +9,22 @@ namespace Microsoft.Build.Framework.Coordinator;
 internal enum ClientMessageType : byte
 {
     /// <summary>
+    ///  Handshake message. Payload: Guid connectionId, string[] capabilities.
+    /// </summary>
+    Handshake = 1,
+
+    /// <summary>
     ///  Request a node grant. Payload: int requestedNodes, int pid.
     /// </summary>
-    RequestNodes = 1,
+    RequestNodes = 2,
 
     /// <summary>
     ///  Release a previously granted node allocation. No payload.
     /// </summary>
-    ReleaseNodes = 2,
+    ReleaseNodes = 3,
 
     /// <summary>
     ///  Heartbeat indicating the build is still active. No payload.
     /// </summary>
-    Heartbeat = 3,
+    Heartbeat = 4,
 }

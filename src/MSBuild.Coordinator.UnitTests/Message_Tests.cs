@@ -8,14 +8,54 @@ using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class Protocol_Tests
+public class Message_Tests
 {
+    [Fact]
+    public void Handshake_RoundTrips()
+    {
+        Guid connectionId = Guid.NewGuid();
+        ClientMessage message = WriteAndReadClientMessage(
+            new ClientHandshakeMessage(connectionId, processId: 12345, capabilities: ["priority", "dynamic-grants"]));
+
+        ClientHandshakeMessage result = message.ShouldBeOfType<ClientHandshakeMessage>();
+        result.ConnectionId.ShouldBe(connectionId);
+        result.Capabilities.ShouldBe(["priority", "dynamic-grants"]);
+    }
+
+    [Fact]
+    public void Handshake_EmptyCapabilities_RoundTrips()
+    {
+        Guid connectionId = Guid.NewGuid();
+        ClientMessage message = WriteAndReadClientMessage(new ClientHandshakeMessage(connectionId, processId: 12345, []));
+
+        ClientHandshakeMessage result = message.ShouldBeOfType<ClientHandshakeMessage>();
+        result.ConnectionId.ShouldBe(connectionId);
+        result.Capabilities.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void HandshakeResponse_RoundTrips()
+    {
+        ServerMessage message = WriteAndReadServerMessage(new ServerHandshakeMessage(capabilities: ["priority"]));
+
+        ServerHandshakeMessage result = message.ShouldBeOfType<ServerHandshakeMessage>();
+        result.Capabilities.ShouldBe(["priority"]);
+    }
+
+    [Fact]
+    public void HandshakeResponse_EmptyCapabilities_RoundTrips()
+    {
+        ServerMessage message = WriteAndReadServerMessage(new ServerHandshakeMessage([]));
+
+        ServerHandshakeMessage result = message.ShouldBeOfType<ServerHandshakeMessage>();
+        result.Capabilities.ShouldBeEmpty();
+    }
+
     [Fact]
     public void RequestNodes_RoundTrips()
     {
-        var connectionId = Guid.NewGuid();
-        ClientMessage message = WriteAndReadClientMessage(new RequestNodesMessage(connectionId, requestedNodes: 16, processId: 12345));
-        message.ShouldBe(new RequestNodesMessage(connectionId, 16, 12345));
+        ClientMessage message = WriteAndReadClientMessage(new RequestNodesMessage(requestedNodes: 16));
+        message.ShouldBe(new RequestNodesMessage(requestedNodes: 16));
     }
 
     [Fact]
@@ -35,39 +75,40 @@ public class Protocol_Tests
     [Fact]
     public void NodeGrant_RoundTrips()
     {
-        ServerMessage message = WriteAndReadCoordinatorMessage(new NodeGrantMessage(grantedNodes: 4));
+        ServerMessage message = WriteAndReadServerMessage(new NodeGrantMessage(grantedNodes: 4));
         message.ShouldBe(new NodeGrantMessage(4));
     }
 
     [Fact]
     public void Wait_RoundTrips()
     {
-        ServerMessage message = WriteAndReadCoordinatorMessage(WaitMessage.Instance);
+        ServerMessage message = WriteAndReadServerMessage(WaitMessage.Instance);
         message.ShouldBe(WaitMessage.Instance);
     }
 
     [Fact]
     public void Error_RoundTrips()
     {
-        ServerMessage message = WriteAndReadCoordinatorMessage(new ErrorMessage("something went wrong"));
+        ServerMessage message = WriteAndReadServerMessage(new ErrorMessage("something went wrong"));
         message.ShouldBe(new ErrorMessage("something went wrong"));
     }
 
     [Fact]
     public void MultipleClientMessages_ReadSequentially()
     {
-        var connectionId = Guid.NewGuid();
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
 
-        writer.Write(new RequestNodesMessage(connectionId, 8, 100));
+        writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId: 12345, []));
+        writer.Write(new RequestNodesMessage(requestedNodes: 8));
         writer.Write(HeartbeatMessage.Instance);
         writer.Write(ReleaseNodesMessage.Instance);
 
         stream.Position = 0;
         using BinaryReader reader = new(stream);
 
-        reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(connectionId, 8, 100));
+        reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
+        reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
         reader.ReadClientMessage().ShouldBe(HeartbeatMessage.Instance);
         reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }
@@ -77,7 +118,6 @@ public class Protocol_Tests
     {
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
-        writer.Write(Protocol.Version);
         writer.Write((byte)99);
         writer.Flush();
 
@@ -88,43 +128,11 @@ public class Protocol_Tests
     }
 
     [Fact]
-    public void UnknownCoordinatorMessageType_Throws()
+    public void UnknownServerMessageType_Throws()
     {
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
-        writer.Write(Protocol.Version);
         writer.Write((byte)99);
-        writer.Flush();
-
-        stream.Position = 0;
-        using BinaryReader reader = new(stream);
-
-        Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
-    }
-
-    [Fact]
-    public void ClientMessage_WrongVersion_Throws()
-    {
-        using MemoryStream stream = new();
-        using BinaryWriter writer = new(stream);
-        writer.Write((byte)255);
-        writer.Write((byte)ClientMessageType.Heartbeat);
-        writer.Flush();
-
-        stream.Position = 0;
-        using BinaryReader reader = new(stream);
-
-        Should.Throw<InternalErrorException>(() => reader.ReadClientMessage());
-    }
-
-    [Fact]
-    public void CoordinatorMessage_WrongVersion_Throws()
-    {
-        using MemoryStream stream = new();
-        using BinaryWriter writer = new(stream);
-        writer.Write((byte)255);
-        writer.Write((byte)ServerMessageType.NodeGrant);
-        writer.Write(4);
         writer.Flush();
 
         stream.Position = 0;
@@ -144,7 +152,7 @@ public class Protocol_Tests
         return reader.ReadClientMessage();
     }
 
-    private static ServerMessage WriteAndReadCoordinatorMessage(ServerMessage message)
+    private static ServerMessage WriteAndReadServerMessage(ServerMessage message)
     {
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);

@@ -14,14 +14,11 @@ internal abstract record ClientMessage
 
     public static ClientMessage ReadFrom(BinaryReader reader)
     {
-        byte version = reader.ReadByte();
-
-        Assumed.Equal(version, Protocol.Version, $"Unsupported coordinator protocol version: {version} (expected {Protocol.Version})");
-
         var messageType = (ClientMessageType)reader.ReadByte();
 
         return messageType switch
         {
+            ClientMessageType.Handshake => ClientHandshakeMessage.ReadPayload(reader),
             ClientMessageType.RequestNodes => RequestNodesMessage.ReadPayload(reader),
             ClientMessageType.ReleaseNodes => ReleaseNodesMessage.Instance,
             ClientMessageType.Heartbeat => HeartbeatMessage.Instance,
@@ -32,7 +29,6 @@ internal abstract record ClientMessage
 
     public void WriteTo(BinaryWriter writer)
     {
-        writer.Write(Protocol.Version);
         writer.Write((byte)MessageType);
         WritePayload(writer);
         writer.Flush();

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
@@ -34,6 +35,11 @@ internal sealed partial class CoordinatorClient : IDisposable
     public Guid ConnectionId { get; }
 
     /// <summary>
+    ///  The capabilities advertised by the server during handshake.
+    /// </summary>
+    public ImmutableArray<string> ServerCapabilities { get; }
+
+    /// <summary>
     ///  The number of nodes granted by the coordinator.
     /// </summary>
     public int GrantedNodes { get; }
@@ -45,6 +51,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
     private CoordinatorClient(
         Guid connectionId,
+        ImmutableArray<string> serverCapabilities,
         NamedPipeClientStream pipeStream,
         BinaryReader reader,
         BinaryWriter writer,
@@ -53,6 +60,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         ICoordinatorOutput output)
     {
         ConnectionId = connectionId;
+        ServerCapabilities = serverCapabilities;
         _pipeStream = pipeStream;
         _reader = reader;
         _writer = writer;
@@ -269,10 +277,31 @@ internal sealed partial class CoordinatorClient : IDisposable
 
         try
         {
-            // Send the node request.
+            // Perform the handshake.
             var connectionId = Guid.NewGuid();
+            output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {connectionId})");
+            writer.Write(new ClientHandshakeMessage(connectionId, settings.ProcessId, []));
+
+            // Read the handshake response.
+            ServerMessage handshakeResponse = reader.ReadServerMessage();
+
+            if (handshakeResponse is ErrorMessage error)
+            {
+                output.WriteLine($"CoordinatorClient: Server rejected handshake: {error.Message}");
+                return null;
+            }
+
+            if (handshakeResponse is not ServerHandshakeMessage serverHandshake)
+            {
+                output.WriteLine($"CoordinatorClient: Unexpected handshake response: {handshakeResponse.GetType().Name}");
+                return null;
+            }
+
+            output.WriteLine($"CoordinatorClient: Handshake complete (server capabilities: [{string.Join(", ", serverHandshake.Capabilities)}])");
+
+            // Send the node request.
             output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId}, ConnectionId {connectionId})");
-            writer.Write(new RequestNodesMessage(connectionId, requestedNodes, settings.ProcessId));
+            writer.Write(new RequestNodesMessage(requestedNodes));
 
             // Read the response.
             ServerMessage response = reader.ReadServerMessage();
@@ -283,7 +312,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                     output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
                     loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
 
-                    var client = new CoordinatorClient(connectionId, pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, output);
+                    var client = new CoordinatorClient(connectionId, serverHandshake.Capabilities, pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, output);
 
                     // Ownership transferred to client
                     reader = null;
@@ -309,7 +338,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                             output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
                             loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
 
-                            var deferredClient = new CoordinatorClient(connectionId, pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
+                            var deferredClient = new CoordinatorClient(connectionId, serverHandshake.Capabilities, pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
                             {
                                 WaitDuration = waitTimer.Elapsed,
                             };

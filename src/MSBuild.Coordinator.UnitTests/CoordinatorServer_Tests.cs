@@ -40,7 +40,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
-        writer.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 16, processId: EnvironmentUtilities.CurrentProcessId));
+        SendHandshake(writer, reader);
+        writer.Write(new RequestNodesMessage(requestedNodes: 16));
 
         ServerMessage response = reader.ReadServerMessage();
 
@@ -62,7 +63,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
-        writer.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId: EnvironmentUtilities.CurrentProcessId));
+        SendHandshake(writer, reader);
+        writer.Write(new RequestNodesMessage(requestedNodes: 4));
 
         ServerMessage response = reader.ReadServerMessage();
 
@@ -85,7 +87,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
-        writer1.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 8, processId: 10001));
+        SendHandshake(writer1, reader1, processId: 10001);
+        writer1.Write(new RequestNodesMessage(requestedNodes: 8));
         reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(8);
 
@@ -94,7 +97,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
-        writer2.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 8, processId: 10002));
+        SendHandshake(writer2, reader2, processId: 10002);
+        writer2.Write(new RequestNodesMessage(requestedNodes: 8));
         reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // First client releases. Second client should receive a NodeGrant.
@@ -121,7 +125,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
-        writer1.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 8, processId: 10001));
+        SendHandshake(writer1, reader1, processId: 10001);
+        writer1.Write(new RequestNodesMessage(requestedNodes: 8));
         reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(8);
 
@@ -130,7 +135,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
-        writer2.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 8, processId: 10002));
+        SendHandshake(writer2, reader2, processId: 10002);
+        writer2.Write(new RequestNodesMessage(requestedNodes: 8));
         reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // Third client waits.
@@ -138,7 +144,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer3 = new(client3, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader3 = new(client3, Encoding.UTF8, leaveOpen: true);
 
-        writer3.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 8, processId: 10003));
+        SendHandshake(writer3, reader3, processId: 10003);
+        writer3.Write(new RequestNodesMessage(requestedNodes: 8));
         reader3.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // Release first client. Both waiters should get grants.
@@ -173,7 +180,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
-        writer1.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId: 10001));
+        SendHandshake(writer1, reader1, processId: 10001);
+        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
         reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         // First waiter.
@@ -181,7 +189,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
-        writer2.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId: 10002));
+        SendHandshake(writer2, reader2, processId: 10002);
+        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
         reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // Second waiter.
@@ -189,7 +198,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer3 = new(client3, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader3 = new(client3, Encoding.UTF8, leaveOpen: true);
 
-        writer3.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId: 10003));
+        SendHandshake(writer3, reader3, processId: 10003);
+        writer3.Write(new RequestNodesMessage(requestedNodes: 4));
         reader3.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // First waiter disconnects abruptly.
@@ -234,12 +244,14 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
         try
         {
-            // Send requests.
+            // Send handshakes and requests.
             for (int i = 0; i < clients.Length; i++)
             {
                 int processId = 20001 + i;
                 BinaryWriter w = new(clients[i], Encoding.UTF8, leaveOpen: true);
-                w.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId));
+                BinaryReader r = new(clients[i], Encoding.UTF8, leaveOpen: true);
+                SendHandshake(w, r, processId);
+                w.Write(new RequestNodesMessage(requestedNodes: 4));
             }
 
             // All should receive grants (no waits).
@@ -277,7 +289,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
-        writer.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId: EnvironmentUtilities.CurrentProcessId));
+        SendHandshake(writer, reader);
+        writer.Write(new RequestNodesMessage(requestedNodes: 4));
         reader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         // Send several heartbeats. None should cause an error or disconnect.
@@ -304,7 +317,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
-        writer1.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId: 10001));
+        SendHandshake(writer1, reader1, processId: 10001);
+        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
         reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         // Second client queued.
@@ -312,7 +326,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
-        writer2.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId: 10002));
+        SendHandshake(writer2, reader2, processId: 10002);
+        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
         reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
 
         // Abruptly disconnect first client.
@@ -384,7 +399,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
         BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
 
-        writer1.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId));
+        SendHandshake(writer1, reader1, processId);
+        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
         reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         // Disconnect abruptly.
@@ -399,7 +415,8 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
 
-        writer2.Write(new RequestNodesMessage(connectionId: Guid.NewGuid(), requestedNodes: 4, processId));
+        SendHandshake(writer2, reader2, processId);
+        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
 
         ServerMessage response = reader2.ReadServerMessage();
         response.ShouldBeOfType<NodeGrantMessage>()
@@ -416,6 +433,16 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         NamedPipeClientStream client = new(".", _pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
         await client.ConnectAsync(5000);
         return client;
+    }
+
+    /// <summary>
+    ///  Performs the handshake and returns the ConnectionId used.
+    /// </summary>
+    private static void SendHandshake(BinaryWriter writer, BinaryReader reader, int? processId = null)
+    {
+        var connectionId = Guid.NewGuid();
+        writer.Write(new ClientHandshakeMessage(connectionId, processId is int pid ? pid : EnvironmentUtilities.CurrentProcessId, []));
+        reader.ReadServerMessage().ShouldBeOfType<ServerHandshakeMessage>();
     }
 
     private CoordinatorServer CreateServer(int totalNodeBudget)

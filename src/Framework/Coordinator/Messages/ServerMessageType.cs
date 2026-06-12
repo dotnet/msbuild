@@ -9,17 +9,22 @@ namespace Microsoft.Build.Framework.Coordinator;
 internal enum ServerMessageType : byte
 {
     /// <summary>
-    ///  A node grant. Payload: int granted Nodes.
+    ///  Handshake response. Payload: string[] capabilities.
     /// </summary>
-    NodeGrant = 128,
+    HandshakeResponse = 1,
+
+    /// <summary>
+    ///  A node grant. Payload: int grantedNodes.
+    /// </summary>
+    NodeGrant = 2,
 
     /// <summary>
     ///  Indicates the client should wait for a grant. No payload.
     /// </summary>
-    Wait = 129,
+    Wait = 3,
 
     /// <summary>
     ///  An error occurred. Payload: string message.
     /// </summary>
-    Error = 130,
+    Error = 4,
 }

@@ -154,36 +154,51 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         try
         {
             using BinaryReader initialReader = new(pipeStream, Encoding.UTF8, leaveOpen: true);
+            using BinaryWriter initialWriter = new(pipeStream, Encoding.UTF8, leaveOpen: true);
 
-            // The first message must be RequestNodes.
+            // The first message must be a Handshake.
             ClientMessage firstMessage = initialReader.ReadClientMessage();
 
-            if (firstMessage is not RequestNodesMessage request)
+            if (firstMessage is not ClientHandshakeMessage handshake)
             {
                 _output.WriteLine($"CoordinatorServer: Rejected client — first message was {firstMessage.GetType().Name}");
-                using BinaryWriter errorWriter = new(pipeStream, Encoding.UTF8, leaveOpen: true);
-                errorWriter.Write(new ErrorMessage("First message must be RequestNodes"));
+                initialWriter.Write(new ErrorMessage("First message must be Handshake"));
                 pipeStream.Dispose();
                 return;
             }
 
-            if (request.ProcessId <= 0 || request.RequestedNodes <= 0)
+            _output.WriteLine($"CoordinatorServer: Handshake received (ConnectionId {handshake.ConnectionId}, PID {handshake.ProcessId}, Capabilities: [{string.Join(", ", handshake.Capabilities)}])");
+
+            // Respond with server capabilities.
+            initialWriter.Write(new ServerHandshakeMessage([]));
+
+            // The second message must be RequestNodes.
+            ClientMessage secondMessage = initialReader.ReadClientMessage();
+
+            if (secondMessage is not RequestNodesMessage request)
             {
-                _output.WriteLine($"CoordinatorServer: Rejected client — invalid request (PID={request.ProcessId}, RequestedNodes={request.RequestedNodes})");
-                using BinaryWriter errorWriter = new(pipeStream, Encoding.UTF8, leaveOpen: true);
-                errorWriter.Write(new ErrorMessage("Invalid request: ProcessId and RequestedNodes must be > 0"));
+                _output.WriteLine($"CoordinatorServer: Rejected client — second message was {secondMessage.GetType().Name}");
+                initialWriter.Write(new ErrorMessage("Second message must be RequestNodes"));
                 pipeStream.Dispose();
                 return;
             }
 
-            _output.WriteLine($"CoordinatorServer: Client connected (PID {request.ProcessId}, ConnectionId {request.ConnectionId}, requested {request.RequestedNodes} nodes)");
+            if (handshake.ProcessId <= 0 || request.RequestedNodes <= 0)
+            {
+                _output.WriteLine($"CoordinatorServer: Rejected client — invalid request (PID={handshake.ProcessId}, RequestedNodes={request.RequestedNodes})");
+                initialWriter.Write(new ErrorMessage("Invalid request: ProcessId and RequestedNodes must be > 0"));
+                pipeStream.Dispose();
+                return;
+            }
 
-            BuildGrant grant = new(request.ConnectionId, request.ProcessId, request.RequestedNodes);
-            connection = new ClientConnection(grant, pipeStream);
+            _output.WriteLine($"CoordinatorServer: Client connected (PID {handshake.ProcessId}, ConnectionId {handshake.ConnectionId}, requested {request.RequestedNodes} nodes)");
+
+            BuildGrant grant = new(handshake.ConnectionId, handshake.ProcessId, request.RequestedNodes);
+            connection = new ClientConnection(handshake.ConnectionId, handshake.ProcessId, handshake.Capabilities, grant, pipeStream);
 
             using (_connectionLock.EnterDisposableWriteLock())
             {
-                _connectionsById[request.ConnectionId] = connection;
+                _connectionsById[handshake.ConnectionId] = connection;
             }
 
             // Try to grant nodes.
@@ -191,12 +206,12 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
             if (grantedNodes > 0)
             {
-                _output.WriteLine($"CoordinatorServer: Granted {grantedNodes} nodes to PID {request.ProcessId}");
+                _output.WriteLine($"CoordinatorServer: Granted {grantedNodes} nodes to PID {handshake.ProcessId}");
                 connection.Writer.Write(new NodeGrantMessage(grantedNodes));
             }
             else
             {
-                _output.WriteLine($"CoordinatorServer: PID {request.ProcessId} queued (no nodes available)");
+                _output.WriteLine($"CoordinatorServer: PID {handshake.ProcessId} queued (no nodes available)");
                 connection.Writer.Write(WaitMessage.Instance);
 
                 // The grant will be fulfilled later when resources free up.
@@ -215,14 +230,14 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                 }
                 catch (EndOfStreamException)
                 {
-                    _output.WriteLine($"CoordinatorServer: PID {request.ProcessId} disconnected (end of stream)");
+                    _output.WriteLine($"CoordinatorServer: PID {handshake.ProcessId} disconnected (end of stream)");
 
                     // Client disconnected.
                     break;
                 }
                 catch (IOException)
                 {
-                    _output.WriteLine($"CoordinatorServer: PID {request.ProcessId} disconnected (pipe broken)");
+                    _output.WriteLine($"CoordinatorServer: PID {handshake.ProcessId} disconnected (pipe broken)");
 
                     // Pipe broken.
                     break;
@@ -235,7 +250,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                         break;
 
                     case ReleaseNodesMessage:
-                        _output.WriteLine($"CoordinatorServer: PID {request.ProcessId} released grant");
+                        _output.WriteLine($"CoordinatorServer: PID {handshake.ProcessId} released grant");
                         ReleaseConnection(connection);
                         connection.Dispose();
                         connection = null;
@@ -273,10 +288,10 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         using (_connectionLock.EnterDisposableWriteLock())
         {
             // Only remove if this connection is still current for the connection ID.
-            if (_connectionsById.TryGetValue(connection.Grant.ConnectionId, out var current) &&
+            if (_connectionsById.TryGetValue(connection.ConnectionId, out var current) &&
                 current == connection)
             {
-                _connectionsById.Remove(connection.Grant.ConnectionId);
+                _connectionsById.Remove(connection.ConnectionId);
             }
         }
 
@@ -340,12 +355,12 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             }
 
             // Check if the process is still alive before reclaiming.
-            if (IsProcessAlive(connection.Grant.ProcessId))
+            if (IsProcessAlive(connection.ProcessId))
             {
                 continue;
             }
 
-            _output.WriteLine($"CoordinatorServer: Reclaiming grant from dead PID {connection.Grant.ProcessId}");
+            _output.WriteLine($"CoordinatorServer: Reclaiming grant from dead PID {connection.ProcessId}");
 
             // ReleaseConnection will acquire its own write lock.
             ReleaseConnection(connection);

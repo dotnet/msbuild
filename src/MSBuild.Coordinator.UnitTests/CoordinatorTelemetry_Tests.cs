@@ -33,11 +33,9 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         TelemetryManager.Instance.Initialize(isStandalone: true);
 
         var connectionId = Guid.NewGuid();
+        var grant = new BuildGrant(connectionId, processId: 42, requestedNodes: 8) { GrantedNodes = 4 };
         CoordinatorTelemetry.RecordGrantIssued(
-            connectionId,
-            processId: 42,
-            requestedNodes: 8,
-            grantedNodes: 4,
+            grant,
             queueDepth: 1,
             activeBuilds: 2,
             allocatedNodes: 12);
@@ -73,10 +71,9 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         TelemetryManager.Instance.Initialize(isStandalone: true);
 
         var connectionId = Guid.NewGuid();
+        var grant = new BuildGrant(connectionId, processId: 99, requestedNodes: 16);
         CoordinatorTelemetry.RecordGrantDeferred(
-            connectionId,
-            processId: 99,
-            requestedNodes: 16,
+            grant,
             queueDepth: 3);
 
         Activity activity = captured.ShouldHaveSingleItem();
@@ -107,10 +104,9 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         TelemetryManager.Instance.Initialize(isStandalone: true);
 
         var connectionId = Guid.NewGuid();
+        var grant = new BuildGrant(connectionId, processId: 7, requestedNodes: 4) { GrantedNodes = 4 };
         CoordinatorTelemetry.RecordGrantReleased(
-            connectionId,
-            processId: 7,
-            releasedNodes: 4,
+            grant,
             queueDepth: 0,
             activeBuilds: 1,
             allocatedNodes: 8);
