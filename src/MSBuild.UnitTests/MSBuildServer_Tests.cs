@@ -39,6 +39,10 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    // Marked multithreadable so that under /mt the engine runs it in-process on a server thread
+    // (rather than routing it to a sidecar TaskHost), letting it observe the server process's GC mode.
+    // The task only reads its own PID and GCSettings, so it is genuinely thread-safe.
+    [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
     public class ProcessIdTask : Microsoft.Build.Utilities.Task
     {
         [Output]
@@ -394,10 +398,11 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// The MSBuild server (build orchestrator) process must be launched with Server GC.
+        /// The MSBuild server (build orchestrator) process must be launched with Server GC when the
+        /// build is multithreaded (/mt) - that is when the server itself does the project work.
         /// </summary>
         [Fact]
-        public void ServerProcessUsesServerGC()
+        public void MultiThreadedServerProcessUsesServerGC()
         {
             if (Environment.ProcessorCount < 2)
             {
@@ -406,6 +411,25 @@ namespace Microsoft.Build.Engine.UnitTests
 
             PrepareIsolatedServerEnv();
             TransientTestFile project = _env.CreateFile("serverGcProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt", out bool success, false, _output);
+
+            success.ShouldBeTrue();
+            int clientPid = ParseNumber(output, "Process ID is ");
+            int serverPid = ParseNumber(output, "TaskRanInPID=");
+            _env.WithTransientProcess(serverPid);
+            serverPid.ShouldNotBe(clientPid, "The build should run in the server node, not the entry process.");
+            output.ShouldContain("TaskNodeServerGC=True", customMessage: "A multithreaded MSBuild server process should run with Server GC.");
+        }
+
+        /// <summary>
+        /// Without /mt the server only orchestrates (project work happens in separate worker nodes),
+        /// so the server process must keep the default Workstation GC.
+        /// </summary>
+        [Fact]
+        public void NonMultiThreadedServerProcessDoesNotUseServerGC()
+        {
+            PrepareIsolatedServerEnv();
+            TransientTestFile project = _env.CreateFile("serverGcProbeNoMt.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success, false, _output);
 
             success.ShouldBeTrue();
@@ -413,29 +437,35 @@ namespace Microsoft.Build.Engine.UnitTests
             int serverPid = ParseNumber(output, "TaskRanInPID=");
             _env.WithTransientProcess(serverPid);
             serverPid.ShouldNotBe(clientPid, "The build should run in the server node, not the entry process.");
-            output.ShouldContain("TaskNodeServerGC=True", customMessage: "The MSBuild server process should run with Server GC.");
+            output.ShouldContain("TaskNodeServerGC=False", customMessage: "A non-multithreaded MSBuild server process should keep the default Workstation GC.");
         }
 
         /// <summary>
-        /// A TaskHost process must keep the default Workstation GC, even though the server uses Server GC.
-        /// Runs two builds against the same (uniquely salted) server: one in-proc to capture the
-        /// Server-GC server PID, then one that forces the task into a TaskHost.
+        /// A TaskHost process must keep the default Workstation GC, even though a multithreaded server
+        /// uses Server GC. Runs two /mt builds against the same (uniquely salted) server: one in-proc to
+        /// capture the Server-GC server PID, then one that forces the task into a TaskHost.
         /// </summary>
         [Fact]
         public void TaskHostProcessDoesNotUseServerGC()
         {
+            if (Environment.ProcessorCount < 2)
+            {
+                Assert.Skip("Server GC can report as Workstation GC on single-processor machines.");
+            }
+
             PrepareIsolatedServerEnv();
 
-            // First build runs the task in-proc in the server node so we can capture the server PID.
+            // First /mt build runs the task in-proc in the server node so we can capture the Server-GC server PID.
             TransientTestFile serverProbe = _env.CreateFile("serverProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
-            string serverOutput = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, serverProbe.Path, out bool serverSuccess, false, _output);
+            string serverOutput = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{serverProbe.Path} -mt", out bool serverSuccess, false, _output);
             serverSuccess.ShouldBeTrue();
             int serverPid = ParseNumber(serverOutput, "TaskRanInPID=");
             _env.WithTransientProcess(serverPid);
+            serverOutput.ShouldContain("TaskNodeServerGC=True", customMessage: "A multithreaded MSBuild server process should run with Server GC.");
 
-            // Second build (same server, reused via the shared handshake salt) forces the task out-of-proc.
+            // Second /mt build (same server, reused via the shared handshake salt) forces the task out-of-proc.
             TransientTestFile taskHostProbe = _env.CreateFile("taskHostProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: true));
-            string taskHostOutput = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, taskHostProbe.Path, out bool taskHostSuccess, false, _output);
+            string taskHostOutput = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{taskHostProbe.Path} -mt", out bool taskHostSuccess, false, _output);
             taskHostSuccess.ShouldBeTrue();
             int clientPid = ParseNumber(taskHostOutput, "Process ID is ");
             int taskHostPid = ParseNumber(taskHostOutput, "TaskRanInPID=");

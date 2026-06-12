@@ -471,12 +471,16 @@ namespace Microsoft.Build.Experimental
                 // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
                 IDictionary<string, string?>? environmentOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
 
-                // Launch the long-lived server (build orchestrator) process with Server GC. The server
-                // hosts the build itself - under a multithreaded (/mt) build it runs all project work on
-                // threads in this single process - so Server GC's higher throughput pays off here. GC mode
-                // is fixed at CLR startup, so it must be set in the child's launch environment via
-                // DOTNET_gcServer (which only affects .NET/CoreCLR and, since .NET 9, takes precedence over
-                // runtimeconfig.json).
+                // When this build is multithreaded (/mt), launch the long-lived server (build
+                // orchestrator) process with Server GC. Under /mt the server runs all project work on
+                // threads in this single process, so Server GC's higher throughput pays off; without
+                // /mt the server only orchestrates and delegates project work to separate worker nodes,
+                // so Server GC on the server would add memory cost for no benefit. GC mode is fixed at
+                // CLR startup, so it must be set in the child's launch environment via DOTNET_gcServer
+                // (which only affects .NET/CoreCLR and, since .NET 9, takes precedence over
+                // runtimeconfig.json). The decision is made from this (launch-time) invocation's command
+                // line; a server is keyed by handshake and reused, so a later differing /mt choice does
+                // not re-launch it.
                 //
                 // This is scoped to the server process only. Sidecar TaskHost (nodemode 2) and worker
                 // (nodemode 1) nodes are launched through other code paths that never set this knob, and
@@ -486,10 +490,13 @@ namespace Microsoft.Build.Experimental
                 //
                 // CreateDotnetRootEnvironmentOverrides returns a shared cached dictionary reused by other
                 // node launches, so copy it before adding the GC override.
-                environmentOverrides = environmentOverrides is null
-                    ? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
-                    : new Dictionary<string, string?>(environmentOverrides, StringComparer.OrdinalIgnoreCase);
-                environmentOverrides["DOTNET_gcServer"] = "1";
+                if (IsMultiThreadedBuildRequested())
+                {
+                    environmentOverrides = environmentOverrides is null
+                        ? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+                        : new Dictionary<string, string?>(environmentOverrides, StringComparer.OrdinalIgnoreCase);
+                    environmentOverrides["DOTNET_gcServer"] = "1";
+                }
 
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
@@ -508,6 +515,50 @@ namespace Microsoft.Build.Experimental
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Determines whether this invocation requests a multithreaded (/mt) build, by inspecting the
+        /// command line this client was constructed with and the MSBUILDFORCEMULTITHREADED opt-in.
+        /// Mirrors the "switch is present" semantics of <c>MSBuildApp.IsMultiThreadedEnabled</c>; the
+        /// switch-prefix handling (-, --, /) matches MSBuild's command-line parser.
+        /// </summary>
+        private bool IsMultiThreadedBuildRequested()
+        {
+            if (Traits.Instance.ForceMultiThreaded)
+            {
+                return true;
+            }
+
+            foreach (string arg in _commandLine)
+            {
+                if (string.IsNullOrEmpty(arg))
+                {
+                    continue;
+                }
+
+                // Strip the leading switch indicator: "--" (length 2), or "-"/"/" (length 1).
+                int indicatorLength = arg.StartsWith("--", StringComparison.Ordinal)
+                    ? 2
+                    : (arg[0] == '-' || arg[0] == '/') ? 1 : 0;
+                if (indicatorLength == 0)
+                {
+                    continue;
+                }
+
+                // The switch name runs up to the first switch/parameter separator (':').
+                int separatorIndex = arg.IndexOf(':', indicatorLength);
+                int nameLength = (separatorIndex < 0 ? arg.Length : separatorIndex) - indicatorLength;
+                ReadOnlySpan<char> switchName = arg.AsSpan(indicatorLength, nameLength);
+
+                if (switchName.Equals("mt".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
+                    switchName.Equals("multithreaded".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool TrySendBuildCommand() => TrySendPacket(() => GetServerNodeBuildCommand());
