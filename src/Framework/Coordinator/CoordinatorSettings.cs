@@ -20,6 +20,7 @@ internal sealed record class CoordinatorSettings()
     public const string PipeNameBase = "msbuild-coordinator";
     public const int DefaultHeartbeatIntervalMs = 5_000;
     public const int DefaultMissedHeartbeatsThreshold = 3;
+    public const int DefaultInitialConnectionTimeoutMs = 200;
     public const int DefaultConnectionTimeoutMs = 5_000;
     public const int DefaultShutdownTimeoutMs = 60_000;
     public const int MaxHeartbeatIntervalMs = 300_000;
@@ -28,6 +29,7 @@ internal sealed record class CoordinatorSettings()
 
     private int? _heartbeatIntervalMs;
     private int? _missedHeartbeatsThreshold;
+    private int? _initialConnectionTimeoutMs;
     private int? _connectionTimeoutMs;
     private int? _shutdownTimeoutMs;
     private int? _totalNodeBudget;
@@ -68,6 +70,15 @@ internal sealed record class CoordinatorSettings()
     {
         get => _shutdownTimeoutMs ??= DefaultShutdownTimeoutMs;
         init => _shutdownTimeoutMs = value >= 0 ? value : DefaultShutdownTimeoutMs;
+    }
+
+    /// <summary>
+    ///  The timeout in milliseconds for the initial fast probe to detect an already-running coordinator.
+    /// </summary>
+    public int InitialConnectionTimeoutMs
+    {
+        get => _initialConnectionTimeoutMs ??= DefaultInitialConnectionTimeoutMs;
+        init => _initialConnectionTimeoutMs = value > 0 ? value : DefaultInitialConnectionTimeoutMs;
     }
 
     public int ConnectionTimeoutMs

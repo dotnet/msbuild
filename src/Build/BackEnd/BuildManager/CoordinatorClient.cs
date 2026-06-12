@@ -140,13 +140,16 @@ internal sealed partial class CoordinatorClient : IDisposable
 
             output.WriteLine($"CoordinatorClient: Connecting to pipe '{settings.PipeName}'");
 
-            // Try to connect to an existing coordinator.
-            if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
+            // Fast probe: use a short timeout to check if a coordinator is already running.
+            // If no pipe exists, this fails quickly (~200ms) instead of waiting the full 5s.
+            if (!TryConnectToPipe(pipeStream, settings.InitialConnectionTimeoutMs))
             {
                 output.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
 
                 pipeStream.Dispose();
+#pragma warning disable CA2000 // Ownership transferred to TryNegotiate or disposed in outer finally
                 pipeStream = TryLaunchAndConnect(settings, loggingService, output);
+#pragma warning restore CA2000
 
                 if (pipeStream is null)
                 {
@@ -179,7 +182,9 @@ internal sealed partial class CoordinatorClient : IDisposable
 
     /// <summary>
     ///  Acquires a named mutex to serialize coordinator launches, then either launches
-    ///  the coordinator or connects to one that was launched by another client.
+    ///  the coordinator or detects one already running via the server mutex.
+    ///  Releases the launch mutex before the pipe readiness wait so concurrent clients
+    ///  can wait for pipe readiness in parallel.
     /// </summary>
     /// <param name="settings">Coordinator connection settings.</param>
     /// <param name="loggingService">The MSBuild logging service for user-visible messages.</param>
@@ -194,7 +199,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     {
         // Acquire a launch mutex so only one client launches the coordinator.
         // Other clients racing here will block until the launcher finishes, then
-        // connect to the now-running coordinator.
+        // detect the running coordinator via its server mutex.
         using Mutex launchMutex = new(initiallyOwned: false, settings.LaunchMutexName);
 
         try
@@ -212,52 +217,105 @@ internal sealed partial class CoordinatorClient : IDisposable
             output.WriteLine("CoordinatorClient: Acquired abandoned launch mutex");
         }
 
-        NamedPipeClientStream? pipeStream = null;
+        try
+        {
+            // Check the server mutex to determine if a coordinator is already running.
+            // This is much faster than attempting a pipe connect with a full timeout.
+            if (IsCoordinatorRunning(settings, output))
+            {
+                output.WriteLine("CoordinatorClient: Coordinator already running (server mutex exists)");
+            }
+            else
+            {
+                // No coordinator running. Launch one.
+                if (!TryLaunchCoordinator(loggingService, output))
+                {
+                    output.WriteLine("CoordinatorClient: Failed to launch coordinator");
+                    return null;
+                }
+
+                // Wait for the coordinator to advertise its server mutex, indicating
+                // it has started and is about to open the pipe.
+                if (!WaitForCoordinatorStartup(settings, output))
+                {
+                    output.WriteLine("CoordinatorClient: Coordinator did not start in time");
+                    loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToConnect");
+                    return null;
+                }
+            }
+        }
+        finally
+        {
+            // Release the launch mutex before the pipe readiness wait so concurrent
+            // clients can check the server mutex and wait for the pipe in parallel.
+            launchMutex.ReleaseMutex();
+        }
+
+        // Wait for the coordinator to be ready by connecting to its pipe.
+        NamedPipeClientStream? pipeStream = new(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
         try
         {
-            // After acquiring the mutex, try connecting again — another client may have
-            // already launched the coordinator while we were waiting.
-            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-
-            if (TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
-            {
-                output.WriteLine("CoordinatorClient: Coordinator was launched by another client");
-                NamedPipeClientStream result = pipeStream;
-                pipeStream = null; // Ownership transferred to caller.
-                return result;
-            }
-
-            // Still no coordinator. Launch one.
-            pipeStream.Dispose();
-            pipeStream = null;
-
-            if (!TryLaunchCoordinator(loggingService, output))
-            {
-                output.WriteLine("CoordinatorClient: Failed to launch coordinator");
-                return null;
-            }
-
-            // Retry connection after launch.
-            pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
-
             if (!TryConnectToPipe(pipeStream, settings.ConnectionTimeoutMs))
             {
-                output.WriteLine("CoordinatorClient: Failed to connect to newly launched coordinator");
+                output.WriteLine("CoordinatorClient: Failed to connect to coordinator");
                 loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToConnect");
                 return null;
             }
 
             output.WriteLine("CoordinatorClient: Coordinator launched successfully");
+
             NamedPipeClientStream connected = pipeStream;
             pipeStream = null; // Ownership transferred to caller.
+
             return connected;
         }
         finally
         {
             pipeStream?.Dispose();
-            launchMutex.ReleaseMutex();
         }
+    }
+
+    /// <summary>
+    ///  Checks whether a coordinator process is running by probing its server mutex.
+    /// </summary>
+    private static bool IsCoordinatorRunning(CoordinatorSettings settings, ICoordinatorOutput output)
+    {
+        try
+        {
+            if (Mutex.TryOpenExisting(settings.ServerMutexName, out Mutex? existingMutex))
+            {
+                existingMutex.Dispose();
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            output.WriteLine($"CoordinatorClient: Failed to check server mutex: {ex.Message}");
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///  Polls for the coordinator's server mutex to appear, indicating the process has started.
+    /// </summary>
+    private static bool WaitForCoordinatorStartup(CoordinatorSettings settings, ICoordinatorOutput output)
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+
+        while (sw.ElapsedMilliseconds < settings.ConnectionTimeoutMs)
+        {
+            if (IsCoordinatorRunning(settings, output))
+            {
+                output.WriteLine($"CoordinatorClient: Server mutex appeared after {sw.ElapsedMilliseconds}ms");
+                return true;
+            }
+
+            Thread.Sleep(50);
+        }
+
+        return false;
     }
 
     /// <summary>
