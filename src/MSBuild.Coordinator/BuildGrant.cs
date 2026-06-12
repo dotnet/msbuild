@@ -9,6 +9,11 @@ namespace Microsoft.Build.Coordinator;
 internal sealed class BuildGrant
 {
     /// <summary>
+    ///  A unique identifier for this connection.
+    /// </summary>
+    public Guid ConnectionId { get; }
+
+    /// <summary>
     ///  The process ID of the MSBuild process that requested the grant.
     /// </summary>
     public int ProcessId { get; }
@@ -36,13 +41,15 @@ internal sealed class BuildGrant
     /// <summary>
     ///  Creates a new build grant for the specified process.
     /// </summary>
+    /// <param name="connectionId">A unique identifier for this connection.</param>
     /// <param name="processId">The OS process ID of the MSBuild process requesting nodes.</param>
     /// <param name="requestedNodes">The number of nodes the build is requesting.</param>
-    public BuildGrant(int processId, int requestedNodes)
+    public BuildGrant(Guid connectionId, int processId, int requestedNodes)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(processId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(requestedNodes);
 
+        ConnectionId = connectionId;
         ProcessId = processId;
         RequestedNodes = requestedNodes;
         GrantedNodes = 0;

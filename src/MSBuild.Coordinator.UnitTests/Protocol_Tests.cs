@@ -13,8 +13,9 @@ public class Protocol_Tests
     [Fact]
     public void RequestNodes_RoundTrips()
     {
-        ClientMessage message = WriteAndReadClientMessage(new RequestNodesMessage(requestedNodes: 16, processId: 12345));
-        message.ShouldBe(new RequestNodesMessage(16, 12345));
+        var connectionId = Guid.NewGuid();
+        ClientMessage message = WriteAndReadClientMessage(new RequestNodesMessage(connectionId, requestedNodes: 16, processId: 12345));
+        message.ShouldBe(new RequestNodesMessage(connectionId, 16, 12345));
     }
 
     [Fact]
@@ -55,17 +56,18 @@ public class Protocol_Tests
     [Fact]
     public void MultipleClientMessages_ReadSequentially()
     {
+        var connectionId = Guid.NewGuid();
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
 
-        writer.Write(new RequestNodesMessage(8, 100));
+        writer.Write(new RequestNodesMessage(connectionId, 8, 100));
         writer.Write(HeartbeatMessage.Instance);
         writer.Write(ReleaseNodesMessage.Instance);
 
         stream.Position = 0;
         using BinaryReader reader = new(stream);
 
-        reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(8, 100));
+        reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(connectionId, 8, 100));
         reader.ReadClientMessage().ShouldBe(HeartbeatMessage.Instance);
         reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }

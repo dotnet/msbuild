@@ -22,6 +22,7 @@ internal static class CoordinatorTelemetry
     private const string ReleasedActivity = $"{ActivityPrefix}Released";
 
     // Tag names
+    private const string ConnectionIdTag = "ConnectionId";
     private const string ProcessIdTag = "ProcessId";
     private const string NodesRequestedTag = "NodesRequested";
     private const string NodesGrantedTag = "NodesGranted";
@@ -36,9 +37,10 @@ internal static class CoordinatorTelemetry
     /// <summary>
     ///  Records that a node grant was issued immediately to a build.
     /// </summary>
-    public static void RecordGrantIssued(int processId, int requestedNodes, int grantedNodes, int queueDepth, int activeBuilds, int allocatedNodes)
+    public static void RecordGrantIssued(Guid connectionId, int processId, int requestedNodes, int grantedNodes, int queueDepth, int activeBuilds, int allocatedNodes)
     {
         using IActivity? _ = StartActivity(GrantActivity)
+            ?.SetTag(ConnectionIdTag, connectionId)
             ?.SetTag(ProcessIdTag, processId)
             ?.SetTag(NodesRequestedTag, requestedNodes)
             ?.SetTag(NodesGrantedTag, grantedNodes)
@@ -50,9 +52,10 @@ internal static class CoordinatorTelemetry
     /// <summary>
     ///  Records that a build was queued because no nodes were available.
     /// </summary>
-    public static void RecordGrantDeferred(int processId, int requestedNodes, int queueDepth)
+    public static void RecordGrantDeferred(Guid connectionId, int processId, int requestedNodes, int queueDepth)
     {
         using IActivity? _ = StartActivity(DeferredActivity)
+            ?.SetTag(ConnectionIdTag, connectionId)
             ?.SetTag(ProcessIdTag, processId)
             ?.SetTag(NodesRequestedTag, requestedNodes)
             ?.SetTag(QueueDepthTag, queueDepth);
@@ -61,9 +64,10 @@ internal static class CoordinatorTelemetry
     /// <summary>
     ///  Records that a deferred grant was fulfilled from the wait queue.
     /// </summary>
-    public static void RecordDeferredGrantFulfilled(int processId, int grantedNodes, int queueDepth, int activeBuilds, int allocatedNodes)
+    public static void RecordDeferredGrantFulfilled(Guid connectionId, int processId, int grantedNodes, int queueDepth, int activeBuilds, int allocatedNodes)
     {
         using IActivity? _ = StartActivity(DeferredGrantFulfilledActivity)
+            ?.SetTag(ConnectionIdTag, connectionId)
             ?.SetTag(ProcessIdTag, processId)
             ?.SetTag(NodesGrantedTag, grantedNodes)
             ?.SetTag(QueueDepthTag, queueDepth)
@@ -74,9 +78,10 @@ internal static class CoordinatorTelemetry
     /// <summary>
     ///  Records that a grant was released by a client.
     /// </summary>
-    public static void RecordGrantReleased(int processId, int releasedNodes, int queueDepth, int activeBuilds, int allocatedNodes)
+    public static void RecordGrantReleased(Guid connectionId, int processId, int releasedNodes, int queueDepth, int activeBuilds, int allocatedNodes)
     {
         using IActivity? _ = StartActivity(ReleasedActivity)
+            ?.SetTag(ConnectionIdTag, connectionId)
             ?.SetTag(ProcessIdTag, processId)
             ?.SetTag(NodesReleasedTag, releasedNodes)
             ?.SetTag(QueueDepthTag, queueDepth)

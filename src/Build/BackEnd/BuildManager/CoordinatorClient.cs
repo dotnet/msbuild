@@ -29,6 +29,11 @@ internal sealed partial class CoordinatorClient : IDisposable
     private volatile bool _disposed;
 
     /// <summary>
+    ///  The unique identifier for this connection to the coordinator.
+    /// </summary>
+    public Guid ConnectionId { get; }
+
+    /// <summary>
     ///  The number of nodes granted by the coordinator.
     /// </summary>
     public int GrantedNodes { get; }
@@ -39,6 +44,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     public TimeSpan? WaitDuration { get; private init; }
 
     private CoordinatorClient(
+        Guid connectionId,
         NamedPipeClientStream pipeStream,
         BinaryReader reader,
         BinaryWriter writer,
@@ -46,6 +52,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         int heartbeatIntervalMs,
         ICoordinatorOutput output)
     {
+        ConnectionId = connectionId;
         _pipeStream = pipeStream;
         _reader = reader;
         _writer = writer;
@@ -263,8 +270,9 @@ internal sealed partial class CoordinatorClient : IDisposable
         try
         {
             // Send the node request.
-            output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId})");
-            writer.Write(new RequestNodesMessage(requestedNodes, settings.ProcessId));
+            var connectionId = Guid.NewGuid();
+            output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId}, ConnectionId {connectionId})");
+            writer.Write(new RequestNodesMessage(connectionId, requestedNodes, settings.ProcessId));
 
             // Read the response.
             ServerMessage response = reader.ReadServerMessage();
@@ -275,7 +283,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                     output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
                     loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
 
-                    var client = new CoordinatorClient(pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, output);
+                    var client = new CoordinatorClient(connectionId, pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, output);
 
                     // Ownership transferred to client
                     reader = null;
@@ -301,7 +309,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                             output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
                             loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
 
-                            var deferredClient = new CoordinatorClient(pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
+                            var deferredClient = new CoordinatorClient(connectionId, pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
                             {
                                 WaitDuration = waitTimer.Elapsed,
                             };

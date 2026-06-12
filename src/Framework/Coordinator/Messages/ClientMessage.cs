@@ -22,7 +22,7 @@ internal abstract record ClientMessage
 
         return messageType switch
         {
-            ClientMessageType.RequestNodes => new RequestNodesMessage(requestedNodes: reader.ReadInt32(), processId: reader.ReadInt32()),
+            ClientMessageType.RequestNodes => RequestNodesMessage.ReadPayload(reader),
             ClientMessageType.ReleaseNodes => ReleaseNodesMessage.Instance,
             ClientMessageType.Heartbeat => HeartbeatMessage.Instance,
 

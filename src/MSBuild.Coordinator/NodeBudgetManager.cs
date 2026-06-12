@@ -72,7 +72,7 @@ internal sealed class NodeBudgetManager
         {
             // No resources available. Queue the build.
             _waitQueue.Enqueue(grant);
-            CoordinatorTelemetry.RecordGrantDeferred(grant.ProcessId, grant.RequestedNodes, WaitingBuildCount);
+            CoordinatorTelemetry.RecordGrantDeferred(grant.ConnectionId, grant.ProcessId, grant.RequestedNodes, WaitingBuildCount);
             return 0;
         }
 
@@ -86,7 +86,7 @@ internal sealed class NodeBudgetManager
         AllocatedNodes += grantedNodes;
         _activeGrants.Add(grant);
 
-        CoordinatorTelemetry.RecordGrantIssued(grant.ProcessId, grant.RequestedNodes, grantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
+        CoordinatorTelemetry.RecordGrantIssued(grant.ConnectionId, grant.ProcessId, grant.RequestedNodes, grantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
 
         return grantedNodes;
     }
@@ -104,7 +104,7 @@ internal sealed class NodeBudgetManager
         if (grant.IsActive)
         {
             AllocatedNodes -= grant.GrantedNodes;
-            CoordinatorTelemetry.RecordGrantReleased(grant.ProcessId, grant.GrantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
+            CoordinatorTelemetry.RecordGrantReleased(grant.ConnectionId, grant.ProcessId, grant.GrantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
             grant.GrantedNodes = 0;
             _activeGrants.Remove(grant);
         }
@@ -142,7 +142,7 @@ internal sealed class NodeBudgetManager
             _activeGrants.Add(waiting);
             newlyGranted.Add(waiting);
 
-            CoordinatorTelemetry.RecordDeferredGrantFulfilled(waiting.ProcessId, grantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
+            CoordinatorTelemetry.RecordDeferredGrantFulfilled(waiting.ConnectionId, waiting.ProcessId, grantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
         }
 
         return newlyGranted.ToImmutable();

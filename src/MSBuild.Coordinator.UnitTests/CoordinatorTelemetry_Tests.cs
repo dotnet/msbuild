@@ -32,7 +32,9 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         TelemetryManager.ResetForTest();
         TelemetryManager.Instance.Initialize(isStandalone: true);
 
+        var connectionId = Guid.NewGuid();
         CoordinatorTelemetry.RecordGrantIssued(
+            connectionId,
             processId: 42,
             requestedNodes: 8,
             grantedNodes: 4,
@@ -42,6 +44,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
 
         Activity activity = captured.ShouldHaveSingleItem();
         activity.DisplayName.ShouldBe("VS/MSBuild/Coordinator/Grant");
+        activity.GetTagItem("VS.MSBuild.ConnectionId").ShouldBe(connectionId);
         activity.GetTagItem("VS.MSBuild.ProcessId").ShouldBe(42);
         activity.GetTagItem("VS.MSBuild.NodesRequested").ShouldBe(8);
         activity.GetTagItem("VS.MSBuild.NodesGranted").ShouldBe(4);
@@ -69,13 +72,16 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         TelemetryManager.ResetForTest();
         TelemetryManager.Instance.Initialize(isStandalone: true);
 
+        var connectionId = Guid.NewGuid();
         CoordinatorTelemetry.RecordGrantDeferred(
+            connectionId,
             processId: 99,
             requestedNodes: 16,
             queueDepth: 3);
 
         Activity activity = captured.ShouldHaveSingleItem();
         activity.DisplayName.ShouldBe("VS/MSBuild/Coordinator/Deferred");
+        activity.GetTagItem("VS.MSBuild.ConnectionId").ShouldBe(connectionId);
         activity.GetTagItem("VS.MSBuild.ProcessId").ShouldBe(99);
         activity.GetTagItem("VS.MSBuild.NodesRequested").ShouldBe(16);
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(3);
@@ -100,7 +106,9 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         TelemetryManager.ResetForTest();
         TelemetryManager.Instance.Initialize(isStandalone: true);
 
+        var connectionId = Guid.NewGuid();
         CoordinatorTelemetry.RecordGrantReleased(
+            connectionId,
             processId: 7,
             releasedNodes: 4,
             queueDepth: 0,
@@ -109,6 +117,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
 
         Activity activity = captured.ShouldHaveSingleItem();
         activity.DisplayName.ShouldBe("VS/MSBuild/Coordinator/Released");
+        activity.GetTagItem("VS.MSBuild.ConnectionId").ShouldBe(connectionId);
         activity.GetTagItem("VS.MSBuild.ProcessId").ShouldBe(7);
         activity.GetTagItem("VS.MSBuild.NodesReleased").ShouldBe(4);
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(0);

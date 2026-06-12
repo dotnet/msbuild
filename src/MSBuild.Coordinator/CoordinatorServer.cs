@@ -24,7 +24,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private readonly string _pipeName = settings.PipeName;
     private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
     private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
-    private readonly Dictionary<int, ClientConnection> _connectionsByProcessId = [];
+    private readonly Dictionary<Guid, ClientConnection> _connectionsById = [];
     private readonly object _budgetLock = new();
     private readonly ReaderWriterLockSlim _connectionLock = new();
     private readonly CancellationTokenSource _cts = new();
@@ -177,14 +177,14 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                 return;
             }
 
-            _output.WriteLine($"CoordinatorServer: Client connected (PID {request.ProcessId}, requested {request.RequestedNodes} nodes)");
+            _output.WriteLine($"CoordinatorServer: Client connected (PID {request.ProcessId}, ConnectionId {request.ConnectionId}, requested {request.RequestedNodes} nodes)");
 
-            BuildGrant grant = new(request.ProcessId, request.RequestedNodes);
+            BuildGrant grant = new(request.ConnectionId, request.ProcessId, request.RequestedNodes);
             connection = new ClientConnection(grant, pipeStream);
 
             using (_connectionLock.EnterDisposableWriteLock())
             {
-                _connectionsByProcessId[request.ProcessId] = connection;
+                _connectionsById[request.ConnectionId] = connection;
             }
 
             // Try to grant nodes.
@@ -278,11 +278,11 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     {
         using (_connectionLock.EnterDisposableWriteLock())
         {
-            // Only remove if this connection is still current for the PID.
-            if (_connectionsByProcessId.TryGetValue(connection.Grant.ProcessId, out var current) &&
+            // Only remove if this connection is still current for the connection ID.
+            if (_connectionsById.TryGetValue(connection.Grant.ConnectionId, out var current) &&
                 current == connection)
             {
-                _connectionsByProcessId.Remove(connection.Grant.ProcessId);
+                _connectionsById.Remove(connection.Grant.ConnectionId);
             }
         }
 
@@ -305,7 +305,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             ClientConnection? waitingConnection;
             using (_connectionLock.EnterDisposableReadLock())
             {
-                found = _connectionsByProcessId.TryGetValue(grant.ProcessId, out waitingConnection);
+                found = _connectionsById.TryGetValue(grant.ConnectionId, out waitingConnection);
             }
 
             if (found && waitingConnection is not null)
@@ -340,7 +340,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
         using (_connectionLock.EnterDisposableReadLock())
         {
-            connectionsToCheck = [.. _connectionsByProcessId.Values];
+            connectionsToCheck = [.. _connectionsById.Values];
         }
 
         foreach (ClientConnection connection in connectionsToCheck)
