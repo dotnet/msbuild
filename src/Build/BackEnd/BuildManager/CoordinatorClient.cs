@@ -287,25 +287,10 @@ internal sealed partial class CoordinatorClient : IDisposable
         {
             // Perform the handshake.
             var connectionId = Guid.NewGuid();
-            output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {connectionId})");
-            writer.Write(new ClientHandshakeMessage(connectionId, settings.ProcessId, []));
-
-            // Read the handshake response.
-            ServerMessage handshakeResponse = reader.ReadServerMessage();
-
-            if (handshakeResponse is ErrorMessage error)
+            if (TrySendHandshake(connectionId, settings.ProcessId, reader, writer, output) is not ServerHandshakeMessage serverHandshake)
             {
-                output.WriteLine($"CoordinatorClient: Server rejected handshake: {error.Message}");
                 return null;
             }
-
-            if (handshakeResponse is not ServerHandshakeMessage serverHandshake)
-            {
-                output.WriteLine($"CoordinatorClient: Unexpected handshake response: {handshakeResponse.GetType().Name}");
-                return null;
-            }
-
-            output.WriteLine($"CoordinatorClient: Handshake complete (server capabilities: [{string.Join(", ", serverHandshake.Capabilities)}])");
 
             // Send the node request.
             output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId}, ConnectionId {connectionId})");
@@ -390,6 +375,46 @@ internal sealed partial class CoordinatorClient : IDisposable
             writer?.Dispose();
             pipe?.Dispose();
         }
+    }
+
+    /// <summary>
+    ///  Sends the client handshake and reads the server's handshake response.
+    /// </summary>
+    /// <param name="connectionId">The unique connection identifier to send.</param>
+    /// <param name="processId">The current process ID to send.</param>
+    /// <param name="reader">The binary reader for the coordinator pipe.</param>
+    /// <param name="writer">The binary writer for the coordinator pipe.</param>
+    /// <param name="output">Debug trace output.</param>
+    /// <returns>
+    ///  The server's handshake message, or <see langword="null"/> if the handshake was rejected.
+    /// </returns>
+    private static ServerHandshakeMessage? TrySendHandshake(
+        Guid connectionId,
+        int processId,
+        BinaryReader reader,
+        BinaryWriter writer,
+        ICoordinatorOutput output)
+    {
+        output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {connectionId})");
+        writer.Write(new ClientHandshakeMessage(connectionId, processId, []));
+
+        ServerMessage response = reader.ReadServerMessage();
+
+        if (response is ErrorMessage error)
+        {
+            output.WriteLine($"CoordinatorClient: Server rejected handshake: {error.Message}");
+            return null;
+        }
+
+        if (response is not ServerHandshakeMessage serverHandshake)
+        {
+            output.WriteLine($"CoordinatorClient: Unexpected handshake response: {response.GetType().Name}");
+            return null;
+        }
+
+        output.WriteLine($"CoordinatorClient: Handshake complete (server capabilities: [{string.Join(", ", serverHandshake.Capabilities)}])");
+
+        return serverHandshake;
     }
 
     /// <summary>
