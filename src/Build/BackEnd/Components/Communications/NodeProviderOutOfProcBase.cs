@@ -1016,6 +1016,14 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private readonly byte _negotiatedPacketVersion;
 
+#if NET
+            /// <summary>
+            /// Optional shared-memory channel used to transfer large packet bodies, bypassing the pipe.
+            /// Null unless the feature is enabled. See <see cref="NodeSharedMemoryChannel"/>.
+            /// </summary>
+            private readonly NodeSharedMemoryChannel _sharedChannel;
+#endif
+
 
 #if FEATURE_APM
             // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
@@ -1046,6 +1054,12 @@ namespace Microsoft.Build.BackEnd
                 _terminateDelegate = terminateDelegate;
                 _handshakeOptions = handshakeOptions;
                 _negotiatedPacketVersion = negotiatedVersion;
+#if NET
+                if (NodeSharedMemoryChannel.FeatureEnabled)
+                {
+                    _sharedChannel = new NodeSharedMemoryChannel(process.Id, isParent: true);
+                }
+#endif
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
                 _bodyReadCompleteCallback = BodyReadComplete;
@@ -1107,27 +1121,58 @@ namespace Microsoft.Build.BackEnd
 
                     NodePacketType packetType = (NodePacketType)_headerByte[0];
                     int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
+#if NET
+                    bool bodyInSharedMemory = _sharedChannel != null && (packetLength & NodeSharedMemoryChannel.SharedMemoryFlag) != 0;
+                    if (bodyInSharedMemory)
+                    {
+                        packetLength &= NodeSharedMemoryChannel.LengthMask;
+                    }
+#endif
 
                     _readBufferMemoryStream.SetLength(packetLength);
                     byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
                     try
                     {
-                        int totalBytesRead = 0;
-                        while (totalBytesRead < packetLength)
+#if NET
+                        if (bodyInSharedMemory)
                         {
-                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
-                            if (bytesRead == 0)
+                            long shmStart = IpcTransferStats.StartTimestamp();
+                            _sharedChannel.ReceivePayload(packetData, 0, packetLength);
+                            if (IpcTransferStats.Enabled)
                             {
-                                break;
+                                IpcTransferStats.RecordShmRecv(shmStart, packetLength);
+                            }
+                        }
+                        else
+#endif
+                        {
+#if NET
+                            bool measure = IpcTransferStats.Enabled && packetLength >= NodeSharedMemoryChannel.PayloadThreshold;
+                            long pipeStart = measure ? IpcTransferStats.StartTimestamp() : 0;
+#endif
+                            int totalBytesRead = 0;
+                            while (totalBytesRead < packetLength)
+                            {
+                                int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                                if (bytesRead == 0)
+                                {
+                                    break;
+                                }
+
+                                totalBytesRead += bytesRead;
                             }
 
-                            totalBytesRead += bytesRead;
-                        }
-
-                        if (!ProcessBodyBytesRead(totalBytesRead, packetLength, packetType))
-                        {
-                            return;
+                            if (!ProcessBodyBytesRead(totalBytesRead, packetLength, packetType))
+                            {
+                                return;
+                            }
+#if NET
+                            if (measure)
+                            {
+                                IpcTransferStats.RecordPipeRead(pipeStart, packetLength);
+                            }
+#endif
                         }
                     }
                     catch (IOException e)
@@ -1219,18 +1264,53 @@ namespace Microsoft.Build.BackEnd
                             packet.Translate(writeTranslator);
 
                             int writeStreamLength = (int)writeStream.Position;
+                            int payloadLength = writeStreamLength - 5;
 
                             // Now plug in the real packet length
                             writeStream.Position = 1;
-                            WriteInt32(writeStream, writeStreamLength - 5);
 
                             byte[] writeStreamBuffer = writeStream.GetBuffer();
-
-                            for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
+#if NET
+                            if (context._sharedChannel != null && NodeSharedMemoryChannel.ShouldUseSharedMemory(payloadLength))
                             {
-                                int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
+                                // Flag the length and deliver the payload through shared memory. The slot
+                                // must exist before the header reaches the pipe so the reader can open it
+                                // as soon as it observes the flag.
+                                WriteInt32(writeStream, payloadLength | NodeSharedMemoryChannel.SharedMemoryFlag);
+                                context._sharedChannel.EnsureOutgoingReady();
 
-                                serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
+                                // Header first: the child can begin draining the slot as soon as it sees
+                                // the header, which minimizes producer backpressure on this thread (the
+                                // parent sends many configs back-to-back). Body-before-header was measured
+                                // ~25x slower here due to AcquireEmpty stalls.
+                                serverToClientStream.Write(writeStreamBuffer, 0, 5);
+                                long shmStart = IpcTransferStats.StartTimestamp();
+                                context._sharedChannel.SendPayload(writeStreamBuffer, 5, payloadLength);
+                                if (IpcTransferStats.Enabled)
+                                {
+                                    IpcTransferStats.RecordShmSend(shmStart, payloadLength);
+                                }
+                            }
+                            else
+#endif
+                            {
+                                WriteInt32(writeStream, payloadLength);
+#if NET
+                                bool measure = IpcTransferStats.Enabled && payloadLength >= NodeSharedMemoryChannel.PayloadThreshold;
+                                long pipeStart = measure ? IpcTransferStats.StartTimestamp() : 0;
+#endif
+                                for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
+                                {
+                                    int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
+
+                                    serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
+                                }
+#if NET
+                                if (measure)
+                                {
+                                    IpcTransferStats.RecordPipeWrite(pipeStart, payloadLength);
+                                }
+#endif
                             }
 
                             if (packet is NodeBuildComplete)
@@ -1278,6 +1358,9 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private void Close()
             {
+#if NET
+                _sharedChannel?.Dispose();
+#endif
                 _pipeStream.Dispose();
                 _terminateDelegate(_nodeId);
             }

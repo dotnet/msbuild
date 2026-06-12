@@ -118,6 +118,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
+#if NET
+        /// <summary>
+        /// Optional shared-memory channel used to transfer large packet bodies, bypassing the pipe.
+        /// Null unless the feature is enabled. See <see cref="NodeSharedMemoryChannel"/>.
+        /// </summary>
+        private NodeSharedMemoryChannel _sharedChannel;
+
+        /// <summary>
+        /// Reusable buffer for deserializing a packet body that arrived via shared memory.
+        /// </summary>
+        private MemoryStream _shmReadStream;
+#endif
+
         /// <summary>
         /// Represents the version of the parent packet associated with the node instantiation.
         /// </summary>
@@ -518,12 +531,24 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+#if NET
+            if (NodeSharedMemoryChannel.FeatureEnabled)
+            {
+                _sharedChannel = new NodeSharedMemoryChannel(Environment.ProcessId, isParent: false);
+            }
+#endif
+
             RunReadLoop(
                 new BufferedReadStream(_pipeServer),
                 _pipeServer,
                 localPacketQueue, localPacketAvailable, localTerminatePacketPump);
 
             CommunicationsUtilities.Trace("Ending read loop");
+
+#if NET
+            _sharedChannel?.Dispose();
+            _sharedChannel = null;
+#endif
 
             try
             {
@@ -697,15 +722,32 @@ namespace Microsoft.Build.BackEnd
                             bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
+                            // By default the payload (optional version byte + body) follows the header
+                            // inline on the pipe. For large payloads the writer instead delivers it via
+                            // shared memory and flags the length field; in that case we read it here.
+                            Stream payloadStream = localReadPipe;
+#if NET
+                            int lengthField = headerByte[1] | (headerByte[2] << 8) | (headerByte[3] << 16) | (headerByte[4] << 24);
+                            if (_sharedChannel != null && (lengthField & NodeSharedMemoryChannel.SharedMemoryFlag) != 0)
+                            {
+                                int payloadLength = lengthField & NodeSharedMemoryChannel.LengthMask;
+                                _shmReadStream ??= new MemoryStream();
+                                _shmReadStream.SetLength(payloadLength);
+                                _shmReadStream.Position = 0;
+                                _sharedChannel.ReceivePayload(_shmReadStream.GetBuffer(), 0, payloadLength);
+                                payloadStream = _shmReadStream;
+                            }
+#endif
+
                             byte parentVersion = 0;
                             if (hasExtendedHeader)
                             {
-                                parentVersion = NodePacketTypeExtensions.ReadVersion(localReadPipe);
+                                parentVersion = NodePacketTypeExtensions.ReadVersion(payloadStream);
                             }
 
                             try
                             {
-                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
+                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(payloadStream, _sharedReadBuffer);
 
                                 // parent sends a packet version that is already negotiated during handshake.
                                 // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
@@ -764,12 +806,37 @@ namespace Microsoft.Build.BackEnd
                                 packet.Translate(writeTranslator);
 
                                 int packetStreamLength = (int)packetStream.Position;
+                                int payloadLength = packetStreamLength - 5;
 
                                 // Now write in the actual packet length
                                 packetStream.Position = 1;
-                                _binaryWriter.Write(packetStreamLength - 5);
-
-                                localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+#if NET
+                                if (_sharedChannel != null && NodeSharedMemoryChannel.ShouldUseSharedMemory(payloadLength))
+                                {
+                                    // Flag the length and deliver the payload through shared memory.
+                                    // The slot must exist before the header reaches the pipe so the
+                                    // reader can open it as soon as it observes the flag.
+                                    _binaryWriter.Write(payloadLength | NodeSharedMemoryChannel.SharedMemoryFlag);
+                                    _sharedChannel.EnsureOutgoingReady();
+                                    if (NodeSharedMemoryChannel.IsSingleChunk(payloadLength))
+                                    {
+                                        // Single chunk: publish the body before the header so the
+                                        // parent does not stall waiting for it after reading the header.
+                                        _sharedChannel.SendPayload(packetStream.GetBuffer(), 5, payloadLength);
+                                        localWritePipe.Write(packetStream.GetBuffer(), 0, 5);
+                                    }
+                                    else
+                                    {
+                                        localWritePipe.Write(packetStream.GetBuffer(), 0, 5);
+                                        _sharedChannel.SendPayload(packetStream.GetBuffer(), 5, payloadLength);
+                                    }
+                                }
+                                else
+#endif
+                                {
+                                    _binaryWriter.Write(payloadLength);
+                                    localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                }
                             }
                         }
                         catch (Exception e)
