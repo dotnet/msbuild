@@ -25,7 +25,6 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
     private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
     private readonly Dictionary<Guid, ClientConnection> _connectionsById = [];
-    private readonly object _budgetLock = new();
     private readonly ReaderWriterLockSlim _connectionLock = new();
     private readonly CancellationTokenSource _cts = new();
     private readonly ICoordinatorOutput _output = output ?? DefaultOutput.Instance;
@@ -188,12 +187,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             }
 
             // Try to grant nodes.
-            int grantedNodes;
-
-            lock (_budgetLock)
-            {
-                grantedNodes = _budgetManager.TryGrant(grant);
-            }
+            int grantedNodes = _budgetManager.TryGrant(grant);
 
             if (grantedNodes > 0)
             {
@@ -286,12 +280,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             }
         }
 
-        ImmutableArray<BuildGrant> newlyGranted;
-
-        lock (_budgetLock)
-        {
-            newlyGranted = _budgetManager.Release(connection.Grant);
-        }
+        ImmutableArray<BuildGrant> newlyGranted = _budgetManager.Release(connection.Grant);
 
         if (newlyGranted.Length > 0)
         {
@@ -394,13 +383,10 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         _shutdownTimer = new Timer(
             _ =>
             {
-                lock (_budgetLock)
+                if (_budgetManager.IsIdle)
                 {
-                    if (_budgetManager.ActiveBuildCount == 0 && _budgetManager.WaitingBuildCount == 0)
-                    {
-                        _output.WriteLine("CoordinatorServer: Auto-shutdown (no active or waiting builds)");
-                        _cts.Cancel();
-                    }
+                    _output.WriteLine("CoordinatorServer: Auto-shutdown (no active or waiting builds)");
+                    _cts.Cancel();
                 }
             },
             state: null,

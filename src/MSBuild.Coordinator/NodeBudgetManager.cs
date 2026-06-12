@@ -8,37 +8,52 @@ namespace Microsoft.Build.Coordinator;
 
 /// <summary>
 ///  Manages the system-wide node budget using a fair-share allocation policy.
-///  All public methods must be called under external synchronization.
+///  All public methods are thread-safe.
 /// </summary>
 internal sealed class NodeBudgetManager
 {
+    private readonly LockType _lock = new();
     private readonly List<BuildGrant> _activeGrants = [];
     private readonly Queue<BuildGrant> _waitQueue = new();
 
     /// <summary>
-    ///  The total node budget available for all builds.
+    ///  Gets the total node budget available for all builds.
     /// </summary>
     public int TotalBudget { get; }
 
     /// <summary>
-    ///  The number of nodes currently allocated to active builds.
+    ///  Gets the number of nodes currently allocated to active builds.
     /// </summary>
     public int AllocatedNodes { get; private set; }
 
     /// <summary>
-    ///  The number of nodes available for new grants.
+    ///  Gets the number of nodes available for new grants.
     /// </summary>
     public int AvailableNodes => TotalBudget - AllocatedNodes;
 
     /// <summary>
-    ///  The number of active builds (those with grants).
+    ///  Gets the number of active builds (those with grants).
     /// </summary>
     public int ActiveBuildCount => _activeGrants.Count;
 
     /// <summary>
-    ///  The number of builds waiting in the queue.
+    ///  Gets the number of builds waiting in the queue.
     /// </summary>
     public int WaitingBuildCount => _waitQueue.Count;
+
+    /// <summary>
+    ///  Returns <see langword="true"/> if there are no active or waiting builds.
+    /// </summary>
+    public bool IsIdle
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _activeGrants.Count == 0 && _waitQueue.Count == 0;
+            }
+        }
+    }
 
     /// <summary>
     ///  Creates a new budget manager with the specified total node capacity.
@@ -66,29 +81,32 @@ internal sealed class NodeBudgetManager
             return 0;
         }
 
-        int available = AvailableNodes;
-
-        if (available <= 0)
+        lock (_lock)
         {
-            // No resources available. Queue the build.
-            _waitQueue.Enqueue(grant);
-            CoordinatorTelemetry.RecordGrantDeferred(grant.ConnectionId, grant.ProcessId, grant.RequestedNodes, WaitingBuildCount);
-            return 0;
+            int available = AvailableNodes;
+
+            if (available <= 0)
+            {
+                // No resources available. Queue the build.
+                _waitQueue.Enqueue(grant);
+                CoordinatorTelemetry.RecordGrantDeferred(grant.ConnectionId, grant.ProcessId, grant.RequestedNodes, WaitingBuildCount);
+                return 0;
+            }
+
+            // Fair share: divide available budget among this build and all waiting builds.
+            // This ensures a new arrival doesn't consume everything while others wait.
+            int contenders = _waitQueue.Count + 1; // +1 for the new arrival
+            int fairShare = Math.Max(1, available / contenders);
+            int grantedNodes = Math.Min(fairShare, grant.RequestedNodes);
+
+            grant.GrantedNodes = grantedNodes;
+            AllocatedNodes += grantedNodes;
+            _activeGrants.Add(grant);
+
+            CoordinatorTelemetry.RecordGrantIssued(grant.ConnectionId, grant.ProcessId, grant.RequestedNodes, grantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
+
+            return grantedNodes;
         }
-
-        // Fair share: divide available budget among this build and all waiting builds.
-        // This ensures a new arrival doesn't consume everything while others wait.
-        int contenders = _waitQueue.Count + 1; // +1 for the new arrival
-        int fairShare = Math.Max(1, available / contenders);
-        int grantedNodes = Math.Min(fairShare, grant.RequestedNodes);
-
-        grant.GrantedNodes = grantedNodes;
-        AllocatedNodes += grantedNodes;
-        _activeGrants.Add(grant);
-
-        CoordinatorTelemetry.RecordGrantIssued(grant.ConnectionId, grant.ProcessId, grant.RequestedNodes, grantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
-
-        return grantedNodes;
     }
 
     /// <summary>
@@ -101,20 +119,23 @@ internal sealed class NodeBudgetManager
     /// </returns>
     public ImmutableArray<BuildGrant> Release(BuildGrant grant)
     {
-        if (grant.IsActive)
+        lock (_lock)
         {
-            AllocatedNodes -= grant.GrantedNodes;
-            CoordinatorTelemetry.RecordGrantReleased(grant.ConnectionId, grant.ProcessId, grant.GrantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
-            grant.GrantedNodes = 0;
-            _activeGrants.Remove(grant);
-        }
-        else
-        {
-            // The build was still in the wait queue.
-            RemoveFromWaitQueue(grant);
-        }
+            if (grant.IsActive)
+            {
+                AllocatedNodes -= grant.GrantedNodes;
+                CoordinatorTelemetry.RecordGrantReleased(grant.ConnectionId, grant.ProcessId, grant.GrantedNodes, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
+                grant.GrantedNodes = 0;
+                _activeGrants.Remove(grant);
+            }
+            else
+            {
+                // The build was still in the wait queue.
+                RemoveFromWaitQueue_NoLock(grant);
+            }
 
-        return DrainWaitQueue();
+            return DrainWaitQueue_NoLock();
+        }
     }
 
     /// <summary>
@@ -124,7 +145,7 @@ internal sealed class NodeBudgetManager
     /// <returns>
     ///  An array of grants that were newly fulfilled from the wait queue.
     /// </returns>
-    private ImmutableArray<BuildGrant> DrainWaitQueue()
+    private ImmutableArray<BuildGrant> DrainWaitQueue_NoLock()
     {
         using RefArrayBuilder<BuildGrant> newlyGranted = new();
 
@@ -148,7 +169,7 @@ internal sealed class NodeBudgetManager
         return newlyGranted.ToImmutable();
     }
 
-    private void RemoveFromWaitQueue(BuildGrant grant)
+    private void RemoveFromWaitQueue_NoLock(BuildGrant grant)
     {
         // Queue<T> doesn't support removal, so rebuild it.
         int count = _waitQueue.Count;

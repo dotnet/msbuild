@@ -9,32 +9,32 @@ namespace Microsoft.Build.Coordinator;
 internal sealed class BuildGrant
 {
     /// <summary>
-    ///  A unique identifier for this connection.
+    ///  Gets a unique identifier for this connection.
     /// </summary>
     public Guid ConnectionId { get; }
 
     /// <summary>
-    ///  The process ID of the MSBuild process that requested the grant.
+    ///  Gets the process ID of the MSBuild process that requested the grant.
     /// </summary>
     public int ProcessId { get; }
 
     /// <summary>
-    ///  The number of nodes requested by the build.
+    ///  Gets the number of nodes requested by the build.
     /// </summary>
     public int RequestedNodes { get; }
 
     /// <summary>
-    ///  The number of nodes granted to the build. Zero if the build is still waiting.
+    ///  Gets the number of nodes granted to the build. Zero if the build is still waiting.
     /// </summary>
     public int GrantedNodes { get; set; }
 
     /// <summary>
-    ///  The time of the last heartbeat received from this build.
+    ///  Gets the time of the last heartbeat received from this build.
     /// </summary>
     public DateTime LastHeartbeat { get; set; }
 
     /// <summary>
-    ///  Whether this build has been granted nodes and is actively building.
+    ///  Gets a value indicating whether this build has been granted nodes and is actively building.
     /// </summary>
     public bool IsActive => GrantedNodes > 0;
 
