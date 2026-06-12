@@ -313,13 +313,13 @@ namespace Microsoft.Build.CommandLine
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(args))
+                CanRunServerBasedOnCommandLineSwitches(args, out bool multiThreaded))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
 
                 // Use the client app to execute build in msbuild server. Opt-in feature.
-                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, multiThreaded, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
             {
@@ -343,9 +343,10 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
         /// </remarks>
-        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine)
+        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine, out bool multiThreaded)
         {
             bool canRunServer = true;
+            multiThreaded = false;
             try
             {
                 commandLineParser.GatherAllSwitches(
@@ -361,6 +362,11 @@ namespace Microsoft.Build.CommandLine
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
+
+                // Determine multithreaded mode from the fully-parsed switches (which include any
+                // response-file-provided switches) using the same logic as the in-proc build path.
+                multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
+
                 string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
