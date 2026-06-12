@@ -1244,14 +1244,15 @@ namespace Microsoft.Build.Evaluation
                     // an exception when we go to actually add the newly created project to the ProjectCollection.
                     // BUT remember that project global properties win -- don't override a property that already exists.
                     //
-                    // Merge into a per-call copy rather than mutating the caller-owned dictionary. Loads for different
-                    // paths run in parallel (they do not share a path lock), so a caller that passes one shared
-                    // dictionary instance into concurrent LoadProject calls would otherwise race on Dictionary.Add.
-                    // Preserve the caller's comparer so de-duplication and project matching keep identical semantics.
-                    IEqualityComparer<string> comparer = globalProperties is Dictionary<string, string> typedProperties
-                        ? typedProperties.Comparer
-                        : StringComparer.Ordinal;
-                    var mergedProperties = new Dictionary<string, string>(globalProperties, comparer);
+                    // Merge into a per-call copy rather than mutating the caller-owned dictionary, so concurrent loads
+                    // of different paths don't race on the caller's dictionary. Use MSBuildNameIgnoreCaseComparer because
+                    // global property names are case-insensitive, matching every downstream consumer; the indexer collapses
+                    // any caller keys differing only in case instead of throwing.
+                    var mergedProperties = new Dictionary<string, string>(globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
+                    foreach (KeyValuePair<string, string> property in globalProperties)
+                    {
+                        mergedProperties[property.Key] = property.Value;
+                    }
 
                     using (_locker.EnterDisposableReadLock())
                     {

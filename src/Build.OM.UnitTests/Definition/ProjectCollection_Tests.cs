@@ -1696,5 +1696,51 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 }
             }
         }
+
+        /// <summary>
+        /// Global property names are case-insensitive MSBuild names. When LoadProject merges the collection's
+        /// global properties into a caller-supplied dictionary, that merge must be case-insensitive regardless of
+        /// the comparer the caller's dictionary uses. Otherwise a caller property that differs only in case from a
+        /// collection property is not recognized as the same property: the collection value is wrongly added as a
+        /// second entry, the "project global properties win" rule is violated, and the duplicate collapses
+        /// inconsistently downstream.
+        /// </summary>
+        [Fact]
+        public void LoadProject_CallerGlobalPropertyWithDifferentCase_WinsOverCollectionPropertyCaseInsensitively()
+        {
+            string path = null;
+
+            try
+            {
+                path = CreateProjectFile();
+
+                var collectionGlobals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Configuration"] = "Release"
+                };
+                using var collection = new ProjectCollection(collectionGlobals);
+
+                // Caller dictionary uses the default (ordinal, case-sensitive) comparer and specifies the same
+                // MSBuild property with different casing than the collection.
+                var callerGlobals = new Dictionary<string, string>
+                {
+                    ["configuration"] = "Debug"
+                };
+
+                Project project = collection.LoadProject(path, callerGlobals, toolsVersion: null);
+
+                // The caller's value must win, and there must be exactly one Configuration property (no case-variant duplicate).
+                project.GlobalProperties.Count.ShouldBe(1);
+                project.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project.GlobalProperties["configuration"].ShouldBe("Debug");
+            }
+            finally
+            {
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
+            }
+        }
     }
 }
