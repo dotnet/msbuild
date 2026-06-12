@@ -375,7 +375,7 @@ namespace Microsoft.Build.Engine.UnitTests
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
             <Output PropertyName=""SERVERGC"" TaskParameter=""IsServerGC"" />
         </ProcessIdTask>
-        <Message Text=""[Work around Github issue #9667 with --interactive]TaskRanInPID=$(PID)"" Importance=""High"" />
+        <Message Text=""[Work around GitHub issue #9667 with --interactive]TaskRanInPID=$(PID)"" Importance=""High"" />
         <Message Text=""TaskNodeServerGC=$(SERVERGC)"" Importance=""High"" />
     </Target>
 </Project>";

@@ -9,7 +9,7 @@ To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
 ## Garbage collection
 
-When a build is multithreaded (`/mt`), the server node is launched with [Server GC](https://learn.microsoft.com/dotnet/standard/garbage-collection/workstation-server-gc) enabled. Under `/mt` the server runs all project work on threads in this single process, so Server GC's higher throughput is beneficial; without `/mt` the server only orchestrates and delegates project work to separate worker nodes, so it keeps the default Workstation GC. GC mode is fixed at CLR startup, so it is set via the `DOTNET_gcServer` environment variable in the server's launch environment (decided from the launching invocation's command line). This is scoped to the server process only: sidecar TaskHosts and worker nodes keep the default Workstation GC.
+When a build is multithreaded (`/mt`), the server node is launched with [Server GC](https://learn.microsoft.com/dotnet/standard/garbage-collection/workstation-server-gc) enabled. Under `/mt` the server runs all project work on threads in this single process, so Server GC's higher throughput is beneficial; without `/mt` the server only orchestrates and delegates project work to separate worker nodes, so it keeps the default Workstation GC. GC mode is fixed at CLR startup, so it is set via the `DOTNET_gcServer` environment variable in the server's launch environment (decided from the launching invocation's command line). An explicit user-set `DOTNET_gcServer` is honored (e.g. set `DOTNET_gcServer=0` to keep Workstation GC in a memory-constrained environment). This is scoped to the server process only: sidecar TaskHosts and worker nodes keep the default Workstation GC.
 
 ## Communication protocol
 

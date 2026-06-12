@@ -469,7 +469,10 @@ namespace Microsoft.Build.Experimental
                 // Set DOTNET_ROOT so the apphost server child can locate the runtime; this
                 // override is replaced by the client's environment on the first build command
                 // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
-                IDictionary<string, string?>? environmentOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+                // This is a shared cached dictionary reused by other node launches, so it must not
+                // be mutated in place.
+                IDictionary<string, string?>? baseOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+                IDictionary<string, string?>? environmentOverrides = baseOverrides;
 
                 // When this build is multithreaded (/mt), launch the long-lived server (build
                 // orchestrator) process with Server GC. Under /mt the server runs all project work on
@@ -488,13 +491,15 @@ namespace Microsoft.Build.Experimental
                 // DOTNET_gcServer is removed before it ever spawns children). Those nodes therefore keep
                 // the default Workstation GC.
                 //
-                // CreateDotnetRootEnvironmentOverrides returns a shared cached dictionary reused by other
-                // node launches, so copy it before adding the GC override.
-                if (IsMultiThreadedBuildRequested())
+                // Copy the shared base overrides (preserving its comparer) before adding the GC override.
+                // Honor an explicit user-set DOTNET_gcServer (e.g. "0" to force Workstation GC in a
+                // memory-constrained container): only inject the default when the user hasn't set it.
+                if (IsMultiThreadedBuildRequested() &&
+                    Environment.GetEnvironmentVariable("DOTNET_gcServer") is null)
                 {
-                    environmentOverrides = environmentOverrides is null
-                        ? new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
-                        : new Dictionary<string, string?>(environmentOverrides, StringComparer.OrdinalIgnoreCase);
+                    environmentOverrides = baseOverrides is null
+                        ? new Dictionary<string, string?>()
+                        : new Dictionary<string, string?>(baseOverrides);
                     environmentOverrides["DOTNET_gcServer"] = "1";
                 }
 
