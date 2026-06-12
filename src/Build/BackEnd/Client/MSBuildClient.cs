@@ -108,6 +108,12 @@ namespace Microsoft.Build.Experimental
         private int? _launchedServerPid;
 
         /// <summary>
+        /// Whether this build is multithreaded (/mt). Determines whether the launched server process
+        /// gets Server GC (the server only does in-process project work under /mt).
+        /// </summary>
+        private readonly bool _multiThreaded;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="commandLine">The command line to process. The first argument
@@ -115,6 +121,20 @@ namespace Microsoft.Build.Experimental
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
         public MSBuildClient(string[] commandLine, string msbuildLocation)
+            : this(commandLine, msbuildLocation, multiThreaded: false)
+        {
+        }
+
+        /// <summary>
+        /// Public constructor with parameters.
+        /// </summary>
+        /// <param name="commandLine">The command line to process. The first argument
+        /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        /// <param name="multiThreaded">Whether this build is multithreaded (/mt). When true, the launched
+        /// server process is started with Server GC.</param>
+        public MSBuildClient(string[] commandLine, string msbuildLocation, bool multiThreaded)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
@@ -122,6 +142,7 @@ namespace Microsoft.Build.Experimental
             // dll & exe locations
             _commandLine = commandLine;
             _msbuildLocation = msbuildLocation;
+            _multiThreaded = multiThreaded;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -494,7 +515,7 @@ namespace Microsoft.Build.Experimental
                 // Copy the shared base overrides (preserving its comparer) before adding the GC override.
                 // Honor an explicit user-set DOTNET_gcServer (e.g. "0" to force Workstation GC in a
                 // memory-constrained container): only inject the default when the user hasn't set it.
-                if (IsMultiThreadedBuildRequested() &&
+                if (_multiThreaded &&
                     Environment.GetEnvironmentVariable("DOTNET_gcServer") is null)
                 {
                     environmentOverrides = baseOverrides is null
@@ -520,50 +541,6 @@ namespace Microsoft.Build.Experimental
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Determines whether this invocation requests a multithreaded (/mt) build, by inspecting the
-        /// command line this client was constructed with and the MSBUILDFORCEMULTITHREADED opt-in.
-        /// Mirrors the "switch is present" semantics of <c>MSBuildApp.IsMultiThreadedEnabled</c>; the
-        /// switch-prefix handling (-, --, /) matches MSBuild's command-line parser.
-        /// </summary>
-        private bool IsMultiThreadedBuildRequested()
-        {
-            if (Traits.Instance.ForceMultiThreaded)
-            {
-                return true;
-            }
-
-            foreach (string arg in _commandLine)
-            {
-                if (string.IsNullOrEmpty(arg))
-                {
-                    continue;
-                }
-
-                // Strip the leading switch indicator: "--" (length 2), or "-"/"/" (length 1).
-                int indicatorLength = arg.StartsWith("--", StringComparison.Ordinal)
-                    ? 2
-                    : (arg[0] == '-' || arg[0] == '/') ? 1 : 0;
-                if (indicatorLength == 0)
-                {
-                    continue;
-                }
-
-                // The switch name runs up to the first switch/parameter separator (':').
-                int separatorIndex = arg.IndexOf(':', indicatorLength);
-                int nameLength = (separatorIndex < 0 ? arg.Length : separatorIndex) - indicatorLength;
-                ReadOnlySpan<char> switchName = arg.AsSpan(indicatorLength, nameLength);
-
-                if (switchName.Equals("mt".AsSpan(), StringComparison.OrdinalIgnoreCase) ||
-                    switchName.Equals("multithreaded".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private bool TrySendBuildCommand() => TrySendPacket(() => GetServerNodeBuildCommand());
