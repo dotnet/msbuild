@@ -424,17 +424,17 @@
       <trans-unit id="CoordinatorFailedToConnect">
         <source>Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</source>
         <target state="new">Failed to connect to the build coordinator after launch. The build will proceed without node coordination.</target>
-        <note>Displayed when the coordinator was launched but the client could not connect to it afterward.</note>
+        <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
         <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
-        <note>Displayed when the coordinator could not be started. The build continues without coordination.</note>
+        <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">
         <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
         <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
-        <note>Displayed when the client could not acquire the launch mutex in time, indicating another client is taking too long to launch.</note>
+        <note />
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>
@@ -446,7 +446,7 @@
       <trans-unit id="CoordinatorWaitingForNodes">
         <source>Waiting for coordinator to grant build resources...</source>
         <target state="new">Waiting for coordinator to grant build resources...</target>
-        <note>Displayed when the build is blocked waiting for the coordinator to allocate node resources.</note>
+        <note />
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
