@@ -325,8 +325,10 @@ namespace Microsoft.Build.Engine.UnitTests
             // the server process PID is the SAME for both — server reuse is the unique signature
             // of MSBuild server engagement (a non-server build would always get a fresh worker PID).
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
-            // Explicitly clear MSBUILDUSESERVER so we test the -mt-implies-server path.
+            // Explicitly clear MSBUILDUSESERVER so we test the -mt-implies-server path, and isolate this
+            // test's server with a unique handshake salt so it can't reuse/shut down an unrelated server.
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
 
             // Make sure we start with no server running.
             MSBuildClient.ShutdownServer(CancellationToken.None);
@@ -334,6 +336,8 @@ namespace Microsoft.Build.Engine.UnitTests
             string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success1, false, _output);
             success1.ShouldBeTrue();
             int serverPid1 = ParseNumber(output1, "Server ID is ");
+            // Register cleanup before any assertion so the server does not leak if an assertion throws.
+            _env.WithTransientProcess(serverPid1);
 
             string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success2, false, _output);
             success2.ShouldBeTrue();
@@ -341,7 +345,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
             serverPid1.ShouldBe(serverPid2, "When -mt implies server, two consecutive builds should reuse the same server process. PIDs were " + serverPid1 + " and " + serverPid2 + ".");
 
-            _env.WithTransientProcess(serverPid1);
             // Clean up the server we spun up.
             MSBuildClient.ShutdownServer(CancellationToken.None);
         }

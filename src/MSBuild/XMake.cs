@@ -309,28 +309,29 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(true /* initialize only */);
             }
 
-            // Determine once whether this is a multithreaded (/mt) build. This single value drives
-            // two related decisions:
-            //   (1) whether to engage MSBuild Server implicitly (this PR: -mt implies server), and
-            //   (2) whether the server, once engaged, is launched with Server GC (the base PR).
-            // Computed with a cheap command-line scan (plus the MSBUILDFORCEMULTITHREADED opt-in) so
-            // the common no-server path does not pay for the full GatherAllSwitches parse here.
-            bool multiThreaded = IsMultiThreadedRequested(args);
+            // Whether -mt was passed on the command line. This is the cheap, early signal used to
+            // decide implicit server engagement (this PR: -mt implies server) - it runs on every
+            // invocation (including the common no-server path), so it must not pay for the full
+            // GatherAllSwitches parse. It deliberately does NOT consider MSBUILDFORCEMULTITHREADED or
+            // response-file content (see IsMultiThreadedRequested remarks).
+            bool isMultiThreadedOnCommandLine = IsMultiThreadedRequested(args);
 
             int exitCode;
             if (
-                ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason) &&
+                ShouldUseMSBuildServer(isMultiThreadedOnCommandLine, out string serverEnableReason) &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(args))
+                CanRunServerBasedOnCommandLineSwitches(args, out bool multiThreaded))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
-                if (KnownTelemetry.PartialBuildTelemetry != null)
+                if (KnownTelemetry.PartialBuildTelemetry is not null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerEnableReason = serverEnableReason;
                 }
 
-                // Use the client app to execute build in msbuild server. Opt-in feature.
+                // Use the client app to execute build in msbuild server. The authoritative multiThreaded
+                // value (from the full parse, which expands response files and honors
+                // MSBUILDFORCEMULTITHREADED) decides whether the server is launched with Server GC.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(args, multiThreaded, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
@@ -355,9 +356,15 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
         /// </remarks>
-        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine)
+        /// <param name="commandLine">Raw command-line arguments.</param>
+        /// <param name="multiThreaded">Set to whether this is a multithreaded (/mt) build, determined from
+        /// the fully-parsed switches (which expand response files and honor MSBUILDFORCEMULTITHREADED) using
+        /// the same logic as the in-proc build path. This is the authoritative value used to decide whether
+        /// the server is launched with Server GC.</param>
+        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine, out bool multiThreaded)
         {
             bool canRunServer = true;
+            multiThreaded = false;
             try
             {
                 commandLineParser.GatherAllSwitches(
@@ -373,6 +380,12 @@ namespace Microsoft.Build.CommandLine
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
+
+                // Authoritative /mt determination from the fully-parsed switches (includes response-file
+                // switches and MSBUILDFORCEMULTITHREADED), matching the in-proc build path. Used to decide
+                // Server GC for the launched server.
+                multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
+
                 string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
@@ -381,7 +394,7 @@ namespace Microsoft.Build.CommandLine
                     !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]))
                 {
                     canRunServer = false;
-                    if (KnownTelemetry.PartialBuildTelemetry != null)
+                    if (KnownTelemetry.PartialBuildTelemetry is not null)
                     {
                         KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
                     }
@@ -390,7 +403,7 @@ namespace Microsoft.Build.CommandLine
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace($"Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {ex}");
-                if (KnownTelemetry.PartialBuildTelemetry != null)
+                if (KnownTelemetry.PartialBuildTelemetry is not null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
                 }
@@ -407,21 +420,24 @@ namespace Microsoft.Build.CommandLine
         /// Decision tree:
         /// <list type="bullet">
         ///   <item><c>MSBUILDUSESERVER=1</c> → use server (existing explicit opt-in).</item>
-        ///   <item><c>MSBUILDUSESERVER=0</c> → do NOT use server (explicit opt-out, takes precedence over -mt).</item>
-        ///   <item><c>MSBUILDUSESERVER</c> unset AND this is a multithreaded (<c>-mt</c>) build → use server.
-        ///         Rationale: <c>-mt</c> users already accept process-shared state (in-proc thread workers
-        ///         instead of multi-process worker nodes), so server reuse barely adds risk and recovers the
-        ///         per-invocation JIT/SDK-resolution warm-up cost that <c>-mt</c> would otherwise pay every
-        ///         build (because <c>-mt</c> shares the entry process with the build instead of the workers).
-        ///         See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
+        ///   <item><c>MSBUILDUSESERVER</c> set to any other non-empty value (e.g. <c>0</c>, <c>false</c>) →
+        ///         do NOT use server (explicit opt-out, takes precedence over -mt). Only <c>1</c> opts in,
+        ///         matching the pre-existing "only <c>1</c> enables the server" semantics.</item>
+        ///   <item><c>MSBUILDUSESERVER</c> unset AND <c>-mt</c> was on the command line AND the change wave
+        ///         is enabled → use server. Rationale: <c>-mt</c> users already accept process-shared state
+        ///         (in-proc thread workers instead of multi-process worker nodes), so server reuse barely
+        ///         adds risk and recovers the per-invocation JIT/SDK-resolution warm-up cost that <c>-mt</c>
+        ///         would otherwise pay every build. See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
         ///   <item>Otherwise → no server (existing default).</item>
         /// </list>
+        /// The implicit <c>-mt</c> path is gated behind <see cref="ChangeWaves.Wave18_8"/> so it can be
+        /// disabled via <c>MSBUILDDISABLEFEATURESFROMVERSION</c> for users who are not ready for the server.
         /// </remarks>
-        /// <param name="multiThreaded">Whether this is a multithreaded (/mt) build, as determined by
-        /// <see cref="IsMultiThreadedRequested"/>.</param>
+        /// <param name="isMultiThreadedOnCommandLine">Whether <c>-mt</c> was passed on the command line, as
+        /// determined by <see cref="IsMultiThreadedRequested"/>.</param>
         /// <param name="serverEnableReason">Telemetry-friendly reason: "EnvVar", "ImpliedByMt", or empty when not enabled.</param>
         /// <returns>True if server should be used.</returns>
-        private static bool ShouldUseMSBuildServer(bool multiThreaded, out string serverEnableReason)
+        internal static bool ShouldUseMSBuildServer(bool isMultiThreadedOnCommandLine, out string serverEnableReason)
         {
             serverEnableReason = string.Empty;
             string envVar = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
@@ -432,14 +448,16 @@ namespace Microsoft.Build.CommandLine
                 return true;
             }
 
-            // Explicit opt-out: MSBUILDUSESERVER=0 always wins, even if -mt is on the command line.
-            if (envVar == "0")
+            // Any explicit non-empty MSBUILDUSESERVER value other than "1" opts out (e.g. "0", "false").
+            // Only a genuinely unset/empty value falls through to the implicit -mt opt-in, preserving the
+            // pre-existing rule that only "1" engages the server.
+            if (!string.IsNullOrEmpty(envVar))
             {
                 return false;
             }
 
-            // Implicit opt-in via -mt.
-            if (multiThreaded)
+            // Implicit opt-in via -mt, gated behind a change wave so it can be turned off.
+            if (isMultiThreadedOnCommandLine && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
             {
                 serverEnableReason = "ImpliedByMt";
                 return true;
@@ -449,31 +467,33 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Determines whether this invocation requests a multithreaded (/mt) build. This single
-        /// determination feeds both the implicit server opt-in (<see cref="ShouldUseMSBuildServer"/>)
-        /// and the server's Server GC decision (passed to <see cref="MSBuildClientApp.Execute(string[], bool, System.Threading.CancellationToken)"/>).
+        /// Lightweight check for whether <c>-mt</c>/<c>-multithreaded</c> was passed on the command line,
+        /// used for the early implicit-server-opt-in decision in <see cref="ShouldUseMSBuildServer"/>.
         /// </summary>
         /// <remarks>
-        /// Uses a lightweight command-line scan (plus the <c>MSBUILDFORCEMULTITHREADED</c> opt-in) rather
-        /// than the full <c>GatherAllSwitches</c> parse: this runs on every invocation (including the
-        /// common no-server path), and the full parse is expensive and already runs later for the actual
-        /// build. Intentionally conservative — returns false on any parse problem, which only declines the
-        /// implicit server opt-in; the explicit <c>MSBUILDUSESERVER=1</c> path is unaffected. A consequence
-        /// is that <c>-mt</c> supplied via a response file is not detected here.
+        /// Deliberately cheap and allocation-free: this runs on every invocation (including the common
+        /// no-server path), so it does NOT do the full <c>GatherAllSwitches</c> parse (which is expensive
+        /// and already runs later for the actual build). Consequences, all acceptable for an opt-in
+        /// heuristic (the authoritative /mt value for Server GC comes from
+        /// <see cref="CanRunServerBasedOnCommandLineSwitches"/>):
+        /// <list type="bullet">
+        ///   <item><c>-mt</c> supplied via a response file is not detected here, so it does not trigger the
+        ///         implicit server opt-in.</item>
+        ///   <item><c>MSBUILDFORCEMULTITHREADED</c> is intentionally NOT considered: that force/testing knob
+        ///         should not by itself engage the long-lived server.</item>
+        /// </list>
+        /// Matches MSBuild's "last occurrence wins" semantics for the boolean switch.
         /// </remarks>
         /// <param name="args">Raw command-line arguments.</param>
-        /// <returns>True if this is a multithreaded build.</returns>
-        private static bool IsMultiThreadedRequested(string[] args)
+        /// <returns>True if <c>-mt</c>/<c>-multithreaded</c> was last set to a truthy value on the command line.</returns>
+        internal static bool IsMultiThreadedRequested(string[] args)
         {
-            if (Traits.Instance.ForceMultiThreaded)
-            {
-                return true;
-            }
-
             if (args is null)
             {
                 return false;
             }
+
+            bool result = false;
 
             foreach (string arg in args)
             {
@@ -483,36 +503,37 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Switches start with - or / (and on Unix, - is the only convention).
-                char prefix = arg[0];
-                if (prefix != '-' && prefix != '/')
+                if (arg[0] != '-' && arg[0] != '/')
                 {
                     continue;
                 }
 
-                // Strip leading - or /, then split on : to get the switch name (ignore any value/parameters).
-                string body = arg.Substring(1);
+                // Strip leading - or /, then split on : into switch name and (optional) value.
+                ReadOnlySpan<char> body = arg.AsSpan(1);
                 int colonIndex = body.IndexOf(':');
-                string switchName = colonIndex >= 0 ? body.Substring(0, colonIndex) : body;
+                ReadOnlySpan<char> switchName = colonIndex >= 0 ? body.Slice(0, colonIndex) : body;
 
-                if (switchName.Equals("mt", StringComparison.OrdinalIgnoreCase) ||
-                    switchName.Equals("multithreaded", StringComparison.OrdinalIgnoreCase))
+                if (!switchName.Equals("mt".AsSpan(), StringComparison.OrdinalIgnoreCase) &&
+                    !switchName.Equals("multithreaded".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
-                    // Honor an explicit ":false" value if present (matches ProcessBooleanSwitch semantics).
-                    if (colonIndex >= 0)
-                    {
-                        string value = body.Substring(colonIndex + 1);
-                        if (value.Equals("false", StringComparison.OrdinalIgnoreCase) ||
-                            value.Equals("0", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return false;
-                        }
-                    }
+                    continue;
+                }
 
-                    return true;
+                // Honor an explicit ":false"/":0" value (matches ProcessBooleanSwitch semantics). Do not
+                // return early: a later occurrence wins, so keep scanning and record this occurrence's value.
+                if (colonIndex >= 0)
+                {
+                    ReadOnlySpan<char> value = body.Slice(colonIndex + 1);
+                    result = !value.Equals("false".AsSpan(), StringComparison.OrdinalIgnoreCase) &&
+                             !value.Equals("0".AsSpan(), StringComparison.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    result = true;
                 }
             }
 
-            return false;
+            return result;
         }
 
         /// <summary>

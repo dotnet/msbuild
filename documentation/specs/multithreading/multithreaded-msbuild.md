@@ -296,14 +296,17 @@ To avoid regressing CLI incremental build performance, it is essential to fully 
 
 ### `-mt` implies MSBuild Server
 
-When `-mt` (`-multithreaded`) is on the command line and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Explicit `MSBUILDUSESERVER=0` opts out and takes precedence over the implicit `-mt` opt-in.
+When `-mt` (`-multithreaded`) is on the command line and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically (gated behind change wave 18.8). Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off — only `1` engages the server, matching the pre-existing rule. The implicit path can also be disabled via `MSBUILDDISABLEFEATURESFROMVERSION=18.8`.
 
-| `MSBUILDUSESERVER` | `-mt` build | Server engaged? | Telemetry `ServerEnableReason` |
+| `MSBUILDUSESERVER` | `-mt` on command line | Server engaged? | Telemetry `ServerEnableReason` |
 |---|---|---|---|
 | `1` | (any) | Yes | `EnvVar` |
-| `0` | (any) | No (explicit opt-out) | — |
-| unset | yes | **Yes** | `ImpliedByMt` |
+| any other non-empty value (`0`, `false`, …) | (any) | No (explicit opt-out) | — |
+| unset | yes | **Yes** (wave 18.8) | `ImpliedByMt` |
 | unset | no | No | — |
 
-The multithreaded determination is computed once (a lightweight command-line scan plus the `MSBUILDFORCEMULTITHREADED` opt-in) and drives both this server opt-in and, when the server is engaged for a multithreaded build, the server process's [Server GC](../../MSBuild-Server.md#garbage-collection) selection.
+Two `-mt` determinations are used, with distinct purposes:
+- A cheap command-line scan (`IsMultiThreadedRequested`) drives the *implicit server opt-in* above. It runs on every invocation, so it avoids the full command-line parse; consequently `-mt` from a response file does not trigger the implicit opt-in, and `MSBUILDFORCEMULTITHREADED` (a force/testing knob) does **not** by itself engage the server.
+- The authoritative full parse (`IsMultiThreadedEnabled`, which expands response files and honors `MSBUILDFORCEMULTITHREADED`) decides, once the server is engaged, whether the server process is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
+
 

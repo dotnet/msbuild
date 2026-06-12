@@ -3217,6 +3217,83 @@ EndGlobal
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
         }
 
+        [Theory]
+        [InlineData(new[] { "proj.proj", "-mt" }, true)]
+        [InlineData(new[] { "proj.proj", "/mt" }, true)]
+        [InlineData(new[] { "proj.proj", "-multithreaded" }, true)]
+        [InlineData(new[] { "proj.proj", "-mt:true" }, true)]
+        [InlineData(new[] { "proj.proj", "-mt:false" }, false)]
+        [InlineData(new[] { "proj.proj", "-mt:0" }, false)]
+        [InlineData(new[] { "proj.proj", "-mt:" }, true)]
+        [InlineData(new[] { "proj.proj" }, false)]
+        [InlineData(new[] { "proj.proj", "-multiproc" }, false)]
+        // Last occurrence wins, matching MSBuild's boolean-switch semantics.
+        [InlineData(new[] { "proj.proj", "-mt:false", "-mt" }, true)]
+        [InlineData(new[] { "proj.proj", "-mt", "-mt:false" }, false)]
+        public void IsMultiThreadedRequestedDetectsCommandLineSwitch(string[] args, bool expected)
+        {
+            // MSBUILDFORCEMULTITHREADED must NOT influence the command-line detection used for the
+            // implicit server opt-in.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+
+            MSBuildApp.IsMultiThreadedRequested(args).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void IsMultiThreadedRequestedIgnoresForceMultiThreadedEnvVar()
+        {
+            // The force/testing knob should not by itself imply the command-line -mt switch.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+
+            MSBuildApp.IsMultiThreadedRequested(["proj.proj"]).ShouldBeFalse();
+        }
+
+        [Theory]
+        // MSBUILDUSESERVER value, -mt on command line, expected server use, expected reason.
+        [InlineData("1", false, true, "EnvVar")]
+        [InlineData("1", true, true, "EnvVar")]
+        [InlineData("0", true, false, "")]
+        [InlineData("0", false, false, "")]
+        [InlineData("false", true, false, "")] // any explicit non-"1" value opts out
+        [InlineData("true", true, false, "")]
+        [InlineData(null, true, true, "ImpliedByMt")]
+        [InlineData(null, false, false, "")]
+        [InlineData("", true, true, "ImpliedByMt")] // empty is treated as unset
+        public void ShouldUseMSBuildServerDecisionTree(string useServerValue, bool isMtOnCommandLine, bool expectedUseServer, string expectedReason)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", useServerValue);
+            // Ensure the implicit -mt path's change wave is enabled for the test.
+            testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMtOnCommandLine, out string reason);
+
+            useServer.ShouldBe(expectedUseServer);
+            reason.ShouldBe(expectedReason);
+
+            ChangeWaves.ResetStateForTests();
+        }
+
+        [Fact]
+        public void ShouldUseMSBuildServerImpliedByMtRespectsChangeWave()
+        {
+            // With the change wave disabled, -mt must NOT implicitly engage the server.
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", null);
+            testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMultiThreadedOnCommandLine: true, out string reason);
+
+            useServer.ShouldBeFalse();
+            reason.ShouldBe(string.Empty);
+
+            ChangeWaves.ResetStateForTests();
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;
