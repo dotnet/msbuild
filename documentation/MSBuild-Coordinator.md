@@ -191,7 +191,7 @@ This ensures:
 
 1. BuildManager checks if `MSBUILDUSECOORDINATOR` environment variable is set
 2. If enabled, `CoordinatorClient` attempts to connect to the coordinator
-3. Sends `RequestNodesMessage` with desired node count
+3. Sends `RequestNodesMessage` with desired node count (the value of `/maxcpucount` passed to MSBuild — defaults to 1 if omitted, or the logical processor count if `/m` is passed without a value)
 4. Receives either `NodeGrantMessage` (nodes granted) or `WaitMessage` (queued)
    - *Note*: If `WaitMessage` is received, `CoordinatorClient` starts sending periodic heartbeats while waiting for the deferred `NodeGrantMessage`, so the coordinator doesn't consider it stale during the queue wait.
 5. Updates build's maximum node count based on grant
