@@ -88,29 +88,49 @@ The coordinator solves this by:
 - `BuildManager.cs` - Requests nodes from coordinator and sets build parallelism
 
 **Protocol** ([src/Framework/Coordinator/](../src/Framework/Coordinator/))
-- Message types: `RequestNodesMessage`, `HeartbeatMessage`, `ReleaseNodesMessage`, `NodeGrantMessage`, `WaitMessage`, `ErrorMessage`
+- Handshake messages: `ClientHandshakeMessage`, `ServerHandshakeMessage`
+- Client messages: `RequestNodesMessage`, `HeartbeatMessage`, `ReleaseNodesMessage`
+- Server messages: `NodeGrantMessage`, `WaitMessage`, `ErrorMessage`
+- `Capabilities.cs` - Capability constants for feature negotiation
 - `CoordinatorSettings.cs` - Configuration management
-- `Protocol.cs` - Protocol versioning
 
 ---
 
 ## Communication Protocol
 
+### Handshake
+
+Every connection begins with a capabilities handshake:
+
+1. Client sends `ClientHandshakeMessage` (ConnectionId, ProcessId, capabilities)
+2. Server responds with `ServerHandshakeMessage` (capabilities)
+
+Both sides advertise the features they support; unknown capabilities are ignored, allowing older clients to work with newer servers.
+
+### Versioning
+
+The coordinator does not use a protocol version number. Instead, it uses a **capabilities-based** versioning model:
+
+- Each side sends a list of capability strings during the handshake.
+- A capability represents a discrete feature or behavior that both sides must agree on to use.
+- Unknown capabilities received from the other side are silently ignored.
+- Required behavior is gated on whether the peer advertised the corresponding capability.
+
+This design avoids the "version bump" problem where a single version number forces all-or-nothing upgrades. New features can be added incrementally — a newer coordinator can offer capabilities that older clients simply don't use, and vice versa. Both sides degrade gracefully when a capability is absent.
+
 ### Message Types
 
-The coordinator uses a binary protocol with six message types:
+After the handshake, the coordinator uses a binary protocol with six message types:
 
 **Client → Server:**
-- `RequestNodesMessage` - Sent when a build starts, requests a node grant
+- `RequestNodesMessage` - Requests a node grant (contains requested node count)
 - `HeartbeatMessage` - Periodic keep-alive message (default: every 5 seconds)
 - `ReleaseNodesMessage` - Sent when build completes, releases allocated nodes
 
 **Server → Client:**
 - `NodeGrantMessage` - Grants nodes to a build
 - `WaitMessage` - Indicates build is queued, no nodes immediately available
-- `ErrorMessage` - Indicates an error condition (e.g., protocol version mismatch)
-
-Each message includes a protocol version for compatibility verification.
+- `ErrorMessage` - Indicates an error condition
 
 **Source:** [src/Framework/Coordinator/](../src/Framework/Coordinator/)
 
@@ -118,12 +138,16 @@ Each message includes a protocol version for compatibility verification.
 
 ```
 Successful Grant:
+  Build → ClientHandshakeMessage(ConnectionId, PID, capabilities)
+  Build ← ServerHandshakeMessage(capabilities)
   Build → RequestNodesMessage(4)
   Build ← NodeGrantMessage(4)
   Build → Heartbeat (every 5s)
   Build → ReleaseNodesMessage (on completion)
 
 Build Queued:
+  Build → ClientHandshakeMessage(ConnectionId, PID, capabilities)
+  Build ← ServerHandshakeMessage(capabilities)
   Build → RequestNodesMessage(4)
   Build ← WaitMessage
   Build → Heartbeat (every 5s while waiting)
@@ -236,10 +260,13 @@ This ensures:
 
 ### Coordinator Startup
 
-1. When first MSBuild process needs coordination, it attempts to start the coordinator
-2. Coordinator uses a system-wide mutex to ensure only one instance runs
-3. If an instance already exists, the new process connects as a client instead
-4. Coordinator listens on a named pipe for client connections
+1. When first MSBuild process needs coordination, it performs a fast pipe probe (~200ms)
+2. If no coordinator is running, it acquires a launch mutex to serialize launch attempts
+3. Checks the coordinator's server mutex to determine if another client already launched one
+4. If not, launches the coordinator process and polls for its server mutex to appear
+5. Releases the launch mutex so concurrent clients can wait for the pipe in parallel
+6. Connects to the coordinator's named pipe once it's ready
+7. Coordinator uses a system-wide mutex to ensure only one instance runs
 
 **Source:** [src/MSBuild.Coordinator/Program.cs](../src/MSBuild.Coordinator/Program.cs)
 
@@ -277,7 +304,7 @@ The coordinator system is designed to be fully optional:
 
 - **Unavailable coordinator** → Build proceeds without coordination using full node count
 - **Connection failure** → Build proceeds independently
-- **Protocol mismatch** → Graceful fallback to unlimited nodes
+- **Unsupported capabilities** → Unknown capabilities are ignored; both sides degrade gracefully
 - **Crashed client** → Detected via heartbeat timeout, resources cleaned up
 - **Coordinator crash** → Next build can launch new instance
 
