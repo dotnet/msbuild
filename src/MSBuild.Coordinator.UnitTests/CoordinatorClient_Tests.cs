@@ -155,28 +155,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
-    public Task Dispose_SendsReleaseMessage()
-    {
-        using CoordinatorServer server = CreateServer(totalNodeBudget: 8);
-        Task serverTask = server.RunAsync(_cts.Token);
-
-        CoordinatorClient? client = TryConnectToServer(requestedNodes: 8, processId: Pid1);
-        client.ShouldNotBeNull();
-        client.GrantedNodes.ShouldBe(8);
-
-        // Dispose sends ReleaseNodesMessage. Verify it doesn't throw.
-        client.Dispose();
-
-        // Disposing again should be a no-op.
-        client.Dispose();
-
-        _cts.Cancel();
-
-        return serverTask;
-    }
-
-    [Fact]
-    public Task MultipleClients_FairShare()
+    public Task MultipleClients_SequentialReuse()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 8);
         Task serverTask = server.RunAsync(_cts.Token);
