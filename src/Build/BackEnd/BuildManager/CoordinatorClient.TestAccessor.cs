@@ -22,7 +22,7 @@ internal sealed partial class CoordinatorClient
         /// <returns>
         ///  A connected <see cref="CoordinatorClient"/> instance, or <see langword="null"/> if the connection fails.
         /// </returns>
-        public static CoordinatorClient? TryConnectToServer(int requestedNodes, CoordinatorSettings settings, ICoordinatorOutput output)
+        public static CoordinatorClient? TryConnectToServer(int requestedNodes, CoordinatorSettings settings, ICoordinatorDebugOutput output)
         {
             NamedPipeClientStream? pipeStream = null;
 

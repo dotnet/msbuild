@@ -10,11 +10,10 @@ namespace Microsoft.Build.Coordinator;
 internal sealed partial class CoordinatorServer
 {
     /// <summary>
-    ///  Lightweight file-based tracing for the coordinator server, following the same
-    ///  pattern as CommunicationsUtilities.Trace in Microsoft.Build.Framework.
-    ///  Gated on MSBUILDDEBUGCOMM.
+    ///  Debug tracing output for the coordinator server. Writes timestamped entries
+    ///  to a file, gated on the MSBUILDDEBUGCOMM environment variable.
     /// </summary>
-    private sealed class DefaultOutput : ICoordinatorOutput
+    private sealed class DefaultDebugOutput : ICoordinatorDebugOutput
     {
         private static readonly bool s_isEnabled = Traits.Instance.DebugNodeCommunication;
 
@@ -24,9 +23,9 @@ internal sealed partial class CoordinatorServer
         private readonly string _debugDumpDirectory;
         private readonly string _debugDumpTraceFilePath;
 
-        public static readonly DefaultOutput Instance = new();
+        public static readonly DefaultDebugOutput Instance = new();
 
-        private DefaultOutput()
+        private DefaultDebugOutput()
         {
             _debugDumpDirectory = FrameworkDebugUtils.DebugPath;
 
@@ -48,7 +47,7 @@ internal sealed partial class CoordinatorServer
             }
         }
 
-        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorOutput.WriteLineInterpolatedStringHandler handler)
+        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorDebugOutput.WriteLineInterpolatedStringHandler handler)
         {
             if (s_isEnabled)
             {

@@ -26,7 +26,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     private readonly BinaryReader _reader;
     private readonly BinaryWriter _writer;
     private readonly Timer _heartbeatTimer;
-    private readonly ICoordinatorOutput _output;
+    private readonly ICoordinatorDebugOutput _output;
     private volatile bool _disposed;
 
     /// <summary>
@@ -57,7 +57,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         BinaryWriter writer,
         int grantedNodes,
         int heartbeatIntervalMs,
-        ICoordinatorOutput output)
+        ICoordinatorDebugOutput output)
     {
         ConnectionId = connectionId;
         ServerCapabilities = serverCapabilities;
@@ -130,7 +130,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     /// </returns>
     public static CoordinatorClient? TryConnect(int requestedNodes, CoordinatorSettings settings, ILoggingService loggingService)
     {
-        ICoordinatorOutput output = DefaultOutput.Instance;
+        ICoordinatorDebugOutput output = DefaultDebugOutput.Instance;
 
         NamedPipeClientStream? pipeStream = null;
 
@@ -195,7 +195,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     private static NamedPipeClientStream? TryLaunchAndConnect(
         CoordinatorSettings settings,
         ILoggingService loggingService,
-        ICoordinatorOutput output)
+        ICoordinatorDebugOutput output)
     {
         // Acquire a launch mutex so only one client launches the coordinator.
         // Other clients racing here will block until the launcher finishes, then
@@ -279,7 +279,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     /// <summary>
     ///  Checks whether a coordinator process is running by probing its server mutex.
     /// </summary>
-    private static bool IsCoordinatorRunning(CoordinatorSettings settings, ICoordinatorOutput output)
+    private static bool IsCoordinatorRunning(CoordinatorSettings settings, ICoordinatorDebugOutput output)
     {
         try
         {
@@ -300,7 +300,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     /// <summary>
     ///  Polls for the coordinator's server mutex to appear, indicating the process has started.
     /// </summary>
-    private static bool WaitForCoordinatorStartup(CoordinatorSettings settings, ICoordinatorOutput output)
+    private static bool WaitForCoordinatorStartup(CoordinatorSettings settings, ICoordinatorDebugOutput output)
     {
         Stopwatch sw = Stopwatch.StartNew();
 
@@ -334,7 +334,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         NamedPipeClientStream pipeStream,
         int requestedNodes,
         CoordinatorSettings settings,
-        ICoordinatorOutput output,
+        ICoordinatorDebugOutput output,
         ILoggingService? loggingService)
     {
         var reader = new BinaryReader(pipeStream, Encoding.UTF8, leaveOpen: true);
@@ -451,7 +451,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         int processId,
         BinaryReader reader,
         BinaryWriter writer,
-        ICoordinatorOutput output)
+        ICoordinatorDebugOutput output)
     {
         output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {connectionId})");
         writer.Write(new ClientHandshakeMessage(connectionId, processId, []));
@@ -517,7 +517,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
     }
 
-    private static bool TryLaunchCoordinator(ILoggingService loggingService, ICoordinatorOutput output)
+    private static bool TryLaunchCoordinator(ILoggingService loggingService, ICoordinatorDebugOutput output)
     {
         try
         {

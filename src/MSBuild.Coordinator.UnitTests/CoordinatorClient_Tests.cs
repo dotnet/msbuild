@@ -19,7 +19,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
 
     private readonly CancellationTokenSource _cts = new();
 
-    private readonly TestCoordinatorOutput _output = new(testOutput);
+    private readonly TestCoordinatorDebugOutput _output = new(testOutput);
 
     private CoordinatorSettings DefaultSettings => CoordinatorSettings.Default with
     {

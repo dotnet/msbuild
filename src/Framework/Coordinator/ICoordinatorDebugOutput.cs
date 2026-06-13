@@ -7,7 +7,12 @@ using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Framework.Coordinator;
 
-internal interface ICoordinatorOutput
+/// <summary>
+///  Debug tracing interface for coordinator communication diagnostics.
+///  Output is gated on the MSBUILDDEBUGCOMM environment variable and is
+///  intended for development-time troubleshooting, not user-visible logging.
+/// </summary>
+internal interface ICoordinatorDebugOutput
 {
     bool IsEnabled { get; }
 
@@ -20,7 +25,7 @@ internal interface ICoordinatorOutput
     {
         private StringBuilderHelper _builder;
 
-        public WriteLineInterpolatedStringHandler(int literalLength, int formattedCount, ICoordinatorOutput output, out bool isEnabled)
+        public WriteLineInterpolatedStringHandler(int literalLength, int formattedCount, ICoordinatorDebugOutput output, out bool isEnabled)
         {
             isEnabled = output.IsEnabled;
             _builder = isEnabled ? new(literalLength) : default;

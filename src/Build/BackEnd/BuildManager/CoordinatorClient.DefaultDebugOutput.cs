@@ -10,11 +10,14 @@ namespace Microsoft.Build.BackEnd;
 
 internal sealed partial class CoordinatorClient
 {
-    private sealed class DefaultOutput : ICoordinatorOutput
+    /// <summary>
+    ///  Debug tracing output gated on <see cref="Traits.DebugNodeCommunication"/> (MSBUILDDEBUGCOMM).
+    /// </summary>
+    private sealed class DefaultDebugOutput : ICoordinatorDebugOutput
     {
-        public static readonly DefaultOutput Instance = new();
+        public static readonly DefaultDebugOutput Instance = new();
 
-        private DefaultOutput()
+        private DefaultDebugOutput()
         {
         }
 
@@ -28,7 +31,7 @@ internal sealed partial class CoordinatorClient
             }
         }
 
-        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorOutput.WriteLineInterpolatedStringHandler handler)
+        public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorDebugOutput.WriteLineInterpolatedStringHandler handler)
         {
             if (IsEnabled)
             {

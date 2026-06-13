@@ -17,7 +17,7 @@ namespace Microsoft.Build.Coordinator;
 /// </summary>
 /// <param name="settings">Configuration for the coordinator (pipe name, budget, timeouts, etc.).</param>
 /// <param name="output">Optional debug trace output. Defaults to file-based trace logging gated on MSBUILDDEBUGCOMM.</param>
-internal sealed partial class CoordinatorServer(CoordinatorSettings settings, ICoordinatorOutput? output = null) : IDisposable
+internal sealed partial class CoordinatorServer(CoordinatorSettings settings, ICoordinatorDebugOutput? output = null) : IDisposable
 {
     private readonly CoordinatorSettings _settings = settings;
     private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget);
@@ -27,7 +27,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private readonly Dictionary<Guid, ClientConnection> _connectionsById = [];
     private readonly ReaderWriterLockSlim _connectionLock = new();
     private readonly CancellationTokenSource _cts = new();
-    private readonly ICoordinatorOutput _output = output ?? DefaultOutput.Instance;
+    private readonly ICoordinatorDebugOutput _output = output ?? DefaultDebugOutput.Instance;
     private Timer? _heartbeatMonitor;
     private Timer? _shutdownTimer;
 

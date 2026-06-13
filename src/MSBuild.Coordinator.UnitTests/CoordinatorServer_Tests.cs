@@ -16,7 +16,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     private readonly string _pipeName = NamedPipeUtil.GetPlatformSpecificPipeName($"msbuild-coordinator-test-{Guid.NewGuid():N}");
     private readonly CancellationTokenSource _cts = new();
 
-    private readonly TestCoordinatorOutput _output = new(testOutput);
+    private readonly TestCoordinatorDebugOutput _output = new(testOutput);
 
     private CoordinatorSettings DefaultSettings => CoordinatorSettings.Default with
     {
