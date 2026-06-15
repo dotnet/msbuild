@@ -296,13 +296,13 @@ To avoid regressing CLI incremental build performance, it is essential to fully 
 
 ### `-mt` implies MSBuild Server
 
-When `-mt` (`-multithreaded`) is on the command line and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically (gated behind change wave 18.8). Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off — only `1` engages the server, matching the pre-existing rule. The implicit path can also be disabled via `MSBUILDDISABLEFEATURESFROMVERSION=18.8`.
+When `-mt` (`-multithreaded`) is on the command line and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off — only `1` engages the server, matching the pre-existing rule. `-mt` is itself experimental and opt-in, so the implicit server engagement is not separately gated.
 
 | `MSBUILDUSESERVER` | `-mt` on command line | Server engaged? | Telemetry `ServerEnableReason` |
 |---|---|---|---|
 | `1` | (any) | Yes | `EnvVar` |
 | any other non-empty value (`0`, `false`, …) | (any) | No (explicit opt-out) | — |
-| unset | yes | **Yes** (wave 18.8) | `ImpliedByMt` |
+| unset | yes | **Yes** | `ImpliedByMt` |
 | unset | no | No | — |
 
 Two `-mt` determinations are used, with distinct purposes:

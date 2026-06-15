@@ -423,15 +423,14 @@ namespace Microsoft.Build.CommandLine
         ///   <item><c>MSBUILDUSESERVER</c> set to any other non-empty value (e.g. <c>0</c>, <c>false</c>) →
         ///         do NOT use server (explicit opt-out, takes precedence over -mt). Only <c>1</c> opts in,
         ///         matching the pre-existing "only <c>1</c> enables the server" semantics.</item>
-        ///   <item><c>MSBUILDUSESERVER</c> unset AND <c>-mt</c> was on the command line AND the change wave
-        ///         is enabled → use server. Rationale: <c>-mt</c> users already accept process-shared state
+        ///   <item><c>MSBUILDUSESERVER</c> unset AND <c>-mt</c> was on the command line → use server.
+        ///         Rationale: <c>-mt</c> users already accept process-shared state
         ///         (in-proc thread workers instead of multi-process worker nodes), so server reuse barely
         ///         adds risk and recovers the per-invocation JIT/SDK-resolution warm-up cost that <c>-mt</c>
-        ///         would otherwise pay every build. See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
+        ///         would otherwise pay every build. <c>-mt</c> is itself experimental and opt-in, so no
+        ///         additional gate is needed. See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
         ///   <item>Otherwise → no server (existing default).</item>
         /// </list>
-        /// The implicit <c>-mt</c> path is gated behind <see cref="ChangeWaves.Wave18_8"/> so it can be
-        /// disabled via <c>MSBUILDDISABLEFEATURESFROMVERSION</c> for users who are not ready for the server.
         /// </remarks>
         /// <param name="isMultiThreadedOnCommandLine">Whether <c>-mt</c> was passed on the command line, as
         /// determined by <see cref="IsMultiThreadedRequested"/>.</param>
@@ -456,8 +455,9 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
-            // Implicit opt-in via -mt, gated behind a change wave so it can be turned off.
-            if (isMultiThreadedOnCommandLine && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+            // Implicit opt-in via -mt. -mt is itself experimental and opt-in (MSBUILDUSESERVER=0 remains the
+            // explicit escape hatch), so this does not need a separate change-wave gate.
+            if (isMultiThreadedOnCommandLine)
             {
                 serverEnableReason = "ImpliedByMt";
                 return true;

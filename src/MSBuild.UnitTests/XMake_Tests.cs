@@ -3265,33 +3265,11 @@ EndGlobal
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", useServerValue);
-            // Ensure the implicit -mt path's change wave is enabled for the test.
-            testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
-            ChangeWaves.ResetStateForTests();
 
             bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMtOnCommandLine, out string reason);
 
             useServer.ShouldBe(expectedUseServer);
             reason.ShouldBe(expectedReason);
-
-            ChangeWaves.ResetStateForTests();
-        }
-
-        [Fact]
-        public void ShouldUseMSBuildServerImpliedByMtRespectsChangeWave()
-        {
-            // With the change wave disabled, -mt must NOT implicitly engage the server.
-            using TestEnvironment testEnvironment = TestEnvironment.Create();
-            testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", null);
-            testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
-            ChangeWaves.ResetStateForTests();
-
-            bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMultiThreadedOnCommandLine: true, out string reason);
-
-            useServer.ShouldBeFalse();
-            reason.ShouldBe(string.Empty);
-
-            ChangeWaves.ResetStateForTests();
         }
 
         private string CopyMSBuild()
