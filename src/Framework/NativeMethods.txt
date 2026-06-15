@@ -52,7 +52,6 @@ GetFileAttributesEx
 GetFileTime
 GetFileType
 GetFileVersion
-GetFinalPathNameByHandle
 GetFullPathName
 GetLogicalDrives
 GetLogicalProcessorInformationEx

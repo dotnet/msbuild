@@ -14,13 +14,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Constants = Microsoft.Build.Framework.Constants;
-#if FEATURE_WINDOWSINTEROP && !RUNTIME_TYPE_NETCORE
-using System.Runtime.Versioning;
-using Microsoft.Build.Utilities;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.Storage.FileSystem;
-#endif
 
 #nullable disable
 
@@ -801,8 +794,11 @@ namespace Microsoft.Build.BackEnd
 
             // The child task host (NodeEndpointOutOfProcTaskHost) computes its handshake
             // toolsDirectory from BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot,
-            // which derives from its own process path (Environment.ProcessPath, backed by
-            // GetModuleFileNameW) and resolves symlinks.
+            // which derives from AppContext.BaseDirectory (resolves symlinks).
+            //
+            // On .NET Framework, the parent MSBuild (VS) is in a different directory than the
+            // child .NET task host (SDK), so we must pass msbuildAssemblyPath explicitly to
+            // match the child's location. Windows has no symlink issues so this is safe.
             //
             // On .NET Core, parent and child are always from the same SDK directory. Passing
             // msbuildAssemblyPath from $(NetCoreSdkRoot) can cause a handshake mismatch on
@@ -812,21 +808,7 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE
             Handshake handshake = new Handshake(hostContext);
 #else
-            // On .NET Framework the parent MSBuild (e.g. Visual Studio) lives in a different
-            // directory than the child .NET task host (the .NET SDK), so the parent must tell the
-            // child which tools directory to expect by passing it explicitly. The child re-derives
-            // that directory from its own process path, which always uses the canonical on-disk
-            // casing reported by the operating system. The path we receive here originates from the
-            // $(NetCoreSdkRoot) property, whose casing reflects however the path was first formed
-            // (environment variables, command line, etc.) and may differ from the on-disk casing,
-            // most commonly in the drive letter. Because the handshake salt hash is case-sensitive,
-            // such a mismatch makes an otherwise valid handshake fail with MSB4216. Normalize the
-            // launch path to its canonical on-disk casing - the same value the child observes - so
-            // both ends compute the same salt. This is a no-op when the casing already matches, so
-            // it never changes the salt for the common case and stays compatible with task hosts
-            // (older SDKs) that predate this fix.
-            launchPath = NormalizePathCasing(launchPath);
-            Handshake handshake = new Handshake(hostContext, toolsDirectory: Path.GetDirectoryName(launchPath));
+            Handshake handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath);
 #endif
 
             if (useAppHost)
@@ -877,120 +859,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
-
-#if !RUNTIME_TYPE_NETCORE
-        /// <summary>
-        /// Returns <paramref name="path"/> with the canonical on-disk casing that the operating
-        /// system reports for the file, matching what the child task host derives from its own
-        /// process path. Falls back to the original string when the canonical path cannot be
-        /// determined, so the behavior is unchanged whenever the supplied casing already matches the
-        /// on-disk casing.
-        /// </summary>
-        internal static string NormalizePathCasing(string path)
-        {
-#if FEATURE_WINDOWSINTEROP
-            if (NativeMethodsShared.IsWindows && !string.IsNullOrEmpty(path) && FileSystems.Default.FileExists(path))
-            {
-                string canonicalPath = GetCanonicalPath(path);
-
-                // Only adopt the canonical form when it differs from the input purely by casing. If
-                // GetFinalPathNameByHandle resolved a symlink or junction (a structural change), keep
-                // the original: the child derives its own process path without resolving symlinks, so
-                // adopting a resolved path here could introduce a new mismatch.
-                if (!string.IsNullOrEmpty(canonicalPath) &&
-                    string.Equals(canonicalPath, path, StringComparison.OrdinalIgnoreCase))
-                {
-                    return canonicalPath;
-                }
-            }
-#endif
-            return path;
-        }
-
-#if FEATURE_WINDOWSINTEROP
-        /// <summary>
-        /// Returns the fully-qualified path the operating system records for <paramref name="path"/>,
-        /// using the canonical on-disk casing (including the drive letter). This matches what the child
-        /// task host derives from its own process path, because both resolve the DOS path through the
-        /// same NT device map.
-        /// </summary>
-        /// <remarks>
-        /// Uses <c>GetFinalPathNameByHandle</c> rather than the module-loading APIs
-        /// (<c>LoadLibraryEx</c> + <c>GetModuleFileName</c>) because it is independent of the target
-        /// file's bitness: an x86 host must be able to canonicalize an x64 SDK <c>MSBuild.exe</c>, and
-        /// <c>GetModuleFileName</c> fails (ERROR_MOD_NOT_FOUND) for a cross-bitness module mapped as a
-        /// data file. Returns <see langword="null"/> on failure.
-        /// </remarks>
-        [SupportedOSPlatform("windows6.0")]
-        private static unsafe string GetCanonicalPath(string path)
-        {
-            HANDLE handle = PInvoke.CreateFile(
-                path,
-                (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_READ,
-                FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE | FILE_SHARE_MODE.FILE_SHARE_DELETE,
-                null,
-                FILE_CREATION_DISPOSITION.OPEN_EXISTING,
-                FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_BACKUP_SEMANTICS, /* allow opening a directory as well as a file */
-                HANDLE.Null);
-
-            if (handle == HANDLE.INVALID_HANDLE_VALUE)
-            {
-                return null;
-            }
-
-            try
-            {
-                using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-
-                int bufferSize = (int)PInvoke.MAX_PATH;
-                buffer.EnsureCapacity(bufferSize);
-
-                // On success GetFinalPathNameByHandle returns the number of characters written
-                // (excluding the null terminator); when the buffer is too small it returns the
-                // required size including the null terminator. So a return value >= bufferSize means
-                // "try again with exactly that many characters".
-                int pathLength = (int)PInvoke.GetFinalPathNameByHandle(handle, buffer.AsSpan(), GETFINALPATHNAMEBYHANDLE_FLAGS.FILE_NAME_NORMALIZED);
-                if (pathLength >= bufferSize && pathLength <= NativeMethodsShared.MaxPath)
-                {
-                    bufferSize = pathLength;
-                    buffer.EnsureCapacity(bufferSize);
-                    pathLength = (int)PInvoke.GetFinalPathNameByHandle(handle, buffer.AsSpan(), GETFINALPATHNAMEBYHANDLE_FLAGS.FILE_NAME_NORMALIZED);
-                }
-
-                return pathLength != 0 && pathLength < bufferSize
-                    ? StripExtendedLengthPrefix(buffer.Slice(0, pathLength).ToString())
-                    : null;
-            }
-            finally
-            {
-                PInvoke.CloseHandle(handle);
-            }
-        }
-
-        /// <summary>
-        /// Removes the extended-length path prefix (<c>\\?\</c>, or <c>\\?\UNC\</c> for UNC paths) that
-        /// <c>GetFinalPathNameByHandle</c> prepends, restoring the conventional form the child task host
-        /// computes from its process path.
-        /// </summary>
-        private static string StripExtendedLengthPrefix(string path)
-        {
-            const string UncPrefix = @"\\?\UNC\";
-            const string DosPrefix = @"\\?\";
-
-            if (path.StartsWith(UncPrefix, StringComparison.Ordinal))
-            {
-                return @"\\" + path.Substring(UncPrefix.Length);
-            }
-
-            if (path.StartsWith(DosPrefix, StringComparison.Ordinal))
-            {
-                return path.Substring(DosPrefix.Length);
-            }
-
-            return path;
-        }
-#endif
-#endif
 
         /// <summary>
         /// Method called when a context created.
