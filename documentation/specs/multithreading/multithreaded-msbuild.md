@@ -296,17 +296,15 @@ To avoid regressing CLI incremental build performance, it is essential to fully 
 
 ### `-mt` implies MSBuild Server
 
-When `-mt` (`-multithreaded`) is on the command line and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off — only `1` engages the server, matching the pre-existing rule. `-mt` is itself experimental and opt-in, so the implicit server engagement is not separately gated.
+When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off — only `1` engages the server, matching the pre-existing rule. `-mt` is itself experimental and opt-in, so the implicit server engagement is not separately gated.
 
-| `MSBUILDUSESERVER` | `-mt` on command line | Server engaged? | Telemetry `ServerEnableReason` |
+| `MSBUILDUSESERVER` | `-mt` build | Server engaged? | Telemetry `ServerEnableReason` |
 |---|---|---|---|
 | `1` | (any) | Yes | `EnvVar` |
 | any other non-empty value (`0`, `false`, …) | (any) | No (explicit opt-out) | — |
 | unset | yes | **Yes** | `ImpliedByMt` |
 | unset | no | No | — |
 
-Two `-mt` determinations are used, with distinct purposes:
-- A cheap command-line scan (`IsMultiThreadedRequested`) drives the *implicit server opt-in* above. It runs on every invocation, so it avoids the full command-line parse; consequently `-mt` from a response file does not trigger the implicit opt-in, and `MSBUILDFORCEMULTITHREADED` (a force/testing knob) does **not** by itself engage the server.
-- The authoritative full parse (`IsMultiThreadedEnabled`, which expands response files and honors `MSBUILDFORCEMULTITHREADED`) decides, once the server is engaged, whether the server process is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
+A single authoritative `-mt` determination drives everything. The command line is parsed once, up front, by the MSBuild Server eligibility check (`CanRunServerBasedOnCommandLineSwitches`), which uses the same `IsMultiThreadedEnabled` logic as the in-proc build path. Because this is the full, response-file-aware parse, `-mt` is detected wherever it is supplied — on the command line, in the auto-response file, in a project `Directory.Build.rsp`, in an `@response` file, or via `MSBUILDFORCEMULTITHREADED`. That same value also decides, once the server is engaged, whether the server process is launched with [Server GC](../../MSBuild-Server.md#garbage-collection). The gathered switches are threaded into the in-proc build path so the command line is **not** parsed a second time.
 
 

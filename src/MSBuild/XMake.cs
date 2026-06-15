@@ -309,18 +309,22 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(true /* initialize only */);
             }
 
-            // Whether -mt was passed on the command line. This is the cheap, early signal used to
-            // decide implicit server engagement (this PR: -mt implies server) - it runs on every
-            // invocation (including the common no-server path), so it must not pay for the full
-            // GatherAllSwitches parse. It deliberately does NOT consider MSBUILDFORCEMULTITHREADED or
-            // response-file content (see IsMultiThreadedRequested remarks).
-            bool isMultiThreadedOnCommandLine = IsMultiThreadedRequested(args);
+            // Perform the single authoritative command-line parse for this process. It yields:
+            //   - canRunServer: whether switches (help/version/binlog/nodereuse/...) permit the server;
+            //   - multiThreaded: the response-file-aware /mt determination (includes the auto-response file,
+            //     any project Directory.Build.rsp, @response files, and MSBUILDFORCEMULTITHREADED);
+            //   - the gathered switches, which the in-proc build path below reuses so it does not re-parse.
+            bool canRunServer = CanRunServerBasedOnCommandLineSwitches(
+                args,
+                out bool multiThreaded,
+                out CommandLineSwitches switchesFromAutoResponseFile,
+                out CommandLineSwitches switchesNotFromAutoResponseFile);
 
             int exitCode;
             if (
-                ShouldUseMSBuildServer(isMultiThreadedOnCommandLine, out string serverEnableReason) &&
+                ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason) &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(args, out bool multiThreaded))
+                canRunServer)
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
@@ -336,8 +340,10 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                // return 0 on success, non-zero on failure
-                exitCode = ((s_initialized && Execute(args) == ExitType.Success) ? 0 : 1);
+                // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
+                // parse succeeded) so the build is not parsed a second time; on parse failure they are null and
+                // Execute re-parses to surface the error.
+                exitCode = ((s_initialized && Execute(args, switchesFromAutoResponseFile, switchesNotFromAutoResponseFile) == ExitType.Success) ? 0 : 1);
             }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -355,23 +361,38 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
+        /// This performs the single authoritative command-line parse for the process: the gathered switches are
+        /// returned so the in-proc build path (<see cref="Execute(string[], CommandLineSwitches, CommandLineSwitches)"/>)
+        /// can reuse them instead of parsing a second time.
         /// </remarks>
         /// <param name="commandLine">Raw command-line arguments.</param>
         /// <param name="multiThreaded">Set to whether this is a multithreaded (/mt) build, determined from
-        /// the fully-parsed switches (which expand response files and honor MSBUILDFORCEMULTITHREADED) using
-        /// the same logic as the in-proc build path. This is the authoritative value used to decide whether
+        /// the fully-parsed switches (which expand response files - including any project <c>Directory.Build.rsp</c> -
+        /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path. This is the
+        /// authoritative value used both to decide whether <c>-mt</c> implicitly engages the server and whether
         /// the server is launched with Server GC.</param>
-        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine, out bool multiThreaded)
+        /// <param name="switchesFromAutoResponseFile">The gathered response-file switches (auto-response file plus any
+        /// project <c>Directory.Build.rsp</c>), or <see langword="null"/> if parsing failed.</param>
+        /// <param name="switchesNotFromAutoResponseFile">The gathered command-line/environment switches, or
+        /// <see langword="null"/> if parsing failed.</param>
+        private static bool CanRunServerBasedOnCommandLineSwitches(
+            string[] commandLine,
+            out bool multiThreaded,
+            out CommandLineSwitches switchesFromAutoResponseFile,
+            out CommandLineSwitches switchesNotFromAutoResponseFile)
         {
             bool canRunServer = true;
             multiThreaded = false;
+            switchesFromAutoResponseFile = null;
+            switchesNotFromAutoResponseFile = null;
+            bool switchesFullyGathered = false;
             try
             {
                 commandLineParser.GatherAllSwitches(
                     commandLine,
                     s_globalMessagesToLogInBuildLoggers,
-                    out CommandLineSwitches switchesFromAutoResponseFile,
-                    out CommandLineSwitches switchesNotFromAutoResponseFile,
+                    out switchesFromAutoResponseFile,
+                    out switchesNotFromAutoResponseFile,
                     out string fullCommandLine,
                     out s_exeName);
 
@@ -381,9 +402,14 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
 
+                // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
+                // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
+                // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
+                switchesFullyGathered = true;
+
                 // Authoritative /mt determination from the fully-parsed switches (includes response-file
                 // switches and MSBUILDFORCEMULTITHREADED), matching the in-proc build path. Used to decide
-                // Server GC for the launched server.
+                // both implicit server engagement and Server GC for the launched server.
                 multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                 string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
@@ -408,6 +434,17 @@ namespace Microsoft.Build.CommandLine
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
                 }
                 canRunServer = false;
+
+                if (!switchesFullyGathered)
+                {
+                    // Gathering itself did not complete (e.g. a malformed @response file); discard the partial
+                    // results so the in-proc path re-parses from scratch and surfaces the error exactly as it
+                    // would without the server check. When the switches were fully gathered and only a later
+                    // validation step threw, keep them so Execute reuses the single parse and surfaces the error
+                    // with consistent response-file state.
+                    switchesFromAutoResponseFile = null;
+                    switchesNotFromAutoResponseFile = null;
+                }
             }
 
             return canRunServer;
@@ -423,7 +460,7 @@ namespace Microsoft.Build.CommandLine
         ///   <item><c>MSBUILDUSESERVER</c> set to any other non-empty value (e.g. <c>0</c>, <c>false</c>) →
         ///         do NOT use server (explicit opt-out, takes precedence over -mt). Only <c>1</c> opts in,
         ///         matching the pre-existing "only <c>1</c> enables the server" semantics.</item>
-        ///   <item><c>MSBUILDUSESERVER</c> unset AND <c>-mt</c> was on the command line → use server.
+        ///   <item><c>MSBUILDUSESERVER</c> unset AND this is a <c>-mt</c> (multithreaded) build → use server.
         ///         Rationale: <c>-mt</c> users already accept process-shared state
         ///         (in-proc thread workers instead of multi-process worker nodes), so server reuse barely
         ///         adds risk and recovers the per-invocation JIT/SDK-resolution warm-up cost that <c>-mt</c>
@@ -432,11 +469,13 @@ namespace Microsoft.Build.CommandLine
         ///   <item>Otherwise → no server (existing default).</item>
         /// </list>
         /// </remarks>
-        /// <param name="isMultiThreadedOnCommandLine">Whether <c>-mt</c> was passed on the command line, as
-        /// determined by <see cref="IsMultiThreadedRequested"/>.</param>
+        /// <param name="isMultiThreaded">Whether this is a multithreaded (<c>-mt</c>) build, as determined by the
+        /// authoritative response-file-aware parse in <see cref="CanRunServerBasedOnCommandLineSwitches"/>. This
+        /// includes <c>-mt</c> supplied via the auto-response file, a project <c>Directory.Build.rsp</c>, an
+        /// <c>@response</c> file, or <c>MSBUILDFORCEMULTITHREADED</c>.</param>
         /// <param name="serverEnableReason">Telemetry-friendly reason: "EnvVar", "ImpliedByMt", or empty when not enabled.</param>
         /// <returns>True if server should be used.</returns>
-        internal static bool ShouldUseMSBuildServer(bool isMultiThreadedOnCommandLine, out string serverEnableReason)
+        internal static bool ShouldUseMSBuildServer(bool isMultiThreaded, out string serverEnableReason)
         {
             serverEnableReason = string.Empty;
             string envVar = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
@@ -457,7 +496,7 @@ namespace Microsoft.Build.CommandLine
 
             // Implicit opt-in via -mt. -mt is itself experimental and opt-in (MSBUILDUSESERVER=0 remains the
             // explicit escape hatch), so this does not need a separate change-wave gate.
-            if (isMultiThreadedOnCommandLine)
+            if (isMultiThreaded)
             {
                 serverEnableReason = "ImpliedByMt";
                 return true;
@@ -466,75 +505,6 @@ namespace Microsoft.Build.CommandLine
             return false;
         }
 
-        /// <summary>
-        /// Lightweight check for whether <c>-mt</c>/<c>-multithreaded</c> was passed on the command line,
-        /// used for the early implicit-server-opt-in decision in <see cref="ShouldUseMSBuildServer"/>.
-        /// </summary>
-        /// <remarks>
-        /// Deliberately cheap and allocation-free: this runs on every invocation (including the common
-        /// no-server path), so it does NOT do the full <c>GatherAllSwitches</c> parse (which is expensive
-        /// and already runs later for the actual build). Consequences, all acceptable for an opt-in
-        /// heuristic (the authoritative /mt value for Server GC comes from
-        /// <see cref="CanRunServerBasedOnCommandLineSwitches"/>):
-        /// <list type="bullet">
-        ///   <item><c>-mt</c> supplied via a response file is not detected here, so it does not trigger the
-        ///         implicit server opt-in.</item>
-        ///   <item><c>MSBUILDFORCEMULTITHREADED</c> is intentionally NOT considered: that force/testing knob
-        ///         should not by itself engage the long-lived server.</item>
-        /// </list>
-        /// Matches MSBuild's "last occurrence wins" semantics for the boolean switch.
-        /// </remarks>
-        /// <param name="args">Raw command-line arguments.</param>
-        /// <returns>True if <c>-mt</c>/<c>-multithreaded</c> was last set to a truthy value on the command line.</returns>
-        internal static bool IsMultiThreadedRequested(string[] args)
-        {
-            if (args is null)
-            {
-                return false;
-            }
-
-            bool result = false;
-
-            foreach (string arg in args)
-            {
-                if (string.IsNullOrEmpty(arg) || arg.Length < 2)
-                {
-                    continue;
-                }
-
-                // Switches start with - or / (and on Unix, - is the only convention).
-                if (arg[0] != '-' && arg[0] != '/')
-                {
-                    continue;
-                }
-
-                // Strip leading - or /, then split on : into switch name and (optional) value.
-                ReadOnlySpan<char> body = arg.AsSpan(1);
-                int colonIndex = body.IndexOf(':');
-                ReadOnlySpan<char> switchName = colonIndex >= 0 ? body.Slice(0, colonIndex) : body;
-
-                if (!switchName.Equals("mt".AsSpan(), StringComparison.OrdinalIgnoreCase) &&
-                    !switchName.Equals("multithreaded".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                // Honor an explicit ":false"/":0" value (matches ProcessBooleanSwitch semantics). Do not
-                // return early: a later occurrence wins, so keep scanning and record this occurrence's value.
-                if (colonIndex >= 0)
-                {
-                    ReadOnlySpan<char> value = body.Slice(colonIndex + 1);
-                    result = !value.Equals("false".AsSpan(), StringComparison.OrdinalIgnoreCase) &&
-                             !value.Equals("0".AsSpan(), StringComparison.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    result = true;
-                }
-            }
-
-            return result;
-        }
 
         /// <summary>
         /// Append output file with elapsedTime
@@ -789,7 +759,27 @@ namespace Microsoft.Build.CommandLine
         /// is ignored.</param>
         /// <returns>A value of type ExitType that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static ExitType Execute(string[] commandLine)
+        public static ExitType Execute(string[] commandLine) => Execute(commandLine, null, null);
+
+        /// <summary>
+        /// Orchestrates the execution of the application, optionally reusing command-line switches
+        /// that have already been gathered (e.g. by the MSBuild Server eligibility check in
+        /// <see cref="Main"/>) so they are not parsed a second time.
+        /// </summary>
+        /// <param name="commandLine">The command line to process. The first argument
+        /// on the command line is assumed to be the name/path of the executable, and
+        /// is ignored.</param>
+        /// <param name="preGatheredSwitchesFromAutoResponseFile">Switches already gathered from response files
+        /// (auto-response file plus any project <c>Directory.Build.rsp</c>), or <see langword="null"/> to gather here.</param>
+        /// <param name="preGatheredSwitchesNotFromAutoResponseFile">Switches already gathered from the command line
+        /// (and environment), or <see langword="null"/> to gather here. Must be non-null iff
+        /// <paramref name="preGatheredSwitchesFromAutoResponseFile"/> is non-null.</param>
+        /// <returns>A value of type ExitType that indicates whether the build succeeded,
+        /// or the manner in which it failed.</returns>
+        internal static ExitType Execute(
+            string[] commandLine,
+            CommandLineSwitches preGatheredSwitchesFromAutoResponseFile,
+            CommandLineSwitches preGatheredSwitchesNotFromAutoResponseFile)
         {
             DebuggerLaunchCheck();
 
@@ -828,8 +818,16 @@ namespace Microsoft.Build.CommandLine
                 // check the operating system the code is running on
                 VerifyThrowSupportedOS();
 
-                // reset the application state for this new build
-                ResetBuildState();
+                // reset the application state for this new build. When we are reusing switches already gathered by
+                // the MSBuild Server eligibility check in Main, skip this: ResetBuildState clears the parser's
+                // response-file bookkeeping (IncludedResponseFiles / SwitchesFromResponseFiles), which is normally
+                // repopulated by the GatherAllSwitches call below - but on the reuse path that call is skipped, so
+                // clearing it here would discard the bookkeeping the in-proc path still needs (e.g. for the
+                // "switches read from response file" notice). The single gather in Main already reset this state.
+                if (preGatheredSwitchesFromAutoResponseFile is null)
+                {
+                    ResetBuildState();
+                }
 
                 // process the detected command line switches -- gather build information, take action on non-build switches, and
                 // check for non-trivial errors
@@ -874,7 +872,22 @@ namespace Microsoft.Build.CommandLine
                 bool reportFileAccesses = false;
 #endif
 
-                commandLineParser.GatherAllSwitches(commandLine, s_globalMessagesToLogInBuildLoggers, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
+                CommandLineSwitches switchesFromAutoResponseFile;
+                CommandLineSwitches switchesNotFromAutoResponseFile;
+                bool switchesAlreadyGathered;
+                if (preGatheredSwitchesFromAutoResponseFile is not null)
+                {
+                    // The MSBuild Server eligibility check in Main already gathered every switch (including any
+                    // project Directory.Build.rsp). Reuse that single parse instead of re-reading response files.
+                    switchesFromAutoResponseFile = preGatheredSwitchesFromAutoResponseFile;
+                    switchesNotFromAutoResponseFile = preGatheredSwitchesNotFromAutoResponseFile;
+                    switchesAlreadyGathered = true;
+                }
+                else
+                {
+                    commandLineParser.GatherAllSwitches(commandLine, s_globalMessagesToLogInBuildLoggers, out switchesFromAutoResponseFile, out switchesNotFromAutoResponseFile, out _, out s_exeName);
+                    switchesAlreadyGathered = false;
+                }
 
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
@@ -921,7 +934,8 @@ namespace Microsoft.Build.CommandLine
                                             ref getTargetResult,
                                             ref getResultOutputFile,
                                             recursing: false,
-                                            string.Join(" ", commandLine));
+                                            string.Join(" ", commandLine),
+                                            switchesAlreadyGathered);
 
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
@@ -2215,7 +2229,8 @@ namespace Microsoft.Build.CommandLine
             ref string[] getTargetResult,
             ref string getResultOutputFile,
             bool recursing,
-            string commandLine)
+            string commandLine,
+            bool switchesAlreadyGathered = false)
         {
             bool invokeBuild = false;
 
@@ -2316,7 +2331,9 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    bool foundProjectAutoResponseFile = commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine);
+                    // When the switches were already fully gathered (including any project Directory.Build.rsp) by the
+                    // MSBuild Server eligibility check in Main, skip re-gathering so response files are not read twice.
+                    bool foundProjectAutoResponseFile = !switchesAlreadyGathered && commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine);
 
                     if (foundProjectAutoResponseFile)
                     {
