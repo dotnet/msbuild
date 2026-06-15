@@ -248,7 +248,7 @@ namespace Microsoft.Build.Evaluation
             /// Throws <see cref="ObjectDisposedException"/> if this concatenator is already disposed.
             /// </summary>
             private readonly void CheckDisposed() =>
-                ErrorUtilities.VerifyThrowObjectDisposed(!_disposed, nameof(SpanBasedConcatenator));
+                ObjectDisposedException.ThrowIf(_disposed, typeof(SpanBasedConcatenator));
 
             /// <summary>
             /// Lazily initializes <see cref="_builder"/> and populates it with the first value
@@ -496,7 +496,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -517,7 +517,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -531,7 +531,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
-            ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
+            Assumed.True((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
             return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation));
         }
@@ -565,7 +565,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -639,7 +639,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            Assumed.NotNull(elementLocation);
 
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
@@ -980,7 +980,7 @@ namespace Microsoft.Build.Evaluation
                         return expression;
                     }
 
-                    ErrorUtilities.VerifyThrow(metadata != null, "Cannot expand metadata without providing metadata");
+                    Assumed.NotNull(metadata, "Cannot expand metadata without providing metadata");
 
                     // PERF NOTE: Regex matching is expensive, so if the string doesn't contain any item metadata references, just bail
                     // out -- pre-scanning the string is actually cheaper than running the Regex, even when there are no matches!
@@ -1150,7 +1150,7 @@ namespace Microsoft.Build.Evaluation
                 _elementLocation = elementLocation;
                 _loggingContext = loggingContext;
 
-                ErrorUtilities.VerifyThrow(options != ExpanderOptions.Invalid, "Must be expanding metadata of some kind");
+                Assumed.NotEqual(options, ExpanderOptions.Invalid, "Must be expanding metadata of some kind");
             }
 
             /// <summary>
@@ -1158,7 +1158,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal static string ExpandSingleMetadata(Match itemMetadataMatch, MetadataMatchEvaluator evaluator)
             {
-                ErrorUtilities.VerifyThrow(itemMetadataMatch.Success, "Need a valid item metadata.");
+                Assumed.True(itemMetadataMatch.Success, "Need a valid item metadata.");
 
                 string metadataName = itemMetadataMatch.Groups[RegularExpressions.NameGroup].Value;
 
@@ -1282,7 +1282,7 @@ namespace Microsoft.Build.Evaluation
                     return expression;
                 }
 
-                ErrorUtilities.VerifyThrow(properties != null, "Cannot expand properties without providing properties");
+                Assumed.NotNull(properties, "Cannot expand properties without providing properties");
 
                 // These are also zero-based indices into the expression, but
                 // these tell us where the current property tag begins and ends.
@@ -2119,7 +2119,7 @@ namespace Microsoft.Build.Evaluation
                 // with nothing else concatenated to the beginning or end, then proceed
                 // with itemizing it, otherwise error.
                 ProjectErrorUtilities.VerifyThrowInvalidProject(match.Value == expression, elementLocation, "EmbeddedItemVectorCannotBeItemized", expression);
-                ErrorUtilities.VerifyThrow(!matchesEnumerator.MoveNext(), "Expected just one item vector");
+                Assumed.False(matchesEnumerator.MoveNext(), "Expected just one item vector");
 
                 return match;
             }
@@ -2130,7 +2130,7 @@ namespace Microsoft.Build.Evaluation
                 where S : class, IItem
                 where T : class, IItem
             {
-                ErrorUtilities.VerifyThrow(items != null, "Cannot expand items without providing items");
+                Assumed.NotNull(items, "Cannot expand items without providing items");
                 isTransformExpression = false;
                 bool brokeEarlyNonEmpty;
 
@@ -2248,7 +2248,7 @@ namespace Microsoft.Build.Evaluation
                 out List<KeyValuePair<string, S>> itemsFromCapture)
                 where S : class, IItem
             {
-                ErrorUtilities.VerifyThrow(evaluatedItems != null, "Cannot expand items without providing items");
+                Assumed.NotNull(evaluatedItems, "Cannot expand items without providing items");
                 // There's something wrong with the expression, and we ended up with a blank item type
                 ProjectErrorUtilities.VerifyThrowInvalidProject(!string.IsNullOrEmpty(expressionCapture.ItemType), elementLocation, "InvalidFunctionPropertyExpression");
 
@@ -2331,7 +2331,7 @@ namespace Microsoft.Build.Evaluation
                     return expression;
                 }
 
-                ErrorUtilities.VerifyThrow(items != null, "Cannot expand items without providing items");
+                Assumed.NotNull(items, "Cannot expand items without providing items");
 
                 ExpressionShredder.ReferencedItemExpressionsEnumerator matchesEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
 
@@ -4306,7 +4306,7 @@ namespace Microsoft.Build.Evaluation
                 if (cachedTypeInformation != null)
                 {
                     // We need at least one of these set
-                    ErrorUtilities.VerifyThrow(cachedTypeInformation.Item1 != null || cachedTypeInformation.Item2 != null, "Function type information needs either string or type represented.");
+                    Assumed.True(cachedTypeInformation.Item1 != null || cachedTypeInformation.Item2 != null, "Function type information needs either string or type represented.");
 
                     // If we have the type information in Type form, then just return that
                     if (cachedTypeInformation.Item2 != null)
@@ -4324,7 +4324,7 @@ namespace Microsoft.Build.Evaluation
 
                         // If the type information from the cache is not loadable, it means the cache information got corrupted somehow
                         // Throw here to prevent adding null types in the cache
-                        ErrorUtilities.VerifyThrowInternalNull(receiverType, $"Type information for {typeName} was present in the allowlist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
+                        Assumed.NotNull(receiverType, $"Type information for {typeName} was present in the allowlist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
 
                         // If we've used it once, chances are that we'll be using it again
                         // We can record the type here since we know it's available for calling from the fact that is was in the AvailableStaticMethods table

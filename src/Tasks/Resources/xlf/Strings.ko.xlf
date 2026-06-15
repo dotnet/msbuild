@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="new">MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</target>
+        <target state="translated">MSB3071: A:에서 Z:까지 모든 드라이브 문자가 현재 사용 중입니다. 작업 디렉터리 "{0}"(UNC 경로 "{1}"로 확인됨)에 UNC 매핑이 필요하므로, "Exec" 작업에는 UNC 경로를 매핑할 수 있는 사용 가능한 드라이브 문자가 필요합니다. 하나 이상의 공유 리소스에서 연결을 끊어 사용 가능한 드라이브 문자를 만들거나 로컬 작업 디렉터리를 지정한 다음 이 명령을 다시 실행하세요.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -563,6 +563,11 @@
         <source>MSB3541: {0} has invalid value "{1}". {2}</source>
         <target state="translated">MSB3541: {0}의 "{1}" 값이 잘못되었습니다. {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
+      </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="translated">MSB4311: InputUrl 값 '{0}'은(는) 공백 문자로만 구성되어 있으므로 Windows에서 유효한 경로가 아닙니다.</target>
+        <note>{StrBegin="MSB4311: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>

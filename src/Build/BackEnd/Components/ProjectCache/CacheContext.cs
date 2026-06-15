@@ -40,9 +40,7 @@ namespace Microsoft.Build.ProjectCache
             ProjectGraph? graph = null,
             IReadOnlyCollection<ProjectGraphEntryPoint>? graphEntryPoints = null)
         {
-            ErrorUtilities.VerifyThrow(
-                (graph != null) ^ (graphEntryPoints != null),
-                "Either Graph is specified, or GraphEntryPoints is specified. Not both.");
+            Assumed.True((graph != null) ^ (graphEntryPoints != null), "Either Graph is specified, or GraphEntryPoints is specified. Not both.");
 
             PluginSettings = pluginSettings;
             Graph = graph;

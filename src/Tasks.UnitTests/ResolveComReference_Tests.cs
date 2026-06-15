@@ -11,8 +11,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+using TYPELIBATTR = Windows.Win32.System.Com.TLIBATTR;
 
 #nullable disable
 
@@ -235,9 +234,9 @@ namespace Microsoft.Build.UnitTests
             TYPELIBATTR refAttr = ResolveComReference.TaskItemToTypeLibAttr(reference);
 
             Assert.Equal(refGuid, refAttr.guid); // "incorrect guid"
-            Assert.Equal(11, refAttr.wMajorVerNum); // "incorrect version major"
-            Assert.Equal(0, refAttr.wMinorVerNum); // "incorrect version minor"
-            Assert.Equal(1033, refAttr.lcid); // "incorrect lcid"
+            Assert.Equal(11, (int)refAttr.wMajorVerNum); // "incorrect version major"
+            Assert.Equal(0, (int)refAttr.wMinorVerNum); // "incorrect version minor"
+            Assert.Equal(1033, (int)refAttr.lcid); // "incorrect lcid"
         }
 
         /// <summary>
@@ -804,13 +803,13 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(TlbReference.GetWrapperFileName(
                         axRefInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.tlbReferenceName),
                         includeVersionInInteropName,
-                        axRefInfo.attr.wMajorVerNum,
-                        axRefInfo.attr.wMinorVerNum),
+                        (short)axRefInfo.attr.wMajorVerNum,
+                        (short)axRefInfo.attr.wMinorVerNum),
                     TlbReference.GetWrapperFileName(
                         tlbRefInfo.typeLibName,
                         includeVersionInInteropName,
-                        tlbRefInfo.attr.wMajorVerNum,
-                        tlbRefInfo.attr.wMinorVerNum)); // "Expected Ax reference's RCW name to match the new TLB"
+                        (short)tlbRefInfo.attr.wMajorVerNum,
+                        (short)tlbRefInfo.attr.wMinorVerNum)); // "Expected Ax reference's RCW name to match the new TLB"
         }
     }
 }

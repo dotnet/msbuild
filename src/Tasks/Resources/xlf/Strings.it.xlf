@@ -564,6 +564,11 @@
         <target state="translated">MSB3541: valore "{1}" di {0} non valido. {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
       </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="translated">MSB4311: Il valore InputUrl '{0}' non è un percorso valido in Windows perché costituito solo da spazi vuoti.</target>
+        <note>{StrBegin="MSB4311: "}</note>
+      </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
         <target state="translated">MSB3102: non è stato possibile eliminare il file di stato "{0}". {1}</target>

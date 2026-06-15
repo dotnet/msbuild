@@ -29,7 +29,7 @@ resources:
   - repository: vmr
     type: github
     name: dotnet/dotnet
-    endpoint: dotnet
+    endpoint: public
 
 stages:
 - template: /eng/pipelines/templates/stages/vmr-build.yml@vmr

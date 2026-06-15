@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public void Translate(ITranslator translator)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(translator);
+                ArgumentNullException.ThrowIfNull(translator);
 
                 translator.Translate(ref lastModified);
                 translator.Translate(ref assemblyName, (t) => new AssemblyNameExtension(t));

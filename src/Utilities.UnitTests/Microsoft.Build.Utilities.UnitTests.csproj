@@ -6,12 +6,14 @@
     <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>Microsoft.Build.Utilities.UnitTests</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
@@ -28,9 +30,6 @@
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
-    <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs">
-      <Link>NativeMethods.cs</Link>
-    </Compile>
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
