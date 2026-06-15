@@ -3256,13 +3256,13 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// No-op on Windows, when <paramref name="projectFile"/> is absolute or contains <c>..</c>,
         /// when <c>PWD</c> is unset/relative/stale, or when the change wave is disabled via
-        /// <c>MSBuildDisableFeaturesFromVersion=18.8</c>. Uses <see cref="NativeMethodsShared.RealPath"/>
+        /// <c>MSBuildDisableFeaturesFromVersion=18.9</c>. Uses <see cref="NativeMethodsShared.RealPath"/>
         /// (POSIX <c>realpath(3)</c>) so no process-global state is mutated; safe under MSBuild Server,
         /// multithreaded MSBuild, and hosted scenarios.
         /// </remarks>
         internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
         {
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9)
                 || NativeMethodsShared.IsWindows
                 || string.IsNullOrEmpty(projectFile)
                 || Path.IsPathRooted(projectFile)

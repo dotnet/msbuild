@@ -29,8 +29,10 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.9
+- [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
+
 ### 18.8
-- Use the Unix logical current directory from `PWD` when resolving relative project paths, so builds under symlinked directories produce logical project full paths and related output paths. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.8` to opt out.
 - [RAR task: across multiple input properties, resolve relative paths against the project directory (not the process current directory)](https://github.com/dotnet/msbuild/pull/13319)
 - [Console, parallel console, and terminal loggers print the paths of log files written by registered loggers (e.g. file logger and binary logger) as part of the end-of-build summary.](https://github.com/dotnet/msbuild/pull/13577)
 
