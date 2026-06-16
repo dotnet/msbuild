@@ -788,7 +788,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                MSBuildEventSource.Log.RequestThreadProcStart(projectPath, configurationId, globalRequestId, nodeRequestId, setThreadParameters);
+                MSBuildEventSource.Log.RequestThreadProcStart(projectPath, configurationId, globalRequestId, nodeRequestId);
                 requestThreadProcEventSourceStarted = true;
                 VerifyEntryInActiveState();
                 result = await BuildProject();
@@ -870,7 +870,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (requestThreadProcEventSourceStarted)
                 {
-                    MSBuildEventSource.Log.RequestThreadProcStop(projectPath, configurationId, globalRequestId, nodeRequestId, setThreadParameters);
+                    MSBuildEventSource.Log.RequestThreadProcStop(projectPath, configurationId, globalRequestId, nodeRequestId);
                 }
 
                 _blockType = BlockType.Unblocked;

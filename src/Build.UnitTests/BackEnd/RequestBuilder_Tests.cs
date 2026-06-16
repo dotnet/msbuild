@@ -293,8 +293,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ToArray();
 
             requestThreadProcEvents.Length.ShouldBe(2);
-            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
-            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, testProject.ProjectFile, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
 
             Directory.SetCurrentDirectory(_originalWorkingDirectory);
         }
@@ -327,8 +327,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ToArray();
 
             requestThreadProcEvents.Length.ShouldBe(2);
-            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
-            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId, true);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[0], 37, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
+            AssertRequestThreadProcEvent(requestThreadProcEvents[1], 38, missingProjectPath, configuration.ConfigurationId, request.GlobalRequestId, request.NodeRequestId);
             entry.State.ShouldBe(BuildRequestEntryState.Complete);
             _buildRequestCompleted_Entry.ShouldBe(entry);
             _buildRequestCompleted_Entry.Result.OverallResult.ShouldBe(BuildResultCode.Failure);
@@ -341,19 +341,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string expectedProjectPath,
             int expectedConfigurationId,
             int expectedGlobalRequestId,
-            int expectedNodeRequestId,
-            bool expectedSetThreadParameters)
+            int expectedNodeRequestId)
         {
             eventData.EventId.ShouldBe(expectedEventId);
             eventData.PayloadNames.ShouldNotBeNull();
             eventData.Payload.ShouldNotBeNull();
-            eventData.PayloadNames.ToArray().ShouldBe(["projectPath", "configurationId", "globalRequestId", "nodeRequestId", "setThreadParameters"]);
-            eventData.Payload.Count.ShouldBe(5);
+            eventData.PayloadNames.ToArray().ShouldBe(["projectPath", "configurationId", "globalRequestId", "nodeRequestId"]);
+            eventData.Payload.Count.ShouldBe(4);
             eventData.Payload[0].ShouldBe(expectedProjectPath);
             eventData.Payload[1].ShouldBe(expectedConfigurationId);
             eventData.Payload[2].ShouldBe(expectedGlobalRequestId);
             eventData.Payload[3].ShouldBe(expectedNodeRequestId);
-            eventData.Payload[4].ShouldBe(expectedSetThreadParameters);
         }
 
         private static bool IsRequestThreadProcEventForRequest(
@@ -363,7 +361,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             return eventData.EventId is 37 or 38
                 && eventData.Payload is not null
-                && eventData.Payload.Count == 5
+                && eventData.Payload.Count == 4
                 && eventData.Payload[0] is string projectPath
                 && eventData.Payload[2] is int globalRequestId
                 && projectPath == expectedProjectPath

@@ -333,22 +333,20 @@ namespace Microsoft.Build.Eventing
         /// <param name="configurationId">Configuration id for the request.</param>
         /// <param name="globalRequestId">Global request id assigned by the build manager.</param>
         /// <param name="nodeRequestId">Node-local request id assigned by the scheduling node.</param>
-        /// <param name="setThreadParameters">True when the request thread configured worker-thread state before building.</param>
         [Event(37, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
-        public void RequestThreadProcStart(string projectPath, int configurationId, int globalRequestId, int nodeRequestId, bool setThreadParameters)
+        public void RequestThreadProcStart(string projectPath, int configurationId, int globalRequestId, int nodeRequestId)
         {
-            WriteEvent(37, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId, setThreadParameters);
+            WriteEvent(37, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId);
         }
 
         /// <param name="projectPath">Full path to the project being built on the request thread.</param>
         /// <param name="configurationId">Configuration id for the request.</param>
         /// <param name="globalRequestId">Global request id assigned by the build manager.</param>
         /// <param name="nodeRequestId">Node-local request id assigned by the scheduling node.</param>
-        /// <param name="setThreadParameters">True when the request thread configured worker-thread state before building.</param>
         [Event(38, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
-        public void RequestThreadProcStop(string projectPath, int configurationId, int globalRequestId, int nodeRequestId, bool setThreadParameters)
+        public void RequestThreadProcStop(string projectPath, int configurationId, int globalRequestId, int nodeRequestId)
         {
-            WriteEvent(38, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId, setThreadParameters);
+            WriteEvent(38, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId);
         }
 
         /// <param name="fileLocation">Project file's location.</param>
