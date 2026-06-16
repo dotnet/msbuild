@@ -4195,8 +4195,49 @@ namespace Microsoft.Build.CommandLine
 
             if (shouldShowLogo)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName));
+                string vmrCommit = GetVmrCommitForLogo();
+                if (string.IsNullOrEmpty(vmrCommit))
+                {
+                    Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName));
+                }
+                else
+                {
+                    Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessageWithVmr", ProjectCollection.DisplayVersion, NativeMethods.FrameworkName, vmrCommit));
+                }
             }
+        }
+
+        /// <summary>
+        /// Returns the VMR (build) commit when it differs from the MSBuild commit shown by
+        /// <see cref="ProjectCollection.DisplayVersion"/>; otherwise null. In VMR builds the assembly
+        /// InformationalVersion carries the VMR commit while DisplayVersion carries the MSBuild commit.
+        /// </summary>
+        private static string GetVmrCommitForLogo()
+        {
+            string informationalVersion = typeof(ProjectCollection).Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            if (string.IsNullOrEmpty(informationalVersion))
+            {
+                return null;
+            }
+
+            int plusIndex = informationalVersion.IndexOf('+');
+            if (plusIndex < 0 || plusIndex + 1 >= informationalVersion.Length)
+            {
+                return null;
+            }
+
+            string vmrCommit = informationalVersion.Substring(plusIndex + 1);
+            if (vmrCommit.Length > 9)
+            {
+                vmrCommit = vmrCommit.Substring(0, 9);
+            }
+
+            string displayVersion = ProjectCollection.DisplayVersion;
+            int displayPlusIndex = displayVersion.IndexOf('+');
+            string displayCommit = displayPlusIndex < 0 ? string.Empty : displayVersion.Substring(displayPlusIndex + 1);
+
+            return string.Equals(vmrCommit, displayCommit, StringComparison.Ordinal) ? null : vmrCommit;
         }
 
         /// <summary>

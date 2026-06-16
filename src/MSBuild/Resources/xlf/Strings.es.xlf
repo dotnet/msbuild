@@ -1575,6 +1575,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">Los registros de MSBuild y la información de depuración estarán en "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildVersionMessageWithVmr">
+        <source>MSBuild version {0} (VMR {2}) for {1}</source>
+        <target state="new">MSBuild version {0} (VMR {2}) for {1}</target>
+        <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework" or ".NET Core". {2} contains the VMR (dotnet/dotnet) commit SHA.</note>
+      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: debe proporcionar un nombre de característica para el conmutador featureAvailability.</target>

@@ -512,13 +512,29 @@ namespace Microsoft.Build.Evaluation
             {
                 if (s_assemblyDisplayVersion == null)
                 {
-                    var fullInformationalVersion = typeof(Constants).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+                    var assembly = typeof(Constants).GetTypeInfo().Assembly;
+                    var fullInformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+                    // When built from the VMR, the InformationalVersion carries the VMR commit. Prefer the
+                    // original MSBuild commit (RepoOriginalSourceRevisionId) so the displayed version maps
+                    // back to this repository.
+                    var sourceRevisionId = assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+                        .FirstOrDefault(metadata => string.Equals(metadata.Key, "RepoOriginalSourceRevisionId", StringComparison.Ordinal))?.Value;
+
+                    var plusIndex = fullInformationalVersion.IndexOf('+');
 
                     // use a truncated version with only 9 digits of SHA
-                    var plusIndex = fullInformationalVersion.IndexOf('+');
-                    s_assemblyDisplayVersion = plusIndex < 0
-                                                    ? fullInformationalVersion
-                                                    : fullInformationalVersion.Substring(startIndex: 0, length: plusIndex + 10);
+                    if (!string.IsNullOrEmpty(sourceRevisionId))
+                    {
+                        var versionWithoutSha = plusIndex < 0 ? fullInformationalVersion : fullInformationalVersion.Substring(0, plusIndex);
+                        s_assemblyDisplayVersion = $"{versionWithoutSha}+{(sourceRevisionId.Length > 9 ? sourceRevisionId.Substring(0, 9) : sourceRevisionId)}";
+                    }
+                    else
+                    {
+                        s_assemblyDisplayVersion = plusIndex < 0
+                                                        ? fullInformationalVersion
+                                                        : fullInformationalVersion.Substring(startIndex: 0, length: plusIndex + 10);
+                    }
                 }
 
                 return s_assemblyDisplayVersion;
