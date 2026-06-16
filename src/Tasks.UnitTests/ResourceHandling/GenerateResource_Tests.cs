@@ -4620,4 +4620,80 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             return base.IsQuotingRequired(path);
         }
     }
+
+    /// <summary>
+    /// Tests for the content-only portion of the Mark-of-the-Web trust check
+    /// (<see cref="GenerateResource.ResourceFileContentsAreDangerous(System.IO.TextReader)"/>).
+    /// These exercise the danger classification independently of the platform-specific zone/COM check,
+    /// so they run on all target frameworks.
+    /// </summary>
+    public sealed class ResourceFileTrustTests
+    {
+        private static bool IsDangerous(string resxContents)
+            => GenerateResource.ResourceFileContentsAreDangerous(new StringReader(resxContents));
+
+        [Fact]
+        public void PlainStringEntryIsNotDangerous()
+        {
+            string resx = @"<root>
+  <data name=""Greeting"" xml:space=""preserve""><value>Hello</value></data>
+</root>";
+
+            IsDangerous(resx).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void MimetypeEntryIsDangerous()
+        {
+            string resx = @"<root>
+  <data name=""Blob"" mimetype=""application/x-microsoft.net.object.bytearray.base64""><value>AAAA</value></data>
+</root>";
+
+            IsDangerous(resx).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void ResXFileRefEntryIsDangerousEvenWhenWave18_8Disabled()
+        {
+            string resx = @"<root>
+  <data name=""Logo"" type=""System.Resources.ResXFileRef, System.Windows.Forms""><value>logo.txt;System.String, mscorlib</value></data>
+</root>";
+
+            // ResXFileRef detection is intentionally unconditional - it is not gated behind a ChangeWave -
+            // because it can trigger reading of an external linked file. Disable Wave18_8 to prove it still fires.
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            IsDangerous(resx).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void TypedEntryIsDangerousWhenWave18_8Enabled()
+        {
+            string resx = @"<root>
+  <data name=""Count"" type=""System.Int32, mscorlib""><value>42</value></data>
+</root>";
+
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", string.Empty);
+            ChangeWaves.ResetStateForTests();
+
+            IsDangerous(resx).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void TypedEntryIsNotDangerousWhenWave18_8Disabled()
+        {
+            string resx = @"<root>
+  <data name=""Count"" type=""System.Int32, mscorlib""><value>42</value></data>
+</root>";
+
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            IsDangerous(resx).ShouldBeFalse();
+        }
+    }
 }
