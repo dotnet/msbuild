@@ -1037,8 +1037,17 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 // Root project has no default targets.
-                // The project file does not contain any targets
-                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new[] { "B" } } }, defaultTargets: string.Empty);
+                // The project file does not contain any targets, so it is created inline rather than via the
+                // CreateProjectFile helper (which always injects a 'Build' target).
+                TransientTestFile entryProject = env.CreateFile("1.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""2.proj"" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReferenceTargets Include=""A"" Targets=""B"" />
+  </ItemGroup>
+</Project>");
 
                 // Dependency has default targets. Even though it gets called with empty targets, B will not get called,
                 // because target propagation only equates empty targets to default targets for the root nodes.
@@ -2671,6 +2680,16 @@ $@"
                 {
                     { 1, new[] { 2 } },
                 },
+                // Give each project an explicit default target so the helper's auto-injected 'Build' target
+                // (which is emitted first and would otherwise become the default) does not hide it.
+                createProjectFile: (env, projectNumber, projectReferences, projectReferenceTargets, defaultTargets, extraContent) =>
+                    Helpers.CreateProjectFile(
+                        env,
+                        projectNumber,
+                        projectReferences,
+                        projectReferenceTargets,
+                        defaultTargets: $"SomeDefaultTarget{projectNumber}",
+                        extraContent: extraContent),
                 extraContentPerProjectNumber: new Dictionary<int, string>()
                 {
                     {
@@ -2684,13 +2703,7 @@ $@"
 <ItemGroup>
     <ProjectReferenceTargets Include='SomeDefaultTarget1' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
 </ItemGroup>
-
-<Target Name='SomeDefaultTarget1' />
 "
-                    },
-                    {
-                        2,
-                        @"<Target Name='SomeDefaultTarget2' />"
                     }
                 });
 
@@ -2713,6 +2726,16 @@ $@"
                 {
                     {1, new[] {2}},
                 },
+                // Give each project an explicit default target so the helper's auto-injected 'Build' target
+                // (which is emitted first and would otherwise become the default) does not hide it.
+                createProjectFile: (env, projectNumber, projectReferences, projectReferenceTargets, defaultTargets, extraContent) =>
+                    Helpers.CreateProjectFile(
+                        env,
+                        projectNumber,
+                        projectReferences,
+                        projectReferenceTargets,
+                        defaultTargets: $"SomeDefaultTarget{projectNumber}",
+                        extraContent: extraContent),
                 extraContentPerProjectNumber: new Dictionary<int, string>()
                 {
                     {
@@ -2726,13 +2749,7 @@ $@"
 <ItemGroup>
     <ProjectReferenceTargets Include='SomeDefaultTarget1' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
 </ItemGroup>
-
-<Target Name='SomeDefaultTarget1' />
 "
-                    },
-                    {
-                        2,
-                        @"<Target Name='SomeDefaultTarget2' />"
                     }
                 });
 
