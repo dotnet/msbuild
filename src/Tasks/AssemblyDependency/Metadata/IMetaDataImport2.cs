@@ -5,9 +5,7 @@
 // CLR metadata interfaces are not in Win32 metadata; declarations from CLR\src\inc\cor.h.
 
 using System;
-#if NET
 using System.Runtime.CompilerServices;
-#endif
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -40,7 +38,11 @@ internal unsafe struct IMetaDataImport2 : IComIID
         get => ref Unsafe.AsRef(in IID_IMetaDataImport2);
     }
 #else
-    readonly Guid IComIID.Guid => IID_IMetaDataImport2;
+    readonly ref readonly Guid IComIID.Guid
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => ref Unsafe.AsRef(in IID_IMetaDataImport2);
+    }
 #endif
 
     private readonly void** _lpVtbl;
