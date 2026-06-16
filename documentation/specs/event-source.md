@@ -222,6 +222,7 @@ Only rows marked **PerfLog = Yes** are included in the `DOTNET_PERFLOG_DIR` text
 
 ### Targets and tasks
 
+* Start by breaking overall execution time down by `Target` duration and then `ExecuteTask` duration. That is usually the fastest way to find the expensive part of execution.
 * `TargetStart` / `TargetStop` tells you target result; `ExecuteTaskStart` / `ExecuteTaskStop` does **not** tell you task success directly.
 * For task-hosted tasks, separate the time into:
   1. `TaskHostDispatch` = whole round trip,
