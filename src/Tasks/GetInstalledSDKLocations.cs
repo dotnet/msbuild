@@ -72,7 +72,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(TargetPlatformVersion));
+                ArgumentNullException.ThrowIfNull(value, nameof(TargetPlatformVersion));
                 _targetPlatformVersion = value;
             }
         }
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(TargetPlatformIdentifier));
+                ArgumentNullException.ThrowIfNull(value, nameof(TargetPlatformIdentifier));
                 _targetPlatformIdentifier = value;
             }
         }

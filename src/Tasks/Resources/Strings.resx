@@ -3088,6 +3088,14 @@
   </data>
 
   <!--
+        MSB4311 - MSB4320   Task: FormatUrl
+  -->
+  <data name="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+    <value>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</value>
+    <comment>{StrBegin="MSB4311: "}</comment>
+  </data>
+
+  <!--
         MSB9901 - MSB9990   MSBuild common targets messages
   -->
   <data name="CommonSdk.SpecifiedSeverityDoesNotExist">
@@ -3251,6 +3259,7 @@
             MSB3981 - MSB3990   Task: GetCompatiblePlatform
             MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
             MSB4300 - MSB4310   Task: AddToWin32Manifest
+            MSB4311 - MSB4320   Task: FormatUrl
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

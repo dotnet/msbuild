@@ -3,6 +3,9 @@
     <TargetFrameworks>$(LibraryTargetFrameworks);net35</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0, net35) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <IsPackable>true</IsPackable>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <PackageId>Microsoft.NET.StringTools</PackageId>

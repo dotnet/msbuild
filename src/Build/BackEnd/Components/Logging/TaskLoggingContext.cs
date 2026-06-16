@@ -128,7 +128,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void LogTaskBatchFinished(string projectFullPath, bool success)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
+            Assumed.True(this.IsValid, "invalid");
 
             LoggingService.LogTaskFinished(
                 BuildEventContext,

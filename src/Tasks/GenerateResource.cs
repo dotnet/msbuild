@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -42,6 +42,12 @@ using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Com.Urlmon;
+#endif
 #endif
 
 #nullable disable
@@ -251,7 +257,9 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return (ITaskItem[])_filesWritten.ToArray(typeof(ITaskItem));
+                ITaskItem[] filesWritten = new ITaskItem[_filesWritten.Count];
+                _filesWritten.CopyTo(filesWritten);
+                return filesWritten;
             }
         }
 
@@ -617,7 +625,7 @@ namespace Microsoft.Build.Tasks
         {
             // Throw an internal error, since this method should only ever get called by other aspects of this task, not
             // anything that the user touches.
-            ErrorUtilities.VerifyThrowInternalNull(resGenCommand);
+            Assumed.NotNull(resGenCommand);
 
             // append the /useSourcePath flag if requested.
             if (UseSourcePath)
@@ -808,7 +816,7 @@ namespace Microsoft.Build.Tasks
                                        typeof(ProcessResourceFiles).FullName);
 
                                 Type processType = obj.GetType();
-                                ErrorUtilities.VerifyThrow(processType == typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
+                                Assumed.Equal(processType, typeof(ProcessResourceFiles), "Somehow got a wrong and possibly incompatible type for ProcessResourceFiles.");
 
                                 process = (ProcessResourceFiles)obj;
 
@@ -931,14 +939,26 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
         private static readonly bool AllowMOTW = !NativeMethodsShared.IsWindows || (Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null) is string allowUntrustedFiles && allowUntrustedFiles.Equals("true", StringComparison.OrdinalIgnoreCase));
 
-        private const string CLSID_InternetSecurityManager = "7b8a2d94-0ac9-11d1-896c-00c04fb6bfc4";
         private const uint ZoneInternet = 3;
-        private static IInternetSecurityManager internetSecurityManager = null;
+
+#if FEATURE_WINDOWSINTEROP
+        // CLSID of the InternetSecurityManager coclass exported by urlmon.dll.
+        // Not in the Win32 metadata, so it is hard-coded here.
+        private static readonly Guid CLSID_InternetSecurityManager = new(0x7B8A2D94, 0x0AC9, 0x11D1, 0x89, 0x6C, 0x00, 0xC0, 0x4F, 0xB6, 0xBF, 0xC4);
+
+        // Lazily-activated InternetSecurityManager COM object. Stored agile so the same
+        // pointer can be reused from any thread within the build; one CoCreate per
+        // process is enough. volatile gives the double-checked lock in IsDangerous safe
+        // publication, so a second thread cannot observe the reference before the GIT
+        // cookie set in the AgileComPointer constructor is visible.
+        private static volatile AgileComPointer<IInternetSecurityManager> s_internetSecurityManager;
+        private static readonly object s_internetSecurityManagerLock = new();
+#endif
 #endif
 
         // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
         // so check to see if we should trust them before analyzing them
-        private bool IsDangerous(String filename)
+        private unsafe bool IsDangerous(String filename)
         {
 #if !FEATURE_RESXREADER_LIVEDESERIALIZATION
             return false;
@@ -950,19 +970,40 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // First check the zone, if they are not an untrusted zone, they aren't dangerous
-            if (internetSecurityManager == null)
+#if FEATURE_WINDOWSINTEROP
+            // First check the zone, if they are not an untrusted zone, they aren't dangerous.
+            // CoCreate the InternetSecurityManager once per process and reuse via the GIT;
+            // double-checked lock around lazy init keeps that allocation single-shot.
+            if (s_internetSecurityManager is null)
             {
-                Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
-                internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
+                lock (s_internetSecurityManagerLock)
+                {
+                    if (s_internetSecurityManager is null)
+                    {
+                        Guid clsid = CLSID_InternetSecurityManager;
+                        Guid iid = IID.Get<IInternetSecurityManager>();
+                        using ComScope<IInternetSecurityManager> scope = new();
+                        PInvoke.CoCreateInstance(&clsid, pUnkOuter: null, CLSCTX.CLSCTX_INPROC_SERVER, &iid, scope).ThrowOnFailure();
+                        s_internetSecurityManager = new AgileComPointer<IInternetSecurityManager>(scope.Pointer, takeOwnership: false);
+                    }
+                }
             }
 
-            int zone;
-            internetSecurityManager.MapUrlToZone(Path.GetFullPath(filename), out zone, 0);
+            uint zone;
+            string fullPath = Path.GetFullPath(filename);
+            using (ComScope<IInternetSecurityManager> mgr = s_internetSecurityManager.GetInterface())
+            {
+                fixed (char* pPath = fullPath)
+                {
+                    mgr.Pointer->MapUrlToZone(new PCWSTR(pPath), &zone, 0).ThrowOnFailure();
+                }
+            }
+
             if (zone < ZoneInternet)
             {
                 return false;
             }
+#endif
 
             // By default all file types that get here are considered dangerous
             bool dangerous = true;
@@ -1181,8 +1222,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool TransformResourceFilesUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count != 0, "There should be resource files to process");
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count == outputsToProcess.Count, "The number of inputs and outputs should be equal");
+            Assumed.True(inputsToProcess.Count != 0, "There should be resource files to process");
+            Assumed.Equal(inputsToProcess.Count, outputsToProcess.Count, "The number of inputs and outputs should be equal");
 
             bool succeeded = true;
 
@@ -1302,7 +1343,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="outputsToProcess">Output files to give to resgen.exe.</param>
         private bool GenerateStronglyTypedResourceUsingResGen(List<ITaskItem> inputsToProcess, List<ITaskItem> outputsToProcess)
         {
-            ErrorUtilities.VerifyThrow(inputsToProcess.Count == 1 && outputsToProcess.Count == 1, "For STR, there should only be one input and one output.");
+            Assumed.True(inputsToProcess.Count == 1 && outputsToProcess.Count == 1, "For STR, there should only be one input and one output.");
 
             ResGen resGen = CreateResGenTaskWithDefaultParameters();
 
@@ -2135,7 +2176,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            ErrorUtilities.VerifyThrow(OutputResources != null && OutputResources.Length != 0, "Should be at least one output resource");
+            Assumed.True(OutputResources != null && OutputResources.Length != 0, "Should be at least one output resource");
 
             // We only get here if there was at least one resource generation error.
             ITaskItem[] temp = new ITaskItem[OutputResources.Length - _unsuccessfullyCreatedOutFiles.Count];
@@ -2219,7 +2260,7 @@ namespace Microsoft.Build.Tasks
 
             // This method eats IO Exceptions
             _cache = ResGenDependencies.DeserializeCache(StateFile?.ItemSpec, UseSourcePath, Log);
-            ErrorUtilities.VerifyThrow(_cache != null, "We did not create a cache!");
+            Assumed.NotNull(_cache, "We did not create a cache!");
         }
 
         /// <summary>
@@ -2751,8 +2792,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     currentOutputFile = outFileOrDir;
-                    ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                        $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
+                    Assumed.Equal(_readers.Count, 1, $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2760,8 +2800,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                            $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
+                        Assumed.Equal(_readers.Count, 1, $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

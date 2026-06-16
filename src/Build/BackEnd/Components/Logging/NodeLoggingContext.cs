@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 
 #nullable disable
@@ -24,7 +23,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal NodeLoggingContext(ILoggingService loggingService, int nodeId, bool inProcNode)
             : base(loggingService, new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId), inProcNode)
         {
-            ErrorUtilities.VerifyThrow(nodeId != BuildEventContext.InvalidNodeId, "Should not ever be given an invalid NodeId");
+            Assumed.NotEqual(nodeId, BuildEventContext.InvalidNodeId, "Should not ever be given an invalid NodeId");
 
             // The in-proc node will have its BuildStarted, BuildFinished events sent by the BuildManager itself.
             if (!IsInProcNode)
@@ -47,7 +46,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">Did the build succeed or not</param>
         internal void LogBuildFinished(bool success)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
+            Assumed.True(this.IsValid, "Build not started.");
 
             // The in-proc node will have its BuildStarted, BuildFinished events sent by the BuildManager itself.
             if (!IsInProcNode)
@@ -72,7 +71,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal (ProjectStartedEventArgs, ProjectLoggingContext) CreateProjectLoggingContext(BuildRequestEntry requestEntry)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
+            Assumed.True(this.IsValid, "Build not started.");
             return ProjectLoggingContext.CreateLoggingContext(this, requestEntry);
         }
 
@@ -84,7 +83,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns>The BuildEventContext to use for this project.</returns>
         internal ProjectLoggingContext LogProjectStarted(BuildRequest request, BuildRequestConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
+            Assumed.True(this.IsValid, "Build not started.");
 
             // Use the persisted ProjectEvaluationId which remains available even when the project is cached.
             int evaluationId = configuration?.ProjectEvaluationId ?? BuildEventContext.InvalidEvaluationId;

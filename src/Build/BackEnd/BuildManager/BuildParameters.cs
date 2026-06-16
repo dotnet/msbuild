@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -256,7 +256,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">The ProjectCollection from which the BuildParameters should populate itself.</param>
         public BuildParameters(ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             Initialize(new PropertyDictionary<ProjectPropertyInstance>(projectCollection.EnvironmentProperties), projectCollection.ProjectRootElementCache, new ToolsetProvider(projectCollection.Toolsets));
 
@@ -283,7 +283,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildParameters(BuildParameters other, bool resetEnvironment = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other);
+            Assumed.NotNull(other);
 
             _buildId = other._buildId;
             _culture = other._culture;
@@ -762,7 +762,7 @@ namespace Microsoft.Build.Execution
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "EnvironmentPropertiesInternal");
+                Assumed.NotNull(value, valueExpression: "EnvironmentPropertiesInternal");
                 _environmentProperties = value;
             }
         }

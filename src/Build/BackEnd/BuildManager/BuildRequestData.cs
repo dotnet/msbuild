@@ -1,11 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
@@ -58,11 +58,11 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, IEnumerable<string>? propertiesToTransfer)
             : this(targetsToBuild, hostServices, flags, projectInstance.FullPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectInstance);
+            ArgumentNullException.ThrowIfNull(projectInstance);
 
             foreach (string targetName in targetsToBuild)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(targetName, "target");
+                ArgumentNullException.ThrowIfNull(targetName, "target");
             }
 
             ProjectInstance = projectInstance;
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, IEnumerable<string>? propertiesToTransfer, RequestedProjectState requestedProjectState)
             : this(projectInstance, targetsToBuild, hostServices, flags, propertiesToTransfer)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState);
+            ArgumentNullException.ThrowIfNull(requestedProjectState);
 
             RequestedProjectState = requestedProjectState;
         }
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Execution
             RequestedProjectState requestedProjectState)
             : this(projectFullPath, globalProperties, toolsVersion, targetsToBuild, hostServices, flags)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState);
+            ArgumentNullException.ThrowIfNull(requestedProjectState);
 
             RequestedProjectState = requestedProjectState;
         }
@@ -138,8 +138,8 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(string projectFullPath, IDictionary<string, string?> globalProperties, string? toolsVersion, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags, FileUtilities.NormalizePath(projectFullPath)!)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath);
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
+            ArgumentException.ThrowIfNullOrEmpty(projectFullPath);
+            ArgumentNullException.ThrowIfNull(globalProperties);
 
             GlobalPropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
             foreach (KeyValuePair<string, string?> propertyPair in globalProperties)
