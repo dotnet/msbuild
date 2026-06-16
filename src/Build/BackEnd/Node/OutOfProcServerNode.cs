@@ -406,44 +406,46 @@ namespace Microsoft.Build.Experimental
             // reflects the client's terminal instead of this node's redirected stdout.
             NativeMethodsShared.ConsoleConfigurationOverride =
                 (command.ConsoleConfiguration.AcceptAnsiColorCodes, command.ConsoleConfiguration.OutputIsScreen);
+            CommunicationsUtilities.Trace($"ConsoleConfigurationOverride: acceptAnsi={command.ConsoleConfiguration.AcceptAnsiColorCodes}, outputIsScreen={command.ConsoleConfiguration.OutputIsScreen}");
 
-            // Initiate build telemetry
-            if (command.PartialBuildTelemetry != null)
-            {
-                BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
-
-                buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
-                buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
-                buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
-                buildTelemetry.ServerEnableReason = command.PartialBuildTelemetry.ServerEnableReason;
-            }
-
-            // Also try our best to increase chance custom Loggers which use Console static members will work as expected.
-            try
-            {
-                if (NativeMethodsShared.IsWindows && command.ConsoleConfiguration.BufferWidth > 0)
-                {
-                    Console.BufferWidth = command.ConsoleConfiguration.BufferWidth;
-                }
-
-                if ((int)command.ConsoleConfiguration.BackgroundColor != -1)
-                {
-                    Console.BackgroundColor = command.ConsoleConfiguration.BackgroundColor;
-                }
-            }
-            catch (Exception)
-            {
-                // Ignore exception, it is best effort only
-            }
-
-            // Configure console output redirection
             var oldOut = Console.Out;
             var oldErr = Console.Error;
             (int exitCode, string exitType) buildResult;
 
-            // Dispose must be called before the server sends ServerNodeBuildResult packet
+            // Everything below is wrapped so that on any failure path the original Console writers are
+            // restored and the override is cleared - important for a long-lived, reusable server node.
             try
             {
+                // Initiate build telemetry
+                if (command.PartialBuildTelemetry != null)
+                {
+                    BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
+
+                    buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
+                    buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
+                    buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
+                    buildTelemetry.ServerEnableReason = command.PartialBuildTelemetry.ServerEnableReason;
+                }
+
+                // Also try our best to increase chance custom Loggers which use Console static members will work as expected.
+                try
+                {
+                    if (NativeMethodsShared.IsWindows && command.ConsoleConfiguration.BufferWidth > 0)
+                    {
+                        Console.BufferWidth = command.ConsoleConfiguration.BufferWidth;
+                    }
+
+                    if ((int)command.ConsoleConfiguration.BackgroundColor != -1)
+                    {
+                        Console.BackgroundColor = command.ConsoleConfiguration.BackgroundColor;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Ignore exception, it is best effort only
+                }
+
+                // Dispose must be called before the server sends ServerNodeBuildResult packet
                 using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
                 using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
                 {
@@ -451,14 +453,14 @@ namespace Microsoft.Build.Experimental
                     Console.SetError(errWriter);
 
                     buildResult = _buildFunction(command.CommandLine);
-
-                    Console.SetOut(oldOut);
-                    Console.SetError(oldErr);
                 }
             }
             finally
             {
-                // Reset the override so a later idle/in-proc query does not observe stale client capabilities.
+                // Restore the original Console writers and clear the override on all paths so a reusable
+                // server node never observes stale state (or disposed writers) between builds.
+                Console.SetOut(oldOut);
+                Console.SetError(oldErr);
                 NativeMethodsShared.ConsoleConfigurationOverride = null;
             }
 

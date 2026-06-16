@@ -248,6 +248,8 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData(true, true, typeof(TerminalLogger))]
         [InlineData(false, false, typeof(ConsoleLogger))]
+        [InlineData(true, false, typeof(ConsoleLogger))]
+        [InlineData(false, true, typeof(ConsoleLogger))]
         public void CreateTerminalOrConsoleLogger_AutoHonorsServerTransmittedConsoleConfiguration(bool acceptAnsi, bool outputIsScreen, Type expectedType)
         {
             using TestEnvironment env = TestEnvironment.Create(_outputHelper);

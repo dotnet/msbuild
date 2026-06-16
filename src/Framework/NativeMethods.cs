@@ -1247,7 +1247,8 @@ internal static class NativeMethods
     /// Overrides the console capabilities reported by <see cref="QueryIsScreenAndTryEnableAnsiColorCodes"/>.
     /// Set by a node (e.g. the MSBuild Server node) to the capabilities transmitted from the client process,
     /// so that auto-detection reflects the client's real terminal rather than the node's own redirected stdout.
-    /// Null when running in-proc, in which case the local <see cref="Console"/> is queried as usual.
+    /// Null when no override is active - i.e. during in-proc builds, or when a server node is idle between
+    /// out-of-proc builds - in which case the local <see cref="Console"/> is queried as usual.
     /// </summary>
     internal static (bool acceptAnsiColorCodes, bool outputIsScreen)? ConsoleConfigurationOverride { get; set; }
 
