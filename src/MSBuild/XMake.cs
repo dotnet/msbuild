@@ -313,13 +313,13 @@ namespace Microsoft.Build.CommandLine
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(args))
+                CanRunServerBasedOnCommandLineSwitches(args, out bool multiThreaded))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
 
                 // Use the client app to execute build in msbuild server. Opt-in feature.
-                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, multiThreaded, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
             {
@@ -343,9 +343,10 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
         /// </remarks>
-        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine)
+        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine, out bool multiThreaded)
         {
             bool canRunServer = true;
+            multiThreaded = false;
             try
             {
                 commandLineParser.GatherAllSwitches(
@@ -361,6 +362,11 @@ namespace Microsoft.Build.CommandLine
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
+
+                // Determine multithreaded mode from the fully-parsed switches (which include any
+                // response-file-provided switches) using the same logic as the in-proc build path.
+                multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
+
                 string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
@@ -658,7 +664,7 @@ namespace Microsoft.Build.CommandLine
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
-            ErrorUtilities.VerifyThrowArgumentLength(commandLine);
+            ArgumentException.ThrowIfNullOrEmpty(commandLine);
 
             AppDomain.CurrentDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
 
@@ -1731,7 +1737,7 @@ namespace Microsoft.Build.CommandLine
             catch (InvalidProjectFileException ex)
             {
                 // just eat the exception because it has already been logged
-                ErrorUtilities.VerifyThrow(ex.HasBeenLogged, "Should have been logged");
+                Assumed.True(ex.HasBeenLogged, "Should have been logged");
                 success = false;
             }
             finally
@@ -2359,7 +2365,7 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            ErrorUtilities.VerifyThrow(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
+            Assumed.True(!invokeBuild || !string.IsNullOrEmpty(projectFile), "We should have a project file if we're going to build.");
 
             return invokeBuild;
         }
@@ -3109,7 +3115,7 @@ namespace Microsoft.Build.CommandLine
                                  string[] projectsExtensionsToIgnore,
                                  DirectoryGetFiles getFiles)
         {
-            ErrorUtilities.VerifyThrow(parameters.Length <= 1, "Expect exactly one project at a time.");
+            Assumed.LessThanOrEqual(parameters.Length, 1, "Expect exactly one project at a time.");
             string projectFile = null;
 
             string projectDirectory = null;
@@ -3864,8 +3870,7 @@ namespace Microsoft.Build.CommandLine
                 // split each <central logger>|<node logger> string into two pieces, breaking on the first | that is found
                 var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out _, '*');
 
-                ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
-                    "SplitUnquoted() must return at least one string, and no more than two.");
+                Assumed.InRange(loggerSpec.Count, 1, 2, "SplitUnquoted() must return at least one string, and no more than two.");
 
                 string unquotedParameter = QuotingUtilities.Unquote(loggerSpec[0]);
                 LoggerDescription centralLoggerDescription =
@@ -3910,8 +3915,7 @@ namespace Microsoft.Build.CommandLine
             // split each <logger type>;<logger parameters> string into two pieces, breaking on the first ; that is found
             var loggerSpec = QuotingUtilities.SplitUnquoted(parameter, 2, true /* keep empty splits */, false /* keep quotes */, out _, ';');
 
-            ErrorUtilities.VerifyThrow((loggerSpec.Count >= 1) && (loggerSpec.Count <= 2),
-                "SplitUnquoted() must return at least one string, and no more than two.");
+            Assumed.InRange(loggerSpec.Count, 1, 2, "SplitUnquoted() must return at least one string, and no more than two.");
 
             // check that the logger is specified
             CommandLineSwitchException.VerifyThrow(loggerSpec[0].Length > 0,
@@ -3926,7 +3930,7 @@ namespace Microsoft.Build.CommandLine
             // split each <logger class>,<logger assembly>[,<option1>][,option2] parameters string into pieces
             var loggerTypeSpec = QuotingUtilities.SplitUnquoted(loggerSpec[0], int.MaxValue, true /* keep empty splits */, false /* keep quotes */, out _, ',');
 
-            ErrorUtilities.VerifyThrow(loggerTypeSpec.Count >= 1, "SplitUnquoted() must return at least one string");
+            Assumed.Positive(loggerTypeSpec.Count, "SplitUnquoted() must return at least one string");
 
             string loggerAssemblySpec;
 

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_FILE_TRACKER
@@ -338,7 +338,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputs">ITaskItem array of outputs.</param>
         public static string FormatRootingMarker(ITaskItem[] sources, ITaskItem[] outputs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources);
+            ArgumentNullException.ThrowIfNull(sources);
 
             // So we don't have to deal with null checks.
             outputs ??= Array.Empty<ITaskItem>();
@@ -559,10 +559,8 @@ namespace Microsoft.Build.Utilities
         {
             // Make sure that if someone starts passing the wrong thing to this method we don't silently
             // eat it and do something possibly unexpected.
-            ErrorUtilities.VerifyThrow(
-                s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase) ||
-                s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase),
-                $"This method should only be passed s_TrackerFilename or s_FileTrackerFilename, but was passed {filename} instead!");
+            Assumed.True(s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase) ||
+                s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase), $"This method should only be passed s_TrackerFilename or s_FileTrackerFilename, but was passed {filename} instead!");
 
             // Look for FileTracker.dll/Tracker.exe in the MSBuild tools directory. They may exist elsewhere on disk,
             // but other copies aren't guaranteed to be compatible with the latest.
@@ -756,7 +754,7 @@ namespace Microsoft.Build.Utilities
             // Only log when we have been passed a TaskLoggingHelper
             if (Log != null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+                ArgumentNullException.ThrowIfNull(messageResourceName);
 
                 Log.LogMessage(importance, AssemblyResources.GetString(messageResourceName), messageArgs);
             }

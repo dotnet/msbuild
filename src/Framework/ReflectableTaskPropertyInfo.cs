@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -23,6 +24,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The type of the generated tasks.
         /// </summary>
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
         private Type _taskType;
 
         /// <summary>
@@ -30,7 +32,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="taskPropertyInfo">The original property info that generated this instance.</param>
         /// <param name="taskType">The type to reflect over to get the reflection propertyinfo later.</param>
-        internal ReflectableTaskPropertyInfo(TaskPropertyInfo taskPropertyInfo, Type taskType)
+        internal ReflectableTaskPropertyInfo(
+            TaskPropertyInfo taskPropertyInfo,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+            Type taskType)
             : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
         {
             ArgumentNullException.ThrowIfNull(taskType);
@@ -77,7 +82,7 @@ namespace Microsoft.Build.Execution
                 if (_propertyInfo == null)
                 {
                     _propertyInfo = _taskType.GetProperty(Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
-                    FrameworkErrorUtilities.VerifyThrow(_propertyInfo != null, $"Could not find property {Name} on type {_taskType.FullName} that the task factory indicated should exist.");
+                    Assumed.NotNull(_propertyInfo, $"Could not find property {Name} on type {_taskType.FullName} that the task factory indicated should exist.");
                 }
 
                 return _propertyInfo;

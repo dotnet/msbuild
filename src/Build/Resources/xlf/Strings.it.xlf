@@ -590,6 +590,11 @@
         <target state="translated">Caricamento del plug-in della cache del progetto seguente: {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogEnabledLogs">
+        <source>Enabled loggers: {0}</source>
+        <target state="translated">Logger abilitati: {0}</target>
+        <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
+      </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
         <source>Logging verbosity is set to: {0}.</source>
         <target state="translated">Il livello di dettaglio della registrazione è impostato su: {0}.</target>

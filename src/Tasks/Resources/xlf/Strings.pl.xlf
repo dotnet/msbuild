@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="new">MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</target>
+        <target state="translated">MSB3071: Wszystkie litery dysków od A: do Z: są obecnie zajęte. Ponieważ katalog roboczy „{0}” (rozpoznany jako ścieżka UNC „{1}”) wymaga mapowania UNC, zadanie „Exec” wymaga wolnej litery dysku, aby zamapować ścieżkę UNC. Odłącz się od co najmniej jednego zasobu udostępnionego, aby zwolnić litery dysków, lub określ lokalny katalog roboczy przed ponownym użyciem tego polecenia.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -563,6 +563,11 @@
         <source>MSB3541: {0} has invalid value "{1}". {2}</source>
         <target state="translated">MSB3541: {0} zawiera nieprawidłową wartość „{1}”. {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
+      </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="translated">MSB4311: Wartość InputUrl „{0}” nie jest prawidłową ścieżką w systemie Windows, ponieważ składa się wyłącznie z białych znaków.</target>
+        <note>{StrBegin="MSB4311: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>

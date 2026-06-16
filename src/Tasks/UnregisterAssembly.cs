@@ -12,11 +12,12 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
-using System.Runtime.InteropServices.ComTypes;
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Ole;
 #endif
 
 using Microsoft.Build.Framework;
@@ -149,9 +150,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper unregistration method
         /// </summary>
-        private bool Unregister(string assemblyPath, string typeLibPath)
+        private unsafe bool Unregister(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath);
+            ArgumentNullException.ThrowIfNull(typeLibPath);
 
             Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisteringAssembly", assemblyPath);
 
@@ -229,59 +230,46 @@ namespace Microsoft.Build.Tasks
 
             Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisteringTypeLib", typeLibPath);
 
-            if (FileSystems.Default.FileExists(typeLibPath))
+            if (!FileSystems.Default.FileExists(typeLibPath))
             {
-                try
-                {
-                    ITypeLib typeLibrary = (ITypeLib)NativeMethods.LoadTypeLibEx(typeLibPath, (int)NativeMethods.REGKIND.REGKIND_NONE);
+                Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisterTlbFileDoesNotExist", typeLibPath);
+                return true;
+            }
 
-                    // Get the library attributes so we can unregister it
-                    IntPtr pTlibAttr = IntPtr.Zero;
+            using ComScope<ITypeLib> typeLibrary = new(null);
+            HRESULT hr = PInvoke.LoadTypeLibEx(typeLibPath, REGKIND.REGKIND_NONE, typeLibrary);
 
-                    try
-                    {
-                        typeLibrary.GetLibAttr(out pTlibAttr);
-                        if (pTlibAttr != IntPtr.Zero)
-                        {
-                            // Unregister the type library
-                            System.Runtime.InteropServices.ComTypes.TYPELIBATTR tlibattr = (System.Runtime.InteropServices.ComTypes.TYPELIBATTR)Marshal.PtrToStructure(pTlibAttr, typeof(System.Runtime.InteropServices.ComTypes.TYPELIBATTR));
-                            NativeMethods.UnregisterTypeLib(ref tlibattr.guid, tlibattr.wMajorVerNum, tlibattr.wMinorVerNum, tlibattr.lcid, tlibattr.syskind);
-                        }
-                    }
-                    finally
-                    {
-                        typeLibrary.ReleaseTLibAttr(pTlibAttr);
-                        Marshal.ReleaseComObject(typeLibrary);
-                    }
-                }
-                catch (COMException ex)
-                {
-                    // if the typelib to be unregistered is not registered, then we don't have anything left to do
-                    if (ex.ErrorCode == HRESULT.TYPE_E_REGISTRYACCESS)
-                    {
-                        Log.LogWarningWithCodeFromResources("UnregisterAssembly.UnregisterTlbFileNotRegistered", typeLibPath);
-                    }
-                    // if the typelib can't be loaded (say because it's not a valid typelib file) we should report an error
-                    else if (ex.ErrorCode == HRESULT.TYPE_E_CANTLOADLIBRARY)
-                    {
-                        Log.LogErrorWithCodeFromResources("UnregisterAssembly.UnregisterTlbCantLoadFile", typeLibPath);
-                        return false;
-                    }
+            // if the typelib can't be loaded (say because it's not a valid typelib file) we should report an error
+            if (hr == HRESULT.TYPE_E_CANTLOADLIBRARY)
+            {
+                Log.LogErrorWithCodeFromResources("UnregisterAssembly.UnregisterTlbCantLoadFile", typeLibPath);
+                return false;
+            }
 
-                    // rethrow other exceptions
-                    else
-                    {
-#if DEBUG
-                        Debug.Assert(false, "Unexpected exception in UnregisterAssembly.DoExecute. " +
-                            "Please log a MSBuild bug specifying the steps to reproduce the problem.");
-#endif
-                        throw;
-                    }
-                }
+            hr.ThrowOnFailure();
+
+            // Get the library attributes so we can unregister it
+            TLIBATTR* pTlibAttr = null;
+            typeLibrary.Pointer->GetLibAttr(&pTlibAttr).ThrowOnFailure();
+
+            // Unregister the type library
+            hr = PInvoke.UnRegisterTypeLib(
+                pTlibAttr->guid,
+                pTlibAttr->wMajorVerNum,
+                pTlibAttr->wMinorVerNum,
+                pTlibAttr->lcid,
+                pTlibAttr->syskind);
+
+            typeLibrary.Pointer->ReleaseTLibAttr(pTlibAttr);
+
+            // if the typelib to be unregistered is not registered, then we don't have anything left to do
+            if (hr == HRESULT.TYPE_E_REGISTRYACCESS)
+            {
+                Log.LogWarningWithCodeFromResources("UnregisterAssembly.UnregisterTlbFileNotRegistered", typeLibPath);
             }
             else
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisterTlbFileDoesNotExist", typeLibPath);
+                hr.ThrowOnFailure();
             }
 
             return true;

@@ -469,7 +469,7 @@ namespace Microsoft.Build.Tasks
 
             // if the working directory is a UNC path, and all drive letters are mapped, bail out, because the pushd command
             // will not be able to auto-map to the UNC path
-            if (workingDirectoryIsUNC && NativeMethods.AllDrivesMapped())
+            if (workingDirectoryIsUNC && AllDrivesMapped())
             {
                 Log.LogErrorWithCodeFromResources(
                     "Exec.AllDriveLettersMappedError",
@@ -479,6 +479,26 @@ namespace Microsoft.Build.Tasks
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Returns true on Windows if every drive letter (A-Z, excluding the reserved high bits) is already
+        /// mapped, in which case the cmd "pushd" used to enter a UNC working directory has no free letter to use.
+        /// </summary>
+        private static bool AllDrivesMapped()
+        {
+#if FEATURE_WINDOWSINTEROP
+            const uint AllDriveMask = 0x0cffffff;
+            if (NativeMethodsShared.IsWindows)
+            {
+                uint driveMask = Windows.Win32.PInvoke.GetLogicalDrives();
+
+                // All drives are taken if the value has all 26 bits set.
+                return driveMask >= AllDriveMask;
+            }
+#endif
+
+            return false;
         }
 
         /// <summary>

@@ -267,7 +267,7 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
 
-# Dedicated /mt validation that turns on the ThreadSafeTaskAnalyzer (BuildAnalyzer=true),
+# Dedicated /mt validation that turns on the TaskAnalyzer (BuildAnalyzer=true),
 # kept as a separate Linux Core job because the analyzer is more expensive and the regular
 # bootstrapped CI jobs (which all run /mt now too) do not need it.
 - job: BootstrapMSBuildWithMTMode

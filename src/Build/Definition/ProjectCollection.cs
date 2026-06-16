@@ -1,9 +1,10 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -121,6 +122,11 @@ namespace Microsoft.Build.Evaluation
         /// The projects loaded into this collection.
         /// </summary>
         private readonly LoadedProjectCollection _loadedProjects;
+
+        /// <summary>
+        /// Locks used to serialize concurrent loads for the same project path.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, LockType> _loadProjectLocks = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// External projects support
@@ -544,14 +550,14 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_locker.EnterDisposableReadLock())
                 {
-                    ErrorUtilities.VerifyThrow(_defaultToolsVersion != null, "Should have a default");
+                    Assumed.NotNull(_defaultToolsVersion, "Should have a default");
                     return _defaultToolsVersion;
                 }
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(DefaultToolsVersion));
+                ArgumentException.ThrowIfNullOrEmpty(value, nameof(DefaultToolsVersion));
 
                 bool sendEvent = false;
                 using (_locker.EnterDisposableWriteLock())
@@ -1072,7 +1078,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void AddToolset(Toolset toolset)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(toolset);
+            ArgumentNullException.ThrowIfNull(toolset);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets[toolset.ToolsVersion] = toolset;
@@ -1088,7 +1094,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
 
             bool changed;
             using (_locker.EnterDisposableWriteLock())
@@ -1132,7 +1138,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ArgumentException.ThrowIfNullOrEmpty(toolsVersion);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
@@ -1219,10 +1225,13 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A loaded project.</returns>
         public Project LoadProject(string fileName, IDictionary<string, string> globalProperties, string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(fileName);
+            ArgumentException.ThrowIfNullOrEmpty(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
-            using (_locker.EnterDisposableWriteLock())
+            // Serialize loads for the same project path to avoid races where multiple threads create equivalent
+            // projects concurrently. Loads for different paths can proceed in parallel.
+            LockType pathLock = _loadProjectLocks.GetOrAdd(fileName, static _ => new());
+            lock (pathLock)
             {
                 if (globalProperties == null)
                 {
@@ -1234,13 +1243,30 @@ namespace Microsoft.Build.Evaluation
                     // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
                     // an exception when we go to actually add the newly created project to the ProjectCollection.
                     // BUT remember that project global properties win -- don't override a property that already exists.
-                    foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
+                    //
+                    // Merge into a per-call copy rather than mutating the caller-owned dictionary, so concurrent loads
+                    // of different paths don't race on the caller's dictionary. Use MSBuildNameIgnoreCaseComparer because
+                    // global property names are case-insensitive, matching every downstream consumer; the indexer collapses
+                    // any caller keys differing only in case instead of throwing.
+                    var mergedProperties = new Dictionary<string, string>(globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
+                    foreach (KeyValuePair<string, string> property in globalProperties)
                     {
-                        if (!globalProperties.ContainsKey(globalProperty.Key))
+                        mergedProperties[property.Key] = property.Value;
+                    }
+
+                    using (_locker.EnterDisposableReadLock())
+                    {
+                        foreach (ProjectPropertyInstance globalProperty in _globalProperties)
                         {
-                            globalProperties.Add(globalProperty);
+                            string name = globalProperty.Name;
+                            if (!mergedProperties.ContainsKey(name))
+                            {
+                                mergedProperties.Add(name, ((IProperty)globalProperty).EvaluatedValueEscaped);
+                            }
                         }
                     }
+
+                    globalProperties = mergedProperties;
                 }
 
                 // We do not control the current directory at this point, but assume that if we were
@@ -1256,12 +1282,12 @@ namespace Microsoft.Build.Evaluation
                     // Either way, no time wasted.
                     try
                     {
-                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, true /*explicitlyloaded*/);
+                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, isExplicitlyLoaded: true);
                         toolsVersionFromProject = (xml.ToolsVersion.Length > 0) ? xml.ToolsVersion : DefaultToolsVersion;
                     }
                     catch (InvalidProjectFileException ex)
                     {
-                        var buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+                        var buildEventContext = new BuildEventContext(nodeId: 0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
                         LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
                         throw;
                     }
@@ -1270,12 +1296,8 @@ namespace Microsoft.Build.Evaluation
                 string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
                 Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
 
-                if (project == null)
-                {
-                    // The Project constructor adds itself to our collection,
-                    // it is not done by us
-                    project = new Project(fileName, globalProperties, effectiveToolsVersion, this);
-                }
+                // The Project constructor adds itself to our collection, it is not done by us
+                project ??= new Project(fileName, globalProperties, effectiveToolsVersion, this);
 
                 return project;
             }
@@ -1441,7 +1463,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public void UnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return;
@@ -1591,7 +1613,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElement">The project XML root element to unload.</param>
         public bool TryUnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return false;
@@ -1730,7 +1752,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterLoggerInternal(ILogger logger)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(logger);
+            ArgumentNullException.ThrowIfNull(logger);
             Debug.Assert(_locker.IsWriteLockHeld);
             _loggingService.RegisterLogger(new Logging.ReusableLogger(logger));
         }
@@ -1811,7 +1833,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // According to Framework Guidelines, Dispose methods should never throw except in dire circumstances.
                     // However if we throw at all, its a bug. Throw InternalErrorException to emphasize that.
-                    ErrorUtilities.ThrowInternalError("Throwing from logger shutdown", ex);
+                    InternalError.Throw("Throwing from logger shutdown", ex);
                     throw;
                 }
 

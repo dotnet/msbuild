@@ -1,9 +1,10 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -114,9 +115,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // It's not null or invalid, so it should be a valid parameter type.
-            ErrorUtilities.VerifyThrow(
-                TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
-                $"How did we manage to get a task parameter of type {wrappedParameterType} that isn't a valid parameter type?");
+            Assumed.True(TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType), $"How did we manage to get a task parameter of type {wrappedParameterType} that isn't a valid parameter type?");
 
             if (wrappedParameterType.IsArray)
             {
@@ -150,7 +149,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
             else
@@ -185,7 +184,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
         }
@@ -256,7 +255,7 @@ namespace Microsoft.Build.BackEnd
                     _wrappedParameter = exceptionParam;
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                     break;
             }
         }
@@ -392,6 +391,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serializes or deserializes an array of primitive type values wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "The element type is always one of the primitive value types selected by the TypeCode switch below, so Array.CreateInstance does not need to generate code for an unknown type.")]
         private void TranslatePrimitiveTypeArray(ITranslator translator)
         {
             translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
@@ -631,7 +632,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
+                Assumed.NotNull(_escapedItemSpec);
             }
 
             private TaskParameterTaskItem()
@@ -730,7 +731,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataValue">The metadata value.</param>
             public void SetMetadata(string metadataName, string metadataValue)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(metadataName);
+                ArgumentException.ThrowIfNullOrEmpty(metadataName);
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
@@ -747,7 +748,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataName">The name of the metadata to remove.</param>
             public void RemoveMetadata(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName);
+                ArgumentNullException.ThrowIfNull(metadataName);
                 ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
                 if (_customEscapedMetadata == null)
@@ -770,7 +771,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="destinationItem">The item to copy metadata to.</param>
             public void CopyMetadataTo(ITaskItem destinationItem)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
+                ArgumentNullException.ThrowIfNull(destinationItem);
 
                 // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
                 // between items, and need to know the source item where the metadata came from
@@ -953,8 +954,8 @@ namespace Microsoft.Build.BackEnd
                 translator.Translate(ref _escapedDefiningProject);
                 translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
 
-                ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
-                ErrorUtilities.VerifyThrowInternalNull(_customEscapedMetadata);
+                Assumed.NotNull(_escapedItemSpec);
+                Assumed.NotNull(_customEscapedMetadata);
             }
 
             internal static TaskParameterTaskItem FactoryForDeserialization(ITranslator translator)

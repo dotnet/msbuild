@@ -25,7 +25,7 @@ namespace Microsoft.Build.BackEnd
         string MSBuildLocation,
         string CommandLineArgs,
         Handshake? Handshake = null,
-        IDictionary<string, string>? EnvironmentOverrides = null);
+        IDictionary<string, string?>? EnvironmentOverrides = null);
 
     internal interface INodeLauncher
     {
