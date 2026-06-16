@@ -394,8 +394,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// </summary>
     private void ResetShutdownTimer()
     {
-        _shutdownTimer?.Dispose();
-        _shutdownTimer = new Timer(
+        var newTimer = new Timer(
             _ =>
             {
                 if (_budgetManager.IsIdle)
@@ -407,5 +406,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             state: null,
             dueTime: _shutdownTimeoutMs,
             period: Timeout.Infinite);
+
+        Interlocked.Exchange(ref _shutdownTimer, newTimer)?.Dispose();
     }
 }
