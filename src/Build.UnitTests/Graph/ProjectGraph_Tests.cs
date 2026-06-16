@@ -14,6 +14,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -3001,6 +3002,142 @@ $@"
             bool mentionsProject1 = innerException.Message.Contains(project1.Path);
             bool mentionsProject2 = innerException.Message.Contains(project2.Path);
             (mentionsProject1 || mentionsProject2).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void FullGraphModeLoadsAllTargetFrameworksIgnoringSetTargetFramework()
+        {
+            using var env = TestEnvironment.Create();
+
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworks>net472;net10.0</TargetFrameworks>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            TransientTestFile project2 = env.CreateFile("project2.proj", $"""
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{project1.Path}">
+                      <SetTargetFramework>TargetFramework=net472</SetTargetFramework>
+                    </ProjectReference>
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var projectGraph = new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(project2.Path)],
+                    Mode = ProjectGraphMode.Full
+                });
+
+            var sorted = projectGraph.ProjectNodesTopologicallySorted.ToList();
+
+            // In Full mode, all target frameworks should be loaded despite SetTargetFramework constraint
+            sorted.Count.ShouldBe(4);
+
+            // Find the inner builds for net10.0 and net472
+            var net10Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
+                n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net10.0");
+            net10Build.ShouldNotBeNull("Should load inner build for net10.0");
+            net10Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+            net10Build.ProjectReferences.ShouldBeEmpty();
+
+            var net472Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
+                n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net472");
+            net472Build.ShouldNotBeNull("Should load inner build for net472");
+            net472Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+            net472Build.ProjectReferences.ShouldBeEmpty();
+
+            var outerBuild = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
+                !n.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            outerBuild.ShouldNotBeNull("Should load outer build");
+            outerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.OuterBuild);
+            outerBuild.ProjectReferences.Count.ShouldBe(2); // References to the two inner builds
+
+            var project2Node = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project2.Path);
+            project2Node.ShouldNotBeNull("Should load project2");
+            project2Node.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.NonMultitargeting);
+            project2Node.ProjectReferences.Count.ShouldBe(3); // References to outer build and two inner builds of project1
+        }
+
+        [Fact]
+        public void FullGraphModeIgnoresSetTargetFrameworkForSingleTargetProject()
+        {
+            using var env = TestEnvironment.Create();
+
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <TargetFramework>net10.0</TargetFramework>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            TransientTestFile project2 = env.CreateFile("project2.proj", $"""
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="{project1.Path}">
+                      <SetTargetFramework>TargetFramework=net472</SetTargetFramework>
+                    </ProjectReference>
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var projectGraph = new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(project2.Path)],
+                    Mode = ProjectGraphMode.Full
+                });
+
+            var sorted = projectGraph.ProjectNodesTopologicallySorted.ToList();
+            sorted.Count.ShouldBe(2);
+
+            var project1Node = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path);
+            project1Node.ShouldNotBeNull("Should load the referenced single-target project");
+            project1Node.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.NonMultitargeting);
+            project1Node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework").ShouldBeFalse();
+
+            var project2Node = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project2.Path);
+            project2Node.ShouldNotBeNull("Should load the entry project");
+            project2Node.ProjectReferences.ShouldHaveSingleItem();
+            project2Node.ProjectReferences.Single().ShouldBe(project1Node);
+        }
+
+        [Fact]
+        public void ConstructWithProjectGraphOptionsAndNullEntryPointsThrows()
+        {
+            var exception = Should.Throw<ArgumentNullException>(() => new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = null
+                }));
+
+            exception.ParamName.ShouldBe("EntryPoints");
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void ConstructWithProjectGraphOptionsAndNonPositiveDegreeOfParallelismThrows(int degreeOfParallelism)
+        {
+            var exception = Should.Throw<ArgumentOutOfRangeException>(() => new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = Enumerable.Empty<ProjectGraphEntryPoint>(),
+                    DegreeOfParallelism = degreeOfParallelism
+                }));
+
+            exception.ParamName.ShouldBe("DegreeOfParallelism");
         }
 
         public void Dispose()

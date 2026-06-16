@@ -72,7 +72,7 @@ namespace Microsoft.Build.Graph
             public bool SkipIfNonexistent { get; }
         }
 
-        public IEnumerable<ReferenceInfo> GetReferences(ProjectGraphNode projectGraphNode, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectGraphNode projectGraphNode, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory, ProjectGraphMode graphMode)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
@@ -195,6 +195,48 @@ namespace Microsoft.Build.Graph
                 }
 
                 var referenceConfig = new ConfigurationMetadata(projectReferenceFullPath, referenceGlobalProperties);
+
+                // When in Full graph mode, enumerate all target frameworks regardless of SetTargetFramework
+                if (graphMode == ProjectGraphMode.Full && projectReferenceItem.HasMetadata(SetTargetFrameworkMetadataName))
+                {
+                    // Evaluate the referenced project with no global properties to discover all its target frameworks
+                    var projectInstanceForDiscovery = projectInstanceFactory(
+                        projectReferenceFullPath,
+                        null,
+                        projectCollection);
+
+                    string targetFrameworksValue = projectInstanceForDiscovery.GetPropertyValue(PropertyNames.TargetFrameworks);
+
+                    // If the project has multiple target frameworks, yield the outer build only
+                    // The normal ConstructInnerBuildReferences logic will discover and create all inner builds
+                    if (!string.IsNullOrWhiteSpace(targetFrameworksValue))
+                    {
+                        // Create outer build reference by removing TargetFramework from the global properties
+                        // This allows all inner builds to be discovered while respecting other modifiers
+                        var outerBuildProperties = new PropertyDictionary<ProjectPropertyInstance>(referenceGlobalProperties);
+                        outerBuildProperties.Remove("TargetFramework");
+                        
+                        // Yield only the outer build (no TargetFramework override)
+                        // The ConstructInnerBuildReferences logic will discover and create the inner builds
+                        yield return new ReferenceInfo(new ConfigurationMetadata(projectReferenceFullPath, outerBuildProperties), projectReferenceItem);
+                        
+                        continue;
+                    }
+                    else
+                    {
+                        string targetFrameworkValue = projectInstanceForDiscovery.GetPropertyValue(PropertyNames.TargetFramework);
+                        
+                        // Single target framework project - yield it without SetTargetFramework constraint
+                        if (!string.IsNullOrWhiteSpace(targetFrameworkValue))
+                        {
+                            // Remove TargetFramework that was set by SetTargetFramework metadata
+                            var singleTargetProperties = new PropertyDictionary<ProjectPropertyInstance>(referenceGlobalProperties);
+                            singleTargetProperties.Remove("TargetFramework");
+                            yield return new ReferenceInfo(new ConfigurationMetadata(projectReferenceFullPath, singleTargetProperties), projectReferenceItem);
+                            continue;
+                        }
+                    }
+                }
 
                 yield return new ReferenceInfo(referenceConfig, projectReferenceItem);
 
