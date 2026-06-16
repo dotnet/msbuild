@@ -110,13 +110,19 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>7b306e34463421cef2816352743b943c6547dfab</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.17">
+    <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
+         version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
+         to it (PrivateAssets="all", so we don't repackage the binary and the API doesn't appear
+         in our public surface). At runtime we still bind to whatever NuGet.Frameworks.dll the
+         host SDK ships, so per the toolset-vs-product test in dotnet/arcade-services'
+         docs/Darc.md this is a toolset dependency, not a product one. -->
+    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.30">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>f2eaca2cd2baa4209e69da89c6d232f42174f6dc</Sha>
+      <Sha>551e8bafd7ec41484f2d8d7fadcd0750f7db173a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.9.0-1.26306.2">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.9.0-1.26314.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>f5856fc44e59b6fffe14c29c74834d77d2554615</Sha>
+      <Sha>94180ea43ae879ba286300360d677cc72f0a1369</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26304.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
