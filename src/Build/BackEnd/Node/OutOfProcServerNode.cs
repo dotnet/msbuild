@@ -401,6 +401,12 @@ namespace Microsoft.Build.Experimental
             // Configure console configuration so Loggers can change their behavior based on Target (client) Console properties.
             ConsoleConfiguration.Provider = command.ConsoleConfiguration;
 
+            // TerminalLogger/ANSI auto-detection runs in this node, but the real terminal belongs to the client.
+            // Override the local console query with the capabilities the client transmitted so that e.g. '-tl:auto'
+            // reflects the client's terminal instead of this node's redirected stdout.
+            NativeMethodsShared.ConsoleConfigurationOverride =
+                (command.ConsoleConfiguration.AcceptAnsiColorCodes, command.ConsoleConfiguration.OutputIsScreen);
+
             // Initiate build telemetry
             if (command.PartialBuildTelemetry != null)
             {
@@ -436,16 +442,24 @@ namespace Microsoft.Build.Experimental
             (int exitCode, string exitType) buildResult;
 
             // Dispose must be called before the server sends ServerNodeBuildResult packet
-            using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
-            using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+            try
             {
-                Console.SetOut(outWriter);
-                Console.SetError(errWriter);
+                using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
+                using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+                {
+                    Console.SetOut(outWriter);
+                    Console.SetError(errWriter);
 
-                buildResult = _buildFunction(command.CommandLine);
+                    buildResult = _buildFunction(command.CommandLine);
 
-                Console.SetOut(oldOut);
-                Console.SetError(oldErr);
+                    Console.SetOut(oldOut);
+                    Console.SetError(oldErr);
+                }
+            }
+            finally
+            {
+                // Reset the override so a later idle/in-proc query does not observe stale client capabilities.
+                NativeMethodsShared.ConsoleConfigurationOverride = null;
             }
 
             // On Windows, a process holds a handle to the current directory,

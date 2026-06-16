@@ -235,6 +235,37 @@ namespace Microsoft.Build.UnitTests
             logger.Verbosity.ShouldBe(expectedVerbosity);
         }
 
+        /// <summary>
+        /// Regression test for dotnet/msbuild#13940. Under MSBuild Server, TerminalLogger
+        /// auto-detection runs in the server node, whose own stdout is redirected. The node receives
+        /// the client's real console capabilities and exposes them via
+        /// <c>NativeMethods.ConsoleConfigurationOverride</c>. When the client transmitted a
+        /// screen-capable console, '-tl:auto' must auto-select <see cref="TerminalLogger"/> (the bug
+        /// was that it fell back to the console logger); when the client transmitted a redirected
+        /// console, it must fall back to <see cref="ConsoleLogger"/>. This exercises the real
+        /// <c>QueryIsScreenAndTryEnableAnsiColorCodes</c> path and needs no real terminal.
+        /// </summary>
+        [Theory]
+        [InlineData(true, true, typeof(TerminalLogger))]
+        [InlineData(false, false, typeof(ConsoleLogger))]
+        public void CreateTerminalOrConsoleLogger_AutoHonorsServerTransmittedConsoleConfiguration(bool acceptAnsi, bool outputIsScreen, Type expectedType)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_outputHelper);
+            env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", "");
+
+            try
+            {
+                Microsoft.Build.Framework.NativeMethods.ConsoleConfigurationOverride = (acceptAnsi, outputIsScreen);
+
+                ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(["-tl:auto"]);
+
+                logger.ShouldBeOfType(expectedType);
+            }
+            finally
+            {
+                Microsoft.Build.Framework.NativeMethods.ConsoleConfigurationOverride = null;
+            }
+        }
 
         #region Helper methods to create BuildEventArgs with BuildEventContext
 

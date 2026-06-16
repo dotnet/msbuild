@@ -1243,8 +1243,23 @@ internal static class NativeMethods
 
 #endif
 
+    /// <summary>
+    /// Overrides the console capabilities reported by <see cref="QueryIsScreenAndTryEnableAnsiColorCodes"/>.
+    /// Set by a node (e.g. the MSBuild Server node) to the capabilities transmitted from the client process,
+    /// so that auto-detection reflects the client's real terminal rather than the node's own redirected stdout.
+    /// Null when running in-proc, in which case the local <see cref="Console"/> is queried as usual.
+    /// </summary>
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen)? ConsoleConfigurationOverride { get; set; }
+
     internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(bool useStandardError = false)
     {
+        if (ConsoleConfigurationOverride is (bool overrideAcceptAnsiColorCodes, bool overrideOutputIsScreen))
+        {
+            // The real terminal lives in a separate client process; use the capabilities it transmitted.
+            // We must not change this node's console mode, so there is no original mode to restore.
+            return (acceptAnsiColorCodes: overrideAcceptAnsiColorCodes, outputIsScreen: overrideOutputIsScreen, originalConsoleMode: null);
+        }
+
         if (Console.IsOutputRedirected)
         {
             // There's no ANSI terminal support if console output is redirected.
