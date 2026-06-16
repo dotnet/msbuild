@@ -57,11 +57,11 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 | BEFORE (UNSAFE - inherits process state)           | AFTER (SAFE - uses task's isolated environment)     |
 |----------------------------------------------------|-----------------------------------------------------|
 | `var psi = new ProcessStartInfo("tool.exe");`      | `var psi = TaskEnvironment.GetProcessStartInfo();`  |
-|                                                    | `psi.FileName = "tool.exe";`                        |
+|                                                    | `psi.FileName = GetFullPathToTool(); // must be absolute` |
 
 ## Updating Unit Tests
 
-Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`.
+Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironment.Fallback` (or use `TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(path)` to point at a specific project directory).
 
 ## APIs to Avoid
 
@@ -251,7 +251,7 @@ catch (Exception ex)              { Log.LogError(ex.Message.Replace(abs.Value, a
 
 `Path.IsPathRooted` returns `true` for **drive-relative** (`C:foo\bar`) and **root-relative** (`\foo\bar`) Windows paths — both still depend on process current-directory / current-drive state. "Absolutize only if not rooted" silently leaves those paths process-dependent.
 
-`GetAbsolutePath` is a no-op on already-rooted paths. Call it unconditionally; remove any `IsPathRooted` short-circuit.
+`GetAbsolutePath` correctly handles all path forms — including the Windows edge cases (`C:foo`, `\foo`) that `Path.IsPathRooted` considers "rooted" but that are still CWD/drive-dependent. Call it unconditionally; remove any `IsPathRooted` short-circuit.
 
 ---
 
@@ -315,19 +315,19 @@ A migration test must **fail when the migration is undone**. Tests that pass ide
 Set the process working directory to a **decoy** dir with no relevant files; set `TaskEnvironment.ProjectDirectory` to a different dir with the inputs/expected outputs. The task must read/write against the project directory, not the decoy.
 
 ```csharp
-using var projectDir = TestEnvironment.Create();
-using var decoyCwd  = TestEnvironment.Create();
+using TestEnvironment env = TestEnvironment.Create();
+TransientTestFolder projectDir = env.CreateFolder();
+TransientTestFolder decoyCwd = env.CreateFolder();
 File.WriteAllText(Path.Combine(projectDir.Path, "input.txt"), "expected");
 
-using (new ChangeCurrentDirectory(decoyCwd.Path))
+env.SetCurrentDirectory(decoyCwd.Path); // auto-restored when env is disposed
+
+var task = new MyTask
 {
-    var task = new MyTask
-    {
-        TaskEnvironment = TaskEnvironmentHelper.CreateForTest(projectDir.Path),
-        Input = "input.txt", // relative
-    };
-    task.Execute().ShouldBeTrue();
-}
+    TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+    Input = "input.txt", // relative
+};
+task.Execute().ShouldBeTrue();
 ```
 
 **CRITICAL:** `Directory.SetCurrentDirectory` is **process-global**. xUnit parallelizes tests within a class by default — a CWD-mutating test will flake unless pinned to a non-parallel collection (`[Collection]` + `[CollectionDefinition(DisableParallelization = true)]`). The `IDisposable` restore protects sequential safety but not concurrent siblings.

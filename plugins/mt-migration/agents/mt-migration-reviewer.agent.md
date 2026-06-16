@@ -15,7 +15,7 @@ You **do not** re-explain the migration playbook. The playbook lives in the `mul
 
 ## Operating Rules
 
-1. **Delegate general review.** If the host repo has an `expert-reviewer` agent (or equivalent — e.g., `dotnet-msbuild:msbuild-code-review`), invoke it for the 24-dimension pass. Do not redo style, perf, naming, or generic concurrency. Read its output, then layer your MT-specific findings on top. Do not repeat its findings.
+1. **Delegate general review.** If the host repo has an `expert-reviewer` agent (or equivalent), invoke it for the 24-dimension pass. Do not redo style, perf, naming, or generic concurrency. Read its output, then layer your MT-specific findings on top. Do not repeat its findings.
 2. **Load the skill once, then stop quoting it.** Read `multithreaded-task-migration` at the start. From that point on, reference the skill by Sin number (e.g., "Sin 7 — exception path leakage") rather than restating the rule.
 3. **Trace every call chain to the leaves.** This is your defining job. See the Call-Chain Audit Protocol below. A review that stops at the task boundary is incomplete.
 4. **No theater.** If a finding's only proof requires speculating about "what if in the future a caller does X", say so explicitly and mark it MINOR. BLOCKING findings need a concrete reproduction path in the current code.

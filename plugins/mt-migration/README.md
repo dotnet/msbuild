@@ -44,9 +44,9 @@ the call-chain audit comes back clean.
 
 Publish this plugin folder to a small standalone repo (e.g.
 `your-org/mt-migration-plugin`) and install from there. The plugin contains no
-hard-coded references to `dotnet/msbuild` paths — only to the public
-`Microsoft.Build.Framework` API surface — so it works on any task-authoring
-repo unchanged.
+hard-coded references to `dotnet/msbuild` repo-local filesystem paths — only to
+the public `Microsoft.Build.Framework` API surface (with source links for
+reference) — so it works on any task-authoring repo unchanged.
 
 ```sh
 /plugin install github:your-org/mt-migration-plugin
