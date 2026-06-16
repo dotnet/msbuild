@@ -4653,23 +4653,23 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         }
 
         [Fact]
-        public void ResXFileRefEntryIsDangerousEvenWhenWave18_8Disabled()
+        public void ResXFileRefEntryIsDangerousEvenWhenWave18_9Disabled()
         {
             string resx = @"<root>
   <data name=""Logo"" type=""System.Resources.ResXFileRef, System.Windows.Forms""><value>logo.txt;System.String, mscorlib</value></data>
 </root>";
 
             // ResXFileRef detection is intentionally unconditional - it is not gated behind a ChangeWave -
-            // because it can trigger reading of an external linked file. Disable Wave18_8 to prove it still fires.
+            // because it can trigger reading of an external linked file. Disable Wave18_9 to prove it still fires.
             using TestEnvironment env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_9.ToString());
             ChangeWaves.ResetStateForTests();
 
             IsDangerous(resx).ShouldBeTrue();
         }
 
         [Fact]
-        public void TypedEntryIsDangerousWhenWave18_8Enabled()
+        public void TypedEntryIsDangerousWhenWave18_9Enabled()
         {
             string resx = @"<root>
   <data name=""Count"" type=""System.Int32, mscorlib""><value>42</value></data>
@@ -4683,14 +4683,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         }
 
         [Fact]
-        public void TypedEntryIsNotDangerousWhenWave18_8Disabled()
+        public void TypedEntryIsNotDangerousWhenWave18_9Disabled()
         {
             string resx = @"<root>
   <data name=""Count"" type=""System.Int32, mscorlib""><value>42</value></data>
 </root>";
 
             using TestEnvironment env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_9.ToString());
             ChangeWaves.ResetStateForTests();
 
             IsDangerous(resx).ShouldBeFalse();

@@ -1063,7 +1063,7 @@ namespace Microsoft.Build.Tasks
         /// <list type="bullet">
         /// <item>has a <c>mimetype</c> attribute (an arbitrary object will be deserialized), or</item>
         /// <item>has a <c>type</c> attribute referencing <c>ResXFileRef</c> (an external linked file will be read), or</item>
-        /// <item>has any other <c>type</c> attribute - only when ChangeWave 18.8 is enabled - because resolving the
+        /// <item>has any other <c>type</c> attribute - only when ChangeWave 18.9 is enabled - because resolving the
         /// type eventually calls <c>Type.GetType</c>, which can probe for assemblies on disk.</item>
         /// </list>
         /// </remarks>
@@ -1102,7 +1102,7 @@ namespace Microsoft.Build.Tasks
                                     {
                                         dangerous = true;
                                     }
-                                    else if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+                                    else if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9))
                                     {
                                         // Require any typed entry on a "Mark of the web" to be unblocked by user
                                         dangerous = true;
