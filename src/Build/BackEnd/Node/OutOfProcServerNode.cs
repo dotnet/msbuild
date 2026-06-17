@@ -409,6 +409,7 @@ namespace Microsoft.Build.Experimental
                 buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
                 buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
                 buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
+                buildTelemetry.ServerEnableReason = command.PartialBuildTelemetry.ServerEnableReason;
             }
 
             // Also try our best to increase chance custom Loggers which use Console static members will work as expected.

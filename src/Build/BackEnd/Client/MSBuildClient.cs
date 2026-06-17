@@ -577,7 +577,8 @@ namespace Microsoft.Build.Experimental
                 : new PartialBuildTelemetry(
                     startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
                     initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
-                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
+                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason,
+                    serverEnableReason: KnownTelemetry.PartialBuildTelemetry.ServerEnableReason);
 
             return new ServerNodeBuildCommand(
                         _commandLine,

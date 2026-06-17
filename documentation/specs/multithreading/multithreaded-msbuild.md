@@ -293,3 +293,18 @@ deactivate Thread1_Project1
 ## MSBuild Server integration
 
 To avoid regressing CLI incremental build performance, it is essential to fully support the MSBuild server feature in multithreaded mode. Out-of-process nodes offer significant benefits by preserving caches across build command executions when node reuse is enabled. However, caches in the entry process are lost at the end of each build unless the MSBuild server feature is used. In multiprocess execution, that is a fraction of the caches and processes, but with multithreading, it is the entire process. As a result, opting into multithreading on the command line should automatically enable MSBuild server.
+
+### `-mt` implies MSBuild Server
+
+When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off, matching the pre-existing behavior. `-mt` is itself experimental and opt-in, so the implicit server engagement is not separately gated.
+
+| `MSBUILDUSESERVER` | `-mt` build | Server engaged? | Telemetry `ServerEnableReason` |
+|---|---|---|---|
+| `1` | (any) | Yes | `EnvVar` |
+| any other non-empty value (`0`, `false`, …) | (any) | No (explicit opt-out) | — |
+| unset | yes | **Yes** | `ImpliedByMt` |
+| unset | no | No | — |
+
+`-mt` is detected from the full, response-file-aware command-line parse, so it counts wherever it is supplied — command line, auto-response file, a project `Directory.Build.rsp`, an `@response` file, or `MSBUILDFORCEMULTITHREADED`. The same value decides whether an engaged server is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
+
+

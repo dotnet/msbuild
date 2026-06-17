@@ -316,6 +316,77 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void ServerStartsWhenMtPresentEvenWithoutEnvVar()
+        {
+            // Regression test for the "-mt implies MSBuild Server" routing decision
+            // (investigation #9379, ShouldUseMSBuildServer / IsMultiThreadedRequested).
+            // When MSBUILDUSESERVER is unset and the user passes -mt, the client should engage
+            // the server automatically. Verified by running two builds back-to-back and asserting
+            // the server process PID is the SAME for both — server reuse is the unique signature
+            // of MSBuild server engagement (a non-server build would always get a fresh worker PID).
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            // Explicitly clear MSBUILDUSESERVER so we test the -mt-implies-server path, and isolate this
+            // test's server with a unique handshake salt so it can't reuse/shut down an unrelated server.
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+
+            // Make sure we start with no server running.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success1, false, _output);
+            success1.ShouldBeTrue();
+            int serverPid1 = ParseNumber(output1, "Server ID is ");
+            // Register cleanup before any assertion so the server does not leak if an assertion throws.
+            _env.WithTransientProcess(serverPid1);
+
+            string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success2, false, _output);
+            success2.ShouldBeTrue();
+            int serverPid2 = ParseNumber(output2, "Server ID is ");
+
+            serverPid1.ShouldBe(serverPid2, "When -mt implies server, two consecutive builds should reuse the same server process. PIDs were " + serverPid1 + " and " + serverPid2 + ".");
+
+            // Clean up the server we spun up.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+        }
+
+        [Fact]
+        public void ServerStartsWhenMtInResponseFileEvenWithoutEnvVar()
+        {
+            // Regression test for rainersigwald's review concern (#13758): -mt enabled via a response file
+            // (here a project Directory.Build.rsp) - not on the command line - must still implicitly engage the
+            // server. This is the expected dogfooding mechanism, so the authoritative, response-file-aware parse
+            // drives the decision. Verified the same way as ServerStartsWhenMtPresentEvenWithoutEnvVar: two builds
+            // back-to-back reuse the SAME server PID, the unique signature of server engagement.
+            TransientTestFolder folder = _env.CreateFolder();
+            TransientTestFile project = _env.CreateFile(folder, "testProject.proj", printPidContents);
+            // -mt comes ONLY from the response file; it is NOT passed on the command line below.
+            _env.CreateFile(folder, "Directory.Build.rsp", "-mt");
+
+            // Explicitly clear MSBUILDUSESERVER so we test the implicit path, and isolate this test's server with
+            // a unique handshake salt so it can't reuse/shut down an unrelated server.
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+
+            // Make sure we start with no server running.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success1, false, _output);
+            success1.ShouldBeTrue();
+            int serverPid1 = ParseNumber(output1, "Server ID is ");
+            // Register cleanup before any assertion so the server does not leak if an assertion throws.
+            _env.WithTransientProcess(serverPid1);
+
+            string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out bool success2, false, _output);
+            success2.ShouldBeTrue();
+            int serverPid2 = ParseNumber(output2, "Server ID is ");
+
+            serverPid1.ShouldBe(serverPid2, "When -mt from a response file implies server, two consecutive builds should reuse the same server process. PIDs were " + serverPid1 + " and " + serverPid2 + ".");
+
+            // Clean up the server we spun up.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+        }
+
+        [Fact]
         public void PropertyMSBuildStartupDirectoryOnServer()
         {
             // This test seems to be flaky, lets enable better logging to investigate it next time
