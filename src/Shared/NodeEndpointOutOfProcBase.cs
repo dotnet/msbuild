@@ -13,7 +13,6 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY

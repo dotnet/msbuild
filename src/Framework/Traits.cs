@@ -136,6 +136,16 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
 
         /// <summary>
+        /// Enables the build coordinator for cross-process node budget management.
+        /// </summary>
+        public readonly bool EnableCoordinator = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(UseCoordinatorEnvVarName));
+
+        /// <summary>
+        /// Name of environment variable used to enable the build coordinator.
+        /// </summary>
+        public const string UseCoordinatorEnvVarName = "MSBUILDUSECOORDINATOR";
+
+        /// <summary>
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";

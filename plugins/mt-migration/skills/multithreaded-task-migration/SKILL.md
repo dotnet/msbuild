@@ -57,11 +57,11 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 | BEFORE (UNSAFE - inherits process state)           | AFTER (SAFE - uses task's isolated environment)     |
 |----------------------------------------------------|-----------------------------------------------------|
 | `var psi = new ProcessStartInfo("tool.exe");`      | `var psi = TaskEnvironment.GetProcessStartInfo();`  |
-|                                                    | `psi.FileName = "tool.exe";`                        |
+|                                                    | `psi.FileName = GetFullPathToTool(); // must be absolute` |
 
 ## Updating Unit Tests
 
-Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`.
+Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironment.Fallback` (or use `TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(path)` to point at a specific project directory).
 
 ## APIs to Avoid
 
@@ -113,6 +113,15 @@ Stay in the `AbsolutePath` world — it's implicitly convertible to `string` whe
 
 If your task spawns multiple threads internally, synchronize access to `TaskEnvironment`. Each task *instance* gets its own environment, so no synchronization between tasks is needed.
 
+### API Discipline When Plumbing Through Helpers
+
+When the migration ripples into shared helpers:
+
+- **Helper signatures: take `AbsolutePath`, not `(string path, string pathForMessages)`**. Two-string signatures drift apart; the caller passing one `AbsolutePath` keeps `.Value` and `.OriginalValue` in lockstep.
+- **Repo-wide helpers belong in an extensions class** (e.g., `TaskEnvironmentExtensions`), not on the task. If a per-task helper looks generic, extract it.
+- **Don't condition behavior on MT-mode**. `TaskEnvironment.Fallback` already gives single-process semantics; `if (mtMode) { … } else { … }` doubles the maintenance surface and skips test coverage of one branch.
+- **Don't silently swallow `ArgumentException` from `GetAbsolutePath`** in a helper — log a diagnostic so customers can debug bad inputs.
+
 ## References
 
 - [Thread-Safe Tasks Spec](https://github.com/dotnet/msbuild/blob/main/documentation/specs/multithreading/thread-safe-tasks.md)
@@ -128,9 +137,11 @@ After migration, review for behavioral compatibility. **Every observable differe
 
 Observable behavior = `Execute()` return value, `[Output]` property values, error/warning message content, exception types, files written, and which code path runs.
 
-## The 6 Deadly Compatibility Sins
+## The 7 Deadly Compatibility Sins
 
 Real bugs found during MSBuild task migrations. Every one shipped in initial "passing" code with green tests.
+
+**Edge-case discipline:** For every migrated code path, verify behavior when inputs are `null`, empty string (`""`), or whitespace-only. `GetAbsolutePath` throws `ArgumentException` on null/empty — if the pre-migration code handled these differently (e.g., returned early, used a default, or threw a different exception type), the migration must preserve that behavior. Even if a scenario seems unlikely, treat it as a relevant finding if it is theoretically possible.
 
 ### Sin 1: Output Property Contamination
 
@@ -150,9 +161,11 @@ document.Save((string)outputPath);    // file I/O: absolute path
 
 **Detect**: For every `[Output]` property, trace backward — is it ever assigned from an `AbsolutePath`?
 
-### Sin 2: Error Message Path Inflation
+### Sin 2: Error/Log Message Path Inflation
 
-Error messages show absolutized paths instead of the user's original input.
+Error messages and exception messages show absolutized paths instead of the user's original input.
+
+**Direct leakage** — passing an `AbsolutePath` to logging APIs:
 
 ```csharp
 // BROKEN: "Cannot find 'C:\repo\app.manifest'" instead of "Cannot find 'app.manifest'"
@@ -163,7 +176,19 @@ Log.LogError("Cannot find '{0}'", abs); // implicit conversion!
 Log.LogError("Cannot find '{0}'", abs.OriginalValue);
 ```
 
-**Detect**: Search every `Log.LogError`/`LogWarning`/`LogMessage` — is any argument an `AbsolutePath`?
+**Indirect leakage** — exception messages from helpers that received the absolutized path:
+
+```csharp
+// BROKEN: ex.FileName / ex.Message embed the absolutized path
+catch (FileNotFoundException ex) { Log.LogError("Not found: {0}", ex.FileName); }
+catch (Exception ex)              { Log.LogError(ex.Message); }
+
+// CORRECT: prefer the original input; if you must use the exception, sanitize
+catch (FileNotFoundException ex) { Log.LogError("Not found: {0}", abs.OriginalValue); }
+catch (Exception ex)              { Log.LogError(ex.Message.Replace(abs.Value, abs.OriginalValue)); }
+```
+
+**Detect**: Search every `Log.LogError`/`LogWarning`/`LogMessage` — is any argument an `AbsolutePath`? Also check every `Log.LogError(ex.Message …)` / `ex.FileName` downstream of a `GetAbsolutePath` — did the exception originate from a helper that received the absolutized path?
 
 ### Sin 3: Null Coalescing That Changes Control Flow
 
@@ -222,6 +247,106 @@ Old code threw `FileNotFoundException` for missing files; new code throws `Argum
 
 **Detect**: For every `GetAbsolutePath`, check what the old code threw for null/empty and whether the calling code has type-specific catch blocks.
 
+### Sin 7: `Path.IsPathRooted` as an Absolutize Gate
+
+`Path.IsPathRooted` returns `true` for **drive-relative** (`C:foo\bar`) and **root-relative** (`\foo\bar`) Windows paths — both still depend on process current-directory / current-drive state. "Absolutize only if not rooted" silently leaves those paths process-dependent.
+
+`GetAbsolutePath` correctly handles all path forms — including the Windows edge cases (`C:foo`, `\foo`) that `Path.IsPathRooted` considers "rooted" but that are still CWD/drive-dependent. Call it unconditionally; remove any `IsPathRooted` short-circuit.
+
+---
+
+## Call-Chain Hazards Beyond the Task
+
+The 7 sins above are *local* to the task body. The other half of MT migration is auditing the **transitive call chain** — helpers and shared utility classes the task reaches into.
+
+### Helpers That Capture Process State
+
+Helpers reached from `Execute()` can quietly depend on process state in any of these ways:
+
+- A relative path falls through to `Directory.GetCurrentDirectory()` (often as a "fallback") or to `Path.GetFullPath(x)` without a base.
+- An env var is read directly via `Environment.GetEnvironmentVariable` (not `TaskEnvironment`).
+- A `static` field is seeded from process state on first use (`static string s_x = Directory.GetCurrentDirectory()`), permanently capturing the first caller's environment for every later caller.
+- A BCL API echoes its input path back through `ex.Message` / `ex.FileName` (Sin 2).
+- The helper takes a `string path` and returns a `string` — losing the `.OriginalValue` distinction, so callers either lie in messages or absolutize twice.
+
+**Resolution patterns:**
+
+1. Add an MT-aware overload that takes `TaskEnvironment` (or an `AbsolutePath` / explicit fallback path). Legacy overload delegates with `TaskEnvironment.Fallback`. Don't branch on "MT mode on/off".
+2. Promote the parameter type to `AbsolutePath` so `.Value` and `.OriginalValue` travel together.
+3. Replace process-state-seeded static caches with `ConcurrentDictionary<TKey, TValue>` keyed on the inputs that determine uniqueness — never on process state.
+4. For cross-repo helpers (foundation types used by many tasks), migrate the foundation in a dedicated PR before the tasks that consume it; the hydration step is usually where `Path.GetFullPath` is hiding.
+
+### Tasks Instantiated Directly by Other Tasks
+
+`[MSBuildMultiThreadableTask]` is only honored when the TaskFactory creates the task (i.e., a target invokes it as `<MyTask … />`). A task created via `new MyTask()` inside another task's body bypasses the factory and **never gets `TaskEnvironment` injected** — it silently defaults to `TaskEnvironment.Fallback` (= process CWD).
+
+Migrating a nested task in isolation is therefore meaningless. Either migrate the parent and have it explicitly propagate its `TaskEnvironment` to the nested instance before calling `Execute()`, or restructure so the nested task is a regular TaskFactory-created task.
+
+**Detect:** grep for `new …Task()` followed by `.Execute()` — every direct instantiation is a hole.
+
+### ToolTask Override Hot Spots
+
+`ToolTask` subclasses inherit virtual methods that run *before or after* `Execute()` and frequently touch the file system. Audit every override:
+
+| Override | Hazard | Migration |
+|---|---|---|
+| `GenerateFullPathToTool()` | Builds `ProcessStartInfo.FileName` — relative tool path → wrong tool launched | Absolutize the tool path before returning |
+| `SkipTaskExecution()` | Up-to-date check on input/output timestamps using relative paths | Absolutize both sides of the comparison |
+| `ValidateParameters()` | `File.Exists` on input parameters | Absolutize before probing |
+| `GenerateResponseFileCommands()` / `GenerateCommandLineCommands()` | Tempting to absolutize args | **Don't** — the child's `WorkingDirectory` is the project dir, so relative args resolve correctly; absolutizing inflates user-visible output and can leak into tool diagnostics or generated artifacts |
+| `GetWorkingDirectory()` | Default `null` → child inherits host CWD | Leave alone if you use `TaskEnvironment.GetProcessStartInfo()`; it already sets `WorkingDirectory` |
+
+**Key contract:** `ProcessStartInfo.FileName` is resolved by the OS **before** `WorkingDirectory` takes effect, so the executable path must be absolute. Tool arguments are interpreted by the child process in its working directory, so they should stay relative.
+
+### Engine-Owned Environment Variables Are Immutable in MT Mode
+
+Env vars consumed by the engine *before* tasks run (e.g., `MSBUILD*`-prefixed flags and the framework/SDK discovery variables) are snapshotted into engine caches at startup. Tasks that mutate them later have no observable effect on the engine — but the mutation appears to succeed locally, masking bugs.
+
+If a migrated task previously mutated such a variable to influence a downstream tool, re-architect to pass the value via `ProcessStartInfo.EnvironmentVariables` on the child process instead of mutating the parent's environment.
+
+---
+
+## Test Patterns for MT Migrations
+
+A migration test must **fail when the migration is undone**. Tests that pass identically against pre- and post-migration code are theater. The two patterns below are the ones that reliably exercise MT-specific behavior.
+
+### Pattern A: Decoy-CWD Test (for tasks that touch the file system)
+
+Set the process working directory to a **decoy** dir with no relevant files; set `TaskEnvironment.ProjectDirectory` to a different dir with the inputs/expected outputs. The task must read/write against the project directory, not the decoy.
+
+```csharp
+using TestEnvironment env = TestEnvironment.Create();
+TransientTestFolder projectDir = env.CreateFolder();
+TransientTestFolder decoyCwd = env.CreateFolder();
+File.WriteAllText(Path.Combine(projectDir.Path, "input.txt"), "expected");
+
+env.SetCurrentDirectory(decoyCwd.Path); // auto-restored when env is disposed
+
+var task = new MyTask
+{
+    TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+    Input = "input.txt", // relative
+};
+task.Execute().ShouldBeTrue();
+```
+
+**CRITICAL:** `Directory.SetCurrentDirectory` is **process-global**. xUnit parallelizes tests within a class by default — a CWD-mutating test will flake unless pinned to a non-parallel collection (`[Collection]` + `[CollectionDefinition(DisableParallelization = true)]`). The `IDisposable` restore protects sequential safety but not concurrent siblings.
+
+### Pattern B: Cross-Instance Independence (for tasks doing relative-path resolution)
+
+Two task instances, two `TaskEnvironment.ProjectDirectory` values, same relative input. Assert each task's output is rooted to its own project directory — proving resolution is per-instance, not shared.
+
+### When NOT to Write a "Migration Test"
+
+Attribute-only migrations (just `[MSBuildMultiThreadableTask]`, no `IMultiThreadableTask`) on tasks whose `Execute()` body contains no file/env/process/static-state interactions have nothing to test — a decoy-CWD test would pass whether the attribute is present or not. **Don't write the test.** Document the call-chain audit conclusion in the PR description instead.
+
+### Test Hygiene
+
+- Use `TestEnvironment` / `TransientTestFolder` for temp dirs; never `Path.GetTempPath() + Guid.NewGuid()` with manual `try/finally`.
+- Hard-code expected assertion values; don't recompute them from `Path.Combine(...)` in the assertion — when the test fails you want to know what was actually wrong.
+
+---
+
 ## Red-Team Audit Protocol
 
 ### Phase 1: Trace Every Changed Line
@@ -277,15 +402,25 @@ Assertions: Execute() return value, [Output] exact string, error message content
 
 - [ ] `[MSBuildMultiThreadableTask]` on every concrete class (not just base — `Inherited=false`)
 - [ ] `IMultiThreadableTask` on classes that use `TaskEnvironment` APIs, with default initializer `= TaskEnvironment.Fallback`
-- [ ] Every `[Output]` property: exact string value matches pre-migration
-- [ ] Every `Log.LogError`/`LogWarning`: path in message matches pre-migration (use `OriginalValue`)
-- [ ] Every `GetAbsolutePath` call: null/empty exception behavior matches old code path
-- [ ] Every dictionary/set with path keys: canonicalization preserved (`GetCanonicalForm()`)
-- [ ] Every try-catch: absolutized value available in catch block where needed
-- [ ] Every `??` or `?.` added: verified it doesn't swallow a previously-thrown exception
+- [ ] Every `[Output]` property: exact string value matches pre-migration (Sin 1)
+- [ ] Every `Log.LogError`/`LogWarning`: path in message matches pre-migration (use `OriginalValue`) (Sin 2)
+- [ ] Every `Log.LogError(ex.Message …)` / `ex.FileName`: exception path sanitized to original input (Sin 2)
+- [ ] Every `GetAbsolutePath` call: null/empty exception behavior matches old code path (Sin 3, 6)
+- [ ] Every dictionary/set with path keys: canonicalization preserved (`GetCanonicalForm()`) (Sin 5)
+- [ ] Every try-catch: absolutized value available in catch block where needed (Sin 4)
+- [ ] Every `??` or `?.` added: verified it doesn't swallow a previously-thrown exception (Sin 3)
+- [ ] No `Path.IsPathRooted` short-circuits around `GetAbsolutePath` — call unconditionally (Sin 7)
 - [ ] No `AbsolutePath` leaks into user-visible strings unintentionally
-- [ ] Helper methods traced for internal File API usage with non-absolutized paths
+- [ ] No behavior conditioned on "MT mode on/off" — `TaskEnvironment.Fallback` handles single-process case
+- [ ] **Call chain traced end-to-end** for every helper invoked from `Execute()`:
+    - No `Environment.CurrentDirectory` / `Directory.GetCurrentDirectory()` / `Path.GetFullPath(x)` without a base anywhere in the transitive call graph
+    - No direct `Environment.Get/SetEnvironmentVariable` (route through `TaskEnvironment`)
+    - No `static` mutable fields seeded from process state; replace with `ConcurrentDictionary` keyed on inputs
+    - No `Console.*`, `Environment.Exit`, `Process.Kill`, `FailFast`
+- [ ] ToolTask overrides audited (`GenerateFullPathToTool`, `SkipTaskExecution`, `ValidateParameters`); `ProcessStartInfo.FileName` is absolute, tool *arguments* stay relative
+- [ ] No nested tasks created via `new …Task()` without explicit `TaskEnvironment` propagation
+- [ ] No mutations of engine-owned env vars (e.g. `MSBUILD*` and the framework/SDK discovery vars) in MT mode
 - [ ] Tests for custom tasks set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()` (built-in tasks have a default)
+- [ ] Migration test follows Pattern A (decoy-CWD) **or** Pattern B (cross-instance independence), or PR explains why no test is meaningful
+- [ ] CWD-mutating tests pinned to a non-parallel xUnit collection
 - [ ] Cross-framework: tested on both net472 and net10.0
-- [ ] Concurrent execution: two tasks with different project directories produce correct results
-- [ ] No forbidden APIs (`Environment.Exit`, `Console.*`, etc.)

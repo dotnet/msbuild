@@ -31,6 +31,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.9
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
+- [GenerateResource: typed ResX data/metadata entries in Mark-of-the-Web files are now treated as untrusted and blocked with MSB3821; unblock the file (or set MSBUILDDISABLEFEATURESFROMVERSION=18.9) to restore prior behavior. ResXFileRef entries are always blocked regardless of this wave.](https://github.com/dotnet/msbuild/pull/14015)
 
 ### 18.8
 - [RAR task: across multiple input properties, resolve relative paths against the project directory (not the process current directory)](https://github.com/dotnet/msbuild/pull/13319)
