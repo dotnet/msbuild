@@ -367,9 +367,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine">Raw command-line arguments.</param>
         /// <param name="multiThreaded">Set to whether this is a multithreaded (/mt) build, determined from
         /// the fully-parsed switches (which expand response files - including any project <c>Directory.Build.rsp</c> -
-        /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path. This is the
-        /// authoritative value used both to decide whether <c>-mt</c> implicitly engages the server and whether
-        /// the server is launched with Server GC.</param>
+        /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path.</param>
         /// <param name="switchesFromAutoResponseFile">The gathered response-file switches (auto-response file plus any
         /// project <c>Directory.Build.rsp</c>), or <see langword="null"/> if parsing failed.</param>
         /// <param name="switchesNotFromAutoResponseFile">The gathered command-line/environment switches, or
@@ -457,18 +455,13 @@ namespace Microsoft.Build.CommandLine
         ///         do NOT use server (explicit opt-out, takes precedence over -mt). Only <c>1</c> opts in,
         ///         matching the pre-existing "only <c>1</c> enables the server" semantics.</item>
         ///   <item><c>MSBUILDUSESERVER</c> unset AND this is a <c>-mt</c> (multithreaded) build → use server.
-        ///         Rationale: <c>-mt</c> users already accept process-shared state
-        ///         (in-proc thread workers instead of multi-process worker nodes), so server reuse barely
-        ///         adds risk and recovers the per-invocation JIT/SDK-resolution warm-up cost that <c>-mt</c>
-        ///         would otherwise pay every build. <c>-mt</c> is itself experimental and opt-in, so no
-        ///         additional gate is needed. See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
+        ///         Rationale: <c>-mt</c> already shares process state, so server reuse adds little risk while
+        ///         recovering per-invocation warm-up cost. See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
         ///   <item>Otherwise → no server (existing default).</item>
         /// </list>
         /// </remarks>
         /// <param name="isMultiThreaded">Whether this is a multithreaded (<c>-mt</c>) build, as determined by the
-        /// authoritative response-file-aware parse in <see cref="CanRunServerBasedOnCommandLineSwitches"/>. This
-        /// includes <c>-mt</c> supplied via the auto-response file, a project <c>Directory.Build.rsp</c>, an
-        /// <c>@response</c> file, or <c>MSBUILDFORCEMULTITHREADED</c>.</param>
+        /// authoritative response-file-aware parse in <see cref="CanRunServerBasedOnCommandLineSwitches"/>.</param>
         /// <param name="serverEnableReason">Telemetry-friendly reason: "EnvVar", "ImpliedByMt", or empty when not enabled.</param>
         /// <returns>True if server should be used.</returns>
         internal static bool ShouldUseMSBuildServer(bool isMultiThreaded, out string serverEnableReason)
@@ -491,7 +484,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Implicit opt-in via -mt. -mt is itself experimental and opt-in (MSBUILDUSESERVER=0 remains the
-            // explicit escape hatch), so this does not need a separate change-wave gate.
+            // explicit escape hatch), so it does not need a separate opt-out gate.
             if (isMultiThreaded)
             {
                 serverEnableReason = "ImpliedByMt";
@@ -760,7 +753,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Orchestrates the execution of the application, optionally reusing command-line switches
         /// that have already been gathered (e.g. by the MSBuild Server eligibility check in
-        /// <see cref="Main"/>) so they are not parsed a second time.
+        /// <see cref="Main"/>) so the command line is not parsed a second time.
         /// </summary>
         /// <param name="commandLine">The command line to process. The first argument
         /// on the command line is assumed to be the name/path of the executable, and
