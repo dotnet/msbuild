@@ -38,7 +38,7 @@ internal partial class Expander<P, I>
         /// <summary>
         /// The set of functions that called during an item transformation, e.g. @(CLCompile->ContainsMetadata('MetaName', 'metaValue')).
         /// </summary>
-        internal static partial class IntrinsicItemFunctions
+        private static partial class Transforms
         {
             /// <summary>
             /// The number of characters added by a quoted expression.

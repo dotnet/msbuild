@@ -14,7 +14,7 @@ internal partial class Expander<P, I>
 {
     private static partial class ItemExpander
     {
-        internal static partial class IntrinsicItemFunctions
+        private static partial class Transforms
         {
             /// <summary>
             /// A discriminated union between one exact, one partial, or multiple matches.

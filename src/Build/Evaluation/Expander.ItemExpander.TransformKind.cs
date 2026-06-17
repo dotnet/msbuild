@@ -11,7 +11,7 @@ internal partial class Expander<P, I>
 {
     private static partial class ItemExpander
     {
-        private enum ItemTransformFunctions
+        private enum TransformKind
         {
             ItemSpecModifierFunction,
             Count,
