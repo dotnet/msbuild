@@ -144,6 +144,176 @@ public bool Execute(...)
 }
 ```
 
+## Managing Static State in Tasks 
+Static state in tasks can cause two issues:
+- **Concurrency**: Race conditions when multiple threads access shared static data
+- **Lifetime**: Static data persisting unexpectedly across multiple builds
+
+### Concurrency
+
+In multithreaded builds, concurrent tasks sharing the same static field can cause race conditions unless the field is designed for concurrent access. Thread-safety of static fields is the task author's responsibility, same as in any multithreaded application.
+
+### Lifetime
+
+Static fields persist across multiple builds, meaning data cached during one build remains available in subsequent builds on the same node, regardless of changes to project state. 
+
+By default, MSBuild reuses worker nodes between builds. Previously, tasks running on the main (scheduler) node avoided this issue because the main process terminated after each build. However, with MSBuild Server (enabled by default in multithreaded builds), the main node now also persists across builds, extending this behavior to all tasks.
+
+This persistence is not inherently problematic and is often intentional — for example, caching expensive computations to improve performance across projects and builds. Such caching is acceptable when task authors implement proper cache invalidation strategies. The concerns below apply specifically when cached data becomes stale or incorrect and needs clean up after each build.
+
+MSBuild provides `IBuildEngine4.RegisterTaskObject` to address the lifetime issue: an API that lets tasks store objects with explicit, engine-managed lifetimes instead of relying on static fields.
+
+```csharp
+void IBuildEngine4.RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection);
+object IBuildEngine4.GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
+```
+
+The engine stores registered objects. Both methods are thread-safe and may be called concurrently from multiple tasks. If multiple tasks attempt to register an object with the same key concurrently, only the first registration takes effect — subsequent calls are ignored. When an object's lifetime expires, MSBuild disposes registered objects (calling `IDisposable.Dispose` on them if they implement `IDisposable`) and clears them from the registry, so their availability and cleanup are managed by the engine according to the configured lifetime.
+
+`RegisteredTaskObjectLifetime` controls when objects are disposed:
+
+| Lifetime | Disposed When | Use Case |
+|----------|---------------|----------|
+| `Build` | The whole build invocation completes (not a single project) | Per-build caches and resources that must not leak across builds. |
+| `AppDomain` | The MSBuild process exits | Objects that are safe to share across builds. |
+
+`Build` lifetime objects are disposed between each build request, so task authors who depended on the isolation they previously got from the entrypoint process lifetime likely prefer it.
+
+
+#### Example: Migrating a Static Cache
+
+**Before — static cache that leaks across builds:**
+
+```csharp
+public class MyTask : Task
+{
+    private static readonly Dictionary<string, string> s_cache = new();
+
+    public override bool Execute()
+    {
+        ...
+        s_cache[key] = value;
+        ...
+    }
+}
+```
+
+This cache persists across builds on reused nodes. It is also not thread-safe for concurrent access.
+
+**After — engine-managed lifetime:**
+
+```csharp
+public class MyTask : Task
+{
+    private const string CacheKey = "MyNamespace.MyTask.Cache";
+    private static readonly object s_cacheLock = new();
+
+    public override bool Execute()
+    {
+        var engine4 = (IBuildEngine4)BuildEngine;
+
+        var cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+            CacheKey, RegisteredTaskObjectLifetime.Build);
+        if (cache is null)
+        {
+            lock (s_cacheLock)
+            {
+                cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+                    CacheKey, RegisteredTaskObjectLifetime.Build);
+                if (cache is null)
+                {
+                    cache = new ConcurrentDictionary<string, string>();
+                    engine4.RegisterTaskObject(
+                        CacheKey, cache,
+                        RegisteredTaskObjectLifetime.Build,
+                        allowEarlyCollection: true);
+                }
+            }
+        }
+
+        cache[key] = value;
+        ...
+    }
+}
+```
+
+The cache is now scoped to a single build and automatically discarded when the build completes.
+
+Alternatively, a **lock-free** version of the same pattern takes advantage of the fact that `RegisterTaskObject` is thread-safe and only keeps the first registration for a given key — subsequent calls are ignored. After registering, re-read with `GetRegisteredTaskObject` to obtain the authoritative instance:
+
+```csharp
+var cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+    CacheKey, RegisteredTaskObjectLifetime.Build);
+if (cache is null)
+{
+    engine4.RegisterTaskObject(
+        CacheKey, new ConcurrentDictionary<string, string>(),
+        RegisteredTaskObjectLifetime.Build,
+        allowEarlyCollection: true);
+    // Re-read to get the authoritative instance in case another
+    // task registered first.
+    cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+        CacheKey, RegisteredTaskObjectLifetime.Build);
+}
+```
+
+
+> **Important:** When multiple tasks share a static field, for example through a utility class, migrating to `RegisterTaskObject` requires that _all_ tasks using the same key are migrated together. If some tasks are migrated while others continue to run in a separate task host process, the migrated tasks will use the engine-managed object while the non-migrated tasks will still use the static field, resulting in inconsistent behavior.
+
+#### Cleanup-on-Dispose Pattern
+
+When the previous `RegisterTaskObject` approach cannot be used — for example, when utility classes or helper methods use static caches but lack access to `IBuildEngine` — the recommended alternative is to keep the static field and register a disposable wrapper that clears it when the build ends:
+
+```csharp
+internal static class MyHelper
+{
+    // Static cache accessed by helper methods that have no IBuildEngine.
+    private static readonly ConcurrentDictionary<string, string> s_cache = new();
+    internal static void ClearCache() => s_cache.Clear();
+}
+
+public class MyTask : Task
+{
+    private const string CleanerKey = "MyNamespace.MyTask.CacheCleaner";
+
+    public override bool Execute()
+    {
+        // Register a one-time cleanup wrapper so the static cache is
+        // cleared when the build ends and does not leak into future builds.
+        var engine4 = (IBuildEngine4)BuildEngine;
+        if (engine4.GetRegisteredTaskObject(CleanerKey, RegisteredTaskObjectLifetime.Build) is null)
+        {
+            // If another task instance races ahead, only one registration wins.
+            // This is safe: at least one cleanup wrapper will be registered.
+            engine4.RegisterTaskObject(
+                CleanerKey,
+                new CacheCleanup(MyHelper.ClearCache),
+                RegisteredTaskObjectLifetime.Build,
+                allowEarlyCollection: false);
+        }
+        ...
+    }
+
+    /// <summary>
+    /// Invokes a cleanup delegate when disposed. Register with
+    /// RegisterTaskObject so MSBuild calls Dispose at end of build.
+    /// </summary>
+    private sealed class CacheCleanup(Action onDispose) : IDisposable
+    {
+        public void Dispose() => onDispose();
+    }
+}
+```
+
+The same pattern must be applied to third-party libraries that maintain their own static state — a task may register a cleanup wrapper that calls the library's cache-clearing API.
+
+### Guidelines for Task Authors
+
+1. **Set `allowEarlyCollection: true`** when the cached data can be safely recreated. This lets MSBuild reclaim memory under pressure. Use `false` only for objects that must survive the entire build (e.g., cleanup wrappers, long-lived connections).
+2. **Use a stable, unique key.** A `const string` with the fully-qualified task name avoids collisions (e.g., `"MyNamespace.MyTask.Cache"`).
+3. **Handle null returns.** `GetRegisteredTaskObject` returns null when no object is registered under the key, or when a previously registered object was disposed through early collection.
+4. **Objects used by multiple task invocations must be thread-safe** in multithreaded builds, since multiple task instances may retrieve and use the same object concurrently.
+
 ## Appendix: Alternatives
 
 This appendix collects alternative approaches considered during design.
