@@ -3857,6 +3857,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Pins the interaction between a target's <c>Returns</c> attribute and <c>AfterTargets</c>:
+        /// a target's returned item set is captured when that target itself completes, before its
+        /// after-targets run. Items that an after-target adds to the same ItemGroup are therefore not
+        /// observed in the predecessor target's returned outputs (the same set the MSBuild task's
+        /// TargetOutputs would observe for that target).
+        /// </summary>
+        [Fact]
+        public void ReturnsCapturedBeforeAfterTargetsRun()
+        {
+            string contents = CleanupFileContents("""
+                <Project>
+                  <Target Name="A" Returns="@(MyItem)">
+                    <ItemGroup>
+                      <MyItem Include="FromA" />
+                    </ItemGroup>
+                  </Target>
+                  <Target Name="B" AfterTargets="A">
+                    <ItemGroup>
+                      <MyItem Include="FromB" />
+                    </ItemGroup>
+                    <Message Text="[B-ran]" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            BuildRequestData data = GetBuildRequestData(contents, ["A"]);
+            ProjectInstance projectInstance = data.ProjectInstance;
+            BuildResult result = _buildManager.Build(_parameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Sanity: the after-target B must actually have run, otherwise this test would pass trivially.
+            _logger.AssertLogContains("[B-ran]");
+
+            // A's Returns snapshot is taken when A completes, before B runs, so only FromA is captured;
+            // the FromB that B adds is not present.
+            result.ResultsByTarget["A"].Items.ShouldHaveSingleItem().ItemSpec.ShouldBe("FromA");
+
+            // The live project item state, by contrast, does see B's mutation: the FromB that is
+            // absent from A's returned snapshot was genuinely added to the item group, just too late
+            // for A's Returns.
+            projectInstance.GetItems("MyItem").Select(i => i.EvaluatedInclude).ShouldBe(["FromA", "FromB"]);
+        }
+
+        /// <summary>
         /// When a <see cref="ProjectInstance"/> based <see cref="BuildRequestData"/> is built out of proc, the node should
         /// not reload it from disk but instead fully utilize the entire translate project instance state
         /// to do the build.
