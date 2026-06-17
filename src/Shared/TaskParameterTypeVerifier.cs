@@ -43,13 +43,6 @@ namespace Microsoft.Build.BackEnd
             => TaskItemTypeDetector.IsPathLikeITaskItemOfT(parameterType);
 
         /// <summary>
-        /// Creates an instance of TaskItem&lt;T&gt; (or a provided TaskItem implementation for ITaskItem&lt;T&gt;)
-        /// from an <see cref="ITaskItem"/>.
-        /// </summary>
-        internal static object CreateTaskItemOfT(Type taskItemType, ITaskItem item, Type taskItemImplementationGenericType)
-            => TaskItemTypeDetector.CreateTaskItemOfT(taskItemType, item, taskItemImplementationGenericType);
-
-        /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>

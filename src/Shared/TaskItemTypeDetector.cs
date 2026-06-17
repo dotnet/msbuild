@@ -3,8 +3,6 @@
 
 using System;
 using System.IO;
-using System.Reflection;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
@@ -41,30 +39,5 @@ namespace Microsoft.Build.Shared
 
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)
             => IsPathLikeTaskItemOfT(parameterType, GenericITaskItemFullName);
-
-        internal static object CreateTaskItemOfT(Type taskItemType, ITaskItem item, Type taskItemImplementationGenericType)
-        {
-            Type[] genericArguments = taskItemType.GetGenericArguments();
-            Type valueType = genericArguments[0];
-
-            Type genericTypeDefinition = taskItemType.GetGenericTypeDefinition();
-            Type constructedType = string.Equals(genericTypeDefinition.FullName, GenericITaskItemFullName, StringComparison.Ordinal)
-                ? taskItemImplementationGenericType.MakeGenericType(valueType)
-                : genericTypeDefinition.MakeGenericType(valueType);
-            ConstructorInfo? constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
-            if (constructor == null)
-            {
-                throw new InvalidOperationException($"Type '{constructedType.FullName}' does not have a constructor that takes ITaskItem.");
-            }
-
-            try
-            {
-                return constructor.Invoke(new object[] { item });
-            }
-            catch (TargetInvocationException e) when (e.InnerException != null)
-            {
-                throw e.InnerException;
-            }
-        }
     }
 }
