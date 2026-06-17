@@ -92,7 +92,7 @@ internal partial class Expander<P, I>
         ///
         /// If no function name is found, we default to <see cref="Transforms.ExpandQuotedExpressionFunction"/>.
         /// </remarks>
-        internal static List<KeyValuePair<string, I>> Transform(
+        internal static List<TransformEntry> Transform(
             Expander<P, I> expander,
             IElementLocation elementLocation,
             ExpanderOptions options,
@@ -103,8 +103,8 @@ internal partial class Expander<P, I>
         {
             // Each transform runs on the full set of transformed items from the previous result.
             // We can reuse our buffers by just swapping the references after each transform.
-            List<KeyValuePair<string, I>> sourceItems = Transforms.GetItemPairs(itemsOfType);
-            List<KeyValuePair<string, I>> transformedItems = new(itemsOfType.Count);
+            List<TransformEntry> sourceItems = Transforms.CreateEntries(itemsOfType);
+            List<TransformEntry> transformedItems = new(itemsOfType.Count);
 
             // Create a TransformFunction for each transform in the chain by extracting the relevant information
             // from the regex parsing results
@@ -207,9 +207,9 @@ internal partial class Expander<P, I>
             // Check for break on non-empty only after ALL transforms are complete
             if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
             {
-                foreach (KeyValuePair<string, I> itemTuple in transformedItems)
+                foreach (TransformEntry entry in transformedItems)
                 {
-                    if (!string.IsNullOrEmpty(itemTuple.Key))
+                    if (!string.IsNullOrEmpty(entry.Value))
                     {
                         brokeEarly = true;
                         return transformedItems; // break out early
@@ -340,26 +340,23 @@ internal partial class Expander<P, I>
                 return result;
             }
 
-            List<KeyValuePair<string, I>> itemsFromCapture;
-            brokeEarlyNonEmpty = ExpandExpressionCapture(expander, expressionCapture, items, elementLocation /* including null items */, options, true, out isTransformExpression, out itemsFromCapture);
+            List<TransformEntry> entries;
+            brokeEarlyNonEmpty = ExpandExpressionCapture(expander, expressionCapture, items, elementLocation /* including null items */, options, true, out isTransformExpression, out entries);
 
             if (brokeEarlyNonEmpty)
             {
                 return null;
             }
 
-            if (itemsFromCapture == null || itemsFromCapture.Count == 0)
+            if (entries == null || entries.Count == 0)
             {
                 return Array.Empty<T>();
             }
 
-            result = new List<T>(itemsFromCapture.Count);
+            result = new List<T>(entries.Count);
 
-            foreach (var itemTuple in itemsFromCapture)
+            foreach (var (itemSpec, originalItem) in entries)
             {
-                var itemSpec = itemTuple.Key;
-                var originalItem = itemTuple.Value;
-
                 if (itemSpec != null && originalItem == null)
                 {
                     // We have an itemspec, but no base item
@@ -388,13 +385,13 @@ internal partial class Expander<P, I>
         /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
         /// </summary>
         /// <param name="isTransformExpression"></param>
-        /// <param name="itemsFromCapture">
+        /// <param name="entries">
         /// List of items.
         ///
-        /// Item1 represents the item string, escaped
-        /// Item2 represents the original item.
+        /// <see cref="TransformEntry.Value"/> represents the item string, escaped.
+        /// <see cref="TransformEntry.Item"/> represents the original item.
         ///
-        /// Item1 differs from Item2's string when it is coming from a transform.
+        /// Value differs from Item's string when it is coming from a transform.
         ///
         /// </param>
         /// <param name="expander">The expander whose state will be used to expand any transforms.</param>
@@ -411,7 +408,7 @@ internal partial class Expander<P, I>
             ExpanderOptions options,
             bool includeNullEntries,
             out bool isTransformExpression,
-            out List<KeyValuePair<string, I>> itemsFromCapture)
+            out List<TransformEntry> entries)
         {
             Assumed.NotNull(evaluatedItems, "Cannot expand items without providing items");
             // There's something wrong with the expression, and we ended up with a blank item type
@@ -431,7 +428,7 @@ internal partial class Expander<P, I>
                     // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
                     if (captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
                     {
-                        itemsFromCapture = null;
+                        entries = null;
                         return false;
                     }
                 }
@@ -444,7 +441,7 @@ internal partial class Expander<P, I>
 
             if (!isTransformExpression)
             {
-                itemsFromCapture = null;
+                entries = null;
 
                 // No transform: expression is like @(Compile), so include the item spec without a transform base item
                 foreach (I item in itemsOfType)
@@ -455,8 +452,8 @@ internal partial class Expander<P, I>
                         return true;
                     }
 
-                    itemsFromCapture ??= new List<KeyValuePair<string, I>>(itemsOfType.Count);
-                    itemsFromCapture.Add(new KeyValuePair<string, I>(evaluatedIncludeEscaped, item));
+                    entries ??= new List<TransformEntry>(itemsOfType.Count);
+                    entries.Add(new TransformEntry(evaluatedIncludeEscaped, item));
                 }
             }
             else
@@ -464,7 +461,7 @@ internal partial class Expander<P, I>
                 // There's something wrong with the expression, and we ended up with no function names
                 ProjectErrorUtilities.VerifyThrowInvalidProject(captures.Count > 0, elementLocation, "InvalidFunctionPropertyExpression");
 
-                itemsFromCapture = Transform(expander, elementLocation, options, includeNullEntries, captures, itemsOfType, out bool brokeEarly);
+                entries = Transform(expander, elementLocation, options, includeNullEntries, captures, itemsOfType, out bool brokeEarly);
 
                 if (brokeEarly)
                 {
@@ -474,9 +471,9 @@ internal partial class Expander<P, I>
 
             if (expressionCapture.Separator != null)
             {
-                var joinedItems = string.Join(expressionCapture.Separator, itemsFromCapture.Select(i => i.Key));
-                itemsFromCapture.Clear();
-                itemsFromCapture.Add(new KeyValuePair<string, I>(joinedItems, null));
+                var joinedItems = string.Join(expressionCapture.Separator, entries.Select(i => i.Value));
+                entries.Clear();
+                entries.Add(new TransformEntry(joinedItems, null));
             }
 
             return false; // did not break early
@@ -550,16 +547,16 @@ internal partial class Expander<P, I>
             SpanBasedStringBuilder builder,
             ExpanderOptions options)
         {
-            List<KeyValuePair<string, I>> itemsFromCapture;
+            List<TransformEntry> entries;
             bool throwaway;
-            var brokeEarlyNonEmpty = ExpandExpressionCapture(expander, capture, evaluatedItems, elementLocation /* including null items */, options, true, out throwaway, out itemsFromCapture);
+            var brokeEarlyNonEmpty = ExpandExpressionCapture(expander, capture, evaluatedItems, elementLocation /* including null items */, options, true, out throwaway, out entries);
 
             if (brokeEarlyNonEmpty)
             {
                 return true;
             }
 
-            if (itemsFromCapture == null)
+            if (entries == null)
             {
                 // No items to expand.
                 return false;
@@ -569,9 +566,9 @@ internal partial class Expander<P, I>
             bool truncate = IsTruncationEnabled(options);
 
             // if the capture.Separator is not null, then ExpandExpressionCapture would have joined the items using that separator itself
-            for (int i = 0; i < itemsFromCapture.Count; i++)
+            for (int i = 0; i < entries.Count; i++)
             {
-                var item = itemsFromCapture[i];
+                var entry = entries[i];
                 if (truncate)
                 {
                     if (i >= ItemLimitPerExpansion)
@@ -580,19 +577,19 @@ internal partial class Expander<P, I>
                         return false;
                     }
                     int currentLength = builder.Length - startLength;
-                    if (!string.IsNullOrEmpty(item.Key) && currentLength + item.Key.Length > CharacterLimitPerExpansion)
+                    if (!string.IsNullOrEmpty(entry.Value) && currentLength + entry.Value.Length > CharacterLimitPerExpansion)
                     {
                         int truncateIndex = CharacterLimitPerExpansion - currentLength - 3;
                         if (truncateIndex > 0)
                         {
-                            builder.Append(item.Key, 0, truncateIndex);
+                            builder.Append(entry.Value, 0, truncateIndex);
                         }
                         builder.Append("...");
                         return false;
                     }
                 }
-                builder.Append(item.Key);
-                if (i < itemsFromCapture.Count - 1)
+                builder.Append(entry.Value);
+                if (i < entries.Count - 1)
                 {
                     builder.Append(";");
                 }
