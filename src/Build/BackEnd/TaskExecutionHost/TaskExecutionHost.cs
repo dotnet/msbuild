@@ -832,7 +832,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         currentItem = item;
                         RecordItemForDisconnectIfNecessary(item);
-                        ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(elementType).GetConstructor([typeof(ITaskItem)]).Invoke([item]) as ITaskItem;
+                        ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(elementType.GetGenericArguments()[0]).GetConstructor([typeof(ITaskItem)]).Invoke([item]) as ITaskItem;
                         finalTaskInputs.Add(taskItemOfT);
                     }
                 }
@@ -1310,7 +1310,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
                         {
-                            ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(parameterType).GetConstructor(new[] { typeof(ITaskItem) }).Invoke([finalTaskItems[0]]) as ITaskItem;
+                            ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(parameterType.GetGenericArguments()[0]).GetConstructor(new[] { typeof(ITaskItem) }).Invoke([finalTaskItems[0]]) as ITaskItem;
                             success = InternalSetTaskParameter(parameter, taskItemOfT);
                         }
                         else
