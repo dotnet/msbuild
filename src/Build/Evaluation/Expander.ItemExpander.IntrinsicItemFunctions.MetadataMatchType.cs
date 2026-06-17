@@ -11,8 +11,7 @@ internal partial class Expander<P, I>
 {
     private static partial class ItemExpander
     {
-        internal static partial class IntrinsicItemFunctions<S>
-            where S : class, IItem
+        internal static partial class IntrinsicItemFunctions
         {
             /// <summary>
             /// The type of match we found.
