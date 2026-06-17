@@ -1265,6 +1265,9 @@ namespace Microsoft.Build.BackEnd
 
                             int writeStreamLength = (int)writeStream.Position;
                             int payloadLength = writeStreamLength - 5;
+#if NET
+                            IpcTransferStats.RecordSend(packet, payloadLength);
+#endif
 
                             // Now plug in the real packet length
                             writeStream.Position = 1;

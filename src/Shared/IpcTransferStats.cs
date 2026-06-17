@@ -3,10 +3,14 @@
 
 #if NET
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
+using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Internal
 {
@@ -41,6 +45,11 @@ namespace Microsoft.Build.Internal
         private static long s_shmRecvTicks;
         private static long s_shmRecvBytes;
         private static long s_shmRecvCount;
+
+        // Per-packet-type and per-task breakdown of EVERY sent packet (regardless of size), to
+        // answer "which packets / which tasks are big". Keyed by packet type name and task name.
+        private static readonly ConcurrentDictionary<string, SizeBucket> s_byPacketType = new(StringComparer.Ordinal);
+        private static readonly ConcurrentDictionary<string, SizeBucket> s_byTask = new(StringComparer.Ordinal);
 
         private static int s_dumped;
 
@@ -82,6 +91,27 @@ namespace Microsoft.Build.Internal
             Interlocked.Increment(ref s_shmRecvCount);
         }
 
+        /// <summary>
+        /// Records the type and size of every packet sent (any size), plus the task name when the
+        /// packet is a <see cref="TaskHostConfiguration"/>, so we can report which packet types and
+        /// which tasks dominate the payload.
+        /// </summary>
+        internal static void RecordSend(INodePacket packet, int payloadLength)
+        {
+            if (!Enabled)
+            {
+                return;
+            }
+
+            s_byPacketType.GetOrAdd(packet.Type.ToString(), static _ => new SizeBucket()).Add(payloadLength);
+
+            if (packet is TaskHostConfiguration config)
+            {
+                string taskName = string.IsNullOrEmpty(config.TaskName) ? "(unknown)" : config.TaskName;
+                s_byTask.GetOrAdd(taskName, static _ => new SizeBucket()).Add(payloadLength);
+            }
+        }
+
         internal static void Dump()
         {
             if (!Enabled || Interlocked.Exchange(ref s_dumped, 1) != 0)
@@ -121,14 +151,72 @@ namespace Microsoft.Build.Internal
                     ms(ticks) > 0 ? (bytes / 1024.0 / 1024.0) / (ms(ticks) / 1000.0) : 0);
 
             int pid = Environment.ProcessId;
-            return string.Join(
-                Environment.NewLine,
-                $"IPCSTATS pid={pid} (large-packet body transfer, threshold={NodeSharedMemoryChannel.PayloadThreshold} bytes)",
-                line("pipe-write", s_pipeWriteCount, s_pipeWriteBytes, s_pipeWriteTicks),
-                line("pipe-read", s_pipeReadCount, s_pipeReadBytes, s_pipeReadTicks),
-                line("shm-send", s_shmSendCount, s_shmSendBytes, s_shmSendTicks),
-                line("shm-recv", s_shmRecvCount, s_shmRecvBytes, s_shmRecvTicks),
-                $"  pipe total time = {ms(s_pipeWriteTicks + s_pipeReadTicks):N2} ms; shm total time = {ms(s_shmSendTicks + s_shmRecvTicks):N2} ms");
+            var sb = new StringBuilder();
+            sb.AppendLine($"IPCSTATS pid={pid} (large-packet body transfer, threshold={NodeSharedMemoryChannel.PayloadThreshold} bytes)");
+            sb.AppendLine(line("pipe-write", s_pipeWriteCount, s_pipeWriteBytes, s_pipeWriteTicks));
+            sb.AppendLine(line("pipe-read", s_pipeReadCount, s_pipeReadBytes, s_pipeReadTicks));
+            sb.AppendLine(line("shm-send", s_shmSendCount, s_shmSendBytes, s_shmSendTicks));
+            sb.AppendLine(line("shm-recv", s_shmRecvCount, s_shmRecvBytes, s_shmRecvTicks));
+            sb.AppendLine($"  pipe total time = {ms(s_pipeWriteTicks + s_pipeReadTicks):N2} ms; shm total time = {ms(s_shmSendTicks + s_shmRecvTicks):N2} ms");
+
+            AppendBreakdown(sb, "SENT PACKETS BY TYPE (all sizes)", s_byPacketType);
+            AppendBreakdown(sb, "SENT TaskHostConfiguration BY TASK (all sizes)", s_byTask);
+            return sb.ToString().TrimEnd();
+        }
+
+        private static void AppendBreakdown(StringBuilder sb, string title, ConcurrentDictionary<string, SizeBucket> map)
+        {
+            if (map.IsEmpty)
+            {
+                return;
+            }
+
+            sb.AppendLine($"  --- {title} ---");
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "    {0,-40} {1,7} {2,15} {3,11} {4,11}", "name", "count", "total bytes", "avg bytes", "max bytes"));
+            foreach (var kvp in map.OrderByDescending(p => p.Value.TotalBytes))
+            {
+                SizeBucket b = kvp.Value;
+                long count = b.Count;
+                sb.AppendLine(string.Format(
+                    CultureInfo.InvariantCulture,
+                    "    {0,-40} {1,7} {2,15:N0} {3,11:N0} {4,11:N0}",
+                    kvp.Key.Length <= 40 ? kvp.Key : kvp.Key.Substring(0, 39) + "…",
+                    count,
+                    b.TotalBytes,
+                    count > 0 ? b.TotalBytes / count : 0,
+                    b.MaxBytes));
+            }
+        }
+
+        private sealed class SizeBucket
+        {
+            private long _count;
+            private long _totalBytes;
+            private long _maxBytes;
+
+            internal long Count => Interlocked.Read(ref _count);
+
+            internal long TotalBytes => Interlocked.Read(ref _totalBytes);
+
+            internal long MaxBytes => Interlocked.Read(ref _maxBytes);
+
+            internal void Add(int bytes)
+            {
+                Interlocked.Increment(ref _count);
+                Interlocked.Add(ref _totalBytes, bytes);
+
+                long current = Interlocked.Read(ref _maxBytes);
+                while (bytes > current)
+                {
+                    long prior = Interlocked.CompareExchange(ref _maxBytes, bytes, current);
+                    if (prior == current)
+                    {
+                        break;
+                    }
+
+                    current = prior;
+                }
+            }
         }
     }
 }
