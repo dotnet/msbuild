@@ -130,6 +130,12 @@ namespace Microsoft.Build.Framework.Telemetry
         public bool? SACEnabled { get; set; }
 
         /// <summary>
+        /// Time in milliseconds spent waiting for a deferred coordinator node grant.
+        /// Null if no wait occurred (immediate grant or coordinator not used).
+        /// </summary>
+        public double? CoordinatorWaitDurationMs { get; set; }
+
+        /// <summary>
         /// State of MSBuild server process before this build.
         /// One of 'cold', 'hot', null (if not run as server)
         /// </summary>
@@ -175,6 +181,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildCheckEnabled);
             AddIfNotNull(MultiThreadedModeEnabled);
             AddIfNotNull(SACEnabled);
+            AddIfNotNull(CoordinatorWaitDurationMs);
             AddIfNotNull(IsStandaloneExecution);
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts);
@@ -206,6 +213,7 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(BuildCheckEnabled?.ToString(), nameof(BuildCheckEnabled));
             AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
+            AddIfNotNull(CoordinatorWaitDurationMs?.ToString(CultureInfo.InvariantCulture), nameof(CoordinatorWaitDurationMs));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
             AddIfNotNull(FailureCategory);
             AddIfNotNull(ErrorCounts?.ToString(), nameof(ErrorCounts));

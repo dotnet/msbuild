@@ -110,6 +110,12 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>7b306e34463421cef2816352743b943c6547dfab</Sha>
     </Dependency>
+    <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
+         version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
+         to it (PrivateAssets="all", so we don't repackage the binary and the API doesn't appear
+         in our public surface). At runtime we still bind to whatever NuGet.Frameworks.dll the
+         host SDK ships, so per the toolset-vs-product test in dotnet/arcade-services'
+         docs/Darc.md this is a toolset dependency, not a product one. -->
     <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.30">
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>551e8bafd7ec41484f2d8d7fadcd0750f7db173a</Sha>

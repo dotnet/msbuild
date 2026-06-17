@@ -1013,46 +1013,9 @@ namespace Microsoft.Build.Tasks
                 String.Equals(extension, ".resw", StringComparison.OrdinalIgnoreCase))
             {
                 // XML files are only dangerous if there are unrecognized objects in them
-                dangerous = false;
-
                 using FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using XmlTextReader reader = new XmlTextReader(stream);
-                reader.DtdProcessing = DtdProcessing.Ignore;
-                reader.XmlResolver = null;
-                try
-                {
-                    while (reader.Read())
-                    {
-                        if (reader.NodeType == XmlNodeType.Element)
-                        {
-                            string s = reader.LocalName;
-
-                            // We only want to parse data nodes,
-                            // the mimetype attribute gives the serializer
-                            // that's requested.
-                            if (reader.LocalName.Equals("data"))
-                            {
-                                if (reader["mimetype"] != null)
-                                {
-                                    dangerous = true;
-                                }
-                            }
-                            else if (reader.LocalName.Equals("metadata"))
-                            {
-                                if (reader["mimetype"] != null)
-                                {
-                                    dangerous = true;
-                                }
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    // If we hit an error while parsing assume there's a dangerous type in this file.
-                    dangerous = true;
-                }
-                stream.Close();
+                using StreamReader streamReader = new StreamReader(stream);
+                dangerous = ResourceFileContentsAreDangerous(streamReader);
             }
 
             return dangerous;
@@ -1090,9 +1053,82 @@ namespace Microsoft.Build.Tasks
 #endif // FEATURE_APPDOMAIN
 
         /// <summary>
-        /// Computes the path to ResGen.exe for use in logging and for passing to the
-        /// nested ResGen task.
+        /// Scans the contents of a <c>.resx</c>/<c>.resw</c> file and determines whether it contains any entry
+        /// that requires the file to be trusted before it is processed by <see cref="GenerateResource"/>.
         /// </summary>
+        /// <remarks>
+        /// This is the content-only portion of the Mark-of-the-Web trust check (see <c>IsDangerous</c>). It is kept
+        /// separate (and free of the zone/COM machinery) so it can be unit-tested on all target frameworks.
+        /// A resource is considered dangerous when a <c>data</c>/<c>metadata</c> element:
+        /// <list type="bullet">
+        /// <item>has a <c>mimetype</c> attribute (an arbitrary object will be deserialized), or</item>
+        /// <item>has a <c>type</c> attribute referencing <c>ResXFileRef</c> (an external linked file will be read), or</item>
+        /// <item>has any other <c>type</c> attribute - only when ChangeWave 18.9 is enabled - because resolving the
+        /// type eventually calls <c>Type.GetType</c>, which can probe for assemblies on disk.</item>
+        /// </list>
+        /// </remarks>
+        internal static bool ResourceFileContentsAreDangerous(TextReader textReader)
+        {
+            // XML files are only dangerous if there are unrecognized objects in them.
+            bool dangerous = false;
+
+            using XmlTextReader reader = new XmlTextReader(textReader);
+            reader.DtdProcessing = DtdProcessing.Ignore;
+            reader.XmlResolver = null;
+            try
+            {
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        string localName = reader.LocalName;
+
+                        // We only want to parse data nodes,
+                        // the mimetype attribute gives the serializer
+                        // that's requested.
+                        if (localName.Equals("data") || localName.Equals("metadata"))
+                        {
+                            if (reader["mimetype"] != null)
+                            {
+                                dangerous = true;
+                            }
+                            else
+                            {
+                                // ResXFileRef can reference external files
+                                string typeAttribute = reader["type"];
+                                if (typeAttribute != null)
+                                {
+                                    if (typeAttribute.IndexOf("ResXFileRef", StringComparison.Ordinal) >= 0)
+                                    {
+                                        dangerous = true;
+                                    }
+                                    else if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9))
+                                    {
+                                        // Require any typed entry on a "Mark of the web" to be unblocked by user
+                                        dangerous = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // The result is already determined; no need to keep parsing the rest of the file.
+                    if (dangerous)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+                // If we hit an error while parsing assume there's a dangerous type in this file.
+                dangerous = true;
+            }
+
+            return dangerous;
+        }
+
+
         /// <returns>True if the path is found (or it doesn't matter because we're executing in memory), false otherwise</returns>
         private bool ComputePathToResGen()
         {
