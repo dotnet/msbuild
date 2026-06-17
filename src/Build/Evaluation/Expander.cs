@@ -424,9 +424,9 @@ internal partial class Expander<P, I>
         ExpanderOptions options,
         bool includeNullEntries,
         out bool isTransformExpression,
-        out List<KeyValuePair<string, I>> itemsFromCapture)
+        out List<TransformEntry> entries)
     {
-        return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
+        return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out entries);
     }
 
     private static string TruncateString(string metadataValue)
