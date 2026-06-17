@@ -214,7 +214,7 @@ namespace Microsoft.Build.Graph
                         // Create outer build reference by removing TargetFramework from the global properties
                         // This allows all inner builds to be discovered while respecting other modifiers
                         var outerBuildProperties = new PropertyDictionary<ProjectPropertyInstance>(referenceGlobalProperties);
-                        outerBuildProperties.Remove("TargetFramework");
+                        outerBuildProperties.Remove(PropertyNames.TargetFramework);
                         
                         // Yield only the outer build (no TargetFramework override)
                         // The ConstructInnerBuildReferences logic will discover and create the inner builds
@@ -231,7 +231,7 @@ namespace Microsoft.Build.Graph
                         {
                             // Remove TargetFramework that was set by SetTargetFramework metadata
                             var singleTargetProperties = new PropertyDictionary<ProjectPropertyInstance>(referenceGlobalProperties);
-                            singleTargetProperties.Remove("TargetFramework");
+                            singleTargetProperties.Remove(PropertyNames.TargetFramework);
                             yield return new ReferenceInfo(new ConfigurationMetadata(projectReferenceFullPath, singleTargetProperties), projectReferenceItem);
                             continue;
                         }
