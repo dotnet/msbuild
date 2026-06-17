@@ -38,9 +38,7 @@ internal partial class Expander<P, I>
         /// <summary>
         /// The set of functions that called during an item transformation, e.g. @(CLCompile->ContainsMetadata('MetaName', 'metaValue')).
         /// </summary>
-        /// <typeparam name="S">class, IItem.</typeparam>
-        internal static partial class IntrinsicItemFunctions<S>
-            where S : class, IItem
+        internal static partial class IntrinsicItemFunctions
         {
             /// <summary>
             /// The number of characters added by a quoted expression.
@@ -91,12 +89,12 @@ internal partial class Expander<P, I>
             /// Create an enumerator from a base IEnumerable of items into an enumerable
             /// of transformation result which includes the new itemspec and the base item.
             /// </summary>
-            internal static List<KeyValuePair<string, S>> GetItemPairs(ICollection<S> itemsOfType)
+            internal static List<KeyValuePair<string, I>> GetItemPairs(ICollection<I> itemsOfType)
             {
-                List<KeyValuePair<string, S>> itemsFromCapture = new(itemsOfType.Count);
+                List<KeyValuePair<string, I>> itemsFromCapture = new(itemsOfType.Count);
 
                 // iterate over the items, and add items in the tuple format
-                foreach (S item in itemsOfType)
+                foreach (I item in itemsOfType)
                 {
                     if (Traits.Instance.UseLazyWildCardEvaluation)
                     {
@@ -106,12 +104,12 @@ internal partial class Expander<P, I>
                                 item.EvaluatedIncludeEscaped,
                                 forceEvaluate: true))
                         {
-                            itemsFromCapture.Add(new KeyValuePair<string, S>(resultantItem, item));
+                            itemsFromCapture.Add(new KeyValuePair<string, I>(resultantItem, item));
                         }
                     }
                     else
                     {
-                        itemsFromCapture.Add(new KeyValuePair<string, S>(item.EvaluatedIncludeEscaped, item));
+                        itemsFromCapture.Add(new KeyValuePair<string, I>(item.EvaluatedIncludeEscaped, item));
                     }
                 }
 
@@ -121,20 +119,20 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds the number of items in the list.
             /// </summary>
-            internal static void Count(List<KeyValuePair<string, S>> itemsOfType, List<KeyValuePair<string, S>> transformedItems)
+            internal static void Count(List<KeyValuePair<string, I>> itemsOfType, List<KeyValuePair<string, I>> transformedItems)
             {
-                transformedItems.Add(new KeyValuePair<string, S>(Convert.ToString(itemsOfType.Count, CultureInfo.InvariantCulture), null /* no base item */));
+                transformedItems.Add(new KeyValuePair<string, I>(Convert.ToString(itemsOfType.Count, CultureInfo.InvariantCulture), null /* no base item */));
             }
 
             /// <summary>
             /// Intrinsic function that adds the specified built-in modifer value of the items in itemsOfType
             /// Tuple is {current item include, item under transformation}.
             /// </summary>
-            internal static void ItemSpecModifierFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void ItemSpecModifierFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     // If the item include has become empty,
                     // this is the end of the pipeline for this item
@@ -168,11 +166,11 @@ internal partial class Expander<P, I>
                     {
                         // GetItemSpecModifier will have returned us an escaped string
                         // there is nothing more to do than yield it into the pipeline
-                        transformedItems.Add(new KeyValuePair<string, S>(result, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(result, item.Value));
                     }
                     else if (includeNullEntries)
                     {
-                        transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(null, item.Value));
                     }
                 }
             }
@@ -180,11 +178,11 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds the subset of items that actually exist on disk.
             /// </summary>
-            internal static void Exists(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void Exists(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     if (String.IsNullOrEmpty(item.Key))
                     {
@@ -229,13 +227,13 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that combines the existing paths of the input items with a given relative path.
             /// </summary>
-            internal static void Combine(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void Combine(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                 string relativePath = arguments[0];
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     if (String.IsNullOrEmpty(item.Key))
                     {
@@ -246,14 +244,14 @@ internal partial class Expander<P, I>
                     string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
                     string combinedPath = Path.Combine(unescapedPath, relativePath);
                     string escapedPath = EscapingUtilities.Escape(combinedPath);
-                    transformedItems.Add(new KeyValuePair<string, S>(escapedPath, null));
+                    transformedItems.Add(new KeyValuePair<string, I>(escapedPath, null));
                 }
             }
 
             /// <summary>
             /// Intrinsic function that adds all ancestor directories of the given items.
             /// </summary>
-            internal static void GetPathsOfAllDirectoriesAbove(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void GetPathsOfAllDirectoriesAbove(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -261,7 +259,7 @@ internal partial class Expander<P, I>
 
                 SortedSet<string> directories = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     if (String.IsNullOrEmpty(item.Key))
                     {
@@ -323,7 +321,7 @@ internal partial class Expander<P, I>
                 foreach (string directoryPath in directories)
                 {
                     string escapedDirectoryPath = EscapingUtilities.Escape(directoryPath);
-                    transformedItems.Add(new KeyValuePair<string, S>(escapedDirectoryPath, null));
+                    transformedItems.Add(new KeyValuePair<string, I>(escapedDirectoryPath, null));
                 }
             }
 
@@ -331,13 +329,13 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds the DirectoryName of the items in itemsOfType
             /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
             /// </summary>
-            internal static void DirectoryName(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void DirectoryName(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                 Dictionary<string, string> directoryNameTable = new Dictionary<string, string>(itemsOfType.Count, StringComparer.OrdinalIgnoreCase);
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     // If the item include has become empty,
                     // this is the end of the pipeline for this item
@@ -388,11 +386,11 @@ internal partial class Expander<P, I>
                     if (!String.IsNullOrEmpty(directoryName))
                     {
                         // return a result through the enumerator
-                        transformedItems.Add(new KeyValuePair<string, S>(directoryName, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(directoryName, item.Value));
                     }
                     else if (includeNullEntries)
                     {
-                        transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(null, item.Value));
                     }
                 }
             }
@@ -400,13 +398,13 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds the contents of the metadata in specified in argument[0].
             /// </summary>
-            internal static void Metadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void Metadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                 string metadataName = arguments[0];
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     if (item.Value != null)
                     {
@@ -433,18 +431,18 @@ internal partial class Expander<P, I>
                                 foreach (string itemSpec in splits)
                                 {
                                     // return a result through the enumerator
-                                    transformedItems.Add(new KeyValuePair<string, S>(itemSpec, item.Value));
+                                    transformedItems.Add(new KeyValuePair<string, I>(itemSpec, item.Value));
                                 }
                             }
                             else
                             {
                                 // return a result through the enumerator
-                                transformedItems.Add(new KeyValuePair<string, S>(metadataValue, item.Value));
+                                transformedItems.Add(new KeyValuePair<string, I>(metadataValue, item.Value));
                             }
                         }
                         else if (metadataValue != String.Empty && includeNullEntries)
                         {
-                            transformedItems.Add(new KeyValuePair<string, S>(metadataValue, item.Value));
+                            transformedItems.Add(new KeyValuePair<string, I>(metadataValue, item.Value));
                         }
                     }
                 }
@@ -454,7 +452,7 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
             /// Using a case sensitive comparison.
             /// </summary>
-            internal static void DistinctWithCase(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void DistinctWithCase(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 DistinctWithComparer(elementLocation, functionName, itemsOfType, arguments, StringComparer.Ordinal, transformedItems);
             }
@@ -463,7 +461,7 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void Distinct(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void Distinct(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 DistinctWithComparer(elementLocation, functionName, itemsOfType, arguments, StringComparer.OrdinalIgnoreCase, transformedItems);
             }
@@ -472,14 +470,14 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void DistinctWithComparer(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, StringComparer comparer, List<KeyValuePair<string, S>> transformedItems)
+            internal static void DistinctWithComparer(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, StringComparer comparer, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                 // This dictionary will ensure that we only return one result per unique itemspec
                 HashSet<string> seenItems = new HashSet<string>(itemsOfType.Count, comparer);
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     if (item.Key != null && seenItems.Add(item.Key))
                     {
@@ -491,7 +489,7 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function reverses the item list.
             /// </summary>
-            internal static void Reverse(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void Reverse(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -504,7 +502,7 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that transforms expressions like the %(foo) in @(Compile->'%(foo)').
             /// </summary>
-            internal static void ExpandQuotedExpressionFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void ExpandQuotedExpressionFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -515,7 +513,7 @@ internal partial class Expander<P, I>
                 SpanBasedStringBuilder includeBuilder = s_includeBuilder ?? new SpanBasedStringBuilder();
                 s_includeBuilder = null;
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     string include = null;
 
@@ -574,11 +572,11 @@ internal partial class Expander<P, I>
                     // We pass in the existing item so we can copy over its metadata
                     if (!string.IsNullOrEmpty(include))
                     {
-                        transformedItems.Add(new KeyValuePair<string, S>(include, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(include, item.Value));
                     }
                     else if (includeNullEntries)
                     {
-                        transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(null, item.Value));
                     }
                 }
 
@@ -698,13 +696,13 @@ internal partial class Expander<P, I>
                 IElementLocation elementLocation,
                 bool includeNullEntries,
                 string functionName,
-                List<KeyValuePair<string, S>> itemsOfType,
+                List<KeyValuePair<string, I>> itemsOfType,
                 string[] arguments,
-                List<KeyValuePair<string, S>> transformedItems)
+                List<KeyValuePair<string, I>> transformedItems)
             {
                 // Transform: expression is like @(Compile->'%(foo)'), so create completely new items,
                 // using the Include from the source items
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     Function function = new Function(
                         typeof(string),
@@ -725,11 +723,11 @@ internal partial class Expander<P, I>
                     // We pass in the existing item so we can copy over its metadata
                     if (include.Length > 0)
                     {
-                        transformedItems.Add(new KeyValuePair<string, S>(include, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(include, item.Value));
                     }
                     else if (includeNullEntries)
                     {
-                        transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
+                        transformedItems.Add(new KeyValuePair<string, I>(null, item.Value));
                     }
                 }
             }
@@ -737,15 +735,15 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds the items from itemsOfType with their metadata cleared, i.e. only the itemspec is retained.
             /// </summary>
-            internal static void ClearMetadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void ClearMetadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     if (includeNullEntries || item.Key != null)
                     {
-                        transformedItems.Add(new KeyValuePair<string, S>(item.Key, null));
+                        transformedItems.Add(new KeyValuePair<string, I>(item.Key, null));
                     }
                 }
             }
@@ -754,13 +752,13 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only those items that have a not-blank value for the metadata specified
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void HasMetadata(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void HasMetadata(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                 string metadataName = arguments[0];
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     string metadataValue = null;
 
@@ -788,14 +786,14 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only those items have the given metadata value
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void WithMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void WithMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                 string metadataName = arguments[0];
                 string metadataValueToFind = arguments[1];
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     string metadataValue = null;
 
@@ -821,14 +819,14 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds those items don't have the given metadata value
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void WithoutMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void WithoutMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                 string metadataName = arguments[0];
                 string metadataValueToFind = arguments[1];
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     string metadataValue = null;
 
@@ -854,7 +852,7 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds a boolean to indicate if any of the items have the given metadata value
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void AnyHaveMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
+            internal static void AnyHaveMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, I>> itemsOfType, string[] arguments, List<KeyValuePair<string, I>> transformedItems)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -862,7 +860,7 @@ internal partial class Expander<P, I>
                 string metadataValueToFind = arguments[1];
                 bool metadataFound = false;
 
-                foreach (KeyValuePair<string, S> item in itemsOfType)
+                foreach (KeyValuePair<string, I> item in itemsOfType)
                 {
                     if (item.Value != null)
                     {
@@ -883,7 +881,7 @@ internal partial class Expander<P, I>
                             metadataFound = true;
 
                             // return a result through the enumerator
-                            transformedItems.Add(new KeyValuePair<string, S>("true", item.Value));
+                            transformedItems.Add(new KeyValuePair<string, I>("true", item.Value));
 
                             // break out as soon as we found a match
                             return;
@@ -894,7 +892,7 @@ internal partial class Expander<P, I>
                 if (!metadataFound)
                 {
                     // We did not locate an item with the required metadata
-                    transformedItems.Add(new KeyValuePair<string, S>("false", null));
+                    transformedItems.Add(new KeyValuePair<string, I>("false", null));
                 }
             }
 

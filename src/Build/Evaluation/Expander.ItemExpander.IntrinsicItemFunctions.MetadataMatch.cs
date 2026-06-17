@@ -13,8 +13,7 @@ internal partial class Expander<P, I>
 {
     private static partial class ItemExpander
     {
-        internal static partial class IntrinsicItemFunctions<S>
-            where S : class, IItem
+        internal static partial class IntrinsicItemFunctions
         {
             /// <summary>
             /// Represents a single match. Whether it was cached or from a Regex should be transparent
