@@ -1956,6 +1956,7 @@ namespace Microsoft.Build.UnitTests
 
             _env.SetCurrentDirectory(linkDirectory);
             _env.SetEnvironmentVariable("PWD", linkDirectory);
+            ChangeWaves.ResetStateForTests();
 
             string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
 
