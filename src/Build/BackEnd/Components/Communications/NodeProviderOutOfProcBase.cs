@@ -1128,9 +1128,6 @@ namespace Microsoft.Build.BackEnd
                         packetLength &= NodeSharedMemoryChannel.LengthMask;
                     }
 #endif
-#if NET
-                    IpcTransferStats.RecordReceive(packetType, packetLength);
-#endif
 
                     _readBufferMemoryStream.SetLength(packetLength);
                     byte[] packetData = _readBufferMemoryStream.GetBuffer();
@@ -1138,22 +1135,15 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
 #if NET
+                        long recvStart = IpcTransferStats.StartTimestamp();
                         if (bodyInSharedMemory)
                         {
-                            long shmStart = IpcTransferStats.StartTimestamp();
                             _sharedChannel.ReceivePayload(packetData, 0, packetLength);
-                            if (IpcTransferStats.Enabled)
-                            {
-                                IpcTransferStats.RecordShmRecv(shmStart, packetLength);
-                            }
+                            IpcTransferStats.RecordReceive(packetType, packetLength, IpcTransferStats.Elapsed(recvStart), viaSharedMemory: true);
                         }
                         else
 #endif
                         {
-#if NET
-                            bool measure = IpcTransferStats.Enabled && packetLength >= NodeSharedMemoryChannel.PayloadThreshold;
-                            long pipeStart = measure ? IpcTransferStats.StartTimestamp() : 0;
-#endif
                             int totalBytesRead = 0;
                             while (totalBytesRead < packetLength)
                             {
@@ -1171,10 +1161,7 @@ namespace Microsoft.Build.BackEnd
                                 return;
                             }
 #if NET
-                            if (measure)
-                            {
-                                IpcTransferStats.RecordPipeRead(pipeStart, packetLength);
-                            }
+                            IpcTransferStats.RecordReceive(packetType, packetLength, IpcTransferStats.Elapsed(recvStart), viaSharedMemory: false);
 #endif
                         }
                     }
@@ -1268,17 +1255,18 @@ namespace Microsoft.Build.BackEnd
 
                             int writeStreamLength = (int)writeStream.Position;
                             int payloadLength = writeStreamLength - 5;
-#if NET
-                            IpcTransferStats.RecordSend(packet, payloadLength);
-#endif
 
                             // Now plug in the real packet length
                             writeStream.Position = 1;
 
                             byte[] writeStreamBuffer = writeStream.GetBuffer();
 #if NET
-                            if (context._sharedChannel != null && NodeSharedMemoryChannel.ShouldUseSharedMemory(payloadLength))
+                            long sendStart = IpcTransferStats.StartTimestamp();
+                            bool sentViaShm = false;
+                            if (context._sharedChannel != null && context._sharedChannel.ShouldSendViaSharedMemory(payloadLength))
                             {
+                                sentViaShm = true;
+
                                 // Flag the length and deliver the payload through shared memory. The slot
                                 // must exist before the header reaches the pipe so the reader can open it
                                 // as soon as it observes the flag.
@@ -1290,34 +1278,22 @@ namespace Microsoft.Build.BackEnd
                                 // parent sends many configs back-to-back). Body-before-header was measured
                                 // ~25x slower here due to AcquireEmpty stalls.
                                 serverToClientStream.Write(writeStreamBuffer, 0, 5);
-                                long shmStart = IpcTransferStats.StartTimestamp();
                                 context._sharedChannel.SendPayload(writeStreamBuffer, 5, payloadLength);
-                                if (IpcTransferStats.Enabled)
-                                {
-                                    IpcTransferStats.RecordShmSend(shmStart, payloadLength);
-                                }
                             }
                             else
 #endif
                             {
                                 WriteInt32(writeStream, payloadLength);
-#if NET
-                                bool measure = IpcTransferStats.Enabled && payloadLength >= NodeSharedMemoryChannel.PayloadThreshold;
-                                long pipeStart = measure ? IpcTransferStats.StartTimestamp() : 0;
-#endif
                                 for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
                                 {
                                     int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
 
                                     serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                                 }
-#if NET
-                                if (measure)
-                                {
-                                    IpcTransferStats.RecordPipeWrite(pipeStart, payloadLength);
-                                }
-#endif
                             }
+#if NET
+                            IpcTransferStats.RecordSend(packet, payloadLength, IpcTransferStats.Elapsed(sendStart), sentViaShm);
+#endif
 
                             if (packet is NodeBuildComplete)
                             {

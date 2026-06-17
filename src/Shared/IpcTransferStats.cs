@@ -20,8 +20,8 @@ namespace Microsoft.Build.Internal
     /// shared memory) and by direction (send vs receive). Enabled with <c>MSBUILDIPCSTATS=1</c>.
     /// </summary>
     /// <remarks>
-    /// Only payloads at or above <see cref="NodeSharedMemoryChannel.PayloadThreshold"/> are timed, so
-    /// the same set of packets is compared whether or not the shared-memory feature is on. The hot
+    /// Only payloads at or above the direction-specific threshold are diverted, so the same set of
+    /// packets is compared whether or not the shared-memory feature is on. The hot
     /// path is a single <see cref="Stopwatch.GetTimestamp"/> pair plus a few interlocked adds. Totals
     /// are written to the file named by <c>MSBUILDIPCSTATSFILE</c> (or the comm trace) at process exit.
     /// </remarks>
@@ -46,8 +46,8 @@ namespace Microsoft.Build.Internal
         private static long s_shmRecvBytes;
         private static long s_shmRecvCount;
 
-        // Per-packet-type and per-task breakdown of EVERY sent packet (regardless of size), to
-        // answer "which packets / which tasks are big". Keyed by packet type name and task name.
+        // Per-packet-type and per-task breakdown of EVERY sent packet (regardless of size), with
+        // time split by mechanism (pipe vs shm), to answer "which tasks improve by how much".
         private static readonly ConcurrentDictionary<string, SizeBucket> s_byPacketType = new(StringComparer.Ordinal);
         private static readonly ConcurrentDictionary<string, SizeBucket> s_byTask = new(StringComparer.Ordinal);
 
@@ -66,67 +66,66 @@ namespace Microsoft.Build.Internal
 
         internal static long StartTimestamp() => Enabled ? Stopwatch.GetTimestamp() : 0;
 
-        internal static void RecordPipeWrite(long startTimestamp, int bytes)
-        {
-            Interlocked.Add(ref s_pipeWriteTicks, Stopwatch.GetTimestamp() - startTimestamp);
-            Interlocked.Add(ref s_pipeWriteBytes, bytes);
-            Interlocked.Increment(ref s_pipeWriteCount);
-        }
-
-        internal static void RecordPipeRead(long startTimestamp, int bytes)
-        {
-            Interlocked.Add(ref s_pipeReadTicks, Stopwatch.GetTimestamp() - startTimestamp);
-            Interlocked.Add(ref s_pipeReadBytes, bytes);
-            Interlocked.Increment(ref s_pipeReadCount);
-        }
-
-        internal static void RecordShmSend(long startTimestamp, int bytes)
-        {
-            Interlocked.Add(ref s_shmSendTicks, Stopwatch.GetTimestamp() - startTimestamp);
-            Interlocked.Add(ref s_shmSendBytes, bytes);
-            Interlocked.Increment(ref s_shmSendCount);
-        }
-
-        internal static void RecordShmRecv(long startTimestamp, int bytes)
-        {
-            Interlocked.Add(ref s_shmRecvTicks, Stopwatch.GetTimestamp() - startTimestamp);
-            Interlocked.Add(ref s_shmRecvBytes, bytes);
-            Interlocked.Increment(ref s_shmRecvCount);
-        }
+        internal static long Elapsed(long startTimestamp) => Stopwatch.GetTimestamp() - startTimestamp;
 
         /// <summary>
-        /// Records the type and size of every packet sent (any size), plus the task name when the
-        /// packet is a <see cref="TaskHostConfiguration"/>, so we can report which packet types and
-        /// which tasks dominate the payload.
+        /// Records a packet sent (parent -&gt; child): aggregate mechanism totals plus per-type and
+        /// per-task (for <see cref="TaskHostConfiguration"/>) bytes and time, split by mechanism.
         /// </summary>
-        internal static void RecordSend(INodePacket packet, int payloadLength)
+        internal static void RecordSend(INodePacket packet, int payloadLength, long elapsedTicks, bool viaSharedMemory)
         {
             if (!Enabled)
             {
                 return;
             }
 
-            s_byPacketType.GetOrAdd(packet.Type.ToString(), static _ => new SizeBucket()).Add(payloadLength);
+            if (viaSharedMemory)
+            {
+                Interlocked.Add(ref s_shmSendTicks, elapsedTicks);
+                Interlocked.Add(ref s_shmSendBytes, payloadLength);
+                Interlocked.Increment(ref s_shmSendCount);
+            }
+            else
+            {
+                Interlocked.Add(ref s_pipeWriteTicks, elapsedTicks);
+                Interlocked.Add(ref s_pipeWriteBytes, payloadLength);
+                Interlocked.Increment(ref s_pipeWriteCount);
+            }
+
+            s_byPacketType.GetOrAdd(packet.Type.ToString(), static _ => new SizeBucket()).Add(payloadLength, elapsedTicks, viaSharedMemory);
 
             if (packet is TaskHostConfiguration config)
             {
                 string taskName = string.IsNullOrEmpty(config.TaskName) ? "(unknown)" : config.TaskName;
-                s_byTask.GetOrAdd(taskName, static _ => new SizeBucket()).Add(payloadLength);
+                s_byTask.GetOrAdd(taskName, static _ => new SizeBucket()).Add(payloadLength, elapsedTicks, viaSharedMemory);
             }
         }
 
         /// <summary>
-        /// Records the type and size of every packet received (parent &lt;- child), so we can report
-        /// the logging and task-output traffic that flows back from TaskHosts.
+        /// Records a packet received (parent &lt;- child): aggregate mechanism totals plus per-type
+        /// bytes and time (logging + task outputs), split by mechanism.
         /// </summary>
-        internal static void RecordReceive(NodePacketType packetType, int payloadLength)
+        internal static void RecordReceive(NodePacketType packetType, int payloadLength, long elapsedTicks, bool viaSharedMemory)
         {
             if (!Enabled)
             {
                 return;
             }
 
-            s_recvByPacketType.GetOrAdd(packetType.ToString(), static _ => new SizeBucket()).Add(payloadLength);
+            if (viaSharedMemory)
+            {
+                Interlocked.Add(ref s_shmRecvTicks, elapsedTicks);
+                Interlocked.Add(ref s_shmRecvBytes, payloadLength);
+                Interlocked.Increment(ref s_shmRecvCount);
+            }
+            else
+            {
+                Interlocked.Add(ref s_pipeReadTicks, elapsedTicks);
+                Interlocked.Add(ref s_pipeReadBytes, payloadLength);
+                Interlocked.Increment(ref s_pipeReadCount);
+            }
+
+            s_recvByPacketType.GetOrAdd(packetType.ToString(), static _ => new SizeBucket()).Add(payloadLength, elapsedTicks, viaSharedMemory);
         }
 
         internal static void Dump()
@@ -169,16 +168,16 @@ namespace Microsoft.Build.Internal
 
             int pid = Environment.ProcessId;
             var sb = new StringBuilder();
-            sb.AppendLine($"IPCSTATS pid={pid} (large-packet body transfer, threshold={NodeSharedMemoryChannel.PayloadThreshold} bytes)");
+            sb.AppendLine($"IPCSTATS pid={pid} sendThr={NodeSharedMemoryChannel.SendThreshold} returnThr={NodeSharedMemoryChannel.ReturnThreshold} slot={NodeSharedMemoryChannel.SlotCapacity} shmEnabled={NodeSharedMemoryChannel.FeatureEnabled}");
             sb.AppendLine(line("pipe-write", s_pipeWriteCount, s_pipeWriteBytes, s_pipeWriteTicks));
             sb.AppendLine(line("pipe-read", s_pipeReadCount, s_pipeReadBytes, s_pipeReadTicks));
             sb.AppendLine(line("shm-send", s_shmSendCount, s_shmSendBytes, s_shmSendTicks));
             sb.AppendLine(line("shm-recv", s_shmRecvCount, s_shmRecvBytes, s_shmRecvTicks));
-            sb.AppendLine($"  pipe total time = {ms(s_pipeWriteTicks + s_pipeReadTicks):N2} ms; shm total time = {ms(s_shmSendTicks + s_shmRecvTicks):N2} ms");
+            sb.AppendLine($"  send total time = {ms(s_pipeWriteTicks + s_shmSendTicks):N2} ms; recv total time = {ms(s_pipeReadTicks + s_shmRecvTicks):N2} ms; ALL = {ms(s_pipeWriteTicks + s_shmSendTicks + s_pipeReadTicks + s_shmRecvTicks):N2} ms");
 
-            AppendBreakdown(sb, "SENT PACKETS BY TYPE (parent -> child, all sizes)", s_byPacketType);
-            AppendBreakdown(sb, "SENT TaskHostConfiguration BY TASK (all sizes)", s_byTask);
-            AppendBreakdown(sb, "RECEIVED PACKETS BY TYPE (parent <- child, all sizes)", s_recvByPacketType);
+            AppendBreakdown(sb, "SENT PACKETS BY TYPE (parent -> child)", s_byPacketType);
+            AppendBreakdown(sb, "SENT TaskHostConfiguration BY TASK", s_byTask);
+            AppendBreakdown(sb, "RECEIVED PACKETS BY TYPE (parent <- child)", s_recvByPacketType);
             return sb.ToString().TrimEnd();
         }
 
@@ -189,20 +188,23 @@ namespace Microsoft.Build.Internal
                 return;
             }
 
+            double ms(long ticks) => ticks * 1000.0 / Stopwatch.Frequency;
             sb.AppendLine($"  --- {title} ---");
-            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "    {0,-40} {1,7} {2,15} {3,11} {4,11}", "name", "count", "total bytes", "avg bytes", "max bytes"));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "    {0,-42} {1,7} {2,14} {3,10} {4,10} {5,11} {6,11}", "name", "count", "total bytes", "avg", "max", "pipe ms", "shm ms"));
             foreach (var kvp in map.OrderByDescending(p => p.Value.TotalBytes))
             {
                 SizeBucket b = kvp.Value;
                 long count = b.Count;
                 sb.AppendLine(string.Format(
                     CultureInfo.InvariantCulture,
-                    "    {0,-40} {1,7} {2,15:N0} {3,11:N0} {4,11:N0}",
-                    kvp.Key.Length <= 40 ? kvp.Key : kvp.Key.Substring(0, 39) + "…",
+                    "    {0,-42} {1,7} {2,14:N0} {3,10:N0} {4,10:N0} {5,11:N2} {6,11:N2}",
+                    kvp.Key.Length <= 42 ? kvp.Key : kvp.Key.Substring(0, 41) + "…",
                     count,
                     b.TotalBytes,
                     count > 0 ? b.TotalBytes / count : 0,
-                    b.MaxBytes));
+                    b.MaxBytes,
+                    ms(b.PipeTicks),
+                    ms(b.ShmTicks)));
             }
         }
 
@@ -211,6 +213,8 @@ namespace Microsoft.Build.Internal
             private long _count;
             private long _totalBytes;
             private long _maxBytes;
+            private long _pipeTicks;
+            private long _shmTicks;
 
             internal long Count => Interlocked.Read(ref _count);
 
@@ -218,10 +222,15 @@ namespace Microsoft.Build.Internal
 
             internal long MaxBytes => Interlocked.Read(ref _maxBytes);
 
-            internal void Add(int bytes)
+            internal long PipeTicks => Interlocked.Read(ref _pipeTicks);
+
+            internal long ShmTicks => Interlocked.Read(ref _shmTicks);
+
+            internal void Add(int bytes, long ticks, bool viaSharedMemory)
             {
                 Interlocked.Increment(ref _count);
                 Interlocked.Add(ref _totalBytes, bytes);
+                Interlocked.Add(ref viaSharedMemory ? ref _shmTicks : ref _pipeTicks, ticks);
 
                 long current = Interlocked.Read(ref _maxBytes);
                 while (bytes > current)

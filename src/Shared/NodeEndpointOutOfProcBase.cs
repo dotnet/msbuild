@@ -811,7 +811,7 @@ namespace Microsoft.Build.BackEnd
                                 // Now write in the actual packet length
                                 packetStream.Position = 1;
 #if NET
-                                if (_sharedChannel != null && NodeSharedMemoryChannel.ShouldUseSharedMemory(payloadLength))
+                                if (_sharedChannel != null && _sharedChannel.ShouldSendViaSharedMemory(payloadLength))
                                 {
                                     // Flag the length and deliver the payload through shared memory.
                                     // The slot must exist before the header reaches the pipe so the

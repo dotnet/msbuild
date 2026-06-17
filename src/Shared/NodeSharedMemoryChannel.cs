@@ -22,7 +22,7 @@ namespace Microsoft.Build.Internal
     /// The existing named-pipe transport continues to carry every packet header and all small
     /// payloads inline, so framing, ordering, version negotiation, and the connection lifecycle
     /// (handshake, disconnect detection, node reuse, shutdown) are completely unchanged. Only the
-    /// body of a packet whose serialized payload exceeds <see cref="PayloadThreshold"/> is moved
+    /// body of a packet whose serialized payload exceeds the direction-specific threshold is moved
     /// out of the pipe and copied through a per-direction memory-mapped slot, signalled by a pair
     /// of semaphores. When this happens the writer sets <see cref="SharedMemoryFlag"/> on the
     /// 32-bit packet-length field of the pipe header; the reader detects the flag and reads the
@@ -54,20 +54,35 @@ namespace Microsoft.Build.Internal
         internal const int LengthMask = 0x7FFFFFFF;
 
         /// <summary>
-        /// Default minimum serialized payload size (in bytes) for which the shared-memory path is used.
+        /// Default minimum serialized payload size (in bytes) for which the shared-memory path is used
+        /// on the parent -&gt; child (TaskHostConfiguration) direction. These packets are large; a higher
+        /// threshold keeps the few small ones off the single-entry slot. Override with
+        /// <c>MSBUILDSHAREDMEMORYIPCTHRESHOLD</c>.
         /// </summary>
-        private const int DefaultThreshold = 8 * 1024;
+        private const int DefaultSendThreshold = 16 * 1024;
 
         /// <summary>
-        /// Size of each direction's shared-memory window. Payloads larger than this are streamed
-        /// through the window in multiple chunks.
+        /// Default threshold for the child -&gt; parent (logging + task outputs) direction. This traffic is
+        /// many small packets; a low threshold pushes them through shared memory to escape per-packet pipe
+        /// syscall overhead (measured ~18x faster on the return path). Kept above tiny control packets so
+        /// lifecycle packets (NodeShutdown, NodeBuildComplete) stay on the pipe. Override with
+        /// <c>MSBUILDSHAREDMEMORYIPCRETURNTHRESHOLD</c>.
         /// </summary>
-        private const int SlotCapacity = 1024 * 1024;
+        private const int DefaultReturnThreshold = 512;
 
         /// <summary>
-        /// Maximum time to block on a semaphore between checks for disposal.
+        /// Default size of each direction's shared-memory window. Payloads larger than this are
+        /// streamed through the window in multiple chunks. 512 KB measured best (256 KB over-chunks the
+        /// ~1.5 MB max packet; ≥1 MB gives no gain since the send path is consumer-coupling-bound, not
+        /// chunk-bound). Override with <c>MSBUILDSHAREDMEMORYIPCSLOTSIZE</c>.
         /// </summary>
-        private const int WaitQuantumMs = 100;
+        private const int DefaultSlotCapacity = 512 * 1024;
+
+        /// <summary>
+        /// Default time to block on a semaphore between checks for disposal.
+        /// Override with <c>MSBUILDSHAREDMEMORYIPCWAITQUANTUM</c>.
+        /// </summary>
+        private const int DefaultWaitQuantumMs = 100;
 
         /// <summary>
         /// Overall safety timeout for a single chunk hand-off, in case a peer dies mid-transfer.
@@ -76,7 +91,16 @@ namespace Microsoft.Build.Internal
 
         internal static readonly bool FeatureEnabled = ComputeEnabled();
 
-        internal static readonly int PayloadThreshold = ComputeThreshold();
+        /// <summary>Minimum payload size to divert to shared memory on the parent -&gt; child path.</summary>
+        internal static readonly int SendThreshold = ReadPositiveIntEnv("MSBUILDSHAREDMEMORYIPCTHRESHOLD", DefaultSendThreshold);
+
+        /// <summary>Minimum payload size to divert to shared memory on the child -&gt; parent path.</summary>
+        internal static readonly int ReturnThreshold = ReadPositiveIntEnv("MSBUILDSHAREDMEMORYIPCRETURNTHRESHOLD", DefaultReturnThreshold);
+
+        /// <summary>Size of each direction's shared-memory window (tunable via env var).</summary>
+        internal static readonly int SlotCapacity = ComputeSlotCapacity();
+
+        private static readonly int WaitQuantumMs = ComputeWaitQuantum();
 
         /// <summary>Number of packets transferred out of this process via shared memory (diagnostics).</summary>
         internal static long PacketsSentViaSharedMemory;
@@ -86,6 +110,7 @@ namespace Microsoft.Build.Internal
 
         private readonly string _baseName;
         private readonly bool _isParent;
+        private readonly int _outgoingThreshold;
         private readonly object _outgoingLock = new();
 
         private Slot? _outgoing;
@@ -96,15 +121,20 @@ namespace Microsoft.Build.Internal
         {
             _baseName = "MSBuildShm_" + childProcessId.ToString(CultureInfo.InvariantCulture);
             _isParent = isParent;
+
+            // The threshold applies to what THIS endpoint sends: the parent sends large configs
+            // (SendThreshold), the child sends many small logging/output packets (ReturnThreshold).
+            _outgoingThreshold = isParent ? SendThreshold : ReturnThreshold;
         }
 
         internal bool IsDisposed => _disposed;
 
         /// <summary>
-        /// Returns true if a payload of the given size should be transferred via shared memory.
+        /// Returns true if a payload this endpoint is about to send should go through shared memory,
+        /// using the threshold appropriate for this endpoint's outgoing direction.
         /// </summary>
-        internal static bool ShouldUseSharedMemory(int payloadLength) =>
-            FeatureEnabled && payloadLength >= PayloadThreshold;
+        internal bool ShouldSendViaSharedMemory(int payloadLength) =>
+            FeatureEnabled && payloadLength >= _outgoingThreshold;
 
         /// <summary>
         /// True if the payload fits in a single slot window, so the producer can publish the whole
@@ -241,12 +271,16 @@ namespace Microsoft.Build.Internal
             return value == "1" || string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static int ComputeThreshold()
+        private static int ComputeSlotCapacity() => ReadPositiveIntEnv("MSBUILDSHAREDMEMORYIPCSLOTSIZE", DefaultSlotCapacity);
+
+        private static int ComputeWaitQuantum() => ReadPositiveIntEnv("MSBUILDSHAREDMEMORYIPCWAITQUANTUM", DefaultWaitQuantumMs);
+
+        private static int ReadPositiveIntEnv(string name, int defaultValue)
         {
-            string? value = Environment.GetEnvironmentVariable("MSBUILDSHAREDMEMORYIPCTHRESHOLD");
+            string? value = Environment.GetEnvironmentVariable(name);
             return !string.IsNullOrEmpty(value) && int.TryParse(value, out int parsed) && parsed > 0
                 ? parsed
-                : DefaultThreshold;
+                : defaultValue;
         }
 
         /// <summary>
