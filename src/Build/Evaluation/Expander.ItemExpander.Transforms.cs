@@ -87,15 +87,19 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds the number of items in the list.
             /// </summary>
             internal static void Count(List<TransformEntry> input, List<TransformEntry> output)
-            {
-                output.Add(new TransformEntry(Convert.ToString(input.Count, CultureInfo.InvariantCulture), null /* no base item */));
-            }
+                => output.Add(new TransformEntry(input.Count.ToString(CultureInfo.InvariantCulture), item: null));
 
             /// <summary>
             /// Intrinsic function that adds the specified built-in modifer value of the items in input
             /// Each entry pairs the current item include with the item under transformation.
             /// </summary>
-            internal static void ItemSpecModifierFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void ItemSpecModifierFunction(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                bool includeNullEntries,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -145,7 +149,12 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds the subset of items that actually exist on disk.
             /// </summary>
-            internal static void Exists(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void Exists(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -194,7 +203,12 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that combines the existing paths of the input items with a given relative path.
             /// </summary>
-            internal static void Combine(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void Combine(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -218,7 +232,12 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds all ancestor directories of the given items.
             /// </summary>
-            internal static void GetPathsOfAllDirectoriesAbove(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void GetPathsOfAllDirectoriesAbove(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -296,7 +315,13 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds the DirectoryName of the items in input
             /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
             /// </summary>
-            internal static void DirectoryName(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void DirectoryName(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                bool includeNullEntries,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -365,7 +390,13 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds the contents of the metadata in specified in argument[0].
             /// </summary>
-            internal static void Metadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void Metadata(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                bool includeNullEntries,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -419,25 +450,37 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only the items from input that have a distinct Include
             /// Using a case sensitive comparison.
             /// </summary>
-            internal static void DistinctWithCase(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
-            {
-                DistinctWithComparer(elementLocation, functionName, input, arguments, StringComparer.Ordinal, output);
-            }
+            internal static void DistinctWithCase(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
+                => DistinctWithComparer(input, output, arguments, StringComparer.Ordinal, functionName, elementLocation);
 
             /// <summary>
             /// Intrinsic function that adds only the items from input that have a distinct Include
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void Distinct(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
-            {
-                DistinctWithComparer(elementLocation, functionName, input, arguments, StringComparer.OrdinalIgnoreCase, output);
-            }
+            internal static void Distinct(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
+                => DistinctWithComparer(input, output, arguments, StringComparer.OrdinalIgnoreCase, functionName, elementLocation);
 
             /// <summary>
             /// Intrinsic function that adds only the items from input that have a distinct Include
-            /// Using a case insensitive comparison.
+            /// using the specified comparer.
             /// </summary>
-            internal static void DistinctWithComparer(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, StringComparer comparer, List<TransformEntry> output)
+            private static void DistinctWithComparer(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                StringComparer comparer,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -456,7 +499,12 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function reverses the item list.
             /// </summary>
-            internal static void Reverse(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void Reverse(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -469,7 +517,13 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that transforms expressions like the %(foo) in @(Compile->'%(foo)').
             /// </summary>
-            internal static void ExpandQuotedExpressionFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void ExpandQuotedExpressionFunction(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                bool includeNullEntries,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -543,7 +597,7 @@ internal partial class Expander<P, I>
                     }
                     else if (includeNullEntries)
                     {
-                        output.Add(new TransformEntry(null, item.Item));
+                        output.Add(new TransformEntry(value: null, item.Item));
                     }
                 }
 
@@ -660,12 +714,12 @@ internal partial class Expander<P, I>
             /// </summary>
             internal static void ExecuteStringFunction(
                 Expander<P, I> expander,
-                IElementLocation elementLocation,
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
                 bool includeNullEntries,
                 string functionName,
-                List<TransformEntry> input,
-                string[] arguments,
-                List<TransformEntry> output)
+                IElementLocation elementLocation)
             {
                 // Transform: expression is like @(Compile->'%(foo)'), so create completely new items,
                 // using the Include from the source items
@@ -702,7 +756,13 @@ internal partial class Expander<P, I>
             /// <summary>
             /// Intrinsic function that adds the items from input with their metadata cleared, i.e. only the itemspec is retained.
             /// </summary>
-            internal static void ClearMetadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void ClearMetadata(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                bool includeNullEntries,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -719,7 +779,12 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only those items that have a not-blank value for the metadata specified
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void HasMetadata(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void HasMetadata(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -753,7 +818,12 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds only those items have the given metadata value
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void WithMetadataValue(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void WithMetadataValue(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -786,7 +856,12 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds those items don't have the given metadata value
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void WithoutMetadataValue(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void WithoutMetadataValue(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -819,7 +894,12 @@ internal partial class Expander<P, I>
             /// Intrinsic function that adds a boolean to indicate if any of the items have the given metadata value
             /// Using a case insensitive comparison.
             /// </summary>
-            internal static void AnyHaveMetadataValue(IElementLocation elementLocation, string functionName, List<TransformEntry> input, string[] arguments, List<TransformEntry> output)
+            internal static void AnyHaveMetadataValue(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string[] arguments,
+                string functionName,
+                IElementLocation elementLocation)
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
