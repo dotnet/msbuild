@@ -12,5 +12,8 @@
         "repo": "dotnet/skills"
       }
     }
+  },
+  "enabledPlugins": {
+    "dotnet-msbuild@dotnet-skills": true
   }
 }
