@@ -12,11 +12,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
-using ItemSpecModifiers = Microsoft.Build.Framework.ItemSpecModifiers;
 
 #if FEATURE_MSIOREDIST
 // File is intentionally NOT aliased — all typeof() comparisons use fully-qualified
@@ -84,37 +82,6 @@ internal partial class Expander<P, I>
             /// In many cases, the expression is exactly the same as the previous.
             /// </summary>
             private static string s_lastParsedQuotedExpression;
-
-            /// <summary>
-            /// Create an enumerator from a base IEnumerable of items into an enumerable
-            /// of transformation result which includes the new itemspec and the base item.
-            /// </summary>
-            internal static List<TransformEntry> CreateEntries(ICollection<I> items)
-            {
-                List<TransformEntry> entries = new(items.Count);
-
-                // iterate over the items, pairing each with its evaluated include
-                foreach (I item in items)
-                {
-                    if (Traits.Instance.UseLazyWildCardEvaluation)
-                    {
-                        foreach (var resultantItem in
-                            EngineFileUtilities.GetFileListEscaped(
-                                item.ProjectDirectory,
-                                item.EvaluatedIncludeEscaped,
-                                forceEvaluate: true))
-                        {
-                            entries.Add(new TransformEntry(resultantItem, item));
-                        }
-                    }
-                    else
-                    {
-                        entries.Add(new TransformEntry(item.EvaluatedIncludeEscaped, item));
-                    }
-                }
-
-                return entries;
-            }
 
             /// <summary>
             /// Intrinsic function that adds the number of items in the list.

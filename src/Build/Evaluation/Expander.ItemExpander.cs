@@ -5,9 +5,10 @@ using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
-using ItemSpecModifiers = Microsoft.Build.Framework.ItemSpecModifiers;
 
 #nullable disable
 
@@ -58,7 +59,7 @@ internal partial class Expander<P, I>
     /// </remarks>
     private static partial class ItemExpander
     {
-        private static readonly FrozenDictionary<string, TransformKind> s_intrinsicItemFunctions = new Dictionary<string, TransformKind>(StringComparer.OrdinalIgnoreCase)
+        private static readonly FrozenDictionary<string, TransformKind> s_intrinsicTransforms = new Dictionary<string, TransformKind>(StringComparer.OrdinalIgnoreCase)
         {
             { "Count", TransformKind.Count },
             { "Exists", TransformKind.Exists },
@@ -79,32 +80,40 @@ internal partial class Expander<P, I>
         }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Execute the list of transform functions.
+        ///  Executes the list of transform functions.
         /// </summary>
         /// <remarks>
-        /// Each captured transform function will be mapped to to a either static method on
-        /// <see cref="Transforms"/> or a known item spec modifier which operates on the item path.
-        ///
-        /// For each function, the full list of items will be iteratvely tranformed using the output of the previous.
-        ///
-        /// E.g. given functions f, g, h, the order of operations will look like:
-        /// results = h(g(f(items)))
-        ///
-        /// If no function name is found, we default to <see cref="Transforms.ExpandQuotedExpressionFunction"/>.
+        ///  <para>
+        ///  Each captured transform function will be mapped to either a static method on
+        ///  <see cref="Transforms"/> or a known item spec modifier which operates on the item path.
+        ///  </para>
+        ///  <para>
+        ///  For each function, the full list of items will be iteratively transformed using the
+        ///  output of the previous. E.g. given functions f, g, h, the order of operations will
+        ///  look like: <c>results = h(g(f(items)))</c>.
+        ///  </para>
+        ///  <para>
+        ///  If no function name is found, we default to
+        ///  <see cref="Transforms.ExpandQuotedExpressionFunction"/>.
+        ///  </para>
         /// </remarks>
-        internal static List<TransformEntry> Transform(
+        /// <returns>
+        ///  <see langword="true"/> if the transform completed successfully; <see langword="false"/> if
+        ///  <see cref="ExpanderOptions.BreakOnNotEmpty"/> was set and the result is non-empty.
+        /// </returns>
+        private static bool TryTransform(
             Expander<P, I> expander,
             IElementLocation elementLocation,
             ExpanderOptions options,
             bool includeNullEntries,
             List<ExpressionShredder.ItemExpressionCapture> captures,
             ICollection<I> itemsOfType,
-            out bool brokeEarly)
+            out List<TransformEntry> result)
         {
             // Each transform runs on the full set of transformed items from the previous result.
             // We can reuse our buffers by just swapping the references after each transform.
-            List<TransformEntry> sourceItems = Transforms.CreateEntries(itemsOfType);
-            List<TransformEntry> transformedItems = new(itemsOfType.Count);
+            List<TransformEntry> input = CreateEntries(itemsOfType);
+            List<TransformEntry> output = new(itemsOfType.Count);
 
             // Create a TransformFunction for each transform in the chain by extracting the relevant information
             // from the regex parsing results
@@ -133,7 +142,7 @@ internal partial class Expander<P, I>
                 {
                     kind = TransformKind.ItemSpecModifierFunction;
                 }
-                else if (!s_intrinsicItemFunctions.TryGetValue(functionName, out kind))
+                else if (!s_intrinsicTransforms.TryGetValue(functionName, out kind))
                 {
                     kind = TransformKind.ExecuteStringFunction;
                 }
@@ -141,55 +150,55 @@ internal partial class Expander<P, I>
                 switch (kind)
                 {
                     case TransformKind.ItemSpecModifierFunction:
-                        Transforms.ItemSpecModifierFunction(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.ItemSpecModifierFunction(elementLocation, includeNullEntries, functionName, input, arguments, output);
                         break;
                     case TransformKind.Count:
-                        Transforms.Count(sourceItems, transformedItems);
+                        Transforms.Count(input, output);
                         break;
                     case TransformKind.Exists:
-                        Transforms.Exists(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.Exists(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.Combine:
-                        Transforms.Combine(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.Combine(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.GetPathsOfAllDirectoriesAbove:
-                        Transforms.GetPathsOfAllDirectoriesAbove(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.GetPathsOfAllDirectoriesAbove(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.DirectoryName:
-                        Transforms.DirectoryName(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.DirectoryName(elementLocation, includeNullEntries, functionName, input, arguments, output);
                         break;
                     case TransformKind.Metadata:
-                        Transforms.Metadata(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.Metadata(elementLocation, includeNullEntries, functionName, input, arguments, output);
                         break;
                     case TransformKind.DistinctWithCase:
-                        Transforms.DistinctWithCase(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.DistinctWithCase(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.Distinct:
-                        Transforms.Distinct(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.Distinct(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.Reverse:
-                        Transforms.Reverse(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.Reverse(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.ExpandQuotedExpressionFunction:
-                        Transforms.ExpandQuotedExpressionFunction(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.ExpandQuotedExpressionFunction(elementLocation, includeNullEntries, functionName, input, arguments, output);
                         break;
                     case TransformKind.ExecuteStringFunction:
-                        Transforms.ExecuteStringFunction(expander, elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.ExecuteStringFunction(expander, elementLocation, includeNullEntries, functionName, input, arguments, output);
                         break;
                     case TransformKind.ClearMetadata:
-                        Transforms.ClearMetadata(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.ClearMetadata(elementLocation, includeNullEntries, functionName, input, arguments, output);
                         break;
                     case TransformKind.HasMetadata:
-                        Transforms.HasMetadata(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.HasMetadata(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.WithMetadataValue:
-                        Transforms.WithMetadataValue(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.WithMetadataValue(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.WithoutMetadataValue:
-                        Transforms.WithoutMetadataValue(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.WithoutMetadataValue(elementLocation, functionName, input, arguments, output);
                         break;
                     case TransformKind.AnyHaveMetadataValue:
-                        Transforms.AnyHaveMetadataValue(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                        Transforms.AnyHaveMetadataValue(elementLocation, functionName, input, arguments, output);
                         break;
                     default:
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
@@ -199,26 +208,55 @@ internal partial class Expander<P, I>
                 // If we have another transform, swap the source and transform lists.
                 if (i < captures.Count - 1)
                 {
-                    (transformedItems, sourceItems) = (sourceItems, transformedItems);
-                    transformedItems.Clear();
+                    (output, input) = (input, output);
+                    output.Clear();
                 }
             }
 
             // Check for break on non-empty only after ALL transforms are complete
             if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
             {
-                foreach (TransformEntry entry in transformedItems)
+                foreach (TransformEntry entry in output)
                 {
                     if (!string.IsNullOrEmpty(entry.Value))
                     {
-                        brokeEarly = true;
-                        return transformedItems; // break out early
+                        result = null;
+                        return false;
                     }
                 }
             }
 
-            brokeEarly = false;
-            return transformedItems;
+            result = output;
+            return true;
+        }
+
+        /// <summary>
+        ///  Creates transform entries from the given items, pairing each with its evaluated include.
+        /// </summary>
+        private static List<TransformEntry> CreateEntries(ICollection<I> items)
+        {
+            List<TransformEntry> entries = new(items.Count);
+
+            foreach (I item in items)
+            {
+                if (Traits.Instance.UseLazyWildCardEvaluation)
+                {
+                    foreach (var resultantItem in
+                        EngineFileUtilities.GetFileListEscaped(
+                            item.ProjectDirectory,
+                            item.EvaluatedIncludeEscaped,
+                            forceEvaluate: true))
+                    {
+                        entries.Add(new TransformEntry(resultantItem, item));
+                    }
+                }
+                else
+                {
+                    entries.Add(new TransformEntry(item.EvaluatedIncludeEscaped, item));
+                }
+            }
+
+            return entries;
         }
 
         /// <summary>
@@ -461,9 +499,7 @@ internal partial class Expander<P, I>
                 // There's something wrong with the expression, and we ended up with no function names
                 ProjectErrorUtilities.VerifyThrowInvalidProject(captures.Count > 0, elementLocation, "InvalidFunctionPropertyExpression");
 
-                entries = Transform(expander, elementLocation, options, includeNullEntries, captures, itemsOfType, out bool brokeEarly);
-
-                if (brokeEarly)
+                if (!TryTransform(expander, elementLocation, options, includeNullEntries, captures, itemsOfType, out entries))
                 {
                     return true;
                 }
