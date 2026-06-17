@@ -1,11 +1,10 @@
 {
   "name": "msbuild-plugins",
   "owner": {
-    "name": "dotnet/msbuild",
-    "email": "msbuild@microsoft.com"
+    "name": "dotnet/msbuild"
   },
   "metadata": {
-    "description": "Copilot CLI plugins for the MSBuild ecosystem",
+    "description": "GitHub Copilot plugins for the MSBuild ecosystem",
     "version": "1.0.0"
   },
   "plugins": [

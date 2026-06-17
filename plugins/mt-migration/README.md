@@ -1,6 +1,6 @@
 # mt-migration plugin
 
-A GitHub Copilot CLI plugin that bundles the MSBuild **multithreaded task migration** playbook plus an MT-specific PR reviewer.
+A GitHub Copilot plugin that bundles the MSBuild **multithreaded task migration** playbook plus an MT-specific PR reviewer.
 
 Use this on any repository that authors MSBuild tasks consuming the
 `IMultiThreadableTask` / `TaskEnvironment` / `[MSBuildMultiThreadableTask]` API
@@ -33,10 +33,10 @@ the call-chain audit comes back clean.
 
 ## Installing
 
-### As a local Copilot CLI plugin (from a clone of this repo)
+### As a local plugin (from a clone of this repo)
 
 ```sh
-# from a Copilot CLI session
+# from a GitHub Copilot session
 /plugin install file://$(pwd)/plugins/mt-migration
 ```
 
