@@ -25,7 +25,7 @@ namespace Microsoft.Build.Framework.Telemetry
             _scope = scope;
         }
 
-        public IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder)
+        public IActivity SetTags(IActivityTelemetryDataHolder? dataHolder)
         {
             Dictionary<string, object>? tags = dataHolder?.GetActivityProperties();
 
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Framework.Telemetry
             return this;
         }
 
-        public IActivity? SetTag(string key, object? value)
+        public IActivity SetTag(string key, object? value)
         {
             if (value != null)
             {
