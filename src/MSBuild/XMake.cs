@@ -322,9 +322,9 @@ namespace Microsoft.Build.CommandLine
 
             int exitCode;
             if (
+                canRunServer &&
                 ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason) &&
-                !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                canRunServer)
+                !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
@@ -333,16 +333,15 @@ namespace Microsoft.Build.CommandLine
                     KnownTelemetry.PartialBuildTelemetry.ServerEnableReason = serverEnableReason;
                 }
 
-                // Use the client app to execute build in msbuild server. The authoritative multiThreaded
-                // value (from the full parse, which expands response files and honors
-                // MSBUILDFORCEMULTITHREADED) decides whether the server is launched with Server GC.
+                // Hand the build off to the MSBuild Server client. The server (not this process) decides
+                // Server GC for itself from the multiThreaded value we pass through.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(args, multiThreaded, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
             {
                 // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
-                // parse succeeded) so the build is not parsed a second time; on parse failure they are null and
-                // Execute re-parses to surface the error.
+                // parse succeeded) so the command line is not parsed a second time; on parse failure they are null
+                // and Execute re-parses to surface the error.
                 exitCode = ((s_initialized && Execute(args, switchesFromAutoResponseFile, switchesNotFromAutoResponseFile) == ExitType.Success) ? 0 : 1);
             }
 
@@ -407,9 +406,6 @@ namespace Microsoft.Build.CommandLine
                 // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
                 switchesFullyGathered = true;
 
-                // Authoritative /mt determination from the fully-parsed switches (includes response-file
-                // switches and MSBUILDFORCEMULTITHREADED), matching the in-proc build path. Used to decide
-                // both implicit server engagement and Server GC for the launched server.
                 multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                 string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);

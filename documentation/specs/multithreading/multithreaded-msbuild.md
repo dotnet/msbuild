@@ -296,7 +296,7 @@ To avoid regressing CLI incremental build performance, it is essential to fully 
 
 ### `-mt` implies MSBuild Server
 
-When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off — only `1` engages the server, matching the pre-existing rule. `-mt` is itself experimental and opt-in, so the implicit server engagement is not separately gated.
+When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off, matching the pre-existing behavior. `-mt` is itself experimental and opt-in, so the implicit server engagement is not separately gated.
 
 | `MSBUILDUSESERVER` | `-mt` build | Server engaged? | Telemetry `ServerEnableReason` |
 |---|---|---|---|
@@ -305,6 +305,6 @@ When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, M
 | unset | yes | **Yes** | `ImpliedByMt` |
 | unset | no | No | — |
 
-A single authoritative `-mt` determination drives everything. The command line is parsed once, up front, by the MSBuild Server eligibility check (`CanRunServerBasedOnCommandLineSwitches`), which uses the same `IsMultiThreadedEnabled` logic as the in-proc build path. Because this is the full, response-file-aware parse, `-mt` is detected wherever it is supplied — on the command line, in the auto-response file, in a project `Directory.Build.rsp`, in an `@response` file, or via `MSBUILDFORCEMULTITHREADED`. That same value also decides, once the server is engaged, whether the server process is launched with [Server GC](../../MSBuild-Server.md#garbage-collection). The gathered switches are threaded into the in-proc build path so the command line is **not** parsed a second time.
+`-mt` is detected from the full, response-file-aware command-line parse, so it counts wherever it is supplied — command line, auto-response file, a project `Directory.Build.rsp`, an `@response` file, or `MSBUILDFORCEMULTITHREADED`. The same value decides whether an engaged server is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
 
 
