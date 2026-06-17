@@ -706,7 +706,7 @@ internal partial class Expander<P, I>
                 // using the Include from the source items
                 foreach (KeyValuePair<string, S> item in itemsOfType)
                 {
-                    Function<P> function = new Function<P>(
+                    Function function = new Function(
                         typeof(string),
                         item.Key,
                         item.Key,
@@ -720,7 +720,7 @@ internal partial class Expander<P, I>
 
                     object result = function.Execute(item.Key, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
-                    string include = Expander<P, I>.PropertyExpander<P>.ConvertToString(result);
+                    string include = Expander<P, I>.PropertyExpander.ConvertToString(result);
 
                     // We pass in the existing item so we can copy over its metadata
                     if (include.Length > 0)

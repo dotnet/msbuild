@@ -38,9 +38,7 @@ internal partial class Expander<P, I>
     /// This class represents the function as extracted from an expression
     /// It is also responsible for executing the function.
     /// </summary>
-    /// <typeparam name="T">Type of the properties used to expand the expression.</typeparam>
-    internal class Function<T>
-        where T : class, IProperty
+    internal class Function
     {
         /// <summary>
         /// The type of this function's receiver.
@@ -136,7 +134,7 @@ internal partial class Expander<P, I>
         /// <summary>
         /// Extract the function details from the given property function expression.
         /// </summary>
-        internal static Function<T> ExtractPropertyFunction(
+        internal static Function ExtractPropertyFunction(
             string expressionFunction,
             IElementLocation elementLocation,
             object propertyValue,
@@ -145,7 +143,7 @@ internal partial class Expander<P, I>
             LoggingContext loggingContext)
         {
             // Used to aggregate all the components needed for a Function
-            FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem, LoggingContext = loggingContext };
+            FunctionBuilder functionBuilder = new FunctionBuilder { FileSystem = fileSystem, LoggingContext = loggingContext };
 
             // By default the expression root is the whole function expression
             ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -293,7 +291,7 @@ internal partial class Expander<P, I>
         /// <summary>
         /// Execute the function on the given instance.
         /// </summary>
-        internal object Execute(object objectInstance, IPropertyProvider<T> properties, ExpanderOptions options, IElementLocation elementLocation)
+        internal object Execute(object objectInstance, IPropertyProvider<P> properties, ExpanderOptions options, IElementLocation elementLocation)
         {
             object functionResult = String.Empty;
             object[] args = null;
@@ -343,7 +341,7 @@ internal partial class Expander<P, I>
                 // Assemble our arguments ready for passing to our method
                 for (int n = 0; n < _arguments.Length; n++)
                 {
-                    object argument = PropertyExpander<T>.ExpandPropertiesLeaveTypedAndEscaped(
+                    object argument = PropertyExpander.ExpandPropertiesLeaveTypedAndEscaped(
                         _arguments[n],
                         properties,
                         options,
@@ -510,7 +508,7 @@ internal partial class Expander<P, I>
                 }
 
                 // Recursively expand the remaining property body after execution
-                return PropertyExpander<T>.ExpandPropertyBody(
+                return PropertyExpander.ExpandPropertyBody(
                     _remainder,
                     functionResult,
                     properties,
@@ -771,7 +769,7 @@ internal partial class Expander<P, I>
         /// Extracts the name, arguments, binding flags, and invocation type for an indexer
         /// Also extracts the remainder of the expression that is not part of this indexer.
         /// </summary>
-        private static void ConstructIndexerFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, int methodStartIndex, int indexerEndIndex, ref FunctionBuilder<T> functionBuilder)
+        private static void ConstructIndexerFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, int methodStartIndex, int indexerEndIndex, ref FunctionBuilder functionBuilder)
         {
             ReadOnlyMemory<char> argumentsContent = expressionFunction.AsMemory().Slice(1, indexerEndIndex - 1);
             string[] functionArguments;
@@ -813,7 +811,7 @@ internal partial class Expander<P, I>
         /// Extracts the name, arguments, binding flags, and invocation type for a static or instance function.
         /// Also extracts the remainder of the expression that is not part of this function.
         /// </summary>
-        private static void ConstructFunction(IElementLocation elementLocation, string expressionFunction, int argumentStartIndex, int methodStartIndex, ref FunctionBuilder<T> functionBuilder)
+        private static void ConstructFunction(IElementLocation elementLocation, string expressionFunction, int argumentStartIndex, int methodStartIndex, ref FunctionBuilder functionBuilder)
         {
             // The unevaluated and unexpanded arguments for this function
             string[] functionArguments;

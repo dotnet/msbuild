@@ -14,8 +14,7 @@ internal partial class Expander<P, I>
     where P : class, IProperty
     where I : class, IItem
 {
-    private struct FunctionBuilder<T>
-        where T : class, IProperty
+    private struct FunctionBuilder
     {
         /// <summary>
         /// The type of this function's receiver.
@@ -61,9 +60,9 @@ internal partial class Expander<P, I>
         /// </summary>
         public PropertiesUseTracker PropertiesUseTracker { get; set; }
 
-        internal readonly Function<T> Build()
+        internal readonly Function Build()
         {
-            return new Function<T>(
+            return new Function(
                 ReceiverType,
                 Expression,
                 Receiver,
