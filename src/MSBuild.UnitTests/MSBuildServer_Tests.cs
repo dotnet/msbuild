@@ -144,6 +144,38 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
         }
 
+        /// <summary>
+        /// Regression test for dotnet/msbuild#13940. With the server enabled, TerminalLogger
+        /// auto-detection runs in the server node. It must honor the client's transmitted console
+        /// configuration rather than the node's own (redirected) stdout. Here the build output is
+        /// captured/redirected, so '-tl:auto' must fall back to the console logger and emit no
+        /// TerminalLogger ANSI escape sequences.
+        /// </summary>
+        [Fact]
+        public void TerminalLoggerAutoIsNotSelectedWhenServerOutputIsRedirected()
+        {
+            TransientTestFile project = _env.CreateFile("tlAutoProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"{project.Path} -tl:auto",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue();
+
+            int pidOfInitialProcess = ParseNumber(output, "Process ID is ");
+            int pidOfServerProcess = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(pidOfServerProcess);
+            pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "The build should have run on a separate server node.");
+
+            // The output is redirected here, so TerminalLogger must not be auto-selected; its
+            // characteristic ANSI cursor-hide sequence must not appear in the captured output.
+            output.ShouldNotContain("\x1b[?25l");
+        }
+
         [Fact]
         public void VerifyMixedLegacyBehavior()
         {
