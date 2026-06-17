@@ -1113,6 +1113,72 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that ToolTask does not hang when the tool process spawns a grandchild
+        /// process that inherits stdout/stderr pipe handles and outlives the tool.
+        /// This is a regression test for https://github.com/dotnet/msbuild/issues/2981.
+        /// </summary>
+        [Fact]
+        public void ToolTaskDoesNotHangWhenGrandchildInheritsPipeHandles()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // cmd echoes "hello", then starts a background ping that inherits
+                // pipe handles. cmd exits immediately; ping outlives the 30s EOF timeout.
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/c echo hello & start /b ping -n 40 127.0.0.1 > nul"
+                    : "-c \"echo hello; sleep 40 &\"";
+
+                // Outer task timeout is generous; the EOF timeout (30s) is what bounds us.
+                t.Timeout = 60000;
+
+                var sw = Stopwatch.StartNew();
+                bool result = t.Execute();
+                sw.Stop();
+
+                _output.WriteLine(engine.Log);
+
+                engine.Log.ShouldContain("hello");
+                // The task must return within ~30s (EOF timeout) even though the grandchild lives longer.
+                sw.Elapsed.TotalSeconds.ShouldBeLessThan(35, "ToolTask should be bounded by the 30s EOF timeout, not the grandchild's lifetime");
+                // The diagnostic message must appear so CI reports show why the wait ended.
+                engine.Log.ShouldContain("Pipe EOF not received");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ToolTask still captures all output from the tool process
+        /// even with the grandchild pipe fix enabled. This is a regression test for
+        /// https://github.com/dotnet/msbuild/issues/10378 where switching to
+        /// WaitForExit(int) caused output to be lost.
+        /// </summary>
+        [Fact]
+        public void ToolTaskCapturesAllOutputWithFix()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // Echo multiple lines to verify all output is captured
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows ?
+                    "/c echo line1 & echo line2 & echo line3"
+                    : "-c \"echo line1; echo line2; echo line3\"";
+
+                bool result = t.Execute();
+
+                _output.WriteLine(engine.Log);
+
+                result.ShouldBeTrue();
+                engine.Log.ShouldContain("line1");
+                engine.Log.ShouldContain("line2");
+                engine.Log.ShouldContain("line3");
+            }
+        }
+
+        /// <summary>
         /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
         /// </summary>
         /// <remarks>
