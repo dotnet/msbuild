@@ -191,9 +191,7 @@
     <Compile Include="Evaluation\Expander.ItemExpander.Transforms.OneOrMultipleMetadataMatches.cs" />
     <Compile Include="Evaluation\Expander.ItemExpander.TransformKind.cs" />
     <Compile Include="Evaluation\Expander.MetadataExpander.cs" />
-    <Compile Include="Evaluation\Expander.MetadataMatchEvaluator.cs" />
     <Compile Include="Evaluation\Expander.PropertyExpander.cs" />
-    <Compile Include="Evaluation\Expander.RegularExpressions.cs" />
     <Compile Include="Evaluation\Expander.SpanBasedConcatenator.cs" />
     <Compile Include="Evaluation\ExpanderOptions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />

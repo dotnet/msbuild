@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
+using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -160,7 +161,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Grab the name, but continue to verify it's a well-formed expression
                     // before we store it.
-                    string itemName = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startOfName, currentIndex - startOfName));
+                    string itemName = Strings.WeakIntern(expression.AsSpan(startOfName, currentIndex - startOfName));
 
                     SinkWhitespace(expression, ref currentIndex);
                     bool transformOrFunctionFound = true;
@@ -258,7 +259,7 @@ namespace Microsoft.Build.Evaluation
                     // Create an expression capture that encompasses the entire expression between the @( and the )
                     // with the item name and any separator contained within it
                     // and each transform expression contained within it (i.e. each ->XYZ)
-                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startPoint, endPoint - startPoint)), itemName, separator, separatorStart, transformExpressions);
+                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, Strings.WeakIntern(expression.AsSpan(startPoint, endPoint - startPoint)), itemName, separator, separatorStart, transformExpressions);
 
                     Current = expressionCapture;
                     ++currentIndex;
@@ -417,51 +418,7 @@ namespace Microsoft.Build.Evaluation
                     // formed metadata expression. (Subtract one for the increment when we loop around.)
                     restartPoint = i - 1;
 
-                    SinkWhitespace(expression, ref i);
-
-                    int startOfText = i;
-
-                    if (!SinkValidName(expression, ref i, end))
-                    {
-                        i = restartPoint;
-                        continue;
-                    }
-
-                    // Grab this, but we don't know if it's an item or metadata name yet
-                    string firstPart = expression.Substring(startOfText, i - startOfText);
-                    string itemName = null;
-                    string metadataName;
-                    string qualifiedMetadataName;
-
-                    SinkWhitespace(expression, ref i);
-
-                    bool qualified = Sink(expression, ref i, '.');
-
-                    if (qualified)
-                    {
-                        SinkWhitespace(expression, ref i);
-
-                        startOfText = i;
-
-                        if (!SinkValidName(expression, ref i, end))
-                        {
-                            i = restartPoint;
-                            continue;
-                        }
-
-                        itemName = firstPart;
-                        metadataName = expression.Substring(startOfText, i - startOfText);
-                        qualifiedMetadataName = $"{itemName}.{metadataName}";
-                    }
-                    else
-                    {
-                        metadataName = firstPart;
-                        qualifiedMetadataName = metadataName;
-                    }
-
-                    SinkWhitespace(expression, ref i);
-
-                    if (!Sink(expression, ref i, ')'))
+                    if (!TryParseMetadataExpression(expression, ref i, end, out string itemName, out string metadataName))
                     {
                         i = restartPoint;
                         continue;
@@ -469,13 +426,77 @@ namespace Microsoft.Build.Evaluation
 
                     if ((whatToShredFor & ShredderOptions.MetadataOutsideTransforms) != 0)
                     {
+                        string qualifiedMetadataName = itemName != null ? $"{itemName}.{metadataName}" : metadataName;
                         pair.Metadata ??= new Dictionary<string, MetadataReference>(MSBuildNameIgnoreCaseComparer.Default);
                         pair.Metadata[qualifiedMetadataName] = new MetadataReference(itemName, metadataName);
                     }
 
+                    // Compensate for the for-loop's i++ since TryParseMetadataExpression
+                    // already advanced i past the closing ')'.
                     i--;
                 }
             }
+        }
+
+        /// <summary>
+        /// Attempts to parse a metadata expression of the form <c>%(Name)</c> or <c>%(ItemType.Name)</c>,
+        /// starting just after the <c>%(</c> has been consumed (i.e., <paramref name="i"/> points at
+        /// the first character after the opening parenthesis).
+        /// </summary>
+        /// <remarks>
+        /// On success, <paramref name="i"/> is left one past the closing <c>)</c>.
+        /// On failure, <paramref name="i"/> is at an indeterminate position and the caller
+        /// should restore it from a saved restart point.
+        /// </remarks>
+        /// <param name="expression">The expression being scanned.</param>
+        /// <param name="i">Current scan position (just after <c>%(</c>). Advanced on success.</param>
+        /// <param name="end">Exclusive end index of the scan range.</param>
+        /// <param name="itemType">The item type if qualified; otherwise <see langword="null"/>.</param>
+        /// <param name="metadataName">The metadata name.</param>
+        /// <returns><see langword="true"/> if a valid metadata expression was parsed.</returns>
+        internal static bool TryParseMetadataExpression(string expression, ref int i, int end, out string itemType, out string metadataName)
+        {
+            itemType = null;
+            metadataName = null;
+
+            SinkWhitespace(expression, ref i);
+
+            int startOfText = i;
+
+            if (!SinkValidName(expression, ref i, end))
+            {
+                return false;
+            }
+
+            string firstName = Strings.WeakIntern(expression.AsSpan(startOfText, i - startOfText));
+
+            SinkWhitespace(expression, ref i);
+
+            if (Sink(expression, ref i, '.'))
+            {
+                // Qualified: %(ItemType.Name)
+                itemType = firstName;
+
+                SinkWhitespace(expression, ref i);
+
+                startOfText = i;
+
+                if (!SinkValidName(expression, ref i, end))
+                {
+                    return false;
+                }
+
+                metadataName = Strings.WeakIntern(expression.AsSpan(startOfText, i - startOfText));
+
+                SinkWhitespace(expression, ref i);
+            }
+            else
+            {
+                // Unqualified: %(Name)
+                metadataName = firstName;
+            }
+
+            return Sink(expression, ref i, ')');
         }
 
         /// <summary>
@@ -620,7 +641,7 @@ namespace Microsoft.Build.Evaluation
                     string functionArguments = null;
                     if (endFunctionArguments > startFunctionArguments)
                     {
-                        functionArguments = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
+                        functionArguments = Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
                     }
 
                     ItemExpressionCapture capture = new ItemExpressionCapture(startTransform, i - startTransform, expression.Substring(startTransform, i - startTransform), null, null, -1, null, functionName, functionArguments);
