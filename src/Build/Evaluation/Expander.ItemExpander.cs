@@ -150,55 +150,55 @@ internal partial class Expander<P, I>
                 switch (kind)
                 {
                     case TransformKind.ItemSpecModifierFunction:
-                        Transforms.ItemSpecModifierFunction(elementLocation, includeNullEntries, functionName, input, arguments, output);
+                        Transforms.ItemSpecModifierFunction(input, output, arguments, includeNullEntries, functionName, elementLocation);
                         break;
                     case TransformKind.Count:
                         Transforms.Count(input, output);
                         break;
                     case TransformKind.Exists:
-                        Transforms.Exists(elementLocation, functionName, input, arguments, output);
+                        Transforms.Exists(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.Combine:
-                        Transforms.Combine(elementLocation, functionName, input, arguments, output);
+                        Transforms.Combine(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.GetPathsOfAllDirectoriesAbove:
-                        Transforms.GetPathsOfAllDirectoriesAbove(elementLocation, functionName, input, arguments, output);
+                        Transforms.GetPathsOfAllDirectoriesAbove(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.DirectoryName:
-                        Transforms.DirectoryName(elementLocation, includeNullEntries, functionName, input, arguments, output);
+                        Transforms.DirectoryName(input, output, arguments, includeNullEntries, functionName, elementLocation);
                         break;
                     case TransformKind.Metadata:
-                        Transforms.Metadata(elementLocation, includeNullEntries, functionName, input, arguments, output);
+                        Transforms.Metadata(input, output, arguments, includeNullEntries, functionName, elementLocation);
                         break;
                     case TransformKind.DistinctWithCase:
-                        Transforms.DistinctWithCase(elementLocation, functionName, input, arguments, output);
+                        Transforms.DistinctWithCase(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.Distinct:
-                        Transforms.Distinct(elementLocation, functionName, input, arguments, output);
+                        Transforms.Distinct(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.Reverse:
-                        Transforms.Reverse(elementLocation, functionName, input, arguments, output);
+                        Transforms.Reverse(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.ExpandQuotedExpressionFunction:
-                        Transforms.ExpandQuotedExpressionFunction(elementLocation, includeNullEntries, functionName, input, arguments, output);
+                        Transforms.ExpandQuotedExpressionFunction(input, output, arguments, includeNullEntries, functionName, elementLocation);
                         break;
                     case TransformKind.ExecuteStringFunction:
-                        Transforms.ExecuteStringFunction(expander, elementLocation, includeNullEntries, functionName, input, arguments, output);
+                        Transforms.ExecuteStringFunction(expander, input, output, arguments, includeNullEntries, functionName, elementLocation);
                         break;
                     case TransformKind.ClearMetadata:
-                        Transforms.ClearMetadata(elementLocation, includeNullEntries, functionName, input, arguments, output);
+                        Transforms.ClearMetadata(input, output, arguments, includeNullEntries, functionName, elementLocation);
                         break;
                     case TransformKind.HasMetadata:
-                        Transforms.HasMetadata(elementLocation, functionName, input, arguments, output);
+                        Transforms.HasMetadata(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.WithMetadataValue:
-                        Transforms.WithMetadataValue(elementLocation, functionName, input, arguments, output);
+                        Transforms.WithMetadataValue(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.WithoutMetadataValue:
-                        Transforms.WithoutMetadataValue(elementLocation, functionName, input, arguments, output);
+                        Transforms.WithoutMetadataValue(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.AnyHaveMetadataValue:
-                        Transforms.AnyHaveMetadataValue(elementLocation, functionName, input, arguments, output);
+                        Transforms.AnyHaveMetadataValue(input, output, arguments, functionName, elementLocation);
                         break;
                     default:
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
