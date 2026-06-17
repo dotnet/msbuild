@@ -1128,6 +1128,9 @@ namespace Microsoft.Build.BackEnd
                         packetLength &= NodeSharedMemoryChannel.LengthMask;
                     }
 #endif
+#if NET
+                    IpcTransferStats.RecordReceive(packetType, packetLength);
+#endif
 
                     _readBufferMemoryStream.SetLength(packetLength);
                     byte[] packetData = _readBufferMemoryStream.GetBuffer();

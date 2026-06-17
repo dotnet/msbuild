@@ -51,6 +51,9 @@ namespace Microsoft.Build.Internal
         private static readonly ConcurrentDictionary<string, SizeBucket> s_byPacketType = new(StringComparer.Ordinal);
         private static readonly ConcurrentDictionary<string, SizeBucket> s_byTask = new(StringComparer.Ordinal);
 
+        // Per-packet-type breakdown of EVERY received packet (parent <- child: logging + outputs).
+        private static readonly ConcurrentDictionary<string, SizeBucket> s_recvByPacketType = new(StringComparer.Ordinal);
+
         private static int s_dumped;
 
         static IpcTransferStats()
@@ -112,6 +115,20 @@ namespace Microsoft.Build.Internal
             }
         }
 
+        /// <summary>
+        /// Records the type and size of every packet received (parent &lt;- child), so we can report
+        /// the logging and task-output traffic that flows back from TaskHosts.
+        /// </summary>
+        internal static void RecordReceive(NodePacketType packetType, int payloadLength)
+        {
+            if (!Enabled)
+            {
+                return;
+            }
+
+            s_recvByPacketType.GetOrAdd(packetType.ToString(), static _ => new SizeBucket()).Add(payloadLength);
+        }
+
         internal static void Dump()
         {
             if (!Enabled || Interlocked.Exchange(ref s_dumped, 1) != 0)
@@ -159,8 +176,9 @@ namespace Microsoft.Build.Internal
             sb.AppendLine(line("shm-recv", s_shmRecvCount, s_shmRecvBytes, s_shmRecvTicks));
             sb.AppendLine($"  pipe total time = {ms(s_pipeWriteTicks + s_pipeReadTicks):N2} ms; shm total time = {ms(s_shmSendTicks + s_shmRecvTicks):N2} ms");
 
-            AppendBreakdown(sb, "SENT PACKETS BY TYPE (all sizes)", s_byPacketType);
+            AppendBreakdown(sb, "SENT PACKETS BY TYPE (parent -> child, all sizes)", s_byPacketType);
             AppendBreakdown(sb, "SENT TaskHostConfiguration BY TASK (all sizes)", s_byTask);
+            AppendBreakdown(sb, "RECEIVED PACKETS BY TYPE (parent <- child, all sizes)", s_recvByPacketType);
             return sb.ToString().TrimEnd();
         }
 
