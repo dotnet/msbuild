@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -776,29 +775,33 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool SetValueParameter(TaskPropertyInfo parameter, Type parameterType, string expandedParameterValue)
         {
-            // Special handling for AbsolutePath to use TaskEnvironment for proper path resolution
-            if (parameterType == typeof(AbsolutePath))
+            return InternalSetTaskParameter(parameter, ConvertStringToParameterValue(expandedParameterValue, parameterType));
+        }
+
+        /// <summary>
+        /// Converts a single string value to an instance of <paramref name="targetType"/>, applying the same
+        /// conversions for both scalar parameters and the elements of array parameters.
+        /// </summary>
+        private object ConvertStringToParameterValue(string value, Type targetType)
+        {
+            // Path-like types are resolved through TaskEnvironment so the path is rooted consistently
+            // with the rest of the build before being handed to the task.
+            if (targetType == typeof(AbsolutePath))
             {
-                return InternalSetTaskParameter(parameter, TaskEnvironment.GetAbsolutePath(expandedParameterValue));
+                return TaskEnvironment.GetAbsolutePath(value);
             }
 
-            // Special handling for FileInfo - validate path through AbsolutePath first
-            if (parameterType == typeof(FileInfo))
+            if (targetType == typeof(FileInfo))
             {
-                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(expandedParameterValue);
-                return InternalSetTaskParameter(parameter, new FileInfo(absolutePath.Value));
+                return new FileInfo(TaskEnvironment.GetAbsolutePath(value).Value);
             }
 
-            // Special handling for DirectoryInfo - validate path through AbsolutePath first
-            if (parameterType == typeof(DirectoryInfo))
+            if (targetType == typeof(DirectoryInfo))
             {
-                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(expandedParameterValue);
-                return InternalSetTaskParameter(parameter, new DirectoryInfo(absolutePath.Value));
+                return new DirectoryInfo(TaskEnvironment.GetAbsolutePath(value).Value);
             }
 
-            // Use the unified ValueTypeParser for all other types
-            object parsedValue = ValueTypeParser.Parse(expandedParameterValue, parameterType);
-            return InternalSetTaskParameter(parameter, parsedValue);
+            return ValueTypeParser.Parse(value, targetType);
         }
 
         /// <summary>
@@ -820,37 +823,11 @@ namespace Microsoft.Build.BackEnd
                     foreach (TaskItem item in taskItems)
                     {
                         currentItem = item;
-                        if (parameterType == typeof(string[]))
-                        {
-                            finalTaskInputs.Add(item.ItemSpec);
-                        }
-                        else if (parameterType == typeof(bool[]))
-                        {
-                            finalTaskInputs.Add(ConversionUtilities.ConvertStringToBool(item.ItemSpec));
-                        }
-                        else if (parameterType == typeof(AbsolutePath[]))
-                        {
-                            finalTaskInputs.Add(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
-                        }
-                        else if (parameterType == typeof(FileInfo[]))
-                        {
-                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
-                            finalTaskInputs.Add(new FileInfo(absolutePath.Value));
-                        }
-                        else if (parameterType == typeof(DirectoryInfo[]))
-                        {
-                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
-                            finalTaskInputs.Add(new DirectoryInfo(absolutePath.Value));
-                        }
-                        else
-                        {
-                            finalTaskInputs.Add(Convert.ChangeType(item.ItemSpec, elementType, CultureInfo.InvariantCulture));
-                        }
+                        finalTaskInputs.Add(ConvertStringToParameterValue(item.ItemSpec, elementType));
                     }
                 }
                 else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
                 {
-                    // Handle TaskItem<T>[]
                     foreach (TaskItem item in taskItems)
                     {
                         currentItem = item;
@@ -861,7 +838,6 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // Handle ITaskItem[]
                     foreach (TaskItem item in taskItems)
                     {
                         // if we've been asked to remote these items then
@@ -912,43 +888,30 @@ namespace Microsoft.Build.BackEnd
         {
             object outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
 
-            if (!(outputs is ITaskItem[] taskItemOutputs))
+            if (outputs is ITaskItem[] taskItemOutputs)
             {
-                if (outputs == null)
-                {
-                    taskItemOutputs = null;
-                }
-                else
-                {
-                    // Check if it's a TaskItem<T> or TaskItem<T>[]
-                    Type outputType = outputs.GetType();
-                    if (outputType.IsArray)
-                    {
-                        Type elementType = outputType.GetElementType();
-                        if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
-                        {
-                            // Convert TaskItem<T>[] to ITaskItem[]
-                            Array taskItemArray = (Array)outputs;
-                            taskItemOutputs = new ITaskItem[taskItemArray.Length];
-                            for (int i = 0; i < taskItemArray.Length; i++)
-                            {
-                                taskItemOutputs[i] = (ITaskItem)taskItemArray.GetValue(i);
-                            }
-                        }
-                        else
-                        {
-                            taskItemOutputs = [(ITaskItem)outputs];
-                        }
-                    }
-                    else
-                    {
-                        // Scalar value (including TaskItem<T>)
-                        taskItemOutputs = [(ITaskItem)outputs];
-                    }
-                }
+                return taskItemOutputs;
             }
 
-            return taskItemOutputs;
+            if (outputs == null)
+            {
+                return null;
+            }
+
+            Type outputType = outputs.GetType();
+            if (outputType.IsArray && IsPathLikeTaskItemOrITaskItemOfT(outputType.GetElementType()))
+            {
+                Array taskItemArray = (Array)outputs;
+                ITaskItem[] result = new ITaskItem[taskItemArray.Length];
+                for (int i = 0; i < taskItemArray.Length; i++)
+                {
+                    result[i] = (ITaskItem)taskItemArray.GetValue(i);
+                }
+
+                return result;
+            }
+
+            return [(ITaskItem)outputs];
         }
 
         /// <summary>
@@ -971,7 +934,6 @@ namespace Microsoft.Build.BackEnd
                 object output = convertibleOutputs.GetValue(i);
                 if (output != null)
                 {
-                    // Use the unified ValueTypeParser for consistent formatting
                     stringOutputs[i] = ValueTypeParser.ToString(output);
                 }
             }

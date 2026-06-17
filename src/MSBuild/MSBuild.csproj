@@ -85,7 +85,7 @@
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
-    <Compile Include="..\Shared\TaskItemTypeHelper.cs" />
+    <Compile Include="..\Shared\TaskItemTypeDetector.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
