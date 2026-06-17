@@ -82,7 +82,7 @@ For every test added/modified in the PR:
 
 ### Step 5 — Verify scope of the migration
 
-If the task is normally invoked via the TaskFactory system (declared in a `.tasks` file or used from targets as `<MyTask … />`), the attribute alone is sufficient *provided* the call chain is clean. Verify in the host repo's `.targets` / `.tasks` files. If the task is **only** instantiated by other tasks via `new MyTask()` (e.g., `TlbImp` inside `ResolveComReference`), the migration is mostly meaningless until the parent is migrated and propagates its `TaskEnvironment` — flag as MAJOR with a recommendation to either bundle the parent migration or close the PR.
+If the task is normally invoked via the TaskFactory system (declared in a `.tasks` file or used from targets as `<MyTask … />`), the attribute alone is sufficient *provided* the call chain is clean. Verify in the host repo's `.targets` / `.tasks` files. If the task is **only** instantiated by other tasks via `new MyTask()` (e.g., `TlbImp` inside `ResolveComReference`), the migration is not harmful but is incomplete until the parent is migrated and propagates its `TaskEnvironment` — flag as MINOR with a recommendation to add a `// TODO: propagate TaskEnvironment from parent task` comment and file a follow-up issue for the parent migration.
 
 ---
 

@@ -141,6 +141,8 @@ Observable behavior = `Execute()` return value, `[Output]` property values, erro
 
 Real bugs found during MSBuild task migrations. Every one shipped in initial "passing" code with green tests.
 
+**Edge-case discipline:** For every migrated code path, verify behavior when inputs are `null`, empty string (`""`), or whitespace-only. `GetAbsolutePath` throws `ArgumentException` on null/empty — if the pre-migration code handled these differently (e.g., returned early, used a default, or threw a different exception type), the migration must preserve that behavior. Even if a scenario seems unlikely, treat it as a relevant finding if it is theoretically possible.
+
 ### Sin 1: Output Property Contamination
 
 Absolutized values leak into `[Output]` properties that users/other tasks consume.
@@ -232,6 +234,8 @@ Old code threw `FileNotFoundException` for missing files; new code throws `Argum
 **Detect**: For every `GetAbsolutePath`, check what the old code threw for null/empty and whether the calling code has type-specific catch blocks.
 
 ### Sin 7: Exception Message Path Leakage
+
+> **How this differs from Sin 2:** Sin 2 is about directly passing an `AbsolutePath` to `Log.LogError`/`LogWarning`. Sin 7 is about *exception messages* that **indirectly** embed the absolute path — the task never logged it, but a helper it called did via `ex.Message`/`ex.FileName`. The fix is also different: Sin 2 uses `OriginalValue`; Sin 7 requires sanitizing the exception string.
 
 Exceptions thrown by *helpers you called with an absolutized path* carry that absolute path in `ex.Message` / `ex.FileName`. Logging the exception verbatim leaks the absolute path even though the task itself never logged an `AbsolutePath` directly.
 
