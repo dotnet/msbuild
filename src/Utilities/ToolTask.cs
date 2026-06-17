@@ -766,6 +766,12 @@ namespace Microsoft.Build.Utilities
             _standardErrorDataAvailable = new ManualResetEvent(false);
             _standardOutputDataAvailable = new ManualResetEvent(false);
 
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                // One count each for the stdout and stderr EOF notifications.
+                _eofCountdown = new CountdownEvent(2);
+            }
+
             _toolExited = new ManualResetEvent(false);
             _terminatedTool = false;
             _toolTimeoutExpired = new ManualResetEvent(false);
@@ -858,6 +864,9 @@ namespace Microsoft.Build.Utilities
                     _eventsDisposed = true;
                     _standardErrorDataAvailable.Dispose();
                     _standardOutputDataAvailable.Dispose();
+
+                    _eofCountdown?.Dispose();
+                    _eofCountdown = null;
 
                     _toolExited.Dispose();
                     _toolTimeoutExpired.Dispose();
@@ -1097,13 +1106,51 @@ namespace Microsoft.Build.Utilities
         /// process is still finishing up, this method waits until it is done.
         /// </summary>
         /// <remarks>
-        /// This method is a hack, but it needs to be called after both
-        /// Process.WaitForExit() and Process.Kill().
+        /// On both .NET Framework and modern .NET, the parameterless Process.WaitForExit() waits not
+        /// only for the process to exit, but also for stdout/stderr pipe EOF via
+        /// AsyncStreamReader.WaitUtilEOF() (Framework) or awaiting the EOF task (Core).
+        /// If the tool spawned child processes that inherited the pipe handles, the EOF wait blocks
+        /// forever even though the tool itself has exited — causing the entire build node to hang.
         /// </remarks>
         /// <param name="proc"></param>
-        private static void WaitForProcessExit(Process proc)
+        private void WaitForProcessExit(Process proc)
         {
-            proc.WaitForExit();
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                // Step 1: Wait for the process handle to be signaled.
+                // Use int.MaxValue to avoid blocking on pipe EOF,
+                // as Process.WaitForExit does not wait for EOF when any timeout is provided.
+                proc.WaitForExit(int.MaxValue);
+
+                // Step 2: Wait for the AsyncStreamReader to deliver all remaining data.
+                // When the pipe reaches EOF, AsyncStreamReader flushes its StringBuilder
+                // (delivering any final partial line) and sends Data=null via the callback.
+                // Our ReceiveStandardErrorOrOutputData handler signals the EOF events.
+                //
+                // Use a bounded timeout as a safety net for the grandchild case where
+                // EOF never arrives because grand child inherited the pipe and keeps it open.
+                const int eofTimeoutSec = 30;
+
+                // CountdownEvent.Wait is STA-safe (it falls back to a single-handle wait),
+                // unlike WaitHandle.WaitAll over multiple handles which throws
+                // NotSupportedException on STA threads (for example when a task such as
+                // AspNetCompiler runs on an STA thread).
+                bool allEOFReceived = _eofCountdown.Wait(TimeSpan.FromSeconds(eofTimeoutSec));
+                if (!allEOFReceived)
+                {
+                    // Timeout: a grandchild process likely still holds the pipe open.
+                    // Drain whatever data has already arrived before returning.
+                    LogMessagesFromStandardError();
+                    LogMessagesFromStandardOutput();
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.PipeEOFTimeout", eofTimeoutSec);
+                }
+            }
+            else
+            {
+                // Legacy behavior: parameterless WaitForExit waits for pipe EOF.
+                // This can hang if grandchild processes hold pipe handles.
+                proc.WaitForExit();
+            }
 
             // Process.WaitForExit() may return prematurely. We need to check to be sure.
             while (!proc.HasExited)
@@ -1269,36 +1316,48 @@ namespace Microsoft.Build.Utilities
         /// <param name="dataAvailableSignal"></param>
         private void ReceiveStandardErrorOrOutputData(DataReceivedEventArgs e, Queue dataQueue, ManualResetEvent dataAvailableSignal)
         {
-            // NOTE: don't ignore empty string, because we need to log that
-            if (e.Data != null)
+            if (e.Data == null)
             {
-                ErrorUtilities.VerifyThrow(dataQueue != null,
-                    "The data queue must be available.");
-
-                // synchronize access to the queue -- this is a producer-consumer problem
-                // NOTE: we lock the entire queue instead of using synchronized queue
-                // wrappers, because ManualResetEvents don't have ref counts, and it's
-                // difficult to discretely signal the availability of each instance of
-                // data in the queue -- so instead we let the consumer lock and empty
-                // the queue and reset the ManualResetEvent, before we add more data
-                // into the queue, and signal the ManualResetEvent again
-                lock (dataQueue.SyncRoot)
+                // The AsyncStreamReader sends Data=null exactly once per stream when the
+                // pipe reaches EOF. Count it down so WaitForProcessExit knows when all
+                // data from both streams has been delivered.
+                lock (_eventCloseLock)
                 {
-                    dataQueue.Enqueue(e.Data);
-
-                    ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
-                        "The signalling event must be available.");
-
-                    // signal the availability of data
-                    // NOTE: intentionally, do the signalling inside the lock, because
-                    // ManualResetEvents don't have ref counts, and we want to make sure
-                    // we don't signal the notification just before the consumer resets it
-                    lock (_eventCloseLock)
+                    if (!_eventsDisposed && _eofCountdown is { IsSet: false })
                     {
-                        if (!_eventsDisposed)
-                        {
-                            dataAvailableSignal.Set();
-                        }
+                        _eofCountdown.Signal();
+                    }
+                }
+
+                return;
+            }
+
+            // NOTE: don't ignore empty string, because we need to log that
+            ErrorUtilities.VerifyThrow(dataQueue != null, "The data queue must be available.");
+
+            // synchronize access to the queue -- this is a producer-consumer problem
+            // NOTE: we lock the entire queue instead of using synchronized queue
+            // wrappers, because ManualResetEvents don't have ref counts, and it's
+            // difficult to discretely signal the availability of each instance of
+            // data in the queue -- so instead we let the consumer lock and empty
+            // the queue and reset the ManualResetEvent, before we add more data
+            // into the queue, and signal the ManualResetEvent again
+            lock (dataQueue.SyncRoot)
+            {
+                dataQueue.Enqueue(e.Data);
+
+                ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
+                    "The signalling event must be available.");
+
+                // signal the availability of data
+                // NOTE: intentionally, do the signalling inside the lock, because
+                // ManualResetEvents don't have ref counts, and we want to make sure
+                // we don't signal the notification just before the consumer resets it
+                lock (_eventCloseLock)
+                {
+                    if (!_eventsDisposed)
+                    {
+                        dataAvailableSignal.Set();
                     }
                 }
             }
@@ -1807,6 +1866,13 @@ namespace Microsoft.Build.Utilities
         /// calls on the event handlers don't try to reset a disposed event
         /// </summary>
         private bool _eventsDisposed;
+
+        /// <summary>
+        /// Counts down once for each of stdout/stderr when its AsyncStreamReader reaches
+        /// EOF (sends Data=null). Used by WaitForProcessExit to know when all data from
+        /// both streams has been delivered.
+        /// </summary>
+        private CountdownEvent _eofCountdown;
 
         /// <summary>
         /// List of name, value pairs to be passed to the spawned tool's environment.
