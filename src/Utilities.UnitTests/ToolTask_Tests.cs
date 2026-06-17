@@ -1126,21 +1126,25 @@ namespace Microsoft.Build.UnitTests
                 t.BuildEngine = engine;
 
                 // cmd echoes "hello", then starts a background ping that inherits
-                // pipe handles. cmd exits immediately; ping outlives the 2s EOF timeout.
+                // pipe handles. cmd exits immediately; ping outlives the 30s EOF timeout.
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
-                    ? "/c echo hello & start /b ping -n 10 127.0.0.1 > nul"
-                    : "-c \"echo hello; sleep 10 &\"";
+                    ? "/c echo hello & start /b ping -n 40 127.0.0.1 > nul"
+                    : "-c \"echo hello; sleep 40 &\"";
 
-                // Set a generous timeout - without the fix this would hang for the full ping duration
-                t.Timeout = 30000;
+                // Outer task timeout is generous; the EOF timeout (30s) is what bounds us.
+                t.Timeout = 60000;
 
+                var sw = Stopwatch.StartNew();
                 bool result = t.Execute();
+                sw.Stop();
 
-                // The tool should complete without hanging.
-                // The exit code may be non-zero depending on timing, but the key thing
-                // is that Execute() returns at all rather than hanging forever.
                 _output.WriteLine(engine.Log);
+
                 engine.Log.ShouldContain("hello");
+                // The task must return within ~30s (EOF timeout) even though the grandchild lives longer.
+                sw.Elapsed.TotalSeconds.ShouldBeLessThan(35, "ToolTask should be bounded by the 30s EOF timeout, not the grandchild's lifetime");
+                // The diagnostic message must appear so CI reports show why the wait ended.
+                engine.Log.ShouldContain("Pipe EOF not received");
             }
         }
 
