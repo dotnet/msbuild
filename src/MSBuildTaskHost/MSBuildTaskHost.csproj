@@ -50,15 +50,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\TaskItemTypeHelper.cs">
-      <Link>BackEnd\TaskItemTypeHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs">
-      <Link>BackEnd\TaskParameterValueStringConverter.cs</Link>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <!-- Disabled PdbGit because of warnings; it could/should be brought back.
     <PackageReference Include="PdbGit" /> -->
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />

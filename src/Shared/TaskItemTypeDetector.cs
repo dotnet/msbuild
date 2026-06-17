@@ -8,7 +8,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
-    internal static class TaskItemTypeHelper
+    internal static class TaskItemTypeDetector
     {
         private const string AbsolutePathFullName = "Microsoft.Build.Framework.AbsolutePath";
         private const string GenericITaskItemFullName = "Microsoft.Build.Framework.ITaskItem`1";
