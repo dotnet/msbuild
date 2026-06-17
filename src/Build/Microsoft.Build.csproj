@@ -184,11 +184,11 @@
     <Compile Include="Evaluation\Expander.Function.cs" />
     <Compile Include="Evaluation\Expander.FunctionBuilder.cs" />
     <Compile Include="Evaluation\Expander.ItemExpander.cs" />
-    <Compile Include="Evaluation\Expander.ItemExpander.IntrinsicItemFunctions.cs" />
-    <Compile Include="Evaluation\Expander.ItemExpander.IntrinsicItemFunctions.MetadataMatch.cs" />
-    <Compile Include="Evaluation\Expander.ItemExpander.IntrinsicItemFunctions.MetadataMatchType.cs" />
-    <Compile Include="Evaluation\Expander.ItemExpander.IntrinsicItemFunctions.OneOrMultipleMetadataMatches.cs" />
-    <Compile Include="Evaluation\Expander.ItemExpander.ItemTransformFunctions.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.MetadataMatch.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.MetadataMatchType.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.OneOrMultipleMetadataMatches.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.TransformKind.cs" />
     <Compile Include="Evaluation\Expander.MetadataExpander.cs" />
     <Compile Include="Evaluation\Expander.MetadataMatchEvaluator.cs" />
     <Compile Include="Evaluation\Expander.PropertyExpander.cs" />

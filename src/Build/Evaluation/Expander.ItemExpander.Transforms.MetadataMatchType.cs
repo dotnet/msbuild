@@ -11,7 +11,7 @@ internal partial class Expander<P, I>
 {
     private static partial class ItemExpander
     {
-        internal static partial class IntrinsicItemFunctions
+        private static partial class Transforms
         {
             /// <summary>
             /// The type of match we found.
@@ -19,7 +19,6 @@ internal partial class Expander<P, I>
             /// </summary>
             private enum MetadataMatchType
             {
-
                 /// <summary>
                 /// No matches found. The result will be empty.
                 /// </summary>
