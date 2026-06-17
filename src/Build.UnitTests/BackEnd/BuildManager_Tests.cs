@@ -3901,6 +3901,45 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Pins the same <c>Returns</c>/<c>AfterTargets</c> timing as <see cref="ReturnsCapturedBeforeAfterTargetsRun"/>,
+        /// but for a <c>Returns</c> that expands a property value: the value is captured when the target
+        /// completes, before its after-targets run, so a later property change in an after-target is not
+        /// reflected in the predecessor target's returned outputs.
+        /// </summary>
+        [Fact]
+        public void ReturnsCapturedPropertyValueBeforeAfterTargetsRun()
+        {
+            string contents = CleanupFileContents("""
+                <Project>
+                  <PropertyGroup>
+                    <MyProp>FromA</MyProp>
+                  </PropertyGroup>
+                  <Target Name="A" Returns="$(MyProp)" />
+                  <Target Name="B" AfterTargets="A">
+                    <PropertyGroup>
+                      <MyProp>FromB</MyProp>
+                    </PropertyGroup>
+                    <Message Text="[B-ran]" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            BuildRequestData data = GetBuildRequestData(contents, ["A"]);
+            ProjectInstance projectInstance = data.ProjectInstance;
+            BuildResult result = _buildManager.Build(_parameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Sanity: the after-target B must actually have run, otherwise this test would pass trivially.
+            _logger.AssertLogContains("[B-ran]");
+
+            // A's Returns expands $(MyProp) when A completes, before B runs, so it captures FromA.
+            result.ResultsByTarget["A"].Items.ShouldHaveSingleItem().ItemSpec.ShouldBe("FromA");
+
+            // The live project property state, by contrast, does see B's change to FromB.
+            projectInstance.GetPropertyValue("MyProp").ShouldBe("FromB");
+        }
+
+        /// <summary>
         /// When a <see cref="ProjectInstance"/> based <see cref="BuildRequestData"/> is built out of proc, the node should
         /// not reload it from disk but instead fully utilize the entire translate project instance state
         /// to do the build.
