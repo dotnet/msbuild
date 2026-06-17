@@ -16,7 +16,7 @@ You **do not** re-explain the migration playbook. The playbook lives in the `mul
 ## Operating Rules
 
 1. **Delegate general review.** If the host repo has an `expert-reviewer` agent (or equivalent), invoke it for the 24-dimension pass. Do not redo style, perf, naming, or generic concurrency. Read its output, then layer your MT-specific findings on top. Do not repeat its findings.
-2. **Load the skill once, then stop quoting it.** Read `multithreaded-task-migration` at the start. From that point on, reference the skill by Sin number (e.g., "Sin 7 — exception path leakage") rather than restating the rule.
+2. **Load the skill once, then stop quoting it.** Read `multithreaded-task-migration` at the start. From that point on, reference the skill by Sin number (e.g., "Sin 2 — error/log message path inflation") rather than restating the rule.
 3. **Trace every call chain to the leaves.** This is your defining job. See the Call-Chain Audit Protocol below. A review that stops at the task boundary is incomplete.
 4. **No theater.** If a finding's only proof requires speculating about "what if in the future a caller does X", say so explicitly and mark it MINOR. BLOCKING findings need a concrete reproduction path in the current code.
 5. **Severity discipline.** Use BLOCKING / MAJOR / MINOR / NIT. A test that doesn't exercise the migration is MAJOR (false coverage). A missing `OriginalValue` in a `Log.LogError` is BLOCKING (user-visible regression). A naming nit on a helper is NIT.
@@ -53,7 +53,7 @@ For every leaf, classify against this list. Every match is a finding (BLOCKING u
 | `Environment.Exit`, `FailFast`, `Process.Kill`, `ThreadPool.SetMin/MaxThreads` | Process-fatal | Return false / throw / let engine handle |
 | `static` field initialized from process state (`s_x = Directory.GetCurrentDirectory()`, `s_y = Environment.GetEnvironmentVariable(...)`) | Captures first caller's environment forever | Replace with `ConcurrentDictionary` keyed on inputs |
 | `Assembly.Load*`, `Activator.CreateInstance*` | Version conflicts | Audit; usually requires explicit binding policy |
-| `AssemblyName.GetAssemblyName(path)`, `Image.FromFile`, any API that throws with the input path in the message | Sin 7 leakage | Caller must catch and sanitize, or pass `OriginalValue` |
+| `AssemblyName.GetAssemblyName(path)`, `Image.FromFile`, any API that throws with the input path in the message | Sin 2 leakage | Caller must catch and sanitize, or pass `OriginalValue` |
 | `new SomeOtherTask()` followed by `.Execute()` | Nested task — bypasses TaskFactory injection | Parent must propagate `TaskEnvironment` before calling `Execute()` |
 
 ### Step 3 — Anchor findings inline, name the full chain
@@ -62,7 +62,7 @@ Each hazard becomes **one inline comment**, anchored to the exact line in the PR
 
 Example inline comment anchored to `src/Tasks/SignFile.cs:65`:
 
-> **BLOCKING — Sin 7 (exception path leakage)**
+> **BLOCKING — Sin 2 (exception path leakage)**
 > Chain: this line → `SecurityUtilities.SignFile(absPath, …)` (Microsoft.Build.Tasks.Core, off-diff) → throws `FileNotFoundException` with `FileName = absPath.Value` → caught at `SignFile.cs:71` and logged as MSB3484.
 > The absolutized path will surface in the MSB3484 message.
 > Fix: log `signingTargetPath.OriginalValue` instead of `ex.FileName`.
@@ -127,7 +127,7 @@ Do not duplicate inline findings in the summary. Do not produce a "Blocking / Ma
 
 ## Skill Cross-Reference
 
-- Migration playbook (8 sins, ToolTask hazards, helper patterns, test patterns): `multithreaded-task-migration` skill.
+- Migration playbook (7 sins, ToolTask hazards, helper patterns, test patterns): `multithreaded-task-migration` skill.
 - Generic MSBuild review (24 dimensions): host repo's `expert-reviewer` agent.
 
 If neither is available in the host repo, fall back to your own reading of the skill bundled with this plugin (`./skills/multithreaded-task-migration/SKILL.md`).

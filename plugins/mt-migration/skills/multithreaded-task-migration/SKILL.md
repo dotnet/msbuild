@@ -137,7 +137,7 @@ After migration, review for behavioral compatibility. **Every observable differe
 
 Observable behavior = `Execute()` return value, `[Output]` property values, error/warning message content, exception types, files written, and which code path runs.
 
-## The 8 Deadly Compatibility Sins
+## The 7 Deadly Compatibility Sins
 
 Real bugs found during MSBuild task migrations. Every one shipped in initial "passing" code with green tests.
 
@@ -161,9 +161,11 @@ document.Save((string)outputPath);    // file I/O: absolute path
 
 **Detect**: For every `[Output]` property, trace backward — is it ever assigned from an `AbsolutePath`?
 
-### Sin 2: Error Message Path Inflation
+### Sin 2: Error/Log Message Path Inflation
 
-Error messages show absolutized paths instead of the user's original input.
+Error messages and exception messages show absolutized paths instead of the user's original input.
+
+**Direct leakage** — passing an `AbsolutePath` to logging APIs:
 
 ```csharp
 // BROKEN: "Cannot find 'C:\repo\app.manifest'" instead of "Cannot find 'app.manifest'"
@@ -174,7 +176,19 @@ Log.LogError("Cannot find '{0}'", abs); // implicit conversion!
 Log.LogError("Cannot find '{0}'", abs.OriginalValue);
 ```
 
-**Detect**: Search every `Log.LogError`/`LogWarning`/`LogMessage` — is any argument an `AbsolutePath`?
+**Indirect leakage** — exception messages from helpers that received the absolutized path:
+
+```csharp
+// BROKEN: ex.FileName / ex.Message embed the absolutized path
+catch (FileNotFoundException ex) { Log.LogError("Not found: {0}", ex.FileName); }
+catch (Exception ex)              { Log.LogError(ex.Message); }
+
+// CORRECT: prefer the original input; if you must use the exception, sanitize
+catch (FileNotFoundException ex) { Log.LogError("Not found: {0}", abs.OriginalValue); }
+catch (Exception ex)              { Log.LogError(ex.Message.Replace(abs.Value, abs.OriginalValue)); }
+```
+
+**Detect**: Search every `Log.LogError`/`LogWarning`/`LogMessage` — is any argument an `AbsolutePath`? Also check every `Log.LogError(ex.Message …)` / `ex.FileName` downstream of a `GetAbsolutePath` — did the exception originate from a helper that received the absolutized path?
 
 ### Sin 3: Null Coalescing That Changes Control Flow
 
@@ -233,25 +247,7 @@ Old code threw `FileNotFoundException` for missing files; new code throws `Argum
 
 **Detect**: For every `GetAbsolutePath`, check what the old code threw for null/empty and whether the calling code has type-specific catch blocks.
 
-### Sin 7: Exception Message Path Leakage
-
-> **How this differs from Sin 2:** Sin 2 is about directly passing an `AbsolutePath` to `Log.LogError`/`LogWarning`. Sin 7 is about *exception messages* that **indirectly** embed the absolute path — the task never logged it, but a helper it called did via `ex.Message`/`ex.FileName`. The fix is also different: Sin 2 uses `OriginalValue`; Sin 7 requires sanitizing the exception string.
-
-Exceptions thrown by *helpers you called with an absolutized path* carry that absolute path in `ex.Message` / `ex.FileName`. Logging the exception verbatim leaks the absolute path even though the task itself never logged an `AbsolutePath` directly.
-
-```csharp
-// BROKEN: ex.FileName / ex.Message embed the absolutized path
-catch (FileNotFoundException ex) { Log.LogError("Not found: {0}", ex.FileName); }
-catch (Exception ex)              { Log.LogError(ex.Message); }
-
-// CORRECT: prefer the original input; if you must use the exception, sanitize
-catch (FileNotFoundException ex) { Log.LogError("Not found: {0}", abs.OriginalValue); }
-catch (Exception ex)              { Log.LogError(ex.Message.Replace(abs.Value, abs.OriginalValue)); }
-```
-
-**Detect**: For every `Log.LogError(ex.Message …)` / `ex.FileName` downstream of a `GetAbsolutePath`, check whether the exception originated from a helper that received the absolutized path. If yes, sanitize.
-
-### Sin 8: `Path.IsPathRooted` as an Absolutize Gate
+### Sin 7: `Path.IsPathRooted` as an Absolutize Gate
 
 `Path.IsPathRooted` returns `true` for **drive-relative** (`C:foo\bar`) and **root-relative** (`\foo\bar`) Windows paths — both still depend on process current-directory / current-drive state. "Absolutize only if not rooted" silently leaves those paths process-dependent.
 
@@ -261,7 +257,7 @@ catch (Exception ex)              { Log.LogError(ex.Message.Replace(abs.Value, a
 
 ## Call-Chain Hazards Beyond the Task
 
-The 8 sins above are *local* to the task body. The other half of MT migration is auditing the **transitive call chain** — helpers and shared utility classes the task reaches into.
+The 7 sins above are *local* to the task body. The other half of MT migration is auditing the **transitive call chain** — helpers and shared utility classes the task reaches into.
 
 ### Helpers That Capture Process State
 
@@ -270,7 +266,7 @@ Helpers reached from `Execute()` can quietly depend on process state in any of t
 - A relative path falls through to `Directory.GetCurrentDirectory()` (often as a "fallback") or to `Path.GetFullPath(x)` without a base.
 - An env var is read directly via `Environment.GetEnvironmentVariable` (not `TaskEnvironment`).
 - A `static` field is seeded from process state on first use (`static string s_x = Directory.GetCurrentDirectory()`), permanently capturing the first caller's environment for every later caller.
-- A BCL API echoes its input path back through `ex.Message` / `ex.FileName` (Sin 7).
+- A BCL API echoes its input path back through `ex.Message` / `ex.FileName` (Sin 2).
 - The helper takes a `string path` and returns a `string` — losing the `.OriginalValue` distinction, so callers either lie in messages or absolutize twice.
 
 **Resolution patterns:**
@@ -408,12 +404,12 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] `IMultiThreadableTask` on classes that use `TaskEnvironment` APIs, with default initializer `= TaskEnvironment.Fallback`
 - [ ] Every `[Output]` property: exact string value matches pre-migration (Sin 1)
 - [ ] Every `Log.LogError`/`LogWarning`: path in message matches pre-migration (use `OriginalValue`) (Sin 2)
-- [ ] Every `Log.LogError(ex.Message …)` / `ex.FileName`: exception path sanitized to original input (Sin 7)
+- [ ] Every `Log.LogError(ex.Message …)` / `ex.FileName`: exception path sanitized to original input (Sin 2)
 - [ ] Every `GetAbsolutePath` call: null/empty exception behavior matches old code path (Sin 3, 6)
 - [ ] Every dictionary/set with path keys: canonicalization preserved (`GetCanonicalForm()`) (Sin 5)
 - [ ] Every try-catch: absolutized value available in catch block where needed (Sin 4)
 - [ ] Every `??` or `?.` added: verified it doesn't swallow a previously-thrown exception (Sin 3)
-- [ ] No `Path.IsPathRooted` short-circuits around `GetAbsolutePath` — call unconditionally (Sin 8)
+- [ ] No `Path.IsPathRooted` short-circuits around `GetAbsolutePath` — call unconditionally (Sin 7)
 - [ ] No `AbsolutePath` leaks into user-visible strings unintentionally
 - [ ] No behavior conditioned on "MT mode on/off" — `TaskEnvironment.Fallback` handles single-process case
 - [ ] **Call chain traced end-to-end** for every helper invoked from `Execute()`:

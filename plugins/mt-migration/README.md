@@ -14,7 +14,7 @@ mt-migration/
 ├── plugin.json
 ├── skills/
 │   └── multithreaded-task-migration/
-│       └── SKILL.md         # The 8 deadly sins, ToolTask hazards, helper patterns, test patterns, sign-off checklist
+│       └── SKILL.md         # The 7 deadly sins, ToolTask hazards, helper patterns, test patterns, sign-off checklist
 └── agents/
     └── mt-migration-reviewer.agent.md   # MT-specific PR reviewer that follows call chains end-to-end
 ```
