@@ -561,6 +561,14 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
         }
 
         /// <summary>
+        /// Returns the item-spec, matching the behavior of other <see cref="ITaskItem"/> implementations.
+        /// Tasks that receive this item (e.g. when task parameters are marshaled to an out-of-proc TaskHost)
+        /// may call ToString() expecting the item-spec; without this override they would get the .NET type
+        /// name instead. See https://github.com/dotnet/msbuild/issues/13896.
+        /// </summary>
+        public override string ToString() => _escapedItemSpec ?? string.Empty;
+
+        /// <summary>
         /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
         /// lease (5 minutes I think) and instances can expire if they take long time processing.
         /// </summary>
