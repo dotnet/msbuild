@@ -300,7 +300,7 @@ namespace Microsoft.Build.CommandLine
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
 
-            TelemetryManager.Instance?.Initialize(isStandalone: true);
+            TelemetryManager.Instance.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -350,7 +350,7 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(false /* log to console */);
             }
 
-            TelemetryManager.Instance?.Dispose();
+            TelemetryManager.Instance.Dispose();
 
             return exitCode;
         }
