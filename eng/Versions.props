@@ -41,20 +41,39 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
-    <SystemCollectionsImmutableVersion>9.0.0</SystemCollectionsImmutableVersion>
-    <SystemConfigurationConfigurationManagerVersion>9.0.0</SystemConfigurationConfigurationManagerVersion>
-    <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
-    <SystemDiagnosticsEventLogVersion>9.0.0</SystemDiagnosticsEventLogVersion>
-    <SystemFormatsAsn1Version>9.0.0</SystemFormatsAsn1Version>
-    <SystemFormatsNrbfVersion>9.0.0</SystemFormatsNrbfVersion>
-    <SystemReflectionMetadataVersion>9.0.0</SystemReflectionMetadataVersion>
-    <SystemReflectionMetadataLoadContextVersion>9.0.0</SystemReflectionMetadataLoadContextVersion>
-    <SystemResourcesExtensionsVersion>9.0.0</SystemResourcesExtensionsVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>9.0.0</SystemSecurityCryptographyProtectedDataVersion>
-    <SystemTextEncodingCodePagesVersion>9.0.0</SystemTextEncodingCodePagesVersion>
-    <SystemTextJsonVersion>9.0.0</SystemTextJsonVersion>
-    <SystemThreadingChannelsVersion>9.0.0</SystemThreadingChannelsVersion>
-    <SystemThreadingTasksDataflowVersion>9.0.0</SystemThreadingTasksDataflowVersion>
+    <!--
+        $(_RuntimePackageVersion) is the version MSBuild COMPILES against and declares as its
+        own NuGet package dependencies. It is deliberately the same for every target framework
+        so that restore never sees a version downgrade: with central transitive pinning on, a
+        TargetFramework-conditioned version here would leak the higher version into leaf
+        packaging/test projects (which pin the unconditioned version directly) and fail with
+        NU1109.
+
+        For net472 we additionally REDISTRIBUTE a newer servicing build of these assemblies to
+        line up with a Visual Studio servicing event, WITHOUT changing what we compile or
+        declare against. That is driven by $(_DeployedRuntimePackageVersion): the newer packages
+        are downloaded and copied to the output in place of the compiled-against assemblies, and
+        the net472 binding redirects (src/MSBuild/app.config and app.amd64.config) point at them.
+        See the ReplaceRuntimeAssembliesWithServicingVersions target in src/Directory.Build.targets.
+        This mirrors the $(UseFrozenMaintenancePackageVersions) mechanism in reverse (there we
+        compile against an older build than we ship; here we ship a newer build than we compile).
+    -->
+    <_RuntimePackageVersion>9.0.0</_RuntimePackageVersion>
+    <_DeployedRuntimePackageVersion>10.0.3</_DeployedRuntimePackageVersion>
+    <SystemCollectionsImmutableVersion>$(_RuntimePackageVersion)</SystemCollectionsImmutableVersion>
+    <SystemConfigurationConfigurationManagerVersion>$(_RuntimePackageVersion)</SystemConfigurationConfigurationManagerVersion>
+    <SystemDiagnosticsDiagnosticSourceVersion>$(_RuntimePackageVersion)</SystemDiagnosticsDiagnosticSourceVersion>
+    <SystemDiagnosticsEventLogVersion>$(_RuntimePackageVersion)</SystemDiagnosticsEventLogVersion>
+    <SystemFormatsAsn1Version>$(_RuntimePackageVersion)</SystemFormatsAsn1Version>
+    <SystemFormatsNrbfVersion>$(_RuntimePackageVersion)</SystemFormatsNrbfVersion>
+    <SystemReflectionMetadataVersion>$(_RuntimePackageVersion)</SystemReflectionMetadataVersion>
+    <SystemReflectionMetadataLoadContextVersion>$(_RuntimePackageVersion)</SystemReflectionMetadataLoadContextVersion>
+    <SystemResourcesExtensionsVersion>$(_RuntimePackageVersion)</SystemResourcesExtensionsVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>$(_RuntimePackageVersion)</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemTextEncodingCodePagesVersion>$(_RuntimePackageVersion)</SystemTextEncodingCodePagesVersion>
+    <SystemTextJsonVersion>$(_RuntimePackageVersion)</SystemTextJsonVersion>
+    <SystemThreadingChannelsVersion>$(_RuntimePackageVersion)</SystemThreadingChannelsVersion>
+    <SystemThreadingTasksDataflowVersion>$(_RuntimePackageVersion)</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- maintained in eng/dependabot/Packages.props -->

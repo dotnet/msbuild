@@ -184,6 +184,94 @@
     </ItemGroup>
   </Target>
 
+  <!--
+    net472 redistributes newer dotnet/runtime servicing assemblies than it compiles against,
+    to line up with a Visual Studio servicing event. This mirrors the frozen maintenance-package
+    mechanism above, in reverse: compile and restore stay at $(_RuntimePackageVersion) so there
+    is no package downgrade, while here we download $(_DeployedRuntimePackageVersion) and copy
+    those assemblies to the output in place of the compiled-against ones. The matching binding
+    redirects live in src/MSBuild/app.config and src/MSBuild/app.amd64.config and must be kept
+    in sync with $(_DeployedRuntimePackageVersion).
+
+    This is opt-in per project ($(DeployRuntimeServicingAssemblies)) and intended only for the
+    assemblies that Visual Studio actually loads (the MSBuild.exe output directory). Enabling it
+    in a library project would make that project's output disagree (10.x) with what every
+    downstream project compiles against (9.x), producing spurious MSB3277 version-conflict
+    warnings (errors under -warnAsError); the redistributed assemblies must therefore only
+    appear in the final, non-referenced application output.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472' and '$(DeployRuntimeServicingAssemblies)' == 'true'">
+    <_DeployedRuntimeAssembly Include="System.Collections.Immutable" />
+    <_DeployedRuntimeAssembly Include="System.Configuration.ConfigurationManager" />
+    <_DeployedRuntimeAssembly Include="System.Diagnostics.DiagnosticSource" />
+    <_DeployedRuntimeAssembly Include="System.Diagnostics.EventLog" />
+    <_DeployedRuntimeAssembly Include="System.Formats.Asn1" />
+    <_DeployedRuntimeAssembly Include="System.Formats.Nrbf" />
+    <_DeployedRuntimeAssembly Include="System.Reflection.Metadata" />
+    <_DeployedRuntimeAssembly Include="System.Reflection.MetadataLoadContext" />
+    <_DeployedRuntimeAssembly Include="System.Resources.Extensions" />
+    <_DeployedRuntimeAssembly Include="System.Security.Cryptography.ProtectedData" />
+    <_DeployedRuntimeAssembly Include="System.Text.Encoding.CodePages" />
+    <_DeployedRuntimeAssembly Include="System.Text.Json" />
+    <_DeployedRuntimeAssembly Include="System.Threading.Channels" />
+    <_DeployedRuntimeAssembly Include="System.Threading.Tasks.Dataflow" />
+    <!-- Transitive dependencies of the above (notably of System.Text.Json) that we also
+         redistribute and that ship as part of the same dotnet/runtime servicing wave. -->
+    <_DeployedRuntimeAssembly Include="System.IO.Pipelines" />
+    <_DeployedRuntimeAssembly Include="System.Text.Encodings.Web" />
+    <_DeployedRuntimeAssembly Include="Microsoft.Bcl.AsyncInterfaces" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472' and '$(DeployRuntimeServicingAssemblies)' == 'true'">
+    <PackageDownload Include="@(_DeployedRuntimeAssembly)" Version="[$(_DeployedRuntimePackageVersion)]" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net472' and '$(DeployRuntimeServicingAssemblies)' == 'true'">
+    <!-- RAR sees the net472 binding redirect to $(_DeployedRuntimePackageVersion) but resolves
+         $(_RuntimePackageVersion) (the swap to the servicing build happens after RAR, and the
+         compile references must stay on the packages so their .NET Framework type-forwards keep
+         working), so it reports an unresolvable version conflict. That mismatch is intentional;
+         ValidateMSBuildPackageDependencyVersions enforces that the shipped redirects match the
+         assemblies actually in the output. -->
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
+  <!--
+    Swap the runtime copy-local assemblies AFTER RAR, so the output directory contains the
+    redistributed servicing build rather than the compiled-against one. We deliberately do NOT
+    touch the compile-time references: the net462 reference assemblies type-forward into the
+    .NET Framework (e.g. System.Configuration.ConfigurationManager forwards
+    ConfigurationErrorsException to the GAC's System.Configuration), and substituting raw file
+    references for the package references breaks those forwards. Compiling against
+    $(_RuntimePackageVersion) and shipping $(_DeployedRuntimePackageVersion) is exactly the
+    intent; the resulting build-time RAR version-conflict warning is suppressed (and the real
+    guardrail is the ValidateMSBuildPackageDependencyVersions task) in the projects that opt in.
+  -->
+  <Target Name="ReplaceRuntimeAssembliesWithServicingVersions"
+          AfterTargets="ResolveAssemblyReferences"
+          Condition="'$(TargetFramework)' == 'net472' and '@(_DeployedRuntimeAssembly)' != ''">
+    <PropertyGroup>
+      <!-- Semicolon-delimited (and -bracketed) so membership tests can't match on a substring. -->
+      <_DeployedRuntimeAssemblyIds>;@(_DeployedRuntimeAssembly);</_DeployedRuntimeAssemblyIds>
+    </PropertyGroup>
+    <ItemGroup>
+      <!-- The assemblies copied to the output by the compiled-against ($(_RuntimePackageVersion)) packages...
+           %(DeployedPath) is precomputed here (rather than inside the transform below) so the
+           transform string stays free of nested quotes / property functions. -->
+      <_RuntimeCopyLocalToReplace Include="@(ReferenceCopyLocalPaths)"
+          Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != '' and $(_DeployedRuntimeAssemblyIds.Contains(';%(ReferenceCopyLocalPaths.NuGetPackageId);'))">
+        <DeployedPath>$(NuGetPackageRoot)$([System.String]::Copy('%(ReferenceCopyLocalPaths.NuGetPackageId)').ToLowerInvariant())\$(_DeployedRuntimePackageVersion)\lib\net462\%(ReferenceCopyLocalPaths.NuGetPackageId).dll</DeployedPath>
+      </_RuntimeCopyLocalToReplace>
+
+      <ReferenceCopyLocalPaths Remove="@(_RuntimeCopyLocalToReplace)" />
+
+      <!-- ...are replaced by the same assemblies from the newer $(_DeployedRuntimePackageVersion) servicing build. -->
+      <ReferenceCopyLocalPaths Include="@(_RuntimeCopyLocalToReplace->'%(DeployedPath)')">
+        <NuGetPackageVersion>$(_DeployedRuntimePackageVersion)</NuGetPackageVersion>
+      </ReferenceCopyLocalPaths>
+    </ItemGroup>
+  </Target>
+
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 
