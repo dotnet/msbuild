@@ -784,7 +784,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private void SetupTaskFactory(TaskHostParameters factoryParameters, bool explicitlyLaunchTaskHost = false, bool isTaskHostFactory = false)
         {
             _taskFactory = new AssemblyTaskFactory();
-            _loadInfo = AssemblyLoadInfo.Create(null, typeof(TaskToTestFactories).Assembly.Location);
+            _loadInfo = explicitlyLaunchTaskHost || isTaskHostFactory
+                ? AssemblyLoadInfo.Create(assemblyName: null, typeof(TaskToTestFactories).GetTypeInfo().Assembly.Location)
+                : AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, assemblyFile: null);
             if (explicitlyLaunchTaskHost)
             {
                 factoryParameters = factoryParameters.WithTaskHostFactoryExplicitlyRequested(true);
