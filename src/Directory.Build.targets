@@ -187,6 +187,15 @@
     <FrozenSystemThreadingChannelsVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemThreadingChannelsVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(UseFrozenMaintenancePackageVersions)' == 'true'">
+    <!-- We compile against deliberately old maintenance-package versions (see above) but ship and binding-redirect
+         to the latest at runtime. A transitive reference that wants a newer version than we froze to - e.g.
+         Microsoft.BuildXL.Processes' net472 assemblies referencing a newer System.Memory - makes RAR emit MSB3277
+         because it can't unify down to the frozen version. That conflict is benign (the runtime redirect resolves it),
+         so demote it to a message rather than letting it fail the warnaserror build. -->
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(UseFrozenMaintenancePackageVersions)' == 'true'">
     <PackageDownload Include="Microsoft.Bcl.AsyncInterfaces" Version="[$(FrozenMicrosoftMicrosoftBclAsyncInterfacesVersion)]" />
     <PackageDownload Include="Microsoft.IO.Redist" Version="[$(FrozenMicrosoftIORedistVersion)]" />
