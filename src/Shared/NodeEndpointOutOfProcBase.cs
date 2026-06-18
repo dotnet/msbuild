@@ -45,9 +45,10 @@ namespace Microsoft.Build.BackEnd
 #endif // NETCOREAPP2_1
 
         /// <summary>
-        /// The size of the buffers to use for named pipes
+        /// The size of the buffers to use for named pipes. Read from <see cref="Traits.NodeConnectionBufferSize"/>
+        /// at construction so it honors the change wave / env override (and Traits reset in tests).
         /// </summary>
-        private const int PipeBufferSize = 131072;
+        private static int PipeBufferSize => Traits.Instance.NodeConnectionBufferSize;
 
         /// <summary>
         /// The current communication status of the node.

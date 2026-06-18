@@ -230,5 +230,48 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
         }
+
+        [Fact]
+        public void NodeConnectionBufferSizeIsLargeWhenWaveEnabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // No MSBUILDDISABLEFEATURESFROMVERSION => all waves enabled => 1 MB buffer.
+                // In unit tests BuildEnvironmentState.s_runningTests is true, so Traits.Instance
+                // returns a fresh instance each access and reflects the current environment.
+                env.SetEnvironmentVariable("MSBUILDNODECONNECTIONBUFFERSIZE", null);
+                SetChangeWave(string.Empty, env);
+
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9).ShouldBeTrue();
+                Traits.Instance.NodeConnectionBufferSize.ShouldBe(1024 * 1024);
+            }
+        }
+
+        [Fact]
+        public void NodeConnectionBufferSizeStaysLegacyWhenWaveDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Opting out of wave 18.9 must restore the historical 128 KB buffer.
+                env.SetEnvironmentVariable("MSBUILDNODECONNECTIONBUFFERSIZE", null);
+                SetChangeWave(ChangeWaves.Wave18_9.ToString(), env);
+
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9).ShouldBeFalse();
+                Traits.Instance.NodeConnectionBufferSize.ShouldBe(128 * 1024);
+            }
+        }
+
+        [Fact]
+        public void NodeConnectionBufferSizeRespectsEnvironmentOverride()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // An explicit override wins regardless of the change wave.
+                SetChangeWave(ChangeWaves.Wave18_9.ToString(), env);
+                env.SetEnvironmentVariable("MSBUILDNODECONNECTIONBUFFERSIZE", (256 * 1024).ToString());
+
+                Traits.Instance.NodeConnectionBufferSize.ShouldBe(256 * 1024);
+            }
+        }
     }
 }
