@@ -143,6 +143,8 @@ Real bugs found during MSBuild task migrations. Every one shipped in initial "pa
 
 **Edge-case discipline:** For every migrated code path, verify behavior when inputs are `null`, empty string (`""`), or whitespace-only. `GetAbsolutePath` throws `ArgumentException` on null/empty — if the pre-migration code handled these differently (e.g., returned early, used a default, or threw a different exception type), the migration must preserve that behavior. Even if a scenario seems unlikely, treat it as a relevant finding if it is theoretically possible.
 
+**Prefer `IsNullOrWhiteSpace` over `IsNullOrEmpty` as the guard before `GetAbsolutePath`:** Since `GetAbsolutePath` will throw on whitespace-only input, replace `string.IsNullOrEmpty(x)` checks with `string.IsNullOrWhiteSpace(x)` when the guarded path calls `TaskEnvironment.GetAbsolutePath`. When the check is false (i.e., input has content), keep the original value as the fallback to preserve user-facing output.
+
 ### Sin 1: Output Property Contamination
 
 Absolutized values leak into `[Output]` properties that users/other tasks consume.
