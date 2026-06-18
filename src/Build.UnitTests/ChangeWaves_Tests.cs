@@ -234,6 +234,11 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void NodeConnectionBufferSizeIsLargeWhenWaveEnabled()
         {
+            // NOTE: these tests cover the value produced by Traits.NodeConnectionBufferSize only.
+            // The single delegation that wires it into the pipe
+            // (NodeEndpointOutOfProcBase.PipeBufferSize => Traits.Instance.NodeConnectionBufferSize)
+            // is intentionally not unit-tested - exercising it would require spawning a real node and
+            // inspecting the kernel pipe buffer. It is a trivial, verified-by-inspection delegation.
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 // No MSBUILDDISABLEFEATURESFROMVERSION => all waves enabled => 1 MB buffer.

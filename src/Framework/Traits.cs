@@ -149,9 +149,9 @@ namespace Microsoft.Build.Framework
                 return configured;
             }
 
-            const int LargeBufferSize = 1024 * 1024;
+            const int DefaultBufferSize = 1024 * 1024;
             const int LegacyBufferSize = 128 * 1024;
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9) ? LargeBufferSize : LegacyBufferSize;
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9) ? DefaultBufferSize : LegacyBufferSize;
         }
 
         /// <summary>

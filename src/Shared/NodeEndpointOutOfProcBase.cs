@@ -45,8 +45,9 @@ namespace Microsoft.Build.BackEnd
 #endif // NETCOREAPP2_1
 
         /// <summary>
-        /// The size of the buffers to use for named pipes. Read from <see cref="Traits.NodeConnectionBufferSize"/>
-        /// at construction so it honors the change wave / env override (and Traits reset in tests).
+        /// The size of the buffers to use for named pipes. Re-evaluated on each access via
+        /// <see cref="Traits.NodeConnectionBufferSize"/> so it honors the change wave / env override
+        /// (and the per-access <see cref="Traits.Instance"/> reset used in tests).
         /// </summary>
         private static int PipeBufferSize => Traits.Instance.NodeConnectionBufferSize;
 
@@ -232,6 +233,8 @@ namespace Microsoft.Build.BackEnd
             _parentPacketVersion = parentPacketVersion;
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
+
+            CommunicationsUtilities.Trace($"Creating pipe '{pipeName}' with buffer size {PipeBufferSize}.");
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
