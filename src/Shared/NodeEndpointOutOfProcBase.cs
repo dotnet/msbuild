@@ -46,9 +46,18 @@ namespace Microsoft.Build.BackEnd
 #endif // NETCOREAPP2_1
 
         /// <summary>
-        /// The size of the buffers to use for named pipes
+        /// The size of the buffers to use for named pipes. Tunable via MSBUILDPIPEBUFFERSIZE for
+        /// experiments with the pipe-only (no shared-memory) transport.
         /// </summary>
-        private const int PipeBufferSize = 131072;
+        private static readonly int PipeBufferSize = GetPipeBufferSize();
+
+        private static int GetPipeBufferSize()
+        {
+            string value = Environment.GetEnvironmentVariable("MSBUILDPIPEBUFFERSIZE");
+            return !string.IsNullOrEmpty(value) && int.TryParse(value, out int parsed) && parsed > 0
+                ? parsed
+                : 131072;
+        }
 
         /// <summary>
         /// The current communication status of the node.
