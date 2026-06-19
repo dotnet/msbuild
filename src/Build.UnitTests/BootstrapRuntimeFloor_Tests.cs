@@ -15,13 +15,39 @@ using Xunit;
 namespace Microsoft.Build.Engine.UnitTests
 {
     /// <summary>
-    /// Tests for the <c>VerifyBootstrapRuntimeFloor</c> target in <c>eng/BootStrapMsBuild.targets</c>.
+    /// Tests for the bootstrap SDK version logic: the <c>BootstrapSdkVersion</c> derivation in
+    /// <c>eng/BootStrapMsBuild.props</c> and the <c>VerifyBootstrapRuntimeFloor</c> target in
+    /// <c>eng/BootStrapMsBuild.targets</c>.
     /// </summary>
     public sealed class BootstrapRuntimeFloor_Tests
     {
         private readonly ITestOutputHelper _output;
 
         public BootstrapRuntimeFloor_Tests(ITestOutputHelper output) => _output = output;
+
+        [Theory]
+        [InlineData("10.0.100", "10.0.300", "10.0.300")] // NETCoreSdkVersion newer than the floor wins.
+        [InlineData("10.0.300", "10.0.100", "10.0.300")] // Floor newer than NETCoreSdkVersion wins.
+        [InlineData("10.0.100", "", "10.0.100")]         // NETCoreSdkVersion unset: the floor is used.
+        public void DerivesBootstrapSdkVersion_AsMaxOfFloorAndSdk(string floor, string netCoreSdkVersion, string expected)
+        {
+            string propsFile = LocateRepositoryEngFile("BootStrapMsBuild.props");
+
+            string projectXml = $"""
+                <Project>
+                  <PropertyGroup>
+                    <BootstrapSdkVersionFloor>{SecurityElement.Escape(floor)}</BootstrapSdkVersionFloor>
+                    <NETCoreSdkVersion>{SecurityElement.Escape(netCoreSdkVersion)}</NETCoreSdkVersion>
+                  </PropertyGroup>
+                  <Import Project="{SecurityElement.Escape(propsFile)}" />
+                </Project>
+                """;
+
+            using ProjectCollection collection = new();
+            using ProjectFromString projectFromString = new(projectXml, null, null, collection);
+
+            projectFromString.Project.GetPropertyValue("BootstrapSdkVersion").ShouldBe(expected);
+        }
 
         [Theory]
         [InlineData("10.0.8", "10.0.8")]   // Exactly the floor is acceptable.
