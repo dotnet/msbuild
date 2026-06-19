@@ -18,21 +18,11 @@
     <BootstrapBinaryDestination>$(BootstrapDestination)</BootstrapBinaryDestination>
   </PropertyGroup>
 
-  <!--
-       Ensure BootstrapSdkVersion is never older than the SDK version delivered
-       by global.json. NETCoreSdkVersion is set by Microsoft.NETCoreSdk.BundledVersions.props
-       (imported transitively from Microsoft.NET.Sdk), so it reflects the SDK
-       resolving this project. The hardcoded floor in eng/Versions.props remains
-       authoritative when it is higher (allowing pinning to a NEWER SDK), but
-       global.json bumps automatically flow through without needing a second edit.
-
-       Note: [MSBuild]::VersionGreaterThan uses MSBuild's SimpleVersion which
-       compares only the numeric components (Major.Minor.Build.Revision) and
-       discards any SemVer prerelease/build suffix, so e.g. "10.0.0-preview.1"
-       and "10.0.0-preview.7" compare equal. Bootstrap SDKs are stable in
-       practice, so this is acceptable.
-  -->
-  <PropertyGroup Condition="'$(NETCoreSdkVersion)' != ''">
-    <BootstrapSdkVersion Condition="$([MSBuild]::VersionGreaterThan('$(NETCoreSdkVersion)', '$(BootstrapSdkVersion)'))">$(NETCoreSdkVersion)</BootstrapSdkVersion>
+  <!-- Effective bootstrap SDK = Max(floor from eng/Versions.props, $(NETCoreSdkVersion) from
+       global.json). NETCoreSdkVersion comes from Microsoft.NET.Sdk and reflects the SDK
+       resolving this project; the floor wins only when it is higher (pinning a newer SDK). -->
+  <PropertyGroup>
+    <BootstrapSdkVersion>$(BootstrapSdkVersionFloor)</BootstrapSdkVersion>
+    <BootstrapSdkVersion Condition="'$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThan('$(NETCoreSdkVersion)', '$(BootstrapSdkVersion)'))">$(NETCoreSdkVersion)</BootstrapSdkVersion>
   </PropertyGroup>
 </Project>

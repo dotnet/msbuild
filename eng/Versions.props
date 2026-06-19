@@ -81,12 +81,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Minimum SDK version used to acquire and lay out the bootstrap.
-         The effective value used by the MSBuild.Bootstrap project is
-         Max(this, $(NETCoreSdkVersion)) so the bootstrap shared runtime
-         is never older than what the SDK in global.json delivers. The
-         max override lives in eng/BootStrapMsBuild.props. -->
-    <BootstrapSdkVersion>10.0.300</BootstrapSdkVersion>
+    <!-- Floor (minimum) for the bootstrap SDK. The effective BootstrapSdkVersion is
+         Max(this, $(NETCoreSdkVersion)), computed in eng/BootStrapMsBuild.props, so the
+         bootstrap never lags the SDK in global.json. Raise this only to pin a NEWER SDK. -->
+    <BootstrapSdkVersionFloor>10.0.300</BootstrapSdkVersionFloor>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">

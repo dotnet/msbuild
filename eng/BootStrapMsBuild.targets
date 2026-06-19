@@ -254,19 +254,7 @@
        independently, a higher SDK *version* does not guarantee a newer runtime, so the runtime
        cannot be predicted cheaply ahead of time. Instead we assert against the runtime that
        actually got laid down, comparing it to $(BundledNETCoreAppPackageVersion) - the runtime
-       the resolving SDK delivers.
-
-       Known limitations (acceptable for a fail-safe backstop; the happy path, where the floor
-       equals global.json's SDK, never trips them):
-         * The check compares the full numeric version, which is stricter than host
-           roll-forward: a same-minor but older *patch* (e.g. bootstrap 10.0.3 vs delivered
-           10.0.8) actually rolls forward and runs, yet is still flagged here. We prefer to
-           fail loudly rather than risk shipping an unrunnable bootstrap.
-         * [MSBuild]::VersionGreaterThanOrEquals compares only numeric components and ignores
-           any SemVer prerelease suffix, so two different previews of the same numeric version
-           compare equal. Like the Max override in eng/BootStrapMsBuild.props, this guard does
-           not catch drift between two previews of the same numeric version. Bootstrap SDKs are
-           stable in practice. -->
+       the resolving SDK delivers. -->
   <Target Name="VerifyBootstrapRuntimeFloor"
           AfterTargets="AcquireSdk"
           Condition="!$(TargetFramework.StartsWith('net4')) and '$(BundledNETCoreAppPackageVersion)' != ''">
@@ -278,9 +266,6 @@
     <ItemGroup Condition="Exists('$(_BootstrapSharedRuntimeRoot)')">
       <_BootstrapRuntimeDir Include="$([System.IO.Directory]::GetDirectories('$(_BootstrapSharedRuntimeRoot)'))" />
       <_BootstrapRuntimeLeaf Include="@(_BootstrapRuntimeDir->'%(Filename)%(Extension)')" />
-      <!-- Keep only version-like directory names: a stray non-version directory (should never
-           happen, as dotnet-install only lays down version folders here) would otherwise make
-           [MSBuild]::VersionGreaterThanOrEquals throw and fail the build cryptically. -->
       <_BootstrapRuntimeVersion Include="@(_BootstrapRuntimeLeaf)"
                                 Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)', '^[0-9]+\.[0-9]+'))" />
       <_BootstrapRuntimeAtLeastFloor Include="@(_BootstrapRuntimeVersion)"
