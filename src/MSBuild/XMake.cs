@@ -4216,6 +4216,17 @@ namespace Microsoft.Build.CommandLine
         {
             string informationalVersion = typeof(ProjectCollection).Assembly
                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+
+            return GetVmrCommit(informationalVersion, ProjectCollection.DisplayVersion);
+        }
+
+        /// <summary>
+        /// Extracts the VMR (build) commit from <paramref name="informationalVersion"/> when it differs from the
+        /// MSBuild commit in <paramref name="displayVersion"/>; otherwise returns null. In VMR builds the assembly
+        /// InformationalVersion carries the VMR commit while DisplayVersion carries the MSBuild commit.
+        /// </summary>
+        internal static string GetVmrCommit(string informationalVersion, string displayVersion)
+        {
             if (string.IsNullOrEmpty(informationalVersion))
             {
                 return null;
@@ -4233,7 +4244,6 @@ namespace Microsoft.Build.CommandLine
                 vmrCommit = vmrCommit.Substring(0, 9);
             }
 
-            string displayVersion = ProjectCollection.DisplayVersion;
             int displayPlusIndex = displayVersion.IndexOf('+');
             string displayCommit = displayPlusIndex < 0 ? string.Empty : displayVersion.Substring(displayPlusIndex + 1);
 

@@ -3059,6 +3059,36 @@ EndGlobal
         }
 
         [Theory]
+        // VMR build: the informational version carries the VMR commit and DisplayVersion carries the MSBuild commit,
+        // so the (truncated) VMR commit is surfaced as secondary info.
+        [InlineData("18.8.0-dev+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv", "18.8.0-dev+aaaaaaaaa", "vvvvvvvvv")]
+        // Non-VMR build: DisplayVersion's SHA matches the informational version's SHA, so there is nothing extra to show.
+        [InlineData("18.8.0-dev+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv", "18.8.0-dev+vvvvvvvvv", null)]
+        // Informational version with no '+' SHA suffix => no VMR commit.
+        [InlineData("18.8.0-dev", "18.8.0-dev+aaaaaaaaa", null)]
+        // Empty or missing informational version => no VMR commit.
+        [InlineData("", "18.8.0-dev+aaaaaaaaa", null)]
+        [InlineData(null, "18.8.0-dev+aaaaaaaaa", null)]
+        // Trailing '+' with no SHA => no VMR commit.
+        [InlineData("18.8.0-dev+", "18.8.0-dev+aaaaaaaaa", null)]
+        public void GetVmrCommit_ReturnsVmrShaOnlyWhenItDiffersFromDisplayCommit(string informationalVersion, string displayVersion, string expected)
+        {
+            MSBuildApp.GetVmrCommit(informationalVersion, displayVersion).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MSBuildVersionMessageWithVmr_SubstitutesAllArguments()
+        {
+            string vmrMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                "MSBuildVersionMessageWithVmr", "18.8.0-dev+aaaaaaaaa", ".NET Framework", "vvvvvvvvv");
+
+            // {0}=display version, {1}=framework, {2}=VMR commit. Guards against a missing placeholder or wrong argument count.
+            vmrMessage.ShouldContain("18.8.0-dev+aaaaaaaaa");
+            vmrMessage.ShouldContain(".NET Framework");
+            vmrMessage.ShouldContain("vvvvvvvvv");
+        }
+
+        [Theory]
         [MemberData(nameof(MinimumMessageImportanceTestData))]
         public void EndToEndMinimumMessageImportance_InProc(string arguments, MessageImportance expectedMinimumMessageImportance)
         {

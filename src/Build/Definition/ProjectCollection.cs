@@ -521,24 +521,33 @@ namespace Microsoft.Build.Evaluation
                     var sourceRevisionId = assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
                         .FirstOrDefault(metadata => string.Equals(metadata.Key, "RepoOriginalSourceRevisionId", StringComparison.Ordinal))?.Value;
 
-                    var plusIndex = fullInformationalVersion.IndexOf('+');
-
-                    // use a truncated version with only 9 digits of SHA
-                    if (!string.IsNullOrEmpty(sourceRevisionId))
-                    {
-                        var versionWithoutSha = plusIndex < 0 ? fullInformationalVersion : fullInformationalVersion.Substring(0, plusIndex);
-                        s_assemblyDisplayVersion = $"{versionWithoutSha}+{(sourceRevisionId.Length > 9 ? sourceRevisionId.Substring(0, 9) : sourceRevisionId)}";
-                    }
-                    else
-                    {
-                        s_assemblyDisplayVersion = plusIndex < 0
-                                                        ? fullInformationalVersion
-                                                        : fullInformationalVersion.Substring(startIndex: 0, length: plusIndex + 10);
-                    }
+                    s_assemblyDisplayVersion = GetDisplayVersion(fullInformationalVersion, sourceRevisionId);
                 }
 
                 return s_assemblyDisplayVersion;
             }
+        }
+
+        /// <summary>
+        /// Computes the display version from the assembly informational version and, when present, the original
+        /// MSBuild commit captured in <c>RepoOriginalSourceRevisionId</c>. In VMR builds the informational version
+        /// carries the VMR commit, so <paramref name="sourceRevisionId"/> (the MSBuild commit) is preferred and
+        /// truncated to 9 characters; otherwise the SHA from the informational version is used (also truncated to 9).
+        /// </summary>
+        internal static string GetDisplayVersion(string fullInformationalVersion, string sourceRevisionId)
+        {
+            var plusIndex = fullInformationalVersion.IndexOf('+');
+
+            // use a truncated version with only 9 digits of SHA
+            if (!string.IsNullOrEmpty(sourceRevisionId))
+            {
+                var versionWithoutSha = plusIndex < 0 ? fullInformationalVersion : fullInformationalVersion.Substring(0, plusIndex);
+                return $"{versionWithoutSha}+{(sourceRevisionId.Length > 9 ? sourceRevisionId.Substring(0, 9) : sourceRevisionId)}";
+            }
+
+            return plusIndex < 0
+                ? fullInformationalVersion
+                : fullInformationalVersion.Substring(startIndex: 0, length: plusIndex + 10);
         }
 
         /// <summary>
