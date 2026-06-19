@@ -1245,13 +1245,12 @@ namespace Microsoft.Build.Execution
         {
             TelemetryManager.Instance.Initialize(isStandalone: false);
 
-            using IActivity? activity = TelemetryManager.Instance
-                ?.DefaultActivitySource
+            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
-                ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
-                        includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-                        includeTargetDetails: false));
+                .SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                    includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+                    includeTargetDetails: false));
         }
 
         /// <summary>
@@ -3483,7 +3482,7 @@ namespace Microsoft.Build.Execution
                         s_singletonInstance = null;
                     }
 
-                    TelemetryManager.Instance?.Dispose();
+                    TelemetryManager.Instance.Dispose();
 
                     _disposed = true;
                 }

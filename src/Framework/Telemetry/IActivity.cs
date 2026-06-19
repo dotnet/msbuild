@@ -15,7 +15,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         /// <param name="dataHolder">Telemetry data holder.</param>
         /// <returns>The activity instance for method chaining.</returns>
-        IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder);
+        IActivity SetTags(IActivityTelemetryDataHolder? dataHolder);
 
         /// <summary>
         /// Sets a tag on the activity.
@@ -23,6 +23,6 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <param name="key">The tag key.</param>
         /// <param name="value">The tag value.</param>
         /// <returns>The activity instance for method chaining.</returns>
-        IActivity? SetTag(string key, object? value);
+        IActivity SetTag(string key, object? value);
     }
 }
