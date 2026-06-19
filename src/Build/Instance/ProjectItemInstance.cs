@@ -1126,9 +1126,12 @@ namespace Microsoft.Build.Execution
                         return EnumerateMetadataEager(list);
                     }
 #endif
-                    // Mainline scenario, returns an iterator to avoid allocating an array
-                    // to store the results. With the iterator, results can stream to the
-                    // consumer (e.g. binlog writer) without allocations.
+                    // Mainline scenario: materialize a snapshot eagerly. A streaming iterator
+                    // would let pooled ImmutableDictionary.Enumerator state escape the call,
+                    // and consumers (e.g. BuildEventArgsWriter from the logger thread) can
+                    // race with the producing thread on the shared SecurePooledObject slot,
+                    // producing ObjectDisposedException mid-MoveNext. See the comment in
+                    // EnumerateMetadata(ImmutableDictionary) below for the full mechanism.
                     return EnumerateMetadata(list);
                 }
                 else
@@ -1237,7 +1240,12 @@ namespace Microsoft.Build.Execution
                 // Materializing here keeps the entire enumeration of `list` inside a single
                 // stack frame on the caller's thread; the returned array carries no reference
                 // to a pooled enumerator and is safe to walk on any thread.
-                var snapshot = new KeyValuePair<string, string>[list.Count];
+                int count = list.Count;
+                if (count == 0)
+                {
+                    return [];
+                }
+                var snapshot = new KeyValuePair<string, string>[count];
                 int i = 0;
                 foreach (KeyValuePair<string, string> projectMetadataInstance in list)
                 {
