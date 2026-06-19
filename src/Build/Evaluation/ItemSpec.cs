@@ -123,9 +123,9 @@ namespace Microsoft.Build.Evaluation
                         ExpanderOptions.ExpandItems,
                         includeNullEntries: false,
                         isTransformExpression: out _,
-                        itemsFromCapture: out var itemsFromCapture);
+                        entries: out var entries);
                     _referencedItems =
-                        itemsFromCapture?.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList() ?? [];
+                        entries?.Select(i => new ReferencedItem(i.Item, new ValueFragment(i.Value, ProjectDirectory))).ToList() ?? [];
 
                     return true;
                 }
