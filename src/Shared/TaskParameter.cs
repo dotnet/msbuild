@@ -640,6 +640,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Returns the escaped item-spec (evaluated include), matching engine task items.
+            /// </summary>
+            public override string ToString() => _escapedItemSpec;
+
+            /// <summary>
             /// Gets or sets the item "specification" e.g. for disk-based items this would be the file path.
             /// </summary>
             /// <remarks>

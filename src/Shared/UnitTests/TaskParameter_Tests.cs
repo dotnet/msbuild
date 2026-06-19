@@ -515,6 +515,38 @@ namespace Microsoft.Build.UnitTests
             (t2.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13896
+        /// ToString() on the marshaled task item must return the item-spec (matching every other
+        /// ITaskItem implementation), not the .NET type name. In -mt mode (and out-of-proc TaskHost)
+        /// task outputs come back as TaskParameterTaskItem; tasks that consume them may call ToString()
+        /// expecting the spec. Without the override they would get
+        /// "Microsoft.Build.BackEnd.TaskParameter+TaskParameterTaskItem" instead.
+        /// </summary>
+        [Fact]
+        public void ITaskItemParameter_ToStringReturnsItemSpec()
+        {
+            TaskParameter t = new TaskParameter(new TaskItem("some/path/foo.dll"));
+
+            ITaskItem wrapped = t.WrappedParameter as ITaskItem;
+            wrapped.ShouldNotBeNull();
+            wrapped.ToString().ShouldBe("some/path/foo.dll");
+
+            // The spec is returned in its escaped form, matching ProjectItemInstance.TaskItem.ToString().
+            ITaskItem wrappedEscaped = new TaskParameter(new TaskItem("foo%3bbar")).WrappedParameter as ITaskItem;
+            wrappedEscaped.ShouldNotBeNull();
+            wrappedEscaped.ToString().ShouldBe("foo%3bbar");
+            wrappedEscaped.ItemSpec.ShouldBe("foo;bar");
+
+            // The spec survives serialization (the TaskHost / -mt marshaling boundary).
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            ITaskItem wrapped2 = t2.WrappedParameter as ITaskItem;
+            wrapped2.ShouldNotBeNull();
+            wrapped2.ToString().ShouldBe("some/path/foo.dll");
+        }
+
 #if FEATURE_APPDOMAIN
         private sealed class RemoteTaskItemFactory : MarshalByRefObject
         {
