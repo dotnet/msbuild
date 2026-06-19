@@ -91,6 +91,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
+    # GitHub's default step shell is `bash --noprofile --norc -e -o pipefail`.
+    # The implicit -e (errexit) aborts a step on the FIRST non-zero command
+    # (e.g. a grep that finds no match), which breaks both the smoke-test gate
+    # and the "collect the trace even if the build fails" design. Drop -e at the
+    # job level; the steps that DO want fail-fast (Install, Resolve) opt back in
+    # with their own `set -e`, while the trace-collecting steps keep it off.
+    defaults:
+      run:
+        shell: bash --noprofile --norc -o pipefail {0}
+
     env:
       TRACE_PATHS_RAW: ${{ inputs.tracePaths || 'artifacts/bin/Microsoft.Build.Framework' }}
       BUILD_CONFIG: ${{ inputs.configuration || 'Debug' }}
@@ -214,7 +224,7 @@ jobs:
             if grep -q 'nametype=DELETE' <<<"$OUT"; then
               AUDIT_OK=true
               echo "Process(es) attributed to the smoke delete:"
-              grep -oE '(comm|exe)="[^"]+"' <<<"$OUT" | sort -u
+              grep -oE '(comm|exe)=("[^"]*"|[^[:space:]]+)' <<<"$OUT" | sort -u
             fi
             sudo auditctl -d always,exit -F dir="$SMOKE_DIR" -F perm=wa -k fssmoke 2>/dev/null || true
           else
@@ -410,7 +420,7 @@ jobs:
               echo
               echo "Distinct processes that touched the watched paths (count comm/exe):"
               echo "------------------------------------------------------------------"
-              grep -oE '(comm|exe)="[^"]+"' "$AUDIT_INTERPRETED" | sort | uniq -c | sort -rn
+              grep -oE '(comm|exe)=("[^"]*"|[^[:space:]]+)' "$AUDIT_INTERPRETED" | sort | uniq -c | sort -rn
               echo
               echo "Syscalls observed:"
               echo "------------------"
