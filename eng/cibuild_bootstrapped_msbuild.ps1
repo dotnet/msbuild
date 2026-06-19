@@ -89,10 +89,7 @@ try {
     $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
 
     # Read the resolved BootstrapSdkVersion (which is Max(hardcoded floor, NETCoreSdkVersion))
-    # from the MSBuild.Bootstrap project itself. This is the same project that drove the
-    # stage1 bootstrap layout, so the value here matches the on-disk sdk\<version> directory.
-    # User properties are forwarded so that explicit /p:BootstrapSdkVersion=... overrides
-    # used during stage1 are honored.
+    # from the MSBuild.Bootstrap project itself.
     $bootstrapCsproj = Join-Path $RepoRoot "src\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj"
     $bootstrapSdkVersion = & $dotnetExePath msbuild $bootstrapCsproj "-getProperty:BootstrapSdkVersion" -nologo @properties
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($bootstrapSdkVersion)) {

@@ -68,10 +68,8 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  # Read the resolved BootstrapSdkVersion (Max(hardcoded floor, NETCoreSdkVersion))
-  # from the same project that drove the stage1 bootstrap layout, so the value here
-  # matches the on-disk sdk/<version> directory. User properties are forwarded so
-  # /p:BootstrapSdkVersion=... overrides used during stage1 are honored.
+  # Read the resolved BootstrapSdkVersion (which is Max(hardcoded floor, NETCoreSdkVersion))
+  # from the MSBuild.Bootstrap project itself.
   bootstrap_csproj="$RepoRoot/src/MSBuild.Bootstrap/MSBuild.Bootstrap.csproj"
   if ! sdk_version_raw=$("$_InitializeDotNetCli/dotnet" msbuild "$bootstrap_csproj" -getProperty:BootstrapSdkVersion -nologo $properties 2>&1); then
     echo "ERROR: Failed to invoke 'dotnet msbuild -getProperty:BootstrapSdkVersion' on $bootstrap_csproj:" >&2

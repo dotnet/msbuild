@@ -16,9 +16,6 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     /// <summary>
     /// Tests for the <c>VerifyBootstrapRuntimeFloor</c> target in <c>eng/BootStrapMsBuild.targets</c>.
-    /// The target guards against laying down a bootstrap whose .NET runtime is older than the runtime
-    /// delivered by the SDK building this repository: build outputs embed that runtime version, so an
-    /// older bootstrap runtime causes host-resolution failures.
     /// </summary>
     public sealed class BootstrapRuntimeFloor_Tests
     {
