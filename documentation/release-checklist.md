@@ -229,7 +229,7 @@ Steps are **mostly parallel** unless noted.
     git push upstream v{{THIS_RELEASE_EXACT_VERSION}}
     ```
   - [ ] **5.3d** Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate.
-- [ ] **5.4** Update `BootstrapSdkVersion` in [`eng/Versions.props`](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props) if a fresh SDK was released. Check https://dotnet.microsoft.com/download/visual-studio-sdks — always verify the details for the targeted .NET version.
+- [ ] **5.4** Update `BootstrapSdkVersionFloor` in [`eng/Versions.props`](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props) only to pin an SDK newer than `global.json`'s `tools.dotnet` (5.4b); the effective bootstrap SDK is `Max(BootstrapSdkVersionFloor, tools.dotnet)`, so a normal SDK bump flows through 5.4b alone. Check https://dotnet.microsoft.com/download/visual-studio-sdks.
 - [ ] **5.4b** Update `tools.dotnet` in [`global.json`](https://github.com/dotnet/msbuild/blob/main/global.json) to the latest released SDK in the targeted band.
 - [ ] **5.5** Verify the overall subscription map across **every still-supported branch** — each `vsXX.Y` branch has an Arcade subscription matching its targeted .NET band, and each supported branch's outbound subscriptions land in the right downstream (e.g. SDK band, VMR). \
 - [ ] **5.6** Review this tracking issue for any process deviations. If the process changed, create a PR to update `documentation/release-checklist.md` with the improvements.

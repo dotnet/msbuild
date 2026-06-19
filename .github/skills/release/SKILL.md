@@ -116,7 +116,7 @@ When asked to execute a specific phase:
 | [`documentation/release.md`](../../../documentation/release.md) | Process description: final branding, public API, major version steps |
 | [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc whose release-cycle updates may require a Learn page sync |
 | [MSBuild Change Waves Learn page](https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio) | Public docs target to update/track during Phase 5 docs work |
-| [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
+| [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersionFloor` |
 | [`.config/git-merge-flow-config.jsonc`](../../../.config/git-merge-flow-config.jsonc) | Branch merge chain — update each release |
 | [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
