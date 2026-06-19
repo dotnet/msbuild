@@ -247,7 +247,7 @@
        Guarantee the acquired bootstrap is never built around a .NET runtime older than the
        one the SDK building this repository delivers. Build outputs (e.g. apphosts and
        runtimeconfig.json) embed that runtime version, so a bootstrap carrying an older
-       runtime fails host resolution ("You must install or update .NET to run this application").
+       runtime can fail host resolution ("You must install or update .NET to run this application").
 
        BootstrapSdkVersion selects the SDK we acquire (see AcquireSdk), but the runtime is
        whatever that SDK happens to bundle. Because SDK feature bands are serviced
@@ -256,9 +256,17 @@
        actually got laid down, comparing it to $(BundledNETCoreAppPackageVersion) - the runtime
        the resolving SDK delivers.
 
-       Note: [MSBuild]::VersionGreaterThanOrEquals compares only the numeric version components
-       and ignores any SemVer prerelease suffix, so two different previews of the same numeric
-       version compare equal. This matches the comparison used to derive BootstrapSdkVersion. -->
+       Known limitations (acceptable for a fail-safe backstop; the happy path, where the floor
+       equals global.json's SDK, never trips them):
+         * The check compares the full numeric version, which is stricter than host
+           roll-forward: a same-minor but older *patch* (e.g. bootstrap 10.0.3 vs delivered
+           10.0.8) actually rolls forward and runs, yet is still flagged here. We prefer to
+           fail loudly rather than risk shipping an unrunnable bootstrap.
+         * [MSBuild]::VersionGreaterThanOrEquals compares only numeric components and ignores
+           any SemVer prerelease suffix, so two different previews of the same numeric version
+           compare equal. Like the Max override in eng/BootStrapMsBuild.props, this guard does
+           not catch drift between two previews of the same numeric version. Bootstrap SDKs are
+           stable in practice. -->
   <Target Name="VerifyBootstrapRuntimeFloor"
           AfterTargets="AcquireSdk"
           Condition="!$(TargetFramework.StartsWith('net4')) and '$(BundledNETCoreAppPackageVersion)' != ''">
@@ -269,13 +277,18 @@
 
     <ItemGroup Condition="Exists('$(_BootstrapSharedRuntimeRoot)')">
       <_BootstrapRuntimeDir Include="$([System.IO.Directory]::GetDirectories('$(_BootstrapSharedRuntimeRoot)'))" />
-      <_BootstrapRuntimeVersion Include="@(_BootstrapRuntimeDir->'%(Filename)%(Extension)')" />
+      <_BootstrapRuntimeLeaf Include="@(_BootstrapRuntimeDir->'%(Filename)%(Extension)')" />
+      <!-- Keep only version-like directory names: a stray non-version directory (should never
+           happen, as dotnet-install only lays down version folders here) would otherwise make
+           [MSBuild]::VersionGreaterThanOrEquals throw and fail the build cryptically. -->
+      <_BootstrapRuntimeVersion Include="@(_BootstrapRuntimeLeaf)"
+                                Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)', '^[0-9]+\.[0-9]+'))" />
       <_BootstrapRuntimeAtLeastFloor Include="@(_BootstrapRuntimeVersion)"
-                                     Condition="$([MSBuild]::VersionGreaterThanOrEquals('%(Identity)', '$(BundledNETCoreAppPackageVersion)'))" />
+                                     Condition="'%(Identity)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('%(Identity)', '$(BundledNETCoreAppPackageVersion)'))" />
     </ItemGroup>
 
     <Error Condition="'@(_BootstrapRuntimeVersion)' != '' and '@(_BootstrapRuntimeAtLeastFloor)' == ''"
-           Text="The bootstrap SDK '$(BootstrapSdkVersion)' delivers .NET runtime(s) '@(_BootstrapRuntimeVersion)', which are older than the runtime '$(BundledNETCoreAppPackageVersion)' delivered by the SDK building this repository. Outputs produced here embed the newer runtime version and will fail host resolution when run under the bootstrap. Choose a BootstrapSdkVersion whose bundled runtime is at least '$(BundledNETCoreAppPackageVersion)'." />
+           Text="The bootstrap SDK '$(BootstrapSdkVersion)' delivers .NET runtime(s) '@(_BootstrapRuntimeVersion)', which are older than the runtime '$(BundledNETCoreAppPackageVersion)' delivered by the SDK building this repository. Outputs produced here embed the SDK's runtime version, so running them under the bootstrap can fail host resolution ('You must install or update .NET to run this application'). Choose a BootstrapSdkVersion whose bundled runtime is at least '$(BundledNETCoreAppPackageVersion)'." />
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">

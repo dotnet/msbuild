@@ -47,7 +47,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void Fails_WhenBootstrapRuntimeOlderThanFloor()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            string artifactsBinDir = CreateBootstrapWithRuntimes(env, "10.0.3");
+            string artifactsBinDir = CreateBootstrapWithRuntimes(env, "9.7.2");
 
             bool success = RunGuard(artifactsBinDir, "10.0.8", out MockLogger logger);
 
@@ -55,9 +55,28 @@ namespace Microsoft.Build.Engine.UnitTests
             BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
 
             // The message is hardcoded (not localized), so asserting on the embedded versions is locale-safe.
+            // "9.7.2" is deliberately not a substring of the SDK version (10.0.300) or the floor (10.0.8),
+            // so this proves the detected-runtime list actually renders into the message.
             string message = error.Message ?? string.Empty;
-            message.ShouldContain("10.0.3");
+            message.ShouldContain("9.7.2");
             message.ShouldContain("10.0.8");
+        }
+
+        [Fact]
+        public void Fails_WhenAllPresentRuntimesAreOlderThanFloor()
+        {
+            // Multiple older runtimes: a single error should list them all (validates the plural,
+            // ';'-joined @(_BootstrapRuntimeVersion) rendering in the message).
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string artifactsBinDir = CreateBootstrapWithRuntimes(env, "9.0.5", "9.7.2");
+
+            bool success = RunGuard(artifactsBinDir, "10.0.8", out MockLogger logger);
+
+            success.ShouldBeFalse();
+            BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
+            string message = error.Message ?? string.Empty;
+            message.ShouldContain("9.0.5");
+            message.ShouldContain("9.7.2");
         }
 
         [Fact]
@@ -89,10 +108,56 @@ namespace Microsoft.Build.Engine.UnitTests
             logger.Errors.ShouldBeEmpty();
         }
 
+        [Fact]
+        public void Passes_WhenFloorIsUnknown()
+        {
+            // On SDKs/configs where BundledNETCoreAppPackageVersion is unset, the guard has no floor
+            // to compare against and must no-op - even when an older runtime is present.
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string artifactsBinDir = CreateBootstrapWithRuntimes(env, "9.0.0");
+
+            bool success = RunGuard(artifactsBinDir, bundledRuntime: string.Empty, out MockLogger logger);
+
+            success.ShouldBeTrue();
+            logger.Errors.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void Passes_WhenSharedRuntimeRootIsEmpty()
+        {
+            // The shared-framework folder exists but no runtime was laid down yet: distinct from the
+            // absent-folder path, and must also no-op rather than false-positive.
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string artifactsBinDir = CreateBootstrapWithRuntimes(env);
+
+            bool success = RunGuard(artifactsBinDir, "10.0.8", out MockLogger logger);
+
+            success.ShouldBeTrue();
+            logger.Errors.ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void Passes_WhenOnlyNonVersionDirectoriesPresent()
+        {
+            // A stray non-version directory must be ignored, not fed into the version comparison
+            // (which would otherwise throw and fail the build cryptically).
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string artifactsBinDir = CreateBootstrapWithRuntimes(env, "host");
+
+            bool success = RunGuard(artifactsBinDir, "10.0.8", out MockLogger logger);
+
+            success.ShouldBeTrue();
+            logger.Errors.ShouldBeEmpty();
+        }
+
         private static string CreateBootstrapWithRuntimes(TestEnvironment env, params string[] runtimeVersions)
         {
             string artifactsBinDir = env.CreateFolder().Path;
             string sharedRoot = Path.Combine(artifactsBinDir, "bootstrap", "core", "shared", "Microsoft.NETCore.App");
+
+            // Always create the shared-framework root so callers can exercise the "root exists but is
+            // empty" path by passing no versions.
+            Directory.CreateDirectory(sharedRoot);
             foreach (string version in runtimeVersions)
             {
                 Directory.CreateDirectory(Path.Combine(sharedRoot, version));
