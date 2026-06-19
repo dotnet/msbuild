@@ -6,8 +6,9 @@
 # therefore stops producing any pass/fail signal.
 #
 # This pipeline runs ONLY the quarantined tests (RunQuarantinedTests=true flips the filter to
-# --filter-trait Category=failing) on a schedule, so we keep collecting fresh data on quarantined
-# tests. A quarantined test that has become consistently green across these runs is a candidate to
+# --filter-trait Category=failing) on `main`'s rolling (batched) builds and once a day on a schedule,
+# so we keep collecting fresh data on quarantined tests as main moves (and even during quiet periods).
+# A quarantined test that has become consistently green across these runs is a candidate to
 # un-quarantine; one that still fails intermittently should stay quarantined.
 #
 # The build is intentionally NOT failed by quarantined-test outcomes: when RunQuarantinedTests=true,
@@ -22,18 +23,31 @@
 # [ActiveIssue("...", TestPlatforms.Linux)]) are re-validated on that platform. The Windows leg
 # covers .NET Framework (net472) and .NET; the Linux/macOS legs cover .NET only (matching CI).
 
-# Only run on a schedule (and manual queue); never on PRs or CI pushes.
-trigger: none
-pr: none
-
-schedules:
-- cron: "0 8,20 * * *"
-  displayName: Twice-daily quarantined-test re-validation
+# Runs on `main`'s rolling (batched) builds -- each batch of commits to main produces one quarantine
+# run, so the quarantined-test pass/fail signal tracks main as it moves. It ALSO runs once a day on a
+# schedule, so quiet periods with no commits to main still get a fresh data point. Plus pull requests
+# targeting `main` (so a fix PR's effect on the quarantined tests is validated on the PR itself), and
+# manual queue. Consumers that aggregate this data treat rolling and scheduled `main` runs the same
+# (reasons batchedCI/individualCI/schedule), so the mix of triggers is transparent to them.
+trigger:
+  batch: true
   branches:
     include:
     - main
-  # Run even when there have been no commits since the last scheduled run -- the set of quarantined
-  # tests changes rarely, but we still want a fresh data point twice a day.
+
+pr:
+  branches:
+    include:
+    - main
+
+schedules:
+- cron: "0 8 * * *"
+  displayName: Daily quarantined-test re-validation
+  branches:
+    include:
+    - main
+  # Run even when there have been no commits since the last scheduled run -- during quiet periods
+  # there are no rolling builds, and we still want at least one fresh data point per day.
   always: true
 
 variables:
