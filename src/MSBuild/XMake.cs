@@ -3273,7 +3273,7 @@ namespace Microsoft.Build.CommandLine
                 || NativeMethodsShared.IsWindows
                 || string.IsNullOrEmpty(projectFile)
                 || Path.IsPathRooted(projectFile)
-                || projectFile.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains(".."))
+                || ContainsParentTraversalSegment(projectFile))
             {
                 // Bail on ".." segments: lexical normalization can escape the shared physical prefix,
                 // so the logical and physical resolutions can end up pointing at different files.
@@ -3295,7 +3295,36 @@ namespace Microsoft.Build.CommandLine
                 return projectFile;
             }
 
-            return Path.GetFullPath(Path.Combine(logicalCurrentDirectory, projectFile));
+            string rebasedProjectFile = Path.GetFullPath(Path.Combine(logicalCurrentDirectory, projectFile));
+
+            // This runs during command-line parsing before any build logger exists, so we cannot emit a
+            // build message. Trace it via comm tracing (MSBUILDDEBUGCOMM) so the rebase is visible when
+            // diagnosing path discrepancies, including MSBuild Server scenarios where the decision is
+            // made client-side. The interpolated handler is a no-op unless comm tracing is enabled.
+            CommunicationsUtilities.Trace($"ResolveProjectPathAgainstLogicalCurrentDirectory: rebased '{projectFile}' to '{rebasedProjectFile}' via $PWD='{logicalCurrentDirectory}'.");
+
+            return rebasedProjectFile;
+        }
+
+        /// <summary>
+        /// Returns true if any path segment is exactly "..", without allocating.
+        /// </summary>
+        private static bool ContainsParentTraversalSegment(ReadOnlySpan<char> path)
+        {
+            // Walk each segment; return true only for a segment that is exactly "..".
+            while (!path.IsEmpty)
+            {
+                int sep = path.IndexOfAny(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                ReadOnlySpan<char> segment = sep < 0 ? path : path.Slice(0, sep);
+                if (segment.SequenceEqual("..".AsSpan()))
+                {
+                    return true;
+                }
+
+                path = sep < 0 ? default : path.Slice(sep + 1);
+            }
+
+            return false;
         }
 
         private static void ValidateExtensions(string[] projectExtensionsToIgnore)

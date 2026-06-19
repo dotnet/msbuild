@@ -1986,6 +1986,42 @@ namespace Microsoft.Build.UnitTests
                 .ShouldBe(relativeProjectPath);
         }
 
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryWithStalePwdReturnsUnchanged()
+        {
+            string root = _env.CreateFolder().Path;
+            string currentDirectory = Path.Combine(root, "current");
+            string stalePwdDirectory = Path.Combine(root, "elsewhere");
+            Directory.CreateDirectory(currentDirectory);
+            Directory.CreateDirectory(stalePwdDirectory);
+
+            // PWD points at a real directory that is not the current working directory, so it is stale.
+            _env.SetCurrentDirectory(currentDirectory);
+            _env.SetEnvironmentVariable("PWD", stalePwdDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryWithParentTraversalReturnsUnchanged()
+        {
+            string currentDirectory = _env.CreateFolder().Path;
+
+            // PWD matches the current working directory, so the only guard that fires is the ".." segment check.
+            _env.SetCurrentDirectory(currentDirectory);
+            _env.SetEnvironmentVariable("PWD", currentDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("..", "sibling", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
+        }
+
         /// <summary>
         /// Test the case where we remove all of the project extensions that exist in the directory
         /// </summary>
