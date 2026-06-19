@@ -41,12 +41,12 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(GrantActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
-            ?.SetTag(ProcessIdTag, grant.ProcessId)
-            ?.SetTag(NodesRequestedTag, grant.RequestedNodes)
-            ?.SetTag(NodesGrantedTag, grant.GrantedNodes)
-            ?.SetTag(QueueDepthTag, queueDepth)
-            ?.SetTag(ActiveBuildsTag, activeBuilds)
-            ?.SetTag(AllocatedNodesTag, allocatedNodes);
+            .SetTag(ProcessIdTag, grant.ProcessId)
+            .SetTag(NodesRequestedTag, grant.RequestedNodes)
+            .SetTag(NodesGrantedTag, grant.GrantedNodes)
+            .SetTag(QueueDepthTag, queueDepth)
+            .SetTag(ActiveBuildsTag, activeBuilds)
+            .SetTag(AllocatedNodesTag, allocatedNodes);
     }
 
     /// <summary>
@@ -56,9 +56,9 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(DeferredActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
-            ?.SetTag(ProcessIdTag, grant.ProcessId)
-            ?.SetTag(NodesRequestedTag, grant.RequestedNodes)
-            ?.SetTag(QueueDepthTag, queueDepth);
+            .SetTag(ProcessIdTag, grant.ProcessId)
+            .SetTag(NodesRequestedTag, grant.RequestedNodes)
+            .SetTag(QueueDepthTag, queueDepth);
     }
 
     /// <summary>
@@ -68,11 +68,11 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(DeferredGrantFulfilledActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
-            ?.SetTag(ProcessIdTag, grant.ProcessId)
-            ?.SetTag(NodesGrantedTag, grant.GrantedNodes)
-            ?.SetTag(QueueDepthTag, queueDepth)
-            ?.SetTag(ActiveBuildsTag, activeBuilds)
-            ?.SetTag(AllocatedNodesTag, allocatedNodes);
+            .SetTag(ProcessIdTag, grant.ProcessId)
+            .SetTag(NodesGrantedTag, grant.GrantedNodes)
+            .SetTag(QueueDepthTag, queueDepth)
+            .SetTag(ActiveBuildsTag, activeBuilds)
+            .SetTag(AllocatedNodesTag, allocatedNodes);
     }
 
     /// <summary>
@@ -82,10 +82,10 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(ReleasedActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
-            ?.SetTag(ProcessIdTag, grant.ProcessId)
-            ?.SetTag(NodesReleasedTag, grant.GrantedNodes)
-            ?.SetTag(QueueDepthTag, queueDepth)
-            ?.SetTag(ActiveBuildsTag, activeBuilds)
-            ?.SetTag(AllocatedNodesTag, allocatedNodes);
+            .SetTag(ProcessIdTag, grant.ProcessId)
+            .SetTag(NodesReleasedTag, grant.GrantedNodes)
+            .SetTag(QueueDepthTag, queueDepth)
+            .SetTag(ActiveBuildsTag, activeBuilds)
+            .SetTag(AllocatedNodesTag, allocatedNodes);
     }
 }

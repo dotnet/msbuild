@@ -70,9 +70,21 @@ Example inline comment anchored to `src/Tasks/SignFile.cs:65`:
 > Log.LogErrorWithCodeFromResources("MSB3484", signingTargetPath.OriginalValue);
 > ```
 
-### Step 4 — Verify the test actually pins the migration
+### Step 4 — Verify test coverage for the migration
 
-For every test added/modified in the PR:
+**First, determine whether the migration is "attribute-only" or "substantive":**
+
+- **Attribute-only**: The PR adds `[MSBuildMultiThreadableTask]` + `IMultiThreadableTask` + the `TaskEnvironment` property, but `TaskEnvironment` is never read or passed anywhere in the task's call chain. The task has no CWD-sensitive leaves (Step 2 came back clean).
+- **Substantive**: `TaskEnvironment` is actively used — passed to helpers, used to absolutize paths, injected into `ProcessStartInfo`, etc. The call-chain audit (Steps 1–2) found at least one leaf where the migration matters.
+
+**If attribute-only and the call-chain audit is clean**: tests are not required. State "n/a (attribute-only, audit clean)" in the Test verdict footer. Do not flag.
+
+**If substantive**: the PR **must** include at least one test that would fail if the `TaskEnvironment` plumbing were reverted to `TaskEnvironment.Fallback`. If no such test exists, flag as MAJOR:
+
+> **MAJOR — Missing MT-specific test coverage**
+> The migration is substantive (TaskEnvironment flows through CWD-sensitive paths: <name the chain>), but no test in this PR would fail if `TaskEnvironment` were reverted to `Fallback`. Add a test using Pattern A (decoy-CWD) or Pattern B (cross-instance ProjectDirectory divergence) from the migration skill.
+
+**For every test that IS present** in the PR (added or modified):
 
 1. **Mentally revert the production change.** Would the test still pass?
 2. If yes → the test is theater. MAJOR finding.
@@ -120,7 +132,7 @@ Do not duplicate inline findings in the summary. Do not produce a "Blocking / Ma
 - Re-explain the migration steps. Author has read the skill.
 - Re-run the 24-dimension review — that's the expert reviewer's job.
 - Suggest stylistic refactors unrelated to MT safety.
-- Demand concurrency tests for attribute-only migrations whose call-chain audit comes back clean. (A clean audit is the evidence.)
+- Demand concurrency tests for attribute-only migrations whose call-chain audit comes back clean. (A clean audit is the evidence.) However, substantive migrations (where `TaskEnvironment` flows through CWD-sensitive paths) **do** require a test — see Step 4.
 - Demand "what if a future caller…" defensive code when no current caller triggers the hazard. Note as MINOR at most.
 
 ---
