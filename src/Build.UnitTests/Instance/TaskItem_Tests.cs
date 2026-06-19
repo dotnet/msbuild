@@ -393,12 +393,23 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IEnumerable<KeyValuePair<string, string>> result = ((IMetadataContainer)item).EnumerateMetadata();
 
-            // The result must NOT be a compiler-generated yield-return state machine. Those box
-            // a copy of the source ImmutableDictionary.Enumerator into a heap field, and that
-            // copy's pooled traversal stack outlives the call frame in ways that have been
-            // observed to interact with logger serialization and produce ObjectDisposedException.
-            result.GetType().FullName.ShouldNotContain("<EnumerateMetadata", Case.Sensitive);
-            // And the no-custom-metadata case must allocation-free (or near-so).
+            // Type-level invariant: result must be a materialized array, not a compiler-generated
+            // yield-return state machine that parks a copy of the ImmutableDictionary.Enumerator
+            // struct across yield boundaries.
+            result.ShouldBeOfType<KeyValuePair<string, string>[]>();
+
+            // Behavioural invariant: the snapshot must not observe later mutations of the item.
+            // A streaming iterator would re-enumerate _directMetadata on iteration, exposing
+            // mutations made after EnumerateMetadata returned.
+            item.SetMetadata("a", "changed-after-snapshot");
+            item.SetMetadata("c", "added-after-snapshot");
+            result.ShouldBe(new[]
+            {
+                new KeyValuePair<string, string>("a", "1"),
+                new KeyValuePair<string, string>("b", "2"),
+            }, ignoreOrder: true);
+
+            // No-custom-metadata case short-circuits to Array.Empty<>.
             ProjectItemInstance.TaskItem empty = new("bar", "test.proj");
             ((IMetadataContainer)empty).EnumerateMetadata().ShouldBeEmpty();
         }

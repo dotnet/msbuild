@@ -360,7 +360,19 @@ namespace Microsoft.Build.UnitTests
 
             IEnumerable<KeyValuePair<string, string>> result = ((IMetadataContainer)item).EnumerateMetadata();
 
-            result.GetType().FullName.ShouldNotContain("<EnumerateMetadata", Case.Sensitive);
+            // Type-level invariant: result must be a materialized array, not a compiler-generated
+            // yield-return state machine that parks a copy of the ImmutableDictionary.Enumerator
+            // struct across yield boundaries.
+            result.ShouldBeOfType<KeyValuePair<string, string>[]>();
+
+            // Behavioural invariant: the snapshot must not observe later mutations of the item.
+            item.SetMetadata("a", "changed-after-snapshot");
+            item.SetMetadata("c", "added-after-snapshot");
+            result.ShouldBe(new[]
+            {
+                new KeyValuePair<string, string>("a", "1"),
+                new KeyValuePair<string, string>("b", "2"),
+            }, ignoreOrder: true);
 
             TaskItem empty = new TaskItem("bar");
             ((IMetadataContainer)empty).EnumerateMetadata().ShouldBeEmpty();
