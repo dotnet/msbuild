@@ -640,7 +640,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Returns the item-spec, matching other <see cref="ITaskItem"/> implementations.
+            /// Returns the escaped item-spec (evaluated include), matching engine task items.
             /// </summary>
             public override string ToString() => _escapedItemSpec;
 
