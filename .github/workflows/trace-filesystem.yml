@@ -1,272 +1,483 @@
-name: Strace Filesystem Tracing
+name: Filesystem Tracing (who deleted my file?)
 
-# Linux-only diagnostic workflow that captures every filesystem-mutating
-# syscall produced by the MSBuild build, then post-filters the trace to a
-# small target folder under the repository. The filtered trace is uploaded
-# as a workflow artifact so it can be downloaded and inspected to attribute
-# file operations (open, write, unlink, rename, truncate, ...) to specific
-# process IDs - i.e. "which process deleted/rewrote my file?".
+# Linux-only, ONE-TIME DIAGNOSTIC workflow (this is NOT production CI).
 #
-# Why we do NOT use `strace -P <dir>`:
-#   `-P` is an EXACT path filter. It does NOT recurse into subdirectories,
-#   and it does not always match relative-path syscalls after a process
-#   `chdir()`s into the target. Tracing the full build and post-filtering
-#   the output with `grep` gives true subtree semantics at the cost of a
-#   larger intermediate trace file (which we delete before uploading).
+# Goal: a file under a build output directory is sporadically deleted and
+# re-created by *some* process - we suspect it is not MSBuild itself - which
+# later breaks a Copy. This workflow watches a caller-supplied list of
+# directories and records, for every destructive filesystem operation in
+# those directories, *which process* did it (command, executable, pid).
 #
-# Why we include explicit write/close/truncate syscalls in addition to
-# `%file`:
-#   `-e trace=%file` only covers syscalls that take a *path* as an argument
-#   (openat, unlink, rename, stat, ...). It does NOT include writes through
-#   a previously-opened file descriptor. With `-yy` strace decorates fds
-#   with their backing path so `grep` can still attribute those events to
-#   our target folder.
+# ---------------------------------------------------------------------------
+# Mechanism and agent compatibility (read this before porting elsewhere)
+# ---------------------------------------------------------------------------
+# PRIMARY: the Linux kernel audit subsystem (auditd) with a recursive
+# directory watch per target folder:
 #
-# strace adds noticeable per-syscall overhead (~2-10x slowdown on
-# syscall-heavy workloads), so this workflow is `workflow_dispatch` only -
-# it is not part of regular PR/CI validation.
+#     auditctl -a always,exit -F dir=<abs-dir> -F perm=wa -k <key>
+#
+# Why auditd rather than wrapping the build in `strace`:
+#   * System-wide -> sees EVERY process, so a deleter that is NOT a child of
+#     the build (a daemon, scanner, server, another pipeline step) is still
+#     caught. This matches the "we think it is not msbuild" hypothesis.
+#   * Names the culprit: each event carries pid + comm + exe + uid, and PATH
+#     records are tagged nametype=DELETE / CREATE.
+#   * Efficient: the rule only fires for operations INSIDE the watched subtree
+#     (and `perm=wa` fires once per create/delete/rename, NOT per write()), so
+#     the build runs at essentially normal speed.
+#   * Multiple directories: one rule per directory - pass a list.
+#   * Absolute paths regardless of chdir (auditd resolves the inode).
+#
+# FALLBACK: auditd needs CAP_AUDIT_CONTROL, which is NOT available inside
+# unprivileged containers (Docker/Helix/k8s) and may be restricted on some
+# managed agents. The smoke test below detects this; if auditd cannot record
+# a delete, the workflow automatically falls back to wrapping the build in a
+# narrowed `strace` (it still names processes, but only sees build CHILD
+# processes - an external deleter would be missed). GitHub-hosted ubuntu
+# runners are full VMs where auditd normally works, so the verification run
+# uses the primary path. `straceBuild: true` forces the strace path on top of
+# auditd for extra syscall-level detail.
+#
+# IMPORTANT inode caveat: a directory watch is bound to the directory's inode
+# at the time the rule is added. If the watched directory itself is deleted
+# and recreated (e.g. a clean target `rm -rf`s the output dir), the new dir
+# has a new inode and the watch goes stale - you then silently see NOTHING.
+# Therefore watch the most stable ANCESTOR that still scopes things tightly
+# (the default below watches the project output root, not the per-TFM leaf).
+# If even that can be recreated, re-arm the rules or watch one level higher.
+#
+# Other options if auditd is blocked and you cannot use a VM agent: `fatrace`
+# (fanotify, also needs root), or a `bpftrace` one-liner on
+# tracepoint:syscalls:sys_enter_unlinkat (needs CAP_BPF). `inotify`
+# (inotifywait) works unprivileged but CANNOT report the pid, so it cannot
+# answer "which process".
 
 on:
   workflow_dispatch:
     inputs:
-      tracePath:
-        description: 'Repo-relative path to filter the trace to (absolute path is derived from $GITHUB_WORKSPACE).'
+      tracePaths:
+        description: 'Directories to watch (repo-relative or absolute). Separate multiple with newlines, commas or semicolons. Prefer a STABLE ancestor dir (see inode caveat in the file header).'
         required: false
-        default: 'artifacts/bin/Microsoft.Build.Framework/Debug/net10.0'
+        default: 'artifacts/bin/Microsoft.Build.Framework'
       configuration:
         description: 'Build configuration (Debug or Release).'
         required: false
         default: 'Debug'
       projects:
-        description: 'Optional --projects argument to scope the build (e.g. src/Framework/Microsoft.Build.Framework.csproj).'
+        description: 'Optional --projects argument to scope the build (e.g. src/Framework/Microsoft.Build.Framework.csproj). Empty = full solution.'
         required: false
         default: 'src/Framework/Microsoft.Build.Framework.csproj'
-  # `pull_request` lets the workflow run on a PR (so an artifact is produced
-  # without needing to merge to main). On this trigger `inputs.*` is null, so
-  # the env vars below use `|| 'default'` to fall back to the same defaults
-  # advertised in the workflow_dispatch UI.
-  #
-  # Tighten later (e.g. add a `paths:` filter to only run when the trace
-  # workflow itself or src/Framework changes) once the workflow is verified.
+      straceBuild:
+        description: 'Also wrap the build under a narrowed strace (adds build-child syscall detail; auditd already runs).'
+        required: false
+        type: boolean
+        default: false
+  # `pull_request` lets the workflow produce an artifact on a PR without
+  # merging. `paths` keeps it from running on unrelated PRs - it only triggers
+  # when this workflow file itself changes. On this trigger `inputs.*` is null,
+  # so the env vars below fall back to the same defaults via `|| 'default'`.
   pull_request:
     branches:
       - main
+    paths:
+      - '.github/workflows/trace-filesystem.yml'
 
 permissions:
   contents: read
 
 jobs:
   trace-build:
-    name: Trace MSBuild filesystem operations
+    name: Trace filesystem operations on watched directories
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 90
 
     env:
-      TRACE_REL_PATH: ${{ inputs.tracePath || 'artifacts/bin/Microsoft.Build.Framework/Debug/net10.0' }}
+      TRACE_PATHS_RAW: ${{ inputs.tracePaths || 'artifacts/bin/Microsoft.Build.Framework' }}
       BUILD_CONFIG: ${{ inputs.configuration || 'Debug' }}
       BUILD_PROJECTS: ${{ inputs.projects || 'src/Framework/Microsoft.Build.Framework.csproj' }}
-      STRACE_FULL_LOG: ${{ github.workspace }}/artifacts/strace/build-trace-full.log
-      STRACE_FILTERED_LOG: ${{ github.workspace }}/artifacts/strace/build-trace.log
-      STRACE_SUMMARY: ${{ github.workspace }}/artifacts/strace/build-trace-summary.txt
+      STRACE_BUILD: ${{ inputs.straceBuild || 'false' }}
+      AUDIT_KEY: msbuildfstrace
+      OUT_DIR: ${{ github.workspace }}/artifacts/fs-trace
+      PATHS_FILE: ${{ github.workspace }}/artifacts/fs-trace/trace-paths.txt
+      AUDIT_RAW: ${{ github.workspace }}/artifacts/fs-trace/audit-raw.log
+      AUDIT_INTERPRETED: ${{ github.workspace }}/artifacts/fs-trace/audit-interpreted.log
+      SUMMARY: ${{ github.workspace }}/artifacts/fs-trace/summary.txt
+      STRACE_FULL_LOG: ${{ github.workspace }}/artifacts/fs-trace/strace-full.log
+      STRACE_FILTERED: ${{ github.workspace }}/artifacts/fs-trace/strace-filtered.log
+      STRACE_EXECVE: ${{ github.workspace }}/artifacts/fs-trace/strace-execve-map.txt
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install strace and build prerequisites
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y strace libxml2
-
-      - name: strace smoke test
-        # Verify the capture-then-grep approach actually records subtree
-        # operations before we sink 20+ minutes into a full build.
+      - name: Install strace and auditd
         run: |
           set -euo pipefail
-          SMOKE_DIR=/tmp/strace-smoke
-          SMOKE_LOG=/tmp/strace-smoke.log
-          rm -rf "$SMOKE_DIR" "$SMOKE_LOG"
-          mkdir -p "$SMOKE_DIR"
-          strace \
-            -f -tt -yy \
-            -e trace=%file,write,close \
-            -o "$SMOKE_LOG" \
-            bash -c '
-              mkdir -p /tmp/strace-smoke/target
-              echo hello > /tmp/strace-smoke/target/sample.txt
-              cat /tmp/strace-smoke/target/sample.txt > /dev/null
-              rm /tmp/strace-smoke/target/sample.txt
-            '
-          if ! grep -qF "$SMOKE_DIR/target" "$SMOKE_LOG"; then
-            echo "::error::strace smoke test failed - no events captured for $SMOKE_DIR/target"
-            tail -200 "$SMOKE_LOG"
+          sudo apt-get update
+          # strace is the fallback tracer and must be present.
+          sudo apt-get install -y strace
+          # auditd is the primary tracer; if it cannot be installed we still
+          # run via the strace fallback, so do not hard-fail here.
+          sudo apt-get install -y auditd \
+            || echo "::warning::auditd package install failed; the strace fallback will be used."
+          # auditd must be running for events to reach /var/log/audit/audit.log.
+          # Direct systemctl start is unsupported on some images, so try
+          # `service` first, then systemctl, then the daemon directly.
+          sudo service auditd start 2>/dev/null \
+            || sudo systemctl start auditd 2>/dev/null \
+            || sudo auditd 2>/dev/null \
+            || true
+          sudo auditctl -e 1 2>/dev/null || true
+          echo "auditd status:"
+          sudo auditctl -s 2>/dev/null || true
+          strace --version 2>&1 | head -1 || true
+
+      - name: Resolve trace paths and build args
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR"
+          : > "$PATHS_FILE"
+          # Split the caller-supplied list on newlines, commas and semicolons.
+          while IFS= read -r line; do
+            # trim leading/trailing whitespace
+            p="${line#"${line%%[![:space:]]*}"}"
+            p="${p%"${p##*[![:space:]]}"}"
+            [ -z "$p" ] && continue
+            case "$p" in
+              /*) abs="$p" ;;
+              *)  abs="$GITHUB_WORKSPACE/$p" ;;
+            esac
+            # The watch needs the directory to exist; the real culprit folder
+            # normally already does, but pre-create so the verification run has
+            # something to watch even before the build populates it.
+            mkdir -p "$abs"
+            echo "$abs" >> "$PATHS_FILE"
+          done < <(printf '%s\n' "$TRACE_PATHS_RAW" | tr ',;' '\n')
+          # De-duplicate: a repeated directory would make `auditctl -a` reject
+          # the second (identical) rule and could abort the configure step.
+          sort -u -o "$PATHS_FILE" "$PATHS_FILE"
+          if [ ! -s "$PATHS_FILE" ]; then
+            echo "::error::No trace paths resolved from input: $TRACE_PATHS_RAW"
             exit 1
           fi
-          echo "Smoke test captured the following events:"
-          # `grep -m 10` stops grep itself after 10 matches, avoiding the
-          # SIGPIPE-under-pipefail trap of `grep ... | head -10`.
-          grep -F -m 10 "$SMOKE_DIR/target" "$SMOKE_LOG"
-          rm -rf "$SMOKE_DIR" "$SMOKE_LOG"
+          echo "Watching these directories (recursive subtree):"
+          sed 's/^/  /' "$PATHS_FILE"
+          # Arcade's Build.proj lives in the NuGet cache and resolves $(Projects)
+          # relative to that directory, not the repo root - make it absolute.
+          # Use the heredoc form for the env write so a stray newline in the
+          # value cannot inject extra environment variables.
+          if [ -n "${BUILD_PROJECTS:-}" ]; then
+            case "$BUILD_PROJECTS" in
+              /*) abs_proj="$BUILD_PROJECTS" ;;
+              *)  abs_proj="$GITHUB_WORKSPACE/$BUILD_PROJECTS" ;;
+            esac
+            echo "Scoping build to: $abs_proj"
+          else
+            abs_proj=""
+            echo "Building full solution."
+          fi
+          {
+            echo "BUILD_PROJECTS_ABS<<__EOF__"
+            echo "$abs_proj"
+            echo "__EOF__"
+          } >> "$GITHUB_ENV"
+
+      - name: auditd smoke test (decide audit vs strace fallback)
+        # Confirm the kernel audit subsystem actually records a delete and
+        # attributes it to a process on THIS runner. If it cannot (e.g. a
+        # container without CAP_AUDIT_CONTROL, or the audit netlink already
+        # owned by another consumer), set AUDIT_OK=false and let the build run
+        # under the strace fallback instead of failing the whole job.
+        run: |
+          set -uo pipefail
+          SMOKE_DIR=/tmp/fstrace-smoke
+          AUDIT_OK=false
+          sudo auditctl -d always,exit -F dir="$SMOKE_DIR" -F perm=wa -k fssmoke 2>/dev/null || true
+          rm -rf "$SMOKE_DIR"; mkdir -p "$SMOKE_DIR"
+          if sudo auditctl -a always,exit -F dir="$SMOKE_DIR" -F perm=wa -k fssmoke 2>/tmp/smoke-add.err; then
+            echo "hello" > "$SMOKE_DIR/sample.txt"
+            rm -f "$SMOKE_DIR/sample.txt"
+            # auditd flushes asynchronously, so retry briefly. Use --input-logs
+            # so ausearch reads the audit log FILES and never the step's stdin:
+            # GitHub may attach a step's stdin as a pipe, and ausearch reads
+            # stdin when it is a FIFO - which would make it read empty input and
+            # falsely report auditd as unavailable, silently disabling the
+            # primary path even on a VM runner where auditd works.
+            OUT=""
+            for _ in 1 2 3 4 5; do
+              sleep 1
+              OUT="$(sudo ausearch --input-logs -k fssmoke -i 2>/dev/null || true)"
+              grep -q 'nametype=DELETE' <<<"$OUT" && break
+            done
+            echo "Interpreted smoke events:"
+            echo "$OUT"
+            if grep -q 'nametype=DELETE' <<<"$OUT"; then
+              AUDIT_OK=true
+              echo "Process(es) attributed to the smoke delete:"
+              grep -oE '(comm|exe)="[^"]+"' <<<"$OUT" | sort -u
+            fi
+            sudo auditctl -d always,exit -F dir="$SMOKE_DIR" -F perm=wa -k fssmoke 2>/dev/null || true
+          else
+            echo "auditctl rule-add failed:"
+            cat /tmp/smoke-add.err 2>/dev/null || true
+          fi
+          rm -rf "$SMOKE_DIR"
+          echo "Audit status:"
+          sudo auditctl -s 2>/dev/null || true
+          echo "AUDIT_OK=$AUDIT_OK" >> "$GITHUB_ENV"
+          if [ "$AUDIT_OK" = "true" ]; then
+            echo "auditd works here - using system-wide audit watches (primary path)."
+          else
+            echo "::warning::auditd cannot attribute deletes on this runner. Falling back to strace, which only sees build CHILD processes. On a container agent this is expected (no CAP_AUDIT_CONTROL) - run on a VM agent for system-wide attribution."
+          fi
+
+      - name: Configure audit watches
+        if: env.AUDIT_OK == 'true'
+        run: |
+          set -uo pipefail
+          # Set a generous backlog / no rate limit so we don't drop events under
+          # a busy build. We deliberately do NOT bulk-delete here: `auditctl -D`
+          # wipes EVERY rule on the host (it ignores -k), which is unsafe when
+          # this is ported onto a shared/persistent agent. We add our rules below
+          # and remove exactly those with surgical `-d` at collection time.
+          sudo auditctl -b 65536 2>/dev/null || true   # large backlog so we don't drop events
+          sudo auditctl -r 0 2>/dev/null || true        # no rate limit
+          while IFS= read -r p; do
+            [ -z "$p" ] && continue
+            sudo auditctl -a always,exit -F dir="$p" -F perm=wa -k "$AUDIT_KEY" \
+              && echo "watch added (recursive subtree): $p" \
+              || echo "::warning::could not add audit watch for $p"
+          done < "$PATHS_FILE"
+          echo "Active audit rules:"
+          sudo auditctl -l || true
+          echo "Audit status:"
+          sudo auditctl -s 2>/dev/null || true
 
       - name: Restore (untraced)
-        # Restore is dominated by NuGet network/disk I/O that never touches
-        # our trace folder. Running it without strace cuts the overall job
-        # time in half without losing any signal in the filtered trace.
-        run: ./eng/common/build.sh --restore --configuration "$BUILD_CONFIG"
-
-      - name: Build under strace
-        id: trace
         run: |
           set -uo pipefail
-          mkdir -p "$(dirname "$STRACE_FULL_LOG")"
-          echo "Writing full strace output to: $STRACE_FULL_LOG"
-          BUILD_ARGS=(--build --configuration "$BUILD_CONFIG" --nodeReuse false)
-          if [[ -n "${BUILD_PROJECTS:-}" ]]; then
-            # Arcade's Build.proj lives in the NuGet cache, and the
-            # ProjectToBuild items it generates from $(Projects) resolve
-            # relative paths against the Build.proj directory (the cache),
-            # not the repo root. Make the path absolute so any caller-
-            # supplied path - relative or absolute - works.
-            if [[ "$BUILD_PROJECTS" != /* ]]; then
-              BUILD_PROJECTS_ABS="$GITHUB_WORKSPACE/$BUILD_PROJECTS"
-            else
-              BUILD_PROJECTS_ABS="$BUILD_PROJECTS"
-            fi
-            BUILD_ARGS+=(--projects "$BUILD_PROJECTS_ABS")
-            echo "Scoping build to: $BUILD_PROJECTS_ABS"
+          # Scope restore to the same project we build so we do not restore the
+          # whole repo just to build one project. Restoring a single project
+          # still restores its closure and bootstraps the Arcade toolset.
+          if [ -n "${BUILD_PROJECTS_ABS:-}" ]; then
+            ./eng/common/build.sh --restore --configuration "$BUILD_CONFIG" --projects "$BUILD_PROJECTS_ABS"
           else
-            echo "Building full solution (no --projects scoping)."
+            ./eng/common/build.sh --restore --configuration "$BUILD_CONFIG"
           fi
-          set +e
-          strace \
-            -f -tt -yy \
-            -e trace=%file,write,writev,pwrite64,close,ftruncate,copy_file_range \
-            -o "$STRACE_FULL_LOG" \
+
+      - name: Build
+        id: build
+        run: |
+          set -uo pipefail
+          # Use strace if explicitly requested OR as the automatic fallback
+          # when auditd is unavailable.
+          USE_STRACE=false
+          if [ "$STRACE_BUILD" = "true" ] || [ "${AUDIT_OK:-false}" != "true" ]; then
+            USE_STRACE=true
+          fi
+          # --warnAsError false: Arcade defaults warnings-to-errors on; without
+          # this a stray warning would fail the build BEFORE the watched Copy
+          # runs, producing a misleading empty trace.
+          BUILD_ARGS=(--build --configuration "$BUILD_CONFIG" --nodeReuse false --warnAsError false)
+          if [ -n "${BUILD_PROJECTS_ABS:-}" ]; then
+            BUILD_ARGS+=(--projects "$BUILD_PROJECTS_ABS")
+          fi
+          # Disabling the shared Roslyn compiler only matters for the strace
+          # process-tree path (so the assembly writer is a build child rather
+          # than a pre-existing VBCSCompiler). auditd is system-wide and would
+          # attribute a VBCSCompiler write fine, so do not pay this cost on the
+          # normal auditd-only run.
+          if [ "$USE_STRACE" = "true" ]; then
+            BUILD_ARGS+=(/p:UseSharedCompilation=false)
+          fi
+          rc=0
+          if [ "$USE_STRACE" = "true" ]; then
+            mkdir -p "$(dirname "$STRACE_FULL_LOG")"
+            DECODE=""
+            # strace >= 6.0 can annotate each pid with its command name.
+            if strace --help 2>&1 | grep -q -- '--decode-pids'; then
+              DECODE="--decode-pids=comm"
+            fi
+            if [ "$STRACE_BUILD" = "true" ]; then
+              echo "Running build under narrowed strace (opt-in, in addition to auditd if available)."
+            else
+              echo "::warning::auditd unavailable - running build under strace fallback (sees build CHILD processes only)."
+            fi
+            strace -f -tt -y $DECODE \
+              -e trace=unlink,unlinkat,rename,renameat,renameat2,openat,creat,truncate,ftruncate,execve \
+              -o "$STRACE_FULL_LOG" \
+              ./eng/common/build.sh "${BUILD_ARGS[@]}"
+            rc=$?
+          else
+            echo "Running build normally; auditd captures filesystem events out-of-band."
             ./eng/common/build.sh "${BUILD_ARGS[@]}"
-          build_rc=$?
-          set -e
-          echo "build_rc=$build_rc" >> "$GITHUB_OUTPUT"
-          echo "Build exit code: $build_rc"
-          if [[ -f "$STRACE_FULL_LOG" ]]; then
-            echo "Full trace size: $(du -h "$STRACE_FULL_LOG" | cut -f1)"
+            rc=$?
           fi
+          echo "build_rc=$rc" >> "$GITHUB_OUTPUT"
+          echo "Build exit code: $rc"
 
-      - name: Filter trace to target path
+      - name: Collect audit results
+        if: always() && env.AUDIT_OK == 'true'
+        run: |
+          set -uo pipefail
+          mkdir -p "$OUT_DIR"
+          sleep 2   # let auditd flush the tail of the build to disk
+          # `lost` in the status means the backlog overflowed and events were
+          # dropped - watch it if results look incomplete.
+          echo "Audit status at collection time:"
+          sudo auditctl -s 2>/dev/null || true
+          echo "Active rules at collection time:"
+          sudo auditctl -l || true
+          # --input-logs reads rotated audit.log.N too, in case a high-volume
+          # build rotated the log mid-run. Redirections run as the (non-root)
+          # runner user, so the output files are readable by later steps.
+          sudo ausearch --input-logs -k "$AUDIT_KEY" 2>/dev/null > "$AUDIT_RAW" || true
+          sudo ausearch --input-logs -k "$AUDIT_KEY" -i 2>/dev/null > "$AUDIT_INTERPRETED" || true
+          # Surgically remove exactly the rules we added. `auditctl -D` would
+          # wipe ALL host rules (it ignores -k), so delete each rule by its
+          # fields instead - safe to run on a shared/persistent agent.
+          while IFS= read -r p; do
+            [ -z "$p" ] && continue
+            sudo auditctl -d always,exit -F dir="$p" -F perm=wa -k "$AUDIT_KEY" 2>/dev/null || true
+          done < "$PATHS_FILE"
+          echo "Raw audit records: $(wc -l < "$AUDIT_RAW" 2>/dev/null || echo 0) lines"
+
+      - name: Summarize (who touched the watched paths)
         if: always()
         run: |
           set -uo pipefail
-          TRACE_DIR_ABS="$GITHUB_WORKSPACE/$TRACE_REL_PATH"
-          TRACE_REL="$TRACE_REL_PATH"
-          echo "Filtering trace to:"
-          echo "  absolute: $TRACE_DIR_ABS"
-          echo "  relative: $TRACE_REL"
-          if [[ ! -s "$STRACE_FULL_LOG" ]]; then
-            echo "No full trace produced - skipping filter."
-            : > "$STRACE_FILTERED_LOG"
-            exit 0
-          fi
-          # `grep -F` keeps every line that mentions the target path -
-          # this covers both path-arg syscalls (openat, unlink, rename, ...)
-          # and fd-arg syscalls decorated by `-yy` (write, close, ...).
-          # We match three forms because MSBuild/dotnet tools sometimes pass
-          # a path relative to the repo root after `chdir()` into it:
-          #   1. absolute repo-rooted path
-          #   2. repo-relative path (e.g. `artifacts/bin/...`)
-          #   3. ./-prefixed repo-relative path
-          grep -F \
-            -e "$TRACE_DIR_ABS" \
-            -e "\"$TRACE_REL" \
-            -e "\"./$TRACE_REL" \
-            "$STRACE_FULL_LOG" > "$STRACE_FILTERED_LOG" || true
-          echo "Filtered trace size: $(du -h "$STRACE_FILTERED_LOG" | cut -f1)"
-          echo "Filtered trace lines: $(wc -l < "$STRACE_FILTERED_LOG")"
-
-      - name: Summarize trace
-        if: always()
-        run: |
-          # Disable `-e` for the summary so a single failing grep/awk
-          # doesn't abort the whole step before we get to upload.
-          set +e
-          set -uo pipefail
-          TRACE_DIR_ABS="$GITHUB_WORKSPACE/$TRACE_REL_PATH"
-          TRACE_REL="$TRACE_REL_PATH"
           {
-            echo "Strace filesystem trace summary"
-            echo "==============================="
-            echo "Trace path (absolute): $TRACE_DIR_ABS"
-            echo "Trace path (relative): $TRACE_REL"
-            echo "Build config:          $BUILD_CONFIG"
-            echo "Build projects:        ${BUILD_PROJECTS:-<full solution>}"
-            if [[ -s "$STRACE_FILTERED_LOG" ]]; then
-              echo "Filtered size:         $(du -h "$STRACE_FILTERED_LOG" | cut -f1)"
-              echo "Filtered lines:        $(wc -l < "$STRACE_FILTERED_LOG")"
-              echo
-              echo "Distinct PIDs that touched the path:"
-              # Use `sed -nE` instead of awk's 3-arg `match(str, regex, arr)`
-              # form, which is a gawk extension - Ubuntu's default `/usr/bin/awk`
-              # is mawk and silently drops the capture array. `-f` makes strace
-              # prefix every line with the PID, either as a bare leading number
-              # or as `[pid NNN]`.
-              sed -nE \
-                -e 's/^\[pid[[:space:]]+([0-9]+)\].*/\1/p' \
-                -e 's/^([0-9]+)[[:space:]].*/\1/p' \
-                "$STRACE_FILTERED_LOG" | sort -u
-              echo
-              echo "Top 30 syscalls by frequency:"
-              # `awk 'NR<=30'` consumes the full input from `sort -rn` instead
-              # of closing the pipe early (which would SIGPIPE upstream `sort`
-              # and trip pipefail).
-              grep -oE '[a-z_][a-z_0-9]*\(' "$STRACE_FILTERED_LOG" \
-                | tr -d '(' \
-                | sort | uniq -c | sort -rn \
-                | awk 'NR<=30'
-              echo
-              echo "Files mentioned in the filtered trace (up to 50):"
-              # Use awk's index() so we don't have to regex-escape TRACE_DIR_ABS
-              # (which contains '.' and '/' that would otherwise be regex
-              # metacharacters in grep -oE).
-              awk -v dir="$TRACE_DIR_ABS" '
-                {
-                  i = index($0, dir)
-                  if (i > 0) {
-                    rest = substr($0, i)
-                    sub(/[\"<>) ].*/, "", rest)
-                    print rest
+            echo "Filesystem trace summary"
+            echo "========================"
+            echo "Watched directories:"
+            sed 's/^/  /' "$PATHS_FILE" 2>/dev/null || echo "  <none>"
+            echo "Build config:   $BUILD_CONFIG"
+            echo "Build projects: ${BUILD_PROJECTS:-<full solution>}"
+            echo "auditd usable:  ${AUDIT_OK:-false}"
+            echo "strace build:   $STRACE_BUILD"
+            echo
+            echo "NOTE: a directory watch is inode-pinned. If a watched directory"
+            echo "is itself deleted and recreated, the watch goes stale and"
+            echo "subsequent events are missed - watch a stable ancestor dir."
+            echo
+            if [ "${AUDIT_OK:-false}" != "true" ]; then
+              echo "auditd was NOT usable on this runner - used the strace fallback"
+              echo "(build child processes only). See the strace section below and"
+              echo "strace-filtered.log.gz in the artifact."
+            elif [ ! -s "$AUDIT_INTERPRETED" ]; then
+              echo "(no audit events recorded for the watched paths)"
+            else
+              echo "Destructive events (DELETE / CREATE) with attributed process:"
+              echo "------------------------------------------------------------"
+              # mawk-safe: no gawk-only 3-arg match(). Each audit event is a
+              # block terminated by a `----` line; we gather the SYSCALL fields
+              # (comm/exe/pid/syscall/cwd) and every PATH record tagged
+              # nametype=DELETE/CREATE, then print one attributed line per path
+              # (relative names resolved against cwd; cwd/comm/exe handled both
+              # quoted and unquoted across auditd versions).
+              awk '
+                function emit(arr, n, kind,   i, nm) {
+                  for (i = 0; i < n; i++) {
+                    nm = arr[i]
+                    if (nm !~ /^\//) nm = cwd "/" nm
+                    printf "  %-7s %s\n           by comm=%s exe=%s pid=%s syscall=%s\n", kind, nm, comm, exe, pid, syscall
                   }
                 }
-              ' "$STRACE_FILTERED_LOG" | sort -u | awk 'NR<=50'
-            else
-              echo "(no events recorded for this path)"
+                function reset() { comm="?"; exe="?"; pid="?"; syscall="?"; cwd="."; dn=0; cn=0; have=0 }
+                BEGIN { reset() }
+                /^----/ { if (have) { emit(dn_name, dn, "DELETE"); emit(cn_name, cn, "CREATE") } reset(); next }
+                {
+                  have=1
+                  if (match($0, /syscall=[a-z0-9_]+/))  syscall=substr($0,RSTART+8,RLENGTH-8)
+                  if (match($0, / pid=[0-9]+/))         pid=substr($0,RSTART+5,RLENGTH-5)
+                  if (match($0, /comm="[^"]+"/))        comm=substr($0,RSTART+6,RLENGTH-7)
+                  else if (match($0, /comm=[^ ]+/))     comm=substr($0,RSTART+5,RLENGTH-5)
+                  if (match($0, /exe="[^"]+"/))         exe=substr($0,RSTART+5,RLENGTH-6)
+                  else if (match($0, /exe=[^ ]+/))      exe=substr($0,RSTART+4,RLENGTH-4)
+                  if (match($0, /cwd="[^"]+"/))         cwd=substr($0,RSTART+5,RLENGTH-6)
+                  else if (match($0, /cwd=[^ ]+/))      cwd=substr($0,RSTART+4,RLENGTH-4)
+                  if ($0 ~ /nametype=DELETE/) {
+                    if (match($0, /name="[^"]*"/))      { dn_name[dn++]=substr($0,RSTART+6,RLENGTH-7) }
+                    else if (match($0, /name=[^ ]+/))   { dn_name[dn++]=substr($0,RSTART+5,RLENGTH-5) }
+                  }
+                  if ($0 ~ /nametype=CREATE/) {
+                    if (match($0, /name="[^"]*"/))      { cn_name[cn++]=substr($0,RSTART+6,RLENGTH-7) }
+                    else if (match($0, /name=[^ ]+/))   { cn_name[cn++]=substr($0,RSTART+5,RLENGTH-5) }
+                  }
+                }
+                END { if (have) { emit(dn_name, dn, "DELETE"); emit(cn_name, cn, "CREATE") } }
+              ' "$AUDIT_INTERPRETED"
+              echo
+              echo "Distinct processes that touched the watched paths (count comm/exe):"
+              echo "------------------------------------------------------------------"
+              grep -oE '(comm|exe)="[^"]+"' "$AUDIT_INTERPRETED" | sort | uniq -c | sort -rn
+              echo
+              echo "Syscalls observed:"
+              echo "------------------"
+              grep -oE 'syscall=[a-z0-9_]+' "$AUDIT_INTERPRETED" | sort | uniq -c | sort -rn
             fi
-          } | tee "$STRACE_SUMMARY"
+          } | tee "$SUMMARY"
 
-      - name: Prepare artifact directory
+      - name: Filter and summarize strace (if a strace log exists)
         if: always()
         run: |
           set -uo pipefail
-          ARTIFACT_DIR="$GITHUB_WORKSPACE/artifacts/strace"
-          if [[ -f "$STRACE_FILTERED_LOG" ]]; then
-            gzip -9 -f "$STRACE_FILTERED_LOG" || true
+          if [ ! -s "$STRACE_FULL_LOG" ]; then
+            echo "No strace log (strace path not taken)."
+            exit 0
           fi
-          # Full trace can be multi-GB; do not upload by default.
+          # Keep every line mentioning a watched path - absolute form (covers
+          # `-y` fd-decorated writes) plus repo-relative and ./-relative forms.
+          PATTERNS=()
+          while IFS= read -r p; do
+            [ -z "$p" ] && continue
+            rel="${p#"$GITHUB_WORKSPACE"/}"
+            PATTERNS+=(-e "$p" -e "\"$rel" -e "\"./$rel")
+          done < "$PATHS_FILE"
+          if [ "${#PATTERNS[@]}" -gt 0 ]; then
+            grep -F "${PATTERNS[@]}" "$STRACE_FULL_LOG" > "$STRACE_FILTERED" || true
+          fi
+          # PID -> argv map from execve lines so filtered pids can be named even
+          # when --decode-pids is unavailable.
+          grep -E 'execve\(' "$STRACE_FULL_LOG" > "$STRACE_EXECVE" || true
+          echo "Filtered strace lines: $(wc -l < "$STRACE_FILTERED" 2>/dev/null || echo 0)"
+          {
+            echo
+            echo "strace (build children only) - distinct pid tags touching watched paths:"
+            echo "------------------------------------------------------------------------"
+            # Match `[pid N]`, `[pid N <comm>]` and `--decode-pids=comm` forms.
+            grep -oE '\[pid [0-9]+[^]]*\]' "$STRACE_FILTERED" 2>/dev/null | sort -u || echo "  <none>"
+          } >> "$SUMMARY"
+          gzip -9 -f "$STRACE_FILTERED" 2>/dev/null || true
+          # The full trace can be large and contains the whole build's syscalls;
+          # keep only the execve map and the filtered slice.
           rm -f "$STRACE_FULL_LOG"
-          ls -lh "$ARTIFACT_DIR" || true
 
-      - name: Upload strace artifact
+      - name: Prepare artifact
+        if: always()
+        run: |
+          set -uo pipefail
+          [ -f "$AUDIT_RAW" ] && gzip -9 -f "$AUDIT_RAW" || true
+          [ -f "$AUDIT_INTERPRETED" ] && gzip -9 -f "$AUDIT_INTERPRETED" || true
+          echo "Artifact contents:"
+          ls -lh "$OUT_DIR" || true
+
+      - name: Upload trace artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: msbuild-strace-trace
-          path: artifacts/strace/
+          name: msbuild-fs-trace
+          path: artifacts/fs-trace/
           retention-days: 14
           if-no-files-found: warn
 
       - name: Re-emit build status
         if: always()
+        env:
+          BUILD_RC: ${{ steps.build.outputs.build_rc }}
         run: |
-          rc='${{ steps.trace.outputs.build_rc }}'
-          if [[ -z "$rc" || "$rc" == "0" ]]; then
+          if [ -z "${BUILD_RC:-}" ] || [ "$BUILD_RC" = "0" ]; then
             exit 0
           fi
-          echo "::error::Build failed under strace (exit code: $rc)"
-          exit "$rc"
+          echo "::error::Build failed (exit code: $BUILD_RC). Trace artifact was still uploaded."
+          exit "$BUILD_RC"
