@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared.FileSystem;
@@ -60,6 +61,8 @@ internal partial class Expander<P, I>
         /// </summary>
         public PropertiesUseTracker PropertiesUseTracker { get; set; }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2072:UnrecognizedReflectionPattern",
+            Justification = "The receiver type stored in ReceiverType is a property-function receiver, restricted to the curated AvailableStaticMethods allowlist (whose members are preserved for trimming) or to a property value of an allowlist type; the DynamicallyAccessedMembers requirement of the Function constructor is satisfied for those preserved types.")]
         internal readonly Function Build()
         {
             return new Function(
