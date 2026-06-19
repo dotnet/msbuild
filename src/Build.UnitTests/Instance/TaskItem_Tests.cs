@@ -373,5 +373,34 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             logger.AssertLogContains("i1%2ai2");
         }
+
+        /// <summary>
+        /// Regression test for the ObjectDisposedException race rooted in returning a
+        /// `yield return` iterator from EnumerateMetadata over an ImmutableDictionary.
+        /// See dotnet/runtime#92290 and the EnumerateMetadataEager rationale comment.
+        ///
+        /// The intent of the fix is that callers always receive a materialized snapshot
+        /// (an array), never a compiler-generated state-machine iterator that parks a
+        /// copy of the ImmutableDictionary.Enumerator struct across yield boundaries.
+        /// Asserting on the runtime type makes a future revert of the fix observable.
+        /// </summary>
+        [Fact]
+        public void EnumerateMetadata_ReturnsMaterializedSnapshot_NotYieldIterator()
+        {
+            ProjectItemInstance.TaskItem item = new("foo", "test.proj");
+            item.SetMetadata("a", "1");
+            item.SetMetadata("b", "2");
+
+            IEnumerable<KeyValuePair<string, string>> result = ((IMetadataContainer)item).EnumerateMetadata();
+
+            // The result must NOT be a compiler-generated yield-return state machine. Those box
+            // a copy of the source ImmutableDictionary.Enumerator into a heap field, and that
+            // copy's pooled traversal stack outlives the call frame in ways that have been
+            // observed to interact with logger serialization and produce ObjectDisposedException.
+            result.GetType().FullName.ShouldNotContain("<EnumerateMetadata", Case.Sensitive);
+            // And the no-custom-metadata case must allocation-free (or near-so).
+            ProjectItemInstance.TaskItem empty = new("bar", "test.proj");
+            ((IMetadataContainer)empty).EnumerateMetadata().ShouldBeEmpty();
+        }
     }
 }

@@ -1117,27 +1117,7 @@ namespace Microsoft.Build.Execution
                 // If we have item definitions, call the expensive property that does the right thing.
                 // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
                 var list = _itemDefinitions != null ? MetadataCollection : DirectMetadata;
-                if (list != null)
-                {
-#if FEATURE_APPDOMAIN
-                    // Can't send a yield-return iterator across AppDomain boundaries
-                    if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
-                    {
-                        return EnumerateMetadataEager(list);
-                    }
-#endif
-                    // Mainline scenario: materialize a snapshot eagerly. A streaming iterator
-                    // would let pooled ImmutableDictionary.Enumerator state escape the call,
-                    // and consumers (e.g. BuildEventArgsWriter from the logger thread) can
-                    // race with the producing thread on the shared SecurePooledObject slot,
-                    // producing ObjectDisposedException mid-MoveNext. See the comment in
-                    // EnumerateMetadata(ImmutableDictionary) below for the full mechanism.
-                    return EnumerateMetadata(list);
-                }
-                else
-                {
-                    return [];
-                }
+                return list != null ? EnumerateMetadataEager(list) : [];
             }
 
             /// <summary>
@@ -1195,51 +1175,25 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-#if FEATURE_APPDOMAIN
             /// <summary>
-            /// Used to return metadata from another AppDomain. Can't use yield return because the
-            /// generated state machine is not marked as [Serializable], so we need to allocate.
+            /// Materialize the metadata snapshot eagerly into a heap-allocated array.
             /// </summary>
+            /// <remarks>
+            /// Used historically only on the AppDomain-crossing path because a yield-iterator
+            /// state machine is not [Serializable]. Now used unconditionally to avoid letting
+            /// a copy of the pooled <see cref="ImmutableDictionary{TKey,TValue}.Enumerator"/>
+            /// struct escape the call frame inside a compiler-generated iterator. That state
+            /// machine has a complex lifetime that has been observed to interact with logger
+            /// serialization to produce ObjectDisposedException in
+            /// <see cref="Microsoft.Build.Logging.BuildEventArgsWriter"/>, surfacing as
+            /// MSB4166 "Child node exited prematurely" — see dotnet/runtime#92290. Eager
+            /// materialization removes the entire class of issues by returning a regular
+            /// array that has no relationship to the BCL enumerator pool.
+            /// </remarks>
             /// <param name="list">The source list to return metadata from.</param>
             /// <returns>An array of string key-value pairs representing metadata.</returns>
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager(ImmutableDictionary<string, string> list)
             {
-                var result = new List<KeyValuePair<string, string>>(list.Count);
-
-                foreach (KeyValuePair<string, string> projectMetadataInstance in list)
-                {
-                    result.Add(new KeyValuePair<string, string>(projectMetadataInstance.Key, EscapingUtilities.UnescapeAll(projectMetadataInstance.Value)));
-                }
-
-                // Probably better to send the raw array across the wire even if it's another allocation.
-                return result.ToArray();
-            }
-#endif
-
-            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(ImmutableDictionary<string, string> list)
-            {
-                // Materialize the metadata snapshot eagerly into a heap-allocated array rather
-                // than yielding from a state-machine iterator.
-                //
-                // Why: ImmutableDictionary<K,V>.Enumerator is a struct whose traversal stack is
-                // rented from a process-wide SecureObjectPool, and the pool uses struct-copy
-                // semantics — every copy of the Enumerator shares the same pooled Stack and the
-                // first copy to be Dispose()'d returns the slot to the pool. Any other live copy
-                // then throws ObjectDisposedException on its next MoveNext call (see
-                // SortedInt32KeyNode.Enumerator.ThrowIfDisposed in System.Collections.Immutable).
-                //
-                // The previous `foreach (...) { yield return ...; }` form parked an Enumerator
-                // copy inside the compiler-generated state machine across yield points. When
-                // the binary logger serialized the same item from a parallel logger sink (or
-                // when MSBuild's parallel build released the project state while the logger
-                // thread was still mid-iteration), the parked struct's pool slot was reclaimed
-                // and a subsequent MoveNext crashed in BuildEventArgsWriter.Write(ITaskItem),
-                // failing the whole build with MSB4166 / "Child node exited prematurely".
-                // See dotnet/runtime#92290 for the long-standing umbrella tracking this.
-                //
-                // Materializing here keeps the entire enumeration of `list` inside a single
-                // stack frame on the caller's thread; the returned array carries no reference
-                // to a pooled enumerator and is safe to walk on any thread.
                 int count = list.Count;
                 if (count == 0)
                 {

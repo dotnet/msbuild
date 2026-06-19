@@ -342,6 +342,30 @@ namespace Microsoft.Build.UnitTests
             Assert.True(actualMetadata.SequenceEqual(expectedMetadata));
         }
 
+        /// <summary>
+        /// Regression test for the ObjectDisposedException race rooted in returning a
+        /// `yield return` iterator from EnumerateMetadata over an ImmutableDictionary.
+        /// See dotnet/runtime#92290.
+        ///
+        /// EnumerateMetadata must return a materialized snapshot (an array), not a
+        /// compiler-generated state-machine iterator that parks a copy of the
+        /// ImmutableDictionary.Enumerator struct (and its pooled traversal stack)
+        /// across yield boundaries.
+        /// </summary>
+        [Fact]
+        public void EnumerateMetadata_ReturnsMaterializedSnapshot_NotYieldIterator()
+        {
+            TaskItem item = new TaskItem("foo");
+            ((IMetadataContainer)item).ImportMetadata(new Dictionary<string, string> { { "a", "1" }, { "b", "2" } });
+
+            IEnumerable<KeyValuePair<string, string>> result = ((IMetadataContainer)item).EnumerateMetadata();
+
+            result.GetType().FullName.ShouldNotContain("<EnumerateMetadata", Case.Sensitive);
+
+            TaskItem empty = new TaskItem("bar");
+            ((IMetadataContainer)empty).EnumerateMetadata().ShouldBeEmpty();
+        }
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Test that task items can be successfully constructed based on a task item from another appdomain.
