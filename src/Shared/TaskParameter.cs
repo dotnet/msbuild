@@ -640,10 +640,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Returns the item-spec, matching the behavior of other <see cref="ITaskItem"/> implementations.
-            /// Tasks that receive this item (e.g. when task parameters are marshaled in -mt mode or to an
-            /// out-of-proc TaskHost) may call ToString() expecting the item-spec; without this override they
-            /// would get the .NET type name instead. See https://github.com/dotnet/msbuild/issues/13896.
+            /// Returns the item-spec, matching other <see cref="ITaskItem"/> implementations.
             /// </summary>
             public override string ToString() => _escapedItemSpec;
 

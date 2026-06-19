@@ -534,6 +534,7 @@ namespace Microsoft.Build.UnitTests
 
             // The spec is returned in its escaped form, matching ProjectItemInstance.TaskItem.ToString().
             ITaskItem wrappedEscaped = new TaskParameter(new TaskItem("foo%3bbar")).WrappedParameter as ITaskItem;
+            wrappedEscaped.ShouldNotBeNull();
             wrappedEscaped.ToString().ShouldBe("foo%3bbar");
             wrappedEscaped.ItemSpec.ShouldBe("foo;bar");
 
