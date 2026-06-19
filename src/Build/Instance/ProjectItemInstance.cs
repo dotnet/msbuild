@@ -1215,10 +1215,37 @@ namespace Microsoft.Build.Execution
 
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(ImmutableDictionary<string, string> list)
             {
+                // Materialize the metadata snapshot eagerly into a heap-allocated array rather
+                // than yielding from a state-machine iterator.
+                //
+                // Why: ImmutableDictionary<K,V>.Enumerator is a struct whose traversal stack is
+                // rented from a process-wide SecureObjectPool, and the pool uses struct-copy
+                // semantics — every copy of the Enumerator shares the same pooled Stack and the
+                // first copy to be Dispose()'d returns the slot to the pool. Any other live copy
+                // then throws ObjectDisposedException on its next MoveNext call (see
+                // SortedInt32KeyNode.Enumerator.ThrowIfDisposed in System.Collections.Immutable).
+                //
+                // The previous `foreach (...) { yield return ...; }` form parked an Enumerator
+                // copy inside the compiler-generated state machine across yield points. When
+                // the binary logger serialized the same item from a parallel logger sink (or
+                // when MSBuild's parallel build released the project state while the logger
+                // thread was still mid-iteration), the parked struct's pool slot was reclaimed
+                // and a subsequent MoveNext crashed in BuildEventArgsWriter.Write(ITaskItem),
+                // failing the whole build with MSB4166 / "Child node exited prematurely".
+                // See dotnet/runtime#92290 for the long-standing umbrella tracking this.
+                //
+                // Materializing here keeps the entire enumeration of `list` inside a single
+                // stack frame on the caller's thread; the returned array carries no reference
+                // to a pooled enumerator and is safe to walk on any thread.
+                var snapshot = new KeyValuePair<string, string>[list.Count];
+                int i = 0;
                 foreach (KeyValuePair<string, string> projectMetadataInstance in list)
                 {
-                    yield return new KeyValuePair<string, string>(projectMetadataInstance.Key, EscapingUtilities.UnescapeAll(projectMetadataInstance.Value));
+                    snapshot[i++] = new KeyValuePair<string, string>(
+                        projectMetadataInstance.Key,
+                        EscapingUtilities.UnescapeAll(projectMetadataInstance.Value));
                 }
+                return snapshot;
             }
 
             /// <summary>
