@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -29,11 +30,13 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal static MSBuildNameIgnoreCaseComparer Default { get; } = new MSBuildNameIgnoreCaseComparer();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(string x, string y)
         {
             return Equals(x, y, 0, y?.Length ?? 0);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetHashCode(string obj)
         {
             return GetHashCode(obj, 0, obj?.Length ?? 0);
