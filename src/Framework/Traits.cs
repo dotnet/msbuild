@@ -176,6 +176,20 @@ namespace Microsoft.Build.Framework
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
 
         /// <summary>
+        /// Name of environment variable that disables the automatic MSBuild Server opt-in
+        /// triggered by multi-threaded (<c>-mt</c>) builds.
+        /// </summary>
+        /// <remarks>
+        /// When <c>-mt</c> is on the command line, MSBuild routes the build through MSBuild Server
+        /// to get Server GC and warm-start benefits, even when the orchestrator (notably the dotnet CLI)
+        /// has set <see cref="UseMSBuildServerEnvVarName"/> to <c>"0"</c>. The dotnet CLI sets that
+        /// value unconditionally for every invocation, so it does not represent a deliberate user
+        /// opt-out. The escape hatch for users who really want <c>-mt</c> without a server is
+        /// <c>MSBUILDDISABLESERVERWITHMT=1</c>.
+        /// </remarks>
+        public const string DisableServerWithMtEnvVarName = "MSBUILDDISABLESERVERWITHMT";
+
+        /// <summary>
         /// Name of environment variable for logging arguments (e.g., -bl, -check).
         /// </summary>
         public const string MSBuildLoggingArgsEnvVarName = "MSBUILD_LOGGING_ARGS";

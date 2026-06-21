@@ -419,6 +419,67 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void ServerStartsWhenMtPresentEvenWithMSBuildUseServerZero()
+        {
+            // Regression test for the dotnet-CLI-driven scenario: dotnet/sdk's
+            // MSBuildForwardingAppWithoutLogging unconditionally sets MSBUILDUSESERVER="0" on every
+            // invocation, regardless of user intent. Without this fix, that unconditional "0" would
+            // suppress the implicit "-mt implies server" opt-in (#13758) for every `dotnet build /mt`
+            // and `dotnet restore /mt` call, eliminating the Server GC + warm-start wins the -mt
+            // implementation is designed around. -mt is itself a deliberate experimental opt-in, so
+            // it must take precedence over the always-set "0". See ShouldUseMSBuildServer remarks.
+            // Verified the same way as the other -mt-implies-server tests: two builds back-to-back
+            // reuse the SAME server PID, the unique signature of server engagement.
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            // Simulate the dotnet CLI's behavior: it sets MSBUILDUSESERVER=0 before invoking MSBuild
+            // in-process via MSBuildForwardingAppWithoutLogging.ExecuteInProc. -mt must still engage
+            // the server in spite of this.
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+
+            // Make sure we start with no server running.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success1, false, _output);
+            success1.ShouldBeTrue();
+            int serverPid1 = ParseNumber(output1, "Server ID is ");
+            _env.WithTransientProcess(serverPid1);
+
+            string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success2, false, _output);
+            success2.ShouldBeTrue();
+            int serverPid2 = ParseNumber(output2, "Server ID is ");
+
+            serverPid1.ShouldBe(serverPid2, "When -mt overrides MSBUILDUSESERVER=0, two consecutive builds should reuse the same server process. PIDs were " + serverPid1 + " and " + serverPid2 + ".");
+
+            // Clean up the server we spun up.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+        }
+
+        [Fact]
+        public void ServerDoesNotStartWhenMtPresentAndDisableServerWithMtIsSet()
+        {
+            // Regression test for the explicit "I want -mt without the server" escape hatch.
+            // MSBUILDDISABLESERVERWITHMT=1 must keep the server off even when -mt is on the command line.
+            // Verified by running a build and asserting the reported server PID is the SAME as the
+            // current test process PID (a non-server build runs inside the entry-point MSBuild process).
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
+            _env.SetEnvironmentVariable(Traits.DisableServerWithMtEnvVarName, "1");
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", Guid.NewGuid().ToString("N"));
+
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path + " -mt", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int reportedPid = ParseNumber(output, "Server ID is ");
+            int currentPid = ParseNumber(output, "Process ID is ");
+
+            // When the server is NOT used, the build runs in the spawned MSBuild process and the
+            // "Server ID" reported by the build task equals the build process's own PID.
+            reportedPid.ShouldBe(currentPid, "With MSBUILDDISABLESERVERWITHMT=1, -mt must NOT engage the server. Server-reported PID and process PID differed, indicating a server WAS used.");
+        }
+
+        [Fact]
         public void PropertyMSBuildStartupDirectoryOnServer()
         {
             // This test seems to be flaky, lets enable better logging to investigate it next time

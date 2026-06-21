@@ -296,14 +296,18 @@ To avoid regressing CLI incremental build performance, it is essential to fully 
 
 ### `-mt` implies MSBuild Server
 
-When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, MSBuild Server is engaged automatically. Setting `MSBUILDUSESERVER` to any explicit value opts out of the implicit path: `1` keeps the server on, and any other value (e.g. `0`, `false`) keeps it off, matching the pre-existing behavior. `-mt` is itself experimental and opt-in, so the implicit server engagement is not separately gated.
+When this is a `-mt` (`-multithreaded`) build, MSBuild Server is engaged automatically. The default is for `-mt` to take precedence over `MSBUILDUSESERVER=0` (and over any other non-`1` value of `MSBUILDUSESERVER`). This is necessary because the dotnet CLI's `MSBuildForwardingAppWithoutLogging` unconditionally sets `MSBUILDUSESERVER=0` on every invocation, regardless of user intent — so without giving `-mt` precedence, the implicit `-mt → server` opt-in would never fire under `dotnet build /mt` or `dotnet restore /mt`. `-mt` is itself an experimental, deliberate user opt-in, so it is the more reliable signal of intent than the always-set `MSBUILDUSESERVER=0`.
 
-| `MSBUILDUSESERVER` | `-mt` build | Server engaged? | Telemetry `ServerEnableReason` |
-|---|---|---|---|
-| `1` | (any) | Yes | `EnvVar` |
-| any other non-empty value (`0`, `false`, …) | (any) | No (explicit opt-out) | — |
-| unset | yes | **Yes** | `ImpliedByMt` |
-| unset | no | No | — |
+Users who genuinely want `-mt` without the server (e.g. memory-constrained CI) can opt out with `MSBUILDDISABLESERVERWITHMT=1`.
+
+| `MSBUILDUSESERVER` | `MSBUILDDISABLESERVERWITHMT` | `-mt` build | Server engaged? | Telemetry `ServerEnableReason` |
+|---|---|---|---|---|
+| `1` | (any) | (any) | Yes | `EnvVar` |
+| (any) | `1` | yes | No (explicit `-mt`+no-server opt-out) | — |
+| `0`, `false`, etc. | (not `1`) | yes | **Yes** | `ImpliedByMt` |
+| any non-empty non-`1` value | (not `1`) | no | No | — |
+| unset | (not `1`) | yes | **Yes** | `ImpliedByMt` |
+| unset | (not `1`) | no | No | — |
 
 `-mt` is detected from the full, response-file-aware command-line parse, so it counts wherever it is supplied — command line, auto-response file, a project `Directory.Build.rsp`, an `@response` file, or `MSBUILDFORCEMULTITHREADED`. The same value decides whether an engaged server is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
 

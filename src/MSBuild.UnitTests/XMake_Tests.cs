@@ -3219,12 +3219,15 @@ EndGlobal
 
         [Theory]
         // MSBUILDUSESERVER value, -mt build, expected server use, expected reason.
+        // Note: -mt now wins over MSBUILDUSESERVER=0/false/etc (see ShouldUseMSBuildServer remarks).
         [InlineData("1", false, true, "EnvVar")]
         [InlineData("1", true, true, "EnvVar")]
-        [InlineData("0", true, false, "")]
+        [InlineData("0", true, true, "ImpliedByMt")] // -mt overrides MSBUILDUSESERVER=0
         [InlineData("0", false, false, "")]
-        [InlineData("false", true, false, "")] // any explicit non-"1" value opts out
-        [InlineData("true", true, false, "")]
+        [InlineData("false", true, true, "ImpliedByMt")] // -mt overrides any non-"1" value
+        [InlineData("true", true, true, "ImpliedByMt")]
+        [InlineData("false", false, false, "")]
+        [InlineData("true", false, false, "")]
         [InlineData(null, true, true, "ImpliedByMt")]
         [InlineData(null, false, false, "")]
         [InlineData("", true, true, "ImpliedByMt")] // empty is treated as unset
@@ -3232,6 +3235,30 @@ EndGlobal
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", useServerValue);
+            // Ensure the opt-out env var is clear so we test the default -mt-wins behavior.
+            testEnvironment.SetEnvironmentVariable(Traits.DisableServerWithMtEnvVarName, null);
+
+            bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMultiThreaded, out string reason);
+
+            useServer.ShouldBe(expectedUseServer);
+            reason.ShouldBe(expectedReason);
+        }
+
+        [Theory]
+        // MSBUILDUSESERVER value, MSBUILDDISABLESERVERWITHMT value, -mt build, expected server use, expected reason.
+        // Verifies the explicit "I want -mt without the server" escape hatch.
+        [InlineData(null, "1", true, false, "")] // MSBUILDDISABLESERVERWITHMT=1 + -mt => no server
+        [InlineData("0", "1", true, false, "")] // even with MSBUILDUSESERVER=0 explicitly, opt-out works
+        [InlineData(null, "0", true, true, "ImpliedByMt")] // MSBUILDDISABLESERVERWITHMT=0 => -mt still implies server
+        [InlineData(null, "true", true, true, "ImpliedByMt")] // any value other than "1" does NOT disable (matches MSBUILDUSESERVER rule)
+        [InlineData("1", "1", true, true, "EnvVar")] // explicit MSBUILDUSESERVER=1 still wins
+        [InlineData("1", "1", false, true, "EnvVar")] // disable-with-mt has no effect on non-mt builds
+        [InlineData(null, "1", false, false, "")] // disable-with-mt only affects -mt builds (non-mt default applies)
+        public void ShouldUseMSBuildServerDisableWithMtOptOut(string useServerValue, string disableWithMtValue, bool isMultiThreaded, bool expectedUseServer, string expectedReason)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", useServerValue);
+            testEnvironment.SetEnvironmentVariable(Traits.DisableServerWithMtEnvVarName, disableWithMtValue);
 
             bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMultiThreaded, out string reason);
 

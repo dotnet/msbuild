@@ -448,21 +448,31 @@ namespace Microsoft.Build.CommandLine
         /// Returns true if MSBuild Server should be used for this invocation.
         /// </summary>
         /// <remarks>
-        /// Decision tree:
+        /// Decision tree (precedence from highest to lowest):
         /// <list type="bullet">
         ///   <item><c>MSBUILDUSESERVER=1</c> → use server (existing explicit opt-in).</item>
-        ///   <item><c>MSBUILDUSESERVER</c> set to any other non-empty value (e.g. <c>0</c>, <c>false</c>) →
-        ///         do NOT use server (explicit opt-out, takes precedence over -mt). Only <c>1</c> opts in,
-        ///         matching the pre-existing "only <c>1</c> enables the server" semantics.</item>
-        ///   <item><c>MSBUILDUSESERVER</c> unset AND this is a <c>-mt</c> (multithreaded) build → use server.
-        ///         Rationale: <c>-mt</c> already shares process state, so server reuse adds little risk while
-        ///         recovering per-invocation warm-up cost. See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see>.</item>
+        ///   <item><c>-mt</c> (multithreaded) build AND <c>MSBUILDDISABLESERVERWITHMT</c> is NOT set to
+        ///         <c>1</c> → use server. The dotnet CLI's <c>MSBuildForwardingAppWithoutLogging</c>
+        ///         unconditionally sets <c>MSBUILDUSESERVER=0</c> on every invocation (regardless of
+        ///         user intent), which would otherwise suppress the implicit <c>-mt</c> opt-in introduced
+        ///         in PR #13758 for every <c>dotnet build /mt</c> / <c>dotnet restore /mt</c> call.
+        ///         <c>-mt</c> is itself an experimental, deliberate opt-in - giving it precedence over
+        ///         a likely-automatic <c>MSBUILDUSESERVER=0</c> recovers the Server GC + warm-start wins
+        ///         the <c>-mt</c> implementation is designed around. Users who genuinely want
+        ///         <c>-mt</c> without the server (e.g. memory-constrained CI) can set
+        ///         <c>MSBUILDDISABLESERVERWITHMT=1</c>.</item>
+        ///   <item><c>MSBUILDUSESERVER</c> set to any non-empty value other than <c>1</c> (e.g. <c>0</c>,
+        ///         <c>false</c>) → do NOT use server. Preserves the pre-existing rule for non-<c>-mt</c>
+        ///         invocations: only <c>1</c> engages the server.</item>
         ///   <item>Otherwise → no server (existing default).</item>
         /// </list>
+        /// See <see href="https://github.com/dotnet/msbuild/issues/9379">#9379</see> for the
+        /// <c>-mt → server</c> motivation and <see href="https://github.com/dotnet/sdk/blob/main/src/Cli/Microsoft.DotNet.Cli.Utils/MSBuildForwardingAppWithoutLogging.cs">dotnet/sdk's MSBuildForwardingAppWithoutLogging.cs</see>
+        /// for the <c>MSBUILDUSESERVER=0</c> behavior this works around.
         /// </remarks>
         /// <param name="isMultiThreaded">Whether this is a multithreaded (<c>-mt</c>) build, as determined by the
         /// authoritative response-file-aware parse in <see cref="CanRunServerBasedOnCommandLineSwitches"/>.</param>
-        /// <param name="serverEnableReason">Telemetry-friendly reason: "EnvVar", "ImpliedByMt", or empty when not enabled.</param>
+        /// <param name="serverEnableReason">Telemetry-friendly reason: <c>"EnvVar"</c>, <c>"ImpliedByMt"</c>, or empty when not enabled.</param>
         /// <returns>True if server should be used.</returns>
         internal static bool ShouldUseMSBuildServer(bool isMultiThreaded, out string serverEnableReason)
         {
@@ -475,20 +485,24 @@ namespace Microsoft.Build.CommandLine
                 return true;
             }
 
-            // Any explicit non-empty MSBUILDUSESERVER value other than "1" opts out (e.g. "0", "false").
-            // Only a genuinely unset/empty value falls through to the implicit -mt opt-in, preserving the
-            // pre-existing rule that only "1" engages the server.
-            if (!string.IsNullOrEmpty(envVar))
-            {
-                return false;
-            }
-
-            // Implicit opt-in via -mt. -mt is itself experimental and opt-in (MSBUILDUSESERVER=0 remains the
-            // explicit escape hatch), so it does not need a separate opt-out gate.
-            if (isMultiThreaded)
+            // -mt is itself an experimental, deliberate user opt-in. Give it precedence over
+            // MSBUILDUSESERVER=0 because the dotnet CLI's MSBuildForwardingAppWithoutLogging
+            // sets that variable unconditionally on every invocation, which is not a deliberate
+            // user choice - it would otherwise suppress the implicit -mt opt-in from #13758 for
+            // every `dotnet build /mt` / `dotnet restore /mt` call. Users who genuinely want -mt
+            // without the server can opt out with MSBUILDDISABLESERVERWITHMT=1.
+            if (isMultiThreaded
+                && Environment.GetEnvironmentVariable(Traits.DisableServerWithMtEnvVarName) != "1")
             {
                 serverEnableReason = "ImpliedByMt";
                 return true;
+            }
+
+            // For non-mt builds, any explicit non-empty MSBUILDUSESERVER value other than "1" opts
+            // out (e.g. "0", "false"), matching the pre-existing "only 1 enables the server" rule.
+            if (!string.IsNullOrEmpty(envVar))
+            {
+                return false;
             }
 
             return false;
