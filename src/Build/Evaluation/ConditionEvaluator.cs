@@ -163,8 +163,16 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        // Cached expression trees for all the combinations of condition strings and parser options
-        private static readonly ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize> s_cachedExpressionTrees = new ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize>();
+        // Cached expression trees for all the combinations of condition strings and parser options.
+        // OrchardCore evaluates ~5000+ distinct condition strings across its ~290 projects. The default
+        // ConcurrentDictionary constructor uses concurrencyLevel = ProcessorCount and capacity = 31; in
+        // MT mode with N in-proc evaluation threads racing to populate the cache during initial
+        // evaluation, that small starting capacity triggers several rehash passes (each of which takes
+        // a write lock on every bucket-segment in the dictionary). Pre-size to 4096 with concurrency
+        // level = ProcessorCount so the dictionary starts large enough to absorb the initial fill
+        // without internal resizing.
+        private static readonly ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize> s_cachedExpressionTrees =
+            new ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize>(concurrencyLevel: Environment.ProcessorCount, capacity: 4096);
 
         /// <summary>
         /// For debugging leaks, a way to disable caching expression trees, to reduce noise
