@@ -325,6 +325,14 @@ namespace Microsoft.Build.Tasks
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {
+                // DIAGNOSTIC (dotnet/aspnetcore#62807 / dotnet/msbuild#12927): the Copy task
+                // unlinks an existing destination before overwriting it. When two parallel
+                // builds copy to/from the same shared output, this delete can briefly remove a
+                // file another project is reading as a Copy SOURCE, surfacing as MSB3030
+                // ("Could not copy ... because it was not found"). This delete is otherwise
+                // invisible in the binlog, so log it (Low importance => binlog only) to confirm
+                // the culprit and correlate the deleted path with any MSB3030 source path.
+                Log.LogMessage(MessageImportance.Low, "MSB-COPY-DELETE: deleting existing destination before overwrite: {0}", destinationFileState.Path.OriginalValue);
                 FileUtilities.DeleteNoThrow(destinationFileState.Path);
             }
 
