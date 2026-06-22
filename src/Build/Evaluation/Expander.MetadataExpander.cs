@@ -202,19 +202,16 @@ internal partial class Expander<P, I>
         {
             int lastCopied = startIndex;
 
-            for (int i = startIndex; i < endIndex - 1; i++)
-            {
-                if (input[i] != '%' || input[i + 1] != '(')
-                {
-                    continue;
-                }
+            int i = input.IndexOf("%(", startIndex, StringComparison.Ordinal);
 
+            while (i >= 0 && i < endIndex - 1)
+            {
                 int pos = i + 2;
 
                 if (!ExpressionShredder.TryParseMetadataExpression(input, ref pos, endIndex, out string itemType, out string metadataName))
                 {
-                    // Not a valid metadata reference — skip past '%(' and continue scanning.
-                    i++;
+                    // Not a valid metadata reference — skip past '%(' and keep scanning.
+                    i = input.IndexOf("%(", i + 2, StringComparison.Ordinal);
                     continue;
                 }
 
@@ -260,8 +257,8 @@ internal partial class Expander<P, I>
 
                 lastCopied = pos;
 
-                // Advance i to just before pos so the for-loop increment puts us at pos.
-                i = pos - 1;
+                // Continue scanning after this reference.
+                i = input.IndexOf("%(", pos, StringComparison.Ordinal);
             }
 
             // Append any remaining text after the last reference.
