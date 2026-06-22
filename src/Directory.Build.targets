@@ -299,19 +299,29 @@
   <!--
     The net472 servicing redistribution above swaps DLLs and updates the binding redirects only in
     the projects that opt in ($(DeployRuntimeServicingAssemblies) == 'true': MSBuild.exe and the
-    bootstrap). Other net472 projects that re-bundle MSBuild.exe (the test projects that spawn it
-    out-of-proc, e.g. via ProjectReference to MSBuild.csproj) copy MSBuild.exe.config (which now
-    carries the servicing redirects) but resolve their own copy-local runtime assemblies at the
-    compiled-against versions. That leaves MSBuild.exe.config pointing at servicing versions
-    (e.g. System.Memory 4.0.5.0) while the assembly on disk is the compiled-against one
-    (4.0.2.0), so the copied MSBuild.exe fails to start with a FileLoadException, breaking every
-    out-of-proc test (and hanging tests that wait on a spawned node/server).
+    bootstrap). Test projects that re-bundle MSBuild.exe (they spawn it out-of-proc, e.g. via
+    ProjectReference to MSBuild.csproj) copy MSBuild.exe.config (which now carries the servicing
+    redirects) but resolve their own copy-local runtime assemblies at the compiled-against
+    versions. That leaves MSBuild.exe.config pointing at servicing versions (e.g. System.Memory
+    4.0.5.0) while the assembly on disk is the compiled-against one (4.0.2.0), so the copied
+    MSBuild.exe fails to start with a FileLoadException, breaking every out-of-proc test (and
+    hanging tests that wait on a spawned node/server).
 
-    These bins are not a VS redistribution surface, so the fix is to keep them self-consistent at
-    the compiled-against versions: realign the copied MSBuild.exe.config binding redirects to the
-    runtime assemblies actually next to it. Deploy surfaces are excluded; their DLLs already are
-    the servicing build, so realigning would be a no-op there anyway.
+    These test bins are not a VS redistribution surface, so the fix is to keep them self-consistent
+    at the compiled-against versions: realign the copied MSBuild.exe.config binding redirects to the
+    runtime assemblies actually next to it.
+
+    This is scoped to test projects only ($(RealignBundledMSBuildExeConfig), defaulted on for
+    $(IsTestProject) == 'true') and deliberately NOT keyed on the absence of
+    $(DeployRuntimeServicingAssemblies): non-test projects that bundle MSBuild.exe for shipping
+    (e.g. the VS.ExternalAPIs.MSBuild insertion package) must never have their copied config
+    rewritten to the compiled-against versions, even though they happen not to ship MSBuild.exe.config
+    today.
   -->
+  <PropertyGroup>
+    <RealignBundledMSBuildExeConfig Condition="'$(RealignBundledMSBuildExeConfig)' == '' and '$(IsTestProject)' == 'true'">true</RealignBundledMSBuildExeConfig>
+  </PropertyGroup>
+
   <UsingTask TaskName="AlignBindingRedirectsToOutputAssemblies"
              AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
              TaskFactory="RoslynCodeTaskFactory">
@@ -388,7 +398,7 @@
 
   <Target Name="AlignCopiedMSBuildExeConfigBindingRedirects"
           AfterTargets="Build"
-          Condition="'$(TargetFramework)' == 'net472' and '$(DeployRuntimeServicingAssemblies)' != 'true'">
+          Condition="'$(TargetFramework)' == 'net472' and '$(RealignBundledMSBuildExeConfig)' == 'true'">
     <ItemGroup>
       <_CopiedMSBuildExeConfig Include="$(TargetDir)**\MSBuild.exe.config" />
     </ItemGroup>
