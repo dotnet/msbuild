@@ -4,7 +4,7 @@ These instructions refer to working with the `main` branch.
 
 ## Required Software
 
-**Latest Microsoft Visual Studio 2022**: You can download the Visual Studio Community edition from [visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/).
+**Latest Microsoft Visual Studio 2026**: You can download the Visual Studio Community edition from [visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/).
 
 All command lines should be executed from a Visual Studio developer command prompt.
 
@@ -75,7 +75,7 @@ Sometimes it's useful to patch your copy of Visual Studio in order to test or de
 .\build.cmd
 
 # copy the bootstrap build output over the MSBuild binaries in Visual Studio
-.\scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin"
+.\scripts\Deploy-MSBuild.ps1 -destination "C:\Program Files\Microsoft Visual Studio\2026\Enterprise\MSBuild\Current\Bin"
 ```
 
 ### Debugging MSBuild

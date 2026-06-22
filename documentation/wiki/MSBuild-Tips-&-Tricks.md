@@ -97,7 +97,7 @@ There is another MSBuild-wide location imported by `Microsoft.Common.props` from
 
 The principle is the same, drop a valid MSBuild file into one of these locations to extend your build according to whatever you put into the respective MSBuild file.
 
-**Note:** The value of `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props` after evaluation would be something like `C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Imports\Microsoft.Common.Props`.
+**Note:** The value of `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props` after evaluation would be something like `C:\Program Files\Microsoft Visual Studio\2026\Enterprise\MSBuild\Current\Imports\Microsoft.Common.Props`.
 
 **Also note:** technically the imports happen from `Microsoft.Common.CurrentVersion.targets` where the above directories say `Microsoft.Common.targets`.
 
