@@ -1824,6 +1824,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        ///  Parity test for the rewritten transform scanner (<c>GetQuotedExpressionMatches</c>): metadata
+        ///  references inside a transform must not be qualified with an item name. This pins the error path
+        ///  (and its message arguments) so the de-regexed scanner keeps rejecting qualified references,
+        ///  including when surrounded by internal whitespace.
+        /// </summary>
+        [Theory]
+        [InlineData("@(i->'%(i.Meta0)')", "%(i.Meta0)")]
+        [InlineData("@(i->'%( i . Meta0 )')", "%( i . Meta0 )")]
+        public void Transform_QualifiedMetadataThrows(string input, string qualifiedReference)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateItemFunctionExpander();
+
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
+                expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandItems, MockElementLocation.Instance));
+
+            // The error reports the offending qualified reference and suggests the unqualified form.
+            exception.Message.ShouldContain(qualifiedReference);
+            exception.Message.ShouldContain("%(Meta0)");
+        }
+
+        /// <summary>
         /// Exercises ExpandAllIntoStringListLeaveEscaped with a complex set of data.
         /// </summary>
         [Fact]
