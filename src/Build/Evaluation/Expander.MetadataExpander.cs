@@ -191,7 +191,9 @@ internal partial class Expander<P, I>
         /// </summary>
         /// <remarks>
         ///  A valid metadata name starts with a letter or underscore, followed by zero or more
-        ///  letters, digits, underscores, or hyphens: <c>[A-Za-z_][A-Za-z_0-9\-]*</c>.
+        ///  letters, digits, underscores, or hyphens: <c>[A-Za-z_][A-Za-z_0-9\-]*</c>. This grammar is
+        ///  enforced by <see cref="ExpressionShredder.TryParseMetadataExpression"/> and must stay in sync
+        ///  with <see cref="ProjectWriter.itemTypeOrMetadataNameSpecification"/>.
         ///  Whitespace is allowed around the parentheses and the dot separator.
         ///  If a <c>%(</c> sequence does not form a valid metadata reference, it is appended
         ///  to the output verbatim.

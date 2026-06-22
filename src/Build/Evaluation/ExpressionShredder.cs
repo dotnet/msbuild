@@ -661,6 +661,15 @@ namespace Microsoft.Build.Evaluation
         /// Returns true if a valid name begins at the specified index.
         /// Leaves index one past the end of the name.
         /// </summary>
+        /// <remarks>
+        /// The accepted grammar is <c>[A-Za-z_][A-Za-z_0-9\-]*</c> (via
+        /// <see cref="XmlUtilities.IsValidInitialElementNameCharacter"/> and
+        /// <see cref="XmlUtilities.IsValidSubsequentElementNameCharacter"/>), which defines a valid item
+        /// type or metadata name. This MUST be kept in sync with
+        /// <see cref="ProjectWriter.itemTypeOrMetadataNameSpecification"/>: if the grammar used to parse
+        /// item/metadata expressions diverges from the one used to write them back out, expressions could
+        /// round-trip incorrectly.
+        /// </remarks>
         private static bool SinkValidName(string expression, ref int i, int end)
         {
             if (end <= i || !XmlUtilities.IsValidInitialElementNameCharacter(expression[i]))
