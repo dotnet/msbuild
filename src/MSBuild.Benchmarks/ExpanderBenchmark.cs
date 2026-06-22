@@ -33,6 +33,10 @@ public class ExpanderBenchmark
     private Expander<ProjectPropertyInstance, ProjectItemInstance> _expander = null!;
     private IElementLocation _location = null!;
 
+    // Kept alive for the lifetime of the benchmark because the created ProjectInstance/
+    // ProjectItemInstance objects hold references back to this collection. Disposed in GlobalCleanup.
+    private ProjectCollection _projectCollection = null!;
+
     // Pre-built expression strings, assigned in GlobalSetup.
     private string _singleProperty = null!;
     private string _multipleProperties = null!;
@@ -59,10 +63,12 @@ public class ExpanderBenchmark
         _location = ElementLocation.EmptyLocation;
 
         // Use a dedicated ProjectCollection so the benchmark does not leak state into the global one.
-        using var pc = new ProjectCollection();
-        ProjectRootElement xml = ProjectRootElement.Create(pc);
+        // Stored in a field (not a local using) so it stays alive for the benchmark iterations; the
+        // ProjectInstance/ProjectItemInstance objects below reference it. Disposed in GlobalCleanup.
+        _projectCollection = new ProjectCollection();
+        ProjectRootElement xml = ProjectRootElement.Create(_projectCollection);
         xml.FullPath = @"c:\src\project.csproj";
-        ProjectInstance project = new(xml, null, null, pc);
+        ProjectInstance project = new(xml, globalProperties: null, toolsVersion: null, _projectCollection);
 
         // --- Properties ---
         var properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -139,6 +145,10 @@ public class ExpanderBenchmark
         // Plain string (no expansion needed)
         _noExpansion = @"This is a plain string with no expansion tokens at all.";
     }
+
+    [GlobalCleanup]
+    public void GlobalCleanup()
+        => _projectCollection?.Dispose();
 
     // =========================================================================
     // Property expansion
