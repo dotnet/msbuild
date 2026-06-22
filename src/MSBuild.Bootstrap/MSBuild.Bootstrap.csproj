@@ -12,6 +12,12 @@
 
     <!-- The output of this project is sort of an "executable" so it can get the latest versions of everything. -->
     <UseFrozenMaintenancePackageVersions>false</UseFrozenMaintenancePackageVersions>
+
+    <!-- This project's output is copied into the bootstrap MSBuild that tests run against, so it
+         is a redistribution surface for the net472 dotnet/runtime servicing assemblies just like
+         MSBuild.csproj. See the ReplaceRuntimeAssembliesWithServicingVersions target in
+         src/Directory.Build.targets. -->
+    <DeployRuntimeServicingAssemblies>true</DeployRuntimeServicingAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
