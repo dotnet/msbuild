@@ -439,27 +439,29 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Attempts to parse a metadata expression of the form <c>%(Name)</c> or <c>%(ItemType.Name)</c>,
-        /// starting just after the <c>%(</c> has been consumed (i.e., <paramref name="i"/> points at
-        /// the first character after the opening parenthesis).
+        ///  Attempts to parse a metadata expression of the form <c>%(Name)</c> or <c>%(ItemType.Name)</c>,
+        ///  starting just after the <c>%(</c> has been consumed (i.e., <paramref name="i"/> points at
+        ///  the first character after the opening parenthesis).
         /// </summary>
         /// <remarks>
-        /// On success, <paramref name="i"/> is left one past the closing <c>)</c>.
-        /// On failure, <paramref name="i"/> is at an indeterminate position and the caller
-        /// should restore it from a saved restart point.
+        ///  On success, <paramref name="i"/> is left one past the closing <c>)</c>.
+        ///  On failure, <paramref name="i"/> is at an indeterminate position and the caller
+        ///  should restore it from a saved restart point.
         /// </remarks>
         /// <param name="expression">The expression being scanned.</param>
         /// <param name="i">Current scan position (just after <c>%(</c>). Advanced on success.</param>
-        /// <param name="end">Exclusive end index of the scan range.</param>
+        /// <param name="end">Exclusive end index of the scan range; no character at or beyond this index is read.</param>
         /// <param name="itemType">The item type if qualified; otherwise <see langword="null"/>.</param>
         /// <param name="metadataName">The metadata name.</param>
-        /// <returns><see langword="true"/> if a valid metadata expression was parsed.</returns>
+        /// <returns>
+        ///  <see langword="true"/> if a valid metadata expression was parsed.
+        /// </returns>
         internal static bool TryParseMetadataExpression(string expression, ref int i, int end, out string itemType, out string metadataName)
         {
             itemType = null;
             metadataName = null;
 
-            SinkWhitespace(expression, ref i);
+            SinkWhitespace(expression, ref i, end);
 
             int startOfText = i;
 
@@ -470,14 +472,14 @@ namespace Microsoft.Build.Evaluation
 
             string firstName = Strings.WeakIntern(expression.AsSpan(startOfText, i - startOfText));
 
-            SinkWhitespace(expression, ref i);
+            SinkWhitespace(expression, ref i, end);
 
-            if (Sink(expression, ref i, '.'))
+            if (Sink(expression, ref i, end, '.'))
             {
                 // Qualified: %(ItemType.Name)
                 itemType = firstName;
 
-                SinkWhitespace(expression, ref i);
+                SinkWhitespace(expression, ref i, end);
 
                 startOfText = i;
 
@@ -488,7 +490,7 @@ namespace Microsoft.Build.Evaluation
 
                 metadataName = Strings.WeakIntern(expression.AsSpan(startOfText, i - startOfText));
 
-                SinkWhitespace(expression, ref i);
+                SinkWhitespace(expression, ref i, end);
             }
             else
             {
@@ -496,7 +498,7 @@ namespace Microsoft.Build.Evaluation
                 metadataName = firstName;
             }
 
-            return Sink(expression, ref i, ')');
+            return Sink(expression, ref i, end, ')');
         }
 
         /// <summary>
@@ -688,13 +690,19 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns true if the character at the specified index
-        /// is the specified char.
-        /// Leaves index one past the character.
+        ///  Returns <see langword="true"/> if the character at the specified index is the specified char.
+        ///  Leaves index one past the character.
         /// </summary>
         private static bool Sink(string expression, ref int i, char c)
+            => Sink(expression, ref i, expression.Length, c);
+
+        /// <summary>
+        ///  Returns <see langword="true"/> if the character at the specified index (which must be before
+        ///  <paramref name="end"/>) is the specified char. Leaves index one past the character.
+        /// </summary>
+        private static bool Sink(string expression, ref int i, int end, char c)
         {
-            if (i < expression.Length && expression[i] == c)
+            if (i < end && expression[i] == c)
             {
                 i++;
                 return true;
@@ -704,9 +712,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns true if the next two characters at the specified index
-        /// are the specified sequence.
-        /// Leaves index one past the second character.
+        ///  Returns <see langword="true"/> if the next two characters at the specified index are the specified sequence.
+        ///  Leaves index one past the second character.
         /// </summary>
         private static bool Sink(string expression, ref int i, int end, char c1, char c2)
         {
@@ -720,18 +727,34 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Moves past all whitespace starting at the specified index.
-        /// Returns the next index, possibly the string length.
+        ///  Moves past all whitespace starting at the specified index.
+        ///  Returns the next index, possibly the string length.
         /// </summary>
-        /// <remarks>
-        /// Char.IsWhitespace() is not identical in behavior to regex's \s character class,
-        /// but it's extremely close, and it's what we use in conditional expressions.
-        /// </remarks>
         /// <param name="expression">The expression to process.</param>
         /// <param name="i">The start location for skipping whitespace, contains the next non-whitespace character on exit.</param>
+        /// <remarks>
+        ///  <see cref="char.IsWhiteSpace(char)"/> is not identical in behavior to regex's <c>\s</c> character class,
+        ///  but it's extremely close, and it's what we use in conditional expressions.
+        /// </remarks>
         private static void SinkWhitespace(string expression, ref int i)
+            => SinkWhitespace(expression, ref i, expression.Length);
+
+        /// <summary>
+        ///  Moves past all whitespace starting at the specified index, without scanning at or beyond
+        ///  <paramref name="end"/>. Returns the next index, possibly <paramref name="end"/>.
+        /// </summary>
+        /// <param name="expression">The expression to process.</param>
+        /// <param name="i">
+        ///  The start location for skipping whitespace, contains the next non-whitespace character (or <paramref name="end"/>) on exit.
+        /// </param>
+        /// <param name="end">Exclusive end index of the scan range.</param>
+        /// <remarks>
+        ///  <see cref="char.IsWhiteSpace(char)"/> is not identical in behavior to regex's <c>\s</c> character class,
+        ///  but it's extremely close, and it's what we use in conditional expressions.
+        /// </remarks>
+        private static void SinkWhitespace(string expression, ref int i, int end)
         {
-            while (i < expression.Length && Char.IsWhiteSpace(expression[i]))
+            while (i < end && char.IsWhiteSpace(expression[i]))
             {
                 i++;
             }
