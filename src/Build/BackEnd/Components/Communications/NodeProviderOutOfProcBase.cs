@@ -1232,17 +1232,6 @@ namespace Microsoft.Build.BackEnd
 
                                 serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                             }
-
-                            if (packet is NodeBuildComplete)
-                            {
-                                if (IsExitPacket(packet))
-                                {
-                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                    context._packetQueueDrainDelayCancellation.Cancel();
-                                }
-
-                                return;
-                            }
                         }
                         catch (IOException e)
                         {
@@ -1252,6 +1241,23 @@ namespace Microsoft.Build.BackEnd
                         catch (ObjectDisposedException) // This happens if a child dies unexpectedly
                         {
                             // Do nothing here because any exception will be caught by the async read handler
+                        }
+
+                        // Once the NodeBuildComplete packet has been dequeued, the node is shutting down and no
+                        // further packets will be enqueued, so the drain thread must terminate. This has to run even
+                        // when writing the packet above threw (e.g. the child already exited and the pipe was
+                        // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
+                        // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
+                        // leaked threads accumulate across builds.
+                        if (packet is NodeBuildComplete)
+                        {
+                            if (IsExitPacket(packet))
+                            {
+                                context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                context._packetQueueDrainDelayCancellation.Cancel();
+                            }
+
+                            return;
                         }
                     }
                 }
