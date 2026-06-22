@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -464,9 +465,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator to use.</param>
         public void Translate(ITranslator translator)
         {
+            long thStart = ThProfile.Now();
+            // Byte positions are readable only on the write side (the MemoryStream is seekable; the read
+            // pipe is not). The serialized byte count is identical either way. See dotnet/msbuild#14097.
+            bool prof = ThProfile.Enabled && translator.Mode == TranslationDirection.WriteToStream;
+            long Pos() => translator.Writer.BaseStream.Position;
+            long p0 = prof ? Pos() : 0;
+
             translator.Translate(ref _nodeId);
             translator.Translate(ref _startupDirectory);
+            long pBeforeEnv = prof ? Pos() : 0;
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            long pAfterEnv = prof ? Pos() : 0;
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
@@ -511,9 +521,13 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             translator.Translate(ref _isTaskInputLoggingEnabled);
+            long pBeforeTP = prof ? Pos() : 0;
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
+            long pAfterTP = prof ? Pos() : 0;
             translator.Translate(ref _continueOnError);
+            long pBeforeGP = prof ? Pos() : 0;
             translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+            long pAfterGP = prof ? Pos() : 0;
             translator.Translate(collection: ref _warningsAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
@@ -523,6 +537,27 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+
+            if (prof)
+            {
+                long pEnd = Pos();
+                long total = pEnd - p0;
+                long env = pAfterEnv - pBeforeEnv;
+                long taskParams = pAfterTP - pBeforeTP;
+                long globalProps = pAfterGP - pBeforeGP;
+                long warnings = pEnd - pAfterGP;
+                ThProfile.AddField("cfg_total", total);
+                ThProfile.AddField("cfg_env", env);
+                ThProfile.AddField("cfg_taskParams", taskParams);
+                ThProfile.AddField("cfg_globalProps", globalProps);
+                ThProfile.AddField("cfg_warnings", warnings);
+                ThProfile.AddField("cfg_other", total - env - taskParams - globalProps - warnings);
+            }
+
+            if (ThProfile.Enabled)
+            {
+                ThProfile.AddPhase(translator.Mode == TranslationDirection.ReadFromStream ? "cfg_deserialize" : "cfg_serialize", thStart);
+            }
         }
 
         /// <summary>
