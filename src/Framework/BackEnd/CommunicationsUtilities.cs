@@ -580,7 +580,19 @@ internal static class CommunicationsUtilities
             }
         }
 
-        if (!string.IsNullOrEmpty(architectureFlagToSet))
+        // For a NET task host the launched TaskHost node runs whatever architecture the .NET
+        // SDK shipped, which the worker node cannot know. Suppress the worker node's arch bit
+        // so the handshake stays architecture-agnostic: any architecture of worker node may
+        // connect to any architecture of the resolved SDK TaskHost node (the TaskHost node
+        // tolerates a missing arch bit via IsAllowedBitnessMismatch). Only the worker node
+        // suppresses; the TaskHost node itself (TaskHostParameters.Empty) keeps its arch bit so
+        // already-deployed worker nodes that still emit one continue to connect.
+        bool isNetTaskHostWorkerNode =
+            taskHost &&
+            !taskHostParameters.IsEmpty &&
+            XMakeAttributes.MSBuildRuntimeValues.net.Equals(taskHostParameters.Runtime, StringComparison.OrdinalIgnoreCase);
+
+        if (!isNetTaskHostWorkerNode && !string.IsNullOrEmpty(architectureFlagToSet))
         {
             if (architectureFlagToSet!.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
             {
