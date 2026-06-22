@@ -67,7 +67,7 @@ public class ExpanderBenchmark
         // ProjectInstance/ProjectItemInstance objects below reference it. Disposed in GlobalCleanup.
         _projectCollection = new ProjectCollection();
         ProjectRootElement xml = ProjectRootElement.Create(_projectCollection);
-        xml.FullPath = @"c:\src\project.csproj";
+        xml.FullPath = Path.Combine(Path.GetTempPath(), "project.csproj");
         ProjectInstance project = new(xml, globalProperties: null, toolsVersion: null, _projectCollection);
 
         // --- Properties ---
