@@ -1254,7 +1254,13 @@ namespace Microsoft.Build.BackEnd
                             if (IsExitPacket(packet))
                             {
                                 context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                context._packetQueueDrainDelayCancellation.Cancel();
+                                try
+                                {
+                                    context._packetQueueDrainDelayCancellation.Cancel();
+                                }
+                                catch (ObjectDisposedException)
+                                {
+                                }
                             }
 
                             return;
