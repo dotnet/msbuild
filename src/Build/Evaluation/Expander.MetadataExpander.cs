@@ -92,24 +92,33 @@ internal partial class Expander<P, I>
             if (expression.IndexOf("@(", StringComparison.Ordinal) < 0)
             {
                 // No item vectors in the string — scan for metadata references directly.
-                ScanAndExpandMetadata(expression, 0, expression.Length);
+                ScanAndExpandMetadata(expression);
             }
             else
             {
-                // If the entire expression is a single item vector with no separator, there are no
-                // gaps to expand metadata in — return the expression unchanged.
-                ExpressionShredder.ReferencedItemExpressionsEnumerator itemVectorExpressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+                ExpressionShredder.ReferencedItemExpressionsEnumerator enumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
 
-                if (itemVectorExpressions.MoveNext()
-                    && itemVectorExpressions.Current.Value == expression
-                    && itemVectorExpressions.Current.Separator == null
-                    && !itemVectorExpressions.MoveNext())
+                if (!enumerator.MoveNext())
                 {
+                    // The string contains "@(" but no well-formed item vector expressions —
+                    // scan the entire string for metadata references.
+                    ScanAndExpandMetadata(expression);
+                }
+                else if (enumerator.Current.Value == expression
+                    && enumerator.Current.Separator == null
+                    && !enumerator.MoveNext())
+                {
+                    // The entire expression is a single item vector with no separator, so there are
+                    // no gaps to expand metadata in — return the expression unchanged.
                     return expression;
                 }
-
-                // Re-enumerate to expand metadata in the gaps between item vector expressions.
-                ScanAndExpandMetadataInGaps(expression);
+                else
+                {
+                    // Reuse the already-advanced enumerator (positioned at the first capture) to
+                    // expand metadata in the gaps between item vector expressions. This avoids
+                    // shredding the expression a second time.
+                    ScanAndExpandMetadataInGaps(expression, ref enumerator);
+                }
             }
 
             return _builder.Equals(expression.AsSpan())
@@ -120,16 +129,21 @@ internal partial class Expander<P, I>
         /// <summary>
         ///  Expands metadata in the gaps between item vector expressions and within their separators.
         /// </summary>
-        private void ScanAndExpandMetadataInGaps(string expression)
+        /// <remarks>
+        ///  The supplied enumerator must already be positioned at the first capture (i.e. a successful
+        ///  <see cref="ExpressionShredder.ReferencedItemExpressionsEnumerator.MoveNext"/> has been called).
+        ///  Passing the already-advanced enumerator lets the caller's shred be reused instead of
+        ///  re-scanning the expression from scratch.
+        /// </remarks>
+        private void ScanAndExpandMetadataInGaps(string expression, ref ExpressionShredder.ReferencedItemExpressionsEnumerator enumerator)
         {
-            ExpressionShredder.ReferencedItemExpressionsEnumerator itemVectorExpressionsEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
-
             int start = 0;
 
-            while (itemVectorExpressionsEnumerator.MoveNext())
+            do
             {
-                start = ProcessItemExpressionCapture(expression, start, itemVectorExpressionsEnumerator.Current);
+                start = ProcessItemExpressionCapture(expression, start, enumerator.Current);
             }
+            while (enumerator.MoveNext());
 
             // Expand metadata in any trailing text after the last item vector expression.
             if (start < expression.Length)
@@ -165,6 +179,10 @@ internal partial class Expander<P, I>
             // Advance past this item vector expression.
             return itemExpressionCapture.Index + itemExpressionCapture.Length;
         }
+
+        /// <inheritdoc cref="ScanAndExpandMetadata(string, int, int)" />
+        private void ScanAndExpandMetadata(string input)
+            => ScanAndExpandMetadata(input, 0, input.Length);
 
         /// <summary>
         ///  Scans the specified range of <paramref name="input"/> for item metadata references
