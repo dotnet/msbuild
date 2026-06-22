@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Xml;
@@ -32,7 +33,7 @@ namespace Microsoft.Build.Construction
         internal ProjectChooseElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
         }
 
         /// <summary>
@@ -78,13 +79,7 @@ namespace Microsoft.Build.Construction
         /// This does not allow conditions, so it should not be called.
         /// </summary>
         public override ElementLocation ConditionLocation
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalError("Should not evaluate this");
-                return null;
-            }
-        }
+            => InternalError.Throw<ElementLocation>("Should not evaluate this");
 
         /// <summary>
         /// Creates an unparented ProjectChooseElement, wrapping an unparented XmlElement.
@@ -92,7 +87,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectChooseElement CreateDisconnected(ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrow(containingProject.Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+            Assumed.Null(containingProject.Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.choose);
             return new ProjectChooseElement(element, containingProject);

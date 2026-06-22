@@ -34,6 +34,13 @@ namespace Microsoft.Build.Framework
         public static TaskEnvironment Fallback { get; } = new(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <summary>
+        /// Gets a value indicating whether this <see cref="TaskEnvironment"/> is providing
+        /// per-task isolated state (multithreaded mode). When <see langword="false"/>, the
+        /// environment delegates to the shared process environment (multi-process mode).
+        /// </summary>
+        internal bool IsMultiThreaded => _driver is MultiThreadedTaskEnvironmentDriver;
+
+        /// <summary>
         /// Creates a new <see cref="TaskEnvironment"/> with isolated working directory and environment variables.
         /// </summary>
         /// <remarks>

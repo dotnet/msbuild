@@ -206,7 +206,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         internal void SendData(TaskHostNodeKey nodeKey, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), $"Invalid host context specified: {nodeKey}.");
+            Assumed.True(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), $"Invalid host context specified: {nodeKey}.");
 
             SendData(context, packet);
         }
@@ -373,8 +373,9 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     break;
+
                 default:
-                    ErrorUtilities.ThrowInternalError($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
+                    Assumed.Unreachable($"PacketReceived: no handler for node {node}, unexpected packet type {packet.Type}");
                     break;
             }
         }
@@ -386,7 +387,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
+            Assumed.Equal(componentType, BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProcTaskHost();
         }
 
@@ -415,7 +416,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
                 return TaskHostNameForClr2TaskHost;
@@ -447,7 +448,7 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         internal static string GetMSBuildExecutablePathForNonNETRuntimes(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             var toolName = GetTaskHostNameFromHostContext(hostContext);
 
@@ -481,10 +482,7 @@ namespace Microsoft.Build.BackEnd
 
             if (isCLR2)
             {
-                if (isArm64)
-                {
-                    ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
-                }
+                Assumed.False(isArm64, "ARM64 CLR2 task hosts are not supported.");
 
                 return isX64
                     ? Path.Combine(GetOrInitializeX64Clr2Path(toolName, basePath64), toolName)
@@ -514,7 +512,7 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         internal static (string RuntimeHostPath, string MSBuildPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            Assumed.True(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters));
         }
@@ -541,12 +539,12 @@ namespace Microsoft.Build.BackEnd
 
                 if (string.IsNullOrEmpty(path))
                 {
-                    ErrorUtilities.ThrowInternalError(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
+                    InternalError.Throw(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
                 }
 
                 if (!FileSystems.Default.DirectoryExists(path))
                 {
-                    ErrorUtilities.ThrowInternalError(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
+                    InternalError.Throw(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
                 }
 
                 var sdkVersion = ExtractSdkVersionFromPath(path);
@@ -631,11 +629,17 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            in TaskHostParameters taskHostParameters)
+            in TaskHostParameters taskHostParameters,
+            out int hostProcessId,
+            out bool wasNewlyCreated)
         {
+            hostProcessId = -1;
+            wasNewlyCreated = false;
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(nodeKey))
             {
+                wasNewlyCreated = true;
                 nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
             }
             else
@@ -652,6 +656,16 @@ namespace Microsoft.Build.BackEnd
                 lock (handlerStack)
                 {
                     handlerStack.Push(handler);
+                }
+
+                try
+                {
+                    hostProcessId = context.Process?.Id ?? -1;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                    hostProcessId = -1;
                 }
 
                 // Configure the node.
@@ -697,8 +711,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
+            ArgumentNullException.ThrowIfNull(factory);
+            Assumed.False(_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
@@ -775,8 +789,8 @@ namespace Microsoft.Build.BackEnd
             HandshakeOptions hostContext,
             bool nodeReuseEnabled)
         {
-            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
             string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
+            (string launchPath, bool useAppHost) = ResolveNetTaskHostLaunchPath(msbuildAssemblyPath);
 
             // The child task host (NodeEndpointOutOfProcTaskHost) computes its handshake
             // toolsDirectory from BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot,
@@ -797,16 +811,16 @@ namespace Microsoft.Build.BackEnd
             Handshake handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath);
 #endif
 
-            if (FileSystems.Default.FileExists(appHostPath))
+            if (useAppHost)
             {
-                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {appHostPath}.");
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {launchPath}.");
 
-                IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
+                var dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
                 return dotnetOverrides == null
                     ? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet"))
                     : new NodeLaunchData(
-                        appHostPath,
+                        launchPath,
                         commandLineArgs,
                         handshake,
                         dotnetOverrides);
@@ -821,12 +835,27 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found at {appHostPath}, falling back to dotnet.exe from {resolvedDotnetHostPath}.");
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found, falling back to dotnet.exe ({resolvedDotnetHostPath}) hosting {launchPath}.");
 
             return new NodeLaunchData(
                 resolvedDotnetHostPath,
-                $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
+                $"\"{launchPath}\" {commandLineArgs}",
                 handshake);
+        }
+
+        /// <summary>
+        /// Resolves the .NET task host launch target for an SDK directory: the MSBuild app host
+        /// (<c>MSBuild[.exe]</c>) when present, otherwise <c>MSBuild.dll</c> (which is launched via
+        /// <c>dotnet[.exe]</c>). Single source of truth for the apphost-vs-fallback decision,
+        /// shared by the launch path and any caller that needs to describe the launch target
+        /// (e.g. error messages).
+        /// </summary>
+        internal static (string LaunchPath, bool UseAppHost) ResolveNetTaskHostLaunchPath(string msbuildAssemblyPath)
+        {
+            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
+            return FileSystems.Default.FileExists(appHostPath)
+                ? (appHostPath, true)
+                : (Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), false);
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";

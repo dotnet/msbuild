@@ -123,9 +123,9 @@ namespace Microsoft.Build.Evaluation
                         ExpanderOptions.ExpandItems,
                         includeNullEntries: false,
                         isTransformExpression: out _,
-                        itemsFromCapture: out var itemsFromCapture);
+                        entries: out var entries);
                     _referencedItems =
-                        itemsFromCapture?.Select(i => new ReferencedItem(i.Value, new ValueFragment(i.Key, ProjectDirectory))).ToList() ?? [];
+                        entries?.Select(i => new ReferencedItem(i.Item, new ValueFragment(i.Value, ProjectDirectory))).ToList() ?? [];
 
                     return true;
                 }
@@ -395,7 +395,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (var fragment in Fragments)
             {
-                if (fragment is ValueFragment || fragment is GlobFragment)
+                if (fragment is ValueFragment or GlobFragment)
                 {
                     yield return fragment.TextFragment;
                 }
@@ -408,7 +408,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
         }

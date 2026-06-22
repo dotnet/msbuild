@@ -72,6 +72,11 @@
         <target state="translated">Güncel olmadığı için görev atlanamıyor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">Kanal EOF’si {0} saniye içinde alınmadı. Bir torun işlem kanalı hala açık tutuyor olabilir. Daha önce teslim edilen çıktı günlüğe kaydedildi.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: "{0}" öğesinden {1} koduyla çıkıldı.</target>

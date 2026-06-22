@@ -3,9 +3,9 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.8.0</VersionPrefix>
+    <VersionPrefix>18.9.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.7.0-preview-26230-02</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>18.8.0-preview-26276-02</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!-- differentiate experimental insertions to avoid package id conflicts, 
@@ -51,7 +51,7 @@
     <SystemMemoryVersion>4.6.3</SystemMemoryVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.1.2</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemThreadingTasksExtensionsVersion>4.6.3</SystemThreadingTasksExtensionsVersion>
-    <SystemValueTupleVersion>4.6.1</SystemValueTupleVersion>
+    <SystemValueTupleVersion>4.6.2</SystemValueTupleVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -81,7 +81,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.106</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.300</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">

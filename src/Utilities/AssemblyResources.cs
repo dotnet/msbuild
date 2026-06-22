@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Globalization;
 using System.Resources;
 
@@ -24,7 +25,7 @@ namespace Microsoft.Build.Shared
             string resource = PrimaryResources.GetString(name, CultureInfo.CurrentUICulture)
                 ?? SharedResources.GetString(name, CultureInfo.CurrentUICulture);
 
-            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
+            Assumed.NotNull(resource, $"Missing resource '{name}'");
 
             return resource;
         }
@@ -52,7 +53,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unformatted);
+            ArgumentNullException.ThrowIfNull(unformatted);
 
             return ResourceUtilities.FormatString(unformatted, args);
         }
@@ -71,7 +72,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName);
+            ArgumentNullException.ThrowIfNull(resourceName);
 
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resourceString = GetString(resourceName);

@@ -72,6 +72,11 @@
         <target state="translated">无法跳过任务，因为它不是最新的。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">未在 {0} 秒内收到管道 EOF。管道可能在孙级进程中仍处于打开状态。已记录已传递的输出。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: “{0}”已退出，代码为 {1}。</target>

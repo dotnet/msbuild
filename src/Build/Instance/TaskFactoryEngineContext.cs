@@ -70,8 +70,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskFactoryEngineContext(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild, bool forceOutOfProcessExecution)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
+            ArgumentNullException.ThrowIfNull(loggingContext);
+            Assumed.NotNull(elementLocation);
 
             _activeProxy = true;
             _isRunningWithMultipleNodes = isRunningWithMultipleNodes;
@@ -197,7 +197,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e);
+            ArgumentNullException.ThrowIfNull(e);
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will
@@ -218,7 +218,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e);
+            ArgumentNullException.ThrowIfNull(e);
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will
@@ -239,7 +239,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e);
+            ArgumentNullException.ThrowIfNull(e);
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will
@@ -260,7 +260,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogCustomEvent(Microsoft.Build.Framework.CustomBuildEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e);
+            ArgumentNullException.ThrowIfNull(e);
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will
@@ -400,7 +400,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyActiveProxy()
         {
-            ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task factory logging host.");
+            Assumed.True(_activeProxy, "Attempted to use an inactive task factory logging host.");
         }
     }
 }

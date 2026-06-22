@@ -28,7 +28,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void RegisterMSBuildExeResources(ResourceManager manager)
         {
-            ErrorUtilities.VerifyThrow(s_msbuildExeResourceManager == null, "Only one extra resource manager");
+            Assumed.Null(s_msbuildExeResourceManager, "Only one extra resource manager");
 
             s_msbuildExeResourceManager = manager;
         }
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Shared
                 resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
             }
 
-            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
+            Assumed.NotNull(resource, $"Missing resource '{name}'");
 
             return resource;
         }

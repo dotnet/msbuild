@@ -172,7 +172,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskRegistry(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
+            Assumed.NotNull(projectRootElementCache);
 
             RootElementCache = projectRootElementCache;
         }
@@ -192,8 +192,8 @@ namespace Microsoft.Build.Execution
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         internal TaskRegistry(Toolset toolset, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
-            ErrorUtilities.VerifyThrowInternalNull(toolset);
+            Assumed.NotNull(projectRootElementCache);
+            Assumed.NotNull(toolset);
 
             RootElementCache = projectRootElementCache;
             _toolset = toolset;
@@ -283,9 +283,9 @@ namespace Microsoft.Build.Execution
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile);
+            Assumed.NotNull(directoryOfImportingFile);
 #if DEBUG
-            ErrorUtilities.VerifyThrow(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
+            Assumed.False(taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
 #endif
 
             if (!ConditionEvaluator.EvaluateCondition(
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Execution
             bool isMultiThreadedBuild)
         {
 #if DEBUG
-            ErrorUtilities.VerifyThrow(_isInitialized, "Attempt to read from TaskRegistry before its initialization was finished.");
+            Assumed.True(_isInitialized, "Attempt to read from TaskRegistry before its initialization was finished.");
 #endif
             TaskFactoryWrapper taskFactory = null;
 
@@ -681,8 +681,8 @@ namespace Microsoft.Build.Execution
             ProjectUsingTaskElement projectUsingTaskInXml,
             bool overrideTask)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
+            Assumed.NotNullOrEmpty(taskName);
+            Assumed.NotNull(assemblyLoadInfo);
 
             // Lazily allocate the hashtable
             if (_taskRegistrations == null)
@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.Execution
                 int registrationOrderId,
                 string containingFileFullPath)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
+                ArgumentNullException.ThrowIfNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
                 _taskFactoryAssemblyLoadInfo = assemblyLoadInfo;
                 _taskFactoryParameters = taskFactoryParameters;
@@ -1167,9 +1167,7 @@ namespace Microsoft.Build.Execution
                 {
                     if (!taskFactoryParameters.IsEmpty)
                     {
-                        ErrorUtilities.VerifyThrow(
-                            taskFactoryParameters.Runtime != null && taskFactoryParameters.Architecture != null,
-                            "if the parameters are non-null, it should contain both Runtime and Architecture when we get here!");
+                        Assumed.True(taskFactoryParameters.Runtime != null && taskFactoryParameters.Architecture != null, "if the parameters are non-null, it should contain both Runtime and Architecture when we get here!");
                     }
 
                     _taskFactory = AssemblyTaskFactory;
@@ -1411,7 +1409,7 @@ namespace Microsoft.Build.Execution
                 if (_taskFactoryWrapperInstance == null)
                 {
                     AssemblyLoadInfo taskFactoryLoadInfo = TaskFactoryAssemblyLoadInfo;
-                    ErrorUtilities.VerifyThrow(taskFactoryLoadInfo != null, "TaskFactoryLoadInfo should never be null");
+                    Assumed.NotNull(taskFactoryLoadInfo, "TaskFactoryLoadInfo should never be null");
                     ITaskFactory factory = null;
                     LoadedType loadedType = null;
 
@@ -1675,8 +1673,8 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml);
-                    ErrorUtilities.VerifyThrowArgumentNull(expander);
+                    ArgumentNullException.ThrowIfNull(projectUsingTaskXml);
+                    ArgumentNullException.ThrowIfNull(expander);
 
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)

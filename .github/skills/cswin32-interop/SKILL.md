@@ -8,6 +8,8 @@ argument-hint: 'Describe the Windows API or interop code you are migrating or ad
 
 [CsWin32](https://github.com/microsoft/CsWin32) replaces `[DllImport]` with source-generated `PInvoke.*` calls. `FEATURE_WINDOWSINTEROP` is the compile-time gate; source builds disable it.
 
+**Paired skill:** [cswin32-com](../cswin32-com/SKILL.md) covers struct-based COM interop on top of CsWin32 (`ComScope<T>`, `AgileComPointer<T>`, `delegate* unmanaged` vtables, `IComIID`, `CoCreateInstance`, manual COM structs not in Win32 metadata). This file covers only the general P/Invoke layer; the COM skill builds on its blittable-signature rules.
+
 ## Rules
 
 1. **Replace `[DllImport]` with `PInvoke.*`**. Delete old declarations and hand-written structs/enums/constants.
@@ -15,6 +17,47 @@ argument-hint: 'Describe the Windows API or interop code you are migrating or ad
 3. **Use CsWin32 types directly** (`HANDLE`, `HMODULE`, `HRESULT.S_OK`, `FILE_FLAGS_AND_ATTRIBUTES`, etc.).
 4. **Call `PInvoke.*` directly** — no wrappers. Types flow via `InternalsVisibleTo`.
 5. **Prefer CsWin32 for Windows APIs**. Use `[LibraryImport]` only for non-Windows native calls (e.g. `libc`), guarded with `#if NET`.
+6. **Preserve the old error-handling contract.** Check the original `[DllImport]` for `PreserveSig` / `SetLastError` / `BOOL` / `HRESULT` semantics and reproduce them: `PreserveSig=false` → `.ThrowOnFailure()`; `SetLastError=true` + failed `BOOL` → `throw new Win32Exception()`. Silently returning where the old code threw is a behavior change. See [cswin32-com's parity table](../cswin32-com/SKILL.md#error-handling-parity-when-migrating) for the COM-side equivalent.
+
+## Blittable signatures
+
+CsWin32 is configured with `allowMarshaling: false`, so every `[DllImport]` and every manual
+COM vtable method must be blittable — no marshalling at the boundary. These rules apply
+to both. For COM-vtable-only additions, see
+[cswin32-com](../cswin32-com/SKILL.md#blittable-vtable-signatures).
+
+- **Return `HRESULT`** from HRESULT-returning APIs (not `int`). Blittable (single `int` field),
+  exposes `.Succeeded` / `.Failed` / `.ThrowOnFailure()`. Use `HRESULT.S_OK` over `0`; cast
+  `e.HResult` to `(HRESULT)` when wrapping. `AddRef` / `Release` return `uint`.
+- **Call `.ThrowOnFailure()`** instead of `if (hr.Failed) Marshal.ThrowExceptionForHR(hr)` —
+  same exception, IErrorInfo-enriched, one-line call site:
+  `iface->Method(...).ThrowOnFailure();`. Branch on `hr` only when handling a specific HRESULT
+  (e.g. `ERROR_INSUFFICIENT_BUFFER`) before throwing. See
+  [cswin32-com's parity table](../cswin32-com/SKILL.md#error-handling-parity-when-migrating)
+  for the migration contract.
+- **Use `PCWSTR` / `PWSTR`** for wide strings, never managed `string`. Implicit conversion from
+  `fixed (char* p = managedString)`. Add to `NativeMethods.txt` if not yet generated.
+- **`T**` not `out T*`** for pointer outputs. `out` triggers marshaling + a `fixed` round-trip
+  at every call site.
+- **`void*` for opaque / reserved params** — never `IntPtr.Zero`; pass `null` literally.
+  `IntPtr` is fine at boundaries with the wider .NET surface (`Marshal.*`,
+  `SafeHandle.DangerousGetHandle`, public API).
+- **Prefer `nint` / `nuint`** over `IntPtr` / `UIntPtr` for native-sized integers — no boxing,
+  better cast semantics, no `IntPtr.Zero` ceremony.
+- **No managed reference types** (`string`, `StringBuilder`, arrays) in blittable signatures.
+- **Don't specify `PreserveSig = true` on `[DllImport]`** — it's the default. Use
+  `PreserveSig = false` only to force marshaller throw-on-failure (rare; prefer returning
+  `HRESULT` and `.ThrowOnFailure()`). `[ComImport]` defaults the opposite way, but struct-based
+  COM uses raw `delegate*` and isn't affected — see
+  [cswin32-com](../cswin32-com/SKILL.md#blittable-vtable-signatures).
+- **Constrain flag / option parameters to a typed `enum`.** When a native `DWORD` / `ULONG` /
+  `int` is documented as a `typedef enum` or `#define` set, declare a C# `[Flags] enum Foo : uint`
+  (matching the underlying type) and use it in the signature (and `delegate*` cast for COM).
+  Mirror the constraint even when the native side has no named enum. Self-documenting at the
+  call site: `OpenScope(path, CorOpenFlags.ofRead, ...)` vs `OpenScope(path, 0, ...)`. Co-locate
+  the enum next to its consumer. See
+  [`CorOpenFlags.cs`](../../../src/Tasks/AssemblyDependency/Metadata/CorOpenFlags.cs) and
+  [`CorAssemblyFlags.cs`](../../../src/Tasks/AssemblyDependency/Metadata/CorAssemblyFlags.cs).
 
 ### Dual Guard Pattern
 
@@ -43,13 +86,13 @@ Windows-only files are excluded via `<Compile Remove>` instead — no `#if` insi
 | Guard | When | Runtime check? |
 |-------|------|----------------|
 | `#if FEATURE_WINDOWSINTEROP` | Multi-TFM Windows calls | Yes |
-| `#if FEATURE_WINDOWSINTEROP && NET` | Manual COM structs that use static-abstract `IComIID` (e.g. WMI). CsWin32-generated COM types via `ComScope<T>` work on net472 via the `IComIID` polyfill — see cswin32-com skill | Yes |
+| `#if FEATURE_WINDOWSINTEROP && NET` | Manual COM structs gated .NET-only (e.g. WMI). CsWin32-generated COM types via `ComScope<T>` work on net472 too — the generator emits `IComIID` on every TFM (see [cswin32-com](../cswin32-com/SKILL.md#icomiid-across-tfms)) | Yes |
 | `#if FEATURE_WINDOWSINTEROP && !NETSTANDARD` | CsWin32 types without `static abstract` (net472 + net10) | Yes |
 | `#if !NET` / `#if FEATURE_MSCOREE` | net472-only = inherently Windows | No |
 
 **Namespace imports** must be inside `#if FEATURE_WINDOWSINTEROP`. WDK APIs use `Windows.Wdk` namespace.
 
-**Files**: `src/Framework/Windows/` (CsWin32 partials), `src/Shared/Win32/` (COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs), `src/Framework/Polyfills/IComIID*.cs` (net472/netstandard2.0 polyfills, gated `#if !NET`).
+**Files**: `src/Framework/Windows/` (CsWin32 partials), `src/Shared/Win32/` (COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs).
 
 ### Constant Replacements
 
@@ -66,6 +109,8 @@ Windows-only files are excluded via `<Compile Remove>` instead — no `#if` insi
 - Shell folder → `KNOWN_FOLDER_FLAG`
 
 Cast `int`/`uint` return codes via `(WIN32_ERROR)res` for `switch` and equality. Add the enum to `NativeMethods.txt` if not yet generated, then check `obj/.../generated/Microsoft.Windows.CsWin32/.../Windows.Win32.<EnumName>.g.cs`.
+
+**Some flag values are standalone constants, not enum members.** A Win32 `#define` outside a `typedef enum` generates as an `internal const` on `PInvoke`. Example: the `LoadTypeLibEx` flags are `PInvoke.LOAD_TLB_AS_32BIT` / `_64BIT` (`uint`), **not** members of `REGKIND` (which has only `REGKIND_DEFAULT/REGISTER/NONE`). Add the *constant name* to `NativeMethods.txt` like any API. OR it onto an enum at the constant's width and cast back: `(REGKIND)((uint)REGKIND.REGKIND_NONE | PInvoke.LOAD_TLB_AS_32BIT)`. Don't reintroduce a local `const` CsWin32 already emits.
 
 **Match local types to the CsWin32 type.** Instead of `int res = (int)PInvoke.RmStartSession(...)` and casting at every comparison, declare `WIN32_ERROR res = PInvoke.RmStartSession(...)` and let helpers like `GetException(WIN32_ERROR res, ...)` take the typed value. Cast to `int`/`uint` only at the boundary where a non-CsWin32 API needs it (e.g. `new Win32Exception((int)res, ...)`). The same applies to `HRESULT`, `BOOL`, `HANDLE`, `PROCESS_CREATION_FLAGS`, etc.
 
@@ -138,4 +183,4 @@ dotnet msbuild MSBuild.SourceBuild.slnf /p:DotNetBuildSourceOnly=true -v:q
 - **CA1823**: Unused private fields (e.g. constants only consumed inside the guard)
 - **CS1587**: XML doc comments (move inside `#if`, not before)
 
-The same applies when adding **polyfills** in `src/Framework/Polyfills/` (e.g. `IComIID`, `SpanExtensions`, `IndexOfAnyExcept`): polyfills usually live behind `#if !NET` (or similar TFM guards) but are still consumed from `#if FEATURE_WINDOWSINTEROP` code paths. Always run the source-build to confirm the polyfill, its callers, and any helper members compile cleanly when interop is disabled — a polyfill referenced only by Windows-only code will trip IDE0051/CA1823 in source-only builds.
+The same applies when adding **polyfills** in `src/Framework/Polyfills/` (e.g. `SpanExtensions`, `IndexOfAnyExcept`): polyfills usually live behind `#if !NET` (or similar TFM guards) but are still consumed from `#if FEATURE_WINDOWSINTEROP` code paths. Always run the source-build to confirm the polyfill, its callers, and any helper members compile cleanly when interop is disabled — a polyfill referenced only by Windows-only code will trip IDE0051/CA1823 in source-only builds.

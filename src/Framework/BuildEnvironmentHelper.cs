@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -374,6 +375,11 @@ namespace Microsoft.Build.Shared
         private static bool? _runningTests;
         private static readonly LockType _runningTestsLock = new LockType();
 
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "Deliberately reads the internal Microsoft.Build.Framework.TestInfo.s_runningTests field by reflection so this type can be shared across assemblies without a hard reference. The DynamicDependency below keeps the field under trimming.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2075:UnrecognizedReflectionPattern",
+            Justification = "TestInfo.s_runningTests is preserved by the DynamicDependency below, so the GetField lookup remains valid under trimming.")]
+        [DynamicDependency("s_runningTests", "Microsoft.Build.Framework.TestInfo", "Microsoft.Build.Framework")]
         private static bool CheckIfRunningTests()
         {
             if (_runningTests != null)
@@ -589,7 +595,8 @@ namespace Microsoft.Build.Shared
                     NativeMethods.ProcessorArchitectures.X86 => CurrentMSBuildToolsDirectory,
                     NativeMethods.ProcessorArchitectures.X64 or NativeMethods.ProcessorArchitectures.ARM64
                         => currentToolsDirectory.Parent?.FullName,
-                    _ => throw new InternalErrorException("Unknown processor architecture " + NativeMethods.ProcessorArchitecture),
+
+                    _ => Assumed.Unreachable<string>($"Unknown processor architecture {NativeMethods.ProcessorArchitecture}"),
                 };
             }
             else

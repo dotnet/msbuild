@@ -3,8 +3,6 @@
 
 using System.Reflection;
 
-#nullable disable
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>

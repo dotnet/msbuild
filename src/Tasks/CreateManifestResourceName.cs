@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_resourceFiles, nameof(ResourceFiles));
+                ArgumentNullException.ThrowIfNull(_resourceFiles, nameof(ResourceFiles));
                 return _resourceFiles;
             }
             set => _resourceFiles = value;
@@ -311,7 +311,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void MakeValidEverettSubFolderIdentifier(StringBuilder builder, string subName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subName);
+            ArgumentNullException.ThrowIfNull(subName);
 
             if (string.IsNullOrEmpty(subName)) { return; }
 
@@ -349,7 +349,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void MakeValidEverettFolderIdentifier(StringBuilder builder, string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name);
+            ArgumentNullException.ThrowIfNull(name);
 
             if (string.IsNullOrEmpty(name)) { return; }
 
@@ -381,7 +381,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static string MakeValidEverettIdentifier(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name);
+            ArgumentNullException.ThrowIfNull(name);
             if (string.IsNullOrEmpty(name)) { return name; }
 
             var everettId = new StringBuilder(name.Length);
