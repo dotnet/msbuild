@@ -67,7 +67,7 @@ internal partial class Expander<P, I>
             Assumed.NotNull(metadata, "Cannot expand metadata without providing metadata");
 
             // PERF NOTE: pre-scanning the string for "%(" is cheaper than a full scan.
-            if (!expression.Contains("%("))
+            if (expression.IndexOf("%(", StringComparison.Ordinal) < 0)
             {
                 return expression;
             }
@@ -89,7 +89,7 @@ internal partial class Expander<P, I>
 
         private string Expand(string expression)
         {
-            if (!expression.Contains("@("))
+            if (expression.IndexOf("@(", StringComparison.Ordinal) < 0)
             {
                 // No item vectors in the string — scan for metadata references directly.
                 ScanAndExpandMetadata(expression, 0, expression.Length);
