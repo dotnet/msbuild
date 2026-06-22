@@ -52,7 +52,7 @@ internal partial class Expander<P, I>
         /// <returns>
         ///  The string with item metadata expanded in-place, escaped.
         /// </returns>
-        internal static string? ExpandMetadataLeaveEscaped(
+        internal static string ExpandMetadataLeaveEscaped(
             string expression,
             IMetadataTable metadata,
             ExpanderOptions options,
