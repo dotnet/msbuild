@@ -4,7 +4,8 @@ This folder builds `MSBuildTaskHost.exe`, which targets .NET Framework 3.5 and
 exists to maintain Visual Studio asset compatibility (especially around
 targeting .NET Framework 3.5). It is **not under active development**.
 
-**Do not edit any files in this folder unless the user explicitly tells you to
+**Do not edit any files in this folder unless it is required to keep communication
+working with the rest of the repo or if the user explicitly tells you to
 modify this folder or a specific file within it.**
 
 When working on a task that would otherwise touch this folder:
