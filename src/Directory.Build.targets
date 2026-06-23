@@ -158,6 +158,50 @@
     <PackageDownload Include="System.Numerics.Vectors" Version="[$(FrozenSystemNumericsVectorsVersion)]" />
   </ItemGroup>
 
+  <!--
+    Select the dotnet/runtime build each project references. This selection lives here rather than in
+    eng/Versions.props because it depends on $(IsUnitTestProject) and $(TargetFramework), which are
+    not yet set when that file is imported.
+
+    Most projects reference $(RuntimePackageVersion_CompileTime) - the build MSBuild compiles against
+    and declares as its own package dependencies. net472 unit-test projects load Microsoft.Build
+    in-proc and run the redistributed MSBuild.exe, so they instead reference the servicing build the
+    application projects redistribute (see $(DeployRuntimeServicingAssemblies) below):
+    $(RuntimePackageVersion_VSDeploy). Referencing it flows the servicing versions through restore,
+    keeping each test output directory self-consistent - the deployed assemblies, the generated
+    test-host binding redirects, and the bundled MSBuild.exe.config all agree. net9.0 keeps the
+    compile-time versions (the shared framework supplies these there).
+
+    Pinning only the leaf test projects higher does not cause an NU1109 downgrade, because their
+    transitive providers (Microsoft.Build etc.) stay at $(RuntimePackageVersion_CompileTime).
+  -->
+  <PropertyGroup>
+    <RuntimePackageVersion Condition="'$(IsUnitTestProject)' == 'true' and '$(TargetFramework)' == 'net472'">$(RuntimePackageVersion_VSDeploy)</RuntimePackageVersion>
+    <RuntimePackageVersion Condition="'$(RuntimePackageVersion)' == ''">$(RuntimePackageVersion_CompileTime)</RuntimePackageVersion>
+
+    <SystemCollectionsImmutableVersion>$(RuntimePackageVersion)</SystemCollectionsImmutableVersion>
+    <SystemConfigurationConfigurationManagerVersion>$(RuntimePackageVersion)</SystemConfigurationConfigurationManagerVersion>
+    <SystemDiagnosticsDiagnosticSourceVersion>$(RuntimePackageVersion)</SystemDiagnosticsDiagnosticSourceVersion>
+    <SystemDiagnosticsEventLogVersion>$(RuntimePackageVersion)</SystemDiagnosticsEventLogVersion>
+    <SystemFormatsAsn1Version>$(RuntimePackageVersion)</SystemFormatsAsn1Version>
+    <SystemFormatsNrbfVersion>$(RuntimePackageVersion)</SystemFormatsNrbfVersion>
+    <SystemReflectionMetadataVersion>$(RuntimePackageVersion)</SystemReflectionMetadataVersion>
+    <SystemReflectionMetadataLoadContextVersion>$(RuntimePackageVersion)</SystemReflectionMetadataLoadContextVersion>
+    <SystemResourcesExtensionsVersion>$(RuntimePackageVersion)</SystemResourcesExtensionsVersion>
+    <SystemSecurityCryptographyProtectedDataVersion>$(RuntimePackageVersion)</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemTextEncodingCodePagesVersion>$(RuntimePackageVersion)</SystemTextEncodingCodePagesVersion>
+    <SystemTextJsonVersion>$(RuntimePackageVersion)</SystemTextJsonVersion>
+    <SystemThreadingChannelsVersion>$(RuntimePackageVersion)</SystemThreadingChannelsVersion>
+    <SystemThreadingTasksDataflowVersion>$(RuntimePackageVersion)</SystemThreadingTasksDataflowVersion>
+  </PropertyGroup>
+
+  <!-- The net472 servicing wave binds to newer maintenance packages than the compile-time defaults in eng/Versions.props. -->
+  <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true' and '$(TargetFramework)' == 'net472'">
+    <SystemMemoryVersion>4.6.3</SystemMemoryVersion>
+    <SystemThreadingTasksExtensionsVersion>4.6.3</SystemThreadingTasksExtensionsVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.2</SystemRuntimeCompilerServicesUnsafeVersion>
+  </PropertyGroup>
+
   <!-- Work around maintenance-packages updates breaking stuff -->
   <Target Name="ReplaceCompileReferencesWithOlderMaintenancePackagesVersions"
           BeforeTargets="ResolveAssemblyReferences"

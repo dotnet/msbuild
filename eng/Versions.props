@@ -69,23 +69,14 @@
         See the ReplaceRuntimeAssembliesWithServicingVersions target in src/Directory.Build.targets.
         This mirrors the $(UseFrozenMaintenancePackageVersions) mechanism in reverse (there we
         compile against an older build than we ship; here we ship a newer build than we compile).
+
+        These two versions are the single source of truth. src/Directory.Build.targets selects between
+        them per project and assigns the individual System.* runtime package versions from the result;
+        the selection lives there because it depends on $(IsUnitTestProject) and $(TargetFramework),
+        which are not yet set this early.
     -->
     <RuntimePackageVersion_CompileTime>9.0.0</RuntimePackageVersion_CompileTime>
     <RuntimePackageVersion_VSDeploy>10.0.8</RuntimePackageVersion_VSDeploy>
-    <SystemCollectionsImmutableVersion>$(RuntimePackageVersion_CompileTime)</SystemCollectionsImmutableVersion>
-    <SystemConfigurationConfigurationManagerVersion>$(RuntimePackageVersion_CompileTime)</SystemConfigurationConfigurationManagerVersion>
-    <SystemDiagnosticsDiagnosticSourceVersion>$(RuntimePackageVersion_CompileTime)</SystemDiagnosticsDiagnosticSourceVersion>
-    <SystemDiagnosticsEventLogVersion>$(RuntimePackageVersion_CompileTime)</SystemDiagnosticsEventLogVersion>
-    <SystemFormatsAsn1Version>$(RuntimePackageVersion_CompileTime)</SystemFormatsAsn1Version>
-    <SystemFormatsNrbfVersion>$(RuntimePackageVersion_CompileTime)</SystemFormatsNrbfVersion>
-    <SystemReflectionMetadataVersion>$(RuntimePackageVersion_CompileTime)</SystemReflectionMetadataVersion>
-    <SystemReflectionMetadataLoadContextVersion>$(RuntimePackageVersion_CompileTime)</SystemReflectionMetadataLoadContextVersion>
-    <SystemResourcesExtensionsVersion>$(RuntimePackageVersion_CompileTime)</SystemResourcesExtensionsVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>$(RuntimePackageVersion_CompileTime)</SystemSecurityCryptographyProtectedDataVersion>
-    <SystemTextEncodingCodePagesVersion>$(RuntimePackageVersion_CompileTime)</SystemTextEncodingCodePagesVersion>
-    <SystemTextJsonVersion>$(RuntimePackageVersion_CompileTime)</SystemTextJsonVersion>
-    <SystemThreadingChannelsVersion>$(RuntimePackageVersion_CompileTime)</SystemThreadingChannelsVersion>
-    <SystemThreadingTasksDataflowVersion>$(RuntimePackageVersion_CompileTime)</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- maintained in eng/dependabot/Packages.props -->

@@ -4,13 +4,6 @@
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
-
-    <!-- This project bundles MSBuild.exe (via the MSBuild.csproj reference) and spawns it
-         out-of-proc, so it is a net472 servicing-assembly redistribution surface just like
-         MSBuild.csproj: deploy the servicing assemblies so the bundled MSBuild.exe and its
-         servicing app.config binding redirects agree. See the
-         ReplaceRuntimeAssembliesWithServicingVersions target in src/Directory.Build.targets. -->
-    <DeployRuntimeServicingAssemblies>true</DeployRuntimeServicingAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
