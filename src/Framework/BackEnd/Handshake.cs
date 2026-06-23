@@ -60,12 +60,12 @@ internal class Handshake
         HandshakeOptions = nodeType;
 
 #if NETFRAMEWORK
-        FrameworkErrorUtilities.VerifyThrow(
+        Assumed.True(
             toolsDirectory is null || IsNetTaskHost || IsClr2TaskHost,
             $"{toolsDirectory} should only be provided for .NET or CLR2 TaskHost nodes.");
 #else
         // IsNetTaskHost covers the case when NET process spawns NET TaskHost.
-        FrameworkErrorUtilities.VerifyThrow(
+        Assumed.True(
             toolsDirectory is null || IsNetTaskHost,
             $"{toolsDirectory} should not have been provided.");
 #endif

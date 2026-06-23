@@ -30,10 +30,10 @@ These are configured in `Directory.Build.props` (repo root), `src/Directory.Buil
 
 ## Flags — MTP vs VSTest pitfalls
 
-This repo uses MTP, **not** VSTest. Many familiar `dotnet test` flags silently do nothing. Key differences:
+This repo uses MTP with the xUnit v3 MTP runner, **not** VSTest. Many familiar `dotnet test` flags silently do nothing. Key differences:
 
 - **Use** `--report-trx` (not `--logger trx`), `--coverage` (not `--collect "XPlat Code Coverage"`), `--filter-method`/`--filter-class`/`--filter-trait` for xUnit v3 native filtering.
-- **Don't use** `--nologo`, `--blame`, `--settings *.runsettings`, `--diag`, `--collect`, or `-- RunConfiguration.MaxCpuCount=...` — these are VSTest-only and ignored.
+- **Don't use** `--filter`, `--nologo`, `--blame`, `--settings *.runsettings`, `--diag`, `--collect`, or `-- RunConfiguration.MaxCpuCount=...` — these are VSTest-only and ignored.
 - **Still works**: `-c`, `-f`, `--no-restore`, `--no-build`, `-v`, `-bl:`, `-p:Property=Value` — these are interpreted by `dotnet test` itself before MTP sees them.
 
 For comprehensive MTP vs VSTest flag reference, see the `run-tests` skill from the `dotnet-test` plugin.
@@ -47,9 +47,9 @@ Aim for sub-30s iterations.
 1. **Run via `dotnet test` with a single TFM and filter** (incremental build handles rebuilding automatically):
    ```powershell
    dotnet test src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj `
-     -f net10.0 --filter "FullyQualifiedName~MyFeature"
+     -f net10.0 -- --filter-method "*MyFeature*"
    ```
-2. **Or run the MTP exe directly** (fastest — no SDK overhead; build first if source changed):
+2. **Or run the test exe directly** (fastest — no SDK overhead; build first if source changed):
    ```powershell
    dotnet build src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj -c Debug -f net10.0
    artifacts\bin\Microsoft.Build.Tasks.UnitTests\Debug\net10.0\Microsoft.Build.Tasks.UnitTests.exe `
@@ -71,7 +71,7 @@ These trade safety for speed — use during iteration, **revert before final val
     "parallelizeTestCollections": true
   }
   ```
-  Or pass it as MTP args after `--`: `-- xUnit.MaxParallelThreads=-1 xUnit.ParallelizeTestCollections=true`. Expect flakes in tests that touch env vars, cwd, the file system, or the global ProjectCollection — **don't ship a fix that depends on this being on**.
+  Or pass them as runner args after `--`: `-- xUnit.MaxParallelThreads=-1 xUnit.ParallelizeTestCollections=true`. Expect flakes in tests that touch env vars, cwd, the file system, or the global ProjectCollection — **don't ship a fix that depends on this being on**.
 - **Skip bootstrap packaging** for non-bootstrap test projects:
   `dotnet build ... -p:CreateBootstrap=false` (useful when the local bootstrap SDK payload is missing).
 - **Narrow with traits**: `--filter-trait Category=mytraitduringdev` if you've tagged a focused subset.
@@ -122,9 +122,9 @@ Match the source area you changed to its `*.UnitTests` project:
 
 | Scenario | Command |
 |----------|---------|
-| Fast scoped dev loop | `dotnet test <proj> -f net10.0 --filter "FullyQualifiedName~X"` |
-| Direct MTP exe | `artifacts\bin\<Proj>\Debug\net10.0\<Proj>.exe --filter-method "*X*" --no-progress` |
-| Single test by name | `dotnet test <proj> --filter "FullyQualifiedName~MyTestMethod"` |
+| Fast scoped dev loop | `dotnet test <proj> -f net10.0 -- --filter-method "*X*"` |
+| Direct test exe | `artifacts\bin\<Proj>\Debug\net10.0\<Proj>.exe --filter-method "*X*" --no-progress` |
+| Single test by name | `dotnet test <proj> -- --filter-method "*MyTestMethod*"` |
 | Final per-project validation | `dotnet test <proj> -c Release` (all TFMs) |
 | Final full validation | `.\build.cmd -test -c Release` / `./build.sh --test -c Release` |
 | TRX report | `--report-trx --report-trx-filename out.trx --results-directory artifacts\TestResults` |

@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_nativeReferences, nameof(NativeReferences));
+                ArgumentNullException.ThrowIfNull(_nativeReferences, nameof(NativeReferences));
                 return _nativeReferences;
             }
             set => _nativeReferences = value;
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_additionalSearchPaths, nameof(AdditionalSearchPaths));
+                ArgumentNullException.ThrowIfNull(_additionalSearchPaths, nameof(AdditionalSearchPaths));
                 return _additionalSearchPaths;
             }
             set => _additionalSearchPaths = value;

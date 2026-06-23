@@ -1,14 +1,17 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System;
-using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using COMException = System.Runtime.InteropServices.COMException;
-using Marshal = System.Runtime.InteropServices.Marshal;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Variant;
+using COMException = System.Runtime.InteropServices.COMException;
+using Marshal = System.Runtime.InteropServices.Marshal;
 
 #nullable disable
 
@@ -80,24 +83,17 @@ namespace Microsoft.Build.Tasks
                 ado27Installed = true;
                 ado27PropertyInitialized = true;
 
-                ITypeLib ado27 = null;
+                unsafe
+                {
+                    using ComScope<ITypeLib> ado27 = new(null);
 
-                try
-                {
                     // see if ADO 2.7 is registered.
-                    ado27 = (ITypeLib)NativeMethods.LoadRegTypeLib(ref s_guidADO27, 2, 7, 0);
-                }
-                catch (COMException ex)
-                {
-                    // it's not registered.
-                    ado27Installed = false;
-                    ado27ErrorMessage = ex.Message;
-                }
-                finally
-                {
-                    if (ado27 != null)
+                    HRESULT hr = PInvoke.LoadRegTypeLib(s_guidADO27, 2, 7, 0, ado27);
+                    if (hr.Failed)
                     {
-                        Marshal.ReleaseComObject(ado27);
+                        // it's not registered.
+                        ado27Installed = false;
+                        ado27ErrorMessage = Marshal.GetExceptionForHR((int)hr)?.Message;
                     }
                 }
 
@@ -123,7 +119,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given a TYPELIBATTR structure, generates a key that can be used in hashtables to identify it.
         /// </summary>
-        internal static string UniqueKeyFromTypeLibAttr(TYPELIBATTR attr)
+        internal static string UniqueKeyFromTypeLibAttr(TLIBATTR attr)
         {
             return $@"{attr.guid}|{attr.wMajorVerNum}.{attr.wMinorVerNum}|{attr.lcid}";
         }
@@ -131,7 +127,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Compares two TYPELIBATTR structures
         /// </summary>
-        internal static bool AreTypeLibAttrEqual(TYPELIBATTR attr1, TYPELIBATTR attr2)
+        internal static bool AreTypeLibAttrEqual(TLIBATTR attr1, TLIBATTR attr2)
         {
             return attr1.wMajorVerNum == attr2.wMajorVerNum &&
                 attr1.wMinorVerNum == attr2.wMinorVerNum &&
@@ -142,12 +138,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper method for retrieving type lib attributes for the given type lib
         /// </summary>
-        internal static void GetTypeLibAttrForTypeLib(ref ITypeLib typeLib, out TYPELIBATTR typeLibAttr)
+        internal static unsafe void GetTypeLibAttrForTypeLib(ITypeLib* typeLib, out TLIBATTR typeLibAttr)
         {
-            typeLib.GetLibAttr(out IntPtr pAttrs);
+            TLIBATTR* pAttrs;
+            typeLib->GetLibAttr(&pAttrs).ThrowOnFailure();
 
             // GetLibAttr should never return null, this is just to be safe
-            if (pAttrs == IntPtr.Zero)
+            if (pAttrs == null)
             {
                 throw new COMException(
                     ResourceUtilities.GetResourceString("ResolveComReference.CannotGetTypeLibAttrForTypeLib"));
@@ -155,11 +152,11 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                typeLibAttr = Marshal.PtrToStructure<TYPELIBATTR>(pAttrs);
+                typeLibAttr = *pAttrs;
             }
             finally
             {
-                typeLib.ReleaseTLibAttr(pAttrs);
+                typeLib->ReleaseTLibAttr(pAttrs);
             }
         }
 
@@ -169,12 +166,13 @@ namespace Microsoft.Build.Tasks
         /// <param name="typeInfo"></param>
         /// <param name="typeAttr"></param>
         /// <returns></returns>
-        internal static void GetTypeAttrForTypeInfo(ITypeInfo typeInfo, out TYPEATTR typeAttr)
+        internal static unsafe void GetTypeAttrForTypeInfo(ITypeInfo* typeInfo, out TYPEATTR typeAttr)
         {
-            typeInfo.GetTypeAttr(out IntPtr pAttrs);
+            TYPEATTR* pAttrs;
+            typeInfo->GetTypeAttr(&pAttrs).ThrowOnFailure();
 
             // GetTypeAttr should never return null, this is just to be safe
-            if (pAttrs == IntPtr.Zero)
+            if (pAttrs == null)
             {
                 throw new COMException(
                     ResourceUtilities.GetResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
@@ -182,11 +180,11 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                typeAttr = (TYPEATTR)Marshal.PtrToStructure(pAttrs, typeof(TYPEATTR));
+                typeAttr = *pAttrs;
             }
             finally
             {
-                typeInfo.ReleaseTypeAttr(pAttrs);
+                typeInfo->ReleaseTypeAttr(pAttrs);
             }
         }
 
@@ -196,19 +194,19 @@ namespace Microsoft.Build.Tasks
         /// It's not really possible to copy everything to a managed struct and then release the ptr immediately
         /// here, since VARDESCs contain other native pointers we may need to access.
         /// </summary>
-        internal static void GetVarDescForVarIndex(ITypeInfo typeInfo, int varIndex, out VARDESC varDesc, out IntPtr varDescHandle)
+        internal static unsafe void GetVarDescForVarIndex(ITypeInfo* typeInfo, int varIndex, out VARDESC* varDesc)
         {
-            typeInfo.GetVarDesc(varIndex, out IntPtr pVarDesc);
+            VARDESC* pVarDesc;
+            typeInfo->GetVarDesc((uint)varIndex, &pVarDesc).ThrowOnFailure();
 
             // GetVarDesc should never return null, this is just to be safe
-            if (pVarDesc == IntPtr.Zero)
+            if (pVarDesc == null)
             {
                 throw new COMException(
                     ResourceUtilities.GetResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
             }
 
-            varDesc = (VARDESC)Marshal.PtrToStructure(pVarDesc, typeof(VARDESC));
-            varDescHandle = pVarDesc;
+            varDesc = pVarDesc;
         }
 
         /// <summary>
@@ -217,32 +215,49 @@ namespace Microsoft.Build.Tasks
         /// It's not really possible to copy everything to a managed struct and then release the ptr immediately
         /// here, since FUNCDESCs contain other native pointers we may need to access.
         /// </summary>
-        internal static void GetFuncDescForDescIndex(ITypeInfo typeInfo, int funcIndex, out FUNCDESC funcDesc, out IntPtr funcDescHandle)
+        internal static unsafe void GetFuncDescForDescIndex(ITypeInfo* typeInfo, int funcIndex, out FUNCDESC* funcDesc)
         {
-            typeInfo.GetFuncDesc(funcIndex, out IntPtr pFuncDesc);
+            FUNCDESC* pFuncDesc;
+            typeInfo->GetFuncDesc((uint)funcIndex, &pFuncDesc).ThrowOnFailure();
 
             // GetFuncDesc should never return null, this is just to be safe
-            if (pFuncDesc == IntPtr.Zero)
+            if (pFuncDesc == null)
             {
                 throw new COMException(
                     ResourceUtilities.GetResourceString("ResolveComReference.CannotRetrieveTypeInformation"));
             }
 
-            funcDesc = (FUNCDESC)Marshal.PtrToStructure(pFuncDesc, typeof(FUNCDESC));
-            funcDescHandle = pFuncDesc;
+            funcDesc = pFuncDesc;
+        }
+
+        /// <summary>
+        /// Gets the name of a type library directly from the library's documentation (index -1),
+        /// which is the struct-based COM equivalent of the legacy Marshal.GetTypeLibName helper.
+        /// </summary>
+        private static unsafe string GetTypeLibNameFromDocumentation(ITypeLib* typeLib)
+        {
+            // All out-params must be supplied: the runtime-callable-wrapper marshaller writes every
+            // [out] BSTR even though only the name is needed here.
+            using BSTR name = default;
+            using BSTR docString = default;
+            using BSTR helpFile = default;
+            uint helpContext;
+            typeLib->GetDocumentation(-1, &name, &docString, &helpContext, &helpFile).ThrowOnFailure();
+            return name.ToString();
         }
 
         /// <summary>
         /// Gets the name of given type library.
         /// </summary>
-        internal static bool GetTypeLibNameForITypeLib(TaskLoggingHelper log, bool silent, ITypeLib typeLib, string typeLibId, out string typeLibName)
+        internal static unsafe bool GetTypeLibNameForITypeLib(TaskLoggingHelper log, bool silent, ITypeLib* typeLib, string typeLibId, out string typeLibName)
         {
-
             // see if the type library supports ITypeLib2
-            if (!(typeLib is ITypeLib2 typeLib2))
+            using ComScope<ITypeLib2> typeLib2 = new(null);
+            Guid typeLib2Iid = ITypeLib2.IID_Guid;
+            if (typeLib->QueryInterface(&typeLib2Iid, typeLib2).Failed)
             {
-                // Looks like the type lib doesn't support it. Let's use the Marshal method.
-                typeLibName = Marshal.GetTypeLibName(typeLib);
+                // Looks like the type lib doesn't support it. Get the name from the type library directly.
+                typeLibName = GetTypeLibNameFromDocumentation(typeLib);
                 return true;
             }
 
@@ -250,25 +265,35 @@ namespace Microsoft.Build.Tasks
             // type library name.
             try
             {
-                typeLib2.GetCustData(ref NativeMethods.GUID_TYPELIB_NAMESPACE, out object data);
+                Guid namespaceGuid = NativeMethods.GUID_TYPELIB_NAMESPACE;
+                VARIANT custData = default;
+                typeLib2.Pointer->GetCustData(&namespaceGuid, &custData).ThrowOnFailure();
+
+                object data;
+                try
+                {
+                    data = Marshal.GetObjectForNativeVariant((IntPtr)(&custData));
+                }
+                finally
+                {
+                    PInvoke.VariantClear(&custData);
+                }
 
                 // if returned namespace is null or its type is not System.String, fall back to the default
                 // way of getting the type lib name (just to be safe)
-                if (data == null || !string.Equals(data.GetType().ToString(), "system.string", StringComparison.OrdinalIgnoreCase))
+                if (data is not string typeLibNamespace)
                 {
-                    typeLibName = Marshal.GetTypeLibName(typeLib);
+                    typeLibName = GetTypeLibNameFromDocumentation(typeLib);
                     return true;
                 }
 
                 // Strip off the DLL extension if it's there
-                typeLibName = (string)data;
+                typeLibName = typeLibNamespace;
 
-                if (typeLibName.Length >= 4)
+                if (typeLibName.Length >= 4 &&
+                    typeLibName.AsSpan().EndsWith(".dll".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
-                    if (typeLibName.AsSpan().EndsWith(".dll".AsSpan(), StringComparison.OrdinalIgnoreCase))
-                    {
-                        typeLibName = typeLibName.Substring(0, typeLibName.Length - 4);
-                    }
+                    typeLibName = typeLibName.Substring(0, typeLibName.Length - 4);
                 }
             }
             catch (COMException ex)
@@ -278,7 +303,7 @@ namespace Microsoft.Build.Tasks
                 {
                     log.LogWarningWithCodeFromResources("ResolveComReference.CannotAccessTypeLibName", typeLibId, ex.Message);
                 }
-                typeLibName = Marshal.GetTypeLibName(typeLib);
+                typeLibName = GetTypeLibNameFromDocumentation(typeLib);
                 return true;
             }
 
@@ -288,40 +313,26 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets the name of given type library.
         /// </summary>
-        internal static bool GetTypeLibNameForTypeLibAttrs(TaskLoggingHelper log, bool silent, TYPELIBATTR typeLibAttr, out string typeLibName)
+        internal static unsafe bool GetTypeLibNameForTypeLibAttrs(TaskLoggingHelper log, bool silent, TLIBATTR typeLibAttr, out string typeLibName)
         {
             typeLibName = "";
-            ITypeLib typeLib = null;
 
-            try
+            // load our type library
+            using ComScope<ITypeLib> typeLib = new(null);
+            HRESULT hr = PInvoke.LoadRegTypeLib(typeLibAttr.guid, typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum, typeLibAttr.lcid, typeLib);
+            if (hr.Failed)
             {
-                // load our type library
-                try
+                if (!silent)
                 {
-                    TYPELIBATTR attr = typeLibAttr;
-                    typeLib = (ITypeLib)NativeMethods.LoadRegTypeLib(ref attr.guid, attr.wMajorVerNum, attr.wMinorVerNum, attr.lcid);
-                }
-                catch (COMException ex)
-                {
-                    if (!silent)
-                    {
-                        log.LogWarningWithCodeFromResources("ResolveComReference.CannotLoadTypeLib", typeLibAttr.guid, typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum, ex.Message);
-                    }
-
-                    return false;
+                    log.LogWarningWithCodeFromResources("ResolveComReference.CannotLoadTypeLib", typeLibAttr.guid, typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum, Marshal.GetExceptionForHR((int)hr)?.Message);
                 }
 
-                string typeLibId = log.FormatResourceString("ResolveComReference.TypeLibAttrId", typeLibAttr.guid.ToString(), typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum);
-
-                return GetTypeLibNameForITypeLib(log, silent, typeLib, typeLibId, out typeLibName);
+                return false;
             }
-            finally
-            {
-                if (typeLib != null)
-                {
-                    Marshal.ReleaseComObject(typeLib);
-                }
-            }
+
+            string typeLibId = log.FormatResourceString("ResolveComReference.TypeLibAttrId", typeLibAttr.guid.ToString(), typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum);
+
+            return GetTypeLibNameForITypeLib(log, silent, typeLib, typeLibId, out typeLibName);
         }
 
         /// <summary>
@@ -421,7 +432,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Double check that the buffer is not insanely big
-                ErrorUtilities.VerifyThrow(bufferSize <= int.MaxValue / 2, "Buffer size approaching int.MaxValue");
+                Assumed.LessThanOrEqual(bufferSize, int.MaxValue / 2, "Buffer size approaching int.MaxValue");
             }
 
             return string.Empty;
@@ -431,7 +442,7 @@ namespace Microsoft.Build.Tasks
         /// Gets the type lib path for given type lib attributes(reused almost verbatim from vsdesigner utils code)
         /// NOTE:  If there's a typelib number at the end of the path, does NOT strip it.
         /// </summary>
-        internal static bool GetPathOfTypeLib(TaskLoggingHelper log, bool silent, ref TYPELIBATTR typeLibAttr, out string typeLibPath)
+        internal static bool GetPathOfTypeLib(TaskLoggingHelper log, bool silent, ref TLIBATTR typeLibAttr, out string typeLibPath)
         {
             // Get which file the type library resides in.  If the appropriate
             // file cannot be found then a blank string is returned.
@@ -444,7 +455,20 @@ namespace Microsoft.Build.Tasks
                 // here for the fix http://support.microsoft.com/kb/982110. Most users from Win7 or Win2008R2 should have already received this post Win7SP1.
                 // In Summary: The issue is about calls to The QueryPathOfRegTypeLib function not returning the correct path for a 32-bit version of a
                 // registered type library in a 64-bit edition of Windows 7 or in Windows Server 2008 R2. It either returns the 64bit path or null.
-                typeLibPath = NativeMethods.QueryPathOfRegTypeLib(ref typeLibAttr.guid, typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum, typeLibAttr.lcid);
+                PInvoke.QueryPathOfRegTypeLib(
+                    typeLibAttr.guid,
+                    typeLibAttr.wMajorVerNum,
+                    typeLibAttr.wMinorVerNum,
+                    typeLibAttr.lcid,
+                    out BSTR path).ThrowOnFailure();
+
+                // BSTR is IDisposable: SysFreeString runs on scope exit. On failure no path is
+                // returned (ThrowOnFailure throws first), so there is nothing to free.
+                using (path)
+                {
+                    typeLibPath = path.ToString();
+                }
+
                 typeLibPath = Environment.ExpandEnvironmentVariables(typeLibPath);
             }
             catch (COMException ex)
@@ -497,7 +521,7 @@ namespace Microsoft.Build.Tasks
         /// then remap it to ADO 2.7 if it's registered on the machine (!). Otherwise don't modify the typelib.
         /// Returns true if the type library passed in was successfully remapped.
         /// </summary>
-        internal static bool RemapAdoTypeLib(TaskLoggingHelper log, bool silent, ref TYPELIBATTR typeLibAttr)
+        internal static bool RemapAdoTypeLib(TaskLoggingHelper log, bool silent, ref TLIBATTR typeLibAttr)
         {
             // we only care about ADO 2.0, 2.1, 2.5 or 2.6 here.
             if (typeLibAttr.wMajorVerNum == 2)
@@ -539,3 +563,5 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 }
+
+#endif

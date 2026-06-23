@@ -521,7 +521,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
+                Assumed.Unreachable();
             }
 
             _itemLists.TryGetValue(itemElement.ItemType, out LazyItemList previousItemList);

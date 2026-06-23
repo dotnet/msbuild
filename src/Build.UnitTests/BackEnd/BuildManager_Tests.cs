@@ -232,7 +232,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A simple successful graph build.
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void SimpleGraphBuild()
         {
             string contents = CleanupFileContents(@"
@@ -266,7 +265,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             propertyValue.ShouldBe("InitialProperty3", StringCompareShould.IgnoreCase);
         }
 
-#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Verify that the environment between two msbuild calls to the same project are stored
         /// so that on the next call we get access to them
@@ -276,7 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string contents1 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <UsingTask TaskName='SetEnvv' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
+ <UsingTask TaskName='SetEnvv' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                                 <Code Language='cs'>
                                     System.Environment.SetEnvironmentVariable(""MOO"", ""When the dawn comes, tonight will be a memory too"");
@@ -314,7 +312,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("What does a cat say : When the dawn comes, tonight will be a memory too");
         }
-#endif
 
         /// <summary>
         /// Verify if idle nodes are shutdown when BuildManager.ShutdownAllNodes is evoked.
@@ -4220,7 +4217,6 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildValid()
         {
             string project1 = _env.CreateFile(".proj").Path;
@@ -4303,7 +4299,6 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
         public void GraphBuildFail()
         {
             string project1 = _env.CreateFile(".proj").Path;

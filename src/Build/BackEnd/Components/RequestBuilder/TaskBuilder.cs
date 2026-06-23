@@ -152,7 +152,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public async Task<WorkUnitResult> ExecuteTask(TargetLoggingContext loggingContext, BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, ProjectTargetInstanceChild taskInstance, TaskExecutionMode mode, Lookup inferLookup, Lookup executeLookup, CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrow(taskInstance != null, "Need to specify the task instance.");
+            Assumed.NotNull(taskInstance, "Need to specify the task instance.");
 
             _buildRequestEntry = requestEntry;
 
@@ -223,7 +223,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_taskExecutionHostSync)
             {
-                ErrorUtilities.VerifyThrow(_taskExecutionHost != null, "taskExecutionHost not initialized.");
+                Assumed.NotNull(_taskExecutionHost, "taskExecutionHost not initialized.");
                 _componentHost = null;
 
                 IDisposable disposable = _taskExecutionHost as IDisposable;
@@ -240,7 +240,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskBuilder, $"Cannot create components of type {type}");
+            Assumed.Equal(type, BuildComponentType.TaskBuilder, $"Cannot create components of type {type}");
             return new TaskBuilder();
         }
 
@@ -308,7 +308,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if successful</returns>
         private async ValueTask<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup);
+            ArgumentNullException.ThrowIfNull(lookup);
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;
@@ -524,11 +524,9 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(howToExecuteTask == TaskExecutionMode.InferOutputsOnly, "should be inferring");
+                    Assumed.Equal(howToExecuteTask, TaskExecutionMode.InferOutputsOnly, "should be inferring");
 
-                    ErrorUtilities.VerifyThrow(
-                        GatherTaskOutputs(null, howToExecuteTask, bucket),
-                        "The method GatherTaskOutputs() should never fail when inferring task outputs.");
+                    Assumed.True(GatherTaskOutputs(null, howToExecuteTask, bucket), "The method GatherTaskOutputs() should never fail when inferring task outputs.");
 
                     if (lookupHash != null)
                     {
@@ -554,7 +552,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
-            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method.
+            Assumed.NotNull(_taskNode); // taskNode should never be null when we're calling this method.
 
             string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
             string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
@@ -935,7 +933,7 @@ namespace Microsoft.Build.BackEnd
                             throw new InvalidProjectFileException(ipex.Message, ipex);
                         }
                     }
-                    else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
+                    else if (type == typeof(Exception) || type.IsSubclassOf(typeof(Exception)))
                     {
                         // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
                         // a debugger attached to break on 2nd chance exceptions.
@@ -977,7 +975,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                        Assumed.Unreachable();
                     }
                 }
 
@@ -1186,7 +1184,7 @@ namespace Microsoft.Build.BackEnd
                     else
                     {
                         // If we're inferring outputs based on information in the task and <Output> tags
-                        ErrorUtilities.VerifyThrow(howToExecuteTask == TaskExecutionMode.InferOutputsOnly, "should be inferring");
+                        Assumed.Equal(howToExecuteTask, TaskExecutionMode.InferOutputsOnly, "should be inferring");
 
                         // UNDONE: Refactor this method to use the same flag/string paradigm we use above, rather than two strings and the task output spec.
                         InferTaskOutputs(bucket.Lookup, taskOutputSpecification, taskParameterName, outputTargetName, outputTargetName, bucket);

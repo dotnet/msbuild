@@ -600,8 +600,8 @@ namespace Microsoft.Build.Framework
 
         internal static string TruncatePathToTrailingSegments(string path, int trailingSegmentsToKeep)
         {
-            FrameworkErrorUtilities.VerifyThrowInternalLength(path, nameof(path));
-            FrameworkErrorUtilities.VerifyThrow(trailingSegmentsToKeep >= 0, "trailing segments must be positive");
+            Assumed.NotNullOrEmpty(path);
+            Assumed.PositiveOrZero(trailingSegmentsToKeep, "trailing segments must be positive");
 
             var segments = path.Split(Slashes, StringSplitOptions.RemoveEmptyEntries);
 
@@ -1323,7 +1323,7 @@ namespace Microsoft.Build.Framework
             string[] splitBase = fullBase.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
             string[] splitPath = fullPath.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
-            FrameworkErrorUtilities.VerifyThrow(splitPath.Length > 0, "Cannot call MakeRelative on a path of only slashes.");
+            Assumed.Positive(splitPath.Length, "Cannot call MakeRelative on a path of only slashes.");
 
             // On a mac, the path could start with any number of slashes and still be valid. We have to check them all.
             int indexOfFirstNonSlashChar = 0;
@@ -1392,7 +1392,7 @@ namespace Microsoft.Build.Framework
             bool hasMaxPath = NativeMethods.HasMaxPath;
             int maxPath = NativeMethods.MaxPath;
             // >= not > because MAX_PATH assumes a trailing null
-            return hasMaxPath && !IsRootedNoThrow(path) && NativeMethods.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
+            return hasMaxPath && !IsRootedNoThrow(path) && Environment.CurrentDirectory.Length + path.Length + 1 /* slash */ >= maxPath;
         }
 
         /// <summary>

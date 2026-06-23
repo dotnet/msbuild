@@ -1,10 +1,9 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
@@ -243,6 +242,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="WorkerNodeTelemetryEventArgs"/>
         /// </summary>
         WorkerNodeTelemetryEvent = 42,
+
+        /// <summary>
+        /// Event is <see cref="LoggersRegisteredEventArgs"/>
+        /// </summary>
+        LoggersRegisteredEvent = 43,
     }
     #endregion
 
@@ -258,11 +262,6 @@ namespace Microsoft.Build.Shared
         /// The packet version, which is based on the CLR version. Cached because querying Environment.Version each time becomes an allocation bottleneck.
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
-
-       /// <summary>
-        /// Dictionary of methods used to write BuildEventArgs.
-        /// </summary>
-        private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
 
         #region Data
 
@@ -291,7 +290,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal LogMessagePacketBase(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent)
         {
-            ErrorUtilities.VerifyThrow(nodeBuildEvent != null, "nodeBuildEvent was null");
+            Assumed.NotNull(nodeBuildEvent, "nodeBuildEvent was null");
             _buildEvent = nodeBuildEvent.Value.Value;
             _sinkId = nodeBuildEvent.Value.Key;
             _eventType = GetLoggingEventId(_buildEvent);
@@ -305,11 +304,6 @@ namespace Microsoft.Build.Shared
         #endregion
 
         #region Delegates
-
-        /// <summary>
-        /// Delegate representing a method on the BuildEventArgs classes used to write to a stream.
-        /// </summary>
-        private delegate void ArgsWriterDelegate(BinaryWriter writer);
 
         /// <summary>
         /// Delegate representing a method on the BuildEventArgs classes used to read from a stream.
@@ -378,33 +372,23 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void WriteToStream(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(_eventType != LoggingEventType.CustomEvent, "_eventType should not be a custom event");
-
-            MethodInfo methodInfo = null;
-            lock (s_writeMethodCache)
-            {
-                if (!s_writeMethodCache.TryGetValue(_eventType, out methodInfo))
-                {
-                    Type eventDerivedType = _buildEvent.GetType();
-                    methodInfo = eventDerivedType.GetMethod("WriteToStream", BindingFlags.NonPublic | BindingFlags.Instance);
-                    s_writeMethodCache.Add(_eventType, methodInfo);
-                }
-            }
+            Assumed.NotEqual(_eventType, LoggingEventType.CustomEvent, "_eventType should not be a custom event");
 
             int packetVersion = s_defaultPacketVersion;
 
             // Make sure the other side knows what sort of serialization is coming
             translator.Translate(ref packetVersion);
 
-            bool eventCanSerializeItself = EventCanSerializeItself(_eventType, methodInfo);
+            bool eventCanSerializeItself = EventCanSerializeItself(_eventType);
 
             translator.Translate(ref eventCanSerializeItself);
 
             if (eventCanSerializeItself)
             {
-                // 3.5 or later -- we have custom serialization methods, so let's use them.
-                ArgsWriterDelegate writerMethod = (ArgsWriterDelegate)CreateDelegateRobust(typeof(ArgsWriterDelegate), _buildEvent, methodInfo);
-                writerMethod(translator.Writer);
+                // 3.5 or later -- the event has a WriteToStream method, so let it serialize itself.
+                // This is a direct virtual call (mirroring ReadFromStream's CreateFromStream call) rather
+                // than a reflective lookup, so it is trimming- and Native AOT-safe.
+                _buildEvent.WriteToStream(translator.Writer);
 
                 TranslateAdditionalProperties(translator, _eventType, _buildEvent);
             }
@@ -419,7 +403,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void ReadFromStream(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(_eventType != LoggingEventType.CustomEvent, "_eventType should not be a custom event");
+            Assumed.NotEqual(_eventType, LoggingEventType.CustomEvent, "_eventType should not be a custom event");
 
             _buildEvent = GetBuildEventArgFromId();
 
@@ -440,7 +424,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 _buildEvent = ReadEventFromStream(_eventType, translator);
-                ErrorUtilities.VerifyThrow(_buildEvent is not null, $"Not Supported LoggingEventType {_eventType}");
+                Assumed.NotNull(_buildEvent, $"Not Supported LoggingEventType {_eventType}");
             }
 
             _eventType = GetLoggingEventId(_buildEvent);
@@ -451,8 +435,13 @@ namespace Microsoft.Build.Shared
         /// If false, defers to overridable implementations in <see cref="WriteEventToStream"/> and
         /// <see cref="ReadEventFromStream"/>.
         /// </summary>
-        protected virtual bool EventCanSerializeItself(LoggingEventType eventType, MethodInfo methodInfo)
-            => methodInfo != null;
+        /// <remarks>
+        /// Every <see cref="BuildEventArgs"/> defines <c>WriteToStream</c> / <c>CreateFromStream</c>, so the
+        /// default is to let the event serialize itself. Overrides return <see langword="false"/> for event
+        /// types whose inherited <c>WriteToStream</c> should not be used.
+        /// </remarks>
+        protected virtual bool EventCanSerializeItself(LoggingEventType eventType)
+            => true;
 
         /// <summary>
         /// Translates additional properties that are not handled by the default serialization.
@@ -464,42 +453,10 @@ namespace Microsoft.Build.Shared
         #region Private Methods
 
         /// <summary>
-        /// Wrapper for Delegate.CreateDelegate with retries.
-        /// </summary>
-        /// <comment>
-        /// TODO:  Investigate if it would be possible to use one of the overrides of CreateDelegate
-        /// that doesn't force the delegate to be closed over its first argument, so that we can
-        /// only create the delegate once per event type and cache it.
-        /// </comment>
-        private static Delegate CreateDelegateRobust(Type type, Object firstArgument, MethodInfo methodInfo)
-        {
-            Delegate delegateMethod = null;
-
-            for (int i = 0; delegateMethod == null && i < 5; i++)
-            {
-                try
-                {
-                    delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
-                }
-                catch (FileLoadException) when (i < 5)
-                {
-                    // Sometimes, in 64-bit processes, the fusion load of Microsoft.Build.Framework.dll
-                    // spontaneously fails when trying to bind to the delegate.  However, it seems to
-                    // not repeat on additional tries -- so we'll try again a few times.  However, if
-                    // it keeps happening, it's probably a real problem, so we want to go ahead and
-                    // throw to let the user know what's up.
-                }
-            }
-
-            return delegateMethod;
-        }
-
-        /// <summary>
         /// Takes in a id (LoggingEventType as an int) and creates the correct specific logging class
         /// </summary>
         private BuildEventArgs GetBuildEventArgFromId()
-        {
-            return _eventType switch
+            => _eventType switch
             {
                 LoggingEventType.BuildErrorEvent => new BuildErrorEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
                 LoggingEventType.BuildFinishedEvent => new BuildFinishedEventArgs(null, null, false),
@@ -543,10 +500,10 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
+                LoggingEventType.LoggersRegisteredEvent => new LoggersRegisteredEventArgs(),
 
-                _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
+                _ => Assumed.Unreachable<BuildEventArgs>($"Should not get to the default of GetBuildEventArgFromId ID: {_eventType}")
             };
-        }
 
         /// <summary>
         /// Based on the type of the BuildEventArg to be wrapped
@@ -690,6 +647,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.WorkerNodeTelemetryEvent;
             }
+            else if (eventType == typeof(LoggersRegisteredEventArgs))
+            {
+                return LoggingEventType.LoggersRegisteredEvent;
+            }
             else if (eventType == typeof(TargetStartedEventArgs))
             {
                 return LoggingEventType.TargetStartedEvent;
@@ -768,7 +729,7 @@ namespace Microsoft.Build.Shared
                     WriteBuildWarningEventToStream((BuildWarningEventArgs)buildEvent, translator);
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError($"Not Supported LoggingEventType {eventType}");
+                    InternalError.Throw($"Not Supported LoggingEventType {eventType}");
                     break;
             }
         }

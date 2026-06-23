@@ -42,13 +42,13 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public CommandLineGenerator(Rule rule, Dictionary<string, Object> parameterValues)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(rule);
-            ErrorUtilities.VerifyThrowArgumentNull(parameterValues);
+            ArgumentNullException.ThrowIfNull(rule);
+            ArgumentNullException.ThrowIfNull(parameterValues);
 
             // Parse the Xaml file
             var parser = new TaskParser();
             bool success = parser.ParseXamlDocument(rule);
-            ErrorUtilities.VerifyThrow(success, "Unable to parse specified file or contents.");
+            Assumed.True(success, "Unable to parse specified file or contents.");
 
             // Generate the switch order list
             _switchOrderList = parser.SwitchOrderList;
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Tasks.Xaml
                     break;
                 default:
                     // should never reach this point - if it does, there's a bug somewhere.
-                    ErrorUtilities.ThrowInternalError("InternalError");
+                    InternalError.Throw("InternalError");
                     break;
             }
         }

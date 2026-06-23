@@ -9,6 +9,7 @@
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS_UNITTESTS</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

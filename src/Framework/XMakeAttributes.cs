@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -160,7 +159,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool RuntimeValuesMatch(string runtimeA, string runtimeB)
         {
-            FrameworkErrorUtilities.VerifyThrow(runtimeA != String.Empty && runtimeB != String.Empty, "We should never get an empty string passed to this method");
+            Assumed.True(runtimeA != string.Empty && runtimeB != string.Empty, "We should never get an empty string passed to this method");
 
             if (runtimeA == null || runtimeB == null)
             {
@@ -204,7 +203,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool TryMergeRuntimeValues(string runtimeA, string runtimeB, out string mergedRuntime)
         {
-            FrameworkErrorUtilities.VerifyThrow(runtimeA != String.Empty && runtimeB != String.Empty, "We should never get an empty string passed to this method");
+            Assumed.True(runtimeA != string.Empty && runtimeB != string.Empty, "We should never get an empty string passed to this method");
 
             // set up the defaults
             if (runtimeA == null)
@@ -277,7 +276,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool ArchitectureValuesMatch(string architectureA, string architectureB)
         {
-            FrameworkErrorUtilities.VerifyThrow(architectureA != String.Empty && architectureB != String.Empty, "We should never get an empty string passed to this method");
+            Assumed.True(architectureA != string.Empty && architectureB != string.Empty, "We should never get an empty string passed to this method");
 
             if (architectureA == null || architectureB == null)
             {
@@ -344,7 +343,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool TryMergeArchitectureValues(string architectureA, string architectureB, out string mergedArchitecture)
         {
-            FrameworkErrorUtilities.VerifyThrow(architectureA != String.Empty && architectureB != String.Empty, "We should never get an empty string passed to this method");
+            Assumed.True(architectureA != string.Empty && architectureB != string.Empty, "We should never get an empty string passed to this method");
 
             // set up the defaults
             if (architectureA == null)
@@ -474,6 +473,37 @@ namespace Microsoft.Build.Shared
                 // either it's already a valid, specific architecture, or we don't know what to do with it.  Either way, return.
                 return architecture;
             }
+        }
+
+        /// <summary>
+        /// Given an MSBuildArchitecture value that may be non-explicit -- e.g. "CurrentArchitecture" or "Any" --
+        /// return the value that it would map to in this case, taking the requested runtime into account.
+        /// When running under .NET Framework MSBuild, <paramref name="runtime"/> is "NET", and
+        /// <paramref name="architecture"/> is unspecified (null or "*"/<see cref="MSBuildArchitectureValues.any"/>),
+        /// the value remains <see cref="MSBuildArchitectureValues.any"/> ("*"). This means: do not pin the
+        /// .NET task host to the current process architecture; allow any architecture (the actual launch
+        /// picks the architecture of the dotnet host that is available).
+        ///
+        /// This special-casing only applies under .NET Framework MSBuild, since that is the only host that
+        /// could launch a cross-architecture task host for <c>Runtime="NET"</c>. Under .NET MSBuild,
+        /// <c>Runtime="NET"</c> tasks run in-process or error if another architecture is specified.
+        ///
+        /// An explicitly specified <paramref name="architecture"/> -- including
+        /// <see cref="MSBuildArchitectureValues.currentArchitecture"/>, which is itself an explicit user
+        /// request to pin to the current process architecture -- always wins.
+        /// </summary>
+        internal static string GetExplicitMSBuildArchitecture(string architecture, string runtime)
+        {
+#if NETFRAMEWORK
+            if (MSBuildRuntimeValues.net.Equals(runtime, StringComparison.OrdinalIgnoreCase) &&
+                (architecture == null ||
+                 MSBuildArchitectureValues.any.Equals(architecture, StringComparison.OrdinalIgnoreCase)))
+            {
+                return MSBuildArchitectureValues.any;
+            }
+#endif
+
+            return GetExplicitMSBuildArchitecture(architecture);
         }
     }
 }

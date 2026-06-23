@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -62,7 +62,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The startup directory.
         /// </summary>
-        private static string s_startupDirectory = NativeMethodsShared.GetCurrentDirectory();
+        private static string s_startupDirectory = Environment.CurrentDirectory;
+
+        /// <summary>
+        /// Process-wide flag indicating that the engine is hosted in a long-lived process
+        /// (e.g., the MSBuild Server) that persists across multiple build invocations.
+        /// </summary>
+        private static bool s_isLongLivedHost;
 
         /// <summary>
         /// Indicates whether we should warn when a property is uninitialized when it is used.
@@ -250,7 +256,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">The ProjectCollection from which the BuildParameters should populate itself.</param>
         public BuildParameters(ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
+            ArgumentNullException.ThrowIfNull(projectCollection);
 
             Initialize(new PropertyDictionary<ProjectPropertyInstance>(projectCollection.EnvironmentProperties), projectCollection.ProjectRootElementCache, new ToolsetProvider(projectCollection.Toolsets));
 
@@ -277,7 +283,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildParameters(BuildParameters other, bool resetEnvironment = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other);
+            Assumed.NotNull(other);
 
             _buildId = other._buildId;
             _culture = other._culture;
@@ -328,6 +334,7 @@ namespace Microsoft.Build.Execution
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
+            IsLongLivedHost = other.IsLongLivedHost;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
         }
@@ -755,7 +762,7 @@ namespace Microsoft.Build.Execution
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "EnvironmentPropertiesInternal");
+                Assumed.NotNull(value, valueExpression: "EnvironmentPropertiesInternal");
                 _environmentProperties = value;
             }
         }
@@ -798,6 +805,25 @@ namespace Microsoft.Build.Execution
         ///  (for diagnostic use) Whether or not this is out of proc
         /// </summary>
         internal bool IsOutOfProc { get; set; }
+
+        /// <summary>
+        /// True when the engine is hosted in a long-lived process (e.g., MSBuild Server)
+        /// that persists across multiple build invocations. Used to opt tasks whose static
+        /// singleton state would leak across invocations out of sidecar TaskHost reuse.
+        /// See https://github.com/dotnet/msbuild/issues/13315.
+        /// </summary>
+        internal bool IsLongLivedHost
+        {
+            get => _isLongLivedHost;
+            set => _isLongLivedHost = value;
+        }
+
+        private bool _isLongLivedHost = s_isLongLivedHost;
+
+        /// <summary>
+        /// Marks the current process as a long-lived host.
+        /// </summary>
+        internal static void MarkProcessAsLongLivedHost() => s_isLongLivedHost = true;
 
         /// <nodoc/>
         public ProjectLoadSettings ProjectLoadSettings
@@ -978,6 +1004,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
+            translator.Translate(ref _isLongLivedHost);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

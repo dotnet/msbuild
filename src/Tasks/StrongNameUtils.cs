@@ -6,7 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Security;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -34,6 +34,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void ReadKeyFile(TaskLoggingHelper log, string keyFile, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
+            ReadKeyFile(log, new AbsolutePath(keyFile, ignoreRootedCheck: true), out keyPair, out publicKey);
+        }
+
+        /// <summary>
+        /// Reads contents of a key file. Reused from vsdesigner code.
+        /// </summary>
+        internal static void ReadKeyFile(TaskLoggingHelper log, AbsolutePath keyFile, out StrongNameKeyPair keyPair, out byte[] publicKey)
+        {
             // Initialize parameters
             keyPair = null;
             publicKey = null;
@@ -54,19 +62,19 @@ namespace Microsoft.Build.Tasks
             }
             catch (ArgumentException e)
             {
-                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile);
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile.OriginalValue);
                 log.LogErrorFromException(e);
                 throw new StrongNameException(e);
             }
             catch (IOException e)
             {
-                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile);
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile.OriginalValue);
                 log.LogErrorFromException(e);
                 throw new StrongNameException(e);
             }
             catch (SecurityException e)
             {
-                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile);
+                log.LogErrorWithCodeFromResources("StrongNameUtils.KeyFileReadFailure", keyFile.OriginalValue);
                 log.LogErrorFromException(e);
                 throw new StrongNameException(e);
             }
@@ -127,11 +135,18 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// <see cref="AbsolutePath"/> overload of <see cref="GetStrongNameKey(TaskLoggingHelper, string, string, out StrongNameKeyPair, out byte[])"/>,
+        /// for callers that have already resolved the key file to an absolute path.
+        /// </summary>
+        internal static void GetStrongNameKey(TaskLoggingHelper log, AbsolutePath keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
+            => GetStrongNameKey(log, keyFile.Value, keyContainer, out keyPair, out publicKey);
+
+        /// <summary>
         /// Given an assembly path, determine if the assembly is [delay] signed or not.
         /// </summary>
         internal static StrongNameLevel GetAssemblyStrongNameLevel(string assemblyPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath);
+            ArgumentNullException.ThrowIfNull(assemblyPath);
 
             try
             {

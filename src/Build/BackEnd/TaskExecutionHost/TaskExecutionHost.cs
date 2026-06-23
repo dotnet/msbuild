@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, in TaskHostParameters taskIdentityParameters, int scheduledNodeId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ArgumentNullException.ThrowIfNull(loggingContext);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
@@ -413,7 +413,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
         public bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameters);
+            ArgumentNullException.ThrowIfNull(parameters);
 
             bool taskInitialized = true;
 
@@ -484,7 +484,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True of the outputs were gathered successfully, false otherwise.</returns>
         public bool GatherTaskOutputs(string parameterName, ElementLocation parameterLocation, bool outputTargetIsItem, string outputTargetName)
         {
-            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Need a taskFactoryWrapper to retrieve outputs from.");
+            Assumed.NotNull(_taskFactoryWrapper, "Need a taskFactoryWrapper to retrieve outputs from.");
 
             bool gatheredGeneratedOutputsSuccessfully = true;
 
@@ -622,7 +622,7 @@ namespace Microsoft.Build.BackEnd
             _taskHost = null;
             CleanupCancellationToken();
 
-            ErrorUtilities.VerifyThrow(TaskInstance == null, "Task Instance should be null");
+            Assumed.Null(TaskInstance, "Task Instance should be null");
         }
 
         /// <summary>
@@ -964,13 +964,13 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
@@ -1362,7 +1362,7 @@ namespace Microsoft.Build.BackEnd
             bool isRequired,
             out bool taskParameterSet)
         {
-            ErrorUtilities.VerifyThrow(parameterValue != null, "Didn't expect null parameterValue in InitializeTaskVectorParameter");
+            Assumed.NotNull(parameterValue, "Didn't expect null parameterValue in InitializeTaskVectorParameter");
 
             taskParameterSet = false;
             bool success;
@@ -1733,7 +1733,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>Gets a list of properties which are required.</returns>
         private IReadOnlyDictionary<string, string> GetNamesOfPropertiesWithRequiredAttribute()
         {
-            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
+            Assumed.NotNull(_taskFactoryWrapper, "Expected taskFactoryWrapper to not be null");
             IReadOnlyDictionary<string, string> requiredParameters = null;
 
             try
@@ -1811,9 +1811,7 @@ namespace Microsoft.Build.BackEnd
             string resolvedAssemblyLocation = outOfProcTaskFactory.GetAssemblyPath();
 
             // This should never happen - if the factory can create a task, it should know where the assembly is
-            ErrorUtilities.VerifyThrow(
-                !string.IsNullOrEmpty(resolvedAssemblyLocation),
-                $"IOutOfProcTaskFactory {_taskFactoryWrapper.TaskFactory.FactoryName} created a task but returned null/empty assembly path");
+            Assumed.NotNullOrEmpty(resolvedAssemblyLocation, $"IOutOfProcTaskFactory {_taskFactoryWrapper.TaskFactory.FactoryName} created a task but returned null/empty assembly path");
 
             LoadedType taskLoadedType = new LoadedType(
                 taskType,

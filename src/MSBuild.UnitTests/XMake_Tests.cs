@@ -1571,6 +1571,48 @@ namespace Microsoft.Build.UnitTests
             successfulExit.ShouldBeTrue();
         }
 
+        [Fact]
+        public void ResponseFileNoticeIsPrintedOnSwitchError()
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("foo.proj", content);
+            var projectPath = directory.CreateFile("bar.proj", content).Path;
+            var rspPath = directory.CreateFile("Directory.Build.rsp", "foo.proj").Path;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
+
+            successfulExit.ShouldBeFalse();
+            int noticeIndex = output.IndexOf("Some command line switches were read from", StringComparison.OrdinalIgnoreCase);
+            int errorIndex = output.IndexOf("MSB1008", StringComparison.OrdinalIgnoreCase);
+            noticeIndex.ShouldBeGreaterThanOrEqualTo(0);
+            errorIndex.ShouldBeGreaterThanOrEqualTo(0);
+            noticeIndex.ShouldBeLessThan(errorIndex);
+            output.ShouldContain(rspPath);
+        }
+
+        [Fact]
+        public void ExplicitResponseFileNoticeIsPrintedOnSwitchError()
+        {
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("foo.proj", content);
+            var projectPath = directory.CreateFile("bar.proj", content).Path;
+            var rspPath = directory.CreateFile("explicit.rsp", "foo.proj").Path;
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\" @\"{rspPath}\" -noAutoResponse", out var successfulExit, _output);
+
+            successfulExit.ShouldBeFalse();
+            int noticeIndex = output.IndexOf("Some command line switches were read from", StringComparison.OrdinalIgnoreCase);
+            int errorIndex = output.IndexOf("MSB1008", StringComparison.OrdinalIgnoreCase);
+            noticeIndex.ShouldBeGreaterThanOrEqualTo(0);
+            errorIndex.ShouldBeGreaterThanOrEqualTo(0);
+            noticeIndex.ShouldBeLessThan(errorIndex);
+            output.ShouldContain(rspPath);
+        }
+
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files. Sanity test when there isn't one.
@@ -3173,6 +3215,28 @@ EndGlobal
 
             CommandLineSwitches switches = new CommandLineSwitches();
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
+        }
+
+        [Theory]
+        // MSBUILDUSESERVER value, -mt build, expected server use, expected reason.
+        [InlineData("1", false, true, "EnvVar")]
+        [InlineData("1", true, true, "EnvVar")]
+        [InlineData("0", true, false, "")]
+        [InlineData("0", false, false, "")]
+        [InlineData("false", true, false, "")] // any explicit non-"1" value opts out
+        [InlineData("true", true, false, "")]
+        [InlineData(null, true, true, "ImpliedByMt")]
+        [InlineData(null, false, false, "")]
+        [InlineData("", true, true, "ImpliedByMt")] // empty is treated as unset
+        public void ShouldUseMSBuildServerDecisionTree(string useServerValue, bool isMultiThreaded, bool expectedUseServer, string expectedReason)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", useServerValue);
+
+            bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMultiThreaded, out string reason);
+
+            useServer.ShouldBe(expectedUseServer);
+            reason.ShouldBe(expectedReason);
         }
 
         private string CopyMSBuild()

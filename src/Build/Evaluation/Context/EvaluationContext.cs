@@ -130,8 +130,7 @@ namespace Microsoft.Build.Evaluation.Context
                     return context;
 
                 default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
-                    return null;
+                    return Assumed.Unreachable<EvaluationContext>();
             }
         }
 

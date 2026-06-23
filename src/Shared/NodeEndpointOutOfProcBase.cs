@@ -13,13 +13,12 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 
-#if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
@@ -46,9 +45,11 @@ namespace Microsoft.Build.BackEnd
 #endif // NETCOREAPP2_1
 
         /// <summary>
-        /// The size of the buffers to use for named pipes
+        /// The size of the buffers to use for named pipes. Re-evaluated on each access via
+        /// <see cref="Traits.NodeConnectionBufferSize"/> so it honors the change wave / env override
+        /// (and the per-access <see cref="Traits.Instance"/> reset used in tests).
         /// </summary>
-        private const int PipeBufferSize = 131072;
+        private static int PipeBufferSize => Traits.Instance.NodeConnectionBufferSize;
 
         /// <summary>
         /// The current communication status of the node.
@@ -169,8 +170,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            Assumed.Equal(_status, LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
+            ArgumentNullException.ThrowIfNull(factory);
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -182,7 +183,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.ThrowInternalError("Connect() not valid on the out of proc endpoint.");
+            InternalError.Throw("Connect() not valid on the out of proc endpoint.");
         }
 
         /// <summary>
@@ -233,7 +234,9 @@ namespace Microsoft.Build.BackEnd
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+            CommunicationsUtilities.Trace($"Creating pipe '{pipeName}' with buffer size {PipeBufferSize}.");
+
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
@@ -289,7 +292,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         protected void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, $"Attempting to change status to existing status {_status}.");
+            Assumed.NotEqual(_status, newStatus, $"Attempting to change status to existing status {_status}.");
             CommunicationsUtilities.Trace($"Changing link status from {_status} to {newStatus}");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
@@ -312,7 +315,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void InternalDisconnect()
         {
-            ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
+            Assumed.NotEqual(_packetPump.ManagedThreadId, Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
             _terminatePacketPump.Dispose();
@@ -329,9 +332,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
-            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
+            ArgumentNullException.ThrowIfNull(packet);
+            Assumed.NotNull(_packetQueue, "packetQueue is null");
+            Assumed.NotNull(_packetAvailable, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
         }
@@ -561,8 +564,8 @@ namespace Microsoft.Build.BackEnd
 
             if (component.Key == nameof(HandshakeComponents.Options))
             {
-                // NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
-                // 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+                // NET task host tolerates a worker node connecting with an architecture mismatch.
+                // The lower 24 bits carry the HandshakeOptions flags; the upper byte is the handshake version.
                 isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
             }
             else
@@ -584,21 +587,32 @@ namespace Microsoft.Build.BackEnd
 
 #if NET
         /// <summary>
-        /// NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
-        /// 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+        /// The .NET task host (TaskHost node) tolerates a worker node that did not emit an
+        /// architecture bit on the wire (indistinguishable from x86) when the TaskHost node
+        /// itself is x64 or arm64. This is the .NET Framework worker node → .NET SDK TaskHost
+        /// node scenario: the worker node typically cannot describe the TaskHost node's
+        /// architecture, but the launched process is whatever the SDK ships (x64 on
+        /// Windows-x64, arm64 on Windows-arm64).
+        ///
+        /// True cross-arch mismatches (e.g. worker node sent X64 but TaskHost node expects
+        /// Arm64, or vice versa) remain rejected.
+        ///
+        /// The lower 24 bits (mask 0x00FFFFFF) carry the HandshakeOptions flags; the upper
+        /// byte carries the handshake version and is ignored here.
         /// </summary>
-        private bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
+        internal static bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
         {
             var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
             var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
 
-            // not X64 or Arm64 means we are running on x86
+            // not X64 or Arm64 means the wire-form architecture is x86 (or no arch bit).
             bool receivedIsX86 = !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
                                  !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
 
             bool expectedIsX64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+            bool expectedIsArm64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.Arm64);
 
-            return receivedIsX86 && expectedIsX64;
+            return receivedIsX86 && (expectedIsX64 || expectedIsArm64);
         }
 #endif
 
@@ -792,7 +806,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError($"waitId {waitId} out of range.");
+                        InternalError.Throw($"waitId {waitId} out of range.");
                         break;
                 }
             }

@@ -331,7 +331,7 @@ namespace Microsoft.Build.Tasks.DataDriven
                     break;
                 default:
                     // should never reach this point - if it does, there's a bug somewhere.
-                    ErrorUtilities.VerifyThrow(false, "InternalError");
+                    Assumed.True(false, "InternalError");
                     break;
             }
         }
@@ -809,7 +809,7 @@ namespace Microsoft.Build.Tasks.DataDriven
         /// <returns>A path with a slash.</returns>
         protected static string EnsureTrailingSlash(string directoryName)
         {
-            ErrorUtilities.VerifyThrow(directoryName != null, "InternalError");
+            Assumed.NotNull(directoryName, "InternalError");
             if (!String.IsNullOrEmpty(directoryName))
             {
                 char endingCharacter = directoryName[directoryName.Length - 1];
