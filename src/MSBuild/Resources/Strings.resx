@@ -148,6 +148,10 @@
     <value>MSBuild version {0} for {1}</value>
     <comment>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework" or ".NET Core"</comment>
   </data>
+  <data name="MSBuildVersionMessageWithVmr" xml:space="preserve">
+    <value>MSBuild version {0} (VMR {2}) for {1}</value>
+    <comment>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework" or ".NET Core". {2} contains the VMR (dotnet/dotnet) commit SHA.</comment>
+  </data>
   <data name="DuplicateProjectSwitchError" xml:space="preserve">
     <value>MSBUILD : error MSB1008: Only one project can be specified.</value>
     <comment>{StrBegin="MSBUILD : error MSB1008: "}UE: This happens if the user does something like "msbuild.exe myapp.proj myapp2.proj". This is not allowed.
