@@ -22,7 +22,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
@@ -760,7 +759,28 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
             => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
-                || TaskParameterTypeVerifier.IsPathLikeTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
+                || TaskParameterTypeVerifier.IsPathLikeUtilitiesTaskItemOfT(parameterType);
+
+        /// <summary>
+        /// Materializes a strongly-typed task item (<see cref="ITaskItem{T}"/>) from <paramref name="sourceItem"/>
+        /// for a parameter or array element declared as <paramref name="declaredItemType"/>.
+        /// </summary>
+        /// <remarks>
+        /// When the task declares the <see cref="ITaskItem{T}"/> interface, an engine-internal concrete
+        /// implementation is created. When the task declares a concrete type (for example the public
+        /// <c>Microsoft.Build.Utilities.TaskItem&lt;T&gt;</c>), that exact type is constructed reflectively so the
+        /// produced value is assignable to the task's property. Looking the concrete type up reflectively keeps
+        /// <c>Microsoft.Build</c> from taking a build/package dependency on <c>Microsoft.Build.Utilities.Core</c>.
+        /// </remarks>
+        private static ITaskItem CreateStronglyTypedTaskItem(Type declaredItemType, ITaskItem sourceItem)
+        {
+            Type valueType = declaredItemType.GetGenericArguments()[0];
+            Type concreteType = declaredItemType.IsInterface
+                ? typeof(StronglyTypedTaskItem<>).MakeGenericType(valueType)
+                : declaredItemType;
+
+            return (ITaskItem)concreteType.GetConstructor([typeof(ITaskItem)]).Invoke([sourceItem]);
+        }
 
         /// <summary>
         /// Called on the local side.
@@ -832,7 +852,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         currentItem = item;
                         RecordItemForDisconnectIfNecessary(item);
-                        ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(elementType.GetGenericArguments()[0]).GetConstructor([typeof(ITaskItem)]).Invoke([item]) as ITaskItem;
+                        ITaskItem taskItemOfT = CreateStronglyTypedTaskItem(elementType, item);
                         finalTaskInputs.Add(taskItemOfT);
                     }
                 }
@@ -1310,7 +1330,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
                         {
-                            ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(parameterType.GetGenericArguments()[0]).GetConstructor(new[] { typeof(ITaskItem) }).Invoke([finalTaskItems[0]]) as ITaskItem;
+                            ITaskItem taskItemOfT = CreateStronglyTypedTaskItem(parameterType, finalTaskItems[0]);
                             success = InternalSetTaskParameter(parameter, taskItemOfT);
                         }
                         else

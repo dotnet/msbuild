@@ -43,6 +43,12 @@ namespace Microsoft.Build.BackEnd
             => TaskItemTypeDetector.IsPathLikeITaskItemOfT(parameterType);
 
         /// <summary>
+        /// Checks if a type is the public Microsoft.Build.Utilities.TaskItem&lt;T&gt; where T is path-like.
+        /// </summary>
+        internal static bool IsPathLikeUtilitiesTaskItemOfT(Type parameterType)
+            => TaskItemTypeDetector.IsPathLikeUtilitiesTaskItemOfT(parameterType);
+
+        /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>
