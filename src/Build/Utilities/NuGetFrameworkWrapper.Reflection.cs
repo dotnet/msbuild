@@ -13,9 +13,10 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
-    // Reflection-based partial: NuGet.Frameworks is loaded by reflection into a separate
-    // AppDomain for NGEN reasons. See documentation/NETFramework-NGEN.md.
-    internal sealed partial class NuGetFrameworkWrapper : MarshalByRefObject
+    // Reflection-based implementation: NuGet.Frameworks is loaded by reflection into a separate
+    // AppDomain for NGEN reasons. This is the Change Wave 18.9 opt-out path; the default path is
+    // the vendored implementation in NuGetFrameworkWrapper.Vendored.cs. See documentation/NETFramework-NGEN.md.
+    internal sealed class NuGetFrameworkWrapperReflection : MarshalByRefObject, INuGetFrameworkWrapper
     {
         private const string NuGetFrameworksAssemblyName = "NuGet.Frameworks";
         private const string NuGetFrameworksFileName = NuGetFrameworksAssemblyName + ".dll";
@@ -33,9 +34,9 @@ namespace Microsoft.Build.Evaluation
         private PropertyInfo AllFrameworkVersionsProperty;
 
         /// <summary>
-        /// Public constructor for cross-domain activation only. Use <see cref="CreateInstance"/> to instantiate.
+        /// Public constructor for cross-domain activation only. Use <see cref="Create"/> to instantiate.
         /// </summary>
-        public NuGetFrameworkWrapper()
+        public NuGetFrameworkWrapperReflection()
         { }
 
         /// <summary>
@@ -82,7 +83,7 @@ namespace Microsoft.Build.Evaluation
         public string GetTargetFrameworkVersion(string tfm, int minVersionPartCount)
         {
             var version = VersionProperty.GetValue(Parse(tfm)) as Version;
-            return GetNonZeroVersionParts(version, minVersionPartCount);
+            return NuGetFrameworkWrapper.GetNonZeroVersionParts(version, minVersionPartCount);
         }
 
         public string GetTargetPlatformIdentifier(string tfm)
@@ -93,7 +94,7 @@ namespace Microsoft.Build.Evaluation
         public string GetTargetPlatformVersion(string tfm, int minVersionPartCount)
         {
             var version = PlatformVersionProperty.GetValue(Parse(tfm)) as Version;
-            return GetNonZeroVersionParts(version, minVersionPartCount);
+            return NuGetFrameworkWrapper.GetNonZeroVersionParts(version, minVersionPartCount);
         }
 
         public bool IsCompatible(string target, string candidate)
@@ -102,12 +103,12 @@ namespace Microsoft.Build.Evaluation
         }
 
         public string FilterTargetFrameworks(string incoming, string filter) =>
-            FilterTargetFrameworks<object, ReflectionTfmAdapter>(incoming, filter, new ReflectionTfmAdapter(this));
+            NuGetFrameworkWrapper.FilterTargetFrameworks<object, ReflectionTfmAdapter>(incoming, filter, new ReflectionTfmAdapter(this));
 
-        private readonly struct ReflectionTfmAdapter : ITfmAdapter<object>
+        private readonly struct ReflectionTfmAdapter : NuGetFrameworkWrapper.ITfmAdapter<object>
         {
-            private readonly NuGetFrameworkWrapper _wrapper;
-            public ReflectionTfmAdapter(NuGetFrameworkWrapper wrapper) => _wrapper = wrapper;
+            private readonly NuGetFrameworkWrapperReflection _wrapper;
+            public ReflectionTfmAdapter(NuGetFrameworkWrapperReflection wrapper) => _wrapper = wrapper;
             public object Parse(string tfm) => _wrapper.Parse(tfm);
             public string GetFramework(object parsed) => _wrapper.FrameworkProperty.GetValue(parsed) as string;
             public bool GetAllFrameworkVersions(object parsed) => Convert.ToBoolean(_wrapper.AllFrameworkVersionsProperty.GetValue(parsed));
@@ -143,7 +144,7 @@ namespace Microsoft.Build.Evaluation
       <DisableFXClosureWalk enabled="true" />
       <DeferFXClosureWalk enabled="true" />
       <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
-        {(Environment.Is64BitProcess ? _bindingRedirects64 : _bindingRedirects32)}
+        {(Environment.Is64BitProcess ? NuGetFrameworkWrapper._bindingRedirects64 : NuGetFrameworkWrapper._bindingRedirects32)}
         <dependentAssembly>
           <assemblyIdentity name="{NuGetFrameworksAssemblyName}" publicKeyToken="{publicKeyTokenString}" culture="{assemblyName.CultureName}" />
           <codeBase version="{assemblyName.Version}" href="{assemblyPath}" />
@@ -158,7 +159,7 @@ namespace Microsoft.Build.Evaluation
             return appDomainSetup;
         }
 
-        public static NuGetFrameworkWrapper CreateInstance()
+        public static INuGetFrameworkWrapper Create()
         {
             // Resolve the location of the NuGet.Frameworks assembly
             string assemblyDirectory = BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio ?
@@ -167,7 +168,7 @@ namespace Microsoft.Build.Evaluation
 
             string assemblyPath = Path.Combine(assemblyDirectory, NuGetFrameworksFileName);
 
-            NuGetFrameworkWrapper instance = null;
+            NuGetFrameworkWrapperReflection instance = null;
             AssemblyName assemblyName = null;
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) &&
                 (BuildEnvironmentHelper.Instance.RunningInMSBuildExe || BuildEnvironmentHelper.Instance.RunningInVisualStudio))
@@ -184,8 +185,8 @@ namespace Microsoft.Build.Evaluation
                         AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
                         if (appDomainSetup != null)
                         {
-                            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
-                            instance = (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
+                            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapperReflection), null, appDomainSetup);
+                            instance = (NuGetFrameworkWrapperReflection)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapperReflection).FullName);
                         }
                     }
                 }
@@ -198,7 +199,7 @@ namespace Microsoft.Build.Evaluation
             }
             try
             {
-                instance ??= new NuGetFrameworkWrapper();
+                instance ??= new NuGetFrameworkWrapperReflection();
                 instance.Initialize(assemblyName, assemblyPath);
 
                 return instance;
