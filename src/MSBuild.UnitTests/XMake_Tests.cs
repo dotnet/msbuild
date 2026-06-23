@@ -3217,6 +3217,28 @@ EndGlobal
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
         }
 
+        [Theory]
+        // MSBUILDUSESERVER value, -mt build, expected server use, expected reason.
+        [InlineData("1", false, true, "EnvVar")]
+        [InlineData("1", true, true, "EnvVar")]
+        [InlineData("0", true, false, "")]
+        [InlineData("0", false, false, "")]
+        [InlineData("false", true, false, "")] // any explicit non-"1" value opts out
+        [InlineData("true", true, false, "")]
+        [InlineData(null, true, true, "ImpliedByMt")]
+        [InlineData(null, false, false, "")]
+        [InlineData("", true, true, "ImpliedByMt")] // empty is treated as unset
+        public void ShouldUseMSBuildServerDecisionTree(string useServerValue, bool isMultiThreaded, bool expectedUseServer, string expectedReason)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", useServerValue);
+
+            bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMultiThreaded, out string reason);
+
+            useServer.ShouldBe(expectedUseServer);
+            reason.ShouldBe(expectedReason);
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;

@@ -86,13 +86,13 @@ Windows-only files are excluded via `<Compile Remove>` instead — no `#if` insi
 | Guard | When | Runtime check? |
 |-------|------|----------------|
 | `#if FEATURE_WINDOWSINTEROP` | Multi-TFM Windows calls | Yes |
-| `#if FEATURE_WINDOWSINTEROP && NET` | Manual COM structs that use static-abstract `IComIID` (e.g. WMI). CsWin32-generated COM types via `ComScope<T>` work on net472 via the `IComIID` polyfill — see [cswin32-com](../cswin32-com/SKILL.md#icomiid-polyfill-for-net472) | Yes |
+| `#if FEATURE_WINDOWSINTEROP && NET` | Manual COM structs gated .NET-only (e.g. WMI). CsWin32-generated COM types via `ComScope<T>` work on net472 too — the generator emits `IComIID` on every TFM (see [cswin32-com](../cswin32-com/SKILL.md#icomiid-across-tfms)) | Yes |
 | `#if FEATURE_WINDOWSINTEROP && !NETSTANDARD` | CsWin32 types without `static abstract` (net472 + net10) | Yes |
 | `#if !NET` / `#if FEATURE_MSCOREE` | net472-only = inherently Windows | No |
 
 **Namespace imports** must be inside `#if FEATURE_WINDOWSINTEROP`. WDK APIs use `Windows.Wdk` namespace.
 
-**Files**: `src/Framework/Windows/` (CsWin32 partials), `src/Shared/Win32/` (COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs), `src/Framework/Polyfills/IComIID*.cs` (net472/netstandard2.0 polyfills, gated `#if !NET`).
+**Files**: `src/Framework/Windows/` (CsWin32 partials), `src/Shared/Win32/` (COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs).
 
 ### Constant Replacements
 
@@ -183,4 +183,4 @@ dotnet msbuild MSBuild.SourceBuild.slnf /p:DotNetBuildSourceOnly=true -v:q
 - **CA1823**: Unused private fields (e.g. constants only consumed inside the guard)
 - **CS1587**: XML doc comments (move inside `#if`, not before)
 
-The same applies when adding **polyfills** in `src/Framework/Polyfills/` (e.g. `IComIID`, `SpanExtensions`, `IndexOfAnyExcept`): polyfills usually live behind `#if !NET` (or similar TFM guards) but are still consumed from `#if FEATURE_WINDOWSINTEROP` code paths. Always run the source-build to confirm the polyfill, its callers, and any helper members compile cleanly when interop is disabled — a polyfill referenced only by Windows-only code will trip IDE0051/CA1823 in source-only builds.
+The same applies when adding **polyfills** in `src/Framework/Polyfills/` (e.g. `SpanExtensions`, `IndexOfAnyExcept`): polyfills usually live behind `#if !NET` (or similar TFM guards) but are still consumed from `#if FEATURE_WINDOWSINTEROP` code paths. Always run the source-build to confirm the polyfill, its callers, and any helper members compile cleanly when interop is disabled — a polyfill referenced only by Windows-only code will trip IDE0051/CA1823 in source-only builds.

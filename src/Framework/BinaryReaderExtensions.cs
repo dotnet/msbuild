@@ -83,9 +83,18 @@ internal static class BinaryReaderExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static unsafe Guid ReadGuid(this BinaryReader reader)
+    public static Guid ReadGuid(this BinaryReader reader)
     {
-        return new Guid(reader.ReadBytes(sizeof(Guid)));
+        const int GuidSize = 16;
+
+#if NET
+        Span<byte> bytes = stackalloc byte[GuidSize];
+        reader.Read(bytes);
+#else
+        byte[] bytes = reader.ReadBytes(GuidSize);
+#endif
+
+        return new Guid(bytes);
     }
 
     public static void ReadExtendedBuildEventData(this BinaryReader reader, IExtendedBuildEventArgs data)

@@ -12,7 +12,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -28,6 +27,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
@@ -264,6 +264,8 @@ namespace Microsoft.Build.Execution
         private InternalTelemetryConsumingLogger? _telemetryConsumingLogger;
 
         private ProjectCacheService? _projectCacheService;
+
+        private CoordinatorClient? _coordinatorClient;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
@@ -628,6 +630,27 @@ namespace Microsoft.Build.Execution
 
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
+
+                // If the coordinator is enabled, request a node grant and cap MaxNodeCount.
+                // This is done after logging initialization so that waiting/grant messages
+                // are visible in the terminal logger.
+                if (Traits.Instance.EnableCoordinator)
+                {
+                    _coordinatorClient = CoordinatorClient.TryConnect(
+                        requestedNodes: _buildParameters.MaxNodeCount,
+                        settings: CoordinatorSettings.FromEnvironment(),
+                        loggingService);
+
+                    if (_coordinatorClient != null)
+                    {
+                        _buildParameters.MaxNodeCount = _coordinatorClient.GrantedNodes;
+
+                        if (_coordinatorClient.WaitDuration is TimeSpan waitDuration)
+                        {
+                            _buildTelemetry.CoordinatorWaitDurationMs = waitDuration.TotalMilliseconds;
+                        }
+                    }
+                }
 
                 // Validate environment variables (e.g., DOTNET_HOST_PATH)
                 EnvironmentVariableValidator.ValidateEnvironmentVariables(loggingService);
@@ -1173,6 +1196,9 @@ namespace Microsoft.Build.Execution
                 }
                 finally
                 {
+                    _coordinatorClient?.Dispose();
+                    _coordinatorClient = null;
+
                     if (_buildParameters!.LegacyThreadingSemantics)
                     {
                         _legacyThreadingData.MainThreadSubmissionId = -1;
@@ -1218,13 +1244,12 @@ namespace Microsoft.Build.Execution
         {
             TelemetryManager.Instance.Initialize(isStandalone: false);
 
-            using IActivity? activity = TelemetryManager.Instance
-                ?.DefaultActivitySource
+            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
-                ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
-                        includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-                        includeTargetDetails: false));
+                .SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                    includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+                    includeTargetDetails: false));
         }
 
         /// <summary>
@@ -3198,7 +3223,7 @@ namespace Microsoft.Build.Execution
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(BuildCheckForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
@@ -3218,7 +3243,7 @@ namespace Microsoft.Build.Execution
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(InternalTelemetryForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
@@ -3273,7 +3298,7 @@ namespace Microsoft.Build.Execution
             static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord>? forwarders)
             {
                 Type configurableLoggerType = typeof(ConfigurableForwardingLogger);
-                string engineAssemblyName = configurableLoggerType.GetTypeInfo().Assembly.GetName().FullName;
+                string engineAssemblyName = configurableLoggerType.Assembly.GetName().FullName;
                 string configurableLoggerName = configurableLoggerType.FullName!;
 
                 if (forwarders == null)
@@ -3456,7 +3481,7 @@ namespace Microsoft.Build.Execution
                         s_singletonInstance = null;
                     }
 
-                    TelemetryManager.Instance?.Dispose();
+                    TelemetryManager.Instance.Dispose();
 
                     _disposed = true;
                 }
