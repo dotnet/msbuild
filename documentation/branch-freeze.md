@@ -22,7 +22,7 @@ Comment on any issue or pull request:
 * The bot reacts 👍 and replies with a confirmation (or 😕 with usage help if the command is malformed).
 
 While a branch is frozen, every open and new PR targeting it shows a failing
-**`branch-freeze`** check — `❄️ Frozen: <reason>` — that links to the tracking
+**`branch-freeze`** check — `Frozen: <reason>` — that links to the tracking
 issue and blocks merge. `/unfreeze` turns the check green again.
 
 ## How it works

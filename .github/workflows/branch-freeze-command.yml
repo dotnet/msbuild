@@ -15,8 +15,8 @@ on:
 permissions:
   contents: read        # checkout the shared scripts
   issues: write         # create/close/label the tracking issue, react, comment
-  statuses: write       # re-stamp open PRs after toggling
-  pull-requests: read   # enumerate open PRs for the fan-out
+  # `statuses: write` and `pull-requests: read` are required only by the reusable
+  # status workflow and are granted on the `fanout` job below (least privilege).
 
 concurrency:
   # Serialize freeze/unfreeze operations so concurrent commands cannot race on
