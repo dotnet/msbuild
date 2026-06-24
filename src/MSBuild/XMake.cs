@@ -321,10 +321,12 @@ namespace Microsoft.Build.CommandLine
                 out CommandLineSwitches switchesNotFromAutoResponseFile);
 
             int exitCode;
+            bool shouldUseServer = ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason);
+            bool stdOutHatchPreventsServer = Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
             if (
                 canRunServer &&
-                ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason) &&
-                !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+                shouldUseServer &&
+                !stdOutHatchPreventsServer)
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
@@ -339,6 +341,16 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
+                // The server was requested for this invocation but cannot be used by the in-process build below.
+                // Record a localized reason so the build log (and any binary log) explains why the server was skipped.
+                // When the server was never requested we stay silent to avoid noise on ordinary builds.
+                // The null check defends the (currently unreachable from here) case where the client-fallback path
+                // in MSBuildClientApp already recorded a more specific reason before invoking the in-process build.
+                if (shouldUseServer && s_serverNotUsedReason is null)
+                {
+                    s_serverNotUsedReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerDisabledForBuild");
+                }
+
                 // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
                 // parse succeeded) so the command line is not parsed a second time; on parse failure they are null
                 // and Execute re-parses to surface the error.
@@ -1952,6 +1964,32 @@ namespace Microsoft.Build.CommandLine
                     MessageImportance.Low),
             };
 
+            // Record the MSBuild Server lifecycle for this build so it is visible in the binary log.
+            // The s_isServerNode check must come first: it intentionally masks any s_serverNotUsedReason
+            // that the server process may have set during its own startup (the server's own command line
+            // can look "server requested but not used"), so the server only ever logs a spawn/reuse message.
+            if (s_isServerNode)
+            {
+                // The first build a freshly spawned server serves reports a "spawned" message; every
+                // subsequent build on the same long-lived node reports that the node is being reused.
+                string serverStatusResource = s_serverBuildCounter == 1 ? "MSBuildServerNodeSpawned" : "MSBuildServerNodeReused";
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            serverStatusResource,
+                            EnvironmentUtilities.CurrentProcessId),
+                        MessageImportance.Low));
+            }
+            else if (!string.IsNullOrEmpty(s_serverNotUsedReason))
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "MSBuildServerNotUsedForBuild",
+                            s_serverNotUsedReason),
+                        MessageImportance.Low));
+            }
+
             NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
             if (longPaths != NativeMethodsShared.LongPathsStatus.NotApplicable)
             {
@@ -2157,6 +2195,22 @@ namespace Microsoft.Build.CommandLine
         /// Indicates that this process is working as a server.
         /// </summary>
         private static bool s_isServerNode;
+
+        /// <summary>
+        /// Number of builds this MSBuild Server node has executed (only meaningful when
+        /// <see cref="s_isServerNode"/> is true). Incremented once per build command the server serves.
+        /// A value of 1 means the node was just spawned for this build; greater than 1 means an
+        /// already-running node is being reused. Used to log a server lifecycle message into the build log.
+        /// </summary>
+        private static int s_serverBuildCounter;
+
+        /// <summary>
+        /// When MSBuild Server was requested for this invocation but the build is instead running in-process
+        /// (e.g. the server was busy, unreachable, or precluded by command-line switches), this holds a
+        /// localized human-readable reason. It is surfaced as a low-importance message in the build log so a
+        /// binary log records why the server was not used. Null when the server was not requested or was used.
+        /// </summary>
+        internal static string s_serverNotUsedReason;
 
         /// <summary>
         /// Indicates that this process was launched as a worker node (via -nodeMode switch).
@@ -3173,6 +3227,13 @@ namespace Microsoft.Build.CommandLine
                         // we have to pass down xmake build invocation to avoid circular dependency
                         OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
                         {
+                            // Count builds this server node serves so the build log can distinguish a
+                            // freshly spawned node (first build) from a reused one (subsequent builds).
+                            // A plain increment is safe: the server serializes build commands behind the
+                            // busy mutex, so this never runs concurrently and the mutex provides the memory
+                            // barrier that makes the new value visible to GetMessagesToLogInBuildLoggers.
+                            s_serverBuildCounter++;
+
                             int exitCode;
                             ExitType exitType;
 

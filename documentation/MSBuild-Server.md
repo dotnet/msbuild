@@ -11,6 +11,14 @@ To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
 When a build is multithreaded (`/mt`), the server node is launched with [Server GC](https://learn.microsoft.com/dotnet/standard/garbage-collection/workstation-server-gc) enabled. Under `/mt` the server runs all project work on threads in this single process, so Server GC's higher throughput is beneficial; without `/mt` the server only orchestrates and delegates project work to separate worker nodes, so it keeps the default Workstation GC. GC mode is fixed at CLR startup, so it is set via the `DOTNET_gcServer` environment variable in the server's launch environment (decided from the launching invocation's command line). An explicit user-set `DOTNET_gcServer` is honored (e.g. set `DOTNET_gcServer=0` to keep Workstation GC in a memory-constrained environment). This is scoped to the server process only: sidecar TaskHosts and worker nodes keep the default Workstation GC.
 
+## Diagnostics
+
+Each build records its relationship to MSBuild Server as a low-importance message, so it is captured in a binary log (`-bl`) and shown at diagnostic verbosity (`-v:diag`) without affecting normal output. One of the following is logged at the start of the build:
+
+- **Server spawned** &mdash; the build runs on a server node that was just started for it; the message includes the server process ID.
+- **Server reused** &mdash; the build runs on an already-running server node (reused across builds); the message includes the server process ID.
+- **Server not used** &mdash; the server was requested for this invocation but the build instead ran in-process, together with the reason (e.g. the server was busy with another build, could not be reached, or the invocation was not compatible with MSBuild Server). Nothing is logged when the server was never requested.
+
 ## Communication protocol
 
 The server node uses same IPC approach as current worker nodes - named pipes. This solution allows to reuse existing code. When process starts, pipe with deterministic name is opened and waiting for commands. Client has following worfklow:
