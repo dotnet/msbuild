@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
             // Handle WriteOnlyWhenDifferent check for Overwrite mode before executing
             if (Overwrite && WriteOnlyWhenDifferent)
             {
-                if (!ShouldWriteFileForOverwrite(filePath, contentsAsString))
+                if (!ShouldWriteFileForOverwrite(filePath, contentsAsString, encoding))
                 {
                     return !Log.HasLoggedErrors;
                 }
@@ -300,7 +300,7 @@ namespace Microsoft.Build.Tasks
         /// Checks if file should be written for Overwrite mode, considering WriteOnlyWhenDifferent option.
         /// </summary>
         /// <returns>True if file should be written, false if write should be skipped.</returns>
-        private bool ShouldWriteFileForOverwrite(AbsolutePath filePath, string contentsAsString)
+        private bool ShouldWriteFileForOverwrite(AbsolutePath filePath, string contentsAsString, Encoding encoding)
         {
             if (!WriteOnlyWhenDifferent)
             {
@@ -313,7 +313,7 @@ namespace Microsoft.Build.Tasks
                 if (FileUtilities.FileExistsNoThrow(filePath))
                 {
                     // Use stream-based comparison to avoid loading entire file into memory
-                    if (FilesAreIdentical(filePath, contentsAsString))
+                    if (FilesAreIdentical(filePath, contentsAsString, encoding))
                     {
                         Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath.OriginalValue);
                         MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath.OriginalValue, true);
@@ -338,40 +338,52 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Compares file contents with the given string using streams to avoid loading the entire file into memory.
-        /// Uses the default encoding for the comparison.
         /// </summary>
+        /// <remarks>
+        /// The comparison must use the same <paramref name="encoding"/> the task writes with, and must
+        /// account for the encoding preamble (BOM), because <see cref="System.IO.File.WriteAllText(string, string, Encoding)"/>
+        /// prepends it. Otherwise the byte length and content never match and the file is rewritten
+        /// on every build even when unchanged.
+        /// </remarks>
         /// <returns>True if file contents are identical to the provided string, false otherwise.</returns>
-        private bool FilesAreIdentical(AbsolutePath filePath, string contentsAsString)
+        private bool FilesAreIdentical(AbsolutePath filePath, string contentsAsString, Encoding encoding)
         {
             try
             {
-                byte[] newContentBytes = s_defaultEncoding.GetBytes(contentsAsString);
+                byte[] preamble = encoding.GetPreamble();
+                byte[] newContentBytes = encoding.GetBytes(contentsAsString);
+                long expectedLength = preamble.Length + newContentBytes.Length;
 
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096))
                 {
-                    // Quick check: file size must match
-                    if (fileStream.Length != newContentBytes.Length)
+                    // Quick check: file size must match (preamble + content)
+                    if (fileStream.Length != expectedLength)
                     {
                         return false;
                     }
 
-                    // Compare bytes in chunks to avoid loading entire file into memory
+                    // Compare bytes in chunks to avoid loading entire file into memory.
+                    // The on-disk stream starts with the preamble (if any), followed by the encoded content.
                     byte[] fileBuffer = new byte[4096];
-                    int newContentOffset = 0;
+                    long fileOffset = 0;
 
                     int bytesRead;
                     while ((bytesRead = fileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0)
                     {
-                        // Compare current chunk with the corresponding part of new content
                         for (int i = 0; i < bytesRead; i++)
                         {
-                            if (fileBuffer[i] != newContentBytes[newContentOffset + i])
+                            long position = fileOffset + i;
+                            byte expectedByte = position < preamble.Length
+                                ? preamble[position]
+                                : newContentBytes[position - preamble.Length];
+
+                            if (fileBuffer[i] != expectedByte)
                             {
                                 return false; // Difference found, files are not identical
                             }
                         }
 
-                        newContentOffset += bytesRead;
+                        fileOffset += bytesRead;
                     }
 
                     // All bytes matched

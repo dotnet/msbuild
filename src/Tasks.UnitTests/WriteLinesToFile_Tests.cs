@@ -166,6 +166,72 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/14071.
+        /// When a custom encoding is specified together with WriteOnlyWhenDifferent, the
+        /// up-to-date comparison must use that same encoding (including its preamble/BOM).
+        /// Otherwise the unchanged file is rewritten on every build, breaking incrementality.
+        /// </summary>
+        [Theory]
+        [InlineData("utf-8")]    // emits a UTF-8 BOM preamble
+        [InlineData("unicode")]  // UTF-16 LE, emits a BOM preamble and multi-byte content
+        [InlineData("utf-32")]   // emits a BOM preamble and 4-byte content
+        public void WriteOnlyWhenDifferentRespectsEncoding(string encoding)
+        {
+            var file = FileUtilities.GetTemporaryFile();
+            try
+            {
+                // Write an initial file with the custom encoding.
+                var a = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+                a.Execute().ShouldBeTrue();
+
+                var writeTime = DateTime.Now.AddHours(-1);
+                File.SetLastWriteTime(file, writeTime);
+
+                // Write the same contents with the same encoding. The file is unchanged,
+                // so the task must skip the write and preserve the timestamp.
+                var a2 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+                a2.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
+
+                // Write different contents - the file must be rewritten.
+                var a3 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents2") }
+                };
+                a3.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBeGreaterThan(writeTime.AddSeconds(1));
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
         [Fact]
         public void RedundantParametersAreLogged()
         {
