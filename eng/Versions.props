@@ -2,12 +2,12 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.14.50</VersionPrefix>
+    <VersionPrefix>17.14.51</VersionPrefix>
     <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <PackageValidationBaselineVersion>17.13.9</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
-    <!-- differentiate experimental insertions to avoid package id conflicts, 
+    <!-- differentiate experimental insertions to avoid package id conflicts,
     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -31,6 +31,18 @@
         As a result, we CONTINUE TO REFERENCE the old versions at build time, so those are the versions that get embedded into MSBuild assemblies.
         However, we can update, binding-redirect to, and distribute the newest version (that matches the VS-referenced versions) in order to get the benefits of updating.
         See uses of $(UseFrozenMaintenancePackageVersions) for details.
+
+        These referenced versions are deliberately NOT bumped to the servicing build that the
+        net472 runtime wave ($(RuntimePackageVersion_VSDeploy)) was produced against: doing so
+        would change what the .NET (Core) build references and pull in new source-build prebuilts.
+        Instead, net472 redistributes the newer maintenance assemblies through the same
+        $(DeployRuntimeServicingAssemblies) swap as the runtime packages (see
+        src/Directory.Build.targets). Because their assembly versions move between servicing
+        builds, the matching redirects in src/MSBuild/app.config and app.amd64.config point at the
+        deployed assembly versions: System.Memory 4.6.3 -> 4.0.5.0,
+        System.Runtime.CompilerServices.Unsafe 6.1.2 -> 6.0.3.0,
+        System.Threading.Tasks.Extensions 4.6.3 -> 4.2.4.0, and the transitively redistributed
+        System.Buffers 4.6.1 -> 4.0.5.0 and System.Numerics.Vectors 4.6.1 -> 4.1.6.0.
     -->
     <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
     <SystemThreadingTasksExtensionsVersion>4.6.0</SystemThreadingTasksExtensionsVersion>
@@ -41,20 +53,30 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
-    <SystemCollectionsImmutableVersion>9.0.0</SystemCollectionsImmutableVersion>
-    <SystemConfigurationConfigurationManagerVersion>9.0.0</SystemConfigurationConfigurationManagerVersion>
-    <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
-    <SystemDiagnosticsEventLogVersion>9.0.0</SystemDiagnosticsEventLogVersion>
-    <SystemFormatsAsn1Version>9.0.0</SystemFormatsAsn1Version>
-    <SystemFormatsNrbfVersion>9.0.0</SystemFormatsNrbfVersion>
-    <SystemReflectionMetadataVersion>9.0.0</SystemReflectionMetadataVersion>
-    <SystemReflectionMetadataLoadContextVersion>9.0.0</SystemReflectionMetadataLoadContextVersion>
-    <SystemResourcesExtensionsVersion>9.0.0</SystemResourcesExtensionsVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>9.0.0</SystemSecurityCryptographyProtectedDataVersion>
-    <SystemTextEncodingCodePagesVersion>9.0.0</SystemTextEncodingCodePagesVersion>
-    <SystemTextJsonVersion>9.0.0</SystemTextJsonVersion>
-    <SystemThreadingChannelsVersion>9.0.0</SystemThreadingChannelsVersion>
-    <SystemThreadingTasksDataflowVersion>9.0.0</SystemThreadingTasksDataflowVersion>
+    <!--
+        $(RuntimePackageVersion_CompileTime) is the version MSBuild COMPILES against and declares as its
+        own NuGet package dependencies. It is deliberately the same for every target framework
+        so that restore never sees a version downgrade: with central transitive pinning on, a
+        TargetFramework-conditioned version here would leak the higher version into leaf
+        packaging/test projects (which pin the unconditioned version directly) and fail with
+        NU1109.
+
+        For net472 we additionally REDISTRIBUTE a newer servicing build of these assemblies to
+        line up with a Visual Studio servicing event, WITHOUT changing what we compile or
+        declare against. That is driven by $(RuntimePackageVersion_VSDeploy): the newer packages
+        are downloaded and copied to the output in place of the compiled-against assemblies, and
+        the net472 binding redirects (src/MSBuild/app.config and app.amd64.config) point at them.
+        See the ReplaceRuntimeAssembliesWithServicingVersions target in src/Directory.Build.targets.
+        This mirrors the $(UseFrozenMaintenancePackageVersions) mechanism in reverse (there we
+        compile against an older build than we ship; here we ship a newer build than we compile).
+
+        These two versions are the single source of truth. src/Directory.Build.targets selects between
+        them per project and assigns the individual System.* runtime package versions from the result;
+        the selection lives there because it depends on $(IsUnitTestProject) and $(TargetFramework),
+        which are not yet set this early.
+    -->
+    <RuntimePackageVersion_CompileTime>9.0.0</RuntimePackageVersion_CompileTime>
+    <RuntimePackageVersion_VSDeploy>10.0.8</RuntimePackageVersion_VSDeploy>
   </PropertyGroup>
   <PropertyGroup>
     <!-- maintained in eng/dependabot/Packages.props -->
