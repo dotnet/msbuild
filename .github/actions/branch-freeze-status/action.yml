@@ -18,7 +18,7 @@ inputs:
     required: false
     default: ${{ github.repository }}
   github-token:
-    description: Token with `statuses: write` and `issues: read` permissions.
+    description: "Token with `statuses: write` and `issues: read` permissions."
     required: true
 
 runs:
@@ -31,57 +31,7 @@ runs:
         REPO: ${{ inputs.repository }}
         SHA: ${{ inputs.sha }}
         BASE_REF: ${{ inputs.base-ref }}
-      run: |
-        set -euo pipefail
-
-        context="branch-freeze"
-        label="branch-freeze"
-        marker="<!-- branch-freeze:${BASE_REF} -->"
-
-        # Find an open tracking issue that marks THIS base branch as frozen. A branch
-        # is frozen iff some `branch-freeze`-labeled open issue has the marker on a
-        # line by itself (surrounding whitespace/CR tolerated). Matching the marker as
-        # a WHOLE LINE - not a substring - prevents an issue body that merely mentions
-        # the marker text from accidentally freezing a branch.
-        issues="$(gh issue list \
-          --repo "$REPO" \
-          --label "$label" \
-          --state open \
-          --limit 200 \
-          --json number,body,url)"
-
-        match="$(printf '%s' "$issues" \
-          | jq -c --arg m "$marker" \
-              'map(select((.body // "") | split("\n") | any(.[]; (gsub("^\\s+|\\s+$";"")) == $m)))
-               | first // empty')"
-
-        if [ -n "$match" ]; then
-          issue_url="$(printf '%s' "$match" | jq -r '.url')"
-
-          # Reason = issue body with the marker line(s) removed, flattened to one line.
-          reason="$(printf '%s' "$match" \
-            | jq -r --arg m "$marker" \
-                '(.body // "") | split("\n") | map(select((gsub("^\\s+|\\s+$";"")) != $m)) | join("\n")' \
-            | tr '\n' ' ' \
-            | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
-          [ -n "$reason" ] || reason="(no reason provided)"
-
-          description="Frozen: ${reason}"
-          # GitHub truncates status descriptions at 140 chars; trim with an ellipsis.
-          if [ "${#description}" -gt 140 ]; then
-            description="${description:0:137}..."
-          fi
-
-          echo "Branch '$BASE_REF' is FROZEN -> reporting failure on $SHA"
-          gh api -X POST "repos/$REPO/statuses/$SHA" \
-            -f state=failure \
-            -f context="$context" \
-            -f description="$description" \
-            -f target_url="$issue_url" >/dev/null
-        else
-          echo "Branch '$BASE_REF' is open -> reporting success on $SHA"
-          gh api -X POST "repos/$REPO/statuses/$SHA" \
-            -f state=success \
-            -f context="$context" \
-            -f description="Branch open" >/dev/null
-        fi
+      # Inputs are passed as positional args (data), never interpolated into the
+      # command text, so a crafted ref/sha cannot inject shell. The shared script
+      # is the single source of truth, also used by the bulk fan-out loop.
+      run: bash "${{ github.action_path }}/post-freeze-status.sh" "$SHA" "$BASE_REF"
