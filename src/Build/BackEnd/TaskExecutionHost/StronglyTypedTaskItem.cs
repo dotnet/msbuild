@@ -55,11 +55,11 @@ namespace Microsoft.Build.BackEnd
         public T Value { get; }
 
         /// <summary>
-        /// Returns true if <typeparamref name="T"/> is one of the supported (path-like) value types that benefit
-        /// from absolute path resolution. Defers to <see cref="TaskItemTypeDetector.IsSupportedValueType"/> so the
-        /// supported set is defined in exactly one place.
+        /// Returns true if <typeparamref name="T"/> is one of the supported (path-like) types that benefit from
+        /// absolute path resolution. Defers to <see cref="TaskItemTypeDetector.IsSupportedPathLikeType"/>, the
+        /// canonical membership test, so the supported set lives in one place.
         /// </summary>
-        private static bool IsPathLikeType() => TaskItemTypeDetector.IsSupportedValueType(typeof(T));
+        private static bool IsPathLikeType() => TaskItemTypeDetector.IsSupportedPathLikeType(typeof(T));
 
         /// <summary>Returns the FullPath metadata value if non-empty, otherwise falls back to itemSpec.</summary>
         private static string GetFullPathOrItemSpec(ITaskItem item, string itemSpec)

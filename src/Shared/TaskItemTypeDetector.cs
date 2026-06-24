@@ -16,12 +16,14 @@ namespace Microsoft.Build.Shared
             => string.Equals(type.FullName, AbsolutePathFullName, StringComparison.Ordinal);
 
         /// <summary>
-        /// The single source of truth for the closed set of value types <c>T</c> that may be wrapped by
-        /// <c>ITaskItem&lt;T&gt;</c> / <c>TaskItem&lt;T&gt;</c> task parameters. Parameter validation, type
-        /// detection, and strongly-typed item construction all defer to this so the set is defined in exactly
-        /// one place.
+        /// The canonical membership test for the closed set of types <c>T</c> that may be wrapped by
+        /// <c>ITaskItem&lt;T&gt;</c> / <c>TaskItem&lt;T&gt;</c> task parameters (currently the path-like types
+        /// <c>AbsolutePath</c>, <c>FileInfo</c>, and <c>DirectoryInfo</c>). Parameter validation and type detection
+        /// call this directly. The engine's construction switch (TaskExecutionHost.CreateStronglyTypedTaskItem)
+        /// cannot defer to it — instantiating the generic requires the static type — so that switch must be kept in
+        /// sync with this predicate.
         /// </summary>
-        internal static bool IsSupportedValueType(Type valueType)
+        internal static bool IsSupportedPathLikeType(Type valueType)
             => IsAbsolutePathType(valueType)
             || valueType == typeof(FileInfo)
             || valueType == typeof(DirectoryInfo);
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            return IsSupportedValueType(genericArguments[0]);
+            return IsSupportedPathLikeType(genericArguments[0]);
         }
 
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)

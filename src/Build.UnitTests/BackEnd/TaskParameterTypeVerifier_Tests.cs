@@ -387,6 +387,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
         }
 
+        // ─── Concrete Microsoft.Build.Utilities.TaskItem<T> is rejected as an INPUT (authors must use ITaskItem<T>) ───
+
+        [Fact]
+        public void IsValidScalarInputParameter_ConcreteUtilitiesTaskItemOfT_ReturnsFalse()
+        {
+            // The concrete public TaskItem<T> is a struct, so it would otherwise pass via the value-type branch.
+            // The engine can only construct its own ITaskItem<T> implementation, so the concrete type must be rejected
+            // as an input (it falls through to the "UnsupportedTaskParameterTypeError" diagnostic).
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(TaskItem<FileInfo>)).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(TaskItem<DirectoryInfo>)).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(TaskItem<AbsolutePath>)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_ConcreteUtilitiesTaskItemOfTArray_ReturnsFalse()
+        {
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(TaskItem<FileInfo>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(TaskItem<AbsolutePath>[])).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void IsValidInputParameter_InterfaceITaskItemOfT_StillValid()
+        {
+            // Regression guard: rejecting the concrete type must not affect the supported interface form.
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<FileInfo>)).ShouldBeTrue();
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem<FileInfo>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_PlainValueType_StillValid()
+        {
+            // The concrete-type exclusion must not affect ordinary value-type parameters.
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(int)).ShouldBeTrue();
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(bool)).ShouldBeTrue();
+        }
+
         #endregion
     }
 }

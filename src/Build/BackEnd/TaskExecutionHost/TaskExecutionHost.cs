@@ -755,7 +755,11 @@ namespace Microsoft.Build.BackEnd
         #region Local Methods
 
         /// <summary>
-        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is path-like.
+        /// Checks if a type is the interface <c>ITaskItem&lt;T&gt;</c> or the concrete public
+        /// <c>Microsoft.Build.Utilities.TaskItem&lt;T&gt;</c> where T is supported. Used when reading task OUTPUTS,
+        /// where a task may legitimately return either form. Input binding only accepts the interface
+        /// (see <see cref="TaskParameterTypeVerifier.IsPathLikeITaskItemOfT"/>); the concrete public type is
+        /// rejected for inputs by parameter validation.
         /// </summary>
         private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
             => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
@@ -766,13 +770,13 @@ namespace Microsoft.Build.BackEnd
         /// for an <see cref="ITaskItem{T}"/> parameter or array element declared as <paramref name="declaredItemType"/>.
         /// </summary>
         /// <remarks>
-        /// The supported value types are a closed set defined once by <see cref="TaskItemTypeDetector.IsSupportedValueType"/>
-        /// (which parameter validation and detection also use). Each is instantiated directly here rather than reflectively
+        /// The supported set's membership is decided by <see cref="TaskItemTypeDetector.IsSupportedPathLikeType"/> (which
+        /// parameter validation and detection also use). Each type is instantiated directly here rather than reflectively
         /// via <c>MakeGenericType</c>/<c>Invoke</c>, which preserves static type information and is friendlier to trimming
-        /// and AOT. The branches below must mirror that predicate; a value type it accepts but this method does not handle
-        /// trips the final guard.
+        /// and AOT. Because the generic cannot be constructed from a runtime <see cref="Type"/> without reflection, this
+        /// switch must be kept in sync with that predicate; a supported type without a branch trips the final guard.
         /// </remarks>
-        private static ITaskItem CreateStronglyTypedTaskItem(Type declaredItemType, ITaskItem sourceItem)
+        internal static ITaskItem CreateStronglyTypedTaskItem(Type declaredItemType, ITaskItem sourceItem)
         {
             Type valueType = declaredItemType.GetGenericArguments()[0];
 
@@ -850,7 +854,7 @@ namespace Microsoft.Build.BackEnd
 
                 Type elementType = parameterType.GetElementType();
 
-                if (parameterType != typeof(ITaskItem[]) && !IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                if (parameterType != typeof(ITaskItem[]) && !TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(elementType))
                 {
                     foreach (TaskItem item in taskItems)
                     {
@@ -858,7 +862,7 @@ namespace Microsoft.Build.BackEnd
                         finalTaskInputs.Add(ConvertStringToParameterValue(item.ItemSpec, elementType));
                     }
                 }
-                else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                else if (TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(elementType))
                 {
                     foreach (TaskItem item in taskItems)
                     {
@@ -1312,7 +1316,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                if (parameterType == typeof(ITaskItem) || IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                if (parameterType == typeof(ITaskItem) || TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType))
                 {
                     // We don't know how many items we're going to end up with, but we'll
                     // keep adding them to this arraylist as we find them.
@@ -1340,7 +1344,7 @@ namespace Microsoft.Build.BackEnd
 
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
 
-                        if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                        if (TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType))
                         {
                             ITaskItem taskItemOfT = CreateStronglyTypedTaskItem(parameterType, finalTaskItems[0]);
                             success = InternalSetTaskParameter(parameter, taskItemOfT);

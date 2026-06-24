@@ -52,7 +52,10 @@ namespace Microsoft.Build.BackEnd
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>
-            parameterType.GetTypeInfo().IsValueType ||
+            // A concrete Microsoft.Build.Utilities.TaskItem<T> is a struct, so it would otherwise qualify via the
+            // value-type branch. The engine can no longer construct that public type (it builds its own ITaskItem<T>
+            // implementation instead), so reject it for inputs and steer authors to declare ITaskItem<T>.
+            (parameterType.GetTypeInfo().IsValueType && !IsPathLikeUtilitiesTaskItemOfT(parameterType)) ||
             parameterType == typeof(ITaskItem) ||
             s_supportedTypes.Contains(parameterType) ||
             IsPathLikeITaskItemOfT(parameterType);
@@ -69,7 +72,8 @@ namespace Microsoft.Build.BackEnd
 
             Type elementType = parameterType.GetElementType();
 
-            return elementType.GetTypeInfo().IsValueType ||
+            // See IsValidScalarInputParameter: reject concrete Microsoft.Build.Utilities.TaskItem<T>[] for inputs.
+            return (elementType.GetTypeInfo().IsValueType && !IsPathLikeUtilitiesTaskItemOfT(elementType)) ||
                         parameterType == typeof(ITaskItem[]) ||
                         s_supportedTypes.Contains(elementType) ||
                         IsPathLikeITaskItemOfT(elementType);
