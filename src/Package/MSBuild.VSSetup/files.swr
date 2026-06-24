@@ -33,7 +33,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.IO.Redist.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
   file source=$(X86BinPath)MSBuild.exe vs.file.ngenArchitecture=x86 vs.file.ngenPriority=2
   file source=$(X86BinPath)MSBuild.exe.config
-  file source=$(CoordinatorBinPath)MSBuild.Coordinator.exe vs.file.ngenArchitecture=x86 vs.file.ngenPriority=3
+  file source=$(CoordinatorBinPath)MSBuild.Coordinator.exe
   file source=$(CoordinatorBinPath)MSBuild.Coordinator.exe.config
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe.config
