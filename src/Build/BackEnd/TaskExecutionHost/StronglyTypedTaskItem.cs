@@ -7,7 +7,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -30,11 +30,7 @@ namespace Microsoft.Build.BackEnd
         /// Initializes a new instance from an <see cref="ITaskItem"/>, parsing its identity as <typeparamref name="T"/>.
         /// </summary>
         /// <param name="item">The task item whose identity is parsed.</param>
-        /// <remarks>
-        /// This constructor is intentionally public (even though the type is internal) so that it can be located via
-        /// <see cref="Type.GetConstructor(Type[])"/>, which only matches public constructors, during reflective binding.
-        /// </remarks>
-        public StronglyTypedTaskItem(ITaskItem item)
+        internal StronglyTypedTaskItem(ITaskItem item)
         {
             if (item == null)
             {

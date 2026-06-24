@@ -763,23 +763,33 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Materializes a strongly-typed task item (<see cref="ITaskItem{T}"/>) from <paramref name="sourceItem"/>
-        /// for a parameter or array element declared as <paramref name="declaredItemType"/>.
+        /// for an <see cref="ITaskItem{T}"/> parameter or array element declared as <paramref name="declaredItemType"/>.
         /// </summary>
         /// <remarks>
-        /// When the task declares the <see cref="ITaskItem{T}"/> interface, an engine-internal concrete
-        /// implementation is created. When the task declares a concrete type (for example the public
-        /// <c>Microsoft.Build.Utilities.TaskItem&lt;T&gt;</c>), that exact type is constructed reflectively so the
-        /// produced value is assignable to the task's property. Looking the concrete type up reflectively keeps
-        /// <c>Microsoft.Build</c> from taking a build/package dependency on <c>Microsoft.Build.Utilities.Core</c>.
+        /// The set of supported value types is closed (callers gate on <see cref="IsPathLikeTaskItemOrITaskItemOfT"/>),
+        /// so the generic is instantiated directly rather than reflectively via <c>MakeGenericType</c>/<c>Invoke</c>.
+        /// Keeping these constructions statically visible preserves type information and is friendlier to trimming and AOT.
         /// </remarks>
         private static ITaskItem CreateStronglyTypedTaskItem(Type declaredItemType, ITaskItem sourceItem)
         {
             Type valueType = declaredItemType.GetGenericArguments()[0];
-            Type concreteType = declaredItemType.IsInterface
-                ? typeof(StronglyTypedTaskItem<>).MakeGenericType(valueType)
-                : declaredItemType;
 
-            return (ITaskItem)concreteType.GetConstructor([typeof(ITaskItem)]).Invoke([sourceItem]);
+            if (valueType == typeof(FileInfo))
+            {
+                return new StronglyTypedTaskItem<FileInfo>(sourceItem);
+            }
+
+            if (valueType == typeof(DirectoryInfo))
+            {
+                return new StronglyTypedTaskItem<DirectoryInfo>(sourceItem);
+            }
+
+            if (valueType == typeof(AbsolutePath))
+            {
+                return new StronglyTypedTaskItem<AbsolutePath>(sourceItem);
+            }
+
+            throw new InternalErrorException($"Unsupported strongly-typed task item value type '{valueType.FullName}'.");
         }
 
         /// <summary>
