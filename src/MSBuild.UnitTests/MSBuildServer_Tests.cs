@@ -187,12 +187,12 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // MSBuild Server is requested via the environment variable, but /nodereuse:false makes the
             // command line incompatible with the server, so the build falls back to running in-process.
-            // The reason must be recorded in the build log.
+            // The specific reason (node reuse disabled) must be recorded in the build log.
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} /nodereuse:false -verbosity:diagnostic", out bool success, false, _output);
             success.ShouldBeTrue();
             ParseNumber(output, "Process ID is ").ShouldBe(ParseNumber(output, "Server ID is "), "The build should have run in-process, not on a server node.");
 
-            string reason = GetServerStatusMessage("MSBuildServerDisabledForBuild");
+            string reason = GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled");
             string notUsedMessage = GetServerStatusMessage("MSBuildServerNotUsedForBuild", reason);
 
             output.ShouldContain(notUsedMessage);
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", ParseNumber(output, "Server ID is ")));
             output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeReused", ParseNumber(output, "Server ID is ")));
             // The not-used template (with its substituted reason) must not appear because the server was never requested.
-            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNotUsedForBuild", GetServerStatusMessage("MSBuildServerDisabledForBuild")));
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNotUsedForBuild", GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled")));
         }
 
         /// <summary>

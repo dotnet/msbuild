@@ -1773,26 +1773,27 @@
   </data>
   <data name="MSBuildServerBusy" xml:space="preserve">
     <value>the server was busy with another build</value>
-    <comment>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerNotUsedForBuild: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</comment>
+  </data>
+  <data name="MSBuildServerReasonNodeReuseDisabled" xml:space="preserve">
+    <value>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</value>
+  </data>
+  <data name="MSBuildServerReasonStdOutForChildNodes" xml:space="preserve">
+    <value>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</value>
   </data>
   <data name="MSBuildServerDisabledForBuild" xml:space="preserve">
     <value>this invocation is not compatible with MSBuild Server</value>
-    <comment>LOCALIZATION: No format arguments. Covers any reason this invocation cannot use the server other than the server being busy/unavailable: e.g. incompatible command-line switches, node reuse disabled (switch or environment variable), or the EnsureStdOutForChildNodes escape hatch. Concatenated mid-sentence after a colon in MSBuildServerNotUsedForBuild: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</comment>
   </data>
   <!-- **** MSBuild Server fallback strings end **** -->
 
   <!-- **** MSBuild Server status strings begin **** -->
   <data name="MSBuildServerNodeSpawned" xml:space="preserve">
     <value>MSBuild Server node started for this build (process ID {0}).</value>
-    <comment>LOCALIZATION: {0} is the integer process ID of the MSBuild Server node; rendered as a decimal integer, do not localize the digits. Logged as a low-importance build message so it only appears in the binary log and diagnostic verbosity output.</comment>
   </data>
   <data name="MSBuildServerNodeReused" xml:space="preserve">
     <value>Reusing the running MSBuild Server node for this build (process ID {0}).</value>
-    <comment>LOCALIZATION: {0} is the integer process ID of the MSBuild Server node; rendered as a decimal integer, do not localize the digits. Logged as a low-importance build message so it only appears in the binary log and diagnostic verbosity output.</comment>
   </data>
   <data name="MSBuildServerNotUsedForBuild" xml:space="preserve">
     <value>MSBuild Server was requested but not used for this build: {0}.</value>
-    <comment>LOCALIZATION: {0} is a sub-message describing why the MSBuild server was not used. It is one of MSBuildServerBusy / MSBuildServerDisabledForBuild / MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</comment>
   </data>
   <!-- **** MSBuild Server status strings end **** -->
 

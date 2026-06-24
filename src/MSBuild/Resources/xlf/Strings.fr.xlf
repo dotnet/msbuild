@@ -383,7 +383,7 @@ futures
       <trans-unit id="MSBuildServerBusy">
         <source>the server was busy with another build</source>
         <target state="new">the server was busy with another build</target>
-        <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerNotUsedForBuild: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
@@ -398,7 +398,7 @@ futures
       <trans-unit id="MSBuildServerDisabledForBuild">
         <source>this invocation is not compatible with MSBuild Server</source>
         <target state="new">this invocation is not compatible with MSBuild Server</target>
-        <note>LOCALIZATION: No format arguments. Covers any reason this invocation cannot use the server other than the server being busy/unavailable: e.g. incompatible command-line switches, node reuse disabled (switch or environment variable), or the EnsureStdOutForChildNodes escape hatch. Concatenated mid-sentence after a colon in MSBuildServerNotUsedForBuild: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
@@ -408,17 +408,27 @@ futures
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
         <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
-        <note>LOCALIZATION: {0} is the integer process ID of the MSBuild Server node; rendered as a decimal integer, do not localize the digits. Logged as a low-importance build message so it only appears in the binary log and diagnostic verbosity output.</note>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
         <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
-        <note>LOCALIZATION: {0} is the integer process ID of the MSBuild Server node; rendered as a decimal integer, do not localize the digits. Logged as a low-importance build message so it only appears in the binary log and diagnostic verbosity output.</note>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
         <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
-        <note>LOCALIZATION: {0} is a sub-message describing why the MSBuild server was not used. It is one of MSBuildServerBusy / MSBuildServerDisabledForBuild / MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</note>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>

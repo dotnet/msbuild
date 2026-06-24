@@ -318,7 +318,8 @@ namespace Microsoft.Build.CommandLine
                 args,
                 out bool multiThreaded,
                 out CommandLineSwitches switchesFromAutoResponseFile,
-                out CommandLineSwitches switchesNotFromAutoResponseFile);
+                out CommandLineSwitches switchesNotFromAutoResponseFile,
+                out string serverDisabledReason);
 
             int exitCode;
             bool shouldUseServer = ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason);
@@ -342,13 +343,18 @@ namespace Microsoft.Build.CommandLine
             else
             {
                 // The server was requested for this invocation but cannot be used by the in-process build below.
-                // Record a localized reason so the build log (and any binary log) explains why the server was skipped.
-                // When the server was never requested we stay silent to avoid noise on ordinary builds.
-                // The null check defends the (currently unreachable from here) case where the client-fallback path
-                // in MSBuildClientApp already recorded a more specific reason before invoking the in-process build.
+                // Record the specific localized reason so the build log (and any binary log) explains why the
+                // server was skipped. When the server was never requested we stay silent to avoid noise on
+                // ordinary builds. The null check defends the (currently unreachable from here) case where the
+                // client-fallback path in MSBuildClientApp already recorded a more specific reason before invoking
+                // the in-process build.
                 if (shouldUseServer && s_serverNotUsedReason is null)
                 {
-                    s_serverNotUsedReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerDisabledForBuild");
+                    // Reaching the else branch with shouldUseServer means either the switches preclude the server
+                    // (serverDisabledReason is set) or only the stdout escape hatch does.
+                    s_serverNotUsedReason = canRunServer
+                        ? ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonStdOutForChildNodes")
+                        : serverDisabledReason;
                 }
 
                 // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
@@ -384,16 +390,21 @@ namespace Microsoft.Build.CommandLine
         /// project <c>Directory.Build.rsp</c>), or <see langword="null"/> if parsing failed.</param>
         /// <param name="switchesNotFromAutoResponseFile">The gathered command-line/environment switches, or
         /// <see langword="null"/> if parsing failed.</param>
+        /// <param name="serverDisabledReason">When the return value is <see langword="false"/>, a localized,
+        /// human-readable reason describing why the switches preclude MSBuild Server (e.g. node reuse disabled);
+        /// <see langword="null"/> when the server can run.</param>
         private static bool CanRunServerBasedOnCommandLineSwitches(
             string[] commandLine,
             out bool multiThreaded,
             out CommandLineSwitches switchesFromAutoResponseFile,
-            out CommandLineSwitches switchesNotFromAutoResponseFile)
+            out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out string serverDisabledReason)
         {
             bool canRunServer = true;
             multiThreaded = false;
             switchesFromAutoResponseFile = null;
             switchesNotFromAutoResponseFile = null;
+            serverDisabledReason = null;
             bool switchesFullyGathered = false;
             try
             {
@@ -422,10 +433,21 @@ namespace Microsoft.Build.CommandLine
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
-                    FileUtilities.IsBinaryLogFilename(projectFile) ||
-                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]))
+                    FileUtilities.IsBinaryLogFilename(projectFile))
                 {
                     canRunServer = false;
+                    serverDisabledReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerDisabledForBuild");
+                    if (KnownTelemetry.PartialBuildTelemetry is not null)
+                    {
+                        KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
+                    }
+                }
+                else if (!ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]))
+                {
+                    // Node reuse is the disablement reason a user most commonly hits while expecting the server
+                    // (and the in-process build still proceeds), so give it a specific message.
+                    canRunServer = false;
+                    serverDisabledReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonNodeReuseDisabled");
                     if (KnownTelemetry.PartialBuildTelemetry is not null)
                     {
                         KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
@@ -435,6 +457,7 @@ namespace Microsoft.Build.CommandLine
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace($"Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {ex}");
+                serverDisabledReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerDisabledForBuild");
                 if (KnownTelemetry.PartialBuildTelemetry is not null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
