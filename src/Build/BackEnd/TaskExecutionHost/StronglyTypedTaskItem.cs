@@ -54,12 +54,12 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public T Value { get; }
 
-        /// <summary>Returns true if T is a path-like type that benefits from absolute path resolution.</summary>
-        private static bool IsPathLikeType()
-        {
-            Type t = typeof(T);
-            return t == typeof(FileInfo) || t == typeof(DirectoryInfo) || t == typeof(AbsolutePath);
-        }
+        /// <summary>
+        /// Returns true if <typeparamref name="T"/> is one of the supported (path-like) value types that benefit
+        /// from absolute path resolution. Defers to <see cref="TaskItemTypeDetector.IsSupportedValueType"/> so the
+        /// supported set is defined in exactly one place.
+        /// </summary>
+        private static bool IsPathLikeType() => TaskItemTypeDetector.IsSupportedValueType(typeof(T));
 
         /// <summary>Returns the FullPath metadata value if non-empty, otherwise falls back to itemSpec.</summary>
         private static string GetFullPathOrItemSpec(ITaskItem item, string itemSpec)

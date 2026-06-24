@@ -766,9 +766,11 @@ namespace Microsoft.Build.BackEnd
         /// for an <see cref="ITaskItem{T}"/> parameter or array element declared as <paramref name="declaredItemType"/>.
         /// </summary>
         /// <remarks>
-        /// The set of supported value types is closed (callers gate on <see cref="IsPathLikeTaskItemOrITaskItemOfT"/>),
-        /// so the generic is instantiated directly rather than reflectively via <c>MakeGenericType</c>/<c>Invoke</c>.
-        /// Keeping these constructions statically visible preserves type information and is friendlier to trimming and AOT.
+        /// The supported value types are a closed set defined once by <see cref="TaskItemTypeDetector.IsSupportedValueType"/>
+        /// (which parameter validation and detection also use). Each is instantiated directly here rather than reflectively
+        /// via <c>MakeGenericType</c>/<c>Invoke</c>, which preserves static type information and is friendlier to trimming
+        /// and AOT. The branches below must mirror that predicate; a value type it accepts but this method does not handle
+        /// trips the final guard.
         /// </remarks>
         private static ITaskItem CreateStronglyTypedTaskItem(Type declaredItemType, ITaskItem sourceItem)
         {
