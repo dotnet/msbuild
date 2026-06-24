@@ -43,9 +43,10 @@ permissions:
   issues: read         # read the branch-freeze tracking issues
   pull-requests: read  # enumerate open PRs for bulk stamping
 
-concurrency:
-  group: branch-freeze-status-${{ github.event_name }}-${{ github.event.pull_request.number || inputs.base_ref || 'all' }}
-  cancel-in-progress: false
+# Per-branch write serialization (set at the JOB level below) guarantees that a
+# freeze/unfreeze fan-out and any concurrent single-PR stamp for the SAME base
+# branch cannot run at once - so whichever runs last reads the freshest freeze
+# state and a stale status can never be the final word for that branch.
 
 jobs:
   single:
@@ -56,6 +57,9 @@ jobs:
       github.event_name == 'pull_request_target' &&
       (github.event.action != 'edited' || github.event.changes.base != null)
     runs-on: ubuntu-latest
+    concurrency:
+      group: branch-freeze-write-${{ github.event.pull_request.base.ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -70,6 +74,9 @@ jobs:
     name: Bulk stamp open pull requests
     if: github.event_name != 'pull_request_target'
     runs-on: ubuntu-latest
+    concurrency:
+      group: branch-freeze-write-${{ inputs.base_ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -80,33 +87,4 @@ jobs:
           REPO: ${{ github.repository }}
           BASE_REF: ${{ inputs.base_ref }}
         shell: bash
-        run: |
-          set -euo pipefail
-
-          args=(--repo "$REPO" --state open --limit 1000 --json "number,headRefOid,baseRefName")
-          if [ -n "${BASE_REF}" ]; then
-            args+=(--base "$BASE_REF")
-          fi
-
-          prs="$(gh pr list "${args[@]}")"
-          count="$(printf '%s' "$prs" | jq 'length')"
-          echo "Stamping ${count} open PR(s)${BASE_REF:+ targeting ${BASE_REF}}"
-          if [ "$count" -ge 1000 ]; then
-            echo "::warning::Open PR count hit the query limit (${count}); some PRs may not have been stamped. Re-run after raising --limit."
-          fi
-
-          script="${GITHUB_WORKSPACE}/.github/actions/branch-freeze-status/post-freeze-status.sh"
-          fail=0
-          while IFS= read -r pr; do
-            num="$(printf '%s' "$pr" | jq -r '.number')"
-            sha="$(printf '%s' "$pr" | jq -r '.headRefOid')"
-            base="$(printf '%s' "$pr" | jq -r '.baseRefName')"
-            echo "::group::PR #${num} (${base} @ ${sha})"
-            if ! bash "$script" "$sha" "$base"; then
-              echo "::warning::Failed to stamp PR #${num}"
-              fail=1
-            fi
-            echo "::endgroup::"
-          done < <(printf '%s' "$prs" | jq -c '.[]')
-
-          exit "$fail"
+        run: bash "${GITHUB_WORKSPACE}/.github/actions/branch-freeze-status/stamp-open-prs.sh" "$BASE_REF"
