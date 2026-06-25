@@ -167,21 +167,18 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         /// <summary>
-        /// Regression test for https://github.com/dotnet/msbuild/issues/14071.
-        /// When a custom encoding is specified together with WriteOnlyWhenDifferent, the
-        /// up-to-date comparison must use that same encoding (including its preamble/BOM).
-        /// Otherwise the unchanged file is rewritten on every build, breaking incrementality.
+        /// With a custom encoding, WriteOnlyWhenDifferent must compare using that encoding (BOM included).
         /// </summary>
         [Theory]
-        [InlineData("utf-8")]    // emits a UTF-8 BOM preamble
-        [InlineData("unicode")]  // UTF-16 LE, emits a BOM preamble and multi-byte content
-        [InlineData("utf-32")]   // emits a BOM preamble and 4-byte content
+        [InlineData("utf-8")]
+        [InlineData("unicode")]
+        [InlineData("utf-32")]
         public void WriteOnlyWhenDifferentRespectsEncoding(string encoding)
         {
             var file = FileUtilities.GetTemporaryFile();
             try
             {
-                // Write an initial file with the custom encoding.
+                // Initial write.
                 var a = new WriteLinesToFile
                 {
                     Overwrite = true,
@@ -197,8 +194,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var writeTime = DateTime.Now.AddHours(-1);
                 File.SetLastWriteTime(file, writeTime);
 
-                // Write the same contents with the same encoding. The file is unchanged,
-                // so the task must skip the write and preserve the timestamp.
+                // Same contents: write is skipped, timestamp preserved.
                 var a2 = new WriteLinesToFile
                 {
                     Overwrite = true,
@@ -212,7 +208,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 a2.Execute().ShouldBeTrue();
                 File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
 
-                // Write different contents - the file must be rewritten.
+                // Different contents: file is rewritten.
                 var a3 = new WriteLinesToFile
                 {
                     Overwrite = true,

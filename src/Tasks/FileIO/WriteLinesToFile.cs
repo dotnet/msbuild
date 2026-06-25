@@ -352,7 +352,7 @@ namespace Microsoft.Build.Tasks
             {
                 byte[] preamble = encoding.GetPreamble();
                 byte[] newContentBytes = encoding.GetBytes(contentsAsString);
-                long expectedLength = preamble.Length + newContentBytes.Length;
+                long expectedLength = (long)preamble.Length + newContentBytes.Length;
 
                 using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096))
                 {
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Tasks
                     {
                         for (int i = 0; i < bytesRead; i++)
                         {
-                            long position = fileOffset + i;
+                            int position = checked((int)(fileOffset + i));
                             byte expectedByte = position < preamble.Length
                                 ? preamble[position]
                                 : newContentBytes[position - preamble.Length];
