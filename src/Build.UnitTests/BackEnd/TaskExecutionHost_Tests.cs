@@ -760,7 +760,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSetTaskItemFileInfoParam()
         {
             string filePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
-            ValidateTaskParameter("TaskItemFileInfoParam", filePath, new Microsoft.Build.Utilities.TaskItem<FileInfo>(new FileInfo(filePath)));
+            ValidateTaskParameter("TaskItemFileInfoParam", filePath, new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(filePath)));
         }
 
         /// <summary>
@@ -801,7 +801,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSetTaskItemFileInfoArrayParam()
         {
             string filePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
-            ValidateTaskParameterArray("TaskItemFileInfoArrayParam", filePath, new Microsoft.Build.Utilities.TaskItem<FileInfo>[] { new Microsoft.Build.Utilities.TaskItem<FileInfo>(new FileInfo(filePath)) });
+            ValidateTaskParameterArray("TaskItemFileInfoArrayParam", filePath, new Microsoft.Build.Framework.TaskItem<FileInfo>[] { new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(filePath)) });
         }
 
         /// <summary>
@@ -812,9 +812,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\file1.txt" : "/tmp/file1.txt";
             string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\file2.txt" : "/tmp/file2.txt";
-            ValidateTaskParameterArray("TaskItemFileInfoArrayParam", path1 + ";" + path2, new Microsoft.Build.Utilities.TaskItem<FileInfo>[] {
-                new Microsoft.Build.Utilities.TaskItem<FileInfo>(new FileInfo(path1)),
-                new Microsoft.Build.Utilities.TaskItem<FileInfo>(new FileInfo(path2))
+            ValidateTaskParameterArray("TaskItemFileInfoArrayParam", path1 + ";" + path2, new Microsoft.Build.Framework.TaskItem<FileInfo>[] {
+                new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(path1)),
+                new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(path2))
             });
         }
 
@@ -856,7 +856,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSetTaskItemDirectoryInfoParam()
         {
             string dirPath = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
-            ValidateTaskParameter("TaskItemDirectoryInfoParam", dirPath, new Microsoft.Build.Utilities.TaskItem<DirectoryInfo>(new DirectoryInfo(dirPath)));
+            ValidateTaskParameter("TaskItemDirectoryInfoParam", dirPath, new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(dirPath)));
         }
 
         /// <summary>
@@ -897,7 +897,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSetTaskItemDirectoryInfoArrayParam()
         {
             string dirPath = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
-            ValidateTaskParameterArray("TaskItemDirectoryInfoArrayParam", dirPath, new Microsoft.Build.Utilities.TaskItem<DirectoryInfo>[] { new Microsoft.Build.Utilities.TaskItem<DirectoryInfo>(new DirectoryInfo(dirPath)) });
+            ValidateTaskParameterArray("TaskItemDirectoryInfoArrayParam", dirPath, new Microsoft.Build.Framework.TaskItem<DirectoryInfo>[] { new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(dirPath)) });
         }
 
         /// <summary>
@@ -908,9 +908,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string path1 = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
             string path2 = NativeMethodsShared.IsWindows ? @"C:\Windows" : "/usr";
-            ValidateTaskParameterArray("TaskItemDirectoryInfoArrayParam", path1 + ";" + path2, new Microsoft.Build.Utilities.TaskItem<DirectoryInfo>[] {
-                new Microsoft.Build.Utilities.TaskItem<DirectoryInfo>(new DirectoryInfo(path1)),
-                new Microsoft.Build.Utilities.TaskItem<DirectoryInfo>(new DirectoryInfo(path2))
+            ValidateTaskParameterArray("TaskItemDirectoryInfoArrayParam", path1 + ";" + path2, new Microsoft.Build.Framework.TaskItem<DirectoryInfo>[] {
+                new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(path1)),
+                new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(path2))
             });
         }
 
