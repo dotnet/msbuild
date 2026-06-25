@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -18,18 +17,11 @@ namespace Microsoft.Build.BackEnd
     /// <remarks>
     /// This mirrors the public <c>Microsoft.Build.Utilities.TaskItem&lt;T&gt;</c>, but lives in the engine so that
     /// <c>Microsoft.Build</c> does not need a build/package dependency on <c>Microsoft.Build.Utilities.Core</c>.
-    /// Identity parsing is delegated to <see cref="ValueTypeParser"/> so behavior stays consistent with the public
-    /// type.
     /// </remarks>
-    /// <typeparam name="T">The type to parse the item identity as (<see cref="AbsolutePath"/>, <see cref="FileInfo"/>, or <see cref="DirectoryInfo"/>).</typeparam>
     internal sealed class StronglyTypedTaskItem<T> : ITaskItem<T>
     {
         private readonly ITaskItem _backingItem;
 
-        /// <summary>
-        /// Initializes a new instance from an <see cref="ITaskItem"/>, parsing its identity as <typeparamref name="T"/>.
-        /// </summary>
-        /// <param name="item">The task item whose identity is parsed.</param>
         internal StronglyTypedTaskItem(ITaskItem item)
         {
             if (item == null)

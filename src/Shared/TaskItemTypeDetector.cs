@@ -15,14 +15,6 @@ namespace Microsoft.Build.Shared
         internal static bool IsAbsolutePathType(Type type)
             => string.Equals(type.FullName, AbsolutePathFullName, StringComparison.Ordinal);
 
-        /// <summary>
-        /// The canonical membership test for the closed set of types <c>T</c> that may be wrapped by
-        /// <c>ITaskItem&lt;T&gt;</c> / <c>TaskItem&lt;T&gt;</c> task parameters (currently the path-like types
-        /// <c>AbsolutePath</c>, <c>FileInfo</c>, and <c>DirectoryInfo</c>). Parameter validation and type detection
-        /// call this directly. The engine's construction switch (TaskExecutionHost.CreateStronglyTypedTaskItem)
-        /// cannot defer to it — instantiating the generic requires the static type — so that switch must be kept in
-        /// sync with this predicate.
-        /// </summary>
         internal static bool IsSupportedPathLikeType(Type valueType)
             => IsAbsolutePathType(valueType)
             || valueType == typeof(FileInfo)
