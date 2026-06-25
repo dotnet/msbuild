@@ -751,44 +751,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
-        #region StronglyTypedTaskItem construction
-
-        /// <summary>
-        /// Guards against drift between the supported-type predicate and the engine construction switch: every type
-        /// accepted by <see cref="TaskItemTypeDetector.IsSupportedPathLikeType"/> must have a matching branch in
-        /// <see cref="TaskExecutionHost.CreateStronglyTypedTaskItem"/> (otherwise it hits the InternalErrorException guard).
-        /// </summary>
-        [Fact]
-        public void EverySupportedValueTypeHasAConstructionBranch()
-        {
-            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
-
-            foreach (Type valueType in new[] { typeof(AbsolutePath), typeof(FileInfo), typeof(DirectoryInfo) })
-            {
-                TaskItemTypeDetector.IsSupportedPathLikeType(valueType).ShouldBeTrue($"{valueType} should be supported.");
-
-                Type declaredItemType = typeof(ITaskItem<>).MakeGenericType(valueType);
-                ITaskItem source = new Utilities.TaskItem(absolutePath);
-
-                ITaskItem result = TaskExecutionHost.CreateStronglyTypedTaskItem(declaredItemType, source);
-
-                result.ShouldNotBeNull();
-                result.GetType().ShouldBe(typeof(TaskItem<>).MakeGenericType(valueType));
-            }
-        }
-
-        /// <summary>
-        /// Documents the closed-set boundary: types outside the supported set are not reported as supported.
-        /// </summary>
-        [Fact]
-        public void UnsupportedValueTypeIsNotReportedAsSupported()
-        {
-            TaskItemTypeDetector.IsSupportedPathLikeType(typeof(int)).ShouldBeFalse();
-            TaskItemTypeDetector.IsSupportedPathLikeType(typeof(string)).ShouldBeFalse();
-        }
-
-        #endregion
-
         #region TaskItem<FileInfo> Params
 
         /// <summary>

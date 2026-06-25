@@ -30,24 +30,23 @@ namespace Microsoft.Build.BackEnd
         ];
 
         /// <summary>
+        /// Checks if a type is the provided generic TaskItem type where T is a path-like type
+        /// (AbsolutePath, FileInfo, or DirectoryInfo).
+        /// </summary>
+        internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
+            => TaskItemTypeDetector.IsPathLikeTaskItemOfT(parameterType, genericTaskItemTypeDefinitionFullName);
+
+        /// <summary>
         /// Checks if a type is ITaskItem&lt;T&gt; where T is path-like.
         /// </summary>
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)
             => TaskItemTypeDetector.IsPathLikeITaskItemOfT(parameterType);
 
         /// <summary>
-        /// Checks if a type is the concrete public <see cref="Microsoft.Build.Framework.TaskItem{T}"/> where T is path-like.
-        /// </summary>
-        internal static bool IsPathLikeConcreteTaskItemOfT(Type parameterType)
-            => TaskItemTypeDetector.IsPathLikeConcreteTaskItemOfT(parameterType);
-
-        /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>
-            // The concrete TaskItem<T> is a struct; keep inputs standardized on the interface ITaskItem<T>
-            // by excluding it from the value-type branch.
-            (parameterType.GetTypeInfo().IsValueType && !IsPathLikeConcreteTaskItemOfT(parameterType)) ||
+            parameterType.GetTypeInfo().IsValueType ||
             parameterType == typeof(ITaskItem) ||
             s_supportedTypes.Contains(parameterType) ||
             IsPathLikeITaskItemOfT(parameterType);
@@ -64,8 +63,7 @@ namespace Microsoft.Build.BackEnd
 
             Type elementType = parameterType.GetElementType();
 
-            // See IsValidScalarInputParameter: keep inputs standardized on the interface ITaskItem<T>[].
-            return (elementType.GetTypeInfo().IsValueType && !IsPathLikeConcreteTaskItemOfT(elementType)) ||
+            return elementType.GetTypeInfo().IsValueType ||
                         parameterType == typeof(ITaskItem[]) ||
                         s_supportedTypes.Contains(elementType) ||
                         IsPathLikeITaskItemOfT(elementType);

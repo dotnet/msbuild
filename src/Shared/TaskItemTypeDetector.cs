@@ -10,15 +10,9 @@ namespace Microsoft.Build.Shared
     {
         private const string AbsolutePathFullName = "Microsoft.Build.Framework.AbsolutePath";
         private const string GenericITaskItemFullName = "Microsoft.Build.Framework.ITaskItem`1";
-        private const string ConcreteTaskItemFullName = "Microsoft.Build.Framework.TaskItem`1";
 
         internal static bool IsAbsolutePathType(Type type)
             => string.Equals(type.FullName, AbsolutePathFullName, StringComparison.Ordinal);
-
-        internal static bool IsSupportedPathLikeType(Type valueType)
-            => IsAbsolutePathType(valueType)
-            || valueType == typeof(FileInfo)
-            || valueType == typeof(DirectoryInfo);
 
         internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
         {
@@ -39,13 +33,11 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            return IsSupportedPathLikeType(genericArguments[0]);
+            Type typeArg = genericArguments[0];
+            return IsAbsolutePathType(typeArg) || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
         }
 
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)
             => IsPathLikeTaskItemOfT(parameterType, GenericITaskItemFullName);
-
-        internal static bool IsPathLikeConcreteTaskItemOfT(Type parameterType)
-            => IsPathLikeTaskItemOfT(parameterType, ConcreteTaskItemFullName);
     }
 }

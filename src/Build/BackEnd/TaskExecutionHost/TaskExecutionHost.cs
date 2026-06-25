@@ -759,32 +759,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
             => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
-                || TaskParameterTypeVerifier.IsPathLikeConcreteTaskItemOfT(parameterType);
-
-        private static readonly Dictionary<Type, Func<ITaskItem, ITaskItem>> s_stronglyTypedTaskItemFactories = new()
-        {
-            [typeof(FileInfo)] = item => new TaskItem<FileInfo>(item),
-            [typeof(DirectoryInfo)] = item => new TaskItem<DirectoryInfo>(item),
-            [typeof(AbsolutePath)] = item => new TaskItem<AbsolutePath>(item),
-        };
-
-        /// <summary>
-        /// Materializes a strongly-typed task item (<see cref="ITaskItem{T}"/>) from <paramref name="sourceItem"/>
-        /// for an <see cref="ITaskItem{T}"/> parameter or array element declared as <paramref name="declaredItemType"/>.
-        /// </summary>
-        internal static ITaskItem CreateStronglyTypedTaskItem(Type declaredItemType, ITaskItem sourceItem)
-        {
-            Type[] genericArguments = declaredItemType is { IsGenericType: true }
-                ? declaredItemType.GetGenericArguments()
-                : Type.EmptyTypes;
-
-            if (genericArguments.Length == 1 && s_stronglyTypedTaskItemFactories.TryGetValue(genericArguments[0], out Func<ITaskItem, ITaskItem> factory))
-            {
-                return factory(sourceItem);
-            }
-
-            throw new InternalErrorException($"Unsupported strongly-typed task item type '{declaredItemType?.FullName}'.");
-        }
+                || TaskParameterTypeVerifier.IsPathLikeTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
 
         /// <summary>
         /// Called on the local side.
@@ -856,7 +831,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         currentItem = item;
                         RecordItemForDisconnectIfNecessary(item);
-                        ITaskItem taskItemOfT = CreateStronglyTypedTaskItem(elementType, item);
+                        ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(elementType.GetGenericArguments()[0]).GetConstructor([typeof(ITaskItem)]).Invoke([item]) as ITaskItem;
                         finalTaskInputs.Add(taskItemOfT);
                     }
                 }
@@ -1334,7 +1309,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
                         {
-                            ITaskItem taskItemOfT = CreateStronglyTypedTaskItem(parameterType, finalTaskItems[0]);
+                            ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(parameterType.GetGenericArguments()[0]).GetConstructor(new[] { typeof(ITaskItem) }).Invoke([finalTaskItems[0]]) as ITaskItem;
                             success = InternalSetTaskParameter(parameter, taskItemOfT);
                         }
                         else
