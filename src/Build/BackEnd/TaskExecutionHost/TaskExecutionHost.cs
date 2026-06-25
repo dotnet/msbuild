@@ -759,13 +759,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
             => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
-                || TaskParameterTypeVerifier.IsPathLikeUtilitiesTaskItemOfT(parameterType);
+                || TaskParameterTypeVerifier.IsPathLikeConcreteTaskItemOfT(parameterType);
 
         private static readonly Dictionary<Type, Func<ITaskItem, ITaskItem>> s_stronglyTypedTaskItemFactories = new()
         {
-            [typeof(FileInfo)] = item => new StronglyTypedTaskItem<FileInfo>(item),
-            [typeof(DirectoryInfo)] = item => new StronglyTypedTaskItem<DirectoryInfo>(item),
-            [typeof(AbsolutePath)] = item => new StronglyTypedTaskItem<AbsolutePath>(item),
+            [typeof(FileInfo)] = item => new TaskItem<FileInfo>(item),
+            [typeof(DirectoryInfo)] = item => new TaskItem<DirectoryInfo>(item),
+            [typeof(AbsolutePath)] = item => new TaskItem<AbsolutePath>(item),
         };
 
         /// <summary>

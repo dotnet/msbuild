@@ -36,19 +36,18 @@ namespace Microsoft.Build.BackEnd
             => TaskItemTypeDetector.IsPathLikeITaskItemOfT(parameterType);
 
         /// <summary>
-        /// Checks if a type is the public Microsoft.Build.Utilities.TaskItem&lt;T&gt; where T is path-like.
+        /// Checks if a type is the concrete public <see cref="Microsoft.Build.Framework.TaskItem{T}"/> where T is path-like.
         /// </summary>
-        internal static bool IsPathLikeUtilitiesTaskItemOfT(Type parameterType)
-            => TaskItemTypeDetector.IsPathLikeUtilitiesTaskItemOfT(parameterType);
+        internal static bool IsPathLikeConcreteTaskItemOfT(Type parameterType)
+            => TaskItemTypeDetector.IsPathLikeConcreteTaskItemOfT(parameterType);
 
         /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>
-            // A concrete Microsoft.Build.Utilities.TaskItem<T> is a struct, so it would otherwise qualify via the
-            // value-type branch. The engine can no longer construct that public type (it builds its own ITaskItem<T>
-            // implementation instead), so reject it for inputs and steer authors to declare ITaskItem<T>.
-            (parameterType.GetTypeInfo().IsValueType && !IsPathLikeUtilitiesTaskItemOfT(parameterType)) ||
+            // The concrete TaskItem<T> is a struct; keep inputs standardized on the interface ITaskItem<T>
+            // by excluding it from the value-type branch.
+            (parameterType.GetTypeInfo().IsValueType && !IsPathLikeConcreteTaskItemOfT(parameterType)) ||
             parameterType == typeof(ITaskItem) ||
             s_supportedTypes.Contains(parameterType) ||
             IsPathLikeITaskItemOfT(parameterType);
@@ -65,8 +64,8 @@ namespace Microsoft.Build.BackEnd
 
             Type elementType = parameterType.GetElementType();
 
-            // See IsValidScalarInputParameter: reject concrete Microsoft.Build.Utilities.TaskItem<T>[] for inputs.
-            return (elementType.GetTypeInfo().IsValueType && !IsPathLikeUtilitiesTaskItemOfT(elementType)) ||
+            // See IsValidScalarInputParameter: keep inputs standardized on the interface ITaskItem<T>[].
+            return (elementType.GetTypeInfo().IsValueType && !IsPathLikeConcreteTaskItemOfT(elementType)) ||
                         parameterType == typeof(ITaskItem[]) ||
                         s_supportedTypes.Contains(elementType) ||
                         IsPathLikeITaskItemOfT(elementType);

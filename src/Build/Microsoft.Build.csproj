@@ -394,7 +394,6 @@
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
-    <Compile Include="BackEnd\TaskExecutionHost\StronglyTypedTaskItem.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="Collections\ArrayDictionary.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />

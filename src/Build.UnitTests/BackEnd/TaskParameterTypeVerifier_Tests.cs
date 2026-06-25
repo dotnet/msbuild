@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
         }
 
-        // ─── Concrete Microsoft.Build.Utilities.TaskItem<T> is rejected as an INPUT (authors must use ITaskItem<T>) ───
+        // ─── Concrete Microsoft.Build.Framework.TaskItem<T> is rejected as an INPUT (authors must use ITaskItem<T>) ───
 
         [Fact]
         public void IsValidScalarInputParameter_ConcreteUtilitiesTaskItemOfT_ReturnsFalse()

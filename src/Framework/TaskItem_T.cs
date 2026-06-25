@@ -4,14 +4,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-// Alias to avoid ambiguity: within TaskItem<T>, "TaskItem" refers to this generic struct;
-// use TaskItemImpl to refer to the non-generic Utilities.TaskItem class.
-using TaskItemImpl = Microsoft.Build.Utilities.TaskItem;
+#nullable enable
 
-namespace Microsoft.Build.Utilities
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// A strongly-typed wrapper around <see cref="ITaskItem"/> that parses the item's identity
@@ -40,9 +37,9 @@ namespace Microsoft.Build.Utilities
         {
             Value = value;
 
-            // Use a mutable TaskItem as backing so metadata mutations are supported
+            // Use a mutable backing so metadata mutations are supported
             string itemSpec = ValueTypeParser.ToString(value);
-            _backingItem = new TaskItemImpl(itemSpec);
+            _backingItem = new MutableTaskItem(itemSpec);
         }
 
         /// <summary>
