@@ -113,4 +113,3 @@ jobs:
       statuses: write
       issues: read
       pull-requests: read
-    secrets: inherit
