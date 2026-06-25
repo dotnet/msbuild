@@ -943,6 +943,157 @@ namespace Microsoft.Build.BackEnd
 
             public override bool IsOutOfProcRarNodeEnabled => _taskHost._host.BuildParameters.EnableRarNode;
 
+            /// <inheritdoc/>
+            public override int Version => Version3;
+
+            private static readonly char[] s_nonLiteralIncludeChars = ['$', '@', '%', '*', '?'];
+
+            /// <inheritdoc/>
+            public override bool TryGetItemSourceLocation(string itemType, string itemSpec, out string file, out int lineNumber, out int columnNumber)
+            {
+                file = null;
+                lineNumber = 0;
+                columnNumber = 0;
+
+#if FEATURE_APPDOMAIN
+                if (RemotingServices.IsTransparentProxy(_taskHost))
+                {
+                    // Reaching into the project XML cache across an AppDomain boundary (out-of-proc task host) is not supported.
+                    return false;
+                }
+#endif
+
+                if (string.IsNullOrEmpty(itemType) || string.IsNullOrEmpty(itemSpec))
+                {
+                    return false;
+                }
+
+                ProjectInstance project = _taskHost._requestEntry?.RequestConfiguration?.Project;
+                Microsoft.Build.Evaluation.ProjectRootElementCacheBase cache = project?.ProjectRootElementCache;
+                if (project is null || cache is null)
+                {
+                    return false;
+                }
+
+                // Collect the declaring XML item element across the project file and the rest of its import closure.
+                // Only already-cached XML is inspected; this best-effort diagnostic path never reloads project files
+                // from disk. To avoid reporting a confidently-wrong location, item elements declared inside a <Target>
+                // (produced at execution time, not part of the restore graph) are ignored, and the lookup returns false
+                // when more than one literal match exists - for example conditional multi-targeting duplicates, whose
+                // active condition cannot be determined from XML alone.
+                ElementLocation match = null;
+                bool ambiguous = false;
+
+                CollectItemElementLocation(cache, project.FullPath, itemType, itemSpec, ref match, ref ambiguous);
+
+                IReadOnlyList<string> imports = project.ImportPaths;
+                if (!ambiguous && imports is not null)
+                {
+                    foreach (string importPath in imports)
+                    {
+                        CollectItemElementLocation(cache, importPath, itemType, itemSpec, ref match, ref ambiguous);
+                        if (ambiguous)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (match is null || ambiguous)
+                {
+                    return false;
+                }
+
+                file = match.File;
+                lineNumber = match.Line;
+                columnNumber = match.Column;
+                return true;
+            }
+
+            /// <summary>
+            /// Scans the cached XML of <paramref name="path"/> for an item element whose type and literal Include match,
+            /// accumulating into <paramref name="match"/>. Sets <paramref name="ambiguous"/> when a second match is found.
+            /// Item elements declared inside a &lt;Target&gt; are ignored.
+            /// </summary>
+            private static void CollectItemElementLocation(Microsoft.Build.Evaluation.ProjectRootElementCacheBase cache, string path, string itemType, string itemSpec, ref ElementLocation match, ref bool ambiguous)
+            {
+                if (ambiguous || string.IsNullOrEmpty(path))
+                {
+                    return;
+                }
+
+                Microsoft.Build.Construction.ProjectRootElement xml = cache.TryGet(path);
+                if (xml is null)
+                {
+                    return;
+                }
+
+                foreach (Microsoft.Build.Construction.ProjectItemElement item in xml.GetAllChildrenOfType<Microsoft.Build.Construction.ProjectItemElement>())
+                {
+                    if (!string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase)
+                        || !IncludeContainsLiteral(item.Include, itemSpec)
+                        || IsTargetScoped(item))
+                    {
+                        continue;
+                    }
+
+                    if (match is not null)
+                    {
+                        ambiguous = true;
+                        return;
+                    }
+
+                    match = item.IncludeLocation;
+                }
+            }
+
+            /// <summary>
+            /// Returns <see langword="true"/> if the item element is declared inside a &lt;Target&gt;, i.e. it is produced
+            /// during execution rather than evaluation and is therefore not part of the restore graph.
+            /// </summary>
+            private static bool IsTargetScoped(Microsoft.Build.Construction.ProjectItemElement item)
+            {
+                for (Microsoft.Build.Construction.ProjectElementContainer parent = item.Parent; parent is not null; parent = parent.Parent)
+                {
+                    if (parent is Microsoft.Build.Construction.ProjectTargetElement)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Returns <see langword="true"/> if <paramref name="include"/> has a literal sub-value equal to
+            /// <paramref name="itemSpec"/>. Includes that use properties, item references, metadata, or wildcards
+            /// are treated as inconclusive and skipped.
+            /// </summary>
+            private static bool IncludeContainsLiteral(string include, string itemSpec)
+            {
+                if (string.IsNullOrEmpty(include))
+                {
+                    return false;
+                }
+
+                // Cold path (diagnostics only); favor clarity over allocation here.
+                foreach (string piece in include.Split(';'))
+                {
+                    string trimmed = piece.Trim();
+                    if (trimmed.Length == 0 || trimmed.IndexOfAny(s_nonLiteralIncludeChars) >= 0)
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(trimmed, itemSpec, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
 #if FEATURE_REPORTFILEACCESSES
             /// <summary>
             /// Reports a file access from a task.

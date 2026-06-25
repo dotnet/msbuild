@@ -26,6 +26,11 @@ namespace Microsoft.Build.Framework
         public const int Version2 = 2;
 
         /// <summary>
+        /// Version 3 with TryGetItemSourceLocation().
+        /// </summary>
+        public const int Version3 = 3;
+
+        /// <summary>
         /// Gets an explicit version of this class.
         /// </summary>
         /// <remarks>
@@ -55,5 +60,27 @@ namespace Microsoft.Build.Framework
         public virtual bool IsTaskInputLoggingEnabled => throw new NotImplementedException();
 
         public virtual bool IsOutOfProcRarNodeEnabled => throw new NotImplementedException();
+
+        /// <summary>
+        /// Attempts to resolve the source location (file, line, column) of the XML item element that
+        /// declared the given item in the project currently being built.
+        /// </summary>
+        /// <param name="itemType">The item type (e.g. <c>PackageReference</c>).</param>
+        /// <param name="itemSpec">The evaluated item include to match (e.g. a package id).</param>
+        /// <param name="file">When this method returns <see langword="true"/>, the file containing the item element.</param>
+        /// <param name="lineNumber">When this method returns <see langword="true"/>, the 1-based line of the item element.</param>
+        /// <param name="columnNumber">When this method returns <see langword="true"/>, the 1-based column of the item element.</param>
+        /// <returns>
+        /// <see langword="true"/> if a single declaring XML item element was found; otherwise <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        /// This is a best-effort, on-demand lookup intended for diagnostics — for example mapping a NuGet
+        /// restore warning back to the <c>&lt;PackageReference&gt;</c> that triggered it — so that the build
+        /// process does not have to carry XML location on every item instance. It returns <see langword="false"/>
+        /// when the item cannot be traced to a literal XML item element (for instance when the element's Include
+        /// uses properties, item references, or wildcards, or when the item was produced inside a target).
+        /// Only call this when <see cref="Version"/> is at least <see cref="Version3"/>.
+        /// </remarks>
+        public virtual bool TryGetItemSourceLocation(string itemType, string itemSpec, out string file, out int lineNumber, out int columnNumber) => throw new NotImplementedException();
     }
 }
