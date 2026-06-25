@@ -30,13 +30,15 @@ namespace Microsoft.Build.CommandLine
         /// on the command line is assumed to be the name/path of the executable, and
         /// is ignored.</param>
         /// <param name="multiThreaded">Whether this build is multithreaded (/mt).</param>
+        /// <param name="shutdownServerAfterBuild">Whether to shut the server down once the build completes
+        /// instead of leaving it resident for reuse.
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
         /// <remarks>
         /// The locations of msbuild exe/dll and dotnet.exe would be automatically detected if called from dotnet or msbuild cli. Calling this function from other executables might not work.
         /// </remarks>
-        public static MSBuildApp.ExitType Execute(string[] commandLineArgs, bool multiThreaded, CancellationToken cancellationToken)
+        public static MSBuildApp.ExitType Execute(string[] commandLineArgs, bool multiThreaded, bool shutdownServerAfterBuild, CancellationToken cancellationToken)
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
@@ -44,6 +46,7 @@ namespace Microsoft.Build.CommandLine
                 commandLineArgs,
                 msbuildLocation,
                 multiThreaded,
+                shutdownServerAfterBuild,
                 cancellationToken);
         }
 
@@ -56,10 +59,12 @@ namespace Microsoft.Build.CommandLine
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
         /// <param name="multiThreaded">Whether this build is multithreaded (/mt).</param>
+        /// <param name="shutdownServerAfterBuild">Whether to shut the server down once the build completes
+        /// instead of leaving it resident for reuse.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static MSBuildApp.ExitType Execute(string[] commandLineArgs, string msbuildLocation, bool multiThreaded, CancellationToken cancellationToken)
+        public static MSBuildApp.ExitType Execute(string[] commandLineArgs, string msbuildLocation, bool multiThreaded, bool shutdownServerAfterBuild, CancellationToken cancellationToken)
         {
             MSBuildClient msbuildClient = new MSBuildClient(commandLineArgs, msbuildLocation, multiThreaded);
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
@@ -93,7 +98,13 @@ namespace Microsoft.Build.CommandLine
                 Enum.TryParse(exitResult.MSBuildAppExitTypeString, out MSBuildApp.ExitType MSBuildAppExitType))
             {
                 // The client successfully set up a build task for MSBuild server and received the result.
-                // (Which could be a failure as well). Return the received exit type.
+                // (Which could be a failure as well). Return the received exit type and shut the server down now if requested.
+                
+                if (shutdownServerAfterBuild)
+                {
+                    MSBuildClient.ShutdownServer(CancellationToken.None);
+                }
+
                 return MSBuildAppExitType;
             }
 

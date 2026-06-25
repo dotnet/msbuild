@@ -310,13 +310,15 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Perform the single authoritative command-line parse for this process. It yields:
-            //   - canRunServer: whether switches (help/version/binlog/nodereuse/...) permit the server;
+            //   - canRunServer: whether switches (help/version/binlog/nodemode/...) permit the server;
             //   - multiThreaded: the response-file-aware /mt determination (includes the auto-response file,
             //     any project Directory.Build.rsp, @response files, and MSBUILDFORCEMULTITHREADED);
+            //   - shutdownServerAfterBuild: whether the server must be torn down once the build finishes
             //   - the gathered switches, which the in-proc build path below reuses so it does not re-parse.
             bool canRunServer = CanRunServerBasedOnCommandLineSwitches(
                 args,
                 out bool multiThreaded,
+                out bool shutdownServerAfterBuild,
                 out CommandLineSwitches switchesFromAutoResponseFile,
                 out CommandLineSwitches switchesNotFromAutoResponseFile);
 
@@ -334,8 +336,10 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Hand the build off to the MSBuild Server client. The server (not this process) decides
-                // Server GC for itself from the multiThreaded value we pass through.
-                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, multiThreaded, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                // Server GC for itself from the multiThreaded value we pass through. When -mt forced the
+                // server on despite node reuse being disabled, shutdownServerAfterBuild ensures the server
+                // process does not persist past this build.
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, multiThreaded, shutdownServerAfterBuild, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
             {
@@ -368,6 +372,8 @@ namespace Microsoft.Build.CommandLine
         /// <param name="multiThreaded">Set to whether this is a multithreaded (/mt) build, determined from
         /// the fully-parsed switches (which expand response files - including any project <c>Directory.Build.rsp</c> -
         /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path.</param>
+        /// <param name="shutdownServerAfterBuild">Set to <see langword="true"/> when the server should be shut
+        /// down immediately after the build instead of being left resident for reuse.</param>
         /// <param name="switchesFromAutoResponseFile">The gathered response-file switches (auto-response file plus any
         /// project <c>Directory.Build.rsp</c>), or <see langword="null"/> if parsing failed.</param>
         /// <param name="switchesNotFromAutoResponseFile">The gathered command-line/environment switches, or
@@ -375,11 +381,13 @@ namespace Microsoft.Build.CommandLine
         private static bool CanRunServerBasedOnCommandLineSwitches(
             string[] commandLine,
             out bool multiThreaded,
+            out bool shutdownServerAfterBuild,
             out CommandLineSwitches switchesFromAutoResponseFile,
             out CommandLineSwitches switchesNotFromAutoResponseFile)
         {
             bool canRunServer = true;
             multiThreaded = false;
+            shutdownServerAfterBuild = false;
             switchesFromAutoResponseFile = null;
             switchesNotFromAutoResponseFile = null;
             bool switchesFullyGathered = false;
@@ -406,12 +414,26 @@ namespace Microsoft.Build.CommandLine
 
                 multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
+                bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+
                 string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
-                if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
+
+                // These switches are fundamentally incompatible with hosting the build in a separate server
+                // process (help/version produce immediate output, -nodeMode is itself a node, and a binary-log
+                // "project" is replayed, not built), so they always disqualify the server.
+                bool serverIncompatibleSwitch =
+                    commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
-                    FileUtilities.IsBinaryLogFilename(projectFile) ||
-                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]))
+                    FileUtilities.IsBinaryLogFilename(projectFile);
+
+                // Node reuse being disabled normally disqualifies the server because the server is a persistent
+                // process. The exception is a multithreaded (/mt) build: it requires the server purely to enable
+                // Server GC. So for /mt we still use the server even when node reuse is off, and instead shut the server down after
+                // the build (see shutdownServerAfterBuild) to honor the no-reuse intent.
+                bool nodeReuseDisqualifies = !nodeReuse && !multiThreaded;
+
+                if (serverIncompatibleSwitch || nodeReuseDisqualifies)
                 {
                     canRunServer = false;
                     if (KnownTelemetry.PartialBuildTelemetry is not null)
@@ -419,6 +441,10 @@ namespace Microsoft.Build.CommandLine
                         KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
                     }
                 }
+
+                // When /mt forced the server on despite node reuse being disabled, the server must not persist
+                // past this build. (When node reuse is on, the server is reused as usual.)
+                shutdownServerAfterBuild = canRunServer && multiThreaded && !nodeReuse;
             }
             catch (Exception ex)
             {
@@ -428,6 +454,7 @@ namespace Microsoft.Build.CommandLine
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
                 }
                 canRunServer = false;
+                shutdownServerAfterBuild = false;
 
                 if (!switchesFullyGathered)
                 {
