@@ -3,29 +3,36 @@
 
 using System.Collections;
 using System.Collections.Generic;
-
-#nullable disable
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Microsoft.Build.Framework
 {
     internal sealed class MutableTaskItem : ITaskItem2
     {
-        private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>();
+        private ImmutableDictionary<string, string> _metadata = ImmutableDictionaryExtensions.EmptyMetadata;
 
         public MutableTaskItem(string itemSpec) => ItemSpec = itemSpec;
 
+        /// <inheritdoc/>
         public string ItemSpec { get; set; }
 
-        public ICollection MetadataNames => _metadata.Keys;
+        /// <inheritdoc/>
+        public ICollection MetadataNames => _metadata.Keys.ToList();
 
+        /// <inheritdoc/>
         public int MetadataCount => _metadata.Count;
 
-        public string GetMetadata(string metadataName) => _metadata.TryGetValue(metadataName, out string value) ? value : string.Empty;
+        /// <inheritdoc/>
+        public string GetMetadata(string metadataName) => _metadata.TryGetValue(metadataName, out string? value) ? value : string.Empty;
 
-        public void SetMetadata(string metadataName, string metadataValue) => _metadata[metadataName] = metadataValue;
+        /// <inheritdoc/>
+        public void SetMetadata(string metadataName, string metadataValue) => _metadata = _metadata.SetItem(metadataName, metadataValue ?? string.Empty);
 
-        public void RemoveMetadata(string metadataName) => _metadata.Remove(metadataName);
+        /// <inheritdoc/>
+        public void RemoveMetadata(string metadataName) => _metadata = _metadata.Remove(metadataName);
 
+        /// <inheritdoc/>
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
             foreach (KeyValuePair<string, string> metadatum in _metadata)
@@ -34,18 +41,23 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        public IDictionary CloneCustomMetadata() => new Dictionary<string, string>(_metadata);
+        /// <inheritdoc/>
+        public IDictionary CloneCustomMetadata() => new Dictionary<string, string>(_metadata, _metadata.KeyComparer);
 
+        /// <inheritdoc/>
         public string EvaluatedIncludeEscaped
         {
             get => ItemSpec;
             set => ItemSpec = value;
         }
 
+        /// <inheritdoc/>
         public string GetMetadataValueEscaped(string metadataName) => GetMetadata(metadataName);
 
+        /// <inheritdoc/>
         public void SetMetadataValueLiteral(string metadataName, string metadataValue) => SetMetadata(metadataName, metadataValue);
 
-        public IDictionary CloneCustomMetadataEscaped() => new Dictionary<string, string>(_metadata);
+        /// <inheritdoc/>
+        public IDictionary CloneCustomMetadataEscaped() => new Dictionary<string, string>(_metadata, _metadata.KeyComparer);
     }
 }
