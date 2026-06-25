@@ -19,6 +19,11 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ProjectElementContainer = Microsoft.Build.Construction.ProjectElementContainer;
+using ProjectItemElement = Microsoft.Build.Construction.ProjectItemElement;
+using ProjectRootElement = Microsoft.Build.Construction.ProjectRootElement;
+using ProjectRootElementCacheBase = Microsoft.Build.Evaluation.ProjectRootElementCacheBase;
+using ProjectTargetElement = Microsoft.Build.Construction.ProjectTargetElement;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 #if FEATURE_REPORTFILEACCESSES
@@ -963,13 +968,21 @@ namespace Microsoft.Build.BackEnd
                 }
 #endif
 
+                if (_taskHost.IsOutOfProc)
+                {
+                    // Off the entry node the project XML is generally not in this node's ProjectRootElementCache and the
+                    // import closure (ProjectInstance.ImportPaths) is not transmitted, so resolution cannot be guaranteed.
+                    // Fail uniformly here rather than returning a partial, node-placement-dependent result.
+                    return false;
+                }
+
                 if (string.IsNullOrEmpty(itemType) || string.IsNullOrEmpty(itemSpec))
                 {
                     return false;
                 }
 
                 ProjectInstance project = _taskHost._requestEntry?.RequestConfiguration?.Project;
-                Microsoft.Build.Evaluation.ProjectRootElementCacheBase cache = project?.ProjectRootElementCache;
+                ProjectRootElementCacheBase cache = project?.ProjectRootElementCache;
                 if (project is null || cache is null)
                 {
                     return false;
@@ -978,9 +991,9 @@ namespace Microsoft.Build.BackEnd
                 // Collect the declaring XML item element across the project file and the rest of its import closure.
                 // Only already-cached XML is inspected; this best-effort diagnostic path never reloads project files
                 // from disk. To avoid reporting a confidently-wrong location, item elements declared inside a <Target>
-                // (produced at execution time, not part of the restore graph) are ignored, and the lookup returns false
-                // when more than one literal match exists - for example conditional multi-targeting duplicates, whose
-                // active condition cannot be determined from XML alone.
+                // (produced at execution time, not part of the restore graph) are ignored, items carrying a Condition
+                // (on the element or an ancestor) are treated as inconclusive because their active state cannot be
+                // determined from XML alone, and the lookup returns false when more than one literal match remains.
                 ElementLocation match = null;
                 bool ambiguous = false;
 
@@ -1013,26 +1026,27 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Scans the cached XML of <paramref name="path"/> for an item element whose type and literal Include match,
             /// accumulating into <paramref name="match"/>. Sets <paramref name="ambiguous"/> when a second match is found.
-            /// Item elements declared inside a &lt;Target&gt; are ignored.
+            /// Item elements declared inside a &lt;Target&gt;, or carrying a Condition on the element or an ancestor, are ignored.
             /// </summary>
-            private static void CollectItemElementLocation(Microsoft.Build.Evaluation.ProjectRootElementCacheBase cache, string path, string itemType, string itemSpec, ref ElementLocation match, ref bool ambiguous)
+            private static void CollectItemElementLocation(ProjectRootElementCacheBase cache, string path, string itemType, string itemSpec, ref ElementLocation match, ref bool ambiguous)
             {
                 if (ambiguous || string.IsNullOrEmpty(path))
                 {
                     return;
                 }
 
-                Microsoft.Build.Construction.ProjectRootElement xml = cache.TryGet(path);
+                ProjectRootElement xml = cache.TryGet(path);
                 if (xml is null)
                 {
                     return;
                 }
 
-                foreach (Microsoft.Build.Construction.ProjectItemElement item in xml.GetAllChildrenOfType<Microsoft.Build.Construction.ProjectItemElement>())
+                foreach (ProjectItemElement item in xml.GetAllChildrenOfType<ProjectItemElement>())
                 {
                     if (!string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase)
                         || !IncludeContainsLiteral(item.Include, itemSpec)
-                        || IsTargetScoped(item))
+                        || IsTargetScoped(item)
+                        || IsConditioned(item))
                     {
                         continue;
                     }
@@ -1051,11 +1065,34 @@ namespace Microsoft.Build.BackEnd
             /// Returns <see langword="true"/> if the item element is declared inside a &lt;Target&gt;, i.e. it is produced
             /// during execution rather than evaluation and is therefore not part of the restore graph.
             /// </summary>
-            private static bool IsTargetScoped(Microsoft.Build.Construction.ProjectItemElement item)
+            private static bool IsTargetScoped(ProjectItemElement item)
             {
-                for (Microsoft.Build.Construction.ProjectElementContainer parent = item.Parent; parent is not null; parent = parent.Parent)
+                for (ProjectElementContainer parent = item.Parent; parent is not null; parent = parent.Parent)
                 {
-                    if (parent is Microsoft.Build.Construction.ProjectTargetElement)
+                    if (parent is ProjectTargetElement)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Returns <see langword="true"/> if the item element, or any of its ancestor containers, carries a non-empty
+            /// Condition. Such elements cannot be confirmed active from XML alone, so they are treated as inconclusive and
+            /// skipped rather than risk reporting a location that was conditioned out of the evaluated project.
+            /// </summary>
+            private static bool IsConditioned(ProjectItemElement item)
+            {
+                if (!string.IsNullOrEmpty(item.Condition))
+                {
+                    return true;
+                }
+
+                for (ProjectElementContainer parent = item.Parent; parent is not null; parent = parent.Parent)
+                {
+                    if (!string.IsNullOrEmpty(parent.Condition))
                     {
                         return true;
                     }

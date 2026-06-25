@@ -67,9 +67,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="itemType">The item type (e.g. <c>PackageReference</c>).</param>
         /// <param name="itemSpec">The evaluated item include to match (e.g. a package id).</param>
-        /// <param name="file">When this method returns <see langword="true"/>, the file containing the item element.</param>
-        /// <param name="lineNumber">When this method returns <see langword="true"/>, the 1-based line of the item element.</param>
-        /// <param name="columnNumber">When this method returns <see langword="true"/>, the 1-based column of the item element.</param>
+        /// <param name="file">When this method returns <see langword="true"/>, the file containing the item element's <c>Include</c> attribute.</param>
+        /// <param name="lineNumber">When this method returns <see langword="true"/>, the 1-based line of the item element's <c>Include</c> attribute.</param>
+        /// <param name="columnNumber">When this method returns <see langword="true"/>, the 1-based column of the item element's <c>Include</c> attribute.</param>
         /// <returns>
         /// <see langword="true"/> if a single declaring XML item element was found; otherwise <see langword="false"/>.
         /// </returns>
@@ -77,8 +77,11 @@ namespace Microsoft.Build.Framework
         /// This is a best-effort, on-demand lookup intended for diagnostics — for example mapping a NuGet
         /// restore warning back to the <c>&lt;PackageReference&gt;</c> that triggered it — so that the build
         /// process does not have to carry XML location on every item instance. It returns <see langword="false"/>
-        /// when the item cannot be traced to a literal XML item element (for instance when the element's Include
-        /// uses properties, item references, or wildcards, or when the item was produced inside a target).
+        /// when the item cannot be traced to a single literal XML item element: for instance when the element's
+        /// <c>Include</c> uses properties, item references, or wildcards; when the element (or an ancestor) is
+        /// conditioned; when the item was produced inside a target; or when more than one literal declaration matches.
+        /// Resolution is only attempted on the in-proc entry node; tasks running on out-of-proc worker nodes always
+        /// receive <see langword="false"/> because the project XML and its import closure are not available there.
         /// Only call this when <see cref="Version"/> is at least <see cref="Version3"/>.
         /// </remarks>
         public virtual bool TryGetItemSourceLocation(string itemType, string itemSpec, out string file, out int lineNumber, out int columnNumber) => throw new NotImplementedException();

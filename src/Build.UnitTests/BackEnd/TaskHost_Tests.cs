@@ -880,6 +880,134 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void TaskItemSourceLocationReturnsFalseOutOfProc()
+        {
+            _mockHost.BuildParameters.IsOutOfProc = true;
+
+            bool found = ((IBuildEngine10)_taskHost).EngineServices.TryGetItemSourceLocation("PackageReference", "Newtonsoft.Json", out string file, out int lineNumber, out int columnNumber);
+
+            found.ShouldBeFalse();
+            file.ShouldBeNull();
+            lineNumber.ShouldBe(0);
+            columnNumber.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// A literal item element that carries a Condition (on the element or an ancestor) cannot be confirmed active
+        /// from XML alone, so it must be treated as inconclusive and not reported - even when it is the only literal
+        /// match - to avoid pointing diagnostics at a declaration that may have been conditioned out of the project.
+        /// </summary>
+        [Fact]
+        public void TaskItemSourceLocationSkipsConditionedItems()
+        {
+            string projectFileContents = @"
+<Project>
+  <ItemGroup>
+    <PackageReference Include='Newtonsoft.Json' Condition=""'$(Unset)' == 'true'"" />
+  </ItemGroup>
+  <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        var engineServices = ((IBuildEngine10)BuildEngine).EngineServices;
+        bool found = engineServices.TryGetItemSourceLocation(""PackageReference"", ""Newtonsoft.Json"", out _, out _, out _);
+        Log.LogMessage(MessageImportance.High, $""ITEMLOCCOND:{found}"");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='Build'>
+      <test/>
+  </Target>
+</Project>";
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("itemloc-cond.proj", projectFileContents);
+            MockLogger mockLogger = new MockLogger();
+            ObjectModelHelpers.BuildTempProjectFileWithTargets("itemloc-cond.proj", null, null, mockLogger).ShouldBeTrue();
+
+            mockLogger.AssertLogContains("ITEMLOCCOND:False");
+        }
+
+        /// <summary>
+        /// An item whose Include is produced by a property (or any non-literal expression) cannot be traced to a
+        /// literal XML element, so the lookup must return false rather than guess.
+        /// </summary>
+        [Fact]
+        public void TaskItemSourceLocationIsUnresolvedForNonLiteralInclude()
+        {
+            string projectFileContents = @"
+<Project>
+  <PropertyGroup>
+    <JsonPackage>Newtonsoft.Json</JsonPackage>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include='$(JsonPackage)' />
+  </ItemGroup>
+  <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        var engineServices = ((IBuildEngine10)BuildEngine).EngineServices;
+        bool found = engineServices.TryGetItemSourceLocation(""PackageReference"", ""Newtonsoft.Json"", out _, out _, out _);
+        Log.LogMessage(MessageImportance.High, $""ITEMLOCNONLITERAL:{found}"");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='Build'>
+      <test/>
+  </Target>
+</Project>";
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("itemloc-nonliteral.proj", projectFileContents);
+            MockLogger mockLogger = new MockLogger();
+            ObjectModelHelpers.BuildTempProjectFileWithTargets("itemloc-nonliteral.proj", null, null, mockLogger).ShouldBeTrue();
+
+            mockLogger.AssertLogContains("ITEMLOCNONLITERAL:False");
+        }
+
+        /// <summary>
+        /// An item declared in an imported file (part of the project's import closure) is resolved to that file's
+        /// element, exercising the import-closure scan rather than just the entry project.
+        /// </summary>
+        [Fact]
+        public void TaskItemSourceLocationResolvesFromImport()
+        {
+            string importContents = @"
+<Project>
+  <ItemGroup>
+    <PackageReference Include='Newtonsoft.Json' />
+  </ItemGroup>
+</Project>";
+
+            string projectFileContents = @"
+<Project>
+  <Import Project='itemloc-import.props' />
+  <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        var engineServices = ((IBuildEngine10)BuildEngine).EngineServices;
+        bool found = engineServices.TryGetItemSourceLocation(""PackageReference"", ""Newtonsoft.Json"", out string file, out int line, out int column);
+        Log.LogMessage(MessageImportance.High, $""ITEMLOCIMPORT:{found}:{line}:{file}"");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='Build'>
+      <test/>
+  </Target>
+</Project>";
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("itemloc-import.props", importContents);
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("itemloc-import.proj", projectFileContents);
+            MockLogger mockLogger = new MockLogger();
+            ObjectModelHelpers.BuildTempProjectFileWithTargets("itemloc-import.proj", null, null, mockLogger).ShouldBeTrue();
+
+            string[] lines = importContents.Replace("\r\n", "\n").Split('\n');
+            int expectedLine = Array.FindIndex(lines, line => line.Contains("<PackageReference Include='Newtonsoft.Json'")) + 1;
+            expectedLine.ShouldBeGreaterThan(0);
+
+            // The match resolves to the imported .props (not the entry project), at the <PackageReference> line.
+            mockLogger.AssertLogContains($"ITEMLOCIMPORT:True:{expectedLine}:");
+            mockLogger.AssertLogContains("itemloc-import.props");
+        }
+
+        [Fact]
         public void RequestCoresThrowsOnInvalidInput()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
