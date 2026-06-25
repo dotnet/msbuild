@@ -372,10 +372,10 @@ namespace Microsoft.Build.Tasks
                     {
                         for (int i = 0; i < bytesRead; i++)
                         {
-                            int position = checked((int)(fileOffset + i));
+                            long position = fileOffset + i;
                             byte expectedByte = position < preamble.Length
-                                ? preamble[position]
-                                : newContentBytes[position - preamble.Length];
+                                ? preamble[(int)position]
+                                : newContentBytes[(int)(position - preamble.Length)];
 
                             if (fileBuffer[i] != expectedByte)
                             {
