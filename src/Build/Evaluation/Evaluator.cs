@@ -774,10 +774,10 @@ namespace Microsoft.Build.Evaluation
                     _data.DefaultTargets.Add(_targetElements[0].Name);
                 }
 
-                Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
-                Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, List<TargetSpecification>> targetsWhichRunBeforeByTarget = new Dictionary<string, List<TargetSpecification>>(MSBuildNameIgnoreCaseComparer.Default);
+                Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(MSBuildNameIgnoreCaseComparer.Default);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
-                Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(MSBuildNameIgnoreCaseComparer.Default);
                 MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
