@@ -39,9 +39,11 @@ namespace Microsoft.Build.Evaluation
 
         private int _nextElementOrder = 0;
 
+        // Typical projects have ~10-20 distinct item types (Compile, ProjectReference, PackageReference, EmbeddedResource,
+        // None, Content, etc.). Pre-size to 16 to avoid the initial rehash chain from default capacity 0.
         private Dictionary<string, LazyItemList> _itemLists = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
-            new Dictionary<string, LazyItemList>() :
-            new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
+            new Dictionary<string, LazyItemList>(16) :
+            new Dictionary<string, LazyItemList>(16, MSBuildNameIgnoreCaseComparer.Default);
 
         protected EvaluationContext EvaluationContext { get; }
 
