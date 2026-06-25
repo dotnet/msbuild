@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
@@ -221,6 +222,7 @@ internal partial class Expander<P, I>
     /// Returns true if the expression contains an item vector pattern, else returns false.
     /// Used to flag use of item expressions where they are illegal.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static bool ExpressionContainsItemVector(string expression)
     {
         ExpressionShredder.ReferencedItemExpressionsEnumerator transformsEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
@@ -234,6 +236,7 @@ internal partial class Expander<P, I>
     ///
     /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
     {
         string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
@@ -288,6 +291,7 @@ internal partial class Expander<P, I>
     /// Use this form when the result is going to be processed further, for example by matching against the file system,
     /// so literals must be distinguished, and you promise to unescape after that.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
     {
         Assumed.True((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
@@ -301,6 +305,7 @@ internal partial class Expander<P, I>
     /// If the expression is empty, returns an empty list.
     /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal IList<TaskItem> ExpandIntoTaskItemsLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
     {
         return ExpandIntoItemsLeaveEscaped(expression, (IItemFactory<I, TaskItem>)TaskItemFactory.Instance, options, elementLocation);
