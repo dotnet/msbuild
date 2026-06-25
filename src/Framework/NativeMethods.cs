@@ -1344,6 +1344,9 @@ internal static class NativeMethods
     [DllImport("libc", EntryPoint = "realpath", SetLastError = true)]
     private static extern IntPtr realpath_native(string path, IntPtr resolved);
 
+    [DllImport("libc", EntryPoint = "free")]
+    private static extern void free_native(IntPtr ptr);
+
     /// <summary>
     /// Resolves <paramref name="path"/> to its canonical form via POSIX <c>realpath(3)</c>, following
     /// symlinks. Returns <c>null</c> on Windows, on null/empty input, or when the call fails.
@@ -1376,8 +1379,9 @@ internal static class NativeMethods
             if (ptr != IntPtr.Zero)
             {
                 // realpath() with NULL second arg returns a malloc()'d buffer; caller must free().
-                // On Unix, Marshal.FreeHGlobal wraps the C runtime's free(), matching that malloc().
-                Marshal.FreeHGlobal(ptr);
+                // Free it through libc's free() - the same library realpath() allocated it from -
+                // rather than relying on the managed runtime's allocator matching that libc.
+                free_native(ptr);
             }
         }
     }

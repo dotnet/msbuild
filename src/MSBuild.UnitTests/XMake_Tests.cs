@@ -1375,7 +1375,11 @@ namespace Microsoft.Build.UnitTests
             string errorMessage = null;
             NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
 
-            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            string content = """
+                <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
+                    <Target Name="t"><Warning Text="[A=$(A)]" /></Target>
+                </Project>
+                """.Cleanup();
             File.WriteAllText(Path.Combine(realDirectory, "my.proj"), content);
             File.WriteAllText(Path.Combine(root, "repo", "Directory.Build.rsp"), "/p:A=physical");
             File.WriteAllText(Path.Combine(logicalParentDirectory, "Directory.Build.rsp"), "/p:A=logical");

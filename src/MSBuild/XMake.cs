@@ -399,6 +399,14 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
 
+                // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
+                // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
+                // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
+                // ProcessProjectSwitch only resolves/validates the project path (it can throw on an ambiguous or
+                // missing project) and reads no further response files, so the flag is set before it runs to keep
+                // the gathered switches on those error paths instead of forcing Execute to re-read response files.
+                switchesFullyGathered = true;
+
                 string projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
                     ProcessProjectSwitch(
                         commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
@@ -407,10 +415,6 @@ namespace Microsoft.Build.CommandLine
 
                 // Determine multithreaded mode from the fully-parsed switches (which include any
                 // response-file-provided switches) using the same logic as the in-proc build path.
-                // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
-                // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
-                // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
-                switchesFullyGathered = true;
                 multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
@@ -3438,7 +3442,7 @@ namespace Microsoft.Build.CommandLine
             // Confirm $PWD physically resolves to the same directory as getcwd(); otherwise PWD is stale.
             string physicalPwd = NativeMethodsShared.RealPath(logicalCurrentDirectory);
             string physicalCwd = NativeMethodsShared.RealPath(Directory.GetCurrentDirectory());
-            if (physicalPwd == null || physicalCwd == null
+            if (physicalPwd is null || physicalCwd is null
                 || !string.Equals(physicalPwd, physicalCwd, StringComparison.Ordinal))
             {
                 return projectFile;
