@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -762,6 +764,33 @@ namespace Microsoft.Build.BackEnd
                 || TaskParameterTypeVerifier.IsPathLikeTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
 
         /// <summary>
+        /// Cache of compiled constructor delegates that wrap an <see cref="ITaskItem"/> into a
+        /// <see cref="TaskItem{T}"/>, keyed by the generic argument T. Building the closed generic type and
+        /// resolving the constructor via reflection on every parameter binding is expensive, so the delegate
+        /// is compiled once per T and reused.
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, Func<ITaskItem, ITaskItem>> s_taskItemOfTFactories = new();
+
+        /// <summary>
+        /// Wraps the given <paramref name="item"/> into a <c>TaskItem&lt;T&gt;</c> where T is
+        /// <paramref name="genericArgument"/>, using a cached compiled constructor delegate.
+        /// </summary>
+        private static ITaskItem CreateTaskItemOfT(Type genericArgument, ITaskItem item)
+        {
+            Func<ITaskItem, ITaskItem> factory = s_taskItemOfTFactories.GetOrAdd(genericArgument, static t =>
+            {
+                ConstructorInfo constructor = typeof(TaskItem<>).MakeGenericType(t).GetConstructor([typeof(ITaskItem)]);
+                ParameterExpression itemParameter = Expression.Parameter(typeof(ITaskItem), "item");
+                return Expression.Lambda<Func<ITaskItem, ITaskItem>>(
+                    Expression.Convert(Expression.New(constructor, itemParameter), typeof(ITaskItem)),
+                    itemParameter).Compile();
+            });
+
+            return factory(item);
+        }
+
+
+        /// <summary>
         /// Called on the local side.
         /// </summary>
         private bool SetTaskItemParameter(TaskPropertyInfo parameter, ITaskItem item)
@@ -831,7 +860,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         currentItem = item;
                         RecordItemForDisconnectIfNecessary(item);
-                        ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(elementType.GetGenericArguments()[0]).GetConstructor([typeof(ITaskItem)]).Invoke([item]) as ITaskItem;
+                        ITaskItem taskItemOfT = CreateTaskItemOfT(elementType.GetGenericArguments()[0], item);
                         finalTaskInputs.Add(taskItemOfT);
                     }
                 }
@@ -1309,7 +1338,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
                         {
-                            ITaskItem taskItemOfT = typeof(TaskItem<>).MakeGenericType(parameterType.GetGenericArguments()[0]).GetConstructor(new[] { typeof(ITaskItem) }).Invoke([finalTaskItems[0]]) as ITaskItem;
+                            ITaskItem taskItemOfT = CreateTaskItemOfT(parameterType.GetGenericArguments()[0], finalTaskItems[0]);
                             success = InternalSetTaskParameter(parameter, taskItemOfT);
                         }
                         else
