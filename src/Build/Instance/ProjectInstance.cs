@@ -409,7 +409,7 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>();
+            this.EvaluatedItemElements = new List<ProjectItemElement>(64);
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = project.ToolsVersion;
@@ -481,7 +481,7 @@ namespace Microsoft.Build.Execution
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
-            EvaluatedItemElements = new List<ProjectItemElement>();
+            EvaluatedItemElements = new List<ProjectItemElement>(64);
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = linkedProject.ToolsVersion;
@@ -587,7 +587,7 @@ namespace Microsoft.Build.Execution
             _importPathsIncludingDuplicates = projectToInheritFrom._importPathsIncludingDuplicates;
             ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>();
+            this.EvaluatedItemElements = new List<ProjectItemElement>(64);
 
             IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> thisAsIEvaluatorData = this;
             thisAsIEvaluatorData.AfterTargets = new Dictionary<string, List<TargetSpecification>>();
@@ -3206,7 +3206,7 @@ namespace Microsoft.Build.Execution
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
             _loggingContext = new GenericLoggingContext(loggingService, buildEventContext);
-            this.EvaluatedItemElements = new List<ProjectItemElement>();
+            this.EvaluatedItemElements = new List<ProjectItemElement>(64);
 
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
             ElementLocation toolsVersionLocation = xml.Location;
