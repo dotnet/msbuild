@@ -105,6 +105,15 @@ namespace Microsoft.Build.CommandLine
         private string _forwardSolutionConfigBaseline;
 
         /// <summary>
+        /// The build process environment whose values are currently reflected in this task host process. Used to
+        /// skip the redundant per-task environment apply + restore when the next task's environment is identical
+        /// and the previous task did not mutate it. Set to <see langword="null"/> whenever a task blocks on a
+        /// callback (<see cref="SaveOperatingEnvironment"/>) or the node is reused for a new build, so nested
+        /// activity and build boundaries always force a fresh apply.
+        /// </summary>
+        private IDictionary<string, string> _lastAppliedConfigEnvironment;
+
+        /// <summary>
         /// The event which is set when we should shut down.
         /// </summary>
         private ManualResetEvent _shutdownEvent;
@@ -1137,6 +1146,9 @@ namespace Microsoft.Build.CommandLine
         {
             ArgumentNullException.ThrowIfNull(context);
 
+            // A task is about to block and let a nested task run, which may change the process environment.
+            _lastAppliedConfigEnvironment = null;
+
             context.SavedCurrentDirectory = Environment.CurrentDirectory;
             context.SavedEnvironment = new Dictionary<string, string>(
                 CommunicationsUtilities.GetEnvironmentVariables(),
@@ -1312,6 +1324,10 @@ namespace Microsoft.Build.CommandLine
         {
             Assumed.Zero(_activeTaskCount, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
+            // When this node is reused for a later build, reset the environment-reuse cache so the first task of
+            // the next build performs a fresh apply rather than trusting state left over from this build.
+            _lastAppliedConfigEnvironment = null;
+
             // Sidecar TaskHost will persist after the build is done.
             if (_nodeReuse)
             {
@@ -1476,14 +1492,24 @@ namespace Microsoft.Build.CommandLine
                 // Change to the startup directory
                 NativeMethodsShared.SetCurrentDirectory(taskConfiguration.StartupDirectory);
 
-                if (_updateEnvironment)
+                bool canSkipEnvironmentApply = _lastAppliedConfigEnvironment is not null
+                    && _blockedTaskCount == 0
+                    && _activeTaskCount == 1
+                    && CommunicationsUtilities.AreEnvironmentsEquivalent(taskConfiguration.BuildProcessEnvironment, _lastAppliedConfigEnvironment);
+
+                if (!canSkipEnvironmentApply)
                 {
-                    InitializeMismatchedEnvironmentTable(taskConfiguration.BuildProcessEnvironment);
+                    if (_updateEnvironment)
+                    {
+                        InitializeMismatchedEnvironmentTable(taskConfiguration.BuildProcessEnvironment);
+                    }
+
+                    // Now set the new environment
+                    SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
+                    DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
                 }
 
-                // Now set the new environment
-                SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
-                DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
+                _lastAppliedConfigEnvironment = taskConfiguration.BuildProcessEnvironment;
 
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
@@ -1567,8 +1593,16 @@ namespace Microsoft.Build.CommandLine
                     }
 #endif
 
-                    // Restore the original clean environment
-                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    bool canSkipEnvironmentRestore = environmentUnchangedByTask
+                        && _blockedTaskCount == 0
+                        && ReferenceEquals(_lastAppliedConfigEnvironment, taskConfiguration.BuildProcessEnvironment);
+
+                    if (!canSkipEnvironmentRestore)
+                    {
+                        // Restore the original clean environment
+                        CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                        _lastAppliedConfigEnvironment = null;
+                    }
                 }
                 catch (Exception e)
                 {

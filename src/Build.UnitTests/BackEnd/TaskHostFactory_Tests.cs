@@ -258,6 +258,65 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Regression test for the out-of-proc task host environment-reuse optimization, which lets the host skip
+        /// re-applying the (unchanged) build process environment between consecutive tasks. The load-bearing
+        /// assertion is that all three tasks run in the SAME reused task host process (a shared task-host process
+        /// id, distinct from this build process), proving the skip path was actually exercised. Each invocation --
+        /// including ones whose apply was skipped -- must also still observe a consistent build environment.
+        /// (Note: the variable is also inherited by the child process, so the read alone does not isolate the
+        /// apply; the dedicated coverage for apply correctness is the serialization and -mt change-propagation
+        /// tests.)
+        /// </summary>
+        [Fact]
+        public void TaskHostObservesEnvironmentAcrossConsecutiveTasks()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string variableName = "MSBUILD_ENV_REUSE_TEST_" + Guid.NewGuid().ToString("N");
+            const string variableValue = "reuse_value_123";
+            env.SetEnvironmentVariable(variableName, variableValue);
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ReadEnvironmentVariableTask)}"" AssemblyFile=""{typeof(ReadEnvironmentVariableTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name='Build'>
+        <{nameof(ReadEnvironmentVariableTask)} VariableName=""{variableName}"">
+            <Output PropertyName=""Value1"" TaskParameter=""Value"" />
+            <Output PropertyName=""Pid1"" TaskParameter=""Pid"" />
+        </{nameof(ReadEnvironmentVariableTask)}>
+        <{nameof(ReadEnvironmentVariableTask)} VariableName=""{variableName}"">
+            <Output PropertyName=""Value2"" TaskParameter=""Value"" />
+            <Output PropertyName=""Pid2"" TaskParameter=""Pid"" />
+        </{nameof(ReadEnvironmentVariableTask)}>
+        <{nameof(ReadEnvironmentVariableTask)} VariableName=""{variableName}"">
+            <Output PropertyName=""Value3"" TaskParameter=""Value"" />
+            <Output PropertyName=""Pid3"" TaskParameter=""Pid"" />
+        </{nameof(ReadEnvironmentVariableTask)}>
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("envReuseProject.csproj", projectContents);
+            ProjectInstance projectInstance = new(project.Path);
+
+            projectInstance.Build().ShouldBeTrue();
+
+            // Every task invocation -- including ones whose environment apply was skipped because the environment
+            // was unchanged from the previous task -- must still observe the build-set variable.
+            projectInstance.GetPropertyValue("Value1").ShouldBe(variableValue);
+            projectInstance.GetPropertyValue("Value2").ShouldBe(variableValue);
+            projectInstance.GetPropertyValue("Value3").ShouldBe(variableValue);
+
+            // All three invocations should have run in the same task host process (so the reuse path was actually
+            // exercised) and not in the current build process.
+            string pid1 = projectInstance.GetPropertyValue("Pid1");
+            pid1.ShouldNotBeNullOrEmpty();
+            pid1.ShouldBe(projectInstance.GetPropertyValue("Pid2"));
+            pid1.ShouldBe(projectInstance.GetPropertyValue("Pid3"));
+            pid1.ShouldNotBe(Process.GetCurrentProcess().Id.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>
         /// Regression test for the out-of-proc task host forward environment-delta optimization (#14097). To avoid
         /// re-transmitting the (invariant) build process environment in every <see cref="TaskHostConfiguration"/>,
         /// the parent sends it once per connection and marks subsequent unchanged configurations "identical". In
