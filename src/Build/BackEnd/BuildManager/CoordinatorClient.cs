@@ -6,7 +6,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
-using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
@@ -50,20 +49,14 @@ internal sealed partial class CoordinatorClient : IDisposable
     public TimeSpan? WaitDuration { get; private init; }
 
     private CoordinatorClient(
-        Guid connectionId,
-        ImmutableArray<string> serverCapabilities,
-        NamedPipeClientStream pipeStream,
-        BinaryReader reader,
-        BinaryWriter writer,
+        Connection connection,
         int grantedNodes,
         int heartbeatIntervalMs,
         ICoordinatorDebugOutput output)
     {
-        ConnectionId = connectionId;
-        ServerCapabilities = serverCapabilities;
-        _pipeStream = pipeStream;
-        _reader = reader;
-        _writer = writer;
+        ConnectionId = connection.Id;
+        ServerCapabilities = connection.ServerCapabilities;
+        (_pipeStream, _reader, _writer) = connection.TransferOwnership();
         _output = output;
         GrantedNodes = grantedNodes;
 
@@ -337,162 +330,91 @@ internal sealed partial class CoordinatorClient : IDisposable
         ICoordinatorDebugOutput output,
         ILoggingService? loggingService)
     {
-        var reader = new BinaryReader(pipeStream, Encoding.UTF8, leaveOpen: true);
-        var writer = new BinaryWriter(pipeStream, Encoding.UTF8, leaveOpen: true);
-        var pipe = pipeStream;
-
-        try
+        using Connection? connection = Connection.TryCreate(pipeStream, settings.ProcessId, output);
+        if (connection is null)
         {
-            // Perform the handshake.
-            var connectionId = Guid.NewGuid();
-            if (TrySendHandshake(connectionId, settings.ProcessId, reader, writer, output) is not ServerHandshakeMessage serverHandshake)
-            {
-                return null;
-            }
+            return null;
+        }
 
-            // Send the node request.
-            output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId}, ConnectionId {connectionId})");
-            writer.Write(new RequestNodesMessage(requestedNodes));
+        // Send the node request.
+        output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {settings.ProcessId}, ConnectionId {connection.Id})");
+        connection.WriteClientMessage(new RequestNodesMessage(requestedNodes));
 
-            // Read the response.
-            ServerMessage response = reader.ReadServerMessage();
+        // Read the response.
+        ServerMessage response = connection.ReadServerMessage();
 
-            switch (response)
-            {
-                case NodeGrantMessage grant:
-                    output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
-                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
+        switch (response)
+        {
+            case NodeGrantMessage grant:
+                output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
+                loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
 
-                    var client = new CoordinatorClient(connectionId, serverHandshake.Capabilities, pipeStream, reader, writer, grant.GrantedNodes, settings.HeartbeatIntervalMs, output);
+                return new CoordinatorClient(connection, grant.GrantedNodes, settings.HeartbeatIntervalMs, output);
 
-                    // Ownership transferred to client
-                    reader = null;
-                    writer = null;
-                    pipe = null;
+            case WaitMessage:
+                output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
+                loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
 
-                    return client;
+                var waitTimer = Stopwatch.StartNew();
 
-                case WaitMessage:
-                    output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
-                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
+                // Send heartbeats while waiting so the server doesn't consider us stale.
+                using (Timer heartbeatPump = CreateHeartbeatPump(connection, settings.HeartbeatIntervalMs))
+                {
+                    ServerMessage grantAfterWait = connection.ReadServerMessage();
 
-                    var waitTimer = Stopwatch.StartNew();
-
-                    // Send heartbeats while waiting so the server doesn't consider us stale.
-                    using (Timer heartbeatPump = CreateHeartbeatPump(writer, settings.HeartbeatIntervalMs))
+                    if (grantAfterWait is NodeGrantMessage deferredGrant)
                     {
-                        ServerMessage grantAfterWait = reader.ReadServerMessage();
+                        waitTimer.Stop();
 
-                        if (grantAfterWait is NodeGrantMessage deferredGrant)
+                        output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
+                        loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
+
+                        return new CoordinatorClient(connection, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
                         {
-                            waitTimer.Stop();
-
-                            output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
-                            loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
-
-                            var deferredClient = new CoordinatorClient(connectionId, serverHandshake.Capabilities, pipeStream, reader, writer, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
-                            {
-                                WaitDuration = waitTimer.Elapsed,
-                            };
-
-                            // Ownership transferred to deferred client
-                            reader = null;
-                            writer = null;
-                            pipe = null;
-
-                            return deferredClient;
-                        }
-
-                        if (grantAfterWait is ErrorMessage waitError)
-                        {
-                            output.WriteLine($"CoordinatorClient: Server error while waiting: {waitError.Message} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
-                        }
-                        else
-                        {
-                            output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
-                        }
+                            WaitDuration = waitTimer.Elapsed,
+                        };
                     }
 
-                    return null;
+                    if (grantAfterWait is ErrorMessage waitError)
+                    {
+                        output.WriteLine($"CoordinatorClient: Server error while waiting: {waitError.Message} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
+                    }
+                    else
+                    {
+                        output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
+                    }
+                }
 
-                case ErrorMessage requestError:
-                    output.WriteLine($"CoordinatorClient: Server error: {requestError.Message}");
-                    return null;
+                return null;
 
-                default:
-                    output.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
-                    return null;
-            }
+            case ErrorMessage requestError:
+                output.WriteLine($"CoordinatorClient: Server error: {requestError.Message}");
+                return null;
+
+            default:
+                output.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
+                return null;
         }
-        finally
-        {
-            // On success, all three are set to null to indicate ownership was
-            // transferred to the CoordinatorClient instance. On failure, dispose
-            // whatever remains.
-            reader?.Dispose();
-            writer?.Dispose();
-            pipe?.Dispose();
-        }
-    }
-
-    /// <summary>
-    ///  Sends the client handshake and reads the server's handshake response.
-    /// </summary>
-    /// <param name="connectionId">The unique connection identifier to send.</param>
-    /// <param name="processId">The current process ID to send.</param>
-    /// <param name="reader">The binary reader for the coordinator pipe.</param>
-    /// <param name="writer">The binary writer for the coordinator pipe.</param>
-    /// <param name="output">Debug trace output.</param>
-    /// <returns>
-    ///  The server's handshake message, or <see langword="null"/> if the handshake was rejected.
-    /// </returns>
-    private static ServerHandshakeMessage? TrySendHandshake(
-        Guid connectionId,
-        int processId,
-        BinaryReader reader,
-        BinaryWriter writer,
-        ICoordinatorDebugOutput output)
-    {
-        output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {connectionId})");
-        writer.Write(new ClientHandshakeMessage(connectionId, processId, []));
-
-        ServerMessage response = reader.ReadServerMessage();
-
-        if (response is ErrorMessage error)
-        {
-            output.WriteLine($"CoordinatorClient: Server rejected handshake: {error.Message}");
-            return null;
-        }
-
-        if (response is not ServerHandshakeMessage serverHandshake)
-        {
-            output.WriteLine($"CoordinatorClient: Unexpected handshake response: {response.GetType().Name}");
-            return null;
-        }
-
-        output.WriteLine($"CoordinatorClient: Handshake complete (server capabilities: [{string.Join(", ", serverHandshake.Capabilities)}])");
-
-        return serverHandshake;
     }
 
     /// <summary>
     ///  Creates a heartbeat pump that periodically writes a heartbeat message to the given writer.
     ///  Dispose the returned timer to stop the pump.
     /// </summary>
-    /// <param name="writer">The binary writer connected to the coordinator pipe.</param>
+    /// <param name="connection">The coordinator connection to send heartbeats over.</param>
     /// <param name="intervalMs">The interval in milliseconds between heartbeats.</param>
     /// <returns>
     ///  A <see cref="Timer"/> that sends heartbeats. Dispose it to stop the pump.
     /// </returns>
-    private static Timer CreateHeartbeatPump(BinaryWriter writer, int intervalMs)
+    private static Timer CreateHeartbeatPump(Connection connection, int intervalMs)
         => new(
             static state =>
             {
                 try
                 {
-                    if (state is BinaryWriter w)
+                    if (state is Connection connection)
                     {
-                        w.Write(HeartbeatMessage.Instance);
+                        connection.WriteClientMessage(HeartbeatMessage.Instance);
                     }
                 }
                 catch
@@ -500,7 +422,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                     // Pipe may be broken; swallow and let the next read detect it.
                 }
             },
-            state: writer,
+            state: connection,
             dueTime: intervalMs,
             period: intervalMs);
 

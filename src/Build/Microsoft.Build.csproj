@@ -166,6 +166,7 @@
     <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.Connection.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.DefaultDebugOutput.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.TestAccessor.cs" />
