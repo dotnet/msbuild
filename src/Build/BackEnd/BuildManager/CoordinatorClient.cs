@@ -355,37 +355,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                 output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
                 loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
 
-                var waitTimer = Stopwatch.StartNew();
-
-                // Send heartbeats while waiting so the server doesn't consider us stale.
-                using (Timer heartbeatPump = CreateHeartbeatPump(connection, settings.HeartbeatIntervalMs))
-                {
-                    ServerMessage grantAfterWait = connection.ReadServerMessage();
-
-                    if (grantAfterWait is NodeGrantMessage deferredGrant)
-                    {
-                        waitTimer.Stop();
-
-                        output.WriteLine($"CoordinatorClient: Deferred grant received: {deferredGrant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
-                        loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", deferredGrant.GrantedNodes);
-
-                        return new CoordinatorClient(connection, deferredGrant.GrantedNodes, settings.HeartbeatIntervalMs, output)
-                        {
-                            WaitDuration = waitTimer.Elapsed,
-                        };
-                    }
-
-                    if (grantAfterWait is ErrorMessage waitError)
-                    {
-                        output.WriteLine($"CoordinatorClient: Server error while waiting: {waitError.Message} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
-                    }
-                    else
-                    {
-                        output.WriteLine($"CoordinatorClient: Unexpected response after wait: {grantAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F1}s)");
-                    }
-                }
-
-                return null;
+                return WaitForDeferredGrant(connection, settings, output, loggingService);
 
             case ErrorMessage requestError:
                 output.WriteLine($"CoordinatorClient: Server error: {requestError.Message}");
@@ -397,34 +367,62 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
     }
 
-    /// <summary>
-    ///  Creates a heartbeat pump that periodically writes a heartbeat message to the given writer.
-    ///  Dispose the returned timer to stop the pump.
-    /// </summary>
-    /// <param name="connection">The coordinator connection to send heartbeats over.</param>
-    /// <param name="intervalMs">The interval in milliseconds between heartbeats.</param>
-    /// <returns>
-    ///  A <see cref="Timer"/> that sends heartbeats. Dispose it to stop the pump.
-    /// </returns>
-    private static Timer CreateHeartbeatPump(Connection connection, int intervalMs)
-        => new(
-            static state =>
+    private static CoordinatorClient? WaitForDeferredGrant(
+        Connection connection,
+        CoordinatorSettings settings,
+        ICoordinatorDebugOutput output,
+        ILoggingService? loggingService)
+    {
+        var waitTimer = Stopwatch.StartNew();
+
+        // Send heartbeats while waiting so the server doesn't consider us stale.
+        using (Timer heartbeatPump = CreateHeartbeatPump(connection, settings.HeartbeatIntervalMs))
+        {
+            ServerMessage responseAfterWait = connection.ReadServerMessage();
+
+            switch (responseAfterWait)
             {
-                try
-                {
-                    if (state is Connection connection)
+                case NodeGrantMessage grant:
+                    waitTimer.Stop();
+
+                    output.WriteLine($"CoordinatorClient: Deferred grant received: {grant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
+                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
+
+                    return new CoordinatorClient(connection, grant.GrantedNodes, settings.HeartbeatIntervalMs, output)
                     {
-                        connection.WriteClientMessage(HeartbeatMessage.Instance);
-                    }
-                }
-                catch
+                        WaitDuration = waitTimer.Elapsed,
+                    };
+
+                case ErrorMessage waitError:
+                    output.WriteLine($"CoordinatorClient: Server error while waiting: {waitError.Message} (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
+                    return null;
+
+                default:
+                    output.WriteLine($"CoordinatorClient: Unexpected response after wait: {responseAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
+                    return null;
+            }
+        }
+
+        static Timer CreateHeartbeatPump(Connection connection, int intervalMs)
+            => new(
+                static state =>
                 {
-                    // Pipe may be broken; swallow and let the next read detect it.
-                }
-            },
-            state: connection,
-            dueTime: intervalMs,
-            period: intervalMs);
+                    try
+                    {
+                        if (state is Connection connection)
+                        {
+                            connection.WriteClientMessage(HeartbeatMessage.Instance);
+                        }
+                    }
+                    catch
+                    {
+                        // Pipe may be broken; swallow and let the next read detect it.
+                    }
+                },
+                state: connection,
+                dueTime: intervalMs,
+                period: intervalMs);
+    }
 
     private static bool TryConnectToPipe(NamedPipeClientStream pipeStream, int timeoutMs)
     {
