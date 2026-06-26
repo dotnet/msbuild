@@ -1161,7 +1161,7 @@ internal partial class Expander<P, I>
         /// </summary>
         private MethodInfo FindPublicMethodBySignature(string methodName, Type[] parameterTypes)
         {
-            foreach (MethodInfo method in _receiverType.GetMethods())
+            foreach (MethodInfo method in _receiverType.GetMethods(_bindingFlags))
             {
                 if (!string.Equals(method.Name, methodName, StringComparison.OrdinalIgnoreCase))
                 {
