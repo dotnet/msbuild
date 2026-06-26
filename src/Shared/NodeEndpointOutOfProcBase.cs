@@ -124,6 +124,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private byte _parentPacketVersion;
 
+        /// <summary>
+        /// The packet version negotiated for outgoing packets: the minimum of this node's supported
+        /// version and the parent's version.
+        /// </summary>
+        private byte _negotiatedWriteVersion;
+
 #if NET
         /// <summary>
         /// The set of property names from handshake responsible for node version.
@@ -231,6 +237,7 @@ namespace Microsoft.Build.BackEnd
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
             _parentPacketVersion = parentPacketVersion;
+            _negotiatedWriteVersion = parentPacketVersion < NodePacketTypeExtensions.PacketVersion ? parentPacketVersion : NodePacketTypeExtensions.PacketVersion;
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
@@ -768,6 +775,8 @@ namespace Microsoft.Build.BackEnd
                                 // Re-use writeTranslator; we clear _packetStream but never replace it.
                                 // If _packetStream is ever reassigned, set writeTranslator = null first.
                                 writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
+
+                                writeTranslator.NegotiatedPacketVersion = _negotiatedWriteVersion;
 
                                 packetStream.WriteByte((byte)packet.Type);
 

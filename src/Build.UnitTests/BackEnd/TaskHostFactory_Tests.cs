@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -254,6 +255,82 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     e.Message.ShouldNotBe($"Process with an Id of {pidSidecar} is not running");
                 }
             }
+        }
+
+        /// <summary>
+        /// Regression test for the out-of-proc task host forward environment-delta optimization (#14097). To avoid
+        /// re-transmitting the (invariant) build process environment in every <see cref="TaskHostConfiguration"/>,
+        /// the parent sends it once per connection and marks subsequent unchanged configurations "identical". In
+        /// multithreaded mode the configuration's environment is the task environment driver's live backing
+        /// dictionary, which is mutated in place between tasks; the baseline used for the "identical" decision must
+        /// therefore be a snapshot, not an alias of that live dictionary. If it aliases the live dictionary, the
+        /// equivalence check short-circuits on reference equality and a genuinely changed environment is silently
+        /// marked "identical", so the task host reconstructs a stale environment. This verifies that when one
+        /// task-host task changes an environment variable, a subsequent task-host task observes the new value.
+        /// </summary>
+        [Fact]
+        public void TaskHostObservesEnvironmentChangedByPreviousTaskInMultiThreadedMode()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string variableName = "MSBUILD_ENV_DELTA_TEST_" + Guid.NewGuid().ToString("N");
+            const string changedValue = "changed_by_first_task";
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(SetEnvironmentVariableTask)}"" AssemblyFile=""{typeof(SetEnvironmentVariableTask).Assembly.Location}"" />
+    <UsingTask TaskName=""{nameof(ReadEnvironmentVariableTask)}"" AssemblyFile=""{typeof(ReadEnvironmentVariableTask).Assembly.Location}"" />
+    <Target Name='Build'>
+        <{nameof(SetEnvironmentVariableTask)} VariableName=""{variableName}"" Value=""{changedValue}"">
+            <Output PropertyName=""SetPid"" TaskParameter=""Pid"" />
+        </{nameof(SetEnvironmentVariableTask)}>
+        <{nameof(ReadEnvironmentVariableTask)} VariableName=""{variableName}"">
+            <Output PropertyName=""ObservedValue"" TaskParameter=""Value"" />
+            <Output PropertyName=""ReadPid"" TaskParameter=""Pid"" />
+        </{nameof(ReadEnvironmentVariableTask)}>
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("envDeltaProject.proj", projectContents);
+
+            MockLogger logger = new(_output);
+            BuildParameters buildParameters = new()
+            {
+                MultiThreaded = true,
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            };
+
+            BuildRequestData buildRequestData = new(
+                project.Path,
+                new Dictionary<string, string>(),
+                null,
+                ["Build"],
+                null,
+                BuildRequestDataFlags.ProvideProjectStateAfterBuild);
+
+            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Both tasks must have actually run out of proc, otherwise Environment.SetEnvironmentVariable and
+            // Environment.GetEnvironmentVariable would share a single process environment and the test would pass
+            // regardless of the delta logic. A non-empty pid that differs from this process, equal across both
+            // tasks, proves they ran in the same external task host (so the per-connection delta path was used).
+            ProjectInstance state = result.ProjectStateAfterBuild;
+            state.ShouldNotBeNull();
+            string setPid = state.GetPropertyValue("SetPid");
+            string readPid = state.GetPropertyValue("ReadPid");
+            setPid.ShouldNotBeNullOrEmpty();
+            readPid.ShouldNotBe(Process.GetCurrentProcess().Id.ToString(CultureInfo.InvariantCulture));
+            readPid.ShouldBe(setPid);
+
+            // The second task-host task must observe the environment variable set by the first. Before the fix the
+            // forward env-delta baseline aliased the live (mutated-in-place) environment dictionary, so this second
+            // configuration was falsely marked "identical" and the task host reconstructed a stale environment that
+            // did not contain the variable -- ObservedValue would be empty.
+            state.GetPropertyValue("ObservedValue").ShouldBe(changedValue);
         }
 
         /// <summary>

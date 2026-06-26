@@ -1011,6 +1011,14 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private readonly byte _negotiatedPacketVersion;
 
+            /// <summary>
+            /// A snapshot of the build process environment most recently sent in full to this task-host connection.
+            /// Used to avoid re-transmitting the (invariant) environment in every <see cref="TaskHostConfiguration"/>:
+            /// when an outgoing configuration's environment matches this baseline it is sent as
+            /// <see cref="TaskHostConfiguration.EnvironmentIdentical"/> instead.
+            /// </summary>
+            private Dictionary<string, string> _forwardEnvironmentBaseline;
+
 
 #if FEATURE_APM
             // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
@@ -1167,6 +1175,28 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Marks an outgoing config <see cref="TaskHostConfiguration.EnvironmentIdentical"/> when its
+            /// environment matches the connection baseline (leaving the dictionary off the wire); otherwise sends
+            /// it in full and updates the baseline. Only <see cref="DrainPacketQueue"/> calls this, in wire order,
+            /// and the child applies the same updates in the same order, so the baselines never drift and no
+            /// locking is needed.
+            /// </summary>
+            private void PrepareEnvironmentForSend(TaskHostConfiguration configuration)
+            {
+                Dictionary<string, string> environment = configuration.BuildProcessEnvironment;
+
+                if (_forwardEnvironmentBaseline != null && CommunicationsUtilities.AreEnvironmentsEquivalent(environment, _forwardEnvironmentBaseline))
+                {
+                    configuration.EnvironmentMode = TaskHostConfiguration.EnvironmentIdentical;
+                }
+                else
+                {
+                    configuration.EnvironmentMode = TaskHostConfiguration.EnvironmentFull;
+                    _forwardEnvironmentBaseline = new Dictionary<string, string>(environment, CommunicationsUtilities.EnvironmentVariableComparer);
+                }
+            }
+
+            /// <summary>
             /// We use a dedicated thread to avoid blocking a threadpool thread.
             /// </summary>
             /// <remarks>Usually there'll be a single packet in the queue, but sometimes
@@ -1209,6 +1239,13 @@ namespace Microsoft.Build.BackEnd
                                 // CLR4 task hosts: set version to 0 to enable version-dependent fields.
                                 // CLR2 task hosts: leave as null (default) to skip version-dependent fields.
                                 writeTranslator.NegotiatedPacketVersion = 0;
+                            }
+
+                            // When the negotiated wire format supports it, send the (invariant) build process
+                            // environment only when it changed; otherwise mark it as unchanged on the wire.
+                            if (packet is TaskHostConfiguration taskHostConfiguration && writeTranslator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
+                            {
+                                context.PrepareEnvironmentForSend(taskHostConfiguration);
                             }
 
                             packet.Translate(writeTranslator);
@@ -1435,6 +1472,8 @@ namespace Microsoft.Build.BackEnd
                 try
                 {
                     _readBufferMemoryStream.Position = 0;
+
+                    _readTranslator.NegotiatedPacketVersion = _negotiatedPacketVersion;
                     _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, _readTranslator);
                 }
                 catch (IOException e)

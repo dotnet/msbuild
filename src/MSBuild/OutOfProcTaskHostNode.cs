@@ -91,6 +91,13 @@ namespace Microsoft.Build.CommandLine
         private IDictionary<string, string> _savedEnvironment;
 
         /// <summary>
+        /// The build process environment most recently received in full from the parent on this connection.
+        /// When a <see cref="TaskHostConfiguration"/> arrives marked <see cref="TaskHostConfiguration.EnvironmentIdentical"/>
+        /// it is reconstructed from this baseline.
+        /// </summary>
+        private Dictionary<string, string> _forwardEnvironmentBaseline;
+
+        /// <summary>
         /// The event which is set when we should shut down.
         /// </summary>
         private ManualResetEvent _shutdownEvent;
@@ -1174,6 +1181,8 @@ namespace Microsoft.Build.CommandLine
             }
 
             _currentConfiguration = taskHostConfiguration;
+            ResolveIncomingEnvironment(taskHostConfiguration);
+
             // Create task execution context for this task
             var context = CreateTaskContext(taskHostConfiguration);
             context.State = TaskExecutionState.Executing;
@@ -1184,6 +1193,25 @@ namespace Microsoft.Build.CommandLine
             context.ExecutingThread = taskThread;
 
             taskThread.Start(context);
+        }
+
+        /// <summary>
+        /// Resolves the build process environment of an incoming configuration. When the parent marked it
+        /// <see cref="TaskHostConfiguration.EnvironmentIdentical"/> the environment was not serialized on the
+        /// wire, so it is reconstructed from this connection's baseline; otherwise the baseline is refreshed
+        /// with the full environment that was sent.
+        /// </summary>
+        private void ResolveIncomingEnvironment(TaskHostConfiguration configuration)
+        {
+            if (configuration.EnvironmentMode == TaskHostConfiguration.EnvironmentIdentical)
+            {
+                Assumed.NotNull(_forwardEnvironmentBaseline, "Received an EnvironmentIdentical TaskHostConfiguration before any full build process environment was sent on this connection.");
+                configuration.SetResolvedBuildProcessEnvironment(_forwardEnvironmentBaseline);
+            }
+            else
+            {
+                _forwardEnvironmentBaseline = configuration.BuildProcessEnvironment;
+            }
         }
 
         /// <summary>
@@ -1488,6 +1516,9 @@ namespace Microsoft.Build.CommandLine
                     IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
+                    bool environmentUnchangedByTask =
+                        CommunicationsUtilities.AreEnvironmentsEquivalent(currentEnvironment, taskConfiguration.BuildProcessEnvironment);
+
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
                     _taskCompletePacket = new TaskHostTaskComplete(
                         taskResult,
@@ -1495,6 +1526,11 @@ namespace Microsoft.Build.CommandLine
                         _fileAccessData,
 #endif
                         currentEnvironment);
+
+                    if (NodePacketTypeExtensions.GetNegotiatedPacketVersion(_parentPacketVersion) >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion && environmentUnchangedByTask)
+                    {
+                        _taskCompletePacket.EnvironmentMode = TaskHostTaskComplete.EnvironmentIdentical;
+                    }
 
 #if FEATURE_APPDOMAIN
                     foreach (TaskParameter param in taskParams.Values)

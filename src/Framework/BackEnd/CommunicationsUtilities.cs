@@ -338,6 +338,34 @@ internal static class CommunicationsUtilities
     }
 
     /// <summary>
+    ///  Returns <see langword="true"/> when both environment dictionaries contain the same set of
+    ///  variables with the same values (keys compared case-insensitively, values compared ordinally).
+    /// </summary>
+    internal static bool AreEnvironmentsEquivalent(IDictionary<string, string>? left, IDictionary<string, string>? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left is null || right is null || left.Count != right.Count)
+        {
+            return false;
+        }
+
+        foreach (KeyValuePair<string, string> entry in left)
+        {
+            if (!right.TryGetValue(entry.Key, out string? otherValue)
+                || !string.Equals(entry.Value, otherValue, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
     ///  Indicate to the client that all elements of the Handshake have been sent.
     /// </summary>
     internal static void WriteEndOfHandshakeSignal(this PipeStream stream)

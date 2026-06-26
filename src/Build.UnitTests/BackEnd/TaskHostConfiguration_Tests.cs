@@ -714,6 +714,118 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// With the environment-delta wire format (packet version >= 5) and the default
+        /// <see cref="TaskHostConfiguration.EnvironmentFull"/> mode, the build process environment
+        /// is serialized in full and round-trips correctly.
+        /// </summary>
+        [Fact]
+        public void TestTranslationEnvironmentFullRoundTripsAtVersion5()
+        {
+            Dictionary<string, string> environment = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["PATH"] = @"c:\windows;c:\windows\system32",
+                ["NUMBER_OF_PROCESSORS"] = "8",
+            };
+
+            TaskHostConfiguration config = CreateConfigurationWithEnvironment(environment);
+            config.EnvironmentMode.ShouldBe(TaskHostConfiguration.EnvironmentFull);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = 5;
+            ((ITranslatable)config).Translate(writeTranslator);
+            long version5Length = TranslationHelpers.GetWriteStreamLength();
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = 5;
+            TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+
+            deserializedConfig.EnvironmentMode.ShouldBe(TaskHostConfiguration.EnvironmentFull);
+            deserializedConfig.BuildProcessEnvironment.ShouldNotBeNull();
+            deserializedConfig.BuildProcessEnvironment.Count.ShouldBe(environment.Count);
+            deserializedConfig.BuildProcessEnvironment["PATH"].ShouldBe(environment["PATH"]);
+            deserializedConfig.BuildProcessEnvironment["NUMBER_OF_PROCESSORS"].ShouldBe("8");
+
+            // Prove the v5 Full path actually emitted the one-byte EnvironmentMode marker rather than silently
+            // falling back to the legacy full-dictionary format: the same config serialized at a pre-delta
+            // version (no marker) is strictly smaller on the wire.
+            TaskHostConfiguration legacyConfig = CreateConfigurationWithEnvironment(environment);
+            ITranslator legacyWriter = TranslationHelpers.GetWriteTranslator();
+            legacyWriter.NegotiatedPacketVersion = 4;
+            ((ITranslatable)legacyConfig).Translate(legacyWriter);
+            TranslationHelpers.GetWriteStreamLength().ShouldBeLessThan(version5Length);
+        }
+
+        /// <summary>
+        /// With the environment-delta wire format (packet version >= 5) and
+        /// <see cref="TaskHostConfiguration.EnvironmentIdentical"/> mode, the build process environment
+        /// dictionary is omitted from the wire (saving bytes) and the receiver reconstructs it from the
+        /// connection's baseline via <see cref="TaskHostConfiguration.SetResolvedBuildProcessEnvironment"/>.
+        /// </summary>
+        [Fact]
+        public void TestTranslationEnvironmentIdenticalOmitsDictionaryAtVersion5()
+        {
+            Dictionary<string, string> environment = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["PATH"] = @"c:\windows;c:\windows\system32",
+                ["TEMP"] = @"c:\temp",
+            };
+
+            // Serialize the same environment both ways to prove the "Identical" form is smaller on the wire.
+            TaskHostConfiguration fullConfig = CreateConfigurationWithEnvironment(environment);
+            ITranslator fullWriter = TranslationHelpers.GetWriteTranslator();
+            fullWriter.NegotiatedPacketVersion = 5;
+            ((ITranslatable)fullConfig).Translate(fullWriter);
+            long fullLength = TranslationHelpers.GetWriteStreamLength();
+
+            TaskHostConfiguration identicalConfig = CreateConfigurationWithEnvironment(environment);
+            identicalConfig.EnvironmentMode = TaskHostConfiguration.EnvironmentIdentical;
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = 5;
+            ((ITranslatable)identicalConfig).Translate(writeTranslator);
+            TranslationHelpers.GetWriteStreamLength().ShouldBeLessThan(fullLength);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = 5;
+            TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+
+            // The dictionary was not on the wire, so it is null until reconstructed from the baseline.
+            deserializedConfig.EnvironmentMode.ShouldBe(TaskHostConfiguration.EnvironmentIdentical);
+            deserializedConfig.BuildProcessEnvironment.ShouldBeNull();
+
+            deserializedConfig.SetResolvedBuildProcessEnvironment(environment);
+            deserializedConfig.BuildProcessEnvironment.ShouldBe(environment);
+        }
+
+        private TaskHostConfiguration CreateConfigurationWithEnvironment(Dictionary<string, string> environment)
+        {
+            return new TaskHostConfiguration(
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: environment,
+                culture: Thread.CurrentThread.CurrentCulture,
+                uiCulture: Thread.CurrentThread.CurrentUICulture,
+                hostServices: null,
+#if FEATURE_APPDOMAIN
+                appDomainSetup: null,
+#endif
+                lineNumberOfTask: 1,
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"c:\my project\myproj.proj",
+                targetName: "TargetName",
+                projectFile: "proj.proj",
+                continueOnError: _continueOnErrorDefault,
+                taskName: "TaskName",
+                taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
+                taskParameters: new Dictionary<string, object>(),
+                globalParameters: new Dictionary<string, string>(),
+                warningsAsErrors: null,
+                warningsNotAsErrors: null,
+                warningsAsMessages: null);
+        }
+
+        /// <summary>
         /// Helper methods for testing the task host-related packets.
         /// </summary>
         internal static class TaskHostPacketHelpers
