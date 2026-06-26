@@ -43,7 +43,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the loaded SDK resolvers, mapped to the manifest from which they came.
         /// </summary>
-        private Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>> _manifestToResolvers;
+        /// <remarks>
+        /// Reads happen on every <see cref="GetResolvers"/> call (one per manifest, per
+        /// matched resolution); after the cache is warm those reads are the common case.
+        /// A <see cref="ConcurrentDictionary{TKey,TValue}"/> lets those reads run
+        /// lock-free, and a <see cref="Lazy{T}"/> value ensures
+        /// <see cref="SdkResolverLoader.LoadResolversFromManifest"/> runs exactly once
+        /// per manifest even if multiple threads race on a cache miss.
+        /// </remarks>
+        private ConcurrentDictionary<SdkResolverManifest, Lazy<IReadOnlyList<SdkResolver>>> _manifestToResolvers;
 
         /// <summary>
         /// Stores the list of manifests of specific SDK resolvers which could be loaded.
@@ -277,18 +285,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolver> resolvers = new List<SdkResolver>();
             foreach (var resolverManifest in resolversManifests)
             {
-                IReadOnlyList<SdkResolver> newResolvers;
-                lock (_lockObject)
-                {
-                    if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
-                    {
-                        // Loading of the needed resolvers.
-                        newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
-                        _manifestToResolvers[resolverManifest] = newResolvers;
-                    }
-                }
+                // ConcurrentDictionary + Lazy<>: reads are lock-free in the warm-cache path
+                // (the dominant case once each manifest has been loaded once).
+                // LoadResolversFromManifest only runs once per manifest because the Lazy
+                // is in LazyThreadSafetyMode.ExecutionAndPublication mode by default.
+                Lazy<IReadOnlyList<SdkResolver>> newResolversLazy = _manifestToResolvers.GetOrAdd(
+                    resolverManifest,
+                    static (manifest, ctx) => new Lazy<IReadOnlyList<SdkResolver>>(
+                        () => ctx.loader.LoadResolversFromManifest(manifest, ctx.location)),
+                    (loader: _sdkResolverLoader, location: sdkReferenceLocation));
 
-                resolvers.AddRange(newResolvers);
+                resolvers.AddRange(newResolversLazy.Value);
             }
 
             resolvers.Sort((l, r) => l.Priority.CompareTo(r.Priority));
@@ -428,11 +435,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             {
                 specificResolversManifestsRegistry = new List<SdkResolverManifest>();
                 generalResolversManifestsRegistry = new List<SdkResolverManifest>();
-                _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
+                _manifestToResolvers = new ConcurrentDictionary<SdkResolverManifest, Lazy<IReadOnlyList<SdkResolver>>>();
 
                 SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: null);
                 generalResolversManifestsRegistry.Add(sdkResolverManifest);
-                _manifestToResolvers[sdkResolverManifest] = resolvers;
+                _manifestToResolvers[sdkResolverManifest] = new Lazy<IReadOnlyList<SdkResolver>>(() => resolvers);
                 _generalResolversManifestsRegistry = generalResolversManifestsRegistry.AsReadOnly();
                 _specificResolversManifestsRegistry = specificResolversManifestsRegistry.AsReadOnly();
             }
@@ -486,7 +493,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
 
                 IReadOnlyList<SdkResolverManifest> allResolversManifests = GetResolverManifests(location);
-                _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
+                _manifestToResolvers = new ConcurrentDictionary<SdkResolverManifest, Lazy<IReadOnlyList<SdkResolver>>>();
 
                 SdkResolverManifest sdkDefaultResolversManifest = null;
 #if NET
@@ -498,7 +505,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     if (defaultResolvers.Count > 0)
                     {
                         sdkDefaultResolversManifest = new SdkResolverManifest(DisplayName: "DefaultResolversManifest", Path: null, ResolvableSdkRegex: null);
-                        _manifestToResolvers[sdkDefaultResolversManifest] = defaultResolvers;
+                        _manifestToResolvers[sdkDefaultResolversManifest] = new Lazy<IReadOnlyList<SdkResolver>>(() => defaultResolvers);
                     }
                 }
 
