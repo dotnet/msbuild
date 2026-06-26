@@ -2237,17 +2237,14 @@ namespace Microsoft.Build.Execution
                     globalProperties: null,
                     toolsVersion: null);
 
-                solutionBuildEventContext = new BuildEventContext(
+                solutionBuildEventContext = loggingService.CreateProjectCacheBuildEventContext(
                     submission.SubmissionId,
-                    _buildParameters!.NodeId,
                     BuildEventContext.InvalidEvaluationId,
                     BuildEventContext.InvalidProjectInstanceId,
-                    BuildEventContext.InvalidProjectContextId,
-                    BuildEventContext.InvalidTargetId,
-                    BuildEventContext.InvalidTaskId);
+                    projectGraph.Solution.FullPath);
 
                 solutionProjectStartedEvent.BuildEventContext = solutionBuildEventContext;
-                loggingService.LogBuildEvent(solutionProjectStartedEvent);
+                loggingService.LogProjectStarted(solutionProjectStartedEvent);
             }
 
             LogMessage(
@@ -2302,16 +2299,7 @@ namespace Microsoft.Build.Execution
             {
                 if (solutionBuildEventContext is not null)
                 {
-                    var solutionProjectFinishedEvent = new ProjectFinishedEventArgs(
-                        message: null,
-                        helpKeyword: null,
-                        projectFile: projectGraph.Solution!.FullPath,
-                        succeeded: graphBuildSucceeded)
-                    {
-                        BuildEventContext = solutionBuildEventContext
-                    };
-
-                    loggingService.LogBuildEvent(solutionProjectFinishedEvent);
+                    loggingService.LogProjectFinished(solutionBuildEventContext, projectGraph.Solution!.FullPath, graphBuildSucceeded);
                 }
             }
 
