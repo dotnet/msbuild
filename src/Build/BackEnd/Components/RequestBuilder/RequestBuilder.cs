@@ -774,6 +774,13 @@ namespace Microsoft.Build.BackEnd
         {
             Exception thrownException = null;
             BuildResult result = null;
+            BuildRequest request = _requestEntry.Request;
+            BuildRequestConfiguration requestConfiguration = _requestEntry.RequestConfiguration;
+            string projectPath = requestConfiguration.ProjectFullPath;
+            int configurationId = requestConfiguration.ConfigurationId;
+            int globalRequestId = request.GlobalRequestId;
+            int nodeRequestId = request.NodeRequestId;
+            bool requestThreadProcEventSourceStarted = false;
 
             try
             {
@@ -781,10 +788,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                MSBuildEventSource.Log.RequestThreadProcStart();
+                MSBuildEventSource.Log.RequestThreadProcStart(projectPath, configurationId, globalRequestId, nodeRequestId);
+                requestThreadProcEventSourceStarted = true;
                 VerifyEntryInActiveState();
                 result = await BuildProject();
-                MSBuildEventSource.Log.RequestThreadProcStop();
             }
             catch (InvalidProjectFileException ex)
             {
@@ -861,6 +868,11 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
+                if (requestThreadProcEventSourceStarted)
+                {
+                    MSBuildEventSource.Log.RequestThreadProcStop(projectPath, configurationId, globalRequestId, nodeRequestId);
+                }
+
                 _blockType = BlockType.Unblocked;
 
                 if (thrownException != null)
