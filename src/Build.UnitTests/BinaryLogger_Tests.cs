@@ -11,9 +11,11 @@ using System.Threading;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
@@ -551,6 +553,42 @@ namespace Microsoft.Build.UnitTests
 </Project>";
 
             ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
+        }
+
+        [Fact]
+        public void GraphBuildFromSolutionShouldEmbedSolutionFile()
+        {
+            var graph = Helpers.CreateProjectGraph(_env, new Dictionary<int, int[]> { { 1, new[] { 2 } } });
+            string solutionContents = SolutionFileBuilder.FromGraph(graph).BuildSolution();
+            string solutionFile = _env.CreateFile("graph.sln", solutionContents).Path;
+
+            using var buildManager = new BuildManager();
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = $"LogFile={_logFile}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            GraphBuildResult graphBuildResult = buildManager.Build(
+                new BuildParameters
+                {
+                    EnableNodeReuse = false,
+                    Loggers = [binaryLogger],
+                },
+                new GraphBuildRequestData(new ProjectGraph(solutionFile), Array.Empty<string>()));
+
+            graphBuildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            string projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            string solutionFileName = Path.GetFileName(solutionFile);
+
+            // Compare by entry name only because ZipArchive entry full names can vary by platform separators.
+            zipArchive.Entries.ShouldContain(
+                entry => entry.Name.EndsWith(solutionFileName, StringComparison.OrdinalIgnoreCase),
+                customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
         /// <summary>
