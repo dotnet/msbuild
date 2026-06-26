@@ -123,6 +123,23 @@ namespace Microsoft.Build.Evaluation
         private WeakValueDictionary<string, ProjectRootElement> _weakCache;
 
         /// <summary>
+        /// A thread-safe shadow of <see cref="_weakCache"/> for the hot read path.
+        /// </summary>
+        /// <remarks>
+        /// Reads against <see cref="_weakCache"/> require taking <see cref="_locker"/>
+        /// because the underlying Dictionary is not concurrent-safe. Under
+        /// multithreaded evaluation (``-mt``) every &lt;Import&gt; element in every
+        /// project goes through ``GetOrLoad`` looking up commonly-imported props/
+        /// targets files, and the resulting lock contention shows up as a top
+        /// per-thread wait in perf traces. This <see cref="ConcurrentDictionary{TKey,TValue}"/>
+        /// holds the same entries as <see cref="_weakCache"/> (by strong ref to
+        /// the same <see cref="ProjectRootElement"/>) and is updated in lockstep
+        /// inside <see cref="_locker"/>, so it's safe to read it lock-free as
+        /// the fast path before falling through to the locked path on a miss.
+        /// </remarks>
+        private ConcurrentDictionary<string, ProjectRootElement> _strongLookupCache;
+
+        /// <summary>
         /// Lock objects keyed by project file path.
         /// </summary>
         private ConcurrentDictionary<string, object> _fileLoadLocks;
@@ -152,6 +169,7 @@ namespace Microsoft.Build.Evaluation
             DebugTraceCache("Constructing with autoreload from disk: ", autoReloadFromDisk);
 
             _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+            _strongLookupCache = new ConcurrentDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
             _strongCache = new LinkedList<ProjectRootElement>();
             _fileLoadLocks = new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             _autoReloadFromDisk = autoReloadFromDisk;
@@ -290,6 +308,61 @@ namespace Microsoft.Build.Evaluation
         private ProjectRootElement GetOrLoad(string projectFile, OpenProjectRootElement loadProjectRootElement, bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
+            // Fast path: try a lock-free lookup against the shadow dictionary first.
+            // This is the dominant case during multithreaded evaluation, where many
+            // projects re-import the same common .props / .targets files.
+            //
+            // It's safe to bypass the lock here because:
+            //  * `_strongLookupCache` is a thread-safe ConcurrentDictionary kept in
+            //    lockstep with `_weakCache` from inside `_locker`. A reader may see
+            //    a slightly stale view but never an inconsistent one.
+            //  * The locked path below is still consulted when we need to mutate
+            //    state (boost LRU, evict invalid entry, load via callback,
+            //    reload with different formatting).
+            //  * Setting `IsExplicitlyLoaded` on the returned PRE is itself an
+            //    atomic per-PRE flag set; it does not require this cache's lock.
+            //
+            // The single condition that prevents taking the fast path is a
+            // requested `preserveFormatting` that differs from the cached value,
+            // because that case must call `Reload` under the lock.
+            if (preserveFormatting is null
+                && _strongLookupCache.TryGetValue(projectFile, out ProjectRootElement cachedPre)
+                && !IsInvalidEntry(projectFile, cachedPre))
+            {
+                if (isExplicitlyLoaded)
+                {
+                    cachedPre.MarkAsExplicitlyLoaded();
+                }
+
+                // Boost LRU position opportunistically: skip the boost on contention.
+                // The strong cache still contains the entry — at worst its LRU slot
+                // is slightly older than it would otherwise be, which is acceptable
+                // because eviction order is a performance hint, not correctness.
+                if (System.Threading.Monitor.TryEnter(_locker, 0))
+                {
+                    try
+                    {
+                        // Re-check the entry is still in the strong cache (it could
+                        // have been evicted between the lock-free read and the lock
+                        // acquisition). If still present, boost it.
+                        if (_strongLookupCache.TryGetValue(projectFile, out ProjectRootElement currentPre) && currentPre == cachedPre)
+                        {
+                            BoostEntryInStrongCache(cachedPre);
+                        }
+                    }
+                    finally
+                    {
+                        System.Threading.Monitor.Exit(_locker);
+                    }
+                }
+
+                if (loadProjectRootElement == null)
+                {
+                    DebugTraceCache("Satisfied from XML cache: ", projectFile);
+                }
+                return cachedPre;
+            }
+
             ProjectRootElement projectRootElement;
             lock (_locker)
             {
@@ -430,6 +503,11 @@ namespace Microsoft.Build.Evaluation
 
                 _strongCache = new LinkedList<ProjectRootElement>();
 
+                // Also clear the lock-free shadow so it does not keep strong references
+                // alive — the whole point of DiscardStrongReferences is to allow
+                // unused PREs to be garbage-collected.
+                _strongLookupCache = new ConcurrentDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+
                 // A scavenge of the weak cache is probably not worth it as
                 // the GC would have had to run immediately after the line above.
             }
@@ -444,6 +522,7 @@ namespace Microsoft.Build.Evaluation
             lock (_locker)
             {
                 _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                _strongLookupCache = new ConcurrentDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
                 _strongCache = new LinkedList<ProjectRootElement>();
             }
         }
@@ -466,6 +545,9 @@ namespace Microsoft.Build.Evaluation
                 WeakValueDictionary<string, ProjectRootElement> oldWeakCache = _weakCache;
                 _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
 
+                ConcurrentDictionary<string, ProjectRootElement> oldStrongLookupCache = _strongLookupCache;
+                _strongLookupCache = new ConcurrentDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+
                 LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
                 _strongCache = new LinkedList<ProjectRootElement>();
 
@@ -479,6 +561,7 @@ namespace Microsoft.Build.Evaluation
                     if (kvp.Value.IsExplicitlyLoaded)
                     {
                         _weakCache[kvp.Key] = kvp.Value;
+                        _strongLookupCache[kvp.Key] = kvp.Value;
                     }
 
                     if (oldStrongCache.Contains(kvp.Value))
@@ -513,6 +596,7 @@ namespace Microsoft.Build.Evaluation
                 lock (_locker)
                 {
                     _weakCache.Remove(projectRootElement.FullPath);
+                    _strongLookupCache.TryRemove(projectRootElement.FullPath, out _);
                 }
             }
         }
@@ -533,6 +617,7 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrowInternalRooted(oldFullPathIfAny);
                 Assumed.Equal(_weakCache[oldFullPathIfAny], projectRootElement, "Should already be present");
                 _weakCache.Remove(oldFullPathIfAny);
+                _strongLookupCache.TryRemove(oldFullPathIfAny, out _);
             }
 
             // There may already be a ProjectRootElement in the cache with the new name. In this case we cannot throw an exception;
@@ -555,6 +640,7 @@ namespace Microsoft.Build.Evaluation
 
             DebugTraceCache("Adding: ", projectRootElement.FullPath);
             _weakCache[projectRootElement.FullPath] = projectRootElement;
+            _strongLookupCache[projectRootElement.FullPath] = projectRootElement;
 
             BoostEntryInStrongCache(projectRootElement);
         }
@@ -596,6 +682,17 @@ namespace Microsoft.Build.Evaluation
 
                 DebugTraceCache("Shedding: ", node.Value.FullPath);
                 _strongCache.Remove(node);
+
+                // Drop the shed entry from the lock-free shadow so it no longer holds a
+                // strong reference (which would defeat the weak-cache semantics that allow
+                // unused PREs to be garbage-collected). The PRE is still present in
+                // _weakCache and may be re-found there on a fast-path miss.
+                // This is safe inside the _locker: no concurrent mutation can intervene
+                // between the read and the remove.
+                if (node.Value.FullPath != null)
+                {
+                    _strongLookupCache.TryRemove(node.Value.FullPath, out _);
+                }
             }
         }
 
@@ -610,6 +707,7 @@ namespace Microsoft.Build.Evaluation
             DebugTraceCache("Forgetting: ", projectRootElement.FullPath);
 
             _weakCache.Remove(projectRootElement.FullPath);
+            _strongLookupCache.TryRemove(projectRootElement.FullPath, out _);
 
             LinkedListNode<ProjectRootElement> strongCacheEntry = _strongCache.Find(projectRootElement);
             if (strongCacheEntry != null)
