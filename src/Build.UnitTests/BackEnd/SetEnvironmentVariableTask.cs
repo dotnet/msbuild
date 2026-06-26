@@ -6,8 +6,6 @@ using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-#nullable disable
-
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
@@ -19,10 +17,10 @@ namespace Microsoft.Build.UnitTests
     public class SetEnvironmentVariableTask : Task
     {
         [Required]
-        public string VariableName { get; set; }
+        public string VariableName { get; set; } = string.Empty;
 
         [Required]
-        public string Value { get; set; }
+        public string Value { get; set; } = string.Empty;
 
         [Output]
         public int Pid { get; set; }

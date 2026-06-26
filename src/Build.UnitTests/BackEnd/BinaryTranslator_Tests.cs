@@ -886,11 +886,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, excludedKeys);
 
             // The excluded keys are gone; every other entry survived (case-insensitively).
-            Assert.Equal(value.Count - 2, deserializedValue.Count);
-            Assert.False(deserializedValue.ContainsKey("ExcludedA"));
-            Assert.False(deserializedValue.ContainsKey("ExcludedB"));
-            Assert.Equal(value["foo"], deserializedValue["FOO"]);
-            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+            deserializedValue.Count.ShouldBe(value.Count - 2);
+            deserializedValue.ContainsKey("ExcludedA").ShouldBeFalse();
+            deserializedValue.ContainsKey("ExcludedB").ShouldBeFalse();
+            deserializedValue["FOO"].ShouldBe(value["foo"]);
+            deserializedValue["alpha"].ShouldBe(value["alpha"]);
         }
 
         /// <summary>
@@ -912,9 +912,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, excludedKeys);
 
-            Assert.Equal(value.Count, deserializedValue.Count);
-            Assert.Equal(value["foo"], deserializedValue["foo"]);
-            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+            deserializedValue.Count.ShouldBe(value.Count);
+            deserializedValue["foo"].ShouldBe(value["foo"]);
+            deserializedValue["alpha"].ShouldBe(value["alpha"]);
         }
 
         /// <summary>
@@ -936,9 +936,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, null);
 
-            Assert.Equal(value.Count, deserializedValue.Count);
-            Assert.Equal(value["foo"], deserializedValue["foo"]);
-            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+            deserializedValue.Count.ShouldBe(value.Count);
+            deserializedValue["foo"].ShouldBe(value["foo"]);
+            deserializedValue["alpha"].ShouldBe(value["alpha"]);
         }
 
         /// <summary>
@@ -955,7 +955,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, excludedKeys);
 
-            Assert.Null(deserializedValue);
+            deserializedValue.ShouldBeNull();
         }
 
         /// <summary>
