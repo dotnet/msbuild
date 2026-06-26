@@ -98,6 +98,13 @@ namespace Microsoft.Build.CommandLine
         private Dictionary<string, string> _forwardEnvironmentBaseline;
 
         /// <summary>
+        /// The CurrentSolutionConfigurationContents value most recently received in full from the parent on this
+        /// connection. When a <see cref="TaskHostConfiguration"/> arrives marked
+        /// <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> it is reconstructed from this baseline.
+        /// </summary>
+        private string _forwardSolutionConfigBaseline;
+
+        /// <summary>
         /// The event which is set when we should shut down.
         /// </summary>
         private ManualResetEvent _shutdownEvent;
@@ -1182,6 +1189,7 @@ namespace Microsoft.Build.CommandLine
 
             _currentConfiguration = taskHostConfiguration;
             ResolveIncomingEnvironment(taskHostConfiguration);
+            ResolveIncomingSolutionConfig(taskHostConfiguration);
 
             // Create task execution context for this task
             var context = CreateTaskContext(taskHostConfiguration);
@@ -1211,6 +1219,25 @@ namespace Microsoft.Build.CommandLine
             else
             {
                 _forwardEnvironmentBaseline = configuration.BuildProcessEnvironment;
+            }
+        }
+
+        /// <summary>
+        /// Resolves the CurrentSolutionConfigurationContents global property of an incoming configuration. When the
+        /// parent marked it <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> the value was not serialized
+        /// on the wire, so it is re-inserted into the global properties from this connection's baseline; otherwise
+        /// the baseline is refreshed with the full value that was sent
+        /// </summary>
+        private void ResolveIncomingSolutionConfig(TaskHostConfiguration configuration)
+        {
+            if (configuration.SolutionConfigMode == TaskHostConfiguration.SolutionConfigIdentical)
+            {
+                Assumed.NotNull(_forwardSolutionConfigBaseline, "Received a SolutionConfigIdentical TaskHostConfiguration before any full CurrentSolutionConfigurationContents value was sent on this connection.");
+                configuration.ApplyResolvedSolutionConfig(_forwardSolutionConfigBaseline);
+            }
+            else if (configuration.SolutionConfigValue != null)
+            {
+                _forwardSolutionConfigBaseline = configuration.SolutionConfigValue;
             }
         }
 

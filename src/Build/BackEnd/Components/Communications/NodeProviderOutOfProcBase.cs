@@ -1019,6 +1019,14 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private Dictionary<string, string> _forwardEnvironmentBaseline;
 
+            /// <summary>
+            /// The CurrentSolutionConfigurationContents value most recently sent in full to this task-host
+            /// connection. Used to avoid re-transmitting the configuration blob in every
+            /// <see cref="TaskHostConfiguration"/>: when an outgoing configuration's value matches this baseline it is
+            /// sent as <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> instead.
+            /// </summary>
+            private string _forwardSolutionConfigBaseline;
+
 
 #if FEATURE_APM
             // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
@@ -1197,6 +1205,35 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Marks an outgoing config <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> when its
+            /// CurrentSolutionConfigurationContents matches the connection baseline (leaving the large blob off the
+            /// wire); otherwise sends it in full and updates the baseline. A config without the property carries a
+            /// null value that never updates the baseline (e.g. restore-phase configs). As in
+            /// <see cref="PrepareEnvironmentForSend"/>, only <see cref="DrainPacketQueue"/> calls this in wire
+            /// order, so the baselines never drift and no locking is needed.
+            /// </summary>
+            private void PrepareSolutionConfigForSend(TaskHostConfiguration configuration)
+            {
+                string value = null;
+                configuration.GlobalProperties?.TryGetValue(TaskHostConfiguration.SolutionConfigKey, out value);
+
+                if (value != null && _forwardSolutionConfigBaseline != null && string.Equals(value, _forwardSolutionConfigBaseline, StringComparison.Ordinal))
+                {
+                    configuration.SolutionConfigMode = TaskHostConfiguration.SolutionConfigIdentical;
+                }
+                else
+                {
+                    configuration.SolutionConfigMode = TaskHostConfiguration.SolutionConfigFull;
+                    configuration.SolutionConfigValue = value;
+
+                    if (value != null)
+                    {
+                        _forwardSolutionConfigBaseline = value;
+                    }
+                }
+            }
+
+            /// <summary>
             /// We use a dedicated thread to avoid blocking a threadpool thread.
             /// </summary>
             /// <remarks>Usually there'll be a single packet in the queue, but sometimes
@@ -1242,10 +1279,12 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             // When the negotiated wire format supports it, send the (invariant) build process
-                            // environment only when it changed; otherwise mark it as unchanged on the wire.
+                            // environment and solution configuration only when they changed; otherwise mark them
+                            // as unchanged on the wire.
                             if (packet is TaskHostConfiguration taskHostConfiguration && writeTranslator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
                             {
                                 context.PrepareEnvironmentForSend(taskHostConfiguration);
+                                context.PrepareSolutionConfigForSend(taskHostConfiguration);
                             }
 
                             packet.Translate(writeTranslator);

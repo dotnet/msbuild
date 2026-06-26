@@ -857,6 +857,108 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Tests that TranslateDictionaryExcludingKeys omits the excluded entries from the wire (making it smaller)
+        /// and the dictionary round-trips without those entries but with every other entry intact.
+        /// </summary>
+        [Fact]
+        public void TestSerializeDictionaryExcludingKeys()
+        {
+            HashSet<string> excludedKeys = new(StringComparer.OrdinalIgnoreCase) { "ExcludedA", "ExcludedB" };
+            Dictionary<string, string> value = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["foo"] = "bar",
+                ["alpha"] = "omega",
+                ["ExcludedA"] = new string('x', 4096),
+                ["ExcludedB"] = new string('y', 4096),
+            };
+
+            // Serialize with the standard (full) translation to capture a baseline wire size.
+            Dictionary<string, string> full = value;
+            TranslationHelpers.GetWriteTranslator().TranslateDictionary(ref full, StringComparer.OrdinalIgnoreCase);
+            long fullLength = TranslationHelpers.GetWriteStreamLength();
+
+            // Serialize excluding the keys; the large values must not be on the wire, so it is strictly smaller.
+            Dictionary<string, string> excluding = value;
+            TranslationHelpers.GetWriteTranslator().TranslateDictionaryExcludingKeys(ref excluding, StringComparer.OrdinalIgnoreCase, excludedKeys);
+            TranslationHelpers.GetWriteStreamLength().ShouldBeLessThan(fullLength);
+
+            Dictionary<string, string> deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, excludedKeys);
+
+            // The excluded keys are gone; every other entry survived (case-insensitively).
+            Assert.Equal(value.Count - 2, deserializedValue.Count);
+            Assert.False(deserializedValue.ContainsKey("ExcludedA"));
+            Assert.False(deserializedValue.ContainsKey("ExcludedB"));
+            Assert.Equal(value["foo"], deserializedValue["FOO"]);
+            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+        }
+
+        /// <summary>
+        /// Tests that TranslateDictionaryExcludingKeys round-trips every entry when none of the excluded keys are present.
+        /// </summary>
+        [Fact]
+        public void TestSerializeDictionaryExcludingKeysNotPresent()
+        {
+            HashSet<string> excludedKeys = new(StringComparer.OrdinalIgnoreCase) { "NotInDictionary" };
+            Dictionary<string, string> value = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["foo"] = "bar",
+                ["alpha"] = "omega",
+            };
+
+            Dictionary<string, string> serialized = value;
+            TranslationHelpers.GetWriteTranslator().TranslateDictionaryExcludingKeys(ref serialized, StringComparer.OrdinalIgnoreCase, excludedKeys);
+
+            Dictionary<string, string> deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, excludedKeys);
+
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(value["foo"], deserializedValue["foo"]);
+            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+        }
+
+        /// <summary>
+        /// Tests that TranslateDictionaryExcludingKeys with a null set behaves like a regular dictionary
+        /// translation (all entries round-trip).
+        /// </summary>
+        [Fact]
+        public void TestSerializeDictionaryExcludingKeysNullSet()
+        {
+            Dictionary<string, string> value = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["foo"] = "bar",
+                ["alpha"] = "omega",
+            };
+
+            Dictionary<string, string> serialized = value;
+            TranslationHelpers.GetWriteTranslator().TranslateDictionaryExcludingKeys(ref serialized, StringComparer.OrdinalIgnoreCase, null);
+
+            Dictionary<string, string> deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, null);
+
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(value["foo"], deserializedValue["foo"]);
+            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+        }
+
+        /// <summary>
+        /// Tests that TranslateDictionaryExcludingKeys round-trips a null dictionary as null.
+        /// </summary>
+        [Fact]
+        public void TestSerializeDictionaryExcludingKeysNullDictionary()
+        {
+            HashSet<string> excludedKeys = new(StringComparer.OrdinalIgnoreCase) { "Excluded" };
+            Dictionary<string, string> value = null;
+
+            TranslationHelpers.GetWriteTranslator().TranslateDictionaryExcludingKeys(ref value, StringComparer.OrdinalIgnoreCase, excludedKeys);
+
+            Dictionary<string, string> deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateDictionaryExcludingKeys(ref deserializedValue, StringComparer.OrdinalIgnoreCase, excludedKeys);
+
+            Assert.Null(deserializedValue);
+        }
+
+        /// <summary>
         /// Tests serializing a dictionary of { string, string }, passing null.
         /// </summary>
         [Fact]

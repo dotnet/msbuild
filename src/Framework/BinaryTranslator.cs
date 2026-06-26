@@ -670,6 +670,12 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            public void TranslateDictionaryExcludingKeys(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, HashSet<string> excludedKeys)
+            {
+                // The excluded keys were never written, so a normal read reconstructs the dictionary without them.
+                TranslateDictionary(ref dictionary, comparer);
+            }
+
             public void TranslateDictionary<K, V>(
                 ref IDictionary<K, V> dictionary,
                 ObjectTranslator<K> keyTranslator,
@@ -1507,16 +1513,43 @@ namespace Microsoft.Build.BackEnd
 
             public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)
             {
+                TranslateStringDictionaryEntries(dictionary, excludedKeys: null);
+            }
+
+            public void TranslateDictionaryExcludingKeys(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, HashSet<string> excludedKeys)
+            {
+                TranslateStringDictionaryEntries(dictionary, excludedKeys);
+            }
+
+            private void TranslateStringDictionaryEntries(IDictionary<string, string> dictionary, HashSet<string> excludedKeys)
+            {
                 if (!TranslateNullable(dictionary))
                 {
                     return;
                 }
 
                 int count = dictionary.Count;
+                if (excludedKeys is not null)
+                {
+                    count = 0;
+                    foreach (KeyValuePair<string, string> pair in dictionary)
+                    {
+                        if (!excludedKeys.Contains(pair.Key))
+                        {
+                            count++;
+                        }
+                    }
+                }
+
                 _writer.Write(count);
 
                 foreach (KeyValuePair<string, string> pair in dictionary)
                 {
+                    if (excludedKeys is not null && excludedKeys.Contains(pair.Key))
+                    {
+                        continue;
+                    }
+
                     string key = pair.Key;
                     Translate(ref key);
                     string value = pair.Value;
