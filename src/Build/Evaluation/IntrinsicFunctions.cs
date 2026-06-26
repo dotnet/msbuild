@@ -55,7 +55,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Add two doubles
         /// </summary>
-        internal static double Add(double a, double b)
+        public static double Add(double a, double b)
         {
             return a + b;
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Add two longs
         /// </summary>
-        internal static long Add(long a, long b)
+        public static long Add(long a, long b)
         {
             return a + b;
         }
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Subtract two doubles
         /// </summary>
-        internal static double Subtract(double a, double b)
+        public static double Subtract(double a, double b)
         {
             return a - b;
         }
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Subtract two longs
         /// </summary>
-        internal static long Subtract(long a, long b)
+        public static long Subtract(long a, long b)
         {
             return a - b;
         }
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Multiply two doubles
         /// </summary>
-        internal static double Multiply(double a, double b)
+        public static double Multiply(double a, double b)
         {
             return a * b;
         }
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Multiply two longs
         /// </summary>
-        internal static long Multiply(long a, long b)
+        public static long Multiply(long a, long b)
         {
             return a * b;
         }
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Divide two doubles
         /// </summary>
-        internal static double Divide(double a, double b)
+        public static double Divide(double a, double b)
         {
             return a / b;
         }
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Divide two longs
         /// </summary>
-        internal static long Divide(long a, long b)
+        public static long Divide(long a, long b)
         {
             return a / b;
         }
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Modulo two doubles
         /// </summary>
-        internal static double Modulo(double a, double b)
+        public static double Modulo(double a, double b)
         {
             return a % b;
         }
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Modulo two longs
         /// </summary>
-        internal static long Modulo(long a, long b)
+        public static long Modulo(long a, long b)
         {
             return a % b;
         }
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Escape the string according to MSBuild's escaping rules
         /// </summary>
-        internal static string Escape(string unescaped)
+        public static string Escape(string unescaped)
         {
             return EscapingUtilities.Escape(unescaped);
         }
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Unescape the string according to MSBuild's escaping rules
         /// </summary>
-        internal static string Unescape(string escaped)
+        public static string Unescape(string escaped)
         {
             return EscapingUtilities.UnescapeAll(escaped);
         }
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Perform a bitwise OR on the first and second (first | second)
         /// </summary>
-        internal static int BitwiseOr(int first, int second)
+        public static int BitwiseOr(int first, int second)
         {
             return first | second;
         }
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Perform a bitwise AND on the first and second (first &amp; second)
         /// </summary>
-        internal static int BitwiseAnd(int first, int second)
+        public static int BitwiseAnd(int first, int second)
         {
             return first & second;
         }
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Perform a bitwise XOR on the first and second (first ^ second)
         /// </summary>
-        internal static int BitwiseXor(int first, int second)
+        public static int BitwiseXor(int first, int second)
         {
             return first ^ second;
         }
@@ -175,22 +175,22 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Perform a bitwise NOT on the first and second (~first)
         /// </summary>
-        internal static int BitwiseNot(int first)
+        public static int BitwiseNot(int first)
         {
             return ~first;
         }
 
-        internal static int LeftShift(int operand, int count)
+        public static int LeftShift(int operand, int count)
         {
             return operand << count;
         }
 
-        internal static int RightShift(int operand, int count)
+        public static int RightShift(int operand, int count)
         {
             return operand >> count;
         }
 
-        internal static int RightShiftUnsigned(int operand, int count)
+        public static int RightShiftUnsigned(int operand, int count)
         {
             return operand >>> count;
         }
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Get the value of the registry key and value, default value is null
         /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName)
+        public static object GetRegistryValue(string keyName, string valueName)
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
@@ -214,7 +214,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Get the value of the registry key and value
         /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName, object defaultValue)
+        public static object GetRegistryValue(string keyName, string valueName, object defaultValue)
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
@@ -227,7 +227,7 @@ namespace Microsoft.Build.Evaluation
             return Registry.GetValue(keyName, valueName, defaultValue);
         }
 
-        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
+        public static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Get the value of the registry key from one of the RegistryView's specified
         /// </summary>
-        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, ArraySegment<object> views)
+        public static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, ArraySegment<object> views)
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
@@ -342,7 +342,7 @@ namespace Microsoft.Build.Evaluation
         /// If the path cannot be made relative to the base path (for example, it is on another drive), it is returned verbatim.
         /// </param>
         /// <returns>relative path (can be the full path)</returns>
-        internal static string MakeRelative(string basePath, string path)
+        public static string MakeRelative(string basePath, string path)
         {
             string result = FileUtilities.MakeRelative(basePath, path);
 
@@ -356,7 +356,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="fileName">The name of the file to search for.</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>The full path of the directory containing the file if it is found, otherwise an empty string. </returns>
-        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName, IFileSystem fileSystem)
+        public static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName, IFileSystem fileSystem)
         {
             return FileUtilities.GetDirectoryNameOfFileAbove(startingDirectory, fileName, fileSystem);
         }
@@ -369,7 +369,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// of the file containing the property function.</param>
         /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
-        internal static string GetPathOfFileAbove(string file, string startingDirectory, IFileSystem fileSystem)
+        public static string GetPathOfFileAbove(string file, string startingDirectory, IFileSystem fileSystem)
         {
             return FileUtilities.GetPathOfFileAbove(file, startingDirectory, fileSystem);
         }
@@ -378,7 +378,7 @@ namespace Microsoft.Build.Evaluation
         /// Return the string in parameter 'defaultValue' only if parameter 'conditionValue' is empty
         /// else, return the value conditionValue
         /// </summary>
-        internal static string ValueOrDefault(string conditionValue, string defaultValue)
+        public static string ValueOrDefault(string conditionValue, string defaultValue)
         {
             if (String.IsNullOrEmpty(conditionValue))
             {
@@ -395,7 +395,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="toEncode">String to encode in base 64.</param>
         /// <returns>The encoded string.</returns>
-        internal static string ConvertToBase64(string toEncode)
+        public static string ConvertToBase64(string toEncode)
         {
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(toEncode));
         }
@@ -405,7 +405,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="toDecode">The string to decode.</param>
         /// <returns>The decoded string.</returns>
-        internal static string ConvertFromBase64(string toDecode)
+        public static string ConvertFromBase64(string toDecode)
         {
             return Encoding.UTF8.GetString(Convert.FromBase64String(toDecode));
         }
@@ -431,7 +431,7 @@ namespace Microsoft.Build.Evaluation
         ///  - for cases where the calling code would erroneously load old version of StringTools alongside of the new version of Microsoft.Build.
         /// Should be removed once Wave17_10 is removed.
         /// </summary>
-        internal static object StableStringHashLegacy(string toHash)
+        public static object StableStringHashLegacy(string toHash)
             => CommunicationsUtilities.GetHashCode(toHash);
 
         /// <summary>
@@ -440,10 +440,10 @@ namespace Microsoft.Build.Evaluation
         ///  JIT load the functions from StringTools - so we would not be able to prevent their loading with ChangeWave as we do now.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        internal static object StableStringHash(string toHash)
+        public static object StableStringHash(string toHash)
             => StableStringHash(toHash, StringHashingAlgorithm.Legacy);
 
-        internal static object StableStringHash(string toHash, StringHashingAlgorithm algo) =>
+        public static object StableStringHash(string toHash, StringHashingAlgorithm algo) =>
             algo switch
             {
                 StringHashingAlgorithm.Legacy => CommunicationsUtilities.GetHashCode(toHash),
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Evaluation
         /// Returns true if a task host exists that can service the requested runtime and architecture
         /// values, and false otherwise.
         /// </summary>
-        internal static bool DoesTaskHostExist(string runtime, string architecture)
+        public static bool DoesTaskHostExist(string runtime, string architecture)
         {
             if (runtime != null)
             {
@@ -523,7 +523,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="path">The path to check.</param>
         /// <returns>The specified path with a trailing slash.</returns>
-        internal static string EnsureTrailingSlash(string path)
+        public static string EnsureTrailingSlash(string path)
         {
             return FileUtilities.EnsureTrailingSlash(path);
         }
@@ -534,7 +534,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="path">One or more directory paths to combine and normalize.</param>
         /// <returns>A canonicalized full directory path with the correct directory separators and a trailing slash.</returns>
-        internal static string NormalizeDirectory(params string[] path)
+        public static string NormalizeDirectory(params string[] path)
         {
             return EnsureTrailingSlash(NormalizePath(path));
         }
@@ -544,7 +544,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="path">The path to check</param>
         /// <returns></returns>
-        internal static bool FileExists(string path)
+        public static bool FileExists(string path)
         {
             return FileUtilities.FileExistsNoThrow(path);
         }
@@ -554,7 +554,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="path">The path to check</param>
         /// <returns></returns>
-        internal static bool DirectoryExists(string path)
+        public static bool DirectoryExists(string path)
         {
             return FileUtilities.DirectoryExistsNoThrow(path);
         }
@@ -564,7 +564,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="path">One or more paths to combine and normalize.</param>
         /// <returns>A canonicalized full path with the correct directory separators.</returns>
-        internal static string NormalizePath(params string[] path)
+        public static string NormalizePath(params string[] path)
         {
             return FileUtilities.NormalizePath(path);
         }
@@ -574,7 +574,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="platformString">The platform string. Must be a member of <see cref="OSPlatform"/>. Case Insensitive</param>
         /// <returns></returns>
-        internal static bool IsOSPlatform(string platformString)
+        public static bool IsOSPlatform(string platformString)
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.Create(platformString.ToUpperInvariant()));
         }
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Evaluation
         /// True if current OS is a Unix system.
         /// </summary>
         /// <returns></returns>
-        internal static bool IsOsUnixLike()
+        public static bool IsOsUnixLike()
         {
             return NativeMethodsShared.IsUnixLike;
         }
@@ -592,77 +592,77 @@ namespace Microsoft.Build.Evaluation
         /// True if current OS is a BSD system.
         /// </summary>
         /// <returns></returns>
-        internal static bool IsOsBsdLike()
+        public static bool IsOsBsdLike()
         {
             return NativeMethodsShared.IsBSD;
         }
 
-        internal static bool VersionEquals(string a, string b)
+        public static bool VersionEquals(string a, string b)
         {
             return SimpleVersion.Parse(a) == SimpleVersion.Parse(b);
         }
 
-        internal static bool VersionNotEquals(string a, string b)
+        public static bool VersionNotEquals(string a, string b)
         {
             return SimpleVersion.Parse(a) != SimpleVersion.Parse(b);
         }
 
-        internal static bool VersionGreaterThan(string a, string b)
+        public static bool VersionGreaterThan(string a, string b)
         {
             return SimpleVersion.Parse(a) > SimpleVersion.Parse(b);
         }
 
-        internal static bool VersionGreaterThanOrEquals(string a, string b)
+        public static bool VersionGreaterThanOrEquals(string a, string b)
         {
             return SimpleVersion.Parse(a) >= SimpleVersion.Parse(b);
         }
 
-        internal static bool VersionLessThan(string a, string b)
+        public static bool VersionLessThan(string a, string b)
         {
             return SimpleVersion.Parse(a) < SimpleVersion.Parse(b);
         }
 
-        internal static bool VersionLessThanOrEquals(string a, string b)
+        public static bool VersionLessThanOrEquals(string a, string b)
         {
             return SimpleVersion.Parse(a) <= SimpleVersion.Parse(b);
         }
 
-        internal static string GetTargetFrameworkIdentifier(string tfm)
+        public static string GetTargetFrameworkIdentifier(string tfm)
         {
             return NuGetFramework.Value.GetTargetFrameworkIdentifier(tfm);
         }
 
-        internal static string GetTargetFrameworkVersion(string tfm, int versionPartCount = 2)
+        public static string GetTargetFrameworkVersion(string tfm, int versionPartCount = 2)
         {
             return NuGetFramework.Value.GetTargetFrameworkVersion(tfm, versionPartCount);
         }
 
-        internal static bool IsTargetFrameworkCompatible(string target, string candidate)
+        public static bool IsTargetFrameworkCompatible(string target, string candidate)
         {
             return NuGetFramework.Value.IsCompatible(target, candidate);
         }
 
-        internal static string GetTargetPlatformIdentifier(string tfm)
+        public static string GetTargetPlatformIdentifier(string tfm)
         {
             return NuGetFramework.Value.GetTargetPlatformIdentifier(tfm);
         }
 
-        internal static string GetTargetPlatformVersion(string tfm, int versionPartCount = 2)
+        public static string GetTargetPlatformVersion(string tfm, int versionPartCount = 2)
         {
             return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 
-        internal static string FilterTargetFrameworks(string incoming, string filter)
+        public static string FilterTargetFrameworks(string incoming, string filter)
         {
             return NuGetFramework.Value.FilterTargetFrameworks(incoming, filter);
         }
 
-        internal static bool AreFeaturesEnabled(Version wave)
+        public static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
         }
 
-        internal static string SubstringByAsciiChars(string input, int start, int length)
+        public static string SubstringByAsciiChars(string input, int start, int length)
         {
             if (start > input.Length)
             {
@@ -690,7 +690,7 @@ namespace Microsoft.Build.Evaluation
             return sb.ToString();
         }
 
-        internal static string CheckFeatureAvailability(string featureName)
+        public static string CheckFeatureAvailability(string featureName)
         {
             return Features.CheckFeatureAvailability(featureName).ToString();
         }
@@ -752,7 +752,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// returns if the string contains escaped wildcards
         /// </summary>
-        internal static List<string> __GetListTest()
+        public static List<string> __GetListTest()
         {
             return new List<string> { "A", "B", "C", "D" };
         }

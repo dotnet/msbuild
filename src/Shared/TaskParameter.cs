@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Build.Collections;
@@ -390,8 +389,6 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serializes or deserializes an array of primitive type values wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
-        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
-            Justification = "The element type is always one of the primitive value types selected by the TypeCode switch below, so Array.CreateInstance does not need to generate code for an unknown type.")]
         private void TranslatePrimitiveTypeArray(ITranslator translator)
         {
             translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
@@ -433,27 +430,31 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        Type elementType = _parameterTypeCode switch
+                        Type arrayType = _parameterTypeCode switch
                         {
-                            TypeCode.Char => typeof(char),
-                            TypeCode.SByte => typeof(sbyte),
-                            TypeCode.Byte => typeof(byte),
-                            TypeCode.Int16 => typeof(short),
-                            TypeCode.UInt16 => typeof(ushort),
-                            TypeCode.UInt32 => typeof(uint),
-                            TypeCode.Int64 => typeof(long),
-                            TypeCode.UInt64 => typeof(ulong),
-                            TypeCode.Single => typeof(float),
-                            TypeCode.Double => typeof(double),
-                            TypeCode.Decimal => typeof(decimal),
-                            TypeCode.DateTime => typeof(DateTime),
+                            TypeCode.Char => typeof(char[]),
+                            TypeCode.SByte => typeof(sbyte[]),
+                            TypeCode.Byte => typeof(byte[]),
+                            TypeCode.Int16 => typeof(short[]),
+                            TypeCode.UInt16 => typeof(ushort[]),
+                            TypeCode.UInt32 => typeof(uint[]),
+                            TypeCode.Int64 => typeof(long[]),
+                            TypeCode.UInt64 => typeof(ulong[]),
+                            TypeCode.Single => typeof(float[]),
+                            TypeCode.Double => typeof(double[]),
+                            TypeCode.Decimal => typeof(decimal[]),
+                            TypeCode.DateTime => typeof(DateTime[]),
                             _ => throw new NotImplementedException(),
                         };
 
                         int length = 0;
                         translator.Translate(ref length);
 
-                        Array array = Array.CreateInstance(elementType, length);
+#if NET
+                        Array array = Array.CreateInstanceFromArrayType(arrayType, length);
+#else
+                        Array array = Array.CreateInstance(arrayType.GetElementType(), length);
+#endif
                         for (int i = 0; i < length; i++)
                         {
                             string valueString = null;

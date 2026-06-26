@@ -790,41 +790,64 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                // Loop through all the TaskItems in our arraylist, and convert them.
-                ArrayList finalTaskInputs = new ArrayList(taskItems.Count);
+                Type elementType = parameterType.GetElementType();
 
-                if (parameterType != typeof(ITaskItem[]))
+                if (parameterType == typeof(ITaskItem[]))
                 {
-                    foreach (TaskItem item in taskItems)
+                    ITaskItem[] finalInputs = new ITaskItem[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
                     {
+                        TaskItem item = taskItems[i];
                         currentItem = item;
-                        if (parameterType == typeof(string[]))
-                        {
-                            finalTaskInputs.Add(item.ItemSpec);
-                        }
-                        else if (parameterType == typeof(bool[]))
-                        {
-                            finalTaskInputs.Add(ConversionUtilities.ConvertStringToBool(item.ItemSpec));
-                        }
-                        else
-                        {
-                            finalTaskInputs.Add(Convert.ChangeType(item.ItemSpec, parameterType.GetElementType(), CultureInfo.InvariantCulture));
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (TaskItem item in taskItems)
-                    {
+
                         // if we've been asked to remote these items then
                         // remember them so we can disconnect them from remoting later
                         RecordItemForDisconnectIfNecessary(item);
-
-                        finalTaskInputs.Add(item);
+                        finalInputs[i] = item;
                     }
-                }
 
-                return InternalSetTaskParameter(parameter, finalTaskInputs.ToArray(parameterType.GetElementType()));
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(string[]))
+                {
+                    string[] finalInputs = new string[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = currentItem.ItemSpec;
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(bool[]))
+                {
+                    bool[] finalInputs = new bool[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = ConversionUtilities.ConvertStringToBool(currentItem.ItemSpec);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else
+                {
+                    // Fallback for custom value types
+#if NET
+                    // AOT friendly
+                    Array finalTaskInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalTaskInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        finalTaskInputs.SetValue(Convert.ChangeType(item.ItemSpec, elementType, CultureInfo.InvariantCulture), i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalTaskInputs);
+                }
             }
             catch (Exception ex)
             {
