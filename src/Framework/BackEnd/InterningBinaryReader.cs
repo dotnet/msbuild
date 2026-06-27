@@ -7,8 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.NET.StringTools;
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 
 #nullable disable
 
@@ -118,7 +118,7 @@ namespace Microsoft.Build
                         // the actual error seems most likely to be occurring.
                         if (n < 0)
                         {
-                            ErrorUtilities.ThrowInternalError("From calculating based on the memorystream, about to read n = {0}. length = {1}, rawPosition = {2}, readLength = {3}, stringLength = {4}, currPos = {5}.", n, length, rawPosition, readLength, stringLength, currPos);
+                            FrameworkErrorUtilities.ThrowInternalError($"From calculating based on the memorystream, about to read n = {n}. length = {length}, rawPosition = {rawPosition}, readLength = {readLength}, stringLength = {stringLength}, currPos = {currPos}.");
                         }
 
                         memoryStream.Seek(n, SeekOrigin.Current);
@@ -133,7 +133,7 @@ namespace Microsoft.Build
                         // See above explanation -- the OutOfRange exception may also be coming from our setting of n here ...
                         if (n < 0)
                         {
-                            ErrorUtilities.ThrowInternalError("From getting the length out of BaseStream.Read directly, about to read n = {0}. readLength = {1}, stringLength = {2}, currPos = {3}", n, readLength, stringLength, currPos);
+                            FrameworkErrorUtilities.ThrowInternalError($"From getting the length out of BaseStream.Read directly, about to read n = {n}. readLength = {readLength}, stringLength = {stringLength}, currPos = {currPos}");
                         }
                     }
 

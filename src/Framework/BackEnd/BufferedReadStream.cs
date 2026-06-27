@@ -5,11 +5,7 @@ using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
-
-#if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
-#endif
-
 
 namespace Microsoft.Build.BackEnd
 {
@@ -125,7 +121,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#if NET451_OR_GREATER || NETCOREAPP
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             if (count > BUFFER_SIZE)
@@ -179,7 +174,6 @@ namespace Microsoft.Build.BackEnd
                 return alreadyCopied;
             }
         }
-#endif
 
         public override long Seek(long offset, SeekOrigin origin)
         {

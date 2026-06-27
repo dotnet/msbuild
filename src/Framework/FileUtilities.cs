@@ -1048,7 +1048,10 @@ namespace Microsoft.Build.Framework
         internal static bool PathIsInvalid(string path)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> b7fc9000d69f5d26df73251ffb134ae15772019e
             if (path == null)
             {
                 return true;
@@ -1061,7 +1064,17 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
+<<<<<<< HEAD
 >>>>>>> 73a107b3d (Address PR 13428 review feedback)
+=======
+            // Paths that exceed MAX_PATH (260) will cause GetFullPath to throw PathTooLongException on
+            // legacy Windows. Treat as invalid so callers skip NormalizePath and handle gracefully (e.g. RAR Regress314573).
+            if (path.Length >= NativeMethods.MAX_PATH)
+            {
+                return true;
+            }
+
+>>>>>>> b7fc9000d69f5d26df73251ffb134ae15772019e
             // Path.GetFileName does not react well to malformed filenames.
             // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
             // It also throws exceptions on illegal path characters

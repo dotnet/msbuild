@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
@@ -67,11 +67,11 @@ namespace Microsoft.Build.Shared
             out int emptySplits,
             params char[] separator)
         {
-            ErrorUtilities.VerifyThrow(maxSplits >= 2, "There is no point calling this method for less than two splits.");
+            FrameworkErrorUtilities.VerifyThrow(maxSplits >= 2, "There is no point calling this method for less than two splits.");
 
             string separators = new StringBuilder().Append(separator).ToString();
 
-            ErrorUtilities.VerifyThrow(separators.IndexOf('"') == -1, "The double-quote character is not supported as a separator.");
+            FrameworkErrorUtilities.VerifyThrow(separators.IndexOf('"') == -1, "The double-quote character is not supported as a separator.");
 
             StringBuilder splitString = new StringBuilder();
             splitString.EnsureCapacity(input.Length);

@@ -3,9 +3,8 @@
 
 using Microsoft.Build.BackEnd;
 
-#nullable disable
+namespace Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Shared
+internal interface IElementLocation : IMSBuildElementLocation, ITranslatable
 {
-    internal interface IElementLocation : IMSBuildElementLocation, ITranslatable { }
 }

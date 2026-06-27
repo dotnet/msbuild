@@ -160,7 +160,7 @@ namespace Microsoft.Build.CommandLine
                 //  This forces the type to initialize in this static constructor and thus    //
                 //  any configuration file exceptions can be caught here.                     //
                 ////////////////////////////////////////////////////////////////////////////////
-                s_exePath = Path.GetDirectoryName(BuildEnvironmentHelper.ExecutingAssemblyPath);
+                s_exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath());
                 commandLineParser = new CommandLineParser();
 
                 s_initialized = true;

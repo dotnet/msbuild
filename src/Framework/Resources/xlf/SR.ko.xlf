@@ -57,6 +57,21 @@
         <target state="translated">값은 빈 문자열일 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">"{0}" 문자열을 부울 값(true/false)으로 변환할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">이 컬렉션은 읽기 전용입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">"{0}" 경로 및 프레임워크 모니커 "{1}"에서 참조 어셈블리 경로를 생성하는 동안 오류가 발생했습니다. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">디버그 로그에 사용된 경로 "{0}"이(가) 너무 깁니다. MSBUILDDEBUGPATH 환경 변수를 사용하여 값을 더 짧게 설정하거나 긴 경로를 허용하도록 시스템 구성을 변경합니다.</target>
@@ -65,6 +80,16 @@
       <trans-unit id="FailedCreatingTempFile">
         <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
         <target state="translated">임시 파일을 만들지 못했습니다. 임시 파일 폴더가 꽉 찼거나 경로가 올바르지 않습니다. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">glob를 사용하여 fileSpec을 확장하는 동안 예외가 발생했습니다. fileSpec: "{0}", 파일 이름이라고 가정합니다. 예외: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">"{0}" 항목에 "{3}"(으)로 변환할 수 없는 "{2}" 값이 있는 "{1}" 특성이 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
@@ -85,6 +110,21 @@
       <trans-unit id="PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
         <target state="translated">경로: {0}은(는) OS 최대 경로 제한을 초과합니다. 정규화된 파일 이름은 {1}자 이하여야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">.NET Framework 버전 "{0}"이(가) 지원되지 않습니다. Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 값을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">.NET 4.5 이상에서만 지원되는 Windows SDK를 명시적으로 대상으로 지정하는 경우 .NET Framework 버전 "{0}"이(가) 지원되지 않습니다.  Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 Version45 이상인 값을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Visual Studio 버전 "{0}"이(가) 지원되지 않습니다.  Microsoft.Build.Utilities.VisualStudioVersion 열거형에서 값을 지정하세요.</target>
         <note />
       </trans-unit>
     </body>

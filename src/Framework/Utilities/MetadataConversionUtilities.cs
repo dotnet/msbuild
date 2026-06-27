@@ -4,7 +4,6 @@
 using System;
 using Microsoft.Build.Framework;
 
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -42,7 +41,7 @@ namespace Microsoft.Build.Shared
             }
             catch (System.ArgumentException e)
             {
-                throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.InvalidAttributeMetadata", item.ItemSpec, itemMetadataName, metadataValue, "bool"), e);
+                throw new ArgumentException(SR.FormatInvalidAttributeMetadata(item.ItemSpec, itemMetadataName, metadataValue, "bool"), e);
             }
         }
 

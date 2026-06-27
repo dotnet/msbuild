@@ -57,6 +57,21 @@
         <target state="translated">Il valore non può essere una stringa vuota.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">Non è possibile convertire la stringa "{0}" in un valore booleano (true/false).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">Raccolta di sola lettura.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">Si è verificato un errore durante il tentativo di generare un percorso dell'assembly di riferimento dal "{0}" e dal moniker del framework "{1}". {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Il percorso "{0}" usato per i log di debug è troppo lungo. Impostarlo su un valore più breve usando la variabile dell'ambiente MSBUILDDEBUGPATH o modificare la configurazione del sistema per consentire percorsi lunghi.</target>
@@ -65,6 +80,16 @@
       <trans-unit id="FailedCreatingTempFile">
         <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
         <target state="translated">Non è stato possibile creare un file temporaneo. La cartella dei file temporanei è piena oppure il percorso è errato. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Si è verificata un'eccezione durante l'espansione di un fileSpec con GLOBS: fileSpec: "{0}", presupponendo che si tratti di un nome di file. Eccezione: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">L'elemento "{0}" include l'attributo "{1}" con il valore "{2}" che non è stato possibile convertire in "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
@@ -85,6 +110,21 @@
       <trans-unit id="PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
         <target state="translated">Il percorso {0} supera il limite massimo dei percorsi del sistema operativo. Il nome completo del file deve essere composto da meno di {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">La versione "{0}" di .NET Framework non è supportata. Specificare un valore dall'enumerazione Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">La versione "{0}" di .NET Framework non è supportata se è destinata in modo esplicito a Windows SDK, che è supportato solo da .NET 4.5 e versioni successive. Specificare un valore dell'enumerazione Microsoft.Build.Utilities.TargetDotNetFrameworkVersion che sia Version45 o successivo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">La versione "{0}" di Visual Studio non è supportata. Specificare un valore dall'enumerazione Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
     </body>

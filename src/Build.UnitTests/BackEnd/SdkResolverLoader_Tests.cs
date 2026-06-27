@@ -426,12 +426,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     if (string.IsNullOrEmpty(msBuildExePath))
                     {
                         // Use the executing assembly path as fallback
-                        msBuildExePath = BuildEnvironmentHelper.ExecutingAssemblyPath;
-                        // If that's also null/empty, use test assembly location
-                        if (string.IsNullOrEmpty(msBuildExePath))
-                        {
-                            msBuildExePath = typeof(BuildEnvironmentHelper).Assembly.Location;
-                        }
+                        msBuildExePath = Path.GetFullPath(Assembly.GetExecutingAssembly().Location);
                     }
 
                     BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(

@@ -34,16 +34,6 @@ namespace Microsoft.Build.Shared
         private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
 
         /// <summary>
-        /// Get the currently executing assembly path.
-        /// </summary>
-        /// <remarks>
-        /// This property depends on BuildEnvironmentHelper being compiled into separate assemblies.
-        /// If BuildEnvironmentHelper is moved to a shared assembly, this property will need to be re-evaluated.
-        /// </remarks>
-        internal static string ExecutingAssemblyPath
-            => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(BuildEnvironmentHelper).Assembly));
-
-        /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
         public static BuildEnvironment Instance
@@ -140,7 +130,7 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromVisualStudioProcess()
         {
-            if (!NativeMethodsShared.IsWindows)
+            if (!NativeMethods.IsWindows)
             {
                 return null;
             }
@@ -172,7 +162,7 @@ namespace Microsoft.Build.Shared
             }
 
             // First check if we're in a VS installation
-            if (NativeMethodsShared.IsWindows &&
+            if (NativeMethods.IsWindows &&
                 Regex.IsMatch(processName, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
             {
                 return new BuildEnvironment(
@@ -246,7 +236,7 @@ namespace Microsoft.Build.Shared
                 ? $@".*\\MSBuild\\({CurrentToolsVersion}|\d+\.0)\\Bin\\.*"
                 : $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*";
 
-            if (NativeMethodsShared.IsWindows &&
+            if (NativeMethods.IsWindows &&
                 Regex.IsMatch(msbuildExe, msBuildPathPattern, RegexOptions.IgnoreCase))
             {
                 string visualStudioRoot = GetVsRootFromMSBuildAssembly(msbuildExe);
@@ -376,8 +366,8 @@ namespace Microsoft.Build.Shared
                 "MSBuild",
                 CurrentToolsVersion,
                 "Bin",
-                NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.X64 ? "amd64" :
-                NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.ARM64 ? "arm64" : string.Empty,
+                NativeMethods.ProcessorArchitecture == NativeMethods.ProcessorArchitectures.X64 ? "amd64" :
+                NativeMethods.ProcessorArchitecture == NativeMethods.ProcessorArchitectures.ARM64 ? "arm64" : string.Empty,
                 Constants.MSBuildExecutableName);
         }
 
@@ -453,7 +443,7 @@ namespace Microsoft.Build.Shared
 
         private static string GetExecutingAssemblyPath()
         {
-            return ExecutingAssemblyPath;
+            return typeof(BuildEnvironmentHelper).GetAssemblyPath();
         }
 
         private static string GetAppContextBaseDirectory()
@@ -563,10 +553,8 @@ namespace Microsoft.Build.Shared
             CurrentMSBuildExePath = currentMSBuildExePath;
             VisualStudioInstallRootDirectory = visualStudioPath;
 
-#if !NO_FRAMEWORK_IVT
-            Framework.BuildEnvironmentState.s_runningTests = runningTests;
-            Framework.BuildEnvironmentState.s_runningInVisualStudio = runningInVisualStudio;
-#endif
+            BuildEnvironmentState.s_runningTests = runningTests;
+            BuildEnvironmentState.s_runningInVisualStudio = runningInVisualStudio;
 
             if (!string.IsNullOrEmpty(currentMSBuildExePath))
             {
@@ -599,12 +587,12 @@ namespace Microsoft.Build.Shared
             if (mode == BuildEnvironmentMode.VisualStudio)
             {
                 // In Visual Studio, the entry-point MSBuild.exe is often from an arch-specific subfolder
-                MSBuildToolsDirectoryRoot = NativeMethodsShared.ProcessorArchitecture switch
+                MSBuildToolsDirectoryRoot = NativeMethods.ProcessorArchitecture switch
                 {
-                    NativeMethodsShared.ProcessorArchitectures.X86 => CurrentMSBuildToolsDirectory,
-                    NativeMethodsShared.ProcessorArchitectures.X64 or NativeMethodsShared.ProcessorArchitectures.ARM64
+                    NativeMethods.ProcessorArchitectures.X86 => CurrentMSBuildToolsDirectory,
+                    NativeMethods.ProcessorArchitectures.X64 or NativeMethods.ProcessorArchitectures.ARM64
                         => currentToolsDirectory.Parent?.FullName,
-                    _ => throw new InternalErrorException("Unknown processor architecture " + NativeMethodsShared.ProcessorArchitecture),
+                    _ => throw new InternalErrorException("Unknown processor architecture " + NativeMethods.ProcessorArchitecture),
                 };
             }
             else

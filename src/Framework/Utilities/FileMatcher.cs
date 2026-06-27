@@ -240,7 +240,7 @@ namespace Microsoft.Build.Shared
                 case FileSystemEntity.Directories: return GetAccessibleDirectories(fileSystem, path, pattern);
                 case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(fileSystem, path, pattern);
                 default:
-                    ErrorUtilities.ThrowInternalError("Unexpected filesystem entity type.");
+                    FrameworkErrorUtilities.ThrowInternalError("Unexpected filesystem entity type.");
                     break;
             }
             return [];
@@ -458,8 +458,9 @@ namespace Microsoft.Build.Shared
                 return path;
             }
 
-            ErrorUtilities.VerifyThrow(!HasWildcards(path),
-                "GetLongPathName does not handle wildcards and was passed '{0}'.", path);
+            FrameworkErrorUtilities.VerifyThrow(
+                !HasWildcards(path),
+                $"GetLongPathName does not handle wildcards and was passed '{path}'.");
 
             string[] parts = path.Split(directorySeparatorCharacters);
             string pathRoot;
@@ -524,9 +525,9 @@ namespace Microsoft.Build.Shared
                         }
 
                         // Since we know there are no wild cards, this should be length one, i.e. MoveNext should return false.
-                        ErrorUtilities.VerifyThrow(entries.Count == 1,
-                            "Unexpected number of entries ({3}) found when enumerating '{0}' under '{1}'. Original path was '{2}'",
-                            parts[i], longPath, path, entries.Count);
+                        FrameworkErrorUtilities.VerifyThrow(
+                            entries.Count == 1,
+                            $"Unexpected number of entries ({entries.Count}) found when enumerating '{parts[i]}' under '{longPath}'. Original path was '{path}'");
 
                         // Entries[0] contains the full path.
                         longPath = entries[0];
@@ -848,13 +849,15 @@ namespace Microsoft.Build.Shared
             catch (UnauthorizedAccessException) { }
 #endif
 
-            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
+            FrameworkErrorUtilities.VerifyThrow(
+                (recursionState.SearchData.Filespec == null) || (recursionState.SearchData.RegexFileMatch == null),
                 "File-spec overrides the regular expression -- pass null for file-spec if you want to use the regular expression.");
 
-            ErrorUtilities.VerifyThrow((recursionState.SearchData.Filespec != null) || (recursionState.SearchData.RegexFileMatch != null),
+            FrameworkErrorUtilities.VerifyThrow(
+                (recursionState.SearchData.Filespec != null) || (recursionState.SearchData.RegexFileMatch != null),
                 "Need either a file-spec or a regular expression to match files.");
 
-            ErrorUtilities.VerifyThrow(recursionState.RemainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
+            FrameworkErrorUtilities.VerifyThrow(recursionState.RemainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
 
             RecursiveStepResult[] excludeNextSteps = null;
             // Determine if any of searchesToExclude is necessarily a superset of the results that will be returned.
@@ -1057,7 +1060,7 @@ namespace Microsoft.Build.Shared
             // it is case sensitive. If the flag is true and matching is handled with MatchFileRecursionStep, it is case-insensitive.
             // TODO: Can we fix this by using case-insensitive file I/O on Linux?
             string filespec;
-            if (NativeMethodsShared.IsLinux && recursionState.SearchData.DirectoryPattern != null)
+            if (NativeMethods.IsLinux && recursionState.SearchData.DirectoryPattern != null)
             {
                 filespec = "*.*";
                 stepResult.NeedsToProcessEachFile = true;
@@ -1190,7 +1193,7 @@ namespace Microsoft.Build.Shared
             string filenamePart)
         {
 #if DEBUG
-            ErrorUtilities.VerifyThrow(
+            FrameworkErrorUtilities.VerifyThrow(
                 FileSpecRegexMinLength == FileSpecRegexParts.BeginningOfLine.Length
                 + FileSpecRegexParts.WildcardGroupStart.Length
                 + FileSpecRegexParts.FilenameGroupStart.Length
@@ -1198,7 +1201,7 @@ namespace Microsoft.Build.Shared
                 + FileSpecRegexParts.EndOfLine.Length,
                 "Checked-in length of known regex components differs from computed length. Update checked-in constant.");
 #endif
-            using (var matchFileExpression = new ReuseableStringBuilder(FileSpecRegexMinLength + NativeMethodsShared.MAX_PATH))
+            using (var matchFileExpression = new ReuseableStringBuilder(FileSpecRegexMinLength + NativeMethods.MAX_PATH))
             {
                 AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
                 AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
@@ -1251,7 +1254,7 @@ namespace Microsoft.Build.Shared
         {
             regex.Append(FileSpecRegexParts.BeginningOfLine);
 
-            bool isUncPath = NativeMethodsShared.IsWindows && fixedDir.Length > 1
+            bool isUncPath = NativeMethods.IsWindows && fixedDir.Length > 1
                              && fixedDir[0] == '\\' && fixedDir[1] == '\\';
             if (isUncPath)
             {
@@ -1687,7 +1690,7 @@ namespace Microsoft.Build.Shared
         {
             if (input == ReadOnlySpan<char>.Empty)
             {
-                ErrorUtilities.ThrowInternalError("Unexpected empty 'input' provided.");
+                FrameworkErrorUtilities.ThrowInternalError("Unexpected empty 'input' provided.");
             }
             if (pattern == null)
             {
@@ -2267,7 +2270,7 @@ namespace Microsoft.Build.Shared
             int wildcardPartLength = wildcardPart.Length;
 
             // Handles detection of <drive letter>:<slashes>** pattern for Windows.
-            if (NativeMethodsShared.IsWindows &&
+            if (NativeMethods.IsWindows &&
                 directoryPartLength >= 3 &&
                 wildcardPartLength >= 2 &&
                 IsDrivePatternWithoutSlash(directoryPart[0], directoryPart[1]))
@@ -2589,7 +2592,7 @@ namespace Microsoft.Build.Shared
                 // Set to use only half processors when we have 4 or more of them, in order to not be too aggresive
                 // By setting MaxTasksPerIteration to the maximum amount of tasks, which means that only one
                 // Parallel.ForEach will run at once, we get a stable number of threads being created.
-                var maxTasks = Math.Max(1, NativeMethodsShared.GetLogicalCoreCount() / 2);
+                var maxTasks = Math.Max(1, NativeMethods.GetLogicalCoreCount() / 2);
                 var taskOptions = new TaskOptions(maxTasks)
                 {
                     AvailableTasks = maxTasks,
@@ -2614,7 +2617,7 @@ namespace Microsoft.Build.Shared
                         CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
                         trackSearchAction,
                         trackExcludeFileSpec,
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Shared.GlobExpansionFailed", filespecUnescaped, ex.ToString()));
+                        SR.FormatGlobExpansionFailed(filespecUnescaped, ex.ToString()));
                 }
 
                 throw;
@@ -2626,7 +2629,7 @@ namespace Microsoft.Build.Shared
                     CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
                     trackSearchAction,
                     trackExcludeFileSpec,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Shared.GlobExpansionFailed", filespecUnescaped, ex.ToString()));
+                    SR.FormatGlobExpansionFailed(filespecUnescaped, ex.ToString()));
             }
 
             /*

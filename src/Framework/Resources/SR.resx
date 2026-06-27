@@ -169,4 +169,28 @@
     <value>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</value>
     <comment>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</comment>
   </data>
+  <data name="CollectionIsReadOnly" xml:space="preserve">
+    <value>This collection is read-only.</value>
+  </data>
+  <data name="CannotConvertStringToBool" xml:space="preserve">
+    <value>The string "{0}" cannot be converted to a boolean (true/false) value.</value>
+  </data>
+  <data name="InvalidAttributeMetadata" xml:space="preserve">
+    <value>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</value>
+  </data>
+  <data name="GlobExpansionFailed" xml:space="preserve">
+    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
+  </data>
+  <data name="UnsupportedFrameworkVersionForWindowsSdk" xml:space="preserve">
+    <value>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</value>
+  </data>
+  <data name="UnsupportedVisualStudioVersion" xml:space="preserve">
+    <value>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</value>
+  </data>
+  <data name="UnsupportedFrameworkVersion" xml:space="preserve">
+    <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
+  </data>
+  <data name="CouldNotGenerateReferenceAssemblyDirectory" xml:space="preserve">
+    <value>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</value>
+  </data>
 </root>
