@@ -1047,6 +1047,8 @@ namespace Microsoft.Build.Framework
 
         internal static bool PathIsInvalid(string path)
         {
+<<<<<<< HEAD
+=======
             if (path == null)
             {
                 return true;
@@ -1059,6 +1061,7 @@ namespace Microsoft.Build.Framework
                 return true;
             }
 
+>>>>>>> 73a107b3d (Address PR 13428 review feedback)
             // Path.GetFileName does not react well to malformed filenames.
             // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
             // It also throws exceptions on illegal path characters
