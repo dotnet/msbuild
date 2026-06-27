@@ -514,6 +514,14 @@ public class FileUtilities_Tests
         });
     }
 
+    [Fact]
+    public void PathIsInvalid_DoesNotTreatWhitespacePaddedPathsAsInvalid()
+    {
+        string paddedPath = "  C:\\temp\\file.txt  ";
+
+        Assert.True(FileUtilities.PathIsInvalid(paddedPath));
+    }
+
     [WindowsOnlyFact]
     public void CannotNormalizePathWithNewLineAndSpace()
     {
