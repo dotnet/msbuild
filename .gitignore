@@ -19,6 +19,9 @@ artifacts/
 .packages/
 BenchmarkDotNet.Artifacts/
 
+# Local scratch / experimentation output
+scratch/
+
 # Visual Studio 2015 cache/options directory
 .vs/
 

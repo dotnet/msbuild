@@ -27,8 +27,16 @@ internal static class TypeExtensions
 
     extension(Type type)
     {
+        [UnconditionalSuppressMessage("SingleFile", "IL3000",
+            Justification = "Assembly.Location is empty under single-file/Native AOT; the empty result is handled here (and AOT hosts supply the MSBuild path via MSBUILD_EXE_PATH rather than relying on it).")]
         public string GetAssemblyPath()
-            => Path.GetFullPath(type.Assembly.Location);
+        {
+            // Path.GetFullPath throws on an empty string, which is exactly what Assembly.Location returns
+            // for a single-file/Native AOT app, so return the empty path as-is in that case. In a hosted
+            // (non-single-file) host Location is populated and this behaves as before.
+            string location = type.Assembly.Location;
+            return location.Length == 0 ? location : Path.GetFullPath(location);
+        }
 
         /// <summary>
         /// Returns a boxed zero-initialized instance when the receiver is a value type, or

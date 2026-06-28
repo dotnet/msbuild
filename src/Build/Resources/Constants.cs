@@ -278,8 +278,30 @@ namespace Microsoft.Build.Internal
         [DynamicDependency(PropertyFunctionMembers, typeof(UriBuilder))]
         [DynamicDependency(PropertyFunctionMembers, typeof(Version))]
 #if NET
+        // ToolLocationHelper lives in Microsoft.Build.Utilities.Core in the SDK, which Microsoft.Build does not
+        // directly reference, so it cannot be named with typeof here like the entries above. Root it with the
+        // (memberTypes, typeName, assemblyName) string overload instead - it is otherwise an ordinary allowlist
+        // entry (see the TryAdd for it below). That overload (and trimming itself) exists only on .NET, so this
+        // entry is guarded for the .NET build; the allowlist still includes the type at run time on .NET Framework.
+        [DynamicDependency(PropertyFunctionMembers, "Microsoft.Build.Utilities.ToolLocationHelper", "Microsoft.Build.Utilities.Core")]
         [DynamicDependency(PropertyFunctionMembers, typeof(OperatingSystem))]
 #endif
+        // The DynamicDependency allowlist above preserves each property-function receiver type's public
+        // surface so trimming keeps it. Across all of those types the only member carrying
+        // [RequiresDynamicCode] is Enum.GetValues(Type) (rooted by typeof(Enum)) - this is the IL3050
+        // suppressed below.
+        //
+        // It is rooted but unreachable from a property function: an author cannot invoke Enum.GetValues(Type)
+        // (or any reflective Type-taking method) because there is no way to supply a System.Type argument.
+        //   - string does not coerce to Type, so the overload never binds and evaluation reports MSB4186
+        //     ("method not found ... parameters of the correct type").
+        //   - [System.Type]::GetType(...) is not an available property function (MSB4185), and stays
+        //     unavailable even with MSBUILDENABLEALLPROPERTYFUNCTIONS=1.
+        // So the case is blocked before any reflective invoke, identically on JIT and AOT, and would still
+        // fail observably (InvalidProjectFileException) if it were ever reached - never silently. This is
+        // verified end to end under Native AOT by src/aot-validation/PropertyFunctionAotTests.cs.
+        [UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode",
+            Justification = "Enum.GetValues(Type) is rooted for the allowlist but is unreachable via property functions; see comment above.")]
         private static void InitializeAvailableMethods()
         {
             if (s_availableStaticMethods == null)
