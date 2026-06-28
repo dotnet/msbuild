@@ -221,6 +221,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14193", TestPlatforms.Windows)]
     [Fact]
     public async Task ConcurrentClients_AllReceiveGrants()
     {

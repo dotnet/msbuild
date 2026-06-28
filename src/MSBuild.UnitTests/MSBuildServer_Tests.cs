@@ -272,6 +272,7 @@ namespace Microsoft.Build.Engine.UnitTests
             t.Wait();
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14195", TestPlatforms.Windows)]
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
