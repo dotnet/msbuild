@@ -3,6 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
@@ -72,6 +73,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal override IReadOnlyList<SdkResolver> GetDefaultResolvers() => _defaultResolvers;
 
         /// <inheritdoc />
+        [RequiresUnreferencedCode("Loads SDK resolver assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         internal override IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
         {
             lock (_lock)
@@ -90,6 +92,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc />
+        [RequiresUnreferencedCode("Loads SDK resolver assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         protected internal override IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
         {
             return _resolversByManifest.GetOrAdd(manifest, (manifest) => base.LoadResolversFromManifest(manifest, location));

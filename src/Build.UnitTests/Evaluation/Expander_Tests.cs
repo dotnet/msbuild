@@ -2788,11 +2788,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string env = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS");
+            AppContext.TryGetSwitch("Microsoft.Build.EnableAllPropertyFunctions", out bool originalSwitch);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", true);
 
                 string result = expander.ExpandIntoStringLeaveEscaped("$([System.Diagnostics.Process]::GetCurrentProcess().Id)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
@@ -2802,7 +2802,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", env);
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", originalSwitch);
                 AvailableStaticMethods.Reset_ForUnitTestsOnly();
             }
         }

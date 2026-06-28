@@ -3,14 +3,13 @@
 
 namespace Microsoft.Build.Framework
 {
-    // This is a central place to keep track of whether tests are running or not.  Test startup code
-    //  will set this to true.  It is consumed in BuildEnvironmentHelper.  However, since that class
-    //  is compiled into each project separately, it's not possible for the test startup code to
-    //  interact directly with the BuildEnvironmentHelper class - hence this central location.
+    // Central flag for whether tests are running.  The test host (TestAssemblyInfo) sets this to
+    //  true at startup; BuildEnvironmentHelper, which is compiled into this same assembly
+    //  (Microsoft.Build.Framework), reads it directly.
 
-    // This class is accessed via reflection, because adding the InternalsVisibleTo attributes which
-    //  would be required to access it statically causes errors due to other shared internal classes
-    //  which are compiled into multiple projects.
+    // The test host sets the field by reflection: TestAssemblyInfo is compiled into every test
+    //  assembly, and reflection lets that one shared file set the flag without requiring an
+    //  InternalsVisibleTo entry from Microsoft.Build.Framework for each of those assemblies.
     internal static class TestInfo
     {
         public static bool s_runningTests = false;
