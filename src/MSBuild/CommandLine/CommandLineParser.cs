@@ -546,7 +546,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         private static string GetProjectDirectory(string[] projectSwitchParameters)
         {
             string projectDirectory = ".";
-            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "Expect exactly one project at a time.");
+            Assumed.LessThanOrEqual(projectSwitchParameters.Length, 1, "Expect exactly one project at a time.");
 
             if (projectSwitchParameters.Length == 1)
             {
@@ -597,11 +597,9 @@ namespace Microsoft.Build.CommandLine.Experimental
             // check if there is any quoting in the name portion of the switch
             string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
 
-            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength),
-                "The switch name extracted from either the partially or completely unquoted arg should be the same.");
+            Assumed.Equal(switchName, unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength), "The switch name extracted from either the partially or completely unquoted arg should be the same.");
 
-            ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
-                "The name portion of the switch cannot contain more quoting than the arg itself.");
+            Assumed.GreaterThanOrEqual(doubleQuotesRemovedFromArg, doubleQuotesRemovedFromSwitchIndicatorAndName, "The name portion of the switch cannot contain more quoting than the arg itself.");
 
             string switchParameters;
             // if quoting in the name portion of the switch was terminated
@@ -629,7 +627,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 }
             }
 
-            ErrorUtilities.VerifyThrow(switchParameters != null, "We must be able to extract the switch parameters.");
+            Assumed.NotNull(switchParameters, "We must be able to extract the switch parameters.");
 
             return switchParameters;
         }
@@ -643,7 +641,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// <returns>Whether envVar is an environment variable</returns>
         private static bool IsEnvironmentVariable(string envVar)
         {
-            return envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1;
+            return envVar.StartsWith("%", StringComparison.Ordinal) && envVar.EndsWith("%", StringComparison.Ordinal) && envVar.Length > 1;
         }
 
         /// <summary>

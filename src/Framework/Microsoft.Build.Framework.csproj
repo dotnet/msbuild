@@ -1,7 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <!-- Do not create Tlbs when building in source-build mode (no net472 TFM available).
          In VMR Windows builds and VS builds, generate the .tlb from the net472 output. -->
@@ -20,8 +23,7 @@
        Place it under tools/ in the NuGet package so it doesn't appear as a library reference. -->
   <Target Name="IncludeTlbInPackage" BeforeTargets="_GetPackageFiles" Condition="'$(CreateTlb)' == 'true'">
     <ItemGroup>
-      <_PackageFiles Include="$(ArtifactsBinDir)Microsoft.Build.Framework\$(Configuration)\net472\Microsoft.Build.Framework.tlb"
-                     PackagePath="tools/net472" />
+      <_PackageFiles Include="$(ArtifactsBinDir)Microsoft.Build.Framework\$(Configuration)\net472\Microsoft.Build.Framework.tlb" PackagePath="tools/net472" />
     </ItemGroup>
   </Target>
 
@@ -37,11 +39,13 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(FeatureMSIORedist)' == 'true'">
+    <PackageReference Include="Microsoft.IO.Redist" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
     <PackageReference Include="System.Text.Json" />
     <!-- Telemetry in Visual Studio scenarios -->
@@ -55,6 +59,7 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
   </ItemGroup>
@@ -83,5 +88,52 @@
     </EmbeddedResource>
 
     <Using Include="$(RootNamespace).Resources" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true'">
+    <Compile Remove="Windows\**\*.cs" />
+    <Compile Remove="Shared\Win32\**\*.cs" />
+    <Compile Remove="Shared\VisualStudio\**\*.cs" />
+    <Compile Remove="FileSystem\MSBuildOnWindowsFileSystem.cs" />
+    <Compile Remove="FileSystem\WindowsFileSystem.cs" />
+    <Compile Remove="FileSystem\WindowsNative.cs" />
+    <Compile Remove="FileSystem\SafeFileHandle.cs" />
+  </ItemGroup>
+
+  <!-- CsWin32 source generator for Windows interop (Windows non-source builds only) -->
+  <ItemGroup Condition="'$(FeatureWindowsInterop)' == 'true'">
+    <PackageReference Include="Microsoft.Windows.CsWin32">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- PolySharp provides C# polyfills on net472 -->
+  <ItemGroup Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">
+    <PackageReference Include="PolySharp">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+    <!-- PolySharp exclusions to avoid conflicts with CsWin32 generated code -->
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">
+    <PolySharpExcludeGeneratedTypes>
+      System.Runtime.CompilerServices.OverloadResolutionPriorityAttribute;
+      System.Diagnostics.CodeAnalysis.UnscopedRefAttribute
+    </PolySharpExcludeGeneratedTypes>
+  </PropertyGroup>
+
+  <!-- Shared Win32 support types — COM helpers (struct-based COM with delegate* unmanaged).
+       Used for struct-based COM interop (WMI, ROT, etc.). Function pointers compile to
+       IL `calli` and work on .NET Framework too; ComScope<T>'s IComIID constraint is
+       satisfied on net472/netstandard via the polyfills under Polyfills\.
+       WMI manual structs use static-abstract IComIID and remain .NET-only. -->
+  <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true'">
+    <Compile Remove="Windows\Win32\System\Com\ComScope.cs" />
+    <Compile Remove="Windows\Win32\System\Com\ComClassFactory.cs" />
+    <Compile Remove="Windows\Win32\System\Com\GlobalInterfaceTable.cs" />
+    <Compile Remove="Windows\Win32\System\Com\AgileComPointer.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(FeatureWindowsInterop)' != 'true' OR '$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+    <Compile Remove="Utilities\Wmi\*.cs" />
   </ItemGroup>
 </Project>

@@ -960,6 +960,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             public readonly bool HasImportedFromTypeLibAttribute;
             public readonly bool HasSecurityTransparentAttribute;
 
+            private static readonly string[] s_attributeNames =
+            [
+                "System.Security.AllowPartiallyTrustedCallersAttribute",
+                "System.Security.SecurityTransparentAttribute",
+                "System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute",
+                "System.Runtime.InteropServices.ImportedFromTypeLibAttribute",
+            ];
+
             public AssemblyAttributeFlags(string path)
             {
                 using (MetadataReader r = MetadataReader.Create(path))
@@ -967,10 +975,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     if (r != null)
                     {
                         IsSigned = !String.IsNullOrEmpty(r.PublicKeyToken);
-                        HasAllowPartiallyTrustedCallersAttribute = r.HasAssemblyAttribute("System.Security.AllowPartiallyTrustedCallersAttribute");
-                        HasSecurityTransparentAttribute = r.HasAssemblyAttribute("System.Security.SecurityTransparentAttribute");
-                        HasPrimaryInteropAssemblyAttribute = r.HasAssemblyAttribute("System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
-                        HasImportedFromTypeLibAttribute = r.HasAssemblyAttribute("System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
+
+                        // Batched on the net472/COM path to share a single GIT acquisition across
+                        // all four probes; on the netcore path it iterates the cached attribute list.
+                        bool[] results = new bool[s_attributeNames.Length];
+                        r.HasAssemblyAttributes(s_attributeNames, results);
+                        HasAllowPartiallyTrustedCallersAttribute = results[0];
+                        HasSecurityTransparentAttribute = results[1];
+                        HasPrimaryInteropAssemblyAttribute = results[2];
+                        HasImportedFromTypeLibAttribute = results[3];
                     }
                 }
             }

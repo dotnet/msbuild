@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, "EvaluatedInclude");
+                ArgumentException.ThrowIfNullOrEmpty(value, "EvaluatedInclude");
                 _project.VerifyThrowNotImmutable();
 
                 _taskItem.ItemSpec = value;
@@ -734,8 +734,8 @@ namespace Microsoft.Build.Execution
             string definingFileEscaped,
             bool useItemDefinitionsWithoutModification)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
-            ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
+            ArgumentNullException.ThrowIfNull(projectToUse, "project");
+            ArgumentException.ThrowIfNullOrEmpty(itemTypeToUse, "itemType");
             XmlUtilities.VerifyThrowArgumentValidElementName(itemTypeToUse);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(itemTypeToUse), "OM_ReservedName", itemTypeToUse);
 
@@ -817,9 +817,9 @@ namespace Microsoft.Build.Execution
             private IReadOnlyDictionary<string, string> _directMetadata;
 
             /// <summary>
-            /// Cached value of the fullpath metadata. All other metadata are computed on demand.
+            /// Cached values of derivable item-spec modifiers. All time-based metadata are computed on demand.
             /// </summary>
-            private string _fullPath;
+            private ItemSpecModifiers.Cache _cachedModifiers;
 
             /// <summary>
             /// All the item definitions that apply to this item, in order of
@@ -863,8 +863,8 @@ namespace Microsoft.Build.Execution
                               bool immutable,
                               string definingFileEscaped) // the actual project file (or import) that defines this item.
             {
-                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped);
-                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped);
+                ArgumentException.ThrowIfNullOrEmpty(includeEscaped);
+                ArgumentException.ThrowIfNullOrEmpty(includeBeforeWildcardExpansionEscaped);
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
@@ -893,7 +893,7 @@ namespace Microsoft.Build.Execution
                 _includeEscaped = source._includeEscaped;
                 _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
                 source.CopyMetadataTo(this, addOriginalItemSpec);
-                _fullPath = source._fullPath;
+                _cachedModifiers = source._cachedModifiers;
                 _definingFileEscaped = source._definingFileEscaped;
             }
 
@@ -933,10 +933,10 @@ namespace Microsoft.Build.Execution
                     ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
                     // Historically empty string was allowed
-                    ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
+                    ArgumentNullException.ThrowIfNull(value, "ItemSpec");
 
                     _includeEscaped = value;
-                    _fullPath = null; // Clear cached value
+                    _cachedModifiers.Clear(); // Clear cached values
                 }
             }
 
@@ -981,7 +981,10 @@ namespace Microsoft.Build.Execution
                         names.Add(metadatum.Key);
                     }
 
-                    names.AddRange(ItemSpecModifiers.All);
+                    foreach (string name in ItemSpecModifiers.All)
+                    {
+                        names.Add(name);
+                    }
 
                     return names;
                 }
@@ -1052,9 +1055,9 @@ namespace Microsoft.Build.Execution
                 {
                     ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                    ErrorUtilities.VerifyThrowArgumentLength(value, "IncludeEscaped");
+                    ArgumentException.ThrowIfNullOrEmpty(value, "IncludeEscaped");
                     _includeEscaped = value;
-                    _fullPath = null; // Clear cached value
+                    _cachedModifiers.Clear(); // Clear cached values
                 }
             }
 
@@ -1252,18 +1255,28 @@ namespace Microsoft.Build.Execution
 
                     // Otherwise, merge remaining inherited item definitions. Front of the list is highest priority,
                     // so walk backwards. Skip the last entry since we've already used it as the base.
+                    // Use a builder to merge all definitions at once instead of creating N-1 intermediate
+                    // immutable trees from chained SetItems calls.
+                    var builder = lastItemDefinition.ToBuilder();
+
                     for (int i = _itemDefinitions.Count - 2; i >= 0; i--)
                     {
-                        lastItemDefinition = lastItemDefinition.SetItems(_itemDefinitions[i].BackingMetadata);
+                        foreach (var kvp in _itemDefinitions[i].BackingMetadata)
+                        {
+                            builder[kvp.Key] = kvp.Value;
+                        }
                     }
 
                     // Finally any direct metadata win.
                     if (_directMetadata != null)
                     {
-                        lastItemDefinition = lastItemDefinition.SetItems(_directMetadata);
+                        foreach (var kvp in _directMetadata)
+                        {
+                            builder[kvp.Key] = kvp.Value;
+                        }
                     }
 
-                    return lastItemDefinition;
+                    return builder.ToImmutable();
                 }
             }
 
@@ -1381,19 +1394,13 @@ namespace Microsoft.Build.Execution
             /// Evaluation never creates ITaskItems, so this should never be called.
             /// </remarks>
             ProjectMetadataInstance IItem<ProjectMetadataInstance>.GetMetadata(string name)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                => Assumed.Unreachable<ProjectMetadataInstance>();
 
             /// <summary>
             /// Set metadata
             /// </summary>
             ProjectMetadataInstance IItem<ProjectMetadataInstance>.SetMetadata(ProjectMetadataElement metadataElement, string evaluatedInclude)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-                return null;
-            }
+                => Assumed.Unreachable<ProjectMetadataInstance>();
 
             /// <summary>
             /// ITaskItem implementation which returns the specified metadata value, unescaped.
@@ -1417,7 +1424,7 @@ namespace Microsoft.Build.Execution
             {
                 if (string.IsNullOrEmpty(metadataName))
                 {
-                    ErrorUtilities.VerifyThrowArgumentLength(metadataName);
+                    ArgumentException.ThrowIfNullOrEmpty(metadataName);
                 }
 
                 if (_directMetadata?.TryGetValue(metadataName, out string escapedValue) == true && escapedValue != null)
@@ -1506,7 +1513,7 @@ namespace Microsoft.Build.Execution
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
+                ArgumentNullException.ThrowIfNull(destinationItem);
 
                 string originalItemSpec = null;
                 if (addOriginalItemSpec)
@@ -1753,7 +1760,7 @@ namespace Microsoft.Build.Execution
                 // the set of metadata names on 'this', to avoid computing the full metadata collection
                 // of both 'this' and 'other'. Once we have the names for 'this', we enumerate 'other'
                 // and ensure the names we see there are set-equal to the names we produce here.
-                int capacity = _itemDefinitions?.Count ?? 0 + _directMetadata?.Count ?? 0;
+                int capacity = (_itemDefinitions?.Count ?? 0) + (_directMetadata?.Count ?? 0);
                 var thisNames = new HashSet<string>(capacity, MSBuildNameIgnoreCaseComparer.Default);
 
                 if (_itemDefinitions is not null)
@@ -1914,14 +1921,17 @@ namespace Microsoft.Build.Execution
                         int count = translator.Reader.ReadInt32();
                         if (count > 0)
                         {
-                            IEnumerable<KeyValuePair<string, string>> metaData =
-                                Enumerable.Range(0, count).Select(_ =>
-                                {
-                                    int key = translator.Reader.ReadInt32();
-                                    int value = translator.Reader.ReadInt32();
-                                    return new KeyValuePair<string, string>(interner.GetString(key), interner.GetString(value));
-                                });
-                            _directMetadata = ImmutableDictionaryExtensions.EmptyMetadata.SetItems(metaData);
+                            // Use a builder to avoid intermediate immutable dictionary allocations
+                            // from feeding a lazy enumerable into SetItems.
+                            var builder = ImmutableDictionaryExtensions.EmptyMetadata.ToBuilder();
+                            for (int i = 0; i < count; i++)
+                            {
+                                int key = translator.Reader.ReadInt32();
+                                int value = translator.Reader.ReadInt32();
+                                builder[interner.GetString(key)] = interner.GetString(value);
+                            }
+
+                            _directMetadata = builder.ToImmutable();
                         }
                         else
                         {
@@ -2081,16 +2091,9 @@ namespace Microsoft.Build.Execution
             /// If value is not available, returns empty string.
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
-            {
-                string value = String.Empty;
-
-                if (ItemSpecModifiers.IsItemSpecModifier(name))
-                {
-                    value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
-                }
-
-                return value;
-            }
+                => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
+                    ? BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, modifierKind, ref _cachedModifiers)
+                    : string.Empty;
 
             /// <summary>
             /// Retrieves the named metadata from the item definition, if any.
@@ -2223,7 +2226,7 @@ namespace Microsoft.Build.Execution
                 internal ProjectItemInstanceFactory(ProjectInstance project, string itemType)
                     : this(project)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
+                    Assumed.NotNullOrEmpty(itemType);
                     this.ItemType = itemType;
                 }
 
@@ -2253,7 +2256,7 @@ namespace Microsoft.Build.Execution
                 /// <returns>A new instance item.</returns>
                 public ProjectItemInstance CreateItem(string include, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+                    Assumed.NotNullOrEmpty(ItemType);
 
                     ProjectItemInstance item = new ProjectItemInstance(_project, ItemType, include, definingProject);
 
@@ -2286,7 +2289,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ProjectItemInstance CreateItem(string evaluatedInclude, string evaluatedIncludeBeforeWildcardExpansion, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+                    Assumed.NotNullOrEmpty(ItemType);
 
                     return new ProjectItemInstance(_project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion, definingProject);
                 }
@@ -2315,8 +2318,8 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject)
                 {
-                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
-                    ErrorUtilities.VerifyThrowInternalNull(source);
+                    Assumed.NotNullOrEmpty(ItemType);
+                    Assumed.NotNull(source);
 
                     // The new item inherits any metadata originating in item definitions, which
                     // takes precedence over its own item definition metadata.
@@ -2465,7 +2468,7 @@ namespace Microsoft.Build.Execution
                 public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<TaskItem> destinationItems)
                 {
                     // Not difficult to implement, but we do not expect to go here.
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
 

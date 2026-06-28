@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
@@ -29,7 +30,7 @@ namespace Microsoft.Build.Tasks
         #region Members
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// The output files.
@@ -77,7 +78,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+                ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
                 return _outputPaths;
             }
 
@@ -100,11 +101,13 @@ namespace Microsoft.Build.Tasks
         /// Executes the XslTransform task.
         /// </summary>
         /// <returns>true if transformation succeeds.</returns>
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "The XslTransformation task compiles the user-supplied stylesheet with XslCompiledTransform, which generates IL at runtime and is inherently incompatible with Native AOT.")]
         public override bool Execute()
         {
             XmlInput xmlinput;
             XsltInput xsltinput;
-            ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+            ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
 
             // Load XmlInput, XsltInput parameters
             try
@@ -458,6 +461,7 @@ namespace Microsoft.Build.Tasks
             /// Loads the XSLT to XslCompiledTransform. By default uses Default settings instead of trusted settings.
             /// </summary>
             /// <returns>A XslCompiledTransform object.</returns>
+            [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
             public XslCompiledTransform LoadXslt()
             {
                 return LoadXslt(false);
@@ -468,10 +472,10 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <param name="useTrustedSettings">Determines whether or not to use trusted settings.</param>
             /// <returns>A XslCompiledTransform object.</returns>
+            [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
             public XslCompiledTransform LoadXslt(bool useTrustedSettings)
             {
                 XslCompiledTransform xslct = new XslCompiledTransform();
-                XsltSettings settings = XsltSettings.Default;
 
                 switch (_xslMode)
                 {
@@ -479,15 +483,11 @@ namespace Microsoft.Build.Tasks
                         {
                             using var sr = new StringReader(_data);
                             using var xmlReader = XmlReader.Create(sr);
-                            xslct.Load(xmlReader, settings, new XmlUrlResolver());
+                            xslct.Load(xmlReader, XsltSettings.Default, new XmlUrlResolver());
                             break;
                         }
                     case XslModes.XsltFile:
-                        if (useTrustedSettings)
-                        {
-                            settings = XsltSettings.TrustedXslt;
-                        }
-                        else
+                        if (!useTrustedSettings)
                         {
                             _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _filePath.Value.OriginalValue);
                         }
@@ -495,7 +495,18 @@ namespace Microsoft.Build.Tasks
                         using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), new XmlReaderSettings { CloseInput = true }, _filePath.Value))
                         {
                             XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
-                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, new XmlUrlResolver());
+                            // Preserve existing behavior: XSLT files can use local xsl:import/xsl:include paths resolved relative to the stylesheet.
+                            XPathDocument stylesheet = new XPathDocument(reader, xmlSpaceOption);
+                            if (useTrustedSettings)
+                            {
+#pragma warning disable CA3076 // UseTrustedSettings intentionally enables trusted XSLT features. Justification: Respecting user's choice to use trusted settings.
+                                xslct.Load(stylesheet, XsltSettings.TrustedXslt, new XmlUrlResolver());
+#pragma warning restore CA3076
+                            }
+                            else
+                            {
+                                xslct.Load(stylesheet, XsltSettings.Default, new XmlUrlResolver());
+                            }
                         }
                         break;
                     case XslModes.XsltCompiledDll:
@@ -512,8 +523,7 @@ namespace Microsoft.Build.Tasks
                         throw new PlatformNotSupportedException("Precompiled XSLTs are not supported in .NET Core");
 #endif
                     default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        break;
+                        return Assumed.Unreachable<XslCompiledTransform>();
                 }
 
                 return xslct;

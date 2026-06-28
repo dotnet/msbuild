@@ -490,8 +490,8 @@
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
-        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="translated">MSB3071: attualmente sono in uso tutte le lettere di unità comprese tra A: e Z:. Poiché la directory di lavoro "{0}" è un percorso UNC, per l'attività "Exec" è necessaria una lettera di unità disponibile a cui mappare il percorso UNC. Eseguire la disconnessione da una o più risorse condivise per rendere disponibili lettere di unità oppure specificare una directory di lavoro locale prima di provare a eseguire nuovamente questo comando.</target>
+        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
+        <target state="translated">MSB3071: attualmente sono in uso tutte le lettere di unità comprese tra A: e Z:. Poiché la directory di lavoro "{0}" (risolta nel percorso UNC "{1}") richiede una mappatura UNC, l'attività "Exec" ha bisogno di una lettera di unità disponibile a cui mappare il percorso UNC. Eseguire la disconnessione da una o più risorse condivise per rendere disponibili lettere di unità oppure specificare una directory di lavoro locale prima di provare a eseguire nuovamente questo comando.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -564,6 +564,11 @@
         <target state="translated">MSB3541: valore "{1}" di {0} non valido. {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
       </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="translated">MSB4311: Il valore InputUrl '{0}' non è un percorso valido in Windows perché costituito solo da spazi vuoti.</target>
+        <note>{StrBegin="MSB4311: "}</note>
+      </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
         <target state="translated">MSB3102: non è stato possibile eliminare il file di stato "{0}". {1}</target>
@@ -617,6 +622,11 @@
       <trans-unit id="General.ExpectedFileMissing">
         <source>Expected file "{0}" does not exist.</source>
         <target state="translated">Il file previsto "{0}" non esiste.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="translated">Non è possibile normalizzare il percorso "{0}" risolvendo i segmenti "." e "..": {1}. Il percorso verrà usato così com'è.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1215,8 +1225,8 @@
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
-        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
-        <target state="translated">MSB3821: non è stato possibile elaborare il file {0} perché si trova nell'area Internet o Siti con restrizioni o presenta il contrassegno del Web. Rimuovere il contrassegno del Web se si intende elaborare questi file.</target>
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
+        <target state="new">MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
@@ -1982,6 +1992,11 @@
         <source>MSB3249: Application Configuration file "{0}" is invalid. {1}</source>
         <target state="translated">MSB3249: file di configurazione dell'applicazione "{0}" non valido. {1}</target>
         <note>{StrBegin="MSB3249: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="translated">Il percorso del file di configurazione dell'applicazione non può essere vuoto.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>

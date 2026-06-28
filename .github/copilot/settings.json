@@ -1,0 +1,26 @@
+{
+  "extraKnownMarketplaces": {
+    "dotnet-arcade-skills": {
+      "source": {
+        "source": "github",
+        "repo": "dotnet/arcade-skills"
+      }
+    },
+    "dotnet-skills": {
+      "source": {
+        "source": "github",
+        "repo": "dotnet/skills"
+      }
+    },
+    "dotnet-msbuild": {
+      "source": {
+        "source": "github",
+        "repo": "dotnet/msbuild"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "dotnet-msbuild@dotnet-skills": true,
+    "mt-migration@dotnet-msbuild": true
+  }
+}

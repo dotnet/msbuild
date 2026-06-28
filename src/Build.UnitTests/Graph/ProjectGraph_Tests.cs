@@ -14,10 +14,10 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 
@@ -1037,8 +1037,17 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 // Root project has no default targets.
-                // The project file does not contain any targets
-                TransientTestFile entryProject = CreateProjectFile(env: env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: new Dictionary<string, string[]> { { "A", new[] { "B" } } }, defaultTargets: string.Empty);
+                // The project file does not contain any targets, so it is created inline rather than via the
+                // CreateProjectFile helper (which always injects a 'Build' target).
+                TransientTestFile entryProject = env.CreateFile("1.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""2.proj"" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReferenceTargets Include=""A"" Targets=""B"" />
+  </ItemGroup>
+</Project>");
 
                 // Dependency has default targets. Even though it gets called with empty targets, B will not get called,
                 // because target propagation only equates empty targets to default targets for the root nodes.
@@ -2671,6 +2680,16 @@ $@"
                 {
                     { 1, new[] { 2 } },
                 },
+                // Give each project an explicit default target so the helper's auto-injected 'Build' target
+                // (which is emitted first and would otherwise become the default) does not hide it.
+                createProjectFile: (env, projectNumber, projectReferences, projectReferenceTargets, defaultTargets, extraContent) =>
+                    Helpers.CreateProjectFile(
+                        env,
+                        projectNumber,
+                        projectReferences,
+                        projectReferenceTargets,
+                        defaultTargets: $"SomeDefaultTarget{projectNumber}",
+                        extraContent: extraContent),
                 extraContentPerProjectNumber: new Dictionary<int, string>()
                 {
                     {
@@ -2684,13 +2703,7 @@ $@"
 <ItemGroup>
     <ProjectReferenceTargets Include='SomeDefaultTarget1' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
 </ItemGroup>
-
-<Target Name='SomeDefaultTarget1' />
 "
-                    },
-                    {
-                        2,
-                        @"<Target Name='SomeDefaultTarget2' />"
                     }
                 });
 
@@ -2713,6 +2726,16 @@ $@"
                 {
                     {1, new[] {2}},
                 },
+                // Give each project an explicit default target so the helper's auto-injected 'Build' target
+                // (which is emitted first and would otherwise become the default) does not hide it.
+                createProjectFile: (env, projectNumber, projectReferences, projectReferenceTargets, defaultTargets, extraContent) =>
+                    Helpers.CreateProjectFile(
+                        env,
+                        projectNumber,
+                        projectReferences,
+                        projectReferenceTargets,
+                        defaultTargets: $"SomeDefaultTarget{projectNumber}",
+                        extraContent: extraContent),
                 extraContentPerProjectNumber: new Dictionary<int, string>()
                 {
                     {
@@ -2726,13 +2749,7 @@ $@"
 <ItemGroup>
     <ProjectReferenceTargets Include='SomeDefaultTarget1' Targets='{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}' />
 </ItemGroup>
-
-<Target Name='SomeDefaultTarget1' />
 "
-                    },
-                    {
-                        2,
-                        @"<Target Name='SomeDefaultTarget2' />"
                     }
                 });
 
@@ -2922,6 +2939,222 @@ $@"
                 InvalidProjectFileException exception = getTargetListsFunc.ShouldThrow<InvalidProjectFileException>();
                 exception.Message.ShouldContain($"The target \"{entryTarget}\" does not exist in the project.");
             }
+        }
+
+        [Fact]
+        [UseInvariantCulture]
+        public void InvalidProjectReferenceErrorIncludesReferringProject()
+        {
+            using var env = TestEnvironment.Create();
+
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var exception = Should.Throw<AggregateException>(() => new ProjectGraph(project1.Path));
+
+            exception.InnerExceptions.ShouldHaveSingleItem();
+            var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+
+            // ProjectFile on the exception should be the missing project
+            innerException.ProjectFile.ShouldContain("missing.proj");
+
+            // The message should name both the missing file and its referrer in the expected format
+            innerException.Message.ShouldContain("missing.proj");
+            innerException.Message.ShouldContain(project1.Path);
+            innerException.Message.ShouldContain("could not be loaded");
+            innerException.Message.ShouldContain("referenced by");
+        }
+
+        [Fact]
+        [UseInvariantCulture]
+        public void InvalidProjectReferenceErrorIncludesMultipleReferringProjects()
+        {
+            using var env = TestEnvironment.Create();
+
+            // Two independent projects both referencing the same missing project
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            TransientTestFile project2 = env.CreateFile("project2.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="missing.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            TransientTestFile main = env.CreateFile("main.proj", """
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="project1.proj" />
+                    <ProjectReference Include="project2.proj" />
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var exception = Should.Throw<AggregateException>(() => new ProjectGraph(main.Path));
+
+            exception.InnerExceptions.ShouldHaveSingleItem();
+            var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+
+            // ProjectFile on the exception should be the missing project
+            innerException.ProjectFile.ShouldContain("missing.proj");
+
+            // The message should name the missing file and at least one of its referrers
+            innerException.Message.ShouldContain("missing.proj");
+            innerException.Message.ShouldContain("could not be loaded");
+            innerException.Message.ShouldContain("referenced by");
+
+            // At least one of the two referring projects must be named in the message
+            bool mentionsProject1 = innerException.Message.Contains(project1.Path);
+            bool mentionsProject2 = innerException.Message.Contains(project2.Path);
+            (mentionsProject1 || mentionsProject2).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void FullGraphModeLoadsAllTargetFrameworksIgnoringSetTargetFramework()
+        {
+            using var env = TestEnvironment.Create();
+
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworks>net472;net10.0</TargetFrameworks>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            TransientTestFile project2 = env.CreateFile("project2.proj", $"""
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{project1.Path}">
+                      <SetTargetFramework>TargetFramework=net472</SetTargetFramework>
+                    </ProjectReference>
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var projectGraph = new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(project2.Path)],
+                    Mode = ProjectGraphMode.Full
+                });
+
+            var sorted = projectGraph.ProjectNodesTopologicallySorted.ToList();
+
+            // In Full mode, all target frameworks should be loaded despite SetTargetFramework constraint
+            sorted.Count.ShouldBe(4);
+
+            // Find the inner builds for net10.0 and net472
+            var net10Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
+                n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net10.0");
+            net10Build.ShouldNotBeNull("Should load inner build for net10.0");
+            net10Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+            net10Build.ProjectReferences.ShouldBeEmpty();
+
+            var net472Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
+                n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net472");
+            net472Build.ShouldNotBeNull("Should load inner build for net472");
+            net472Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+            net472Build.ProjectReferences.ShouldBeEmpty();
+
+            var outerBuild = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
+                !n.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            outerBuild.ShouldNotBeNull("Should load outer build");
+            outerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.OuterBuild);
+            outerBuild.ProjectReferences.Count.ShouldBe(2); // References to the two inner builds
+
+            var project2Node = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project2.Path);
+            project2Node.ShouldNotBeNull("Should load project2");
+            project2Node.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.NonMultitargeting);
+            project2Node.ProjectReferences.Count.ShouldBe(3); // References to outer build and two inner builds of project1
+        }
+
+        [Fact]
+        public void FullGraphModeIgnoresSetTargetFrameworkForSingleTargetProject()
+        {
+            using var env = TestEnvironment.Create();
+
+            TransientTestFile project1 = env.CreateFile("project1.proj", """
+                <Project>
+                  <PropertyGroup>
+                    <TargetFramework>net10.0</TargetFramework>
+                  </PropertyGroup>
+                </Project>
+                """);
+
+            TransientTestFile project2 = env.CreateFile("project2.proj", $"""
+                <Project>
+                  <ItemGroup>
+                    <ProjectReference Include="{project1.Path}">
+                      <SetTargetFramework>TargetFramework=net472</SetTargetFramework>
+                    </ProjectReference>
+                  </ItemGroup>
+                </Project>
+                """);
+
+            var projectGraph = new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(project2.Path)],
+                    Mode = ProjectGraphMode.Full
+                });
+
+            var sorted = projectGraph.ProjectNodesTopologicallySorted.ToList();
+            sorted.Count.ShouldBe(2);
+
+            var project1Node = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path);
+            project1Node.ShouldNotBeNull("Should load the referenced single-target project");
+            project1Node.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.NonMultitargeting);
+            project1Node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework").ShouldBeFalse();
+
+            var project2Node = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project2.Path);
+            project2Node.ShouldNotBeNull("Should load the entry project");
+            project2Node.ProjectReferences.ShouldHaveSingleItem();
+            project2Node.ProjectReferences.Single().ShouldBe(project1Node);
+        }
+
+        [Fact]
+        public void ConstructWithProjectGraphOptionsAndNullEntryPointsThrows()
+        {
+            var exception = Should.Throw<ArgumentNullException>(() => new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = null
+                }));
+
+            exception.ParamName.ShouldBe("EntryPoints");
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void ConstructWithProjectGraphOptionsAndNonPositiveDegreeOfParallelismThrows(int degreeOfParallelism)
+        {
+            var exception = Should.Throw<ArgumentOutOfRangeException>(() => new ProjectGraph(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = Enumerable.Empty<ProjectGraphEntryPoint>(),
+                    DegreeOfParallelism = degreeOfParallelism
+                }));
+
+            exception.ParamName.ShouldBe("DegreeOfParallelism");
         }
 
         public void Dispose()

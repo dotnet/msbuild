@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, in TaskHostParameters taskIdentityParameters, int scheduledNodeId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ArgumentNullException.ThrowIfNull(loggingContext);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
@@ -393,7 +393,7 @@ namespace Microsoft.Build.BackEnd
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
-            
+
             if (TaskInstance is IMultiThreadableTask multiThreadableTask)
             {
                 multiThreadableTask.TaskEnvironment = TaskEnvironment;
@@ -413,7 +413,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
         public bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameters);
+            ArgumentNullException.ThrowIfNull(parameters);
 
             bool taskInitialized = true;
 
@@ -484,7 +484,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True of the outputs were gathered successfully, false otherwise.</returns>
         public bool GatherTaskOutputs(string parameterName, ElementLocation parameterLocation, bool outputTargetIsItem, string outputTargetName)
         {
-            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Need a taskFactoryWrapper to retrieve outputs from.");
+            Assumed.NotNull(_taskFactoryWrapper, "Need a taskFactoryWrapper to retrieve outputs from.");
 
             bool gatheredGeneratedOutputsSuccessfully = true;
 
@@ -622,7 +622,7 @@ namespace Microsoft.Build.BackEnd
             _taskHost = null;
             CleanupCancellationToken();
 
-            ErrorUtilities.VerifyThrow(TaskInstance == null, "Task Instance should be null");
+            Assumed.Null(TaskInstance, "Task Instance should be null");
         }
 
         /// <summary>
@@ -790,41 +790,64 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                // Loop through all the TaskItems in our arraylist, and convert them.
-                ArrayList finalTaskInputs = new ArrayList(taskItems.Count);
+                Type elementType = parameterType.GetElementType();
 
-                if (parameterType != typeof(ITaskItem[]))
+                if (parameterType == typeof(ITaskItem[]))
                 {
-                    foreach (TaskItem item in taskItems)
+                    ITaskItem[] finalInputs = new ITaskItem[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
                     {
+                        TaskItem item = taskItems[i];
                         currentItem = item;
-                        if (parameterType == typeof(string[]))
-                        {
-                            finalTaskInputs.Add(item.ItemSpec);
-                        }
-                        else if (parameterType == typeof(bool[]))
-                        {
-                            finalTaskInputs.Add(ConversionUtilities.ConvertStringToBool(item.ItemSpec));
-                        }
-                        else
-                        {
-                            finalTaskInputs.Add(Convert.ChangeType(item.ItemSpec, parameterType.GetElementType(), CultureInfo.InvariantCulture));
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (TaskItem item in taskItems)
-                    {
+
                         // if we've been asked to remote these items then
                         // remember them so we can disconnect them from remoting later
                         RecordItemForDisconnectIfNecessary(item);
-
-                        finalTaskInputs.Add(item);
+                        finalInputs[i] = item;
                     }
-                }
 
-                return InternalSetTaskParameter(parameter, finalTaskInputs.ToArray(parameterType.GetElementType()));
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(string[]))
+                {
+                    string[] finalInputs = new string[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = currentItem.ItemSpec;
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(bool[]))
+                {
+                    bool[] finalInputs = new bool[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = ConversionUtilities.ConvertStringToBool(currentItem.ItemSpec);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else
+                {
+                    // Fallback for custom value types
+#if NET
+                    // AOT friendly
+                    Array finalTaskInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalTaskInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        finalTaskInputs.SetValue(Convert.ChangeType(item.ItemSpec, elementType, CultureInfo.InvariantCulture), i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalTaskInputs);
+                }
             }
             catch (Exception ex)
             {
@@ -964,13 +987,13 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
+                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
                     returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
@@ -1362,7 +1385,7 @@ namespace Microsoft.Build.BackEnd
             bool isRequired,
             out bool taskParameterSet)
         {
-            ErrorUtilities.VerifyThrow(parameterValue != null, "Didn't expect null parameterValue in InitializeTaskVectorParameter");
+            Assumed.NotNull(parameterValue, "Didn't expect null parameterValue in InitializeTaskVectorParameter");
 
             taskParameterSet = false;
             bool success;
@@ -1488,7 +1511,7 @@ namespace Microsoft.Build.BackEnd
                             ProjectItemInstance newItem;
 
                             TaskItem outputAsProjectItem = output as TaskItem;
-                            string parameterLocationEscaped = EscapingUtilities.EscapeWithCaching(parameterLocation.File);
+                            string parameterLocationEscaped = EscapingUtilities.Escape(parameterLocation.File, cache: true);
 
                             if (outputAsProjectItem != null)
                             {
@@ -1733,7 +1756,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>Gets a list of properties which are required.</returns>
         private IReadOnlyDictionary<string, string> GetNamesOfPropertiesWithRequiredAttribute()
         {
-            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
+            Assumed.NotNull(_taskFactoryWrapper, "Expected taskFactoryWrapper to not be null");
             IReadOnlyDictionary<string, string> requiredParameters = null;
 
             try
@@ -1811,9 +1834,7 @@ namespace Microsoft.Build.BackEnd
             string resolvedAssemblyLocation = outOfProcTaskFactory.GetAssemblyPath();
 
             // This should never happen - if the factory can create a task, it should know where the assembly is
-            ErrorUtilities.VerifyThrow(
-                !string.IsNullOrEmpty(resolvedAssemblyLocation),
-                $"IOutOfProcTaskFactory {_taskFactoryWrapper.TaskFactory.FactoryName} created a task but returned null/empty assembly path");
+            Assumed.NotNullOrEmpty(resolvedAssemblyLocation, $"IOutOfProcTaskFactory {_taskFactoryWrapper.TaskFactory.FactoryName} created a task but returned null/empty assembly path");
 
             LoadedType taskLoadedType = new LoadedType(
                 taskType,

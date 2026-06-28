@@ -49,7 +49,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(ProjectElementLink link)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(link);
+            ArgumentNullException.ThrowIfNull(link);
 
             _xmlSource = link;
         }
@@ -60,8 +60,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlElement);
-            ErrorUtilities.VerifyThrowArgumentNull(containingProject);
+            ArgumentNullException.ThrowIfNull(xmlElement);
+            ArgumentNullException.ThrowIfNull(containingProject);
 
             _xmlSource = (XmlElementWithLocation)xmlElement;
             _parent = parent;
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Construction
 
             internal set
             {
-                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+                Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
                 if (value == null)
                 {
                     // We're about to lose the parent. Hijack the field to store the owning PRE.
@@ -261,8 +261,8 @@ namespace Microsoft.Build.Construction
             // ContainingProject is set ONLY when an element is first constructed.
             internal set
             {
-                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
-                ErrorUtilities.VerifyThrowArgumentNull(value, "ContainingProject");
+                Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+                ArgumentNullException.ThrowIfNull(value, "ContainingProject");
 
                 if (_parent == null)
                 {
@@ -350,7 +350,7 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element);
+            ArgumentNullException.ThrowIfNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
@@ -506,7 +506,7 @@ namespace Microsoft.Build.Construction
             var clone = CreateNewInstance(factory);
             if (!clone.GetType().IsEquivalentTo(GetType()))
             {
-                ErrorUtilities.ThrowInternalError("{0}.Clone() returned an instance of type {1}.", GetType().Name, clone.GetType().Name);
+                InternalError.Throw($"{GetType().Name}.Clone() returned an instance of type {clone.GetType().Name}.");
             }
 
             clone.CopyFrom(this);
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Construction
             /// </summary>
             internal WrapperForProjectRootElement(ProjectRootElement containingProject)
             {
-                ErrorUtilities.VerifyThrowInternalNull(containingProject);
+                Assumed.NotNull(containingProject);
                 ContainingProject = containingProject;
             }
 
@@ -630,15 +630,11 @@ namespace Microsoft.Build.Construction
             /// Dummy required implementation
             /// </summary>
             internal override void VerifyThrowInvalidOperationAcceptableLocation(ProjectElementContainer parent, ProjectElement previousSibling, ProjectElement nextSibling)
-            {
-                ErrorUtilities.ThrowInternalErrorUnreachable();
-            }
+                => Assumed.Unreachable();
 
             /// <inheritdoc />
             protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
-            {
-                return new WrapperForProjectRootElement(ContainingProject);
-            }
+                => new WrapperForProjectRootElement(ContainingProject);
         }
     }
 }

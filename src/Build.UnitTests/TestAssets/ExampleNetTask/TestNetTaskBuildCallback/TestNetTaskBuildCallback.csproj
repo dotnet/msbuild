@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(MSBuildThisFileDirectory)', '..', '..', '..', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+    <ChildProjectPath>$([System.IO.Path]::Combine('$(MSBuildThisFileDirectory)', 'ChildProject.proj'))</ChildProjectPath>
+  </PropertyGroup>
+
+  <UsingTask
+      TaskName="Microsoft.Build.UnitTests.BackEnd.BuildProjectFileTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+      Runtime="NET"/>
+
+  <Target Name="TestTask" BeforeTargets="Build">
+    <Microsoft.Build.UnitTests.BackEnd.BuildProjectFileTask
+        ProjectFile="$(ChildProjectPath)"
+        Targets="GetOutputs">
+      <Output PropertyName="ChildBuildResult" TaskParameter="BuildSucceeded" />
+      <Output ItemName="ChildOutputItems" TaskParameter="OutputItems" />
+    </Microsoft.Build.UnitTests.BackEnd.BuildProjectFileTask>
+    <Message Text="CallbackResult: BuildProjectFile = $(ChildBuildResult)" Importance="high" />
+    <Message Text="CallbackResult: OutputItem = %(ChildOutputItems.Identity)" Importance="high" Condition="'@(ChildOutputItems)' != ''" />
+  </Target>
+
+</Project>

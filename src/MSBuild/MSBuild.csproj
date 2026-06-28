@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\DebuggingSources.proj" />
 
@@ -60,18 +60,13 @@
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\XMakeElements.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
@@ -81,6 +76,9 @@
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
     <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
     <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
+    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
+    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
+
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
@@ -102,6 +100,7 @@
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
+    <Compile Include="TaskExecutionContext.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
@@ -138,7 +137,6 @@
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
 
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
   <!-- Manually download this library for RoslynCodeTaskFactory.

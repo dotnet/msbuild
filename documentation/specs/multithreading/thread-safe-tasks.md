@@ -39,7 +39,7 @@ Similar to how MSBuild provides the abstract `Task` class with default implement
 namespace Microsoft.Build.Utilities;
 public abstract class MultiThreadableTask : Task, IMultiThreadableTask
 {
-    public TaskEnvironment TaskEnvironment{ get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 }
 ```
 

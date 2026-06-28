@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -14,7 +16,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -1449,7 +1450,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectCollectionVersionIsCorrect()
         {
-            Version expectedVersion = new Version(this.GetType().GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+            Version expectedVersion = new Version(this.GetType().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
 
             ProjectCollection.Version.Major.ShouldBe(expectedVersion.Major);
             ProjectCollection.Version.Minor.ShouldBe(expectedVersion.Minor);
@@ -1497,6 +1498,249 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectPropertyInstance property = collection.GetGlobalProperty("a");
             Assert.NotNull(property);
             Assert.Equal(ProjectCollection.Unescape(propertyValue), property.EvaluatedValue);
+        }
+
+        /// <summary>
+        /// Verifies that LoadProject(string fileName, IDictionary&lt;string, string&gt; globalProperties, string toolsVersion)
+        /// can be called concurrently and consistently returns the same loaded project for equivalent inputs.
+        /// </summary>
+        [Fact]
+        public void LoadProject_WithGlobalPropertiesAndToolsVersion_IsThreadSafeInParallel()
+        {
+            string path = null;
+
+            try
+            {
+                path = CreateProjectFile();
+
+                using var collection = new ProjectCollection();
+
+                const int concurrency = 16;
+                using var start = new ManualResetEventSlim(false);
+                var tasks = new System.Threading.Tasks.Task<Project>[concurrency];
+                var globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["p"] = "test"
+                };
+
+                for (int i = 0; i < concurrency; i++)
+                {
+                    int index = i;
+                    tasks[i] = System.Threading.Tasks.Task.Run(() =>
+                    {
+                        start.Wait();
+
+                        return collection.LoadProject(path, globals, toolsVersion: null);
+                    });
+                }
+
+                start.Set();
+                System.Threading.Tasks.Task.WaitAll(tasks);
+
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    tasks[i].Result.ShouldNotBeNull();
+                    tasks[i].Result.FullPath.ShouldBe(path);
+                }
+
+                collection.Count.ShouldBe(1);
+            }
+            finally
+            {
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Regression test for the parallel-evaluation change in ProjectCollection.LoadProject.
+        /// A host enabling parallel loading naturally builds one global-properties dictionary and
+        /// reuses that same instance across concurrent LoadProject calls for different projects.
+        /// LoadProject merges the collection's global properties into the caller-supplied dictionary;
+        /// with per-path locking, concurrent loads of distinct paths run that merge simultaneously,
+        /// mutating the shared (non-thread-safe) Dictionary at the same time. This must not corrupt
+        /// the dictionary or throw.
+        /// </summary>
+        [Fact]
+        public void LoadProject_SharedGlobalPropertiesDictionary_AcrossDistinctPaths_IsNotConcurrentlyMutated()
+        {
+            const int distinctProjects = 32;
+            const int collectionGlobalCount = 64;
+            const int outerIterations = 10;
+
+            var createdPaths = new List<string>();
+
+            try
+            {
+                for (int i = 0; i < distinctProjects; i++)
+                {
+                    createdPaths.Add(CreateProjectFile());
+                }
+
+                // Collection-level global properties that are absent from the caller's dictionary,
+                // so the merge actually writes into the shared dictionary.
+                var collectionGlobals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < collectionGlobalCount; i++)
+                {
+                    collectionGlobals["cg" + i] = "v";
+                }
+
+                var failures = new ConcurrentQueue<Exception>();
+                bool completed = true;
+
+                for (int iteration = 0; iteration < outerIterations && failures.IsEmpty && completed; iteration++)
+                {
+                    using var collection = new ProjectCollection(collectionGlobals);
+
+                    // A single mutable dictionary shared by every concurrent load.
+                    var sharedGlobals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["p"] = "test"
+                    };
+
+                    using var start = new ManualResetEventSlim(false);
+                    var tasks = new System.Threading.Tasks.Task[distinctProjects];
+
+                    for (int i = 0; i < distinctProjects; i++)
+                    {
+                        int index = i;
+                        tasks[i] = System.Threading.Tasks.Task.Run(() =>
+                        {
+                            start.Wait();
+
+                            try
+                            {
+                                collection.LoadProject(createdPaths[index], sharedGlobals, toolsVersion: null);
+                            }
+                            catch (Exception ex)
+                            {
+                                failures.Enqueue(ex);
+                            }
+                        });
+                    }
+
+                    start.Set();
+
+                    // Bound the wait: concurrent Dictionary writes can also corrupt internal state
+                    // into an infinite loop rather than throwing, which would hang here.
+                    completed = System.Threading.Tasks.Task.WaitAll(tasks, TimeSpan.FromSeconds(60));
+                }
+
+                completed.ShouldBeTrue("Parallel LoadProject calls did not complete in time; the shared global-properties dictionary was likely corrupted by concurrent mutation.");
+                failures.ShouldBeEmpty();
+            }
+            finally
+            {
+                foreach (string createdPath in createdPaths)
+                {
+                    File.Delete(createdPath);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Guards the per-path locking behavior introduced for parallel evaluation: concurrent
+        /// LoadProject calls for the same path but with different global properties must each
+        /// produce their own project without the "equivalent project already present" race that
+        /// the per-path lock is meant to prevent.
+        /// </summary>
+        [Fact]
+        public void LoadProject_SamePathDifferentGlobalProperties_InParallel_CreatesDistinctProjects()
+        {
+            string path = null;
+
+            try
+            {
+                path = CreateProjectFile();
+
+                using var collection = new ProjectCollection();
+
+                const int concurrency = 16;
+                using var start = new ManualResetEventSlim(false);
+                var tasks = new System.Threading.Tasks.Task<Project>[concurrency];
+
+                for (int i = 0; i < concurrency; i++)
+                {
+                    int index = i;
+                    tasks[i] = System.Threading.Tasks.Task.Run(() =>
+                    {
+                        start.Wait();
+
+                        var globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            ["p"] = index.ToString()
+                        };
+
+                        return collection.LoadProject(path, globals, toolsVersion: null);
+                    });
+                }
+
+                start.Set();
+                System.Threading.Tasks.Task.WaitAll(tasks);
+
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    tasks[i].Result.ShouldNotBeNull();
+                    tasks[i].Result.FullPath.ShouldBe(path);
+                }
+
+                collection.Count.ShouldBe(concurrency);
+            }
+            finally
+            {
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Global property names are case-insensitive MSBuild names. When LoadProject merges the collection's
+        /// global properties into a caller-supplied dictionary, that merge must be case-insensitive regardless of
+        /// the comparer the caller's dictionary uses. Otherwise a caller property that differs only in case from a
+        /// collection property is not recognized as the same property: the collection value is wrongly added as a
+        /// second entry, the "project global properties win" rule is violated, and the duplicate collapses
+        /// inconsistently downstream.
+        /// </summary>
+        [Fact]
+        public void LoadProject_CallerGlobalPropertyWithDifferentCase_WinsOverCollectionPropertyCaseInsensitively()
+        {
+            string path = null;
+
+            try
+            {
+                path = CreateProjectFile();
+
+                var collectionGlobals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Configuration"] = "Release"
+                };
+                using var collection = new ProjectCollection(collectionGlobals);
+
+                // Caller dictionary uses the default (ordinal, case-sensitive) comparer and specifies the same
+                // MSBuild property with different casing than the collection.
+                var callerGlobals = new Dictionary<string, string>
+                {
+                    ["configuration"] = "Debug"
+                };
+
+                Project project = collection.LoadProject(path, callerGlobals, toolsVersion: null);
+
+                // The caller's value must win, and there must be exactly one Configuration property (no case-variant duplicate).
+                project.GlobalProperties.Count.ShouldBe(1);
+                project.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project.GlobalProperties["configuration"].ShouldBe("Debug");
+            }
+            finally
+            {
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
+            }
         }
     }
 }

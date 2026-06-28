@@ -329,16 +329,24 @@ namespace Microsoft.Build.Eventing
             WriteEvent(36);
         }
 
-        [Event(37, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void RequestThreadProcStart()
+        /// <param name="projectPath">Full path to the project being built on the request thread.</param>
+        /// <param name="configurationId">Configuration id for the request.</param>
+        /// <param name="globalRequestId">Global request id assigned by the build manager.</param>
+        /// <param name="nodeRequestId">Node-local request id assigned by the scheduling node.</param>
+        [Event(37, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void RequestThreadProcStart(string projectPath, int configurationId, int globalRequestId, int nodeRequestId)
         {
-            WriteEvent(37);
+            WriteEvent(37, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId);
         }
 
-        [Event(38, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void RequestThreadProcStop()
+        /// <param name="projectPath">Full path to the project being built on the request thread.</param>
+        /// <param name="configurationId">Configuration id for the request.</param>
+        /// <param name="globalRequestId">Global request id assigned by the build manager.</param>
+        /// <param name="nodeRequestId">Node-local request id assigned by the scheduling node.</param>
+        [Event(38, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void RequestThreadProcStop(string projectPath, int configurationId, int globalRequestId, int nodeRequestId)
         {
-            WriteEvent(38);
+            WriteEvent(38, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId);
         }
 
         /// <param name="fileLocation">Project file's location.</param>
@@ -708,6 +716,118 @@ namespace Microsoft.Build.Eventing
         public void FallbackAssemblyLoadStop(string assemblyName)
         {
             WriteEvent(98);
+        }
+
+        [Event(99, Keywords = Keywords.All)]
+        public void NodeConnectStart(int nodeId)
+        {
+            WriteEvent(99, nodeId);
+        }
+
+        [Event(100, Keywords = Keywords.All)]
+        public void NodeConnectStop(int nodeId, int processId, bool isReused)
+        {
+            WriteEvent(100, nodeId, processId, isReused);
+        }
+
+        [Event(101, Keywords = Keywords.All)]
+        public void NodeReuseScanStart()
+        {
+            WriteEvent(101);
+        }
+
+        [Event(102, Keywords = Keywords.All)]
+        public void NodeReuseScanStop(int candidateCount)
+        {
+            WriteEvent(102, candidateCount);
+        }
+
+        [Event(103, Keywords = Keywords.All)]
+        public void NodeLaunchStart(int nodeId)
+        {
+            WriteEvent(103, nodeId);
+        }
+
+        [Event(104, Keywords = Keywords.All)]
+        public void NodeLaunchStop(int nodeId, int processId)
+        {
+            WriteEvent(104, nodeId, processId);
+        }
+
+        [Event(105, Keywords = Keywords.All)]
+        public void NodePipeConnectStart(int nodeId, int processId)
+        {
+            WriteEvent(105, nodeId, processId);
+        }
+
+        [Event(106, Keywords = Keywords.All)]
+        public void NodePipeConnectStop(int nodeId, int processId, bool succeeded)
+        {
+            WriteEvent(106, nodeId, processId, succeeded);
+        }
+        #endregion
+
+        #region TaskHost Callback Events
+
+        /// <summary>
+        /// Raised when a TaskHost begins a BuildProjectFile callback.
+        /// </summary>
+        [Event(107, Keywords = Keywords.All)]
+        public void TaskHostBuildProjectFileStart(string projectFiles, string targetNames)
+        {
+            WriteEvent(107, projectFiles, targetNames);
+        }
+
+        /// <summary>
+        /// Raised when a TaskHost BuildProjectFile callback completes.
+        /// </summary>
+        [Event(108, Keywords = Keywords.All)]
+        public void TaskHostBuildProjectFileStop(string projectFiles, bool success)
+        {
+            WriteEvent(108, projectFiles, success);
+        }
+        #endregion
+
+        #region TaskHost events
+
+        /// <summary>
+        /// Signals that a task is being dispatched to the task host.
+        /// Pair with <see cref="TaskHostDispatchStop"/> to compute total task host wall-clock time.
+        /// </summary>
+        [Event(109, Keywords = Keywords.All)]
+        public void TaskHostDispatchStart(string taskName)
+        {
+            WriteEvent(109, taskName);
+        }
+
+        /// <summary>
+        /// Signals that a task dispatched to the task host has completed and the result has been received.
+        /// Measures the full round-trip: serialization, IPC, remote execution, and result retrieval.
+        /// </summary>
+        [Event(110, Keywords = Keywords.All)]
+        public void TaskHostDispatchStop(string taskName, bool succeeded)
+        {
+            WriteEvent(110, taskName, succeeded);
+        }
+
+        /// <summary>
+        /// Signals that the actual task.Execute() call has started inside the task host process.
+        /// The duration between this and <see cref="TaskExecuteInHostStop"/> is the task execution work.
+        /// </summary>
+        [Event(111, Keywords = Keywords.All)]
+        public void TaskExecuteInHostStart(string taskName)
+        {
+            WriteEvent(111, taskName);
+        }
+
+
+        /// <summary>
+        /// Signals that the actual task.Execute() call has completed inside the task host process.
+        /// </summary>
+        [Event(112, Keywords = Keywords.All)]
+        public void TaskExecuteInHostStop(string taskName, bool succeeded)
+        {
+            WriteEvent(112, taskName, succeeded);
         }
         #endregion
     }

@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -13,6 +13,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32.Foundation;
+#endif
 
 #nullable disable
 
@@ -24,8 +27,6 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class Copy : TaskExtension, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
-        internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
-        internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
 
         // Default parallelism determined empirically - times below are in seconds spent in the Copy task building this repo
         // with "build -skiptests -rebuild -configuration Release /ds" (with hack to build.ps1 to disable creating selfhost
@@ -110,17 +111,16 @@ namespace Microsoft.Build.Tasks
         // Bool is just a placeholder, we're mainly interested in a threadsafe key set.
         private readonly ConcurrentDictionary<string, bool> _directoriesKnownToExist = new ConcurrentDictionary<string, bool>(DefaultCopyParallelism, DefaultCopyParallelism, FileUtilities.PathComparer);
 
+        internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
+        internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
+
         /// <summary>
         /// Force the copy to retry even when it hits ERROR_ACCESS_DENIED -- normally we wouldn't retry in this case since
         /// normally there's no point, but occasionally things get into a bad state temporarily, and retrying does actually
         /// succeed.  So keeping around a secret environment variable to allow forcing that behavior if necessary.
+        /// Initialized from TaskEnvironment in Execute() for MT-safety.
         /// </summary>
-        private static bool s_alwaysRetryCopy = Environment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
-
-        /// <summary>
-        /// Global flag to force on UseSymboliclinksIfPossible since Microsoft.Common.targets doesn't expose the functionality.
-        /// </summary>
-        private static readonly bool s_forceSymlinks = Environment.GetEnvironmentVariable("MSBuildUseSymboliclinksIfPossible") != null;
+        private bool _alwaysRetryCopy;
 
         private static readonly bool s_copyInParallel = GetParallelismFromEnvironment();
 
@@ -156,8 +156,20 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets a value that indicates whether to create symbolic links for the copied files
         /// rather than copy the files, if it's possible to do so.
+        /// The MSBuildUseSymboliclinksIfPossible env var sets the default; explicit task parameter overrides it.
         /// </summary>
-        public bool UseSymboliclinksIfPossible { get; set; } = s_forceSymlinks;
+        public bool UseSymboliclinksIfPossible
+        {
+            get => _useSymboliclinksIfPossible ?? false;
+            set
+            {
+                _useSymboliclinksIfPossible = value;
+                _useSymboliclinksIfPossibleExplicitlySet = true;
+            }
+        }
+
+        private bool? _useSymboliclinksIfPossible;
+        private bool _useSymboliclinksIfPossibleExplicitlySet;
 
         /// <summary>
         /// Fail if unable to create a symbolic or hard link instead of falling back to copy
@@ -187,7 +199,7 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         #endregion
 
@@ -230,24 +242,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// INTERNAL FOR UNIT-TESTING ONLY
-        ///
-        /// We've got several environment variables that we read into statics since we don't expect them to ever
-        /// reasonably change, but we need some way of refreshing their values so that we can modify them for
-        /// unit testing purposes.
-        /// </summary>
-        internal static void RefreshInternalEnvironmentValues()
-        {
-            s_alwaysRetryCopy = Environment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
-        }
-
-        /// <summary>
         /// If MSBUILDALWAYSRETRY is set, also log useful diagnostic information -- as
         /// a warning, so it's easily visible.
         /// </summary>
         private void LogAlwaysRetryDiagnosticFromResources(string messageResourceName, params object[] messageArgs)
         {
-            if (s_alwaysRetryCopy)
+            if (_alwaysRetryCopy)
             {
                 Log.LogWarningWithCodeFromResources(messageResourceName, messageArgs);
             }
@@ -454,6 +454,15 @@ namespace Microsoft.Build.Tasks
             if (TaskEnvironment.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
             {
                 OverwriteReadOnlyFiles = true;
+            }
+
+            _alwaysRetryCopy = TaskEnvironment.GetEnvironmentVariable(AlwaysRetryEnvVar) != null;
+
+            // Env var sets the default for UseSymboliclinksIfPossible, but explicit task parameter wins.
+            if (!_useSymboliclinksIfPossibleExplicitlySet
+                && TaskEnvironment.GetEnvironmentVariable("MSBuildUseSymboliclinksIfPossible") != null)
+            {
+                _useSymboliclinksIfPossible = true;
             }
 
             // Track successfully copied subset.
@@ -846,7 +855,7 @@ namespace Microsoft.Build.Tasks
 
                     foreach (ITaskItem sourceFolder in SourceFolders)
                     {
-                        ErrorUtilities.VerifyThrowArgumentLength(sourceFolder.ItemSpec);
+                        ArgumentException.ThrowIfNullOrEmpty(sourceFolder.ItemSpec);
                         AbsolutePath src = FileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(sourceFolder.ItemSpec));
                         string srcName = Path.GetFileName(src);
 
@@ -1024,7 +1033,9 @@ namespace Microsoft.Build.Tasks
                             int code = Marshal.GetHRForException(e);
 
                             LogAlwaysRetryDiagnosticFromResources("Copy.IOException", e.ToString(), sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue, code);
-                            if (code == NativeMethods.ERROR_ACCESS_DENIED)
+#if FEATURE_WINDOWSINTEROP
+                            // HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_ACCESS_DENIED)
+                            if (code == (int)(HRESULT)WIN32_ERROR.ERROR_ACCESS_DENIED)
                             {
                                 // ERROR_ACCESS_DENIED can either mean there's an ACL preventing us, or the file has the readonly bit set.
                                 // In either case, that's likely not a race, and retrying won't help.
@@ -1033,7 +1044,10 @@ namespace Microsoft.Build.Tasks
                                 // to a failure to reset the readonly bit properly, in which case retrying will succeed.  This seems to be
                                 // a pretty edge scenario, but since some of our internal builds appear to be hitting it, provide a secret
                                 // environment variable to allow overriding the default behavior and forcing retries in this circumstance as well.
-                                if (!s_alwaysRetryCopy)
+                                // On at least some non-Windows platforms (e.g. macOS https://github.com/dotnet/msbuild/issues/13463), access denied can also indicate a
+                                // transient lock conflict (e.g. EACCES from a concurrent clonefile/flock), so we only skip retries for
+                                // access denied on Windows.
+                                if (!_alwaysRetryCopy && (NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_7)))
                                 {
                                     throw;
                                 }
@@ -1042,11 +1056,13 @@ namespace Microsoft.Build.Tasks
                                     LogAlwaysRetryDiagnosticFromResources("Copy.RetryingOnAccessDenied");
                                 }
                             }
-                            else if (code == NativeMethods.ERROR_INVALID_FILENAME)
+                            // HRESULT_FROM_WIN32(WIN32_ERROR.ERROR_INVALID_NAME) -- illegal characters in name
+                            else if (code == (int)(HRESULT)WIN32_ERROR.ERROR_INVALID_NAME)
                             {
                                 // Invalid characters used in file name; no point retrying.
                                 throw;
                             }
+#endif
 
                             if (e is UnauthorizedAccessException)
                             {

@@ -72,6 +72,11 @@
         <target state="translated">Não foi possível ignorar a tarefa porque ela não está atualizada.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">EOF do pipe não recebido em {0} segundos. Um processo neto ainda pode estar mantendo o pipe aberto. A saída já entregue foi registrada.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: "{0}" foi encerrado com o código {1}.</target>

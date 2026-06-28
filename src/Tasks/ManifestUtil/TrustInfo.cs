@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -489,10 +489,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private void ReadTrustInfo(string xml)
         {
-            _inputTrustInfoDocument = new XmlDocument();
-            // CA3057: DoNotUseLoadXml. Suppressed since the suggested fix is to use XmlReader.
-            // XmlReader.Create(string) requires an URI. Whereas the input parameter 'xml' is file content and not a path.
-            _inputTrustInfoDocument.LoadXml(xml);
+            _inputTrustInfoDocument = new XmlDocument { XmlResolver = null };
+            using (var sr = new StringReader(xml))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null }))
+            {
+                _inputTrustInfoDocument.Load(reader);
+            }
             XmlElement psElement = GetInputPermissionSetElement();
             XmlAttribute unrestrictedAttribute = (XmlAttribute)psElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
 #if RUNTIME_TYPE_NETCORE
@@ -528,6 +530,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "ToString is a debugging convenience that serializes the trust info through XslCompiledTransform; the ClickOnce trust-info path is inherently incompatible with Native AOT.")]
         public override string ToString()
         {
             var m = new MemoryStream();
@@ -542,6 +546,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Writes the application trust to an XML file.
         /// </summary>
         /// <param name="path">The name of the output file.</param>
+        [RequiresDynamicCode("Writes trust info through XslCompiledTransform, which generates IL at runtime and is not supported with Native AOT.")]
         public void Write(string path)
         {
             using (Stream s = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -555,6 +560,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Writes the application trust to an XML file.
         /// </summary>
         /// <param name="output"></param>
+        [RequiresDynamicCode("Writes trust info through XslCompiledTransform, which generates IL at runtime and is not supported with Native AOT.")]
         public void Write(Stream output)
         {
             var outputDocument = new XmlDocument();

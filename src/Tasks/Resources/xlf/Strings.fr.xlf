@@ -490,8 +490,8 @@
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
-        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="translated">MSB3071: Toutes les lettres de lecteur de A: à Z: sont actuellement utilisées. Le répertoire de travail "{0}" étant un chemin UNC, la tâche "Exec" nécessite une lettre de lecteur disponible à laquelle le chemin UNC sera mappé. Déconnectez-vous d'une ou de plusieurs ressources partagées pour libérer des lettres de lecteur ou spécifiez un répertoire de travail local avant de réexécuter cette commande.</target>
+        <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
+        <target state="translated">MSB3071: Toutes les lettres de lecteur de A: à Z: sont actuellement utilisées. Étant donné que le répertoire de travail « {0} » (résolu en chemin UNC « {1} ») nécessite un mappage UNC, la tâche « Exec » requiert une lettre de lecteur libre pour y mapper le chemin UNC. Déconnectez-vous d'une ou de plusieurs ressources partagées pour libérer des lettres de lecteur ou spécifiez un répertoire de travail local avant de réexécuter cette commande.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -564,6 +564,11 @@
         <target state="translated">MSB3541: {0} comporte la valeur non valide "{1}". {2}</target>
         <note>{StrBegin="MSB3541: "}</note>
       </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="translated">MSB4311: la valeur InputUrl « {0} » n’est pas un chemin valide sous Windows, car elle est composée uniquement de caractères d’espacement.</target>
+        <note>{StrBegin="MSB4311: "}</note>
+      </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
         <target state="translated">MSB3102: Impossible de supprimer le fichier d'état "{0}". {1}</target>
@@ -617,6 +622,11 @@
       <trans-unit id="General.ExpectedFileMissing">
         <source>Expected file "{0}" does not exist.</source>
         <target state="translated">Le fichier attendu "{0}" n'existe pas.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.FailedToCanonicalizePath">
+        <source>Could not normalize path "{0}" by resolving "." and ".." segments: {1}. The path will be used as-is.</source>
+        <target state="translated">Nous n’avons pas pu normaliser le chemin d’accès « {0} » en résolvant les segments « . » et « .. » : {1}. Le chemin d’accès sera utilisé tel quel.</target>
         <note />
       </trans-unit>
       <trans-unit id="General.FrameworksFileNotFound">
@@ -1215,8 +1225,8 @@
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
-        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
-        <target state="translated">MSB3821: Impossible de traiter le fichier {0} car il se trouve dans la zone Internet ou Restreinte ou il contient Mark of the Web. Pour traiter ces fichiers, supprimez Mark of the Web.</target>
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
+        <target state="new">MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
@@ -1982,6 +1992,11 @@
         <source>MSB3249: Application Configuration file "{0}" is invalid. {1}</source>
         <target state="translated">MSB3249: Le fichier de configuration de l'application "{0}" n'est pas valide. {1}</target>
         <note>{StrBegin="MSB3249: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AppConfigFilePathEmpty">
+        <source>Application Configuration file path cannot be empty.</source>
+        <target state="translated">Le chemin du fichier de configuration de l’application ne peut pas être vide.</target>
+        <note>This message can be used as the {1} in MSB3249</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
         <source>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</source>

@@ -20,7 +20,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 
 using Xunit;
-using Xunit.Abstractions;
 using Microsoft.Build.UnitTests.Shared;
 
 #nullable disable
@@ -108,8 +107,6 @@ namespace Microsoft.Build.UnitTests
 
             Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, null);
             Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, null);
-
-            Copy.RefreshInternalEnvironmentValues();
         }
 
         /// <summary>
@@ -119,8 +116,6 @@ namespace Microsoft.Build.UnitTests
         {
             Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, _alwaysOverwriteReadOnlyFiles);
             Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, _alwaysRetry);
-
-            Copy.RefreshInternalEnvironmentValues();
         }
 
         [Fact]
@@ -705,8 +700,6 @@ namespace Microsoft.Build.UnitTests
         /// Unless ignore readonly attributes is set, we should not copy over readonly files.
         /// </summary>
         [Theory]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         [MemberData(nameof(GetHardLinksSymLinks))]
         public void DoNotNormallyCopyOverReadOnlyFile(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
@@ -753,7 +746,18 @@ namespace Microsoft.Build.UnitTests
                 string destinationContent = File.ReadAllText(destination);
                 Assert.Equal("This is a destination file.", destinationContent);
 
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // did not do retries as it was r/o
+                // On Windows, ERROR_ACCESS_DENIED is not retried (it's a real ACL or r/o bit issue).
+                // On non-Windows with Wave18_7 enabled (default), access denied can be a transient lock
+                // (e.g. macOS CoW filesystem), so we retry; retries will ultimately fail for a genuinely read-only file.
+                if (NativeMethodsShared.IsWindows)
+                {
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026");
+                }
+                else
+                {
+                    // non-Windows: retries are expected due to possible transient EACCES
+                    ((MockEngine)t.BuildEngine).AssertLogContains("MSB3026");
+                }
             }
             finally
             {
@@ -761,6 +765,62 @@ namespace Microsoft.Build.UnitTests
                 File.SetAttributes(destination, FileAttributes.Normal);
                 File.Delete(source);
                 File.Delete(destination);
+            }
+        }
+
+        /// <summary>
+        /// When Wave18_7 is disabled, non-Windows should NOT retry on ERROR_ACCESS_DENIED (old behavior preserved via opt-out).
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyOverReadOnlyFileWhenWave18_7Disabled(bool isUseHardLinks, bool isUseSymbolicLinks)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+
+            // TODO: Remove test when Wave18_7 rotates out
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_7.ToString());
+
+            TransientTestFile source = env.CreateFile("source.tmp", "This is a source file.");
+            TransientTestFile destination = env.CreateFile("destination.tmp", "This is a destination file.");
+
+            File.SetAttributes(destination.Path, FileAttributes.ReadOnly);
+            try
+            {
+                ITaskItem sourceItem = new TaskItem(source.Path);
+                ITaskItem destinationItem = new TaskItem(destination.Path);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                var engine = new MockEngine(_testOutputHelper);
+                var t = new Copy
+                {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    // OverwriteReadOnlyFiles defaults to false
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
+                };
+
+                // Should fail: target is readonly
+                t.Execute().ShouldBeFalse();
+
+                // Expect for there to have been no copies.
+                t.CopiedFiles.ShouldBeEmpty();
+
+                File.ReadAllText(destination.Path).ShouldBe("This is a destination file.");
+
+                // With Wave18_7 disabled, ERROR_ACCESS_DENIED should not be retried on any platform (old behavior).
+                engine.AssertLogDoesntContain("MSB3026");
+            }
+            finally
+            {
+                File.SetAttributes(destination.Path, FileAttributes.Normal);
+                ChangeWaves.ResetStateForTests();
             }
         }
 
@@ -848,7 +908,6 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, "1   ");
-                Copy.RefreshInternalEnvironmentValues();
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                 {
@@ -896,7 +955,6 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, oldAlwaysRetryValue);
-                Copy.RefreshInternalEnvironmentValues();
 
                 File.SetAttributes(destination, FileAttributes.Normal);
 

@@ -17,8 +17,13 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
+using Windows.Win32.System.Console;
+#endif
 
 #nullable disable
 
@@ -1220,15 +1225,23 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DisplayEnvironmentInDetailed()
         {
-            SimulatedConsole sc = new SimulatedConsole();
+            var logAllOriginal = Traits.LogAllEnvironmentVariables;
+            try
+            {
+                SimulatedConsole sc = new SimulatedConsole();
 
-            ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
-            EventSourceSink es = new EventSourceSink();
-            cl2.Initialize(es);
-            cl2.Parameters = "ShowEnvironment";
-            cl2.ParseParameters();
+                ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
+                EventSourceSink es = new EventSourceSink();
+                cl2.Initialize(es);
+                cl2.Parameters = "ShowEnvironment";
+                cl2.ParseParameters();
 
-            WriteEnvironment(cl2, sc, true);
+                WriteEnvironment(cl2, sc, true);
+            }
+            finally
+            {
+                Traits.LogAllEnvironmentVariables = logAllOriginal;
+            }
         }
 
         /// <summary>
@@ -1264,15 +1277,23 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DisplayEnvironmentInMinimal()
         {
-            SimulatedConsole sc = new SimulatedConsole();
-           
-            ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
-            EventSourceSink es = new EventSourceSink();
-            cl2.Initialize(es);
-            cl2.Parameters = "ShowEnvironment";
-            cl2.ParseParameters();
+            var logAllOriginal = Traits.LogAllEnvironmentVariables;
+            try
+            {
+                SimulatedConsole sc = new SimulatedConsole();
 
-            WriteEnvironment(cl2, sc, true);
+                ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
+                EventSourceSink es = new EventSourceSink();
+                cl2.Initialize(es);
+                cl2.Parameters = "ShowEnvironment";
+                cl2.ParseParameters();
+
+                WriteEnvironment(cl2, sc, true);
+            }
+            finally
+            {
+                Traits.LogAllEnvironmentVariables = logAllOriginal;
+            }
         }
 
         /// <summary>
@@ -1941,21 +1962,97 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// <summary>
+        /// When the loggers print their output paths feature wave is enabled (default),
+        /// the ParallelConsoleLogger end-of-build summary should list each registered logger
+        /// that wrote to a file along with its output path(s).
+        /// </summary>
+        [Fact]
+        public void LogFileOutputPaths_PrintedInSummary_WhenWaveEnabled()
+        {
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+
+                SimulatedConsole sc = new SimulatedConsole();
+                ParallelConsoleLogger cl = new ParallelConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
+                EventSourceSink es = new EventSourceSink();
+                cl.Initialize(es);
+
+                BuildStartedEventArgs bsea = new BuildStartedEventArgs("bs", null);
+                cl.BuildStartedHandler(null, bsea);
+
+                LoggersRegisteredEventArgs lrea = new LoggersRegisteredEventArgs(new List<RegisteredLoggerInfo>
+                {
+                    new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }),
+                });
+                cl.StatusEventHandler(null, lrea);
+
+                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+                cl.BuildFinishedHandler(null, bfea);
+
+                sc.ToString().ShouldContain("FileLogger");
+                sc.ToString().ShouldContain(@"C:\logs\build.log");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        /// <summary>
+        /// When the loggers print their output paths feature wave is disabled
+        /// via MSBUILDDISABLEFEATURESFROMVERSION, the ParallelConsoleLogger summary
+        /// must preserve the legacy behavior and NOT print logger output paths.
+        /// </summary>
+        [Fact]
+        public void LogFileOutputPaths_NotPrintedInSummary_WhenWaveDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+
+                SimulatedConsole sc = new SimulatedConsole();
+                ParallelConsoleLogger cl = new ParallelConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
+                EventSourceSink es = new EventSourceSink();
+                cl.Initialize(es);
+
+                BuildStartedEventArgs bsea = new BuildStartedEventArgs("bs", null);
+                cl.BuildStartedHandler(null, bsea);
+
+                LoggersRegisteredEventArgs lrea = new LoggersRegisteredEventArgs(new List<RegisteredLoggerInfo>
+                {
+                    new RegisteredLoggerInfo("FileLogger", new[] { @"C:\logs\build.log" }),
+                });
+                cl.StatusEventHandler(null, lrea);
+
+                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+                cl.BuildFinishedHandler(null, bfea);
+
+                sc.ToString().ShouldNotContain(@"C:\logs\build.log");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        /// <summary>
         /// Check to see what kind of device we are outputting the log to, is it a character device, a file, or something else
         /// this can be used by loggers to modify their outputs based on the device they are writing to
         /// </summary>
-        [SupportedOSPlatform("windows")]
+        [SupportedOSPlatform("windows6.1")]
         internal bool IsRunningWithCharacterFileType()
         {
             // Get the std out handle
-            IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
+            HANDLE stdHandle = PInvoke.GetStdHandle(STD_HANDLE.STD_OUTPUT_HANDLE);
 
-            if (stdHandle != Microsoft.Build.BackEnd.NativeMethods.InvalidHandle)
+            if (stdHandle != HANDLE.INVALID_HANDLE_VALUE)
             {
-                uint fileType = NativeMethodsShared.GetFileType(stdHandle);
-
                 // The std out is a char type(LPT or Console)
-                return fileType == NativeMethodsShared.FILE_TYPE_CHAR;
+                return PInvoke.GetFileType(stdHandle) == FILE_TYPE.FILE_TYPE_CHAR;
             }
             else
             {

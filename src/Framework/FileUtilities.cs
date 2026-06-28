@@ -600,8 +600,8 @@ namespace Microsoft.Build.Framework
 
         internal static string TruncatePathToTrailingSegments(string path, int trailingSegmentsToKeep)
         {
-            FrameworkErrorUtilities.VerifyThrowInternalLength(path, nameof(path));
-            FrameworkErrorUtilities.VerifyThrow(trailingSegmentsToKeep >= 0, "trailing segments must be positive");
+            Assumed.NotNullOrEmpty(path);
+            Assumed.PositiveOrZero(trailingSegmentsToKeep, "trailing segments must be positive");
 
             var segments = path.Split(Slashes, StringSplitOptions.RemoveEmptyEntries);
 
@@ -682,43 +682,65 @@ namespace Microsoft.Build.Framework
 
         private static string GetFullPath(string path)
         {
-#if FEATURE_MSIOREDIST
-            if (ShouldUseRedistPathFallback(path))
+#if FEATURE_LEGACY_GETFULLPATH
+            if (NativeMethods.IsWindows)
             {
-                string redistResult = NewPath.GetFullPath(path);
+                string uncheckedFullPath = NativeMethods.GetFullPath(path);
 
-                // Some paths (for example newline- or whitespace-padded paths) are accepted by the redist implementation
-                // but are rejected by the legacy .NET Framework path handling. Preserve MSBuild's existing behavior by
-                // only using the redist result when it is not one of the invalid UNC roots that existing tests expect to fail.
-                if (redistResult.StartsWith(@"\\", StringComparison.Ordinal) &&
-                    (redistResult is @"\\" or @"\\\\" or @"\\localhost" or @"\\XXX\"))
+                if (IsPathTooLong(uncheckedFullPath))
                 {
-                    throw new ArgumentException("Illegal characters in path.");
+                    throw new PathTooLongException(SR.FormatPathTooLong(path, NativeMethods.MaxPath));
                 }
 
-                return redistResult;
-            }
+                // We really don't care about extensions here, but Path.HasExtension provides a great way to
+                // invoke the CLR's invalid path checks (these are independent of path length)
+                Path.HasExtension(uncheckedFullPath);
 
-            return Path.GetFullPath(path);
-#else
-            return Path.GetFullPath(path);
+                // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
+                // and security checks for strings like \\?\GlobalRoot
+                return IsUNCPath(uncheckedFullPath) ? Path.GetFullPath(uncheckedFullPath) : uncheckedFullPath;
+            }
 #endif
+
+            return Path.GetFullPath(path);
         }
 
-        private static bool ShouldUseRedistPathFallback(string path)
+#if FEATURE_LEGACY_GETFULLPATH
+        private static bool IsUNCPath(string path)
         {
-            if (string.IsNullOrEmpty(path))
+            if (!NativeMethods.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
             {
                 return false;
             }
-
-            if (path.IndexOfAny(InvalidPathChars) >= 0)
+            bool isUNC = true;
+            for (int i = 2; i < path.Length - 1; i++)
             {
-                return false;
+                if (path[i] == '\\')
+                {
+                    isUNC = false;
+                    break;
+                }
             }
 
-            return path[0] is '\r' or '\n' or ' ' || path[^1] is '\r' or '\n' or ' ';
+            /*
+              From Path.cs in the CLR
+
+              Throw an ArgumentException for paths like \\, \\server, \\server\
+              This check can only be properly done after normalizing, so
+              \\foo\.. will be properly rejected.  Also, reject \\?\GLOBALROOT\
+              (an internal kernel path) because it provides aliases for drives.
+
+              throw new ArgumentException(Environment.GetResourceString("Arg_PathIllegalUNC"));
+
+               // Check for \\?\Globalroot, an internal mechanism to the kernel
+               // that provides aliases for drives and other undocumented stuff.
+               // The kernel team won't even describe the full set of what
+               // is available here - we don't want managed apps mucking
+               // with this for security reasons.
+            */
+            return isUNC || path.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1;
         }
+#endif // FEATURE_LEGACY_GETFULLPATH
 
         /// <summary>
         /// Normalizes all path separators (both forward and back slashes) to forward slashes.
@@ -852,6 +874,13 @@ namespace Microsoft.Build.Framework
             if (NativeMethods.IsWindows)
             {
                 return false;
+            }
+
+            // In MT mode the process CWD should not be used when resolving the first relative path segment. Use the
+            // thread-local working directory so the directory existence heuristic runs against the correct project directory.
+            if (string.IsNullOrEmpty(baseDirectory))
+            {
+                baseDirectory = CurrentThreadWorkingDirectory ?? "";
             }
 
             // The first slash will either be at the beginning of the string or after the first directory name
@@ -1047,34 +1076,6 @@ namespace Microsoft.Build.Framework
 
         internal static bool PathIsInvalid(string path)
         {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> b7fc9000d69f5d26df73251ffb134ae15772019e
-            if (path == null)
-            {
-                return true;
-            }
-
-            // Leading or trailing whitespace can cause NormalizePath to produce wrong results
-            // (e.g. Microsoft.IO.Path.GetFullPath may trim), so treat as invalid. See issue #4593.
-            if (path != path.Trim())
-            {
-                return true;
-            }
-
-<<<<<<< HEAD
->>>>>>> 73a107b3d (Address PR 13428 review feedback)
-=======
-            // Paths that exceed MAX_PATH (260) will cause GetFullPath to throw PathTooLongException on
-            // legacy Windows. Treat as invalid so callers skip NormalizePath and handle gracefully (e.g. RAR Regress314573).
-            if (path.Length >= NativeMethods.MAX_PATH)
-            {
-                return true;
-            }
-
->>>>>>> b7fc9000d69f5d26df73251ffb134ae15772019e
             // Path.GetFileName does not react well to malformed filenames.
             // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
             // It also throws exceptions on illegal path characters
@@ -1339,7 +1340,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns true if the specified filename is a metaproject file (.metaproj), otherwise false.
         /// </summary>
-        internal static bool IsMetaprojectFilename(string filename)
+        internal static bool IsMetaprojectFilename(string? filename)
         {
             return HasExtension(filename, ".metaproj");
         }
@@ -1349,14 +1350,14 @@ namespace Microsoft.Build.Framework
             return HasExtension(filename, ".binlog");
         }
 
-        private static bool HasExtension(string filename, string extension)
+        private static bool HasExtension(string? filename, string extension)
         {
             if (String.IsNullOrEmpty(filename))
             {
                 return false;
             }
 
-            return filename.EndsWith(extension, PathComparison);
+            return filename!.EndsWith(extension, PathComparison);
         }
 
         /// <summary>
@@ -1384,7 +1385,7 @@ namespace Microsoft.Build.Framework
             string[] splitBase = fullBase.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
             string[] splitPath = fullPath.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
-            FrameworkErrorUtilities.VerifyThrow(splitPath.Length > 0, "Cannot call MakeRelative on a path of only slashes.");
+            Assumed.Positive(splitPath.Length, "Cannot call MakeRelative on a path of only slashes.");
 
             // On a mac, the path could start with any number of slashes and still be valid. We have to check them all.
             int indexOfFirstNonSlashChar = 0;
@@ -1392,7 +1393,7 @@ namespace Microsoft.Build.Framework
             {
                 indexOfFirstNonSlashChar++;
             }
-            if (path.IndexOf(splitPath[0]) != indexOfFirstNonSlashChar)
+            if (path.IndexOf(splitPath[0], PathComparison) != indexOfFirstNonSlashChar)
             {
                 // path was already relative so just return it
                 return FixFilePath(path);
@@ -1453,7 +1454,7 @@ namespace Microsoft.Build.Framework
             bool hasMaxPath = NativeMethods.HasMaxPath;
             int maxPath = NativeMethods.MaxPath;
             // >= not > because MAX_PATH assumes a trailing null
-            return hasMaxPath && !IsRootedNoThrow(path) && NativeMethods.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
+            return hasMaxPath && !IsRootedNoThrow(path) && Environment.CurrentDirectory.Length + path.Length + 1 /* slash */ >= maxPath;
         }
 
         /// <summary>

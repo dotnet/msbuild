@@ -11,7 +11,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -29,10 +28,13 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsFullFrameworkOnlyFact]
-        public void NetTaskHostTest_FallbackToDotnet()
+        public void NetTaskHostTest_AppHostFromResolvedSdk()
         {
-            // This test verifies the fallback behavior when app host is not used.
-            // When DOTNET_HOST_PATH points to system dotnet, it uses dotnet.exe + MSBuild.dll.
+            // This test verifies that without an explicit DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR override,
+            // MSBuild resolves the .NET SDK from the standard location (DOTNET_ROOT) and uses the SDK's
+            // MSBuild.exe app host to spawn the .NET TaskHost. Starting with .NET SDK 10.0.300, the SDK
+            // ships an app host (MSBuild.exe) alongside MSBuild.dll, so the app host path is preferred
+            // over the legacy `dotnet.exe MSBuild.dll` fallback.
             using TestEnvironment env = TestEnvironment.Create(_output);
             var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
 
@@ -46,7 +48,11 @@ namespace Microsoft.Build.Engine.UnitTests
             }
 
             successTestTask.ShouldBeTrue();
-            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
+
+            // The TaskHost should be the app host (MSBuild.exe), not `dotnet.exe MSBuild.dll`.
+            testTaskOutput.ShouldContain("The task is executed in process: MSBuild", customMessage: testTaskOutput);
+
+            // The resolved app host path lives under DOTNET_ROOT (e.g. {DOTNET_ROOT}\sdk\<version>\MSBuild.exe).
             testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
 
             var customTaskAssemblyLocation = Path.GetFullPath(Path.Combine(AssemblyLocation, "..", RunnerUtilities.LatestDotNetCoreForMSBuild, "ExampleTask.dll"));
@@ -170,7 +176,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using TestEnvironment env = TestEnvironment.Create(_output);
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestMSBuildTaskInNet", "TestMSBuildTaskInNet.csproj");
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -228,15 +234,38 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("CallbackResult: RequestCores(2) =");
         }
 
-        [WindowsFullFrameworkOnlyFact] // This test verifies the fallback behavior with implicit host parameters.
-        public void NetTaskWithImplicitHostParamsTest_FallbackToDotnet()
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_CallbackBuildProjectFileTest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskBuildCallback", "TestNetTaskBuildCallback.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTask", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain("CallbackResult: BuildProjectFile = True");
+            testTaskOutput.ShouldContain("ChildProject: GetOutputs target executed");
+        }
+
+        [WindowsFullFrameworkOnlyFact] // This test verifies app host behavior with implicit host parameters.
+        public void NetTaskWithImplicitHostParamsTest_AppHostWithImplicitParams()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskWithImplicitParams", "TestNetTaskWithImplicitParams.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -245,8 +274,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
             successTestTask.ShouldBeTrue();
 
-            // Output from the task where only Runtime was specified
-            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
+            // Output from the task where only Runtime was specified.
+            // The TaskHost should be the app host (MSBuild.exe) resolved from the standard SDK location
+            // under DOTNET_ROOT (e.g. {DOTNET_ROOT}\sdk\<version>\MSBuild.exe). Starting with .NET SDK
+            // 10.0.300 the SDK ships an app host, so it is preferred over `dotnet.exe MSBuild.dll`.
+            testTaskOutput.ShouldContain("The task is executed in process: MSBuild", customMessage: testTaskOutput);
             testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
             testTaskOutput.ShouldContain("/nodereuse:True");
 
@@ -276,6 +308,37 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("/nodereuse:True");
         }
 
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_TaskHostProcessReuse_SameProcessForNestedBuild()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskHostReuse", "TestNetTaskHostReuse.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTaskHostReuse", out bool successTestTask);
+
+            _output.WriteLine(testTaskOutput);
+
+            successTestTask.ShouldBeTrue();
+
+            // Both the parent task and child task should report TASKHOST_PID
+            // Extract PIDs from output and verify they match (same process reused)
+            var parentPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"PARENT_TASKHOST_PID=(\d+)");
+            var childPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"CHILD_TASKHOST_PID=(\d+)");
+
+            parentPidMatch.Success.ShouldBeTrue("Should find PARENT_TASKHOST_PID in output");
+            childPidMatch.Success.ShouldBeTrue("Should find CHILD_TASKHOST_PID in output");
+
+            string parentPid = parentPidMatch.Groups[1].Value;
+            string childPid = childPidMatch.Groups[1].Value;
+
+            parentPid.ShouldBe(childPid, $"Parent PID ({parentPid}) and child PID ({childPid}) should match -- same TaskHost process should be reused for nested build");
+        }
+
 #if NET
         /// <summary>
         /// Regression test: proves that launching the MSBuild task host through a symlinked
@@ -284,8 +347,8 @@ namespace Microsoft.Build.Engine.UnitTests
         /// On macOS, /tmp is a symlink to /private/tmp. When the SDK is under /tmp, the
         /// MSBuild property $(NetCoreSdkRoot) = $(MSBuildThisFileDirectory) preserves the
         /// unresolved /tmp form. But the child task host's AppContext.BaseDirectory resolves
-        /// to /private/tmp. The parent and child compute different handshake hashes → different
-        /// pipe names → MSB4216.
+        /// to /private/tmp. The parent and child compute different handshake hashes -> different
+        /// pipe names -> MSB4216.
         ///
         /// This test recreates the scenario by symlinking the bootstrap SDK directory and
         /// running MSBuild through the symlink.
@@ -296,7 +359,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using TestEnvironment env = TestEnvironment.Create(_output);
 
             // Create a symlink pointing to the bootstrap SDK binary location.
-            // This simulates the macOS /tmp → /private/tmp scenario.
+            // This simulates the macOS /tmp -> /private/tmp scenario.
             string realSdkPath = RunnerUtilities.BootstrapMsBuildBinaryLocation;
             string symlinkPath = Path.Combine(Path.GetTempPath(), $"msbuild_symlink_test_{Guid.NewGuid():N}");
 

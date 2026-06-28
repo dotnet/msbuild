@@ -6,6 +6,9 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
@@ -33,14 +36,11 @@
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <!-- Node communication -->
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePipeBase.cs" />
     <Compile Include="..\Shared\NodePipeClient.cs" />
@@ -108,8 +108,6 @@
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\XMakeAttributes.cs" />
-    <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="AppConfig\*.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersExResolver.cs" />
     <Compile Include="AssemblyDependency\AssemblyFoldersFromConfig\AssemblyFoldersFromConfigCache.cs" />
@@ -167,6 +165,7 @@
     <Compile Include="CommandLineBuilderExtension.cs" />
     <Compile Include="ResourceHandling\*.cs" />
     <Compile Include="GetCompatiblePlatform.cs" />
+    <Compile Include="IFixedTypeInfo.cs" />
     <Compile Include="SetRidAgnosticValueForProjects.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
@@ -191,7 +190,6 @@
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
-    <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs" />
     <Compile Include="FileIO\ReadLinesFromFile.cs" />
@@ -228,6 +226,9 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="AssemblyDependency\Fusion\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Metadata\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="TypeLib\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
     <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="AddToWin32Manifest.cs" />
@@ -252,6 +253,7 @@
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs" />
     <Compile Include="TaskTranslatorHelpers.cs" />
+    <Compile Include="TaskEnvironmentExtensions.cs" />
     <Compile Include="Telemetry.cs" />
     <Compile Include="ToolTaskExtension.cs" />
     <Compile Include="Touch.cs" />
@@ -614,8 +616,15 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
+  <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
+  <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
+    <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005</WarningsNotAsErrors>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
@@ -638,9 +647,6 @@
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>

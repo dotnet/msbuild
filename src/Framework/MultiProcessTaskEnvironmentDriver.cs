@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Framework
 {
@@ -31,7 +32,7 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
-            get => new AbsolutePath(NativeMethods.GetCurrentDirectory(), ignoreRootedCheck: true);
+            get => new AbsolutePath(Environment.CurrentDirectory, ignoreRootedCheck: true);
             set => NativeMethods.SetCurrentDirectory(value.Value);
         }
 
@@ -50,19 +51,19 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public IReadOnlyDictionary<string, string> GetEnvironmentVariables()
         {
-            return FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+            return CommunicationsUtilities.GetEnvironmentVariables();
         }
 
         /// <inheritdoc/>
         public void SetEnvironmentVariable(string name, string? value)
         {
-            FrameworkCommunicationsUtilities.SetEnvironmentVariable(name, value);
+            CommunicationsUtilities.SetEnvironmentVariable(name, value);
         }
 
         /// <inheritdoc/>
         public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
-            FrameworkCommunicationsUtilities.SetEnvironment(newEnvironment);
+            CommunicationsUtilities.SetEnvironment(newEnvironment);
         }
 
         /// <inheritdoc/>

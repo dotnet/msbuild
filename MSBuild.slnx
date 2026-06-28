@@ -67,7 +67,22 @@
   <Project Path="src/Framework/Microsoft.Build.Framework.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="src/MSBuild.Benchmarks/MSBuild.Benchmarks.csproj" Id="7ab529db-7954-4d4f-a186-7544008a3b46">
+    <Platform Solution="*|ARM64" Project="arm64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="src/MSBuild.Bootstrap/MSBuild.Bootstrap.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/MSBuild.Coordinator.UnitTests/MSBuild.Coordinator.UnitTests.csproj" Id="a6947a1c-6f87-47de-a23f-519b9e05af47">
+    <Platform Solution="*|ARM64" Project="arm64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/MSBuild.Coordinator/MSBuild.Coordinator.csproj" Id="96b6c6a6-8219-4c15-b296-c30c6222ca02">
+    <Platform Solution="*|ARM64" Project="arm64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/MSBuild.EndToEnd.Tests/Microsoft.Build.EndToEnd.Tests.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="src/MSBuild.UnitTests/Microsoft.Build.CommandLine.UnitTests.csproj">
@@ -98,6 +113,8 @@
   <Project Path="src/Tasks/Microsoft.Build.Tasks.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="src/TaskAnalyzer/TaskAnalyzer.csproj" />
+  <Project Path="src/TaskAnalyzer.Tests/TaskAnalyzer.Tests.csproj" />
   <Project Path="src/UnitTests.Shared/Microsoft.Build.UnitTests.Shared.csproj">
     <Platform Solution="*|ARM64" Project="arm64" />
     <Platform Solution="*|x64" Project="x64" />

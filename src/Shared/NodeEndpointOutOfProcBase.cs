@@ -13,13 +13,12 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 
-#if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
@@ -46,9 +45,11 @@ namespace Microsoft.Build.BackEnd
 #endif // NETCOREAPP2_1
 
         /// <summary>
-        /// The size of the buffers to use for named pipes
+        /// The size of the buffers to use for named pipes. Re-evaluated on each access via
+        /// <see cref="Traits.NodeConnectionBufferSize"/> so it honors the change wave / env override
+        /// (and the per-access <see cref="Traits.Instance"/> reset used in tests).
         /// </summary>
-        private const int PipeBufferSize = 131072;
+        private static int PipeBufferSize => Traits.Instance.NodeConnectionBufferSize;
 
         /// <summary>
         /// The current communication status of the node.
@@ -169,8 +170,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            Assumed.Equal(_status, LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
+            ArgumentNullException.ThrowIfNull(factory);
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -182,7 +183,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.ThrowInternalError("Connect() not valid on the out of proc endpoint.");
+            InternalError.Throw("Connect() not valid on the out of proc endpoint.");
         }
 
         /// <summary>
@@ -233,7 +234,9 @@ namespace Microsoft.Build.BackEnd
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+            CommunicationsUtilities.Trace($"Creating pipe '{pipeName}' with buffer size {PipeBufferSize}.");
+
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
@@ -289,8 +292,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         protected void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, "Attempting to change status to existing status {0}.", _status);
-            CommunicationsUtilities.Trace("Changing link status from {0} to {1}", _status.ToString(), newStatus.ToString());
+            Assumed.NotEqual(_status, newStatus, $"Attempting to change status to existing status {_status}.");
+            CommunicationsUtilities.Trace($"Changing link status from {_status} to {newStatus}");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
         }
@@ -312,7 +315,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void InternalDisconnect()
         {
-            ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
+            Assumed.NotEqual(_packetPump.ManagedThreadId, Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
             _terminatePacketPump.Dispose();
@@ -329,9 +332,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
-            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
+            ArgumentNullException.ThrowIfNull(packet);
+            Assumed.NotNull(_packetQueue, "packetQueue is null");
+            Assumed.NotNull(_packetAvailable, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
         }
@@ -384,11 +387,11 @@ namespace Microsoft.Build.BackEnd
                     // Wait for a connection
 #if FEATURE_APM
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
+                    CommunicationsUtilities.Trace($"Waiting for connection {waitTimeRemaining} ms...");
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
 #else
                     Task connectionTask = localPipeServer.WaitForConnectionAsync();
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
+                    CommunicationsUtilities.Trace($"Waiting for connection {waitTimeRemaining} ms...");
                     bool connected = connectionTask.Wait(waitTimeRemaining);
 #endif
                     if (!connected)
@@ -428,10 +431,7 @@ namespace Microsoft.Build.BackEnd
                             if (!IsHandshakePartValid(component, result.Value, index))
                             {
                                 CommunicationsUtilities.Trace(
-                                        "Handshake failed. Received {0} from host  for {1} but expected {2}. Probably the host is a different MSBuild build.",
-                                        result.Value,
-                                        component.Key,
-                                        component.Value);
+                                    $"Handshake failed. Received {result.Value} from host for {component.Key} but expected {component.Value}. Probably the host is a different MSBuild build.");
                                 _pipeServer.WriteIntForHandshake(index + 1);
                                 gotValidConnection = false;
                                 break;
@@ -457,7 +457,7 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     _pipeServer.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
                                     _pipeServer.WriteIntForHandshake(NodePacketTypeExtensions.PacketVersion);
-                                    CommunicationsUtilities.Trace("Sent PacketVersion: {0}", NodePacketTypeExtensions.PacketVersion);
+                                    CommunicationsUtilities.Trace($"Sent PacketVersion: {NodePacketTypeExtensions.PacketVersion}");
                                 }
 
                                 CommunicationsUtilities.Trace("Successfully connected to parent.");
@@ -472,7 +472,7 @@ namespace Microsoft.Build.BackEnd
 
                                 if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                                    CommunicationsUtilities.Trace($"Handshake failed. Host user is {(clientIdentity == null ? "<unknown>" : clientIdentity.Name)} but we were created by {currentIdentity.Name}.");
                                     gotValidConnection = false;
                                     continue;
                                 }
@@ -487,7 +487,7 @@ namespace Microsoft.Build.BackEnd
                         //    and if they don't match it disconnects immediately leaving us still trying to read the blank handshake
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         // 3. We expected to read the EndOfHandshake signal, but we received something else
-                        CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
+                        CommunicationsUtilities.Trace($"Client connection failed but we will wait for another connection. Exception: {e.Message}");
 
                         gotValidConnection = false;
                     }
@@ -509,7 +509,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
+                    CommunicationsUtilities.Trace($"Client connection failed.  Exiting comm thread. {e}");
                     if (localPipeServer.IsConnected)
                     {
                         localPipeServer.Disconnect();
@@ -564,8 +564,8 @@ namespace Microsoft.Build.BackEnd
 
             if (component.Key == nameof(HandshakeComponents.Options))
             {
-                // NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
-                // 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+                // NET task host tolerates a worker node connecting with an architecture mismatch.
+                // The lower 24 bits carry the HandshakeOptions flags; the upper byte is the handshake version.
                 isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
             }
             else
@@ -575,36 +575,44 @@ namespace Microsoft.Build.BackEnd
 
             if (isAllowedMismatch)
             {
-                CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, component.Key);
+                CommunicationsUtilities.Trace($"Handshake for NET Host. Child host {handshakePart} for {component.Key}.");
                 return true;
             }
 #endif
             CommunicationsUtilities.Trace(
-                "Handshake failed. Received {0} from host for {1} but expected {2}. Probably the host is a different MSBuild build.",
-                handshakePart,
-                component.Key,
-                component.Value);
+                $"Handshake failed. Received {handshakePart} from host for {component.Key} but expected {component.Value}. Probably the host is a different MSBuild build.");
 
             return false;
         }
 
 #if NET
         /// <summary>
-        /// NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
-        /// 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+        /// The .NET task host (TaskHost node) tolerates a worker node that did not emit an
+        /// architecture bit on the wire (indistinguishable from x86) when the TaskHost node
+        /// itself is x64 or arm64. This is the .NET Framework worker node → .NET SDK TaskHost
+        /// node scenario: the worker node typically cannot describe the TaskHost node's
+        /// architecture, but the launched process is whatever the SDK ships (x64 on
+        /// Windows-x64, arm64 on Windows-arm64).
+        ///
+        /// True cross-arch mismatches (e.g. worker node sent X64 but TaskHost node expects
+        /// Arm64, or vice versa) remain rejected.
+        ///
+        /// The lower 24 bits (mask 0x00FFFFFF) carry the HandshakeOptions flags; the upper
+        /// byte carries the handshake version and is ignored here.
         /// </summary>
-        private bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
+        internal static bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
         {
             var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
             var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
 
-            // not X64 or Arm64 means we are running on x86
+            // not X64 or Arm64 means the wire-form architecture is x86 (or no arch bit).
             bool receivedIsX86 = !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
                                  !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
 
             bool expectedIsX64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+            bool expectedIsArm64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.Arm64);
 
-            return receivedIsX86 && expectedIsX64;
+            return receivedIsX86 && (expectedIsX64 || expectedIsArm64);
         }
 #endif
 
@@ -663,7 +671,7 @@ namespace Microsoft.Build.BackEnd
                             catch (Exception e)
                             {
                                 // Lost communications.  Abort (but allow node reuse)
-                                CommunicationsUtilities.Trace("Exception reading from server.  {0}", e);
+                                CommunicationsUtilities.Trace($"Exception reading from server.  {e}");
                                 DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Inactive);
                                 exitLoop = true;
@@ -690,7 +698,7 @@ namespace Microsoft.Build.BackEnd
                                 }
                                 else
                                 {
-                                    CommunicationsUtilities.Trace("Incomplete header read from server.  {0} of {1} bytes read", bytesRead, headerByte.Length);
+                                    CommunicationsUtilities.Trace($"Incomplete header read from server.  {bytesRead} of {headerByte.Length} bytes read");
                                     ChangeLinkStatus(LinkStatus.Failed);
                                 }
 
@@ -722,7 +730,7 @@ namespace Microsoft.Build.BackEnd
                             catch (Exception e)
                             {
                                 // Error while deserializing or handling packet.  Abort.
-                                CommunicationsUtilities.Trace("Exception while deserializing packet {0}: {1}", packetType, e);
+                                CommunicationsUtilities.Trace($"Exception while deserializing packet {packetType}: {e}");
                                 DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
@@ -781,7 +789,7 @@ namespace Microsoft.Build.BackEnd
                         catch (Exception e)
                         {
                             // Error while deserializing or handling packet.  Abort.
-                            CommunicationsUtilities.Trace("Exception while serializing packets: {0}", e);
+                            CommunicationsUtilities.Trace($"Exception while serializing packets: {e}");
                             DebugUtils.DumpExceptionToFile(e);
                             ChangeLinkStatus(LinkStatus.Failed);
                             exitLoop = true;
@@ -798,7 +806,7 @@ namespace Microsoft.Build.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("waitId {0} out of range.", waitId);
+                        InternalError.Throw($"waitId {waitId} out of range.");
                         break;
                 }
             }

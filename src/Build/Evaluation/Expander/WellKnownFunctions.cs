@@ -169,7 +169,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.StartsWith(arg0);
+                    returnVal = text.StartsWith(arg0, StringComparison.CurrentCulture);
                     return true;
                 }
             }
@@ -209,7 +209,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.EndsWith(arg0);
+                    returnVal = text.EndsWith(arg0, StringComparison.CurrentCulture);
                     return true;
                 }
                 else if (ParseArgs.TryGetArgs(args, out arg0, out StringComparison arg1) && arg0 != null)
@@ -246,12 +246,12 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.LastIndexOf(arg0);
+                    returnVal = text.LastIndexOf(arg0, StringComparison.CurrentCulture);
                     return true;
                 }
                 else if (ParseArgs.TryGetArgs(args, out arg0, out int startIndex) && arg0 != null)
                 {
-                    returnVal = text.LastIndexOf(arg0, startIndex);
+                    returnVal = text.LastIndexOf(arg0, startIndex, StringComparison.CurrentCulture);
                     return true;
                 }
                 else if (ParseArgs.TryGetArgs(args, out arg0, out StringComparison arg1) && arg0 != null)
@@ -952,7 +952,7 @@ namespace Microsoft.Build.Evaluation.Expander
                 if (string.Equals(methodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
                 {
                     string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
-                    ErrorUtilities.VerifyThrow(loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
+                    Assumed.NotNull(loggingContext, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
                     if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                     {
                         returnVal = IntrinsicFunctions.RegisterBuildCheck(projectPath, arg0, loggingContext);

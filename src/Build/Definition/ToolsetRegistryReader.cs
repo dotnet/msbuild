@@ -3,6 +3,7 @@
 
 #if FEATURE_WIN32_REGISTRY
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Evaluation
         internal ToolsetRegistryReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, RegistryKeyWrapper msbuildRegistryWrapper)
             : base(environmentProperties, globalProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
+            ArgumentNullException.ThrowIfNull(msbuildRegistryWrapper);
 
             _msbuildRegistryWrapper = msbuildRegistryWrapper;
         }
@@ -233,7 +234,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>An enumeration of property definitions.</returns>
         protected override IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion);
+            ArgumentException.ThrowIfNullOrEmpty(subToolsetVersion);
 
             RegistryKeyWrapper toolsVersionWrapper = null;
             RegistryKeyWrapper subToolsetWrapper = null;

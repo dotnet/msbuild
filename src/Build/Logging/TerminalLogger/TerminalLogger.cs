@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -220,6 +220,12 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Indicates whether to show the live-updated nodes display.
     /// </summary>
     private bool _showNodesDisplay = true;
+
+    /// <summary>
+    /// Stores the registered loggers.
+    /// </summary>
+    private readonly List<RegisteredLoggerInfo> _registeredLoggers = new();
+
 
     private uint? _originalConsoleMode;
 
@@ -453,11 +459,6 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
 
-        if (eventSource is IEventSource3 eventSource3)
-        {
-            eventSource3.IncludeTaskInputs();
-        }
-
         if (eventSource is IEventSource4 eventSource4)
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();
@@ -485,7 +486,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </remark>
     private void ApplyParameter(string parameterName, string? parameterValue)
     {
-        ErrorUtilities.VerifyThrowArgumentNull(parameterName);
+        ArgumentNullException.ThrowIfNull(parameterName);
 
         switch (parameterName.ToUpperInvariant())
         {
@@ -631,6 +632,21 @@ public sealed partial class TerminalLogger : INodeLogger
                 if (_showSummary == true)
                 {
                     RenderBuildSummary();
+
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8)
+                        && _registeredLoggers.Any(logger => logger.OutputFilePaths.Count > 0))
+                    {
+                        Terminal.WriteLine(string.Empty);
+
+                        foreach (var logger in _registeredLoggers.Where(logger => logger.OutputFilePaths.Count > 0))
+                        {
+                            string displayPaths = string.Join(
+                                CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ",
+                                logger.OutputFilePaths.Select(outputPath => $"{AnsiCodes.LinkPrefix}{new Uri(outputPath).AbsoluteUri}{AnsiCodes.LinkInfix}{outputPath}{AnsiCodes.LinkSuffix}"));
+
+                            Terminal.WriteLine(string.Format(CultureInfo.CurrentCulture, Microsoft.Build.Framework.Resources.SR.LogFileOutputPath, logger.LoggerName, displayPaths));
+                        }
+                    }
                 }
 
                 if (_restoreFailed)
@@ -659,6 +675,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         _projects.Clear();
         _testRunSummaries.Clear();
+        _registeredLoggers.Clear();
         _buildErrorsCount = 0;
         _buildWarningsCount = 0;
         _restoreFailed = false;
@@ -705,6 +722,9 @@ public sealed partial class TerminalLogger : INodeLogger
             case ProjectEvaluationFinishedEventArgs evalFinish:
                 CaptureEvalContext(evalFinish);
                 break;
+            case LoggersRegisteredEventArgs loggerEvent:
+                _registeredLoggers.AddRange(loggerEvent.Loggers);
+                break;
         }
     }
 
@@ -725,12 +745,18 @@ public sealed partial class TerminalLogger : INodeLogger
             EvalContext evalContext = new(e.BuildEventContext);
             string? targetFramework = null;
             string? runtimeIdentifier = null;
+            
             if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
             {
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
+
+            // Per-project metaproj files (e.g. MyProject.csproj.metaproj) are constructed
+            // directly without evaluation, so they won't have a matching ProjectEvaluationFinished event.
+            System.Diagnostics.Debug.Assert(
+                evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
+                "EvalProjectInfo should have been captured before ProjectStarted");
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
             _projects[c] = projectInfo;
@@ -1174,7 +1200,6 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return;
         }
-
         string? message = e.Message;
 
         if (message is not null && e.Importance == MessageImportance.High)

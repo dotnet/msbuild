@@ -10,7 +10,6 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 #endif
 using System.Diagnostics;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Collections;
@@ -116,9 +115,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetBuilderCallback">An <see cref="ITargetBuilderCallback"/> to use to invoke targets and build projects.</param>
         public TaskHost(IBuildComponentHost host, BuildRequestEntry requestEntry, ElementLocation taskLocation, ITargetBuilderCallback targetBuilderCallback)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host);
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
-            ErrorUtilities.VerifyThrowInternalNull(taskLocation);
+            ArgumentNullException.ThrowIfNull(host);
+            ArgumentNullException.ThrowIfNull(requestEntry);
+            Assumed.NotNull(taskLocation);
 
             _host = host;
             _requestEntry = requestEntry;
@@ -298,7 +297,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Copy results from result.TargetOutputsPerProject to targetOutputsPerProject
                 // We should always have the same number of entries - although an entry might be empty if a project failed.
-                ErrorUtilities.VerifyThrow(targetOutputsPerProject.Length == result.TargetOutputsPerProject.Count, "{0} != {1}", targetOutputsPerProject.Length, result.TargetOutputsPerProject.Count);
+                Assumed.Equal(targetOutputsPerProject.Length, result.TargetOutputsPerProject.Count, $"{targetOutputsPerProject.Length} != {result.TargetOutputsPerProject.Count}");
 
                 for (int i = 0; i < targetOutputsPerProject.Length; i++)
                 {
@@ -358,7 +357,7 @@ namespace Microsoft.Build.BackEnd
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
-                ErrorUtilities.VerifyThrow(_yieldThreadId == -1, "Cannot call Yield() while yielding.");
+                Assumed.Equal(_yieldThreadId, -1, "Cannot call Yield() while yielding.");
                 _yieldThreadId = Environment.CurrentManagedThreadId;
                 MSBuildEventSource.Log.ExecuteTaskYieldStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Yield();
@@ -387,8 +386,8 @@ namespace Microsoft.Build.BackEnd
             lock (_callbackMonitor)
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
-                ErrorUtilities.VerifyThrow(_yieldThreadId != -1, "Cannot call Reacquire() before Yield().");
-                ErrorUtilities.VerifyThrow(_yieldThreadId == Environment.CurrentManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Environment.CurrentManagedThreadId, _yieldThreadId);
+                Assumed.NotEqual(_yieldThreadId, -1, "Cannot call Reacquire() before Yield().");
+                Assumed.Equal(_yieldThreadId, Environment.CurrentManagedThreadId, $"Cannot call Reacquire() on thread {Environment.CurrentManagedThreadId} when Yield() was called on thread {_yieldThreadId}");
                 MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Reacquire();
@@ -410,7 +409,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -480,7 +479,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -521,7 +520,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -562,7 +561,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
+                ArgumentNullException.ThrowIfNull(e);
 
                 if (!_activeProxy)
                 {
@@ -653,7 +652,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(eventName);
+                ArgumentNullException.ThrowIfNull(eventName);
 
                 if (!_activeProxy)
                 {
@@ -812,7 +811,7 @@ namespace Microsoft.Build.BackEnd
         /// at least one core to become available.</returns>
         public int RequestCores(int requestedCores)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(requestedCores);
 
             lock (_callbackMonitor)
             {
@@ -859,7 +858,7 @@ namespace Microsoft.Build.BackEnd
         /// granted and not yet released.</param>
         public void ReleaseCores(int coresToRelease)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(coresToRelease);
 
             lock (_callbackMonitor)
             {
@@ -969,8 +968,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public async Task<BuildEngineResult> InternalBuildProjects(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames);
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
+            ArgumentNullException.ThrowIfNull(projectFileNames);
+            ArgumentNullException.ThrowIfNull(globalProperties);
             VerifyActiveProxy();
 
             BuildEngineResult result;
@@ -1119,7 +1118,7 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable SYSLIB0050
             // Types which are not serializable and are not IExtendedBuildEventArgs as
             // those always implement custom serialization by WriteToStream and CreateFromStream.
-            if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+            if (!e.GetType().IsSerializable && e is not IExtendedBuildEventArgs)
 #pragma warning restore SYSLIB0050
             {
                 _taskLoggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
@@ -1142,8 +1141,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames);
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
+            ArgumentNullException.ThrowIfNull(projectFileNames);
+            ArgumentNullException.ThrowIfNull(globalProperties);
             VerifyActiveProxy();
 
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
@@ -1215,7 +1214,7 @@ namespace Microsoft.Build.BackEnd
                         skipNonexistentTargets: skipNonexistentTargets);
 
                     // Even if one of the projects fails to build and therefore has no outputs, it should still have an entry in the results array (albeit with an empty list in it)
-                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length, "{0}!={1}.", results.Length, projectFileNames.Length);
+                    Assumed.Equal(results.Length, projectFileNames.Length, $"{results.Length}!={projectFileNames.Length}.");
 
                     if (returnTargetOutputs)
                     {
@@ -1260,7 +1259,7 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    ErrorUtilities.VerifyThrow(results.Length == projectFileNames.Length || !overallSuccess, "The number of results returned {0} cannot be less than the number of project files {1} unless one of the results indicated failure.", results.Length, projectFileNames.Length);
+                    Assumed.True(results.Length == projectFileNames.Length || !overallSuccess, $"The number of results returned {results.Length} cannot be less than the number of project files {projectFileNames.Length} unless one of the results indicated failure.");
                 }
 
                 BuildRequestsSucceeded = overallSuccess;
@@ -1275,7 +1274,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyActiveProxy()
         {
-            ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task host.");
+            Assumed.True(_activeProxy, "Attempted to use an inactive task host.");
         }
     }
 }

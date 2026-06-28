@@ -72,6 +72,11 @@
         <target state="translated">Die Aufgabe kann nicht übersprungen werden, da sie nicht auf dem neuesten Stand ist.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">Das Pipe-EOF wurde nicht innerhalb von {0} Sekunden empfangen. Möglicherweise hält noch der Prozess eines zwei Ebenen untergeordneten Elements die Pipe geöffnet. Die bereits übermittelte Ausgabe wurde protokolliert.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: "{0}" wurde mit dem Code {1} beendet.</target>

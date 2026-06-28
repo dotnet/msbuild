@@ -1,9 +1,7 @@
-<Project DefaultTargets="Build">
+﻿<Project DefaultTargets="Build">
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
-    <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
@@ -18,36 +16,48 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
-    <OutputType>Exe</OutputType>
-    <GenerateProgramFile>false</GenerateProgramFile>
-
-    <!-- Makes xunit print all test names in stdout -->
-    <XunitOptions>$(XunitOptions)</XunitOptions>
-
     <!-- Respect the traits set up by PlatformSpecific attribute. -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --filter &quot;Category!=nonwindowstests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux'))">$(XunitOptions) --filter &quot;Category!=nonlinuxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">--filter &quot;Category!=nonlinuxtests&amp;Category!=netcore-linux-failing</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) --filter &quot;Category!=nonosxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">--filter &quot;Category!=nonosxtests&amp;Category!=netcore-osx-failing</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --filter-not-trait Category=nonwindowstests</XunitOptions>
+
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux'))">$(XunitOptions) --filter-not-trait Category=nonlinuxtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">$(XunitOptions) --filter-not-trait Category=netcore-linux-failing</XunitOptions>
+
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) --filter-not-trait Category=nonosxtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">$(XunitOptions) --filter-not-trait Category=netcore-osx-failing</XunitOptions>
+
     <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) --filter &quot;Category!=nonfreebsdtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) --filter-not-trait Category=nonfreebsdtests</XunitOptions>
 
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions)&amp;Category!=nonnetcoreapptests</XunitOptions>
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions)&amp;Category!=nonnetfxtests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) --filter-not-trait Category=nonnetcoreapptests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions) --filter-not-trait Category=nonnetfxtests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions)&amp;Category!=failing&quot; --Diag $(TargetName).log</XunitOptions>
+    <!-- Normal runs EXCLUDE quarantined tests: tests marked [ActiveIssue(...)] carry the
+         Category=failing trait. The scheduled quarantine pipeline sets RunQuarantinedTests=true to
+         run ONLY those tests instead, so we keep collecting pass/fail signal on quarantined tests
+         (an [ActiveIssue] test never executes in normal CI). See azure-pipelines/quarantine.yml. -->
+    <XunitOptions Condition="'$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --filter-not-trait Category=failing</XunitOptions>
+    <!-- Quarantined tests are expected to be flaky, and most assemblies contain zero quarantined
+         tests; treat exit code 8 (zero tests ran) and 2 (test failures) as success so a red run means
+         an actual infrastructure problem. The per-test signal is the published TRX, not exit code.
+         The "8;2" value MUST stay quoted: arcade runs the test command through <Exec>, which on
+         non-Windows executes via /bin/sh, where an unquoted ';' is a command separator (it would
+         split the command and the trailing "2" + remaining arguments fragment fails with code 127). -->
+    <XunitOptions Condition="'$(RunQuarantinedTests)' == 'true'">$(XunitOptions) --filter-trait Category=failing --ignore-exit-code "8;2"</XunitOptions>
     
     <!-- Enable code coverage -->
     <!-- There are separate runsettings files for Windows and non-Windows. -->
     <!-- Some test projects hang on windows and hence coverage is disabled for these projects. -->
-    <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -settings $(RepoRoot)CoverageWindowsFull.runsettings - -test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions> -->
-    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --settings $(RepoRoot)Coverage.runsettings --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions>
+    <!-- Quarantined-only runs (RunQuarantinedTests=true, the scheduled quarantine pipeline) skip
+         coverage: those runs only collect flaky pass/fail signal via repeated execution, and coverage
+         instrumentation adds overhead and can perturb timing-sensitive flakes. -->
+    <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -coverage - -coverage-settings $(RepoRoot)CoverageWindowsFull.config</XunitOptions> -->
+    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows')) and '$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
     <PackageOutputPath Condition="'$(IsVisualStudioInsertionPackage)' == 'true'">$(DevDivPackagesDir)</PackageOutputPath>
+
+    <DefineConstants Condition="'$(XUnitV3Version)' != '' and $([MSBuild]::VersionGreaterThanOrEquals($(XUnitV3Version), '4.0.0'))">$(DefineConstants);XUNIT_V3_4_OR_LATER</DefineConstants>
 
     <!-- Arcade sdk also carries an xunit.runner.json which sometimes overrides the one in this repo. Assign a value to the arcade properties XUnitDesktopSettingsFile and XUnitCoreSettingsFile to prevent the arcade version of the file being added. -->
     <XUnitDesktopSettingsFile>$(MSBuildThisFileDirectory)Shared\UnitTests\xunit.runner.json</XUnitDesktopSettingsFile>
@@ -59,13 +69,13 @@
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
-    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
+    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
-    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true'" />
-    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestProgram.cs" />
+    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>
@@ -84,10 +94,6 @@
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</PublicApiTfm>
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</PublicApiTfm>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
-    <PackageReference Include="xunit.console" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(OutputType)' == 'Exe'">
     <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
@@ -143,13 +149,13 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Warning Condition="!Exists('$(TlbExpPath)')"
-             Text="TlbExp was not found at '$(TlbExpPath)'. Type library generation will be skipped. Ensure the .NET Framework SDK tools are installed if you need the .tlb file." />
+    <Error Condition="!Exists('$(TlbExpPath)')"
+           Text="TlbExp was not found at '$(TlbExpPath)'. Ensure the .NET Framework SDK tools are installed." />
 
     <!-- Generate x86 type library -->
-    <Exec Condition="Exists('$(TlbExpPath)')" Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
+    <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
     <!-- Generate x64 type library -->
-    <Exec Condition="Exists('$(TlbExpPath)')" Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)x64\$(TargetName).tlb&quot; /win64" />
+    <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)x64\$(TargetName).tlb&quot; /win64" />
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />

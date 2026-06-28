@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Items { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         public override bool Execute()
         {
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Tasks
         internal static bool TryParseHashEncoding(string value, out HashEncoding encoding)
             => Enum.TryParse<HashEncoding>(value, /*ignoreCase:*/ true, out encoding);
 
-        internal static byte[] ComputeHash(Func<HashAlgorithm> algorithmFactory, string filePath, CancellationToken ct)
+        internal static byte[] ComputeHash(Func<HashAlgorithm> algorithmFactory, AbsolutePath filePath, CancellationToken ct)
         {
             using (var stream = File.OpenRead(filePath))
             using (var algorithm = algorithmFactory())

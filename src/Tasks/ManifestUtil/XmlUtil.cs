@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -72,6 +72,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         [SuppressMessage("Microsoft.Security.Xml", "CA3073: ReviewTrustedXsltUse.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3053: UseSecureXmlResolver.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
+        [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3059: UseXmlReaderForXPathDocument.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         public static Stream XslTransform(string resource, Stream input, params DictionaryEntry[] entries)
         {
@@ -80,14 +81,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Stream s = Util.GetEmbeddedResourceStream(resource);
 
             int t2 = Environment.TickCount;
-            XPathDocument d = new XPathDocument(s);
+            using var xsltReader = XmlReader.Create(s, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null });
+            XPathDocument d = new XPathDocument(xsltReader);
             Util.WriteLog($"new XPathDocument(1) t={Environment.TickCount - t2}");
 
             int t3 = Environment.TickCount;
             var xslc = new XslCompiledTransform();
             // Using the Trusted Xslt is fine as the style sheet comes from our own assemblies.
             // This is similar to the prior this.GetType().Assembly/Evidence method that was used in the now depricated XslTransform.
+#pragma warning disable CA3076 // Trusted embedded stylesheet; preserve existing resource resolution behavior.
             xslc.Load(d, XsltSettings.TrustedXslt, s_resolver);
+#pragma warning restore CA3076
             Util.WriteLog($"XslCompiledTransform.Load t={Environment.TickCount - t3}");
 
             // Need to copy input stream because XmlReader will close it,

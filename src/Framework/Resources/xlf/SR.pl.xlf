@@ -47,6 +47,11 @@
         <target state="translated">{0} („{1}”) nie może równać się „{2}”.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Argument_EmptyCollection">
+        <source>The collection must contain at least one element.</source>
+        <target state="translated">Kolekcja musi zawierać co najmniej jeden element.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
         <target state="translated">Wartość nie może być pustym ciągiem ani składać się wyłącznie z białych znaków.</target>
@@ -102,6 +107,11 @@
         <target state="translated">Parametr „{0}” może zawierać tylko nazwę pliku i nie może zawierać katalogu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LogFileOutputPath">
+        <source>{0} wrote to: {1}</source>
+        <target state="translated">{0} napisano do: {1}</target>
+        <note>{0} is the logger name. {1} is a list of full file paths separated by the current culture's list separator (followed by a space).</note>
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">Ścieżka musi zaczynać się od katalogu głównego.</target>
@@ -119,12 +129,22 @@
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw SDK systemu Windows, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw Windows SDK, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
         <target state="translated">Program Visual Studio w wersji „{0}” nie jest obsługiwany.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_contains_no_elements">
+        <source>'{0}' contains no elements.</source>
+        <target state="translated">Wtyczka „{0}” nie zawiera żadnych elementów.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_does_not_contain_matching_element">
+        <source>'{0}' does not contain matching element.</source>
+        <target state="translated">Wtyczka „{0}” nie zawiera pasującego elementu.</target>
         <note />
       </trans-unit>
     </body>

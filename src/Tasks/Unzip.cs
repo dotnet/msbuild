@@ -77,7 +77,7 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
-            string fullDestinationDirectoryPath = Path.GetFullPath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
+            AbsolutePath fullDestinationDirectoryPath = TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName)).GetCanonicalForm();
 
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
@@ -186,8 +186,8 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                string fullDestinationPath = Path.GetFullPath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
-                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
+                AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName)).GetCanonicalForm();
+                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
 
                 FileInfo destinationPath = new(fullDestinationPath);
 
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
                     // We don't apply UnixFileMode.None because .zip files created on Windows and .zip files created
                     // with previous versions of .NET don't include permissions.
                     UnixFileMode mode = (UnixFileMode)(zipArchiveEntry.ExternalAttributes >> 16) & OwnershipPermissions;
-                    if (mode != UnixFileMode.None && !NativeMethodsShared.IsWindows)
+                    if (mode != UnixFileMode.None && NativeMethodsShared.IsUnixLike)
                     {
                         fileStreamOptions.UnixCreateMode = mode;
                     }

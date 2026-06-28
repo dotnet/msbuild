@@ -53,10 +53,7 @@ namespace Microsoft.Build.Framework.BuildException
                 Type exceptionType = typeConstructionTuple.Type;
                 Func<string, Exception?, BuildExceptionBase> exceptionFactory = typeConstructionTuple.Factory;
 
-                if (!IsSupportedExceptionType(exceptionType))
-                {
-                    EscapeHatches.ThrowInternalError($"Type {exceptionType.FullName} is not recognized as a build exception type.");
-                }
+                Assumed.True(IsSupportedExceptionType(exceptionType), $"Type {exceptionType.FullName} is not recognized as a build exception type.");
 
                 string key = GetExceptionSerializationKey(exceptionType);
                 exceptionFactories[key] = exceptionFactory;
@@ -64,7 +61,7 @@ namespace Microsoft.Build.Framework.BuildException
 
             if (Interlocked.Exchange(ref s_exceptionFactories, exceptionFactories) != null)
             {
-                EscapeHatches.ThrowInternalError("Serialization contract was already initialized.");
+                InternalError.Throw("Serialization contract was already initialized.");
             }
         }
 
@@ -75,17 +72,11 @@ namespace Microsoft.Build.Framework.BuildException
 
         internal static Func<string, Exception?, BuildExceptionBase> CreateExceptionFactory(string serializationType)
         {
-            Func<string, Exception?, BuildExceptionBase>? factory = null;
-            if (s_exceptionFactories == null)
-            {
-                EscapeHatches.ThrowInternalError("Serialization contract was not initialized.");
-            }
-            else
-            {
-                s_exceptionFactories.TryGetValue(serializationType, out factory);
-            }
+            Assumed.NotNull(s_exceptionFactories, "Serialization contract was not initialized.");
 
-            return factory ?? s_defaultFactory;
+            return s_exceptionFactories.TryGetValue(serializationType, out Func<string, Exception?, BuildExceptionBase>? factory)
+                ? factory ?? s_defaultFactory
+                : s_defaultFactory;
         }
     }
 }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -278,7 +277,7 @@ namespace Microsoft.Build.BackEnd
 
             if (parent != null)
             {
-                ErrorUtilities.VerifyThrow(_buildHierarchy.ContainsKey(parent), "Parent doesn't exist in build hierarchy for request {0}", request.BuildRequest.GlobalRequestId);
+                Assumed.True(_buildHierarchy.ContainsKey(parent), $"Parent doesn't exist in build hierarchy for request {request.BuildRequest.GlobalRequestId}");
                 _buildHierarchy[parent].Add(request);
             }
 
@@ -302,7 +301,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case SchedulableRequestState.Completed:
-                    ErrorUtilities.ThrowInternalError("Should not be updating a request after it has reached the Completed state.");
+                    InternalError.Throw("Should not be updating a request after it has reached the Completed state.");
                     break;
 
                 case SchedulableRequestState.Executing:
@@ -330,7 +329,7 @@ namespace Microsoft.Build.BackEnd
                             _scheduledRequestsByNode[request.AssignedNode] = requestsAssignedToNode;
                         }
 
-                        ErrorUtilities.VerifyThrow(!requestsAssignedToNode.Contains(request), "Request {0} is already scheduled to node {1}", request.BuildRequest.GlobalRequestId, request.AssignedNode);
+                        Assumed.False(requestsAssignedToNode.Contains(request), $"Request {request.BuildRequest.GlobalRequestId} is already scheduled to node {request.AssignedNode}");
                         requestsAssignedToNode.Add(request);
 
                         // Map the configuration to the node.
@@ -354,18 +353,18 @@ namespace Microsoft.Build.BackEnd
             switch (request.State)
             {
                 case SchedulableRequestState.Blocked:
-                    ErrorUtilities.VerifyThrow(!_blockedRequests.ContainsKey(request.BuildRequest.GlobalRequestId), "Request with global id {0} is already blocked!");
+                    Assumed.False(_blockedRequests.ContainsKey(request.BuildRequest.GlobalRequestId), $"Request with global id {request.BuildRequest.GlobalRequestId} is already blocked!");
                     _blockedRequests[request.BuildRequest.GlobalRequestId] = request;
                     break;
 
                 case SchedulableRequestState.Yielding:
-                    ErrorUtilities.VerifyThrow(!_yieldingRequests.ContainsKey(request.BuildRequest.GlobalRequestId), "Request with global id {0} is already yielded!");
+                    Assumed.False(_yieldingRequests.ContainsKey(request.BuildRequest.GlobalRequestId), $"Request with global id {request.BuildRequest.GlobalRequestId} is already yielded!");
                     _yieldingRequests[request.BuildRequest.GlobalRequestId] = request;
                     break;
 
                 case SchedulableRequestState.Completed:
-                    ErrorUtilities.VerifyThrow(_configurationToRequests.ContainsKey(request.BuildRequest.ConfigurationId), "Configuration {0} never had requests assigned to it.", request.BuildRequest.ConfigurationId);
-                    ErrorUtilities.VerifyThrow(_configurationToRequests[request.BuildRequest.ConfigurationId].Count > 0, "Configuration {0} has no requests assigned to it.", request.BuildRequest.ConfigurationId);
+                    Assumed.True(_configurationToRequests.ContainsKey(request.BuildRequest.ConfigurationId), $"Configuration {request.BuildRequest.ConfigurationId} never had requests assigned to it.");
+                    Assumed.Positive(_configurationToRequests[request.BuildRequest.ConfigurationId].Count, $"Configuration {request.BuildRequest.ConfigurationId} has no requests assigned to it.");
                     _configurationToRequests[request.BuildRequest.ConfigurationId].Remove(request);
                     if (_scheduledRequestsByNode.TryGetValue(request.AssignedNode, out var requests))
                     {
@@ -376,8 +375,8 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case SchedulableRequestState.Executing:
-                    ErrorUtilities.VerifyThrow(!_executingRequests.ContainsKey(request.BuildRequest.GlobalRequestId), "Request with global id {0} is already executing!");
-                    ErrorUtilities.VerifyThrow(!_executingRequestByNode.ContainsKey(request.AssignedNode) || _executingRequestByNode[request.AssignedNode] == null, "Node {0} is currently executing a request.", request.AssignedNode);
+                    Assumed.False(_executingRequests.ContainsKey(request.BuildRequest.GlobalRequestId), $"Request with global id {request.BuildRequest.GlobalRequestId} is already executing!");
+                    Assumed.True(!_executingRequestByNode.ContainsKey(request.AssignedNode) || _executingRequestByNode[request.AssignedNode] == null, $"Node {request.AssignedNode} is currently executing a request.");
 
                     _executingRequests[request.BuildRequest.GlobalRequestId] = request;
                     _executingRequestByNode[request.AssignedNode] = request;
@@ -390,7 +389,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case SchedulableRequestState.Ready:
-                    ErrorUtilities.VerifyThrow(!_readyRequests.ContainsKey(request.BuildRequest.GlobalRequestId), "Request with global id {0} is already ready!");
+                    Assumed.False(_readyRequests.ContainsKey(request.BuildRequest.GlobalRequestId), $"Request with global id {request.BuildRequest.GlobalRequestId} is already ready!");
                     _readyRequests[request.BuildRequest.GlobalRequestId] = request;
                     HashSet<SchedulableRequest> readyRequestsOnNode;
                     if (!_readyRequestsByNode.TryGetValue(request.AssignedNode, out readyRequestsOnNode))
@@ -399,12 +398,12 @@ namespace Microsoft.Build.BackEnd
                         _readyRequestsByNode[request.AssignedNode] = readyRequestsOnNode;
                     }
 
-                    ErrorUtilities.VerifyThrow(!readyRequestsOnNode.Contains(request), "Request with global id {0} is already marked as ready on node {1}", request.BuildRequest.GlobalRequestId, request.AssignedNode);
+                    Assumed.False(readyRequestsOnNode.Contains(request), $"Request with global id {request.BuildRequest.GlobalRequestId} is already marked as ready on node {request.AssignedNode}");
                     readyRequestsOnNode.Add(request);
                     break;
 
                 case SchedulableRequestState.Unscheduled:
-                    ErrorUtilities.ThrowInternalError("Request with global id {0} cannot transition to the Unscheduled state", request.BuildRequest.GlobalRequestId);
+                    Assumed.Unreachable($"Request with global id {request.BuildRequest.GlobalRequestId} cannot transition to the Unscheduled state");
                     break;
             }
 
@@ -489,7 +488,7 @@ namespace Microsoft.Build.BackEnd
         public SchedulableRequest GetScheduledRequest(int globalRequestId)
         {
             SchedulableRequest returnValue = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
-            ErrorUtilities.VerifyThrow(returnValue != null, "Global Request Id {0} has not been assigned and cannot be retrieved.", globalRequestId);
+            Assumed.NotNull(returnValue, $"Global Request Id {globalRequestId} has not been assigned and cannot be retrieved.");
             return returnValue;
         }
 
@@ -680,10 +679,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         internal void UnassignNodeForRequestConfiguration(int configurationId)
         {
-            ErrorUtilities.VerifyThrow(
-                GetRequestsAssignedToConfigurationCount(configurationId) == 0,
-                "Configuration with ID {0} cannot be unassigned from a node, because there are requests scheduled with that configuration.",
-                configurationId);
+            Assumed.Zero(GetRequestsAssignedToConfigurationCount(configurationId), $"Configuration with ID {configurationId} cannot be unassigned from a node, because there are requests scheduled with that configuration.");
 
             _configurationToNode.Remove(configurationId);
         }
@@ -723,14 +719,10 @@ namespace Microsoft.Build.BackEnd
         private void ExpectScheduledRequestState(int globalRequestId, SchedulableRequestState state)
         {
             SchedulableRequest request = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
-            if (request == null)
-            {
-                ErrorUtilities.ThrowInternalError("Request {0} was expected to be in state {1} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)", globalRequestId, state);
-            }
-            else
-            {
-                request.VerifyState(state);
-            }
+
+            Assumed.NotNull(request, $"Request {globalRequestId} was expected to be in state {state} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)");
+
+            request.VerifyState(state);
         }
 
         internal struct UnscheduledRequestsWhichCanBeScheduledEnumerator

@@ -4,6 +4,9 @@
 #nullable enable
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Storage.FileSystem;
 
 namespace Microsoft.Build.UnitTests.Shared;
 
@@ -11,8 +14,8 @@ internal static class DriveMapping
 {
     private const int ERROR_FILE_NOT_FOUND = 2;
     private const int ERROR_INSUFFICIENT_BUFFER = 122;
-    private const int DDD_REMOVE_DEFINITION = 2;
-    private const int DDD_NO_FLAG = 0;
+    private const DEFINE_DOS_DEVICE_FLAGS DDD_REMOVE_DEFINITION = (DEFINE_DOS_DEVICE_FLAGS)2;
+    private const DEFINE_DOS_DEVICE_FLAGS DDD_NO_FLAG = 0;
     // extra space for '\??\'. Not counting for long paths support in tests.
     private const int MAX_PATH = 259;
 
@@ -21,10 +24,10 @@ internal static class DriveMapping
     /// </summary>
     /// <param name="letter">Drive letter</param>
     /// <param name="path">Path to be mapped</param>
-    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows5.1.2600")]
     public static void MapDrive(char letter, string path)
     {
-        if (!DefineDosDevice(DDD_NO_FLAG, ToDeviceName(letter), path))
+        if (!PInvoke.DefineDosDevice(DDD_NO_FLAG, ToDeviceName(letter), path))
         {
             NativeMethodsShared.ThrowExceptionForErrorCode(Marshal.GetLastWin32Error());
         }
@@ -34,10 +37,10 @@ internal static class DriveMapping
     /// Windows specific. Unmaps drive mapping.
     /// </summary>
     /// <param name="letter">Drive letter.</param>
-    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows5.1.2600")]
     public static void UnmapDrive(char letter)
     {
-        if (!DefineDosDevice(DDD_REMOVE_DEFINITION, ToDeviceName(letter), null))
+        if (!PInvoke.DefineDosDevice(DDD_REMOVE_DEFINITION, ToDeviceName(letter), null))
         {
             NativeMethodsShared.ThrowExceptionForErrorCode(Marshal.GetLastWin32Error());
         }
@@ -48,15 +51,28 @@ internal static class DriveMapping
     /// </summary>
     /// <param name="letter">Drive letter.</param>
     /// <returns>Path mapped under specified letter. Empty string if mapping not found.</returns>
-    [SupportedOSPlatform("windows")]
-    public static string GetDriveMapping(char letter)
+    [SupportedOSPlatform("windows5.1.2600")]
+    public static unsafe string GetDriveMapping(char letter)
     {
         // since this is just for test purposes - let's not overcomplicate with long paths support
         char[] buffer = new char[MAX_PATH];
+        string deviceName = ToDeviceName(letter);
+        uint length;
 
-        while (QueryDosDevice(ToDeviceName(letter), buffer, buffer.Length) == 0)
+        while (true)
         {
-            // Return empty string if the drive is not mapped
+            fixed (char* pBuf = buffer)
+            {
+                fixed (char* pDevice = deviceName)
+                {
+                    length = PInvoke.QueryDosDevice(new PCWSTR(pDevice), new PWSTR(pBuf), (uint)buffer.Length);
+                }
+            }
+            if (length != 0)
+            {
+                break;
+            }
+
             int err = Marshal.GetLastWin32Error();
             if (err == ERROR_FILE_NOT_FOUND)
             {
@@ -71,20 +87,14 @@ internal static class DriveMapping
             buffer = new char[buffer.Length * 4];
         }
 
-        // Translate from the native path semantic - starting with '\??\'
-        return new string(buffer, 4, buffer.Length - 4);
+        // Translate from the native path semantic - starting with '\??\'. `length` is the
+        // number of characters QueryDosDevice copied INCLUDING the trailing NUL; trim the
+        // prefix (4) and the terminator (1) to get the managed string content.
+        return new string(buffer, 4, (int)length - 5);
     }
 
     private static string ToDeviceName(char letter)
     {
         return $"{char.ToUpper(letter)}:";
     }
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    [SupportedOSPlatform("windows")]
-    private static extern bool DefineDosDevice([In] int flags, [In] string deviceName, [In] string? path);
-
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    [SupportedOSPlatform("windows")]
-    private static extern int QueryDosDevice([In] string deviceName, [Out] char[] buffer, [In] int bufSize);
 }

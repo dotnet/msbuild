@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -891,8 +891,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(buildComponentHost != null, "BuildComponentHost was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(buildComponentHost, "BuildComponentHost was null");
 
                 _componentHost = buildComponentHost;
 
@@ -930,7 +930,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
 
                 // Set the state to indicate we are starting the shutdown process.
                 _serviceState = LoggingServiceState.ShuttingDown;
@@ -1000,19 +1000,15 @@ namespace Microsoft.Build.BackEnd.Logging
         public void PacketReceived(int node, INodePacket packet)
         {
             // The packet cannot be null
-            ErrorUtilities.VerifyThrow(packet != null, "packet was null");
+            Assumed.NotNull(packet, "packet was null");
 
             // Expected the packet type to be a logging message packet
-            // PERF: Not using VerifyThrow to avoid allocations for enum.ToString (boxing of NodePacketType) in the non-error case.
-            if (packet.Type != NodePacketType.LogMessage)
-            {
-                ErrorUtilities.ThrowInternalError("Expected packet type \"{0}\" but instead got packet type \"{1}\".", nameof(NodePacketType.LogMessage), packet.Type.ToString());
-            }
+            Assumed.Equal(packet.Type, NodePacketType.LogMessage, $"""Expected packet type "{nameof(NodePacketType.LogMessage)}" but instead got packet type "{packet.Type}".""");
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
 
-            ErrorUtilities.VerifyThrow(loggingPacket.EventType != LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
+            Assumed.NotEqual(loggingPacket.EventType, LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
 
             ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }
@@ -1029,8 +1025,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(logger != null, "logger was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(logger, "logger was null");
 
                 // If the logger is already in the list it should not be registered again.
                 if (_loggers.Contains(logger))
@@ -1044,8 +1040,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (_centralForwardingLoggerSinkId == -1)
                 {
                     // Create a forwarding logger which forwards all events to an eventSourceSink
-                    Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
-                    string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
+                    Assembly engineAssembly = typeof(CentralForwardingLogger).Assembly;
+                    string loggerClassName = typeof(CentralForwardingLogger).FullName;
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
                     LoggerDescription centralForwardingLoggerDescription = new LoggerDescription(
                                                                                       loggerClassName,
@@ -1054,9 +1050,9 @@ namespace Microsoft.Build.BackEnd.Logging
                                                                                       string.Empty /*No parameters needed as we are forwarding all events*/,
                                                                                       LoggerVerbosity.Diagnostic); /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
 
-                    // Registering a distributed logger will initialize the logger, and create and initialize the forwarding logger.
+                    // Registering a distributed logger will initialize the logger, and initialize the forwarding logger.
                     // In addition it will register the logging description so that it can be instantiated on a node.
-                    RegisterDistributedLogger(logger, centralForwardingLoggerDescription);
+                    RegisterDistributedLoggerCore(logger, centralForwardingLoggerDescription, new CentralForwardingLogger());
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
@@ -1118,57 +1114,67 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(forwardingLogger != null, "forwardingLogger was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(forwardingLogger, "forwardingLogger was null");
                 if (centralLogger == null)
                 {
                     centralLogger = new NullCentralLogger();
                 }
 
-                IForwardingLogger localForwardingLogger = null;
-
-                // create an eventSourceSink which the central logger will register with to receive the events from the forwarding logger
-                EventSourceSink eventSourceSink = new EventSourceSink();
-
-                // If the logger is already in the list it should not be registered again.
-                // Note here that we are checking for direct equivalence (fast)
-                // and if we're dealing with a reusable logger, we need to check its original logger (slower)
-                if (_loggers.Contains(centralLogger) || _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger))
-                {
-                    return false;
-                }
-
-                // Assign a unique logger Id to this distributed logger
-                int sinkId = _nextSinkId++;
-                forwardingLogger.LoggerId = sinkId;
-                eventSourceSink.Name = $"Sink for forwarding logger \"{sinkId}\".";
-
-                // Initialize and register the central logger
-                InitializeLogger(centralLogger, eventSourceSink);
-
-                localForwardingLogger = forwardingLogger.CreateForwardingLogger();
-                EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
-                localForwardingLogger.BuildEventRedirector = newRedirector;
-                localForwardingLogger.Parameters = forwardingLogger.LoggerSwitchParameters;
-                localForwardingLogger.Verbosity = forwardingLogger.Verbosity;
-
-                // Give the forwarding logger registered on the inproc node the correct ID.
-                localForwardingLogger.NodeId = 1;
-
-                // Convert the path to the logger DLL to full path before passing it to the node provider
-                forwardingLogger.ConvertPathsToFullPaths();
-
-                CreateFilterEventSource();
-
-                // Initialize and register the forwarding logger
-                InitializeLogger(localForwardingLogger, _filterEventSource);
-
-                _loggerDescriptions.Add(forwardingLogger);
-
-                _eventSinkDictionary.Add(sinkId, eventSourceSink);
-
-                return true;
+                return RegisterDistributedLoggerCore(centralLogger, forwardingLogger, forwardingLogger.CreateForwardingLogger());
             }
+        }
+
+        private bool RegisterDistributedLoggerCore(ILogger centralLogger, LoggerDescription forwardingLogger, IForwardingLogger localForwardingLogger)
+        {
+            Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+            Assumed.NotNull(forwardingLogger, "forwardingLogger was null");
+            Assumed.NotNull(localForwardingLogger, "localForwardingLogger was null");
+            if (centralLogger == null)
+            {
+                centralLogger = new NullCentralLogger();
+            }
+
+            // create an eventSourceSink which the central logger will register with to receive the events from the forwarding logger
+            EventSourceSink eventSourceSink = new EventSourceSink();
+
+            // If the logger is already in the list it should not be registered again.
+            // Note here that we are checking for direct equivalence (fast)
+            // and if we're dealing with a reusable logger, we need to check its original logger (slower)
+            if (_loggers.Contains(centralLogger) || _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger))
+            {
+                return false;
+            }
+
+            // Assign a unique logger Id to this distributed logger
+            int sinkId = _nextSinkId++;
+            forwardingLogger.LoggerId = sinkId;
+            eventSourceSink.Name = $"Sink for forwarding logger \"{sinkId}\".";
+
+            // Initialize and register the central logger
+            InitializeLogger(centralLogger, eventSourceSink);
+
+            EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
+            localForwardingLogger.BuildEventRedirector = newRedirector;
+            localForwardingLogger.Parameters = forwardingLogger.LoggerSwitchParameters;
+            localForwardingLogger.Verbosity = forwardingLogger.Verbosity;
+
+            // Give the forwarding logger registered on the inproc node the correct ID.
+            localForwardingLogger.NodeId = 1;
+
+            // Convert the path to the logger DLL to full path before passing it to the node provider
+            forwardingLogger.ConvertPathsToFullPaths();
+
+            CreateFilterEventSource();
+
+            // Initialize and register the forwarding logger
+            InitializeLogger(localForwardingLogger, _filterEventSource);
+
+            _loggerDescriptions.Add(forwardingLogger);
+
+            _eventSinkDictionary.Add(sinkId, eventSourceSink);
+
+            return true;
         }
 
         /// <summary>
@@ -1185,10 +1191,10 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                ErrorUtilities.VerifyThrow(_serviceState != LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
-                ErrorUtilities.VerifyThrow(forwardingLoggerSink != null, "forwardingLoggerSink was null");
-                ErrorUtilities.VerifyThrow(descriptions != null, "loggerDescriptions was null");
-                ErrorUtilities.VerifyThrow(descriptions.Count > 0, "loggerDescriptions was null");
+                Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+                Assumed.NotNull(forwardingLoggerSink, "forwardingLoggerSink was null");
+                Assumed.NotNull(descriptions, "loggerDescriptions was null");
+                Assumed.Positive(descriptions.Count, "loggerDescriptions was null");
 
                 bool sinkAlreadyRegistered = false;
                 int sinkId = -1;
@@ -1240,7 +1246,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void LogBuildEvent(BuildEventArgs buildEvent)
         {
-            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+            Assumed.NotNull(buildEvent, "buildEvent is null");
 
             BuildWarningEventArgs warningEvent = null;
             BuildErrorEventArgs errorEvent = null;
@@ -1294,18 +1300,48 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
-            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+            // Avoid processing events after shutdown has cleaned up resources.
+            // External code (e.g., plugin adapters) may hold references to LoggingService
+            // and attempt to log after shutdown has nullified internal state.
+            if (_serviceState == LoggingServiceState.Shutdown)
+            {
+                return;
+            }
+
+            Assumed.NotNull(buildEvent, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
-                // Block until queue is not full.
-                while (_eventQueue.Count >= _queueCapacity)
+                // Capture local references to prevent race with CleanLoggingEventProcessing
+                // which sets these fields to null during shutdown.
+                ConcurrentQueue<object> eventQueue = _eventQueue;
+                AutoResetEvent dequeueEvent = _dequeueEvent;
+                AutoResetEvent enqueueEvent = _enqueueEvent;
+
+                // Double-check after capturing references in case shutdown raced between
+                // the _serviceState check above and the field reads.
+                if (eventQueue == null || dequeueEvent == null || enqueueEvent == null)
                 {
-                    // Block and wait for dequeue event.
-                    _dequeueEvent.WaitOne();
+                    return;
                 }
 
-                _eventQueue.Enqueue(buildEvent);
-                _enqueueEvent.Set();
+                try
+                {
+                    // Block until queue is not full.
+                    while (eventQueue.Count >= _queueCapacity)
+                    {
+                        // Block and wait for dequeue event.
+                        dequeueEvent.WaitOne();
+                    }
+
+                    eventQueue.Enqueue(buildEvent);
+                    enqueueEvent.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Shutdown disposed the wait handles after we captured them;
+                    // silently drop the event.
+                    return;
+                }
             }
             else
             {
@@ -1344,7 +1380,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (loggingPacket.NodeBuildEvent.Value.Value is ProjectStartedEventArgs projectStartedEventArgs && _configCache.Value != null)
                 {
-                    ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
+                    Assumed.True(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
 
                     // Always log GlobalProperties on ProjectStarted for compatibility.
@@ -1566,10 +1602,8 @@ namespace Microsoft.Build.BackEnd.Logging
         private void RouteBuildEvent(object loggingEvent)
         {
             BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
-            if (buildEventArgs is null)
-            {
-                ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
-            }
+
+            Assumed.NotNull(buildEventArgs, $"Unknown logging item in queue: {loggingEvent.GetType().FullName}");
 
             if (buildEventArgs is BuildWarningEventArgs warningEvent)
             {
@@ -1954,13 +1988,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext context = eventArgs.BuildEventContext!;
             _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
 
-            // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
-            if (projectFile == null && !allowCacheMiss)
-            {
-                ErrorUtilities.ThrowInternalError(
-                    "ContextID {0} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{1}'",
-                    context.ProjectContextId, eventArgs.Message);
-            }
+            Assumed.True(projectFile != null || allowCacheMiss, $"ContextID {context.ProjectContextId} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{eventArgs.Message}'");
 
             return projectFile;
         }

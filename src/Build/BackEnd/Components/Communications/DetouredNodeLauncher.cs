@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.NodeLauncher);
             return new DetouredNodeLauncher();
         }
 
@@ -57,9 +57,9 @@ namespace Microsoft.Build.BackEnd
         public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(launchData.MSBuildLocation, nameof(launchData.MSBuildLocation));
+            Assumed.NotNullOrEmpty(launchData.MSBuildLocation);
 
-            ErrorUtilities.VerifyThrowInternalNull(_fileAccessManager, nameof(_fileAccessManager));
+            Assumed.NotNull(_fileAccessManager);
 
             if (!FileSystems.Default.FileExists(launchData.MSBuildLocation))
             {
@@ -70,7 +70,7 @@ namespace Microsoft.Build.BackEnd
             // parser logic expects it and will otherwise skip the first argument
             var commandLineArgs = $"\"{launchData.MSBuildLocation}\" {launchData.CommandLineArgs}";
 
-            CommunicationsUtilities.Trace("Launching node from {0}", launchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"Launching node from {launchData.MSBuildLocation}");
 
             string exeName = launchData.MSBuildLocation;
 
@@ -137,14 +137,16 @@ namespace Microsoft.Build.BackEnd
                 _sandboxedProcesses.Add(sp);
             }
 
-            CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", sp.ProcessId, exeName);
+            CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {sp.ProcessId}");
             return Process.GetProcessById(sp.ProcessId);
         }
 
         /// <summary>
         /// Creates environment variables with optional overrides for app host bootstrap.
         /// </summary>
-        private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string> environmentOverrides)
+#nullable enable annotations
+        private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string?>? environmentOverrides)
+#nullable disable annotations
         {
             var envVars = new Dictionary<string, string>();
             foreach (DictionaryEntry baseVar in Environment.GetEnvironmentVariables())

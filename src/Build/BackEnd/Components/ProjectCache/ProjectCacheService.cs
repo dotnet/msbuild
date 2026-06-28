@@ -24,7 +24,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework.Telemetry;
 using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 
 #pragma warning disable CS0618 // Type or member is obsolete, this class is adapting to both Experimental and new plugin APIs
@@ -222,7 +221,7 @@ namespace Microsoft.Build.ProjectCache
             }
             else
             {
-                ErrorUtilities.VerifyThrowArgumentNull(projectCacheDescriptor.PluginAssemblyPath, nameof(projectCacheDescriptor.PluginAssemblyPath));
+                ArgumentNullException.ThrowIfNull(projectCacheDescriptor.PluginAssemblyPath);
 
                 string pluginAssemblyPath = projectCacheDescriptor.PluginAssemblyPath!;
                 pluginTypeName = pluginAssemblyPath; // Just in case the assembly can't be loaded, the path would be helpful to help identify the problem.
@@ -452,13 +451,7 @@ namespace Microsoft.Build.ProjectCache
             IEnumerable<Type> GetTypes<T>(Assembly assembly)
             {
                 return assembly.ExportedTypes
-                    .Select(type => new { type, info = type.GetTypeInfo() })
-                    .Where(
-                        t => t.info.IsClass &&
-                             t.info.IsPublic &&
-                             !t.info.IsAbstract &&
-                             typeof(T).IsAssignableFrom(t.type))
-                    .Select(t => t.type);
+                    .Where(t => t.IsClass && t.IsPublic && !t.IsAbstract && typeof(T).IsAssignableFrom(t));
             }
         }
 
@@ -556,8 +549,7 @@ namespace Microsoft.Build.ProjectCache
 
             void EvaluateProjectIfNecessary(BuildSubmission submission, BuildRequestConfiguration configuration)
             {
-                ErrorUtilities.VerifyThrow(submission.BuildRequestData != null,
-                    "Submission BuildRequestData is not populated.");
+                Assumed.NotNull(submission.BuildRequestData, "Submission BuildRequestData is not populated.");
 
                 lock (configuration)
                 {
@@ -579,7 +571,7 @@ namespace Microsoft.Build.ProjectCache
 
         private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowInternalNull(buildRequest.ProjectInstance, nameof(buildRequest.ProjectInstance));
+            Assumed.NotNull(buildRequest.ProjectInstance);
 
             var buildEventFileInfo = new BuildEventFileInfo(buildRequest.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
@@ -621,7 +613,7 @@ namespace Microsoft.Build.ProjectCache
                     plugin.InitializationException?.Throw();
 
 
-                    ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, "Plugin '{0}' instance is null", plugin.Name);
+                    Assumed.NotNull(plugin.PluginInstance, $"Plugin '{plugin.Name}' instance is null");
 
                     MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(plugin.Name, buildRequest.ProjectFullPath, targetNames ?? MSBuildConstants.DefaultTargetsMarker);
                     if (plugin.PluginInstance is ProjectCachePluginBase currentPlugin)
@@ -637,7 +629,7 @@ namespace Microsoft.Build.ProjectCache
 #pragma warning restore CS0618 // Type or member is obsolete
                     else
                     {
-                        ErrorUtilities.ThrowInternalError("Unknown plugin type", plugin.Name);
+                        InternalError.Throw($"Unknown plugin type: {plugin.Name}");
                     }
 
                     if (pluginLogger.HasLoggedErrors || experimentalPluginLogger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
@@ -766,7 +758,7 @@ namespace Microsoft.Build.ProjectCache
 
                 foreach (XmlElement projectConfiguration in projectConfigurations)
                 {
-                    ErrorUtilities.VerifyThrowInternalNull(projectConfiguration.Attributes, nameof(projectConfiguration.Attributes));
+                    Assumed.NotNull(projectConfiguration.Attributes);
 
                     var buildProjectInSolution = projectConfiguration.Attributes![SolutionConfiguration.BuildProjectInSolutionAttribute];
                     if (buildProjectInSolution is not null &&
@@ -778,7 +770,7 @@ namespace Microsoft.Build.ProjectCache
                     }
 
                     XmlAttribute? projectPathAttribute = projectConfiguration.Attributes![SolutionConfiguration.AbsolutePathAttribute];
-                    ErrorUtilities.VerifyThrow(projectPathAttribute is not null, "Expected VS to set the project path on each ProjectConfiguration element.");
+                    Assumed.NotNull(projectPathAttribute, "Expected VS to set the project path on each ProjectConfiguration element.");
 
                     string projectPath = projectPathAttribute!.Value;
 
@@ -811,37 +803,38 @@ namespace Microsoft.Build.ProjectCache
                 return;
             }
 
-            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
+            // The ProjectInstance may not be loaded on the in-proc node when the project was built on an
+            // out-of-proc worker. VS submits builds by project path (without a ProjectInstance), so the
+            // configuration is added to the in-proc cache with _project=null. The worker node loads and
+            // evaluates the project locally, but the ProjectInstance is never transferred back — it's too
+            // large to serialize across the named pipe (only the BuildResult with target outcomes is returned).
+            //
+            // This method is reached because ShouldUseCache is shared by two call sites:
+            //   1. Pre-build (BuildManager.ExecuteSubmission): decides whether to issue a cache request.
+            //      The project isn't evaluated yet, so ShouldUseCache must return true in VS/global-plugin
+            //      scenarios without requiring IsLoaded. The cache request path (PostCacheRequest) handles
+            //      loading the project itself via EvaluateProjectIfNecessary.
+            //   2. Post-build (BuildManager.HandleResult): decides whether to notify cache plugins about
+            //      the build result. Here the in-proc config may still have no ProjectInstance if the
+            //      project was built on an out-of-proc node.
+            //
+            // We check IsLoaded rather than Project==null because the Project getter asserts !IsCached
+            // and would throw if the configuration happens to be in cached-to-disk state. IsLoaded is
+            // a safe read-only check (_project?.IsLoaded == true) with no side effects.
+            //
+            // Skipping is safe: the build already completed successfully and the cache plugin's
+            // HandleProjectFinishedAsync needs a loaded ProjectInstance to determine which plugins
+            // apply (via GetProjectCacheDescriptors) and to provide project context to the plugin.
+            if (!requestConfiguration.IsLoaded)
+            {
+                return;
+            }
+
+            // If the ProjectInstance was evicted to disk to save memory, restore it before accessing
+            // the Project property below (whose getter asserts !IsCached).
             if (requestConfiguration.IsCached)
             {
                 requestConfiguration.RetrieveFromCache();
-            }
-
-            // The Project property may be null if the configuration was created from a remote node
-            // request or the project was never loaded locally (e.g., in VS scenario where ShouldUseCache
-            // returns true before checking IsLoaded). Skip cache result handling in this case.
-            if (requestConfiguration.Project is null)
-            {
-                string projectCacheState = string.Join(":",
-                    requestConfiguration.ConfigurationId,
-                    Path.GetFileName(requestConfiguration.ProjectFullPath),
-                    requestConfiguration.IsLoaded,
-                    requestConfiguration.IsCached,
-                    requestConfiguration.WasGeneratedByNode,
-                    _isVsScenario,
-                    _globalProjectCacheDescriptor is not null);
-
-                CrashTelemetryRecorder.EmitEndBuildHangDiagnostics(new CrashTelemetry
-                {
-                    ExitType = CrashExitType.ProjectCacheFailure,
-                    ExceptionMessage = "Project unexpectedly null in HandleBuildResultAsync",
-                    BuildEngineVersion = Evaluation.ProjectCollection.Version?.ToString(),
-                    BuildEngineFrameworkName = NativeMethodsShared.FrameworkName,
-                    BuildEngineHost = BuildEnvironmentState.GetHostName(),
-                    IsStandaloneExecution = false,
-                    ProjectCacheState = projectCacheState,
-                });
-                return;
             }
 
             // Filter to plugins which apply to the project, if any
@@ -898,7 +891,7 @@ namespace Microsoft.Build.ProjectCache
                         // Rethrow any initialization exception.
                         plugin.InitializationException?.Throw();
 
-                        ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, "Plugin '{0}' instance is null", plugin.Name);
+                        Assumed.NotNull(plugin.PluginInstance, $"Plugin '{plugin.Name}' instance is null");
 
                         MSBuildEventSource.Log.ProjectCacheHandleBuildResultStart(plugin.Name, fileAccessContext.ProjectFullPath, targetNames);
                         try

@@ -116,7 +116,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal TypeLoader(Func<Type, object, bool> isDesiredType)
         {
-            ErrorUtilities.VerifyThrow(isDesiredType != null, "need a type filter");
+            Assumed.NotNull(isDesiredType, "need a type filter");
 
             _isDesiredType = isDesiredType;
         }
@@ -419,8 +419,8 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal AssemblyInfoToLoadedTypes(Func<Type, object, bool> typeFilter, AssemblyLoadInfo loadInfo)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
-                ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
+                ArgumentNullException.ThrowIfNull(typeFilter, "typefilter");
+                ArgumentNullException.ThrowIfNull(loadInfo);
 
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Shared
                 bool taskHostParamsMatchCurrentProc,
                 LogWarningDelegate logWarning)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeName);
+                ArgumentNullException.ThrowIfNull(typeName);
 
                 if (ShouldUseMetadataLoadContext(useTaskHost, taskHostParamsMatchCurrentProc))
                 {
@@ -625,7 +625,7 @@ namespace Microsoft.Build.Shared
                         {
                             // the final value looks like: ".NETFramework,Version=v3.5"
                             targetFramework = targetFrameworkAttr.ConstructorArguments[0].Value as string ?? string.Empty;
-                            _runtime = targetFramework.StartsWith(DotNetCoreIdentifier) ? MSBuildRuntimeValues.net : MSBuildRuntimeValues.clr4;
+                            _runtime = targetFramework.StartsWith(DotNetCoreIdentifier, StringComparison.Ordinal) ? MSBuildRuntimeValues.net : MSBuildRuntimeValues.clr4;
                         }
                     }
                     catch

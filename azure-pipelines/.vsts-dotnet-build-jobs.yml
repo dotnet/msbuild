@@ -32,6 +32,7 @@ jobs:
       buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
       toLowerCase: false
       usePat: true
+      dropRetentionDays: '1095'
       dropMetadataContainerName: 'DropMetadata-OptProf'
       condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
@@ -267,13 +268,6 @@ jobs:
   - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
     displayName: Execute cleanup tasks
     condition: succeededOrFailed()
-
-  - template: /eng/common/templates-official/steps/component-governance.yml@self
-    parameters:
-      ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
-        disableComponentGovernance: false
-      ${{ else }}:
-        disableComponentGovernance: true
 
 - template: /eng/common/templates-official/jobs/source-build.yml@self
   parameters:

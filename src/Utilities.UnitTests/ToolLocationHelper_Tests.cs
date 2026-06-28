@@ -22,7 +22,6 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -506,14 +505,14 @@ namespace Microsoft.Build.UnitTests
         public void FindFrameworksPathRunningThisTest()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
-                Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName),
+                Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
                 ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version40),
                 DirectoryExists,
                 GetDirectories,
                 SharedDotNetFrameworkArchitecture.Current);
 
 #if FEATURE_INSTALLED_MSBUILD
-            path.ShouldBe(Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName));
+            path.ShouldBe(Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName));
 #else
             path.ShouldBeNull();
 #endif

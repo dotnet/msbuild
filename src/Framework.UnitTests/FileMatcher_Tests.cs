@@ -13,7 +13,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -83,6 +82,50 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateSymbolicLink(symlinkPath, testFolder.Path);
                 string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, "**").FileList;
                 fileMatches.Length.ShouldBe(1);
+            }
+            finally
+            {
+                if (Directory.Exists(symlinkPath))
+                {
+                    Directory.Delete(symlinkPath);
+                }
+            }
+        }
+
+        [RequiresSymbolicLinksFact]
+        public void ShouldNotSkipSymlinkDirectoryWhenProjectDirectoryIsPrefixedWithSymlinkTargetName()
+        {
+            TransientTestFolder rootFolder = _env.CreateFolder();
+
+            string targetFolderName = "target";
+            string fileAName = "A.cs";
+            string targetSubFolderName = "foo";
+            string fileBName = "B.cs";
+            TransientTestFolder targetFolder = _env.CreateFolder(Path.Combine(rootFolder.Path, targetFolderName));
+            _env.CreateFile(targetFolder, fileName: fileAName);
+            TransientTestFolder targetSubFolder = _env.CreateFolder(Path.Combine(targetFolder.Path, targetSubFolderName));
+            _env.CreateFile(targetSubFolder, fileName: fileBName);
+
+            TransientTestFolder projectFolder = _env.CreateFolder(Path.Combine(rootFolder.Path, $"{targetFolderName}Test"));
+            string symlinkName = "mySymlink";
+            string symlinkPath = Path.Combine(projectFolder.Path, symlinkName);
+            string include = Path.Combine(symlinkName, "**", "*.cs");
+
+            string[] expectedFiles =
+            [
+                Path.Combine(symlinkName, fileAName),
+                Path.Combine(symlinkName, targetSubFolderName, fileBName)
+            ];
+
+            try
+            {
+                Directory.CreateSymbolicLink(symlinkPath, targetFolder.Path);
+                string[] fileMatches = FileMatcher.Default.GetFiles(projectFolder.Path, include).FileList;
+                fileMatches.Length.ShouldBe(expectedFiles.Length);
+                foreach (var item in fileMatches)
+                {
+                    expectedFiles.ShouldContain(item);
+                }
             }
             finally
             {
@@ -2171,7 +2214,7 @@ namespace Microsoft.Build.UnitTests
                             if (nextSlash != -1)
                             {
                                 // UNC paths start with a \\ fragment. Match against \\ when path is empty (i.e., inside the current working directory)
-                                string match = normalizedCandidate.StartsWith(@"\\") && string.IsNullOrEmpty(path)
+                                string match = normalizedCandidate.StartsWith(@"\\", StringComparison.Ordinal) && string.IsNullOrEmpty(path)
                                     ? @"\\"
                                     : normalizedCandidate.Substring(0, nextSlash);
 
@@ -2254,7 +2297,7 @@ namespace Microsoft.Build.UnitTests
                     normalized = path.Replace("\\", Path.DirectorySeparatorChar.ToString());
                 }
                 // Replace leading UNC.
-                if (normalized.StartsWith(@"\\"))
+                if (normalized.StartsWith(@"\\", StringComparison.Ordinal))
                 {
                     normalized = "<:UNC:>" + normalized.Substring(2);
                 }

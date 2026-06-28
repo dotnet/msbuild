@@ -576,7 +576,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private static void GenerateAssignPropertyToValue(CodeMemberProperty propertyName, string property, CodeExpression value)
         {
-            ErrorUtilities.VerifyThrow(value != null, "NullValue", property);
+            Assumed.NotNull(value, $"NullValue: {property}");
             CodeAssignStatement setStatement = new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(SwitchToAdd), property), value);
             propertyName.SetStatements.Add(setStatement);
         }
