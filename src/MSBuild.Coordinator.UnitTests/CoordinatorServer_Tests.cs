@@ -369,6 +369,58 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
+    public async Task InvalidHandshakeProcessId_ReceivesError()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
+        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
+
+        writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId: 0, []));
+
+        reader.ReadServerMessage().ShouldBeOfType<ErrorMessage>();
+
+        _cts.Cancel();
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task UnexpectedMessageAfterGrant_ReleasesGrant()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream client1 = await ConnectClientPipeAsync();
+        using BinaryWriter writer1 = new(client1, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader reader1 = new(client1, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(writer1, reader1, processId: 10001);
+        writer1.Write(new RequestNodesMessage(requestedNodes: 4));
+        reader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
+
+        using NamedPipeClientStream client2 = await ConnectClientPipeAsync();
+        using BinaryWriter writer2 = new(client2, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader reader2 = new(client2, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(writer2, reader2, processId: 10002);
+        writer2.Write(new RequestNodesMessage(requestedNodes: 4));
+        reader2.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+
+        writer1.Write(new RequestNodesMessage(requestedNodes: 1));
+        reader1.ReadServerMessage().ShouldBeOfType<ErrorMessage>();
+
+        reader2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBeGreaterThan(0);
+
+        writer2.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+
+        await serverTask;
+    }
+
+    [Fact]
     public async Task AutoShutdown_ExitsWhenNoBuildsActive()
     {
         using CoordinatorServer server = CreateServer(

@@ -4,6 +4,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Pipes;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Internal;
@@ -148,67 +149,28 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <param name="token">Cancellation token to signal the client loop should exit.</param>
     private async Task HandleClientAsync(NamedPipeServerStream pipeStream, CancellationToken token)
     {
-        ConnectedClient? client = null;
+        using Connection? connection = Connection.TryCreate(pipeStream, _output);
+        if (connection is null)
+        {
+            return;
+        }
+
+        if (!TryProcessGrantRequest(connection, out BuildGrant? grant))
+        {
+            return;
+        }
+
+        if (!TryAcceptClient(connection, grant, out ConnectedClient? client))
+        {
+            return;
+        }
 
         try
         {
-            // Establish client identity and capabilities. The grant request is a separate
-            // protocol message and is handled below.
-            using Connection? connection = Connection.TryCreate(pipeStream, _output);
-            if (connection is null)
-            {
-                return;
-            }
-
-            ClientMessage requestMessage = connection.ReadClientMessage();
-
-            if (requestMessage is not RequestNodesMessage request)
-            {
-                _output.WriteLine($"CoordinatorServer: Rejected client — second message was {requestMessage.GetType().Name}");
-                connection.WriteServerMessage(new ErrorMessage("Second message must be RequestNodes"));
-                return;
-            }
-
-            if (request.RequestedNodes <= 0)
-            {
-                _output.WriteLine($"CoordinatorServer: Rejected client — invalid request (PID={connection.ProcessId}, RequestedNodes={request.RequestedNodes})");
-                connection.WriteServerMessage(new ErrorMessage("Invalid request: RequestedNodes must be > 0"));
-                return;
-            }
-
-            _output.WriteLine($"CoordinatorServer: Client connected (PID {connection.ProcessId}, ConnectionId {connection.Id}, requested {request.RequestedNodes} nodes)");
-
-            BuildGrant grant = new(connection.Id, connection.ProcessId, request.RequestedNodes);
-
-            // Once a client is accepted, transfer pipe ownership to ConnectedClient so
-            // cleanup and subsequent message I/O are tied to the grant lifecycle.
-            client = new ConnectedClient(connection, grant);
-
-            using (_clientsLock.EnterDisposableWriteLock())
-            {
-                _clientsById[connection.Id] = client;
-            }
-
-            // Try to grant nodes.
-            int grantedNodes = _budgetManager.TryGrant(grant);
-
-            if (grantedNodes > 0)
-            {
-                _output.WriteLine($"CoordinatorServer: Granted {grantedNodes} nodes to PID {connection.ProcessId}");
-                client.WriteServerMessage(new NodeGrantMessage(grantedNodes));
-            }
-            else
-            {
-                _output.WriteLine($"CoordinatorServer: PID {connection.ProcessId} queued (no nodes available)");
-                client.WriteServerMessage(WaitMessage.Instance);
-
-                // The grant will be fulfilled later when resources free up.
-            }
-
-            ResetShutdownTimer();
+            bool stopProcessing = false;
 
             // Process subsequent messages (heartbeats and release).
-            while (!token.IsCancellationRequested && pipeStream.IsConnected)
+            while (!stopProcessing && !token.IsCancellationRequested && client.IsConnected)
             {
                 ClientMessage message;
 
@@ -239,10 +201,14 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
                     case ReleaseNodesMessage:
                         _output.WriteLine($"CoordinatorServer: PID {connection.ProcessId} released grant");
-                        ReleaseClient(client);
-                        client.Dispose();
-                        client = null;
-                        return;
+                        stopProcessing = true;
+                        break;
+
+                    default:
+                        _output.WriteLine($"CoordinatorServer: PID {connection.ProcessId} sent unexpected message {message.GetType().Name}");
+                        client.WriteServerMessage(new ErrorMessage("Unexpected message after grant"));
+                        stopProcessing = true;
+                        break;
                 }
             }
         }
@@ -254,16 +220,94 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         }
         finally
         {
-            // If we get here without an explicit release, treat it as a crash/disconnect.
+            ReleaseClient(client);
+            client.Dispose();
+        }
+    }
+
+    private bool TryProcessGrantRequest(Connection connection, [NotNullWhen(true)] out BuildGrant? grant)
+    {
+        try
+        {
+            ClientMessage clientMessage = connection.ReadClientMessage();
+
+            if (clientMessage is RequestNodesMessage { RequestedNodes: int requestedNodes })
+            {
+                if (requestedNodes <= 0)
+                {
+                    _output.WriteLine($"CoordinatorServer: Rejected client — invalid request (RequestedNodes={requestedNodes})");
+                    connection.WriteServerMessage(new ErrorMessage("Invalid request: RequestedNodes must be > 0"));
+
+                    grant = null;
+                    return false;
+                }
+
+                grant = new(connection.Id, connection.ProcessId, requestedNodes);
+                return true;
+            }
+
+            _output.WriteLine($"CoordinatorServer: Rejected client — second message was {clientMessage.GetType().Name}");
+            connection.WriteServerMessage(new ErrorMessage($"Second message must be {nameof(ClientMessageType.RequestNodes)}"));
+
+            grant = null;
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _output.WriteLine($"CoordinatorServer: Exception handling client: {ex}");
+
+            grant = null;
+            return false;
+        }
+    }
+
+    private bool TryAcceptClient(Connection connection, BuildGrant grant, [NotNullWhen(true)] out ConnectedClient? client)
+    {
+        client = null;
+
+        try
+        {
+            _output.WriteLine($"CoordinatorServer: Client connected (PID {connection.ProcessId}, ConnectionId {connection.Id}, requested {grant.RequestedNodes} nodes)");
+
+            // Once a client is accepted, transfer pipe ownership to ConnectedClient so
+            // cleanup and subsequent message I/O are tied to the grant lifecycle.
+            client = new ConnectedClient(connection, grant);
+
+            using (_clientsLock.EnterDisposableWriteLock())
+            {
+                _clientsById[connection.Id] = client;
+            }
+
+            int grantedNodes = _budgetManager.TryGrant(grant);
+
+            if (grantedNodes > 0)
+            {
+                _output.WriteLine($"CoordinatorServer: Granted {grantedNodes} nodes to PID {connection.ProcessId}");
+                client.WriteServerMessage(new NodeGrantMessage(grantedNodes));
+            }
+            else
+            {
+                _output.WriteLine($"CoordinatorServer: PID {connection.ProcessId} queued (no nodes available)");
+                client.WriteServerMessage(WaitMessage.Instance);
+
+                // The grant will be fulfilled later when resources free up.
+            }
+
+            ResetShutdownTimer();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _output.WriteLine($"CoordinatorServer: Exception accepting client: {ex}");
+
             if (client is not null)
             {
                 ReleaseClient(client);
                 client.Dispose();
+                client = null;
             }
-            else
-            {
-                pipeStream.Dispose();
-            }
+
+            return false;
         }
     }
 

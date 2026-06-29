@@ -40,6 +40,11 @@ internal sealed partial class CoordinatorServer
         public BuildGrant Grant { get; }
 
         /// <summary>
+        ///  Gets a value indicating whether the pipe is still connected to the client.
+        /// </summary>
+        public bool IsConnected => _pipeStream.IsConnected;
+
+        /// <summary>
         ///  Creates a connected client by taking ownership of a negotiated connection.
         /// </summary>
         public ConnectedClient(Connection connection, BuildGrant grant)
