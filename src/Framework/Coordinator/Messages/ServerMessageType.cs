@@ -27,4 +27,9 @@ internal enum ServerMessageType : byte
     ///  An error occurred. Payload: string message.
     /// </summary>
     Error = 4,
+
+    /// <summary>
+    ///  A node grant with an associated grant token. Payload: Guid grantId, int grantedNodes.
+    /// </summary>
+    NodeGrantWithId = 5,
 }

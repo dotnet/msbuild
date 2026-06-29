@@ -22,6 +22,7 @@ internal abstract record ServerMessage
             ServerMessageType.NodeGrant => new NodeGrantMessage(grantedNodes: reader.ReadInt32()),
             ServerMessageType.Wait => WaitMessage.Instance,
             ServerMessageType.Error => new ErrorMessage(message: reader.ReadString()),
+            ServerMessageType.NodeGrantWithId => NodeGrantWithIdMessage.ReadPayload(reader),
 
             _ => Assumed.Unreachable<ServerMessage>($"Unknown coordinator message type: {messageType}"),
         };
