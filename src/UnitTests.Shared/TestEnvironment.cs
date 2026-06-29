@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -529,6 +529,19 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
+            debugPath = FrameworkDebugUtils.DebugPath;
+            if (debugPath != null)
+            {
+                try
+                {
+                    files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // Debug folder might not have been created
+                }
+            }
+
             try
             {
                 files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
@@ -561,9 +574,10 @@ namespace Microsoft.Build.UnitTests
                     continue;
                 }
 
-                // Com trace file. This is probably fine, but output it as it was likely turned on
-                // for a reason.
-                if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt"))
+                // Communication or coordinator trace file.
+                // This is probably fine, but add it to the test output, because it was likely turned on for a reason.
+                if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt") ||
+                    Regex.IsMatch(file.Name, @"MSBuild_CoordinatorTrace_PID_\d+\.txt"))
                 {
                     output.WriteLine($"{file.Name}: {contents}");
                     newFilesCount--;
