@@ -85,6 +85,59 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
+    public Task TryConnect_RootGrant_DoesNotMutateProcessEnvironment()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        env.SetEnvironmentVariable(Constants.GrantIdEnvVarName, null);
+
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        CoordinatorClient? client = TryConnectToServer(requestedNodes: 8, processId: Pid1);
+        client.ShouldNotBeNull();
+        client.GrantId.ShouldNotBe(Guid.Empty);
+        Environment.GetEnvironmentVariable(Constants.GrantIdEnvVarName).ShouldBeNull();
+
+        client.Dispose();
+        Environment.GetEnvironmentVariable(Constants.GrantIdEnvVarName).ShouldBeNull();
+
+        _cts.Cancel();
+
+        return serverTask;
+    }
+
+    [Fact]
+    public Task TryConnect_WithInheritedGrantId_JoinsExistingGrant()
+    {
+        using TestEnvironment env = TestEnvironment.Create(testOutput);
+        env.SetEnvironmentVariable(Constants.GrantIdEnvVarName, null);
+
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        CoordinatorClient? rootClient = TryConnectToServer(requestedNodes: 4, processId: Pid1);
+        rootClient.ShouldNotBeNull();
+        rootClient.GrantedNodes.ShouldBe(4);
+        rootClient.GrantId.ShouldNotBe(Guid.Empty);
+
+        env.SetEnvironmentVariable(Constants.GrantIdEnvVarName, rootClient.GrantId.ToString("D"));
+
+        using CoordinatorClient? nestedClient = TryConnectToServer(requestedNodes: 8, processId: Pid2);
+        nestedClient.ShouldNotBeNull();
+        nestedClient.GrantedNodes.ShouldBe(4);
+        nestedClient.GrantId.ShouldBe(rootClient.GrantId);
+
+        nestedClient.Dispose();
+        Environment.GetEnvironmentVariable(Constants.GrantIdEnvVarName).ShouldBe(rootClient.GrantId.ToString("D"));
+
+        rootClient.Dispose();
+        Environment.GetEnvironmentVariable(Constants.GrantIdEnvVarName).ShouldBe(rootClient.GrantId.ToString("D"));
+        _cts.Cancel();
+
+        return serverTask;
+    }
+
+    [Fact]
     public void TryConnect_NoServer_ReturnsNull()
     {
         // Use a pipe name that no server is listening on.

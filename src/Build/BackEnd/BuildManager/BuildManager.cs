@@ -38,6 +38,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
+using CoordinatorConstants = Microsoft.Build.Framework.Coordinator.Constants;
 using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
@@ -644,6 +645,15 @@ namespace Microsoft.Build.Execution
                     if (_coordinatorClient != null)
                     {
                         _buildParameters.MaxNodeCount = _coordinatorClient.GrantedNodes;
+
+                        if (_coordinatorClient.GrantId != Guid.Empty)
+                        {
+                            // Add the grant token to this build's environment snapshot so
+                            // task-launched child processes can join this coordinator grant.
+                            _buildParameters.SetBuildProcessEnvironmentVariable(
+                                CoordinatorConstants.GrantIdEnvVarName,
+                                _coordinatorClient.GrantId.ToString());
+                        }
 
                         if (_coordinatorClient.WaitDuration is TimeSpan waitDuration)
                         {

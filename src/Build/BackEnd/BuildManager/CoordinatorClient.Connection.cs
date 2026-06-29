@@ -63,7 +63,7 @@ internal sealed partial class CoordinatorClient
         private bool TryHandshake(int processId, ICoordinatorDebugOutput output)
         {
             output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {Id})");
-            WriteClientMessage(new ClientHandshakeMessage(Id, processId, capabilities: []));
+            WriteClientMessage(new ClientHandshakeMessage(Id, processId, capabilities: [Capabilities.NestedGrants]));
 
             ServerMessage response = ReadServerMessage();
 
