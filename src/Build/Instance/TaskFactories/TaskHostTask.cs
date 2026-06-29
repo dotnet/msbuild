@@ -159,7 +159,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The configuration sent to the task host for this task. Retained so that, when the task host
-        /// reports its environment as unchanged (<see cref="TaskHostTaskComplete.EnvironmentIdentical"/>),
+        /// reports its environment as unchanged (<see cref="InvariantPayloadTransfer.Identical"/>),
         /// we can reconstruct the returned environment from what we sent rather than re-receiving it.
         /// </summary>
         private TaskHostConfiguration _sentConfiguration;
@@ -604,7 +604,7 @@ namespace Microsoft.Build.BackEnd
 
             // Update the task environment with the environment changes from the task host execution.
             Dictionary<string, string> returnedEnvironment;
-            if (taskHostTaskComplete.EnvironmentMode == TaskHostTaskComplete.EnvironmentIdentical)
+            if (taskHostTaskComplete.EnvironmentMode == InvariantPayloadTransfer.Identical)
             {
                 Assumed.NotNull(_sentConfiguration, "Task host reported EnvironmentIdentical but no configuration was recorded for this task.");
                 returnedEnvironment = _sentConfiguration.BuildProcessEnvironment;

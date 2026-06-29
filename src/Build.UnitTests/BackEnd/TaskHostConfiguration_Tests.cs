@@ -715,7 +715,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the environment-delta wire format (packet version >= 5) and the default
-        /// <see cref="TaskHostConfiguration.EnvironmentFull"/> mode, the build process environment
+        /// <see cref="InvariantPayloadTransfer.Full"/> mode, the build process environment
         /// is serialized in full and round-trips correctly.
         /// </summary>
         [Fact]
@@ -728,7 +728,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             };
 
             TaskHostConfiguration config = CreateConfigurationWithEnvironment(environment);
-            config.EnvironmentMode.ShouldBe(TaskHostConfiguration.EnvironmentFull);
+            config.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Full);
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -739,7 +739,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
-            deserializedConfig.EnvironmentMode.ShouldBe(TaskHostConfiguration.EnvironmentFull);
+            deserializedConfig.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Full);
             deserializedConfig.BuildProcessEnvironment.ShouldNotBeNull();
             deserializedConfig.BuildProcessEnvironment.Count.ShouldBe(environment.Count);
             deserializedConfig.BuildProcessEnvironment["PATH"].ShouldBe(environment["PATH"]);
@@ -757,7 +757,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the environment-delta wire format (packet version >= 5) and
-        /// <see cref="TaskHostConfiguration.EnvironmentIdentical"/> mode, the build process environment
+        /// <see cref="InvariantPayloadTransfer.Identical"/> mode, the build process environment
         /// dictionary is omitted from the wire (saving bytes) and the receiver reconstructs it from the
         /// connection's baseline via <see cref="TaskHostConfiguration.SetResolvedBuildProcessEnvironment"/>.
         /// </summary>
@@ -778,7 +778,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             long fullLength = TranslationHelpers.GetWriteStreamLength();
 
             TaskHostConfiguration identicalConfig = CreateConfigurationWithEnvironment(environment);
-            identicalConfig.EnvironmentMode = TaskHostConfiguration.EnvironmentIdentical;
+            identicalConfig.EnvironmentMode = InvariantPayloadTransfer.Identical;
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -790,7 +790,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
             // The dictionary was not on the wire, so it is null until reconstructed from the baseline.
-            deserializedConfig.EnvironmentMode.ShouldBe(TaskHostConfiguration.EnvironmentIdentical);
+            deserializedConfig.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Identical);
             deserializedConfig.BuildProcessEnvironment.ShouldBeNull();
 
             deserializedConfig.SetResolvedBuildProcessEnvironment(environment);
@@ -799,7 +799,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the solution-config delta wire format (packet version >= 5) and the default
-        /// <see cref="TaskHostConfiguration.SolutionConfigFull"/> mode, the CurrentSolutionConfigurationContents
+        /// <see cref="InvariantPayloadTransfer.Full"/> mode, the CurrentSolutionConfigurationContents
         /// global property is carried in its own field (out of the dictionary) and round-trips correctly.
         /// </summary>
         [Fact]
@@ -813,7 +813,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             };
 
             TaskHostConfiguration config = CreateConfigurationWithGlobalProperties(globalProperties);
-            config.SolutionConfigMode.ShouldBe(TaskHostConfiguration.SolutionConfigFull);
+            config.SolutionConfigMode.ShouldBe(InvariantPayloadTransfer.Full);
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -823,7 +823,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
-            deserializedConfig.SolutionConfigMode.ShouldBe(TaskHostConfiguration.SolutionConfigFull);
+            deserializedConfig.SolutionConfigMode.ShouldBe(InvariantPayloadTransfer.Full);
             deserializedConfig.GlobalProperties.ShouldNotBeNull();
             deserializedConfig.GlobalProperties.Count.ShouldBe(globalProperties.Count);
             deserializedConfig.GlobalProperties["Configuration"].ShouldBe("Debug");
@@ -836,7 +836,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the solution-config delta wire format (packet version >= 5) and
-        /// <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> mode, the CurrentSolutionConfigurationContents
+        /// <see cref="InvariantPayloadTransfer.Identical"/> mode, the CurrentSolutionConfigurationContents
         /// value is omitted from the wire (saving bytes) and the receiver reconstructs it from the connection's
         /// baseline via <see cref="TaskHostConfiguration.ApplyResolvedSolutionConfig"/>.
         /// </summary>
@@ -860,7 +860,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             long fullLength = TranslationHelpers.GetWriteStreamLength();
 
             TaskHostConfiguration identicalConfig = CreateConfigurationWithGlobalProperties(globalProperties);
-            identicalConfig.SolutionConfigMode = TaskHostConfiguration.SolutionConfigIdentical;
+            identicalConfig.SolutionConfigMode = InvariantPayloadTransfer.Identical;
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -872,7 +872,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
             // The blob was not on the wire, so the dictionary holds only the other properties until reconstructed.
-            deserializedConfig.SolutionConfigMode.ShouldBe(TaskHostConfiguration.SolutionConfigIdentical);
+            deserializedConfig.SolutionConfigMode.ShouldBe(InvariantPayloadTransfer.Identical);
             deserializedConfig.GlobalProperties.ShouldNotBeNull();
             deserializedConfig.GlobalProperties.ContainsKey(TaskHostConfiguration.SolutionConfigKey).ShouldBeFalse();
             deserializedConfig.GlobalProperties["Configuration"].ShouldBe("Debug");

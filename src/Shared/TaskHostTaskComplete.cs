@@ -90,25 +90,10 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, string> _buildProcessEnvironment = null;
 
         /// <summary>
-        /// Environment transfer mode indicating that the full build process environment dictionary is
-        /// serialized on the wire.
-        /// Only meaningful when the negotiated packet version is >= 5.
-        /// </summary>
-        internal const byte EnvironmentFull = 0;
-
-        /// <summary>
-        /// Environment transfer mode indicating that the build process environment is identical to the
-        /// environment supplied to the task, so no dictionary is serialized on the wire. The parent
-        /// reconstructs it from the configuration it sent for this task.
-        /// Only meaningful when the negotiated packet version is >= 5.
-        /// </summary>
-        internal const byte EnvironmentIdentical = 1;
-
-        /// <summary>
         /// How <see cref="_buildProcessEnvironment"/> is represented on the wire. Defaults to
-        /// <see cref="EnvironmentFull"/> so older (legacy) code paths keep their existing behavior.
+        /// <see cref="InvariantPayloadTransfer.Full"/> so older (legacy) code paths keep their existing behavior.
         /// </summary>
-        private byte _environmentMode = EnvironmentFull;
+        private InvariantPayloadTransfer _environmentMode = InvariantPayloadTransfer.Full;
 
 
 #pragma warning disable CS1572 // XML comment has a param tag, but there is no parameter by that name. Justification: xmldoc doesn't seem to interact well with #ifdef of params.
@@ -234,11 +219,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How the build process environment is transferred on the wire. See <see cref="EnvironmentFull"/>
-        /// and <see cref="EnvironmentIdentical"/>. Set by the task host when the negotiated packet version
-        /// supports environment delta transfer and the task did not change the environment.
+        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
+        /// Set by the task host when the negotiated packet version supports environment delta transfer and the task
+        /// did not change the environment.
         /// </summary>
-        internal byte EnvironmentMode
+        internal InvariantPayloadTransfer EnvironmentMode
         {
             [DebuggerStepThrough]
             get { return _environmentMode; }
@@ -290,9 +275,9 @@ namespace Microsoft.Build.BackEnd
         {
             if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
             {
-                translator.Translate(ref _environmentMode);
+                translator.TranslateEnum(ref _environmentMode, (int)_environmentMode);
 
-                if (_environmentMode == EnvironmentFull)
+                if (_environmentMode == InvariantPayloadTransfer.Full)
                 {
                     translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
                 }

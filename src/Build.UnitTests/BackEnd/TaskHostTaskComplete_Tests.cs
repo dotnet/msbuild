@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the environment-delta wire format (packet version >= 5) and the default
-        /// <see cref="TaskHostTaskComplete.EnvironmentFull"/> mode, the build process environment
+        /// <see cref="InvariantPayloadTransfer.Full"/> mode, the build process environment
         /// is serialized in full and round-trips correctly.
         /// </summary>
         [Fact]
@@ -254,7 +254,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 environment);
-            complete.EnvironmentMode.ShouldBe(TaskHostTaskComplete.EnvironmentFull);
+            complete.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Full);
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostTaskComplete deserializedComplete = (TaskHostTaskComplete)TaskHostTaskComplete.FactoryForDeserialization(readTranslator);
 
-            deserializedComplete.EnvironmentMode.ShouldBe(TaskHostTaskComplete.EnvironmentFull);
+            deserializedComplete.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Full);
             deserializedComplete.BuildProcessEnvironment.ShouldNotBeNull();
             deserializedComplete.BuildProcessEnvironment.Count.ShouldBe(environment.Count);
             deserializedComplete.BuildProcessEnvironment["PATH"].ShouldBe(environment["PATH"]);
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the environment-delta wire format (packet version >= 5) and
-        /// <see cref="TaskHostTaskComplete.EnvironmentIdentical"/> mode, the build process environment
+        /// <see cref="InvariantPayloadTransfer.Identical"/> mode, the build process environment
         /// dictionary is omitted from the wire (saving the ~6 KB echo) and is null after deserialization;
         /// the parent reconstructs it from the configuration it sent for the task.
         /// </summary>
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 environment);
-            complete.EnvironmentMode = TaskHostTaskComplete.EnvironmentIdentical;
+            complete.EnvironmentMode = InvariantPayloadTransfer.Identical;
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostTaskComplete deserializedComplete = (TaskHostTaskComplete)TaskHostTaskComplete.FactoryForDeserialization(readTranslator);
 
-            deserializedComplete.EnvironmentMode.ShouldBe(TaskHostTaskComplete.EnvironmentIdentical);
+            deserializedComplete.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Identical);
             deserializedComplete.BuildProcessEnvironment.ShouldBeNull();
         }
 

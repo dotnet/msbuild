@@ -1015,7 +1015,7 @@ namespace Microsoft.Build.BackEnd
             /// A snapshot of the build process environment most recently sent in full to this task-host connection.
             /// Used to avoid re-transmitting the (invariant) environment in every <see cref="TaskHostConfiguration"/>:
             /// when an outgoing configuration's environment matches this baseline it is sent as
-            /// <see cref="TaskHostConfiguration.EnvironmentIdentical"/> instead.
+            /// <see cref="InvariantPayloadTransfer.Identical"/> instead.
             /// </summary>
             private Dictionary<string, string> _forwardEnvironmentBaseline;
 
@@ -1023,7 +1023,7 @@ namespace Microsoft.Build.BackEnd
             /// The CurrentSolutionConfigurationContents value most recently sent in full to this task-host
             /// connection. Used to avoid re-transmitting the configuration blob in every
             /// <see cref="TaskHostConfiguration"/>: when an outgoing configuration's value matches this baseline it is
-            /// sent as <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> instead.
+            /// sent as <see cref="InvariantPayloadTransfer.Identical"/> instead.
             /// </summary>
             private string _forwardSolutionConfigBaseline;
 
@@ -1183,7 +1183,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Marks an outgoing config <see cref="TaskHostConfiguration.EnvironmentIdentical"/> when its
+            /// Marks an outgoing config <see cref="InvariantPayloadTransfer.Identical"/> when its
             /// environment matches the connection baseline (leaving the dictionary off the wire); otherwise sends
             /// it in full and updates the baseline. Only <see cref="DrainPacketQueue"/> calls this, in wire order,
             /// and the child applies the same updates in the same order, so the baselines never drift and no
@@ -1195,17 +1195,17 @@ namespace Microsoft.Build.BackEnd
 
                 if (_forwardEnvironmentBaseline != null && CommunicationsUtilities.AreEnvironmentsEquivalent(environment, _forwardEnvironmentBaseline))
                 {
-                    configuration.EnvironmentMode = TaskHostConfiguration.EnvironmentIdentical;
+                    configuration.EnvironmentMode = InvariantPayloadTransfer.Identical;
                 }
                 else
                 {
-                    configuration.EnvironmentMode = TaskHostConfiguration.EnvironmentFull;
+                    configuration.EnvironmentMode = InvariantPayloadTransfer.Full;
                     _forwardEnvironmentBaseline = new Dictionary<string, string>(environment, CommunicationsUtilities.EnvironmentVariableComparer);
                 }
             }
 
             /// <summary>
-            /// Marks an outgoing config <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> when its
+            /// Marks an outgoing config <see cref="InvariantPayloadTransfer.Identical"/> when its
             /// CurrentSolutionConfigurationContents matches the connection baseline (leaving the large blob off the
             /// wire); otherwise sends it in full and updates the baseline. A config without the property carries a
             /// null value that never updates the baseline (e.g. restore-phase configs). As in
@@ -1219,11 +1219,11 @@ namespace Microsoft.Build.BackEnd
 
                 if (value != null && _forwardSolutionConfigBaseline != null && string.Equals(value, _forwardSolutionConfigBaseline, StringComparison.Ordinal))
                 {
-                    configuration.SolutionConfigMode = TaskHostConfiguration.SolutionConfigIdentical;
+                    configuration.SolutionConfigMode = InvariantPayloadTransfer.Identical;
                 }
                 else
                 {
-                    configuration.SolutionConfigMode = TaskHostConfiguration.SolutionConfigFull;
+                    configuration.SolutionConfigMode = InvariantPayloadTransfer.Full;
                     configuration.SolutionConfigValue = value;
 
                     if (value != null)
