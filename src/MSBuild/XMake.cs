@@ -783,6 +783,7 @@ namespace Microsoft.Build.CommandLine
             // because tasks in the build can (and occasionally do) load MSBuild format files
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
+            string oldMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
             ArgumentException.ThrowIfNullOrEmpty(commandLine);
@@ -1235,6 +1236,8 @@ namespace Microsoft.Build.CommandLine
                 s_cancelComplete.WaitOne();
 
                 NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
+
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldMSBuildLoadMicrosoftTargetsReadOnly);
 
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();

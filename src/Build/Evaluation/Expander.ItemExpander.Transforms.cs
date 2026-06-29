@@ -10,7 +10,6 @@ using System.IO;
 #endif
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -28,8 +27,6 @@ using Path = Microsoft.IO.Path;
 namespace Microsoft.Build.Evaluation;
 
 internal partial class Expander<P, I>
-    where P : class, IProperty
-    where I : class, IItem
 {
     private static partial class ItemExpander
     {
@@ -605,9 +602,9 @@ internal partial class Expander<P, I>
             }
 
             /// <summary>
-            /// Extracts a value from the input string based on a regular expression.
-            /// In the vast majority of cases, we'll only have 1-2 matches, and within those we can avoid allocating
-            /// the vast majority of Regex objects and return a cached result.
+            /// Scans the input string for unqualified metadata references of the form <c>%(Name)</c>.
+            /// In the vast majority of cases, we'll only have 1-2 matches.
+            /// Qualified metadata (e.g. <c>%(ItemType.Name)</c>) is not allowed in transforms and will throw.
             /// </summary>
             private static OneOrMultipleMetadataMatches GetQuotedExpressionMatches(string quotedExpressionFunction, IElementLocation elementLocation)
             {
@@ -618,60 +615,74 @@ internal partial class Expander<P, I>
                     return new OneOrMultipleMetadataMatches(cachedName);
                 }
 
-                // GroupCollection + Groups are the most expensive source of allocations here, so we want to return
-                // before ever accessing the property. Simply accessing it will trigger the full collection
-                // allocation, so we avoid it unless absolutely necessary.
-                // Unfortunately even .NET Core does not have a struct-based Group enumerator at this point.
-                Match match = RegularExpressions.ItemMetadataRegex.Match(quotedExpressionFunction);
-
-                if (!match.Success)
+                // Scan for %(Name) references manually.
+                int firstIndex = quotedExpressionFunction.IndexOf("%(", StringComparison.Ordinal);
+                if (firstIndex == -1)
                 {
-                    // No matches - the caller will use the original string.
-                    return new OneOrMultipleMetadataMatches();
+                    return OneOrMultipleMetadataMatches.None;
                 }
 
-                // From here will either return:
-                // 1. A single match, which may be offset within the input string..
-                // 2. A list of multiple matches.
                 List<MetadataMatch> multipleMatches = null;
-                while (match.Success)
+                MetadataMatch? firstMatch = null;
+
+                int pos = firstIndex;
+                while (pos < quotedExpressionFunction.Length - 1)
                 {
-                    // If true, this is likely an interpolated string, e.g. NETCOREAPP%(Identity)_OR_GREATER
-                    bool isItemSpecModifier = s_itemSpecModifiers.TryGetValue(match.Value, out string name);
-                    if (!isItemSpecModifier)
+                    if (quotedExpressionFunction[pos] != '%' || quotedExpressionFunction[pos + 1] != '(')
                     {
-                        // Here is the worst case path which we've hopefully avoided at the point.
-                        GroupCollection groupCollection = match.Groups;
-                        name = groupCollection[RegularExpressions.NameGroup].Value;
-                        ProjectErrorUtilities.VerifyThrowInvalidProject(groupCollection[RegularExpressions.ItemSpecificationGroup].Length == 0, elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
+                        pos++;
+                        continue;
                     }
 
-                    Match nextMatch = match.NextMatch();
+                    int refEnd = pos + 2;
 
-                    // If we only have a single match, return before allocating the list.
-                    bool isSingleMatch = multipleMatches == null && !nextMatch.Success;
-                    if (isSingleMatch)
+                    if (!ExpressionShredder.TryParseMetadataExpression(quotedExpressionFunction, ref refEnd, quotedExpressionFunction.Length, out string itemType, out string name))
                     {
-                        OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, match, name);
-
-                        // Only cache full string matches - skip known modifiers since they are permenantly cached.
-                        if (singleMatch.Type == MetadataMatchType.ExactSingle && !isItemSpecModifier)
-                        {
-                            s_lastParsedQuotedExpression = name;
-                        }
-
-                        return singleMatch;
+                        pos += 2;
+                        continue;
                     }
 
-                    // We have multiple matches, so run the full loop.
-                    // e.g. %(Filename)%(Extension)
-                    // This is a very hot path, so we avoid allocating this until after we know there are multiple matches.
-                    multipleMatches ??= [];
-                    multipleMatches.Add(new MetadataMatch(match, name));
-                    match = nextMatch;
+                    // Qualified metadata is not allowed in transforms.
+                    if (itemType != null)
+                    {
+                        string matchValue = quotedExpressionFunction.Substring(pos, refEnd - pos);
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "QualifiedMetadataInTransformNotAllowed", matchValue, name);
+                    }
+
+                    int matchLength = refEnd - pos;
+
+                    if (firstMatch == null)
+                    {
+                        firstMatch = new MetadataMatch(pos, matchLength, name);
+                    }
+                    else
+                    {
+                        multipleMatches ??= [firstMatch.Value];
+                        multipleMatches.Add(new MetadataMatch(pos, matchLength, name));
+                    }
+
+                    pos = refEnd;
                 }
 
-                return new OneOrMultipleMetadataMatches(multipleMatches);
+                if (multipleMatches != null)
+                {
+                    return new OneOrMultipleMetadataMatches(multipleMatches);
+                }
+
+                if (firstMatch != null)
+                {
+                    MetadataMatch match = firstMatch.Value;
+                    OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, match.Index, match.Length, match.Name);
+
+                    if (singleMatch.Type == MetadataMatchType.ExactSingle && !ItemSpecModifiers.IsItemSpecModifier(match.Name))
+                    {
+                        s_lastParsedQuotedExpression = match.Name;
+                    }
+
+                    return singleMatch;
+                }
+
+                return new OneOrMultipleMetadataMatches();
             }
 
             /// <summary>

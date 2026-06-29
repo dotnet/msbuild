@@ -10,7 +10,6 @@ using System.IO;
 #endif
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation.Expander;
 using Microsoft.Build.Framework;
@@ -18,6 +17,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
+using FeatureSwitches = Microsoft.Build.Internal.FeatureSwitches;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 
 #if FEATURE_MSIOREDIST
@@ -43,6 +43,17 @@ internal partial class Expander<P, I>
         /// <summary>
         /// The type of this function's receiver.
         /// </summary>
+        /// <remarks>
+        /// Property-function evaluation only ever binds public members (BindingFlags.NonPublic is
+        /// never set on this path), so only the public member surface needs to be preserved for
+        /// trimming. Keep in sync with Constants.PropertyFunctionMembers, which preserves the same
+        /// set on every allowlisted receiver type.
+        /// </remarks>
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicConstructors |
+            DynamicallyAccessedMemberTypes.PublicMethods |
+            DynamicallyAccessedMemberTypes.PublicProperties |
+            DynamicallyAccessedMemberTypes.PublicFields)]
         private Type _receiverType;
 
         /// <summary>
@@ -66,8 +77,30 @@ internal partial class Expander<P, I>
         private readonly string _receiver;
 
         /// <summary>
+        /// The complete set of <see cref="BindingFlags"/> the property-function binder is permitted
+        /// to use. This set intentionally excludes <see cref="BindingFlags.NonPublic"/>: property
+        /// functions only ever bind public members. That exclusion is what lets a receiver type
+        /// preserve only its public member surface for trimming (see Constants.PropertyFunctionMembers)
+        /// and keeps the flags handed to <c>TypeExtensions.InvokePublicMember</c> free of
+        /// <see cref="BindingFlags.NonPublic"/>.
+        /// </summary>
+        private const BindingFlags AllowedBindingFlags =
+            BindingFlags.IgnoreCase
+            | BindingFlags.Public
+            | BindingFlags.Static
+            | BindingFlags.Instance
+            | BindingFlags.InvokeMethod
+            | BindingFlags.GetProperty
+            | BindingFlags.GetField;
+
+        /// <summary>
         /// The binding flags that will be used during invocation of this function.
         /// </summary>
+        /// <remarks>
+        /// Always a subset of <see cref="AllowedBindingFlags"/> - constrained at construction and only
+        /// ever augmented with <see cref="BindingFlags.Static"/> / <see cref="BindingFlags.Instance"/>
+        /// thereafter - so it can never carry <see cref="BindingFlags.NonPublic"/>.
+        /// </remarks>
         private BindingFlags _bindingFlags;
 
         /// <summary>
@@ -88,7 +121,11 @@ internal partial class Expander<P, I>
         /// Construct a function that will be executed during property evaluation.
         /// </summary>
         internal Function(
-            Type receiverType,
+            [DynamicallyAccessedMembers(
+                DynamicallyAccessedMemberTypes.PublicConstructors |
+                DynamicallyAccessedMemberTypes.PublicMethods |
+                DynamicallyAccessedMemberTypes.PublicProperties |
+                DynamicallyAccessedMemberTypes.PublicFields)] Type receiverType,
             string expression,
             string receiver,
             string methodName,
@@ -112,7 +149,17 @@ internal partial class Expander<P, I>
             _receiver = receiver;
             _expression = expression;
             _receiverType = receiverType;
-            _bindingFlags = bindingFlags;
+
+            // Property functions never bind non-public members. Constrain the incoming flags to the
+            // allowed set so that invariant holds by construction: the only in-class mutations after
+            // this add Static/Instance (both already allowed), so _bindingFlags can never carry
+            // BindingFlags.NonPublic, so the flags handed to TypeExtensions.InvokePublicMember never
+            // request non-public members.
+            System.Diagnostics.Debug.Assert(
+                (bindingFlags & ~AllowedBindingFlags) == 0,
+                $"Property-function binding flags '{bindingFlags}' include flags outside the allowed set; BindingFlags.NonPublic in particular is never permitted.");
+            _bindingFlags = bindingFlags & AllowedBindingFlags;
+
             _remainder = remainder;
             _propertiesUseTracker = propertiesUseTracker;
             _fileSystem = fileSystem;
@@ -291,6 +338,8 @@ internal partial class Expander<P, I>
         /// <summary>
         /// Execute the function on the given instance.
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2074:UnrecognizedReflectionPattern",
+            Justification = "_receiverType is reassigned from a runtime property value whose type is restricted to the property-function allowlist, whose members are preserved for trimming.")]
         internal object Execute(object objectInstance, IPropertyProvider<P> properties, ExpanderOptions options, IElementLocation elementLocation)
         {
             object functionResult = String.Empty;
@@ -308,18 +357,11 @@ internal partial class Expander<P, I>
                     }
 
                     _bindingFlags |= BindingFlags.Static;
-
-                    // For our intrinsic function we need to support calling of internal methods
-                    // since we don't want them to be public
-                    if (_receiverType == typeof(IntrinsicFunctions))
-                    {
-                        _bindingFlags |= BindingFlags.NonPublic;
-                    }
                 }
                 else
                 {
                     // Check that the function that we're going to call is valid to call
-                    if (!IsInstanceMethodAvailable(_methodMethodName))
+                    if (!IsInstanceMethodAvailable(_receiverType, _methodMethodName))
                     {
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionMethodUnavailable", _methodMethodName, _receiverType.FullName);
                     }
@@ -470,13 +512,13 @@ internal partial class Expander<P, I>
                             // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
                             if (args.Any(a => "out _".Equals(a)))
                             {
-                                IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                IEnumerable<MethodInfo> methods = _receiverType.GetMethods().Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
                                 functionResult = GetMethodResult(objectInstance, methods, args, 0);
                             }
                             else
                             {
                                 // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                functionResult = _receiverType.InvokePublicMember(_methodMethodName, _bindingFlags, objectInstance, args);
                             }
                         }
                         // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
@@ -562,7 +604,7 @@ internal partial class Expander<P, I>
                     foreach (MethodInfo method in methods)
                     {
                         Type t = method.GetParameters()[i].ParameterType;
-                        args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                        args[i] = t.CreateDefault();
                         object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
                         if (currentReturnValue is not null)
                         {
@@ -585,7 +627,7 @@ internal partial class Expander<P, I>
 
             try
             {
-                return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture) ?? "null";
+                return _receiverType.InvokePublicMember(_methodMethodName, _bindingFlags, objectInstance, args) ?? "null";
             }
             catch (Exception)
             {
@@ -600,6 +642,10 @@ internal partial class Expander<P, I>
         /// <param name="typeName">May be full name or assembly qualified name.</param>
         /// <param name="simpleMethodName">simple name of the method.</param>
         /// <returns></returns>
+        [UnconditionalSuppressMessage("Trimming", "IL2096:UnrecognizedReflectionPattern",
+            Justification = "The type name is resolved against the curated AvailableStaticMethods allowlist; the case-insensitive lookup only resolves to allowlist types, whose members are preserved for trimming.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "The GetTypeFromAssembly / GetTypeFromAssemblyUsingNamespace calls below are reached only when the EnableAllPropertyFunctions feature switch is enabled (MSBUILDENABLEALLPROPERTYFUNCTIONS=1). That switch is a FeatureSwitchDefinition defaulting to false under trimming (see the RuntimeHostConfigurationOption in Microsoft.Build.csproj), so the trimmer removes this branch from a trimmed application; the trim analyzer does not evaluate the feature-switch default and therefore still reports the call as reachable.")]
         private static Type GetTypeForStaticMethod(string typeName, string simpleMethodName)
         {
             Type receiverType;
@@ -658,8 +704,11 @@ internal partial class Expander<P, I>
             }
 
             // Note the following code path is only entered when MSBUILDENABLEALLPROPERTYFUNCTIONS == 1.
-            // This environment variable must not be cached - it should be dynamically settable while the application is executing.
-            if (Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1")
+            // It is modeled as a trimmer feature switch (see FeatureSwitches) so this reflective
+            // probing is removed from trimmed applications, where only the curated allowlist of
+            // receiver types is supported. The environment variable is still honored at runtime when
+            // not trimmed, and must not be cached so it stays dynamically settable.
+            if (FeatureSwitches.EnableAllPropertyFunctions)
             {
                 // We didn't find the type, so go probing. First in System
                 receiverType = GetTypeFromAssembly(typeName, "System");
@@ -690,6 +739,7 @@ internal partial class Expander<P, I>
         /// <summary>
         /// Gets the specified type using the namespace to guess the assembly that its in.
         /// </summary>
+        [RequiresUnreferencedCode("Resolves a property-function receiver type by probing and loading assemblies at runtime; reachable only via the MSBUILDENABLEALLPROPERTYFUNCTIONS feature switch, which is disabled under trimming.")]
         private static Type GetTypeFromAssemblyUsingNamespace(string typeName)
         {
             string baseName = typeName;
@@ -731,6 +781,7 @@ internal partial class Expander<P, I>
         /// Get the specified type from the assembly partial name supplied.
         /// </summary>
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadWithPartialName", Justification = "Necessary since we don't have the full assembly name. ")]
+        [RequiresUnreferencedCode("Resolves a property-function receiver type by loading an assembly by partial name at runtime; reachable only via the MSBUILDENABLEALLPROPERTYFUNCTIONS feature switch, which is disabled under trimming.")]
         private static Type GetTypeFromAssembly(string typeName, string candidateAssemblyName)
         {
             Type objectType = null;
@@ -1065,7 +1116,7 @@ internal partial class Expander<P, I>
                 return true;
             }
 
-            if (Traits.Instance.EnableAllPropertyFunctions)
+            if (FeatureSwitches.EnableAllPropertyFunctions)
             {
                 // anything goes
                 return true;
@@ -1074,17 +1125,72 @@ internal partial class Expander<P, I>
             return AvailableStaticMethods.GetTypeInformationFromTypeCache(receiverType.FullName, methodName) != null;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsInstanceMethodAvailable(string methodName)
+        private static bool IsInstanceMethodAvailable(Type receiverType, string methodName)
         {
-            if (Traits.Instance.EnableAllPropertyFunctions)
+            // The escape hatch opens everything (this preserves the historical behavior, including
+            // allowing GetType). Under trimming EnableAllPropertyFunctions is substituted false and
+            // this branch is removed.
+            if (FeatureSwitches.EnableAllPropertyFunctions)
             {
-                // anything goes
                 return true;
             }
 
-            // This could be expanded to an allow / deny list.
-            return !string.Equals("GetType", methodName, StringComparison.OrdinalIgnoreCase);
+            // GetType is excluded outside the escape hatch: it returns an open-ended Type that would
+            // make the reachable member surface unpredictable.
+            if (string.Equals("GetType", methodName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // When restriction is on - the default under trimming, opt-in otherwise - instance
+            // "dotting in" is limited to a curated set of receiver types so the members reachable by
+            // reflection are predictable and statically known. Under trimming
+            // RestrictPropertyFunctionReceivers is substituted true, so the unrestricted 'return true'
+            // below is removed, keeping the property-function path trim compatible.
+            if (FeatureSwitches.RestrictPropertyFunctionReceivers)
+            {
+                return PropertyFunctionReceiver.IsAllowed(receiverType, methodName);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Finds a public method on the receiver type by name (case-insensitive) and exact
+        /// parameter-type signature, using the public-only <see cref="Type.GetMethods()"/> overload.
+        /// </summary>
+        private MethodInfo FindPublicMethodBySignature(string methodName, Type[] parameterTypes)
+        {
+            foreach (MethodInfo method in _receiverType.GetMethods())
+            {
+                if (!string.Equals(method.Name, methodName, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                ParameterInfo[] parameters = method.GetParameters();
+                if (parameters.Length != parameterTypes.Length)
+                {
+                    continue;
+                }
+
+                bool match = true;
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    if (parameters[i].ParameterType != parameterTypes[i])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match)
+                {
+                    return method;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -1103,11 +1209,14 @@ internal partial class Expander<P, I>
             MethodBase memberInfo;
             if (isConstructor)
             {
-                memberInfo = _receiverType.GetConstructor(bindingFlags, null, types, null);
+                memberInfo = _receiverType.GetConstructor(types);
             }
             else
             {
-                memberInfo = _receiverType.GetMethod(_methodMethodName, bindingFlags, null, types, null);
+                // Match a public method by name (case-insensitive) and exact parameter signature.
+                // Equivalent to the prior GetMethod(..., BindingFlags, ...) call but uses the
+                // public-only GetMethods() overload, since BindingFlags.NonPublic is never set here.
+                memberInfo = FindPublicMethodBySignature(_methodMethodName, types);
             }
 
             // If we didn't get a match on all string arguments,
@@ -1118,11 +1227,14 @@ internal partial class Expander<P, I>
                 IEnumerable<MethodBase> members;
                 if (isConstructor)
                 {
-                    members = _receiverType.GetConstructors(bindingFlags);
+                    members = _receiverType.GetConstructors();
                 }
                 else if (_receiverType == typeof(IntrinsicFunctions) && IntrinsicFunctionOverload.IsKnownOverloadMethodName(_methodMethodName))
                 {
-                    MemberInfo[] foundMembers = _receiverType.FindMembers(
+                    // FindMembers is invoked on the statically-known IntrinsicFunctions type (the
+                    // only receiver that reaches this branch), so its broad reflection contract is
+                    // satisfied by that concrete, rooted type rather than the receiver-type field.
+                    MemberInfo[] foundMembers = typeof(IntrinsicFunctions).FindMembers(
                         MemberTypes.Method,
                         bindingFlags,
                         (info, criteria) => string.Equals(info.Name, (string)criteria, StringComparison.OrdinalIgnoreCase),
@@ -1132,7 +1244,7 @@ internal partial class Expander<P, I>
                 }
                 else
                 {
-                    members = _receiverType.GetMethods(bindingFlags).Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
+                    members = _receiverType.GetMethods().Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
                 }
 
                 foreach (MethodBase member in members)

@@ -1719,6 +1719,132 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        ///  Builds an <see cref="Expander{P, I}"/> backed by a fixed metadata table for exercising the
+        ///  hand-written metadata scanner. Metadata values intentionally contain no path separators so
+        ///  that <c>MaybeAdjustFilePath</c> does not perturb the asserted results.
+        /// </summary>
+        private static Expander<ProjectPropertyInstance, ProjectItemInstance> CreateMetadataExpander()
+        {
+            Dictionary<string, string> metadata = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Culture"] = "en-US",
+                ["Foo"] = "Bar",
+                ["Compile.Link"] = "Link.cs",
+                ["Filename"] = "App",
+            };
+
+            return new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                new PropertyDictionary<ProjectPropertyInstance>(),
+                new ItemDictionary<ProjectItemInstance>(),
+                new StringMetadataTable(metadata),
+                FileSystems.Default);
+        }
+
+        /// <summary>
+        ///  Parity tests for the hand-written metadata scanner. These pin the exact expanded result for
+        ///  whitespace handling, malformed references, nested references, qualified vs. unqualified
+        ///  names, and missing metadata so future edits to the scanner cannot silently regress them.
+        /// </summary>
+        [Theory]
+        // Simple expansion, unqualified and qualified.
+        [InlineData("%(Culture)", "en-US")]
+        [InlineData("%(Foo)", "Bar")]
+        [InlineData("%(Compile.Link)", "Link.cs")]
+        // Whitespace around the parentheses and the dot separator is allowed.
+        [InlineData("%( Culture )", "en-US")]
+        [InlineData("%( Compile . Link )", "Link.cs")]
+        // Missing metadata expands to empty; a missing qualifier does not fall back to the unqualified key.
+        [InlineData("%(DoesNotExist)", "")]
+        [InlineData("%(Other.Foo)", "")]
+        // Malformed references are emitted verbatim.
+        [InlineData("%(", "%(")]
+        [InlineData("%()", "%()")]
+        [InlineData("%( )", "%( )")]
+        [InlineData("%(.x)", "%(.x)")]
+        // The outer reference is not closed by ')', so only the inner reference expands.
+        [InlineData("%(Culture%(Foo))", "%(CultureBar)")]
+        // Mixed with surrounding literal text and adjacent references.
+        [InlineData("prefix_%(Culture)_suffix", "prefix_en-US_suffix")]
+        [InlineData("%(Culture)%(Foo)", "en-USBar")]
+        public void ExpandMetadata_ScannerEdgeCases(string input, string expected)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+
+            expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandMetadata, MockElementLocation.Instance)
+                .ShouldBe(expected);
+        }
+
+        /// <summary>
+        ///  Parity tests for metadata expansion in the gaps between (and within the separators of) item
+        ///  vector expressions. Items are intentionally left unexpanded (ExpandMetadata only) so the
+        ///  assertions isolate the gap/separator boundary handling in ScanAndExpandMetadataInGaps,
+        ///  including the case where "@(" appears but does not form a well-formed item vector.
+        /// </summary>
+        [Theory]
+        // Metadata after, before, and between item vectors.
+        [InlineData("@(Compile)%(Culture)", "@(Compile)en-US")]
+        [InlineData("%(Culture)@(Compile)", "en-US@(Compile)")]
+        [InlineData("@(A)%(Culture)@(B)", "@(A)en-US@(B)")]
+        // A lone item vector has no gaps and is returned unchanged, even with embedded metadata in a transform.
+        [InlineData("@(Compile)", "@(Compile)")]
+        [InlineData("@(Compile->'%(Filename)')", "@(Compile->'%(Filename)')")]
+        // Metadata embedded in an item vector's separator is expanded in place.
+        [InlineData("@(Compile, '%(Culture)')", "@(Compile, 'en-US')")]
+        // "@(" that does not form a valid item vector still has its surrounding metadata expanded.
+        [InlineData("%(Culture)@(", "en-US@(")]
+        public void ExpandMetadata_ItemVectorGapsAndSeparators(string input, string expected)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+
+            expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandMetadata, MockElementLocation.Instance)
+                .ShouldBe(expected);
+        }
+
+        /// <summary>
+        ///  Verifies the built-in vs. custom metadata gating in the scanner: a reference is expanded only
+        ///  when the matching <see cref="ExpanderOptions"/> flag is set; otherwise it is emitted verbatim.
+        /// </summary>
+        /// <remarks>
+        ///  Declared <c>internal</c> because <see cref="ExpanderOptions"/> is internal; this assembly is
+        ///  configured to discover non-public test methods.
+        /// </remarks>
+        [Theory]
+        // Custom metadata (Culture) only expands with ExpandCustomMetadata.
+        [InlineData("%(Culture)", ExpanderOptions.ExpandCustomMetadata, "en-US")]
+        [InlineData("%(Culture)", ExpanderOptions.ExpandBuiltInMetadata, "%(Culture)")]
+        // Built-in metadata (Filename) only expands with ExpandBuiltInMetadata.
+        [InlineData("%(Filename)", ExpanderOptions.ExpandBuiltInMetadata, "App")]
+        [InlineData("%(Filename)", ExpanderOptions.ExpandCustomMetadata, "%(Filename)")]
+        internal void ExpandMetadata_BuiltInVsCustomGating(string input, ExpanderOptions options, string expected)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+
+            expander.ExpandIntoStringLeaveEscaped(input, options, MockElementLocation.Instance)
+                .ShouldBe(expected);
+        }
+
+        /// <summary>
+        ///  Parity test for the rewritten transform scanner (<c>GetQuotedExpressionMatches</c>): metadata
+        ///  references inside a transform must not be qualified with an item name. This pins the error path
+        ///  (and its message arguments) so the de-regexed scanner keeps rejecting qualified references,
+        ///  including when surrounded by internal whitespace.
+        /// </summary>
+        [Theory]
+        [InlineData("@(i->'%(i.Meta0)')", "%(i.Meta0)")]
+        [InlineData("@(i->'%( i . Meta0 )')", "%( i . Meta0 )")]
+        public void Transform_QualifiedMetadataThrows(string input, string qualifiedReference)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateItemFunctionExpander();
+
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
+                expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandItems, MockElementLocation.Instance));
+
+            // The error reports the offending qualified reference and suggests the unqualified form.
+            exception.Message.ShouldContain(qualifiedReference);
+            exception.Message.ShouldContain("%(Meta0)");
+        }
+
+        /// <summary>
         /// Exercises ExpandAllIntoStringListLeaveEscaped with a complex set of data.
         /// </summary>
         [Fact]
