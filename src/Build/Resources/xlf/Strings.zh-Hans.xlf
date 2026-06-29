@@ -73,6 +73,13 @@
         <target state="translated">在向前兼容读取期间，必须订阅 RecoverableReadError。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
+        <source>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <note>
+      LOCALIZATION: {0} is the offending embedded file path.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="translated">BuildEvent 记录号 {0} (序列化大小: {1}%1)尝试执行不允许的读取(详细信息: {2}: {3})。</target>

@@ -73,6 +73,13 @@
         <target state="translated">İleriye dönük olarak uyumlu okuma sırasında RecoverableReadError aboneliği zorunludur.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
+        <source>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <note>
+      LOCALIZATION: {0} is the offending embedded file path.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="translated">{0} BuildEvent kayıt numarası (serileştirilmiş boyut: {1}), izin verilmeyen okumalar gerçekleştirmeyi denedi (ayrıntılar: {2}: {3}).</target>

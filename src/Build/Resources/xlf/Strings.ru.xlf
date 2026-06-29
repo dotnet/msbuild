@@ -73,6 +73,13 @@
         <target state="translated">Подписка на RecoverableReadError обязательна во время прямого совместимого чтения.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
+        <source>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <note>
+      LOCALIZATION: {0} is the offending embedded file path.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="translated">Номер записи BuildEvent {0} (сериализованный размер: {1}) попытался выполнить запрещенные операции чтения (сведения: {2}: {3}).</target>

@@ -73,6 +73,13 @@
         <target state="translated">L’abonnement à RecoverableReadError est obligatoire pendant la lecture compatible avec le transfert.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
+        <source>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <note>
+      LOCALIZATION: {0} is the offending embedded file path.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="translated">Le numéro d’enregistrement BuildEvent {0} (taille sérialisée : {1}) a tenté d’effectuer des lectures non autorisées (détails : {2} : {3}).</target>
