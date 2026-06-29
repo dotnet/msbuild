@@ -512,7 +512,7 @@ internal partial class Expander<P, I>
                             // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
                             if (args.Any(a => "out _".Equals(a)))
                             {
-                                IEnumerable<MethodInfo> methods = _receiverType.GetMethods().Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
                                 functionResult = GetMethodResult(objectInstance, methods, args, 0);
                             }
                             else
@@ -1157,11 +1157,11 @@ internal partial class Expander<P, I>
 
         /// <summary>
         /// Finds a public method on the receiver type by name (case-insensitive) and exact
-        /// parameter-type signature, using the public-only <see cref="Type.GetMethods()"/> overload.
+        /// parameter-type signature, filtering by the current binding flags (instance/static).
         /// </summary>
         private MethodInfo FindPublicMethodBySignature(string methodName, Type[] parameterTypes)
         {
-            foreach (MethodInfo method in _receiverType.GetMethods())
+            foreach (MethodInfo method in _receiverType.GetMethods(_bindingFlags))
             {
                 if (!string.Equals(method.Name, methodName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -1215,7 +1215,7 @@ internal partial class Expander<P, I>
             {
                 // Match a public method by name (case-insensitive) and exact parameter signature.
                 // Equivalent to the prior GetMethod(..., BindingFlags, ...) call but uses the
-                // public-only GetMethods() overload, since BindingFlags.NonPublic is never set here.
+                // public-only GetMethods(_bindingFlags) call, since BindingFlags.NonPublic is never set here.
                 memberInfo = FindPublicMethodBySignature(_methodMethodName, types);
             }
 
@@ -1244,7 +1244,7 @@ internal partial class Expander<P, I>
                 }
                 else
                 {
-                    members = _receiverType.GetMethods().Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
+                    members = _receiverType.GetMethods(_bindingFlags).Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
                 }
 
                 foreach (MethodBase member in members)
