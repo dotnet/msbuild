@@ -365,14 +365,6 @@ namespace Microsoft.Build.BackEnd
 
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
 
-        /// <summary>
-        /// Translates a dictionary of { string, string }, omitting a set of keys on the wire.
-        /// </summary>
-        /// <param name="dictionary">The dictionary to be translated.</param>
-        /// <param name="comparer">The comparer used to instantiate the dictionary on read.</param>
-        /// <param name="excludedKeys">The keys to omit from the wire. </param>
-        void TranslateDictionaryExcludingKeys(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, HashSet<string> excludedKeys);
-
         void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer);
 
         void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);

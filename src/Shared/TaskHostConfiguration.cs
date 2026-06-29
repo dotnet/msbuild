@@ -61,13 +61,6 @@ namespace Microsoft.Build.BackEnd
         internal const string SolutionConfigKey = "CurrentSolutionConfigurationContents";
 
         /// <summary>
-        /// The global-property keys carried in their own dedicated wire field and therefore excluded from the
-        /// serialized global-properties dictionary. Cached as a single shared instance to avoid allocating it on
-        /// every <see cref="TaskHostConfiguration"/> (de)serialization.
-        /// </summary>
-        private static readonly HashSet<string> s_solutionConfigExcludedKeys = new(StringComparer.OrdinalIgnoreCase) { SolutionConfigKey };
-
-        /// <summary>
         /// How <see cref="SolutionConfigKey"/> is represented on the wire.
         /// </summary>
         private InvariantPayloadTransfer _solutionConfigMode = InvariantPayloadTransfer.Full;
@@ -674,7 +667,21 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // The blob is carried in its own field above, so it is excluded from the dictionary on the wire
-                translator.TranslateDictionaryExcludingKeys(ref _globalParameters, StringComparer.OrdinalIgnoreCase, s_solutionConfigExcludedKeys);
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    Dictionary<string, string> globalPropertiesToSend = _globalParameters;
+                    if (globalPropertiesToSend is not null && globalPropertiesToSend.ContainsKey(SolutionConfigKey))
+                    {
+                        globalPropertiesToSend = new Dictionary<string, string>(_globalParameters, StringComparer.OrdinalIgnoreCase);
+                        globalPropertiesToSend.Remove(SolutionConfigKey);
+                    }
+
+                    translator.TranslateDictionary(ref globalPropertiesToSend, StringComparer.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+                }
 
                 // Re-insert the value into the dictionary on read. An identical send
                 // is rebuilt later from the connection baseline.
