@@ -81,6 +81,11 @@ internal sealed class NodeBudgetManager
             return 0;
         }
 
+        if (grant.IsNested)
+        {
+            return 0;
+        }
+
         lock (_lock)
         {
             int available = AvailableNodes;
@@ -123,10 +128,17 @@ internal sealed class NodeBudgetManager
         {
             if (grant.IsActive)
             {
-                AllocatedNodes -= grant.GrantedNodes;
-                CoordinatorTelemetry.RecordGrantReleased(grant, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
-                grant.GrantedNodes = 0;
-                _activeGrants.Remove(grant);
+                if (grant.IsNested)
+                {
+                    grant.GrantedNodes = 0;
+                }
+                else
+                {
+                    AllocatedNodes -= grant.GrantedNodes;
+                    CoordinatorTelemetry.RecordGrantReleased(grant, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
+                    grant.GrantedNodes = 0;
+                    _activeGrants.Remove(grant);
+                }
             }
             else
             {
