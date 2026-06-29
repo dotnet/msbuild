@@ -12,6 +12,24 @@ using Microsoft.Build.Execution;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// How an invariant payload (e.g. the build process environment or the solution-config blob) is transferred
+    /// across a task-host connection. Only meaningful when the negotiated packet version is &gt;= 5.
+    /// </summary>
+    internal enum InvariantPayloadTransfer : byte
+    {
+        /// <summary>
+        /// The full payload is on the wire. Used for the first config on a connection or whenever it changed.
+        /// </summary>
+        Full = 0,
+
+        /// <summary>
+        /// The payload matches the connection's baseline, so it is not on the wire and the receiver reconstructs
+        /// it from that baseline.
+        /// </summary>
+        Identical = 1,
+    }
+
+    /// <summary>
     /// TaskHostConfiguration contains information needed for the task host to
     /// configure itself for to execute a particular task.
     /// </summary>
@@ -28,18 +46,6 @@ namespace Microsoft.Build.BackEnd
         private string _startupDirectory;
 
         /// <summary>
-        /// Environment transfer mode: the full environment dictionary is on the wire. Used for the first config on
-        /// a connection or whenever the environment changed. Only meaningful when packet version is >= 5.
-        /// </summary>
-        internal const byte EnvironmentFull = 0;
-
-        /// <summary>
-        /// Environment transfer mode: the environment matches the connection's baseline, so no dictionary is on the
-        /// wire and the receiver reconstructs it from that baseline. Only meaningful when packet version is >= 5.
-        /// </summary>
-        internal const byte EnvironmentIdentical = 1;
-
-        /// <summary>
         /// The process environment.
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment;
@@ -47,19 +53,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// How <see cref="_buildProcessEnvironment"/> is represented on the wire.
         /// </summary>
-        private byte _environmentMode = EnvironmentFull;
-
-        /// <summary>
-        /// Solution-config transfer mode: the CurrentSolutionConfigurationContents value is on the wire.
-        ///  Only meaningful when packet version is >= 5.
-        /// </summary>
-        internal const byte SolutionConfigFull = 0;
-
-        /// <summary>
-        /// Solution-config transfer mode: the value matches the connection's baseline, so it is not on the wire and
-        /// the receiver reconstructs it from that baseline. Only meaningful when packet version is >= 5.
-        /// </summary>
-        internal const byte SolutionConfigIdentical = 1;
+        private InvariantPayloadTransfer _environmentMode = InvariantPayloadTransfer.Full;
 
         /// <summary>
         /// The build-invariant global property that dominates the global-properties payload.
@@ -76,7 +70,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// How <see cref="SolutionConfigKey"/> is represented on the wire.
         /// </summary>
-        private byte _solutionConfigMode = SolutionConfigFull;
+        private InvariantPayloadTransfer _solutionConfigMode = InvariantPayloadTransfer.Full;
 
         /// <summary>
         /// The <see cref="SolutionConfigKey"/> value carried in its own field. Non-null only when sent in full.
@@ -320,11 +314,10 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How the build process environment is transferred on the wire. See <see cref="EnvironmentFull"/>
-        /// and <see cref="EnvironmentIdentical"/>. Set by the sender (per connection) when the negotiated
-        /// packet version supports environment delta transfer.
+        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
+        /// Set by the sender (per connection) when the negotiated packet version supports environment delta transfer.
         /// </summary>
-        internal byte EnvironmentMode
+        internal InvariantPayloadTransfer EnvironmentMode
         {
             [DebuggerStepThrough]
             get { return _environmentMode; }
@@ -334,7 +327,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Fills in the build process environment after deserialization when it was sent as
-        /// <see cref="EnvironmentIdentical"/> (i.e. reconstructed from the connection's baseline).
+        /// <see cref="InvariantPayloadTransfer.Identical"/> (i.e. reconstructed from the connection's baseline).
         /// </summary>
         internal void SetResolvedBuildProcessEnvironment(Dictionary<string, string> environment)
         {
@@ -342,10 +335,10 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How <see cref="SolutionConfigKey"/> is transferred on the wire (<see cref="SolutionConfigFull"/> /
-        /// <see cref="SolutionConfigIdentical"/>). Set by the sender, per connection.
+        /// How <see cref="SolutionConfigKey"/> is transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
+        /// Set by the sender, per connection.
         /// </summary>
-        internal byte SolutionConfigMode
+        internal InvariantPayloadTransfer SolutionConfigMode
         {
             [DebuggerStepThrough]
             get { return _solutionConfigMode; }
@@ -366,7 +359,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Re-inserts <see cref="SolutionConfigKey"/> into the global properties from the connection baseline after
-        /// an <see cref="SolutionConfigIdentical"/> receive. No-op when the value or the dictionary is null.
+        /// an <see cref="InvariantPayloadTransfer.Identical"/> receive. No-op when the value or the dictionary is null.
         /// </summary>
         internal void ApplyResolvedSolutionConfig(string value)
         {
@@ -634,18 +627,18 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Translates the build process environment. For packet version >= 5 a one-byte <see cref="EnvironmentMode"/>
-        /// precedes the dictionary; <see cref="EnvironmentIdentical"/> omits it and the receiver rebuilds it from the
-        /// connection baseline via <see cref="SetResolvedBuildProcessEnvironment"/>. Older versions use the legacy
-        /// full-dictionary format.
+        /// Translates the build process environment. For packet version >= 5 an <see cref="EnvironmentMode"/> marker
+        /// precedes the dictionary; <see cref="InvariantPayloadTransfer.Identical"/> omits it and the receiver rebuilds
+        /// it from the connection baseline via <see cref="SetResolvedBuildProcessEnvironment"/>. Older versions use the
+        /// legacy full-dictionary format.
         /// </summary>
         private void TranslateBuildProcessEnvironment(ITranslator translator)
         {
             if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
             {
-                translator.Translate(ref _environmentMode);
+                translator.TranslateEnum(ref _environmentMode, (int)_environmentMode);
 
-                if (_environmentMode == EnvironmentFull)
+                if (_environmentMode == InvariantPayloadTransfer.Full)
                 {
                     translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
                 }
@@ -658,24 +651,24 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Translates the global properties, deduplicating the build-invariant <see cref="SolutionConfigKey"/> value
-        /// per connection. For packet version >= 5 the value is carried in its own field,
-        /// preceded by a one-byte <see cref="SolutionConfigMode"/>: <see cref="SolutionConfigFull"/>
-        /// serializes it once; <see cref="SolutionConfigIdentical"/> omits it and the receiver rebuilds it from the
-        /// connection baseline. Older versions use the legacy full-dictionary format.
+        /// per connection. For packet version >= 5 the value is carried in its own field, preceded by a
+        /// <see cref="SolutionConfigMode"/> marker: <see cref="InvariantPayloadTransfer.Full"/> serializes it once;
+        /// <see cref="InvariantPayloadTransfer.Identical"/> omits it and the receiver rebuilds it from the connection
+        /// baseline. Older versions use the legacy full-dictionary format.
         /// </summary>
         private void TranslateGlobalProperties(ITranslator translator)
         {
             if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
             {
                 if (translator.Mode == TranslationDirection.WriteToStream
-                    && _solutionConfigMode == SolutionConfigFull && _solutionConfigValue is null && _globalParameters is not null)
+                    && _solutionConfigMode == InvariantPayloadTransfer.Full && _solutionConfigValue is null && _globalParameters is not null)
                 {
                     _globalParameters.TryGetValue(SolutionConfigKey, out _solutionConfigValue);
                 }
 
-                translator.Translate(ref _solutionConfigMode);
+                translator.TranslateEnum(ref _solutionConfigMode, (int)_solutionConfigMode);
 
-                if (_solutionConfigMode == SolutionConfigFull)
+                if (_solutionConfigMode == InvariantPayloadTransfer.Full)
                 {
                     translator.Translate(ref _solutionConfigValue);
                 }
@@ -685,7 +678,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Re-insert the value into the dictionary on read. An identical send
                 // is rebuilt later from the connection baseline.
-                if (translator.Mode == TranslationDirection.ReadFromStream && _solutionConfigMode == SolutionConfigFull)
+                if (translator.Mode == TranslationDirection.ReadFromStream && _solutionConfigMode == InvariantPayloadTransfer.Full)
                 {
                     ApplyResolvedSolutionConfig(_solutionConfigValue);
                 }

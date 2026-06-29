@@ -92,7 +92,7 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// The build process environment most recently received in full from the parent on this connection.
-        /// When a <see cref="TaskHostConfiguration"/> arrives marked <see cref="TaskHostConfiguration.EnvironmentIdentical"/>
+        /// When a <see cref="TaskHostConfiguration"/> arrives marked <see cref="InvariantPayloadTransfer.Identical"/>
         /// it is reconstructed from this baseline.
         /// </summary>
         private Dictionary<string, string> _forwardEnvironmentBaseline;
@@ -100,7 +100,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The CurrentSolutionConfigurationContents value most recently received in full from the parent on this
         /// connection. When a <see cref="TaskHostConfiguration"/> arrives marked
-        /// <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> it is reconstructed from this baseline.
+        /// <see cref="InvariantPayloadTransfer.Identical"/> it is reconstructed from this baseline.
         /// </summary>
         private string _forwardSolutionConfigBaseline;
 
@@ -1217,13 +1217,13 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Resolves the build process environment of an incoming configuration. When the parent marked it
-        /// <see cref="TaskHostConfiguration.EnvironmentIdentical"/> the environment was not serialized on the
+        /// <see cref="InvariantPayloadTransfer.Identical"/> the environment was not serialized on the
         /// wire, so it is reconstructed from this connection's baseline; otherwise the baseline is refreshed
         /// with the full environment that was sent.
         /// </summary>
         private void ResolveIncomingEnvironment(TaskHostConfiguration configuration)
         {
-            if (configuration.EnvironmentMode == TaskHostConfiguration.EnvironmentIdentical)
+            if (configuration.EnvironmentMode == InvariantPayloadTransfer.Identical)
             {
                 Assumed.NotNull(_forwardEnvironmentBaseline, "Received an EnvironmentIdentical TaskHostConfiguration before any full build process environment was sent on this connection.");
                 configuration.SetResolvedBuildProcessEnvironment(_forwardEnvironmentBaseline);
@@ -1236,13 +1236,13 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Resolves the CurrentSolutionConfigurationContents global property of an incoming configuration. When the
-        /// parent marked it <see cref="TaskHostConfiguration.SolutionConfigIdentical"/> the value was not serialized
+        /// parent marked it <see cref="InvariantPayloadTransfer.Identical"/> the value was not serialized
         /// on the wire, so it is re-inserted into the global properties from this connection's baseline; otherwise
         /// the baseline is refreshed with the full value that was sent
         /// </summary>
         private void ResolveIncomingSolutionConfig(TaskHostConfiguration configuration)
         {
-            if (configuration.SolutionConfigMode == TaskHostConfiguration.SolutionConfigIdentical)
+            if (configuration.SolutionConfigMode == InvariantPayloadTransfer.Identical)
             {
                 Assumed.NotNull(_forwardSolutionConfigBaseline, "Received a SolutionConfigIdentical TaskHostConfiguration before any full CurrentSolutionConfigurationContents value was sent on this connection.");
                 configuration.ApplyResolvedSolutionConfig(_forwardSolutionConfigBaseline);
@@ -1582,7 +1582,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (NodePacketTypeExtensions.GetNegotiatedPacketVersion(_parentPacketVersion) >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion && environmentUnchangedByTask)
                     {
-                        _taskCompletePacket.EnvironmentMode = TaskHostTaskComplete.EnvironmentIdentical;
+                        _taskCompletePacket.EnvironmentMode = InvariantPayloadTransfer.Identical;
                     }
 
 #if FEATURE_APPDOMAIN
