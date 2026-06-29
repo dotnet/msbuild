@@ -356,7 +356,10 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.File::GetAttributes", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetLastAccessTime", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTime", fileType);
+                        availableStaticMethods.TryAdd("System.IO.File::GetCreationTimeUtc", fileType);
+                        availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTimeUtc", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
+                        availableStaticMethods.TryAdd("System.IO.File::ReadAllBytes", fileType);
 
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
