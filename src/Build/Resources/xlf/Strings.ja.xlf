@@ -73,6 +73,13 @@
         <target state="translated">前方互換性のある読み取り中は、RecoverableReadError のサブスクリプションが必須です。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
+        <source>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <note>
+      LOCALIZATION: {0} is the offending embedded file path.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="translated">BuildEvent レコード番号 {0} (シリアル化されたサイズ: {1}) が許可されていない読み取りを実行しようとしました (詳細: {2}: {3})。</target>

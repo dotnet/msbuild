@@ -410,6 +410,12 @@ namespace Microsoft.Build.Logging
 
                 foreach (var entry in zipArchive.Entries/*.OrderBy(e => e.LastWriteTime)*/)
                 {
+                    // Guard against path traversal ("zip-slip"): legitimate binlog imports are stored
+                    // as rooted paths with the drive colon stripped and never contain ".." segments,
+                    // so any traversal segment indicates a maliciously crafted log meant to escape an
+                    // extraction directory. Fail fast on it.
+                    ThrowIfPathTraversal(entry.FullName);
+
                     var file = ArchiveStream.From(entry);
                     ArchiveFileEventArgs archiveFileEventArgs = new(file);
                     // ArchiveFileEventArgs is not IDisposable as we do not want to clutter exposed API
@@ -457,6 +463,38 @@ namespace Microsoft.Build.Logging
             else
             {
                 SkipBytes(length);
+            }
+        }
+
+        /// <summary>
+        /// Detects whether an embedded-archive entry path attempts to traverse out of the
+        /// extraction directory (a ".." segment in either slash style). Legitimate binlog
+        /// imports are stored as rooted, colon-stripped paths and never contain ".." segments.
+        /// </summary>
+        internal static bool IsPathTraversal(string? entryPath)
+        {
+            if (string.IsNullOrEmpty(entryPath))
+            {
+                return false;
+            }
+
+            foreach (string segment in entryPath!.Split('/', '\\'))
+            {
+                if (segment == "..")
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void ThrowIfPathTraversal(string? entryPath)
+        {
+            if (IsPathTraversal(entryPath))
+            {
+                throw new InvalidDataException(
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_PathTraversalInEmbeddedFile", entryPath));
             }
         }
 

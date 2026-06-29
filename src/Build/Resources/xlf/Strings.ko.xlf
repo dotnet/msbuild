@@ -73,6 +73,13 @@
         <target state="translated">상위 호환 읽기 중에는 RecoverableReadError에 대한 구독이 필수입니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
+        <source>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <note>
+      LOCALIZATION: {0} is the offending embedded file path.
+    </note>
+      </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">
         <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
         <target state="translated">BuildEvent 레코드 번호 {0}번(직렬화된 크기: {1})이 허용되지 않는 읽기를 수행하려고 했습니다(세부 정보: {2}: {3}).</target>
