@@ -158,13 +158,6 @@ namespace Microsoft.Build.BackEnd
         private readonly TaskEnvironment _taskEnvironment;
 
         /// <summary>
-        /// The configuration sent to the task host for this task. Retained so that, when the task host
-        /// reports its environment as unchanged (<see cref="InvariantPayloadTransfer.Identical"/>),
-        /// we can reconstruct the returned environment from what we sent rather than re-receiving it.
-        /// </summary>
-        private TaskHostConfiguration _sentConfiguration;
-
-        /// <summary>
         /// Constructor.
         /// </summary>
         public TaskHostTask(
@@ -357,8 +350,6 @@ namespace Microsoft.Build.BackEnd
                             _taskLoggingContext.GetWarningsAsErrors(),
                             _taskLoggingContext.GetWarningsNotAsErrors(),
                             _taskLoggingContext.GetWarningsAsMessages());
-
-                _sentConfiguration = hostConfiguration;
 
                 try
                 {
@@ -603,18 +594,10 @@ namespace Microsoft.Build.BackEnd
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
             // Update the task environment with the environment changes from the task host execution.
-            Dictionary<string, string> returnedEnvironment;
-            if (taskHostTaskComplete.EnvironmentMode == InvariantPayloadTransfer.Identical)
+            if (taskHostTaskComplete.EnvironmentMode != InvariantPayloadTransfer.Identical)
             {
-                Assumed.NotNull(_sentConfiguration, "Task host reported EnvironmentIdentical but no configuration was recorded for this task.");
-                returnedEnvironment = _sentConfiguration.BuildProcessEnvironment;
+                _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
             }
-            else
-            {
-                returnedEnvironment = taskHostTaskComplete.BuildProcessEnvironment;
-            }
-
-            _taskEnvironment.SetEnvironment(returnedEnvironment);
 
             // If it crashed during the execution phase, then we can effectively replicate the inproc task execution
             // behaviour by just throwing here and letting the taskbuilder code take care of it the way it would
