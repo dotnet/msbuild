@@ -1032,6 +1032,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     TaskFactoryEngineContext taskFactoryEngineContext = new TaskFactoryEngineContext(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
                     bool isTaskHost = false;
+                    TaskHostReason taskHostReason = TaskHostReason.None;
                     try
                     {
                         // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
@@ -1055,6 +1056,13 @@ namespace Microsoft.Build.BackEnd
 
                             task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory, scheduledNodeId);
                             isTaskHost = true;
+
+                            // In multi-threaded mode the factory-produced task is not MT-enlightened, so it is
+                            // routed out-of-proc for isolation; otherwise it was forced out-of-proc explicitly
+                            // (e.g. via the MSBUILDFORCETASKFACTORYOUTOFPROC environment variable).
+                            taskHostReason = (_buildComponentHost?.BuildParameters?.MultiThreaded ?? false)
+                                ? TaskHostReason.NonMultiThreadedTask
+                                : TaskHostReason.ExplicitlyRequested;
                         }
 
                         // Normal in-process execution for custom task factories
@@ -1074,7 +1082,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // Track telemetry for non-AssemblyTaskFactory task factories
-                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost);
+                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost, taskHostReason);
                     }
                     finally
                     {
