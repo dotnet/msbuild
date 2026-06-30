@@ -282,6 +282,7 @@
     </ItemGroup>
 
     <Error Condition="'@(_BootstrapRuntimeVersion)' != '' and '@(_BootstrapRuntimeAtLeastSdk)' == ''"
+           File="$(MSBuildThisFileDirectory)Versions.props"
            Text="The bootstrap SDK '$(BootstrapSdkVersion)' delivers .NET runtime(s) '@(_BootstrapRuntimeVersion)', which are older than the runtime '$(BundledNETCoreAppPackageVersion)' delivered by the SDK building this repository. Outputs produced here embed the SDK's runtime version, so running them under the bootstrap can fail host resolution ('You must install or update .NET to run this application'). Update BootstrapSdkVersion in eng/Versions.props to a version whose bundled runtime is at least '$(BundledNETCoreAppPackageVersion)'." />
   </Target>
 

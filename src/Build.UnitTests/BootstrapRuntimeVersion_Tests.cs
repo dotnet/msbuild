@@ -52,7 +52,7 @@ namespace Microsoft.Build.Engine.UnitTests
             success.ShouldBeFalse();
             BuildErrorEventArgs error = logger.Errors.ShouldHaveSingleItem();
 
-            // "9.7.2" is not a substring of the bootstrap SDK version (10.0.300) or the required runtime
+            // "9.7.2" is not a substring of the bootstrap SDK version set for this test or the required runtime
             // (10.0.8), so this proves the detected-runtime list actually renders into the message.
             string message = error.Message ?? string.Empty;
             message.ShouldContain("9.7.2");
