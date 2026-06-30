@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("C/Users/jan/sub/../../../escape.txt")]
         [InlineData("dir/../../up")]
         [InlineData("a\\..\\b")]
-        public void IsPathTraversal_RejectsTraversalSegments(string entryPath)
+        public void IsPathTraversal_WithDotDotSegment_ReturnsTrue(string entryPath)
         {
             BuildEventArgsReader.IsPathTraversal(entryPath).ShouldBeTrue();
         }
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("file..with..dots.txt")]
         [InlineData("..hidden")]
         [InlineData("trailing..")]
-        public void IsPathTraversal_AllowsLegitimatePaths(string? entryPath)
+        public void IsPathTraversal_WithLegitimateSegments_ReturnsFalse(string? entryPath)
         {
             BuildEventArgsReader.IsPathTraversal(entryPath).ShouldBeFalse();
         }
