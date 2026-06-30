@@ -12,7 +12,7 @@ Artifacts produced over the course of the release. Record each URL here as the c
 |---|---|
 | Phase 1.2d — maestro-configuration PR (channels for `{{THIS_RELEASE_VERSION}}` / `{{NEXT_VERSION}}`) | {{URL_OF_PHASE1_DARC_PR}} |
 | Phase 2.3j — maestro-configuration PR (`main`-targeting subs + VMR backflow retargeted, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
-| Phase 3.4 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
+| Phase 3.5 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
 | Phase 4.3 — `vs{{THIS_RELEASE_VERSION}}` final branding PR | {{URL_OF_FINAL_BRANDING_PR}} |
 | Phase 4.6 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
 | Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
@@ -151,11 +151,15 @@ Verifications (**parallel** — read-only, no ordering dependency):
 Create **one PR in `main`** containing all of the following changes:
 
 - [ ] **3.1** `eng/Versions.props`: Update `VersionPrefix` to `{{NEXT_VERSION}}.0`
-- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` (see [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill).
-- [ ] **3.3** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
+- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`. \
+Resolve it deterministically with `pwsh ./scripts/Get-PackageValidationBaseline.ps1 -ThisReleaseVersion {{THIS_RELEASE_VERSION}}` (requires `az login` with devdiv access). See [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill for the manual fallback.
+- [ ] **3.3** `.vsts-dotnet.yml`: Refresh the hardcoded OptProf baseline so the **next** `vs*` branch cut from `main` inherits valid OptProf data (this is what lets that branch's first official build succeed without the manual Phase 4.4 rerun). \
+Resolve the current value with `pwsh ./scripts/Get-LatestOptProfDrop.ps1` (requires `az login` with devdiv access), then set it as `OptProfBaselineDrop`: \
+`<name: OptProfBaselineDrop` → `value: 'OptimizationData/DotNet-msbuild-Trusted/main/<NNNNNNNN.N>/<buildId>/1'`.
+- [ ] **3.4** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
 `dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true` \
 See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for details.
-- [ ] **3.4** Merge main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
+- [ ] **3.5** Merge main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
 
 ---
 
@@ -173,9 +177,9 @@ Move contents of `PublicAPI.Unshipped.txt` → `PublicAPI.Shipped.txt` for all p
 Use `-DryRun` first to preview. The script adds `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` on the same line as `VersionPrefix` (creates merge conflict for forward-flow) and changes `PreReleaseVersionLabel` from `preview` to `servicing`. \
 _If the script says "already stabilized" — skip (idempotent)._
 - [ ] **4.3** Create and merge final branding PR to `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}}
-- [ ] **4.4** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. After the final-branding commit (4.3) merges, the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) is auto-triggered without OptProf data for the new branch and will fail. To work around:
+- [ ] **4.4** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. **If the Phase 3.3 hardcoded `OptProfBaselineDrop` was kept current, the auto-triggered build should already pick it up (`.vsts-dotnet.yml` seeds `OptProfDrop` from it on `vs*` branches) and this step is a no-op.** Only if the official build still fails for lack of OptProf data (e.g. the baseline was stale/empty at branch-cut):
   - [ ] **4.4a** **Cancel** the auto-triggered official build for `vs{{THIS_RELEASE_VERSION}}`.
-  - [ ] **4.4b** **Re-run the official build manually** for `vs{{THIS_RELEASE_VERSION}}` with the OptProf override from `main` — set `Optional OptProfDrop Override` to `main`'s latest OptProf drop path. _(Find the path in main CI logs: Windows_NT → Build → search for `OptimizationData`.)_
+  - [ ] **4.4b** **Re-run the official build manually** for `vs{{THIS_RELEASE_VERSION}}` with the OptProf override from `main` — set `Optional OptProfDrop Override` to `main`'s latest OptProf drop path (`pwsh ./scripts/Get-LatestOptProfDrop.ps1`).
 - [ ] **4.5** Get M2 or QB approval as necessary per the VS schedule. \
 _**Only required if we are behind the VS schedule** — i.e. the insertion didn't land in VS `main` before `{{INSIDERS_SNAP_DATE}}` (4.6 was missed) and a milestone-gate approval is now needed. If the insertion made the schedule, **skip this step**._
 - [ ] **4.6** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The final-branded bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \

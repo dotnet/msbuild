@@ -61,6 +61,15 @@ Before starting any phase, ensure you have these values (the user must provide t
 
 **Procedure:**
 
+**Determinized (preferred):** run the helper, which does all of the below mechanically (requires `az login` with devdiv access):
+
+```
+pwsh ./scripts/Get-PackageValidationBaseline.ps1 -ThisReleaseVersion {{THIS_RELEASE_VERSION}}
+# -> prints e.g. 18.9.0-preview-26330-01
+```
+
+It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, finds the matching successful build in pipeline 9434, derives the package version from the OfficialBuildId, and verifies it on the dotnet-tools feed. The manual procedure below is the fallback / explanation of what the script does:
+
 1. Open [MSBuild official build pipeline 9434](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434).
 2. Filter runs to branch `vs{{THIS_RELEASE_VERSION}}`. Find the run that final-branded the release (it produces `{{THIS_RELEASE_VERSION}}.X` — no `-preview-` — corresponding to the commit that ran `Stabilize-Release.ps1`; see [Phase 4.2 + 4.3](../../../documentation/release-checklist.md#phase-4-final-branding--vs-insertion)). Anything successful **before** that on `vs{{THIS_RELEASE_VERSION}}` is a candidate.
 3. If `vs{{THIS_RELEASE_VERSION}}` has no successful pre-stabilization preview runs (common — the branch sees little churn before stabilization), fall back to the most recent successful `main` run whose commit is the branch-point ancestor: \
@@ -81,7 +90,7 @@ Before starting any phase, ensure you have these values (the user must provide t
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
 | **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), merge-flow config, `VisualStudio.ChannelName` |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
-| **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline) |
+| **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, `Stabilize-Release.ps1`, OptProf bootstrap, get final-branded bits into VS `main` before insiders snap |
 | **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | nuget.org publish, docs, GitHub release, cleanup |
 
@@ -127,7 +136,9 @@ When asked to execute a specific phase:
 | [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
 | [`scripts/Stabilize-Release.ps1`](../../../scripts/Stabilize-Release.ps1) | Final branding automation (`-DryRun` to preview) |
-| [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build pipeline — `VisualStudio.ChannelName` setting |
+| [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.2 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
+| [`scripts/Get-LatestOptProfDrop.ps1`](../../../scripts/Get-LatestOptProfDrop.ps1) | Phase 3.3 — resolves the latest main OptProf drop (MSBuild-OptProf pipeline 17389) to refresh `OptProfBaselineDrop` in `.vsts-dotnet.yml` |
+| [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build pipeline — `VisualStudio.ChannelName`, and `OptProfBaselineDrop` (hardcoded OptProf seed for new `vs*` branches) |
 
 ## Validation
 
