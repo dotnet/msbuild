@@ -31,6 +31,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private readonly ICoordinatorDebugOutput _output = output ?? DefaultDebugOutput.Instance;
     private Timer? _heartbeatMonitor;
     private Timer? _shutdownTimer;
+    private int _activeConnectionHandlers;
 
     public void Dispose()
     {
@@ -84,7 +85,24 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                 // CancellationToken.None is intentional: we don't want Task.Run to cancel
                 // before HandleClientAsync starts, which would orphan the pipe stream.
                 // HandleClientAsync receives the cancellation token for its own loop.
-                Task clientTask = Task.Run(() => HandleClientAsync(pipeStream, token), CancellationToken.None);
+                Task clientTask;
+                try
+                {
+                    clientTask = Task.Run(() => HandleTrackedClientAsync(pipeStream, token), CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    _output.WriteLine($"CoordinatorServer: Failed to schedule client handler: {ex}");
+                    pipeStream.Dispose();
+
+                    if (Interlocked.Decrement(ref _activeConnectionHandlers) == 0 && _budgetManager.IsIdle)
+                    {
+                        ResetShutdownTimer();
+                    }
+
+                    continue;
+                }
+
                 clientTasks.TryAdd(clientTask, 0);
 
                 // Remove task from tracking when it completes to prevent unbounded growth.
@@ -134,12 +152,33 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         try
         {
             await pipeStream.WaitForConnectionAsync(token);
+            Interlocked.Increment(ref _activeConnectionHandlers);
             return pipeStream;
         }
         catch (OperationCanceledException)
         {
             pipeStream.Dispose();
             return null;
+        }
+    }
+
+    /// <summary>
+    ///  Tracks a connected client from pipe acceptance through negotiation and its granted lifetime.
+    /// </summary>
+    /// <param name="pipeStream">The connected pipe stream for this client.</param>
+    /// <param name="token">Cancellation token to signal the client loop should exit.</param>
+    private async Task HandleTrackedClientAsync(NamedPipeServerStream pipeStream, CancellationToken token)
+    {
+        try
+        {
+            await HandleClientAsync(pipeStream, token);
+        }
+        finally
+        {
+            if (Interlocked.Decrement(ref _activeConnectionHandlers) == 0 && _budgetManager.IsIdle)
+            {
+                ResetShutdownTimer();
+            }
         }
     }
 
@@ -387,6 +426,14 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     /// <param name="client">The client whose grant is being released.</param>
     private void ReleaseClient(ConnectedClient client)
     {
+        ImmutableArray<BuildGrant> newlyGranted = ReleaseClientCore(client);
+
+        NotifyNewlyGrantedBuilds(newlyGranted);
+        ResetShutdownTimer();
+    }
+
+    private ImmutableArray<BuildGrant> ReleaseClientCore(ConnectedClient client)
+    {
         using (_clientsLock.EnterDisposableWriteLock())
         {
             // Only remove if this connection is still current for the connection ID.
@@ -402,16 +449,23 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             }
         }
 
-        ImmutableArray<BuildGrant> newlyGranted = _budgetManager.Release(client.Grant);
+        return _budgetManager.Release(client.Grant);
+    }
 
-        if (newlyGranted.Length > 0)
+    private void NotifyNewlyGrantedBuilds(ImmutableArray<BuildGrant> newlyGranted)
+    {
+        if (newlyGranted.IsEmpty)
         {
-            _output.WriteLine($"CoordinatorServer: Draining wait queue, {newlyGranted.Length} build(s) to notify");
+            return;
         }
 
+        List<BuildGrant> pendingNotifications = new(newlyGranted.Length);
+        AppendNewlyGrantedNotifications(pendingNotifications, newlyGranted);
+
         // Notify newly granted builds outside the locks.
-        foreach (BuildGrant grant in newlyGranted)
+        for (int i = 0; i < pendingNotifications.Count; i++)
         {
+            BuildGrant grant = pendingNotifications[i];
             bool found;
             ConnectedClient? waitingClient;
             using (_clientsLock.EnterDisposableReadLock())
@@ -427,17 +481,28 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                     TrackRootGrant(grant);
                     WriteGrantMessage(waitingClient, grant);
                 }
-                catch (IOException)
+                catch (Exception ex) when (ex is IOException or ObjectDisposedException)
                 {
                     _output.WriteLine($"CoordinatorServer: PID {grant.ProcessId} disconnected while waiting");
 
-                    // Client disconnected while waiting. Release their grant too.
-                    ReleaseClient(waitingClient);
+                    // Client disconnected while waiting. Release their grant too, then append
+                    // any newly available grants after the current notification batch.
+                    ImmutableArray<BuildGrant> appendedGrants = ReleaseClientCore(waitingClient);
+                    AppendNewlyGrantedNotifications(pendingNotifications, appendedGrants);
                 }
             }
         }
+    }
 
-        ResetShutdownTimer();
+    private void AppendNewlyGrantedNotifications(List<BuildGrant> pendingNotifications, ImmutableArray<BuildGrant> newlyGranted)
+    {
+        if (newlyGranted.IsEmpty)
+        {
+            return;
+        }
+
+        _output.WriteLine($"CoordinatorServer: Draining wait queue, {newlyGranted.Length} build(s) to notify");
+        pendingNotifications.AddRange(newlyGranted);
     }
 
     private void TrackRootGrant(BuildGrant grant)
@@ -525,7 +590,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         var newTimer = new Timer(
             _ =>
             {
-                if (_budgetManager.IsIdle)
+                if (_budgetManager.IsIdle && Volatile.Read(ref _activeConnectionHandlers) == 0)
                 {
                     _output.WriteLine("CoordinatorServer: Auto-shutdown (no active or waiting builds)");
                     _cts.Cancel();
