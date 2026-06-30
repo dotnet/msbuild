@@ -254,6 +254,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
 
             Assert.Equal(config, deserializedConfig);
+
+            // RequestedTargets is excluded from InternalEquals, so assert the empty-list round-trip explicitly.
+            deserializedConfig.RequestedTargets.ShouldBeEmpty();
         }
 
         /// <summary>
