@@ -260,10 +260,8 @@
     <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetInstallScriptRootPath)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
   </Target>
 
-  <!-- BootstrapSdkVersion is maintained independently of the SDK in global.json. Fail with a clear,
-       actionable error when the runtime bundled with the acquired bootstrap SDK is older than the one
-       the building SDK ships ($(BundledNETCoreAppPackageVersion)): outputs produced here embed that
-       runtime version, so an older bootstrap runtime causes host-resolution failures at run time. -->
+  <!-- Fail if the bootstrap SDK's runtime is older than $(BundledNETCoreAppPackageVersion): outputs embed that
+       version and would fail host resolution under the bootstrap at run time. -->
   <Target Name="VerifyBootstrapRuntimeVersion"
           AfterTargets="AcquireSdk"
           Condition="!$(TargetFramework.StartsWith('net4')) and '$(BundledNETCoreAppPackageVersion)' != ''">
