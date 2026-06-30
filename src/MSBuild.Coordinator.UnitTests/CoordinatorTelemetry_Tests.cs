@@ -4,6 +4,10 @@
 #if NET
 
 using System.Diagnostics;
+using System.IO.Pipes;
+using System.Text;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -13,6 +17,8 @@ namespace Microsoft.Build.Coordinator.UnitTests;
 
 public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
 {
+    private readonly TestCoordinatorDebugOutput _output = new(outputHelper);
+
     [Fact]
     public void RecordGrantIssued_EmitsActivityWithExpectedTags()
     {
@@ -119,6 +125,89 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(0);
         activity.GetTagItem("VS.MSBuild.ActiveBuilds").ShouldBe(1);
         activity.GetTagItem("VS.MSBuild.AllocatedNodes").ShouldBe(8);
+    }
+
+    [Fact]
+    public async Task NestedGrant_ServerPath_EmitsGrantAndReleaseTelemetry()
+    {
+        using TestEnvironment env = TestEnvironment.Create(outputHelper);
+        env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", null);
+        env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", null);
+
+        List<Activity> captured = [];
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.ActivitySourceNamespacePrefix, StringComparison.Ordinal),
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStopped = a => { lock (captured) { captured.Add(a); } },
+        };
+
+        ActivitySource.AddActivityListener(listener);
+        TelemetryManager.ResetForTest();
+        TelemetryManager.Instance.Initialize(isStandalone: true);
+
+        string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName($"msbuild-coordinator-test-{Guid.NewGuid():N}");
+        using CancellationTokenSource cts = new();
+        using CoordinatorServer server = new(
+            CoordinatorSettings.Default with
+            {
+                PipeName = pipeName,
+                TotalNodeBudget = 4,
+                ShutdownTimeoutMs = Timeout.Infinite,
+            },
+            _output);
+
+        Task serverTask = server.RunAsync(cts.Token);
+
+        using NamedPipeClientStream rootClient = await ConnectClientPipeAsync(pipeName);
+        using BinaryWriter rootWriter = new(rootClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader rootReader = new(rootClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(rootWriter, rootReader, processId: 10001);
+        rootWriter.Write(new RequestNodesMessage(requestedNodes: 4));
+
+        NodeGrantWithIdMessage rootGrant = rootReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+
+        using NamedPipeClientStream nestedClient = await ConnectClientPipeAsync(pipeName);
+        using BinaryWriter nestedWriter = new(nestedClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader nestedReader = new(nestedClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(nestedWriter, nestedReader, processId: 10002);
+        nestedWriter.Write(new JoinGrantMessage(rootGrant.GrantId, requestedNodes: 4));
+        nestedReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+
+        nestedWriter.Write(ReleaseNodesMessage.Instance);
+        rootWriter.Write(ReleaseNodesMessage.Instance);
+        cts.Cancel();
+
+        await serverTask;
+
+        Activity nestedGrant = captured.Where(activity =>
+            activity.DisplayName == "VS/MSBuild/Coordinator/Grant" &&
+            activity.GetTagItem("VS.MSBuild.IsNested") is true).ShouldHaveSingleItem();
+
+        nestedGrant.GetTagItem("VS.MSBuild.GrantId").ShouldBe(rootGrant.GrantId);
+        nestedGrant.GetTagItem("VS.MSBuild.NodesGranted").ShouldBe(4);
+
+        Activity nestedRelease = captured.Where(activity =>
+            activity.DisplayName == "VS/MSBuild/Coordinator/Released" &&
+            activity.GetTagItem("VS.MSBuild.IsNested") is true).ShouldHaveSingleItem();
+
+        nestedRelease.GetTagItem("VS.MSBuild.GrantId").ShouldBe(rootGrant.GrantId);
+        nestedRelease.GetTagItem("VS.MSBuild.NodesReleased").ShouldBe(4);
+    }
+
+    private static async Task<NamedPipeClientStream> ConnectClientPipeAsync(string pipeName)
+    {
+        NamedPipeClientStream client = new(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+        await client.ConnectAsync(5000);
+        return client;
+    }
+
+    private static void SendHandshake(BinaryWriter writer, BinaryReader reader, int processId)
+    {
+        writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId, [Capabilities.NestedGrants]));
+        reader.ReadServerMessage().ShouldBeOfType<ServerHandshakeMessage>();
     }
 }
 

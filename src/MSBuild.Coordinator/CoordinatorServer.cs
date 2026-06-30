@@ -340,9 +340,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                 _clientsById[connection.Id] = client;
             }
 
-            int grantedNodes = grant.IsNested
-                ? grant.GrantedNodes
-                : _budgetManager.TryGrant(grant);
+            int grantedNodes = _budgetManager.TryGrant(grant);
 
             if (grantedNodes > 0)
             {

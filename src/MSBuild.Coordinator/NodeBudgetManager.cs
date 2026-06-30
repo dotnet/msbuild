@@ -83,7 +83,9 @@ internal sealed class NodeBudgetManager
 
         if (grant.IsNested)
         {
-            return 0;
+            Assumed.Positive(grant.GrantedNodes);
+            CoordinatorTelemetry.RecordGrantIssued(grant, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
+            return grant.GrantedNodes;
         }
 
         lock (_lock)
@@ -130,6 +132,7 @@ internal sealed class NodeBudgetManager
             {
                 if (grant.IsNested)
                 {
+                    CoordinatorTelemetry.RecordGrantReleased(grant, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
                     grant.GrantedNodes = 0;
                 }
                 else
