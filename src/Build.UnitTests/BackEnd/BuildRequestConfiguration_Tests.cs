@@ -256,6 +256,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(config, deserializedConfig);
         }
 
+        /// <summary>
+        /// Regression test for the solution metaproject bug where building a solution with a
+        /// non-standard target (e.g. "Pack") in a multi-node/parallel build fails with MSB4057.
+        /// The requested targets must round-trip through translation; otherwise a configuration
+        /// that crosses a node boundary loses them and the generated solution metaproject omits
+        /// the user-requested targets.
+        /// </summary>
+        [Fact]
+        public void TestTranslationPreservesRequestedTargets()
+        {
+            PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(ProjectPropertyInstance.Create("this", "that"));
+
+            BuildRequestData data = new BuildRequestData("file", properties.ToDictionary(), "4.0", new[] { "Build", "Pack" }, null);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
+
+            config.RequestedTargets.ShouldBe(new[] { "Build", "Pack" });
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildRequestConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
+
+            deserializedConfig.RequestedTargets.ShouldBe(new[] { "Build", "Pack" });
+        }
+
         [Fact]
         public void TestTranslationWithEntireProjectState()
         {
