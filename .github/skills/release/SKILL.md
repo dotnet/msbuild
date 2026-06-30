@@ -80,8 +80,8 @@ Before starting any phase, ensure you have these values (the user must provide t
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
 | **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), merge-flow config, `VisualStudio.ChannelName` |
-| **2: Bump Main** | Phase 1 branch exists | Branding PR in main (version bump, baseline, pipeline YAML) |
-| **3: DARC Updates** | Phase 2 merged | Channel reassignment, subscription updates (batched PR), verification |
+| **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
+| **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, `Stabilize-Release.ps1`, OptProf bootstrap, get final-branded bits into VS `main` before insiders snap |
 | **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | nuget.org publish, docs, GitHub release, cleanup |
 
@@ -95,6 +95,12 @@ DARC write commands push to the [maestro-configuration](https://dev.azure.com/dn
 4. Get the PR reviewed and merged
 
 Read-only commands (`get-default-channels`, `get-subscriptions`, `get-channel`) don't need these flags.
+
+**Non-interactive (`-q`).** `darc add-default-channel` / `add-subscription` prompt `y/n` when the target branch does not exist yet (e.g. pre-creating the `vs{{NEXT_VERSION}}` mapping in Phase 1.2c, or adding the new `vs{{THIS_RELEASE_VERSION}}` backflow in Phase 2). Console input is redirected in an agent session, so the prompt **fails the command** — always pass `-q` for these "branch doesn't exist yet" writes.
+
+**Phase 2 — what moves vs. what stays.** When rotating `main` to the next channel, retarget **only** the subscriptions whose **target branch is `main`** (`dotnet/dotnet @ main`, `dotnet/fsharp @ main`). **Never** retarget a subscription that targets a VMR servicing/release branch (`dotnet/dotnet @ release/*`) — that includes the SDK band paired with the new `vs{{THIS_RELEASE_VERSION}}` branch and any `.NET-next` preview band (`release/*-preview*`). Those stay on `VS {{THIS_RELEASE_VERSION}}` so the new release branch owns their downstream flow; moving them steals it. (This bit the 18.9 release: the band and preview subs were moved and had to be reverted.)
+
+**Phase 2 — VMR backflow rotation (easy to miss).** Backflow (`dotnet/dotnet → msbuild`, source-enabled) must rotate too **when the new `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band** (skip for a VS-only release): repoint the `→ main` backflow to the **next** SDK band channel (`.NET <NEXT_BAND> SDK`, the channel `dotnet/dotnet @ main` publishes to), and **add** a backflow from the **outgoing** band channel into the new `vs{{THIS_RELEASE_VERSION}}` branch (mirror the prior release branch's backflow, e.g. `vs18.0 ← .NET 10.0.1xx SDK`). See checklist steps 2.2b / 2.3f / 2.3g.
 
 ## Executing a Phase
 
