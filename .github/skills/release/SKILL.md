@@ -90,7 +90,7 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
 | **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), merge-flow config, `VisualStudio.ChannelName` |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
-| **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline) |
+| **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, `Stabilize-Release.ps1`, OptProf bootstrap, get final-branded bits into VS `main` before insiders snap |
 | **5: Post-GA** | VS shipped (`VS_SHIP_DATE`) | nuget.org publish, docs, GitHub release, cleanup |
 
@@ -137,7 +137,8 @@ When asked to execute a specific phase:
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
 | [`scripts/Stabilize-Release.ps1`](../../../scripts/Stabilize-Release.ps1) | Final branding automation (`-DryRun` to preview) |
 | [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.2 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
-| [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build pipeline — `VisualStudio.ChannelName` setting |
+| [`scripts/Get-LatestOptProfDrop.ps1`](../../../scripts/Get-LatestOptProfDrop.ps1) | Phase 3.3 — resolves the latest main OptProf drop (MSBuild-OptProf pipeline 17389) to refresh `OptProfBaselineDrop` in `.vsts-dotnet.yml` |
+| [`.vsts-dotnet.yml`](../../../.vsts-dotnet.yml) | Build pipeline — `VisualStudio.ChannelName`, and `OptProfBaselineDrop` (hardcoded OptProf seed for new `vs*` branches) |
 
 ## Validation
 
