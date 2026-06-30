@@ -49,12 +49,50 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         Activity activity = captured.ShouldHaveSingleItem();
         activity.DisplayName.ShouldBe("VS/MSBuild/Coordinator/Grant");
         activity.GetTagItem("VS.MSBuild.ConnectionId").ShouldBe(connectionId);
+        activity.GetTagItem("VS.MSBuild.GrantId").ShouldBe(grant.GrantId);
+        activity.GetTagItem("VS.MSBuild.IsNested").ShouldBe(false);
         activity.GetTagItem("VS.MSBuild.ProcessId").ShouldBe(42);
         activity.GetTagItem("VS.MSBuild.NodesRequested").ShouldBe(8);
         activity.GetTagItem("VS.MSBuild.NodesGranted").ShouldBe(4);
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(1);
         activity.GetTagItem("VS.MSBuild.ActiveBuilds").ShouldBe(2);
         activity.GetTagItem("VS.MSBuild.AllocatedNodes").ShouldBe(12);
+    }
+
+    [Fact]
+    public void RecordGrantIssued_NestedGrant_EmitsNestedTag()
+    {
+        using TestEnvironment env = TestEnvironment.Create(outputHelper);
+        env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", null);
+        env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", null);
+
+        List<Activity> captured = [];
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.ActivitySourceNamespacePrefix, StringComparison.Ordinal),
+            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+            ActivityStopped = a => { lock (captured) { captured.Add(a); } },
+        };
+
+        ActivitySource.AddActivityListener(listener);
+        TelemetryManager.ResetForTest();
+        TelemetryManager.Instance.Initialize(isStandalone: true);
+
+        Guid grantId = Guid.NewGuid();
+        var grant = new BuildGrant(Guid.NewGuid(), processId: 42, requestedNodes: 8, grantId, isNested: true)
+        {
+            GrantedNodes = 4,
+        };
+
+        CoordinatorTelemetry.RecordGrantIssued(
+            grant,
+            queueDepth: 0,
+            activeBuilds: 1,
+            allocatedNodes: 4);
+
+        Activity activity = captured.ShouldHaveSingleItem();
+        activity.GetTagItem("VS.MSBuild.GrantId").ShouldBe(grantId);
+        activity.GetTagItem("VS.MSBuild.IsNested").ShouldBe(true);
     }
 
     [Fact]
@@ -85,6 +123,8 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         Activity activity = captured.ShouldHaveSingleItem();
         activity.DisplayName.ShouldBe("VS/MSBuild/Coordinator/Deferred");
         activity.GetTagItem("VS.MSBuild.ConnectionId").ShouldBe(connectionId);
+        activity.GetTagItem("VS.MSBuild.GrantId").ShouldBe(grant.GrantId);
+        activity.GetTagItem("VS.MSBuild.IsNested").ShouldBe(false);
         activity.GetTagItem("VS.MSBuild.ProcessId").ShouldBe(99);
         activity.GetTagItem("VS.MSBuild.NodesRequested").ShouldBe(16);
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(3);
@@ -120,6 +160,8 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         Activity activity = captured.ShouldHaveSingleItem();
         activity.DisplayName.ShouldBe("VS/MSBuild/Coordinator/Released");
         activity.GetTagItem("VS.MSBuild.ConnectionId").ShouldBe(connectionId);
+        activity.GetTagItem("VS.MSBuild.GrantId").ShouldBe(grant.GrantId);
+        activity.GetTagItem("VS.MSBuild.IsNested").ShouldBe(false);
         activity.GetTagItem("VS.MSBuild.ProcessId").ShouldBe(7);
         activity.GetTagItem("VS.MSBuild.NodesReleased").ShouldBe(4);
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(0);

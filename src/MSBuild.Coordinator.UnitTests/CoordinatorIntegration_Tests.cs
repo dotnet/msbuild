@@ -92,6 +92,82 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldContain("MaxNodeCount=2");
     }
 
+    [Fact]
+    public async Task NestedBuild_InheritsCoordinatorGrant_DoesNotDeadlock()
+    {
+        using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
+
+        TransientTestFile childProject = helper.CreateFile(
+            "nested.proj",
+            """
+            <Project>
+              <Target Name="Build">
+                <Message Text="NestedMaxNodeCount=$(MSBuildNodeCount)" Importance="High" />
+              </Target>
+            </Project>
+            """);
+
+        TransientTestFile rootProject = helper.CreateFile(
+            "root.proj",
+            """
+            <Project>
+              <Target Name="Build">
+                <Exec Command="$(NestedMSBuildCommand) &quot;$(ChildProject)&quot; /m:8 /p:UseSharedCompilation=false /v:n" />
+              </Target>
+            </Project>
+            """);
+
+        var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
+            $"\"{rootProject.Path}\" /m:1 /v:n /p:NestedMSBuildCommand=\"{RunnerUtilities.BootstrapMSBuildCommand}\" /p:ChildProject=\"{childProject.Path}\"",
+            outputHelper: outputHelper,
+            timeoutMilliseconds: 60_000);
+
+        outputHelper.WriteLine(buildOutput);
+
+        success.ShouldBeTrue("Build failed");
+        buildOutput.ShouldContain("NestedMaxNodeCount=1");
+        buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
+    }
+
+    [Fact]
+    public async Task NuGetStaticGraphRestore_InheritsCoordinatorGrant_DoesNotDeadlock()
+    {
+        using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
+
+        TransientTestFolder projectFolder = helper.CreateFolder();
+        TransientTestFile project = helper.CreateFile(
+            projectFolder,
+            "StaticGraphRestoreRepro.csproj",
+            """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        helper.CreateFile(
+            projectFolder,
+            "Class1.cs",
+            """
+            namespace StaticGraphRestoreRepro;
+
+            public class Class1
+            {
+            }
+            """);
+
+        var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
+            $"\"{project.Path}\" /restore /m:16 /p:RestoreUseStaticGraphEvaluation=true /p:RestoreIgnoreFailedSources=true /p:UseSharedCompilation=false /v:n",
+            outputHelper: outputHelper,
+            timeoutMilliseconds: 60_000);
+
+        outputHelper.WriteLine(buildOutput);
+
+        success.ShouldBeTrue("Build failed");
+        buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
+    }
+
     private sealed class CoordinatorTestHelper : IDisposable
     {
         public TestEnvironment TestEnvironment { get; }
@@ -126,7 +202,13 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             FileUtilities.DeleteDirectoryNoThrow(_debugLogPath, recursive: true);
         }
 
+        public TransientTestFile CreateFile(TransientTestFolder folder, string fileName, string contents)
+            => TestEnvironment.CreateFile(folder, fileName, contents);
+
         public TransientTestFile CreateFile(string fileName, string contents)
             => TestEnvironment.CreateFile(fileName, contents);
+
+        public TransientTestFolder CreateFolder()
+            => TestEnvironment.CreateFolder();
     }
 }

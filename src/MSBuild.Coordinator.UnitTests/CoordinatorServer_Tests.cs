@@ -77,6 +77,116 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
+    public async Task ClientWithNestedGrantCapability_ReceivesGrantId()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
+        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(writer, reader, supportsNestedGrants: true);
+        writer.Write(new RequestNodesMessage(requestedNodes: 4));
+
+        NodeGrantWithIdMessage response = reader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        response.GrantedNodes.ShouldBe(4);
+        response.GrantId.ShouldNotBe(Guid.Empty);
+
+        writer.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task ClientWithoutNestedGrantCapability_ReceivesLegacyNodeGrant()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
+        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(writer, reader, supportsNestedGrants: false);
+        writer.Write(new RequestNodesMessage(requestedNodes: 4));
+
+        reader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(4);
+
+        writer.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task JoinGrantWithoutNestedGrantCapability_ReceivesError()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
+        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(writer, reader, supportsNestedGrants: false);
+        writer.Write(new JoinGrantMessage(Guid.NewGuid(), requestedNodes: 4));
+
+        reader.ReadServerMessage().ShouldBeOfType<ErrorMessage>();
+
+        _cts.Cancel();
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task NestedClient_JoinsRootGrant_WithoutConsumingAdditionalBudget()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream rootClient = await ConnectClientPipeAsync();
+        using BinaryWriter rootWriter = new(rootClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader rootReader = new(rootClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(rootWriter, rootReader, processId: 10001, supportsNestedGrants: true);
+        rootWriter.Write(new RequestNodesMessage(requestedNodes: 4));
+
+        NodeGrantWithIdMessage rootGrant = rootReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        rootGrant.GrantedNodes.ShouldBe(4);
+
+        using NamedPipeClientStream nestedClient = await ConnectClientPipeAsync();
+        using BinaryWriter nestedWriter = new(nestedClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader nestedReader = new(nestedClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(nestedWriter, nestedReader, processId: 10002, supportsNestedGrants: true);
+        nestedWriter.Write(new JoinGrantMessage(rootGrant.GrantId, requestedNodes: 4));
+
+        NodeGrantWithIdMessage nestedGrant = nestedReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        nestedGrant.GrantedNodes.ShouldBe(4);
+        nestedGrant.GrantId.ShouldBe(rootGrant.GrantId);
+
+        using NamedPipeClientStream unrelatedClient = await ConnectClientPipeAsync();
+        using BinaryWriter unrelatedWriter = new(unrelatedClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader unrelatedReader = new(unrelatedClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(unrelatedWriter, unrelatedReader, processId: 10003, supportsNestedGrants: true);
+        unrelatedWriter.Write(new RequestNodesMessage(requestedNodes: 4));
+        unrelatedReader.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+
+        nestedWriter.Write(ReleaseNodesMessage.Instance);
+        Task<ServerMessage> unrelatedGrantTask = Task.Run(() => unrelatedReader.ReadServerMessage());
+        Task completedBeforeRootRelease = await Task.WhenAny(unrelatedGrantTask, Task.Delay(200));
+        completedBeforeRootRelease.ShouldNotBeSameAs(unrelatedGrantTask);
+
+        rootWriter.Write(ReleaseNodesMessage.Instance);
+        (await unrelatedGrantTask).ShouldBeOfType<NodeGrantWithIdMessage>();
+
+        unrelatedWriter.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+        await serverTask;
+    }
+
+    [Fact]
     public async Task MultipleClients_FairShareAllocation()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 8);
@@ -491,10 +601,13 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     /// <summary>
     ///  Performs the handshake and returns the ConnectionId used.
     /// </summary>
-    private static void SendHandshake(BinaryWriter writer, BinaryReader reader, int? processId = null)
+    private static void SendHandshake(BinaryWriter writer, BinaryReader reader, int? processId = null, bool supportsNestedGrants = false)
     {
         var connectionId = Guid.NewGuid();
-        writer.Write(new ClientHandshakeMessage(connectionId, processId is int pid ? pid : EnvironmentUtilities.CurrentProcessId, []));
+        writer.Write(new ClientHandshakeMessage(
+            connectionId,
+            processId is int pid ? pid : EnvironmentUtilities.CurrentProcessId,
+            supportsNestedGrants ? [Capabilities.NestedGrants] : []));
         reader.ReadServerMessage().ShouldBeOfType<ServerHandshakeMessage>();
     }
 
