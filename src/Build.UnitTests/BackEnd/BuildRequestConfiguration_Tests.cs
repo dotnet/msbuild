@@ -269,17 +269,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             properties.Set(ProjectPropertyInstance.Create("this", "that"));
 
-            BuildRequestData data = new BuildRequestData("file", properties.ToDictionary(), "4.0", new[] { "Build", "Pack" }, null);
+            BuildRequestData data = new BuildRequestData("file", properties.ToDictionary(), "4.0", ["Build", "Pack"], null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
 
-            config.RequestedTargets.ShouldBe(new[] { "Build", "Pack" });
+            config.RequestedTargets.ShouldBe(["Build", "Pack"]);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildRequestConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
 
-            deserializedConfig.RequestedTargets.ShouldBe(new[] { "Build", "Pack" });
+            deserializedConfig.RequestedTargets.ShouldBe(["Build", "Pack"]);
         }
 
         [Fact]
