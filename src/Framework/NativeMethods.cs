@@ -1341,6 +1341,7 @@ internal static class NativeMethods
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
 
+#if NET
     [DllImport("libc", EntryPoint = "realpath", SetLastError = true)]
     private static extern IntPtr realpath_native(string path, IntPtr resolved);
 
@@ -1368,11 +1369,8 @@ internal static class NativeMethods
             {
                 return null;
             }
-#if NET
+
             return Marshal.PtrToStringUTF8(ptr);
-#else
-            return Marshal.PtrToStringAnsi(ptr);
-#endif
         }
         finally
         {
@@ -1385,6 +1383,13 @@ internal static class NativeMethods
             }
         }
     }
+#else
+    /// <summary>
+    /// .NET Framework builds of MSBuild only ship for Windows, where POSIX <c>realpath(3)</c> does not
+    /// exist, so this is always a no-op returning <c>null</c>.
+    /// </summary>
+    internal static string RealPath(string path) => null;
+#endif
 
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]

@@ -3409,24 +3409,18 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// On Unix, rebases a relative project path onto <c>$PWD</c> when <c>$PWD</c> physically resolves
-        /// to the same directory as <see cref="Directory.GetCurrentDirectory"/>. This makes
-        /// <c>$(MSBuildProjectFullPath)</c> (and dependent output paths) stable whether the user reached
-        /// the project through a symlinked working directory or via the kernel-resolved absolute path.
+        /// to the same directory as <see cref="Directory.GetCurrentDirectory"/>, keeping
+        /// <c>$(MSBuildProjectFullPath)</c> stable across symlinked working directories.
+        /// No-op on Windows, for absolute paths or paths containing <c>..</c>, when <c>PWD</c> is
+        /// unset/relative/stale, or when change wave 18.9 is disabled.
         /// </summary>
-        /// <remarks>
-        /// No-op on Windows, when <paramref name="projectFile"/> is absolute or contains <c>..</c>,
-        /// when <c>PWD</c> is unset/relative/stale, or when the change wave is disabled via
-        /// <c>MSBuildDisableFeaturesFromVersion=18.9</c>. Uses <see cref="NativeMethodsShared.RealPath"/>
-        /// (POSIX <c>realpath(3)</c>) so no process-global state is mutated; safe under MSBuild Server,
-        /// multithreaded MSBuild, and hosted scenarios.
-        /// </remarks>
         internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
         {
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9)
                 || NativeMethodsShared.IsWindows
                 || string.IsNullOrEmpty(projectFile)
                 || Path.IsPathRooted(projectFile)
-                || ContainsParentTraversalSegment(projectFile))
+                || FileUtilities.ContainsParentTraversalSegment(projectFile))
             {
                 // Bail on ".." segments: lexical normalization can escape the shared physical prefix,
                 // so the logical and physical resolutions can end up pointing at different files.
@@ -3457,27 +3451,6 @@ namespace Microsoft.Build.CommandLine
             CommunicationsUtilities.Trace($"ResolveProjectPathAgainstLogicalCurrentDirectory: rebased '{projectFile}' to '{rebasedProjectFile}' via $PWD='{logicalCurrentDirectory}'.");
 
             return rebasedProjectFile;
-        }
-
-        /// <summary>
-        /// Returns true if any path segment is exactly "..", without allocating.
-        /// </summary>
-        private static bool ContainsParentTraversalSegment(ReadOnlySpan<char> path)
-        {
-            // Walk each segment; return true only for a segment that is exactly "..".
-            while (!path.IsEmpty)
-            {
-                int sep = path.IndexOfAny(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                ReadOnlySpan<char> segment = sep < 0 ? path : path.Slice(0, sep);
-                if (segment.SequenceEqual("..".AsSpan()))
-                {
-                    return true;
-                }
-
-                path = sep < 0 ? default : path.Slice(sep + 1);
-            }
-
-            return false;
         }
 
         private static void ValidateExtensions(string[] projectExtensionsToIgnore)
