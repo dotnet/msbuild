@@ -478,12 +478,18 @@ namespace Microsoft.Build.Logging
                 return false;
             }
 
-            foreach (string segment in entryPath!.Split('/', '\\'))
+            // Scan the path segment-by-segment without allocating an intermediate string[].
+            ReadOnlySpan<char> span = entryPath.AsSpan();
+            while (!span.IsEmpty)
             {
-                if (segment == "..")
+                int slash = span.IndexOfAny('/', '\\');
+                ReadOnlySpan<char> segment = slash < 0 ? span : span.Slice(0, slash);
+                if (segment.SequenceEqual("..".AsSpan()))
                 {
                     return true;
                 }
+
+                span = slash < 0 ? default : span.Slice(slash + 1);
             }
 
             return false;
