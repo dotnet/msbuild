@@ -276,7 +276,7 @@
       <_BootstrapRuntimeDir Include="$([System.IO.Directory]::GetDirectories('$(_BootstrapSharedRuntimeRoot)'))" />
       <_BootstrapRuntimeLeaf Include="@(_BootstrapRuntimeDir->'%(Filename)%(Extension)')" />
       <_BootstrapRuntimeVersion Include="@(_BootstrapRuntimeLeaf)"
-                                Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)', '^[0-9]+\.[0-9]+'))" />
+                                Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Identity)', '^v?[0-9]+\.[0-9]+(\.[0-9]+)*([-+].*)?$'))" />
       <_BootstrapRuntimeAtLeastSdk Include="@(_BootstrapRuntimeVersion)"
                                    Condition="'%(Identity)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('%(Identity)', '$(BundledNETCoreAppPackageVersion)'))" />
     </ItemGroup>

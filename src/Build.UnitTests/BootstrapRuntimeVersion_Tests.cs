@@ -138,6 +138,20 @@ namespace Microsoft.Build.Engine.UnitTests
             logger.Errors.ShouldBeEmpty();
         }
 
+        [Fact]
+        public void Passes_WhenPartiallyNumericDirectoryPresent()
+        {
+            // A name like "10.0.bad" starts with digits but is not a parseable version. It must be
+            // filtered out rather than reach the comparison, which would otherwise throw.
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string artifactsBinDir = CreateBootstrapWithRuntimes(env, "10.0.bad");
+
+            bool success = RunCheck(artifactsBinDir, "10.0.8", out MockLogger logger);
+
+            success.ShouldBeTrue();
+            logger.Errors.ShouldBeEmpty();
+        }
+
         private static string CreateBootstrapWithRuntimes(TestEnvironment env, params string[] runtimeVersions)
         {
             string artifactsBinDir = env.CreateFolder().Path;
