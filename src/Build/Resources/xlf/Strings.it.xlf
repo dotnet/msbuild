@@ -74,10 +74,10 @@
         <note />
       </trans-unit>
       <trans-unit id="Binlog_PathTraversalInEmbeddedFile">
-        <source>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
-        <target state="new">Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
+        <source>MSB4282: Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</source>
+        <target state="new">MSB4282: Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</target>
         <note>
-      LOCALIZATION: {0} is the offending embedded file path.
+      {StrBegin="MSB4282: "} LOCALIZATION: {0} is the offending embedded file path.
     </note>
       </trans-unit>
       <trans-unit id="Binlog_ReaderMismatchedRead">

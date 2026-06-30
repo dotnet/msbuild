@@ -2124,9 +2124,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Content already acquired as StreamReader via GetContentReader.</value>
   </data>
   <data name="Binlog_PathTraversalInEmbeddedFile" xml:space="preserve">
-    <value>Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</value>
+    <value>MSB4282: Embedded file path "{0}" contains a directory traversal segment and was rejected as potentially malicious.</value>
     <comment>
-      LOCALIZATION: {0} is the offending embedded file path.
+      {StrBegin="MSB4282: "} LOCALIZATION: {0} is the offending embedded file path.
     </comment>
   </data>
   <data name="Binlog_ArchiveFile_AcquiredAsString" xml:space="preserve">
