@@ -263,7 +263,8 @@
   <!-- Fail if the bootstrap SDK's runtime is older than $(BundledNETCoreAppPackageVersion): outputs embed that
        version and would fail host resolution under the bootstrap at run time. -->
   <Target Name="VerifyBootstrapRuntimeVersion"
-          AfterTargets="AcquireSdk"
+          DependsOnTargets="AcquireSdk"
+          BeforeTargets="PrepareForBuild"
           Condition="!$(TargetFramework.StartsWith('net4')) and '$(BundledNETCoreAppPackageVersion)' != ''">
 
     <PropertyGroup>
