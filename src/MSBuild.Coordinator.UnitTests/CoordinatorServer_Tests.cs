@@ -3,6 +3,7 @@
 
 using System.IO.Pipes;
 using System.Text;
+using System.Collections.Immutable;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
@@ -40,13 +41,60 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
-        SendHandshake(writer, reader);
+        ServerHandshakeMessage handshake = SendHandshake(writer, reader);
+        handshake.Capabilities.ShouldContain(Capabilities.Priority);
         writer.Write(new RequestNodesMessage(requestedNodes: 16));
 
         ServerMessage response = reader.ReadServerMessage();
 
         response.ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(16);
+
+        writer.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task RunAsync_DebugOutputUsesEffectiveNodePolicyValues()
+    {
+        CoordinatorSettings settings = DefaultSettings with
+        {
+            TotalNodeBudget = 8,
+            HighPriorityReservedNodes = 100,
+            MaxNodesPerBuild = 0,
+            PriorityAgingThreshold = 5,
+        };
+
+        using CoordinatorServer server = CreateServer(settings);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        _output.Lines.ShouldContain(
+            line => line.Contains("high-priority reserved nodes=7")
+                && line.Contains("max nodes per build=0 (uncapped)")
+                && line.Contains("priority aging threshold=5"));
+
+        _cts.Cancel();
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task SingleClient_PriorityRequest_ReceivesNodeGrant()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream client = await ConnectClientPipeAsync();
+        using BinaryWriter writer = new(client, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(writer, reader);
+        writer.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.High));
+
+        ServerMessage response = reader.ReadServerMessage();
+
+        response.ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(4);
 
         writer.Write(ReleaseNodesMessage.Instance);
         _cts.Cancel();
@@ -331,7 +379,111 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14193", TestPlatforms.Windows)]
+    [Fact]
+    public async Task HighPriorityReserve_LeavesCapacityForHighPriorityClient()
+    {
+        using CoordinatorServer server = CreateServer(DefaultSettings with
+        {
+            TotalNodeBudget = 4,
+            HighPriorityReservedNodes = 1,
+            MaxNodesPerBuild = 0,
+        });
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream normalClient = await ConnectClientPipeAsync();
+        using BinaryWriter normalWriter = new(normalClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader normalReader = new(normalClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(normalWriter, normalReader, processId: 10001, capabilities: [Capabilities.Priority]);
+        normalWriter.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.Normal));
+        normalReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(3);
+
+        using NamedPipeClientStream highClient = await ConnectClientPipeAsync();
+        using BinaryWriter highWriter = new(highClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader highReader = new(highClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(highWriter, highReader, processId: 10002, capabilities: [Capabilities.Priority]);
+        highWriter.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.High));
+
+        highReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(1);
+
+        highWriter.Write(ReleaseNodesMessage.Instance);
+        normalWriter.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+
+        await serverTask;
+    }
+
+    [Fact]
+    public async Task AutoStrictPolicy_CapsNormalAndReservesHighPriorityCapacity()
+    {
+        using CoordinatorServer server = CreateServer(DefaultSettings with
+        {
+            TotalNodeBudget = 16,
+            HighPriorityReservedNodes = CoordinatorSettings.AutoNodeConfiguration,
+            MaxNodesPerBuild = CoordinatorSettings.AutoNodeConfiguration,
+        });
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        using NamedPipeClientStream normalClient1 = await ConnectClientPipeAsync();
+        using BinaryWriter normalWriter1 = new(normalClient1, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader normalReader1 = new(normalClient1, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(normalWriter1, normalReader1, processId: 10001, capabilities: [Capabilities.Priority]);
+        normalWriter1.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        normalReader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(4);
+
+        using NamedPipeClientStream normalClient2 = await ConnectClientPipeAsync();
+        using BinaryWriter normalWriter2 = new(normalClient2, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader normalReader2 = new(normalClient2, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(normalWriter2, normalReader2, processId: 10002, capabilities: [Capabilities.Priority]);
+        normalWriter2.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        normalReader2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(4);
+
+        using NamedPipeClientStream normalClient3 = await ConnectClientPipeAsync();
+        using BinaryWriter normalWriter3 = new(normalClient3, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader normalReader3 = new(normalClient3, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(normalWriter3, normalReader3, processId: 10003, capabilities: [Capabilities.Priority]);
+        normalWriter3.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        normalReader3.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(4);
+
+        using NamedPipeClientStream normalClient4 = await ConnectClientPipeAsync();
+        using BinaryWriter normalWriter4 = new(normalClient4, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader normalReader4 = new(normalClient4, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(normalWriter4, normalReader4, processId: 10004, capabilities: [Capabilities.Priority]);
+        normalWriter4.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        (await ReadServerMessageWithTimeout(normalReader4)).ShouldBeOfType<WaitMessage>();
+
+        using NamedPipeClientStream highClient = await ConnectClientPipeAsync();
+        using BinaryWriter highWriter = new(highClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader highReader = new(highClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(highWriter, highReader, processId: 10005, capabilities: [Capabilities.Priority]);
+        highWriter.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
+        highReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(4);
+
+        normalWriter1.Write(ReleaseNodesMessage.Instance);
+        (await ReadServerMessageWithTimeout(normalReader4)).ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(4);
+
+        normalWriter2.Write(ReleaseNodesMessage.Instance);
+        normalWriter3.Write(ReleaseNodesMessage.Instance);
+        normalWriter4.Write(ReleaseNodesMessage.Instance);
+        highWriter.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+
+        await serverTask;
+    }
+
     [Fact]
     public async Task ConcurrentClients_AllReceiveGrants()
     {
@@ -601,18 +753,37 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     /// <summary>
     ///  Performs the handshake and returns the ConnectionId used.
     /// </summary>
-    private static void SendHandshake(BinaryWriter writer, BinaryReader reader, int? processId = null, bool supportsNestedGrants = false)
+    private static ServerHandshakeMessage SendHandshake(
+        BinaryWriter writer,
+        BinaryReader reader,
+        int? processId = null,
+        ImmutableArray<string> capabilities = default,
+        bool supportsNestedGrants = false)
     {
         var connectionId = Guid.NewGuid();
-        writer.Write(new ClientHandshakeMessage(
-            connectionId,
-            processId is int pid ? pid : EnvironmentUtilities.CurrentProcessId,
-            supportsNestedGrants ? [Capabilities.NestedGrants] : []));
-        reader.ReadServerMessage().ShouldBeOfType<ServerHandshakeMessage>();
+        ImmutableArray<string> effectiveCapabilities = capabilities.IsDefault
+            ? supportsNestedGrants ? [Capabilities.NestedGrants] : []
+            : capabilities;
+
+        writer.Write(new ClientHandshakeMessage(connectionId, processId is int pid ? pid : EnvironmentUtilities.CurrentProcessId, effectiveCapabilities));
+        return reader.ReadServerMessage().ShouldBeOfType<ServerHandshakeMessage>();
+    }
+
+    private static async Task<ServerMessage> ReadServerMessageWithTimeout(BinaryReader reader)
+    {
+        Task<ServerMessage> readTask = Task.Run(() => reader.ReadServerMessage());
+        Task completedTask = await Task.WhenAny(readTask, Task.Delay(TimeSpan.FromSeconds(5)));
+        completedTask.ShouldBeSameAs(readTask);
+        return await readTask;
     }
 
     private CoordinatorServer CreateServer(int totalNodeBudget)
-        => CreateServer(DefaultSettings with { TotalNodeBudget = totalNodeBudget });
+        => CreateServer(DefaultSettings with
+        {
+            TotalNodeBudget = totalNodeBudget,
+            HighPriorityReservedNodes = 0,
+            MaxNodesPerBuild = 0,
+        });
 
     private CoordinatorServer CreateServer(CoordinatorSettings settings)
         => new(settings, _output);

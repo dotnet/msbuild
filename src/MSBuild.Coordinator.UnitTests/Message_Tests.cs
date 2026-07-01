@@ -15,11 +15,11 @@ public class Message_Tests
     {
         Guid connectionId = Guid.NewGuid();
         ClientMessage message = WriteAndReadClientMessage(
-            new ClientHandshakeMessage(connectionId, processId: 12345, capabilities: ["priority", "dynamic-grants"]));
+            new ClientHandshakeMessage(connectionId, processId: 12345, capabilities: [Capabilities.Priority]));
 
         ClientHandshakeMessage result = message.ShouldBeOfType<ClientHandshakeMessage>();
         result.ConnectionId.ShouldBe(connectionId);
-        result.Capabilities.ShouldBe(["priority", "dynamic-grants"]);
+        result.Capabilities.ShouldBe([Capabilities.Priority]);
     }
 
     [Fact]
@@ -36,10 +36,10 @@ public class Message_Tests
     [Fact]
     public void HandshakeResponse_RoundTrips()
     {
-        ServerMessage message = WriteAndReadServerMessage(new ServerHandshakeMessage(capabilities: ["priority"]));
+        ServerMessage message = WriteAndReadServerMessage(new ServerHandshakeMessage(capabilities: [Capabilities.Priority]));
 
         ServerHandshakeMessage result = message.ShouldBeOfType<ServerHandshakeMessage>();
-        result.Capabilities.ShouldBe(["priority"]);
+        result.Capabilities.ShouldBe([Capabilities.Priority]);
     }
 
     [Fact]
@@ -64,6 +64,15 @@ public class Message_Tests
         Guid grantId = Guid.NewGuid();
         ClientMessage message = WriteAndReadClientMessage(new JoinGrantMessage(grantId, requestedNodes: 16));
         message.ShouldBe(new JoinGrantMessage(grantId, requestedNodes: 16));
+    }
+
+    [Fact]
+    public void RequestNodesWithPriority_RoundTrips()
+    {
+        ClientMessage message = WriteAndReadClientMessage(
+            new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
+
+        message.ShouldBe(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
     }
 
     [Fact]
@@ -118,6 +127,7 @@ public class Message_Tests
         writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId: 12345, []));
         writer.Write(new RequestNodesMessage(requestedNodes: 8));
         writer.Write(new JoinGrantMessage(Guid.NewGuid(), requestedNodes: 4));
+        writer.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.Low));
         writer.Write(HeartbeatMessage.Instance);
         writer.Write(ReleaseNodesMessage.Instance);
 
@@ -127,6 +137,7 @@ public class Message_Tests
         reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
         reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
         reader.ReadClientMessage().ShouldBeOfType<JoinGrantMessage>();
+        reader.ReadClientMessage().ShouldBe(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.Low));
         reader.ReadClientMessage().ShouldBe(HeartbeatMessage.Instance);
         reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }
