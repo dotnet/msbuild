@@ -3,9 +3,41 @@
 
 using System;
 using System.Collections.Concurrent;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// Describes an explicit override of the engine's multi-threaded task-routing decision.
+    /// </summary>
+    /// <remarks>
+    /// The override may come from an environment variable (prototype / testing surface, see
+    /// <see cref="TaskRouter.GetEnvironmentRoutingOverride"/>) or, in a separate design, from
+    /// <c>UsingTask</c> metadata. It only has meaning in multi-threaded mode.
+    /// </remarks>
+    internal enum TaskHostRoutingOverride
+    {
+        /// <summary>
+        /// No override; the engine applies its default routing decision.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Force the task to run in-process within the thread node.
+        /// </summary>
+        InProc,
+
+        /// <summary>
+        /// Force the task to run in a reusable (sidecar) TaskHost process.
+        /// </summary>
+        Sidecar,
+
+        /// <summary>
+        /// Force the task to run in a transient TaskHost process that terminates after execution.
+        /// </summary>
+        Transient,
+    }
+
     /// <summary>
     /// Determines where a task should be executed in multi-threaded mode.
     /// In multi-threaded execution mode, tasks implementing IMultiThreadableTask or marked with
@@ -112,6 +144,58 @@ namespace Microsoft.Build.BackEnd
             }
 
             return string.Equals(fullName, TaskRequiringTransientTaskHostFullName, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// PROTOTYPE / TESTING ONLY. Determines whether an environment variable explicitly overrides
+        /// the engine's routing decision for the given task, forcing it in-process, into a transient
+        /// TaskHost, or into a sidecar TaskHost.
+        /// </summary>
+        /// <param name="taskType">The type of the task to evaluate.</param>
+        /// <returns>
+        /// The requested <see cref="TaskHostRoutingOverride"/>, or <see cref="TaskHostRoutingOverride.None"/>
+        /// when the task is not named in any of the override environment variables.
+        /// </returns>
+        /// <remarks>
+        /// The override is controlled by the following environment variables, each a comma- or
+        /// semicolon-delimited list of task full names (Namespace.TaskName):
+        /// <list type="bullet">
+        /// <item><c>MSBUILDFORCETASKSINPROCHOSTLIST</c> -&gt; <see cref="TaskHostRoutingOverride.InProc"/></item>
+        /// <item><c>MSBUILDFORCETASKSTRANSIENTHOSTLIST</c> -&gt; <see cref="TaskHostRoutingOverride.Transient"/></item>
+        /// <item><c>MSBUILDFORCETASKSSIDECARHOSTLIST</c> -&gt; <see cref="TaskHostRoutingOverride.Sidecar"/></item>
+        /// </list>
+        /// If a task appears in more than one list, in-proc wins over transient, which wins over sidecar.
+        /// This surface exists to unblock testing of multi-threaded execution against tasks the author
+        /// cannot change; it is not a supported production configuration.
+        /// </remarks>
+        public static TaskHostRoutingOverride GetEnvironmentRoutingOverride(Type taskType)
+        {
+            ArgumentNullException.ThrowIfNull(taskType);
+
+            string? fullName = taskType.FullName;
+            if (fullName is null)
+            {
+                return TaskHostRoutingOverride.None;
+            }
+
+            Traits traits = Traits.Instance;
+
+            if (traits.ForceTasksInProcHostList.Contains(fullName))
+            {
+                return TaskHostRoutingOverride.InProc;
+            }
+
+            if (traits.ForceTasksTransientHostList.Contains(fullName))
+            {
+                return TaskHostRoutingOverride.Transient;
+            }
+
+            if (traits.ForceTasksSidecarHostList.Contains(fullName))
+            {
+                return TaskHostRoutingOverride.Sidecar;
+            }
+
+            return TaskHostRoutingOverride.None;
         }
 
         /// <summary>
