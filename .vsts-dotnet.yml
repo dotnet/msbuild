@@ -15,11 +15,8 @@ parameters:
   default: 'default'
 - name: enableOptProf
   displayName: Enable OptProf data collection for this build
-  # vs17.14 is in servicing and no longer collects fresh OptProf data: the VS
-  # bootstrapper build (required only for OptProf collection) is disabled by default.
-  # We keep applying the last-collected optimization data (see SkipApplyOptimizationData below).
   type: boolean
-  default: false
+  default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
@@ -47,11 +44,10 @@ variables:
       value: ${{ parameters.OptProfDropName }}
     - name: SourceBranch
       value: ''
-  # NOTE (vs17.14 servicing): historically, disabling OptProf collection also forced
-  # SkipApplyOptimizationData to true (stop applying data). On this branch we intentionally
-  # decouple the two: collection is disabled, but we keep applying the last-collected
-  # optimization data so shipped binaries stay optimized. SkipApplyOptimizationData is
-  # therefore governed solely by the pipeline variable (default 'false' = apply existing data).
+  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
+  - ${{ if eq(parameters.enableOptProf, false) }}:
+    - name: SkipApplyOptimizationData
+      value: true
   - name: EnableReleaseOneLocBuild
     value: false # Disable loc for vs18.0
   - name: Codeql.Enabled

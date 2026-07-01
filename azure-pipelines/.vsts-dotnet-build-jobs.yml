@@ -147,8 +147,7 @@ jobs:
       ArtifactName: MicroBuildOutputs
       ArtifactType: Container
     displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-    # Only produced when the OptProf bootstrapper runs; skip when OptProf collection is disabled.
-    condition: and(succeeded(), ${{ parameters.enableOptProf }})
+    condition: succeeded()
 
   - task: 1ES.PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
