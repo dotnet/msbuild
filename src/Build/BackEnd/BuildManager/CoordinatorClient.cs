@@ -444,6 +444,26 @@ internal sealed partial class CoordinatorClient : IDisposable
                 DisposeTimerAndWait(heartbeatPump);
             }
         }
+
+        static Timer CreateHeartbeatPump(Connection connection, int intervalMs)
+            => new(
+                static state =>
+                {
+                    try
+                    {
+                        if (state is Connection connection)
+                        {
+                            connection.WriteClientMessage(HeartbeatMessage.Instance);
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // Pipe may be broken; swallow and let the next read detect it.
+                    }
+                },
+                state: connection,
+                dueTime: intervalMs,
+                period: intervalMs);
     }
 
     private static CoordinatorClient CreateRootClient(
@@ -463,35 +483,6 @@ internal sealed partial class CoordinatorClient : IDisposable
         int heartbeatIntervalMs,
         ICoordinatorDebugOutput output)
         => new(connection, grant.GrantId, grant.GrantedNodes, GrantOwnership.Nested, heartbeatIntervalMs, output);
-
-    /// <summary>
-    ///  Creates a heartbeat pump that periodically writes a heartbeat message to the given connection.
-    ///  Dispose the returned timer with <see cref="DisposeTimerAndWait"/> before transferring connection ownership.
-    /// </summary>
-    /// <param name="connection">The connection to the coordinator pipe.</param>
-    /// <param name="intervalMs">The interval in milliseconds between heartbeats.</param>
-    /// <returns>
-    ///  A <see cref="Timer"/> that sends heartbeats. Dispose it to stop the pump.
-    /// </returns>
-    private static Timer CreateHeartbeatPump(Connection connection, int intervalMs)
-        => new(
-            static state =>
-            {
-                try
-                {
-                    if (state is Connection connection)
-                    {
-                        connection.WriteClientMessage(HeartbeatMessage.Instance);
-                    }
-                }
-                catch (IOException)
-                {
-                    // Pipe may be broken; swallow and let the next read detect it.
-                }
-            },
-            state: connection,
-            dueTime: intervalMs,
-            period: intervalMs);
 
     private static void DisposeTimerAndWait(Timer? timer)
     {
