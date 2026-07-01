@@ -27,9 +27,9 @@ jobs:
   - name: TeamName
     value: MSBuild
   - name: VisualStudio.MajorVersion
-    value: 17
+    value: 18
   - name: VisualStudio.ChannelName
-    value: 'int.d17.14' # MSBuild's vs17.14 branch corresponds to this VS channel
+    value: 'int.d18.0'
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -216,13 +216,6 @@ jobs:
     displayName: Execute cleanup tasks
     condition: succeededOrFailed()
 
-  - template: /eng/common/templates-official/steps/component-governance.yml@self
-    parameters:
-      ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
-        disableComponentGovernance: false
-      ${{ else }}:
-        disableComponentGovernance: true
-
 - template: /eng/common/templates-official/jobs/source-build.yml@self
   parameters:
     platforms:
@@ -243,4 +236,3 @@ jobs:
       name: $(DncEngInternalBuildPool)
       image: $(WindowsImage)
       os: windows
-

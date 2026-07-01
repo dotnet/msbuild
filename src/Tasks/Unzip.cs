@@ -258,6 +258,7 @@ namespace Microsoft.Build.Tasks
 #else
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
 #endif
+#pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
                     using (Stream stream = zipArchiveEntry.Open())
                     {
                         stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
@@ -265,6 +266,7 @@ namespace Microsoft.Build.Tasks
                             .GetAwaiter()
                             .GetResult();
                     }
+#pragma warning restore CA2025
 
                     destinationPath.LastWriteTimeUtc = zipArchiveEntry.LastWriteTime.UtcDateTime;
                 }
@@ -327,7 +329,7 @@ namespace Microsoft.Build.Tasks
                     // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
                 }
-                else if (pattern.IndexOfAny(FileUtilities.InvalidPathChars) != -1)
+                else if (pattern.AsSpan().IndexOfAny(FileUtilities.InvalidPathChars) >= 0)
                 {
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
                 }

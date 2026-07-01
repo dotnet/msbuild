@@ -20,12 +20,12 @@ public abstract class BuildExceptionBase : Exception
         : base()
     { }
 
-    private protected BuildExceptionBase(string message)
+    private protected BuildExceptionBase(string? message)
         : base(message)
     { }
 
     private protected BuildExceptionBase(
-        string message,
+        string? message,
         Exception? inner)
         : base(message, inner)
     { }

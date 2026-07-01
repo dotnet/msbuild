@@ -10,10 +10,13 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Framework.Logging;
+#endif
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
@@ -461,7 +464,7 @@ internal static class NativeMethods
             {
                 ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
 
-#if NETCOREAPP || NETSTANDARD1_1_OR_GREATER
+#if NET || NETSTANDARD1_1_OR_GREATER
                 // Get the architecture from the runtime.
                 processorArchitecture = RuntimeInformation.OSArchitecture switch
                 {
@@ -469,13 +472,9 @@ internal static class NativeMethods
                     Architecture.Arm64 => ProcessorArchitectures.ARM64,
                     Architecture.X64 => ProcessorArchitectures.X64,
                     Architecture.X86 => ProcessorArchitectures.X86,
-#if NET5_0_OR_GREATER
+#if NET
                     Architecture.Wasm => ProcessorArchitectures.WASM,
-#endif
-#if NET6_0_OR_GREATER
                     Architecture.S390x => ProcessorArchitectures.S390X,
-#endif
-#if NET7_0_OR_GREATER
                     Architecture.LoongArch64 => ProcessorArchitectures.LOONGARCH64,
                     Architecture.Armv6 => ProcessorArchitectures.ARMV6,
                     Architecture.Ppc64le => ProcessorArchitectures.PPC64LE,
@@ -582,7 +581,7 @@ internal static class NativeMethods
 
     private static bool IsMaxPathSet { get; set; }
 
-    private static readonly object MaxPathLock = new object();
+    private static readonly LockType MaxPathLock = new LockType();
 
     private static void SetMaxPath()
     {
@@ -946,7 +945,7 @@ internal static class NativeMethods
 
     private static SystemInformationData _systemInformation;
     private static bool _systemInformationInitialized;
-    private static readonly object SystemInformationLock = new object();
+    private static readonly LockType SystemInformationLock = new LockType();
 
     /// <summary>
     /// Architecture getter
@@ -1394,7 +1393,7 @@ internal static class NativeMethods
                 // using (var r = FileUtilities.OpenRead("/proc/" + processId + "/stat"))
                 // and could be again when FileUtilities moves to Framework
 
-                using var fileStream = new FileStream("/proc/" + processId + "/stat", FileMode.Open, System.IO.FileAccess.Read);
+                using var fileStream = new FileStream($"/proc/{processId}/stat", FileMode.Open, System.IO.FileAccess.Read);
                 using StreamReader r = new(fileStream);
 
                 line = r.ReadLine();
@@ -1571,7 +1570,7 @@ internal static class NativeMethods
 
         return true;
 #else
-        return MemoryExtensions.SequenceEqual(new ReadOnlySpan<char>(buffer, len), s.AsSpan());
+        return s.AsSpan().SequenceEqual(new ReadOnlySpan<char>(buffer, len));
 #endif
     }
 
@@ -1591,6 +1590,13 @@ internal static class NativeMethods
         if (Console.IsOutputRedirected)
         {
             // There's no ANSI terminal support if console output is redirected.
+            return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
+        }
+
+        if (Console.BufferHeight == 0 || Console.BufferWidth == 0)
+        {
+            // The current console doesn't have a valid buffer size, which means it is not a real console. let's default to not using TL
+            // in those scenarios.
             return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
         }
 

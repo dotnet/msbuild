@@ -7,7 +7,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -241,7 +240,7 @@ namespace Microsoft.Build.Utilities
 
             public override string ToString()
             {
-                return ProcessId + "@" + StartTime.ToString("s");
+                return $"{ProcessId}@{StartTime:s}";
             }
         }
 

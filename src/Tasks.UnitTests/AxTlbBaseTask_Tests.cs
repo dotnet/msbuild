@@ -8,7 +8,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Runtime.Hosting;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

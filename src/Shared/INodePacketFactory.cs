@@ -43,7 +43,14 @@ namespace Microsoft.Build.BackEnd
         void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator);
 
         /// <summary>
-        /// Routes the specified packet
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator);
+
+        /// <summary>
+        /// Routes the specified packet.
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet to route.</param>

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 
 namespace ErrorCustomCheck

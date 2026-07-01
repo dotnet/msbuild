@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
-using Microsoft.IO;
 using File = System.IO.File;
 
 #nullable disable

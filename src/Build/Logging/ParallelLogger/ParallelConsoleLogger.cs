@@ -760,7 +760,7 @@ namespace Microsoft.Build.BackEnd.Logging
             foreach (DictionaryEntry prop in list)
             {
                 setColor(ConsoleColor.Gray);
-                string propertyString = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", prop.Key, EscapingUtilities.UnescapeAll((string)(prop.Value)));
+                string propertyString = $"{prop.Key} = {EscapingUtilities.UnescapeAll((string)(prop.Value))}";
                 WriteMessageAligned(propertyString, false);
             }
             resetColor();
@@ -781,7 +781,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 foreach (KeyValuePair<string, string> entry in environment)
                 {
                     setColor(ConsoleColor.Gray);
-                    string environmentMessage = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", entry.Key, entry.Value);
+                    string environmentMessage = $"{entry.Key} = {entry.Value}";
                     WriteMessageAligned(environmentMessage, false);
                 }
             }
@@ -812,6 +812,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
+
             WriteLinePrefix(e.BuildEventContext, e.Timestamp, false);
             WriteItems(itemList);
             ShownBuildEventContext(e.BuildEventContext);
@@ -897,7 +898,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                                 foreach (DictionaryEntry metadatum in metadata)
                                 {
-                                    WriteMessageAligned(new String(' ', 4 * tabWidth) + metadatum.Key + " = " + item.GetMetadata(metadatum.Key as string), false);
+                                    WriteMessageAligned($"{new String(' ', 4 * tabWidth)}{metadatum.Key} = {item.GetMetadata(metadatum.Key as string)}", false);
                                 }
                             }
                         }
@@ -1343,7 +1344,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
                     else
                     {
-                        WriteMessageAligned(targetName + ":", prefixAlreadyWritten);
+                        WriteMessageAligned($"{targetName}:", prefixAlreadyWritten);
                     }
 
                     if (lightenText)
@@ -1398,22 +1399,6 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int adjustedPrefixWidth = _prefixWidth + prefixAdjustment;
                 WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
-            }
-        }
-
-        /// <summary>
-        /// Write message taking into account whether or not the prefix (timestamp and key) have already been written on the line
-        /// </summary>
-        private void WriteBasedOnPrefix(string nonNullMessage, bool prefixAlreadyWritten, int adjustedPrefixWidth)
-        {
-            if (prefixAlreadyWritten)
-            {
-                WriteHandler(nonNullMessage + Environment.NewLine);
-            }
-            else
-            {
-                // No prefix info has been written, indent the line to the proper location
-                WriteHandler(IndentString(nonNullMessage, adjustedPrefixWidth));
             }
         }
 
@@ -1618,11 +1603,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (!isMessagePrefix || IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
-                prefixString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", context, key) + ">";
+                prefixString = $"{ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", context, key)}>";
             }
             else
             {
-                prefixString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", context, string.Empty) + " ";
+                prefixString = $"{ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", context, string.Empty)} ";
             }
 
             WritePretty(prefixString);
@@ -1763,8 +1748,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     MessageIndentLevel,
                     "PerformanceLine",
                     time,
-                    String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
-                    String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
+                    $"{scopeName,-40}", // pad to 40 align left
+                    $"{calls,3}");
 
                 if (_internalPerformanceCounters?.Count > 0)
                 {

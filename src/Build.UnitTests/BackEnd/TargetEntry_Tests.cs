@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
@@ -18,6 +17,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.Abstractions;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable
@@ -40,6 +40,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
+        private readonly ITestOutputHelper _output;
+
 #pragma warning disable xUnit1013
 
         /// <summary>
@@ -55,8 +57,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Called prior to each test.
         /// </summary>
-        public TargetEntry_Tests()
+        public TargetEntry_Tests(ITestOutputHelper output)
         {
+            _output = output;
             _nodeRequestId = 1;
             _host = new MockHost();
             _host.OnLoggingThreadException += this.LoggingException;
@@ -158,13 +161,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies that the dependencies specified for a target are returned by the GetDependencies call.
         /// </summary>
-        [Fact]
-        public void TestDependencies()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestDependencies(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
 
@@ -192,19 +193,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal("Bar", depsEnum.Current.TargetName);
                 depsEnum.MoveNext();
                 Assert.Equal("Foo", depsEnum.Current.TargetName);
-            }
         }
 
         /// <summary>
         /// Tests normal target execution and verifies the tasks expected to be executed are.
         /// </summary>
-        [Fact]
-        public void TestExecution()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestExecution(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -236,20 +234,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal("Baz2Task1", taskBuilder.ExecutedTasks[0].Name);
                 Assert.Equal("Baz2Task2", taskBuilder.ExecutedTasks[1].Name);
                 Assert.Equal("Baz2Task3", taskBuilder.ExecutedTasks[2].Name);
-            }
         }
 
         /// <summary>
         /// Executes various cases where tasks cause an error.  Verifies that the expected tasks
         /// executed.
         /// </summary>
-        [Fact]
-        public void TestExecutionWithErrors()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestExecutionWithErrors(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -304,20 +299,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
                 Assert.Equal("ErrorTask3", taskBuilder.ExecutedTasks[2].Name);
                 Assert.Equal(TargetEntryState.Completed, entry.State);
-            }
         }
 
         /// <summary>
         /// Tests that the dependencies returned can also be built and that their entries in the lookup
         /// are appropriately aggregated into the parent target entry.
         /// </summary>
-        [Fact]
-        public void TestBuildDependencies()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestBuildDependencies(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -337,19 +329,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Equal(2, entry.Lookup.GetItems("Compile").Count);
                 Assert.Single(entry.Lookup.GetItems("FooTask1_Item"));
                 Assert.Single(entry.Lookup.GetItems("BarTask1_Item"));
-            }
         }
 
         /// <summary>
         /// Tests a variety of situations returning various results
         /// </summary>
-        [Fact]
-        public void TestGatherResults()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestGatherResults(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -446,19 +435,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 entry.GetErrorTargets(GetProjectLoggingContext(entry.RequestEntry));
                 results = entry.GatherResults();
                 Assert.Equal(TargetResultCode.Failure, results.ResultCode);
-            }
         }
 
         /// <summary>
         /// Tests that multiple outputs are allowed
         /// </summary>
-        [Fact]
-        public void TestMultipleOutputs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestMultipleOutputs(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -477,7 +463,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     Assert.Equal(2, results.Items.Length);
                 }
-            }
         }
 
         /// <summary>
@@ -518,13 +503,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that duplicate outputs are allowed
         /// </summary>
-        [Fact]
-        public void TestDuplicateOutputs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestDuplicateOutputs(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -533,19 +516,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
                 Assert.Single(results.Items);
-            }
         }
 
         /// <summary>
         /// Tests that duplicate outputs are not trimmed under the false trim condition
         /// </summary>
-        [Fact]
-        public void TestKeepDuplicateOutputsTrue()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestKeepDuplicateOutputsTrue(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -554,19 +534,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
                 Assert.Equal(2, results.Items.Length);
-            }
         }
 
         /// <summary>
         /// Tests that duplicate outputs are trimmed under the false keep condition
         /// </summary>
-        [Fact]
-        public void TestKeepDuplicateOutputsFalse()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestKeepDuplicateOutputsFalse(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -575,19 +552,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
                 Assert.Single(results.Items);
-            }
         }
 
         /// <summary>
         /// Tests that duplicate outputs are trimmed if they have the same metadata
         /// </summary>
-        [Fact]
-        public void TestKeepDuplicateOutputsSameMetadata()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestKeepDuplicateOutputsSameMetadata(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -596,19 +570,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
                 Assert.Single(results.Items);
-            }
         }
 
         /// <summary>
         /// Tests that duplicate outputs are not trimmed if they have different metadata
         /// </summary>
-        [Fact]
-        public void TestKeepDuplicateOutputsDiffMetadata()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestKeepDuplicateOutputsDiffMetadata(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 MockTaskBuilder taskBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
@@ -617,19 +588,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
                 Assert.Equal(4, results.Items.Length);
-            }
         }
 
         /// <summary>
         /// Tests that metadata references in target outputs are correctly expanded
         /// </summary>
-        [Fact]
-        public void TestMetadataReferenceInTargetOutputs()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void TestMetadataReferenceInTargetOutputs(bool returnsEnabledForThisProject)
         {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            foreach (bool returnsEnabledForThisProject in returnsEnabled)
-            {
                 string content = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
@@ -658,26 +626,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     log.AssertLogContains("item1;item2");
                 }
-            }
         }
 
         /// <summary>
         /// Tests that we get the target outputs correctly.
         /// </summary>
-        [Fact]
-        public void TestTargetOutputsOnFinishedEvent()
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public void TestTargetOutputsOnFinishedEvent(bool returnsEnabledForThisProject, bool allowTargetOutputsLogging)
         {
-            bool[] returnsEnabled = new bool[] { false, true };
-
-            string loggingVariable = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
-            Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
-            try
+            using (var env = TestEnvironment.Create(_output))
             {
-                TargetLoggingContext.EnableTargetOutputLogging = true;
+                _ = env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", allowTargetOutputsLogging ? "1" : null);
 
-                foreach (bool returnsEnabledForThisProject in returnsEnabled)
-                {
-                    string content = @"
+                string content = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
         <SomeItem1 Include=`item1.cs`/>
@@ -692,135 +657,61 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <Target Name=`b` " + (returnsEnabledForThisProject ? "Returns" : "Outputs") + @"=`%(SomeItem1.Filename)`/>
     <Target Name=`c` Outputs=`%(SomeItem2.Filename)`/>
 </Project>
-                ";
+        ";
+                var logger = new MockLogger(_output);
+                Helpers.BuildProjectWithNewOMExpectSuccess(content, enableTargetOutputLogging: allowTargetOutputsLogging, logger: logger);
 
-                    // Only log critical event is false by default
-                    MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content);
+                Assert.Equal(3, logger.TargetFinishedEvents.Count);
 
-                    Assert.Equal(3, log.TargetFinishedEvents.Count);
+                TargetFinishedEventArgs targeta = logger.TargetFinishedEvents[2];
+                TargetFinishedEventArgs targetb = logger.TargetFinishedEvents[0];
+                TargetFinishedEventArgs targetc = logger.TargetFinishedEvents[1];
 
-                    TargetFinishedEventArgs targeta = log.TargetFinishedEvents[2];
-                    TargetFinishedEventArgs targetb = log.TargetFinishedEvents[0];
-                    TargetFinishedEventArgs targetc = log.TargetFinishedEvents[1];
+                Assert.NotNull(targeta);
+                Assert.NotNull(targetb);
+                Assert.NotNull(targetc);
 
-                    Assert.NotNull(targeta);
-                    Assert.NotNull(targetb);
-                    Assert.NotNull(targetc);
+                Assert.Equal("a", targeta.TargetName);
+                Assert.Equal("b", targetb.TargetName);
+                Assert.Equal("c", targetc.TargetName);
 
-                    Assert.Equal("a", targeta.TargetName);
-                    Assert.Equal("b", targetb.TargetName);
-                    Assert.Equal("c", targetc.TargetName);
+                IEnumerable targetOutputsA = targeta.TargetOutputs;
+                IEnumerable targetOutputsB = targetb.TargetOutputs;
+                IEnumerable targetOutputsC = targetc.TargetOutputs;
 
-                    IEnumerable targetOutputsA = targeta.TargetOutputs;
-                    IEnumerable targetOutputsB = targetb.TargetOutputs;
-                    IEnumerable targetOutputsC = targetc.TargetOutputs;
-
-                    Assert.Null(targetOutputsA);
-                    Assert.NotNull(targetOutputsB);
-
+                Assert.Null(targetOutputsA);
+                if (allowTargetOutputsLogging)
+                {
                     if (returnsEnabledForThisProject)
                     {
+                        // b should have stuff, c should not have stuff, because only B has Returns
+                        Assert.NotNull(targetOutputsB);
+                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
+                        Assert.Single(outputListB);
+                        Assert.Equal("item1", outputListB[0].ItemSpec);
+
                         Assert.Null(targetOutputsC);
                     }
                     else
                     {
+                        // b and c should have stuff because everything has Outputs
+                        Assert.NotNull(targetOutputsB);
                         Assert.NotNull(targetOutputsC);
-                    }
 
-                    List<ITaskItem> outputListB = new List<ITaskItem>();
-                    foreach (ITaskItem item in targetOutputsB)
-                    {
-                        outputListB.Add(item);
-                    }
+                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
+                        Assert.Single(outputListB);
+                        Assert.Equal("item1", outputListB[0].ItemSpec);
 
-                    Assert.Single(outputListB);
-                    Assert.Equal("item1", outputListB[0].ItemSpec);
-
-                    if (!returnsEnabledForThisProject)
-                    {
-                        List<ITaskItem> outputListC = new List<ITaskItem>();
-                        foreach (ITaskItem item in targetOutputsC)
-                        {
-                            outputListC.Add(item);
-                        }
-
+                        List<ITaskItem> outputListC = [.. targetOutputsC as IEnumerable<ITaskItem> ];
                         Assert.Single(outputListC);
-
                         Assert.Equal("item2", outputListC[0].ItemSpec);
                     }
                 }
-            }
-            finally
-            {
-                TargetLoggingContext.EnableTargetOutputLogging = false;
-                Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", loggingVariable);
-            }
-        }
-
-        /// <summary>
-        /// Tests that we get no target outputs when the environment variable is not set
-        /// </summary>
-        [Fact]
-        public void TestTargetOutputsOnFinishedEventNoVariableSet()
-        {
-            bool[] returnsEnabled = new bool[] { true, false };
-
-            string loggingVariable = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
-            Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", null);
-            bool originalTargetOutputLoggingValue = TargetLoggingContext.EnableTargetOutputLogging;
-            TargetLoggingContext.EnableTargetOutputLogging = false;
-
-            try
-            {
-                foreach (bool returnsEnabledForThisProject in returnsEnabled)
+                else
                 {
-                    string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion`>
-    <ItemGroup>
-        <SomeItem1 Include=`item1.cs`/>
-        <SomeItem2 Include=`item2.cs`/>
-    </ItemGroup>
-    <Target Name=`a`>
-        <CallTarget Targets=`b;c`>
-            <Output TaskParameter=`TargetOutputs` PropertyName=`foo`/>
-        </CallTarget>
-        <Message Text=`[$(foo)]`/>
-    </Target>
-    <Target Name=`b` Outputs=`%(SomeItem1.Filename)`/>
-    <Target Name=`c` " + (returnsEnabledForThisProject ? "Returns" : "Outputs") + @"=`%(SomeItem2.Filename)`/>
-</Project>
-                ";
-
-                    // Only log critical event is false by default
-                    MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content);
-
-                    Assert.Equal(3, log.TargetFinishedEvents.Count);
-
-                    TargetFinishedEventArgs targeta = log.TargetFinishedEvents[2];
-                    TargetFinishedEventArgs targetb = log.TargetFinishedEvents[0];
-                    TargetFinishedEventArgs targetc = log.TargetFinishedEvents[1];
-
-                    Assert.NotNull(targeta);
-                    Assert.NotNull(targetb);
-                    Assert.NotNull(targetc);
-
-                    Assert.Equal("a", targeta.TargetName);
-                    Assert.Equal("b", targetb.TargetName);
-                    Assert.Equal("c", targetc.TargetName);
-
-                    IEnumerable targetOutputsA = targeta.TargetOutputs;
-                    IEnumerable targetOutputsB = targetb.TargetOutputs;
-                    IEnumerable targetOutputsC = targetc.TargetOutputs;
-
-                    Assert.Null(targetOutputsA);
                     Assert.Null(targetOutputsB);
                     Assert.Null(targetOutputsC);
                 }
-            }
-            finally
-            {
-                TargetLoggingContext.EnableTargetOutputLogging = originalTargetOutputLoggingValue;
-                Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", loggingVariable);
             }
         }
 

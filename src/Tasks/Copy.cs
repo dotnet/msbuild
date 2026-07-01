@@ -7,15 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks.Dataflow;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
-
-using TPLTask = System.Threading.Tasks.Task;
 
 #nullable disable
 
@@ -64,7 +61,9 @@ namespace Microsoft.Build.Tasks
                     {
                         AutoResetEvent autoResetEvent = new AutoResetEvent(false);
                         copyThreadSignals[i] = autoResetEvent;
-                        Thread newThread = new Thread(ParallelCopyTask);
+
+                        // specify the smallest stack size - 64kb
+                        Thread newThread = new Thread(ParallelCopyTask, 64 * 1024);
                         newThread.IsBackground = true;
                         newThread.Name = "Parallel Copy Thread";
                         newThread.Start(autoResetEvent);

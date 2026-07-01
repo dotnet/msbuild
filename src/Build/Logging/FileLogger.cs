@@ -88,7 +88,6 @@ namespace Microsoft.Build.Logging
             // Finally, ask the base console logger class to initialize. It may
             // want to make decisions based on our verbosity, so we do this last.
             base.Initialize(eventSource, nodeCount);
-            KnownTelemetry.LoggingConfigurationTelemetry.FileLoggersCount++;
             KnownTelemetry.LoggingConfigurationTelemetry.FileLogger = true;
             KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerVerbosity = Verbosity.ToString();
 
@@ -269,6 +268,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private Encoding _encoding = new UTF8Encoding(false);
 #endif
+
         /// <summary>
         /// File logger parameters delimiters.
         /// </summary>

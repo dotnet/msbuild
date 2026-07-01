@@ -101,8 +101,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().Translate(ref copy);
 
             // test _configurations
-            var initialConfigurations = initial.GetEnumerator().ToArray();
-            var copiedConfigurations = copy.GetEnumerator().ToArray();
+            var initialConfigurations = initial.ToArray();
+            var copiedConfigurations = copy.ToArray();
 
             Assert.Equal(copiedConfigurations, initialConfigurations, EqualityComparer<BuildRequestConfiguration>.Default);
 

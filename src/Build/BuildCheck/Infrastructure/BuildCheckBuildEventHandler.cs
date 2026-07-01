@@ -28,25 +28,25 @@ internal class BuildCheckBuildEventHandler
 
         _eventHandlersFull = new()
         {
-            { typeof(BuildSubmissionStartedEventArgs), (BuildEventArgs e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
-            { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
-            { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
-            { typeof(EnvironmentVariableReadEventArgs), (BuildEventArgs e) => HandleEnvironmentVariableReadEvent((EnvironmentVariableReadEventArgs)e) },
-            { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => HandleProjectStartedRequest((ProjectStartedEventArgs)e) },
-            { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => HandleProjectFinishedRequest((ProjectFinishedEventArgs)e) },
-            { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
-            { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => HandleBuildCheckAcquisitionEvent((BuildCheckAcquisitionEventArgs)e) },
-            { typeof(TaskStartedEventArgs), (BuildEventArgs e) => HandleTaskStartedEvent((TaskStartedEventArgs)e) },
-            { typeof(TaskFinishedEventArgs), (BuildEventArgs e) => HandleTaskFinishedEvent((TaskFinishedEventArgs)e) },
-            { typeof(TaskParameterEventArgs), (BuildEventArgs e) => HandleTaskParameterEvent((TaskParameterEventArgs)e) },
-            { typeof(BuildFinishedEventArgs), (BuildEventArgs e) => HandleBuildFinishedEvent((BuildFinishedEventArgs)e) },
-            { typeof(ProjectImportedEventArgs), (BuildEventArgs e) => HandleProjectImportedEvent((ProjectImportedEventArgs)e) },
+            { typeof(BuildSubmissionStartedEventArgs), (e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
+            { typeof(ProjectEvaluationFinishedEventArgs), (e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
+            { typeof(ProjectEvaluationStartedEventArgs), (e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
+            { typeof(EnvironmentVariableReadEventArgs), (e) => HandleEnvironmentVariableReadEvent((EnvironmentVariableReadEventArgs)e) },
+            { typeof(ProjectStartedEventArgs), (e) => HandleProjectStartedRequest((ProjectStartedEventArgs)e) },
+            { typeof(ProjectFinishedEventArgs), (e) => HandleProjectFinishedRequest((ProjectFinishedEventArgs)e) },
+            { typeof(BuildCheckTracingEventArgs), (e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
+            { typeof(BuildCheckAcquisitionEventArgs), (e) => HandleBuildCheckAcquisitionEvent((BuildCheckAcquisitionEventArgs)e) },
+            { typeof(TaskStartedEventArgs), (e) => HandleTaskStartedEvent((TaskStartedEventArgs)e) },
+            { typeof(TaskFinishedEventArgs), (e) => HandleTaskFinishedEvent((TaskFinishedEventArgs)e) },
+            { typeof(TaskParameterEventArgs), (e) => HandleTaskParameterEvent((TaskParameterEventArgs)e) },
+            { typeof(BuildFinishedEventArgs), (e) => HandleBuildFinishedEvent((BuildFinishedEventArgs)e) },
+            { typeof(ProjectImportedEventArgs), (e) => HandleProjectImportedEvent((ProjectImportedEventArgs)e) },
         };
 
         // During restore we'll wait only for restore to be done.
         _eventHandlersRestore = new()
         {
-            { typeof(BuildSubmissionStartedEventArgs), (BuildEventArgs e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
+            { typeof(BuildSubmissionStartedEventArgs), (e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
         };
 
         _eventHandlers = _eventHandlersFull;

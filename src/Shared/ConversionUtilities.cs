@@ -3,7 +3,9 @@
 
 using System;
 using System.Globalization;
+#if !NET
 using System.Text;
+#endif
 using Error = Microsoft.Build.Shared.ErrorUtilities;
 
 #nullable disable
@@ -57,6 +59,9 @@ namespace Microsoft.Build.Shared
         /// <returns>A string byte types formated as X2.</returns>
         internal static string ConvertByteArrayToHex(byte[] bytes)
         {
+#if NET
+            return Convert.ToHexString(bytes);
+#else
             var sb = new StringBuilder();
             foreach (var b in bytes)
             {
@@ -64,6 +69,7 @@ namespace Microsoft.Build.Shared
             }
 
             return sb.ToString();
+#endif
         }
 
         internal static bool TryConvertStringToBool(string parameterValue, out bool boolValue)
@@ -131,7 +137,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static double ConvertHexToDouble(string number)
         {
-            return (double)Int32.Parse(number.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat);
+            return (double)Int32.Parse(
+#if NET
+                number.AsSpan(2),
+#else
+                number.Substring(2),
+#endif
+                NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat);
         }
 
         /// <summary>
@@ -172,9 +184,15 @@ namespace Microsoft.Build.Shared
         {
             bool canConvert = false;
             value = 0;
-            if (number.Length >= 3 && number[0] == '0' && (number[1] == 'x' || number[1] == 'X'))
+            if (number.Length >= 3 && number[0] is '0' && number[1] is 'x' or 'X')
             {
-                canConvert = Int32.TryParse(number.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat, out value);
+                canConvert = Int32.TryParse(
+#if NET
+                    number.AsSpan(2),
+#else
+                    number.Substring(2),
+#endif
+                    NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat, out value);
             }
             return canConvert;
         }

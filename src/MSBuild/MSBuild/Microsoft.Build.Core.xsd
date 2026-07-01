@@ -329,7 +329,7 @@
         <xs:attribute name="Runtime" type="msb:runtime" use="optional">
           <xs:annotation>
             <xs:documentation>
-              <!-- _locID_text="UsingTaskType_Runtime" _locComment="" -->Defines the .NET runtime version of the task host that this task should be run in.  Currently supported values:  CLR2, CLR4, CurrentRuntime, and * (any).  If Runtime is not specified, either the task will be run within the MSBuild process, or the task host will be launched using the runtime of the parent MSBuild process
+              <!-- _locID_text="UsingTaskType_Runtime" _locComment="" -->Defines the .NET runtime version of the task host that this task should be run in.  Currently supported values:  CLR2, CLR4, NET, CurrentRuntime, and * (any).  If Runtime is not specified, either the task will be run within the MSBuild process, or the task host will be launched using the runtime of the parent MSBuild process
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>
@@ -618,6 +618,7 @@
             <xs:enumeration value="CurrentRuntime" />
             <xs:enumeration value="CLR2" />
             <xs:enumeration value="CLR4" />
+            <xs:enumeration value="NET" />
           </xs:restriction>
         </xs:simpleType>
       </xs:union>

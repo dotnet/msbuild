@@ -6,11 +6,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using BuildXL.Processes;
 using BuildXL.Utilities.Core;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -110,7 +108,7 @@ namespace Microsoft.Build.BackEnd
             info.FileAccessManifest.ChildProcessesToBreakawayFromSandbox =
             [
 #if RUNTIME_TYPE_NETCORE
-                new BreakawayChildProcess(NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet", "vbcscompiler.dll", CommandLineArgsSubstringContainmentIgnoreCase: true)
+                new BreakawayChildProcess(Constants.DotnetProcessName, "vbcscompiler.dll", CommandLineArgsSubstringContainmentIgnoreCase: true)
 #else
                 new BreakawayChildProcess(NativeMethodsShared.IsWindows ? "VBCSCompiler.exe" : "VBCSCompiler")
 #endif

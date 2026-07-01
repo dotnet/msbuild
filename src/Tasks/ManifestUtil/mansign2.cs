@@ -550,126 +550,68 @@ namespace System.Deployment.Internal.CodeSigning
             }
         }
 
+        [SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
         private static byte[] ComputeHashFromManifest(XmlDocument manifestDom, bool useSha256)
         {
-#if (true) // BUGBUG: Remove before RTM when old format support is no longer needed.
-            return ComputeHashFromManifest(manifestDom, false, useSha256);
-        }
+            // Since the DOM given to us is not guaranteed to be normalized,
+            // we need to normalize it ourselves. Also, we always preserve
+            // white space as Fusion XML engine always preserve white space.
+            XmlDocument normalizedDom = new XmlDocument();
+            normalizedDom.PreserveWhitespace = true;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
-        private static byte[] ComputeHashFromManifest(XmlDocument manifestDom, bool oldFormat, bool useSha256)
-        {
-            if (oldFormat)
+            // Normalize the document
+            using (TextReader stringReader = new StringReader(manifestDom.OuterXml))
             {
-                XmlDsigExcC14NTransform exc = new XmlDsigExcC14NTransform();
-                exc.LoadInput(manifestDom);
-
-                if (useSha256)
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.DtdProcessing = DtdProcessing.Parse;
+                using (XmlReader reader = XmlReader.Create(stringReader, settings, manifestDom.BaseURI))
                 {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    using (SHA256 sha2 = SHA256.Create(
-#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
-                        "System.Security.Cryptography.SHA256CryptoServiceProvider"
-#endif
-                ))
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    {
-                        byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
-                        if (hash == null)
-                        {
-                            throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
-                        }
-
-                        return hash;
-                    }
+                    normalizedDom.Load(reader);
                 }
-                else
-                {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
-                    using (SHA1 sha1 = SHA1.Create(
-#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
-                        "System.Security.Cryptography.SHA1CryptoServiceProvider"
-#endif
-                        ))
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    {
-                        byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
-                        if (hash == null)
-                        {
-                            throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
-                        }
+            }
 
-                        return hash;
+            XmlDsigExcC14NTransform exc = new XmlDsigExcC14NTransform();
+            exc.LoadInput(normalizedDom);
+
+            if (useSha256)
+            {
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                using (SHA256 sha2 = SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                    "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                    ))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                {
+                    byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
+                    if (hash == null)
+                    {
+                        throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
                     }
+
+                    return hash;
                 }
             }
             else
             {
-#endif
-                // Since the DOM given to us is not guaranteed to be normalized,
-                // we need to normalize it ourselves. Also, we always preserve
-                // white space as Fusion XML engine always preserve white space.
-                XmlDocument normalizedDom = new XmlDocument();
-                normalizedDom.PreserveWhitespace = true;
-
-                // Normalize the document
-                using (TextReader stringReader = new StringReader(manifestDom.OuterXml))
-                {
-                    XmlReaderSettings settings = new XmlReaderSettings();
-                    settings.DtdProcessing = DtdProcessing.Parse;
-                    using (XmlReader reader = XmlReader.Create(stringReader, settings, manifestDom.BaseURI))
-                    {
-                        normalizedDom.Load(reader);
-                    }
-                }
-
-                XmlDsigExcC14NTransform exc = new XmlDsigExcC14NTransform();
-                exc.LoadInput(normalizedDom);
-
-                if (useSha256)
-                {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    using (SHA256 sha2 = SHA256.Create(
+                // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
+                using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
-                        "System.Security.Cryptography.SHA256CryptoServiceProvider"
+                    "System.Security.Cryptography.SHA1CryptoServiceProvider"
 #endif
-                        ))
+                     ))
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    {
-                        byte[] hash = sha2.ComputeHash(exc.GetOutput() as MemoryStream);
-                        if (hash == null)
-                        {
-                            throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
-                        }
-
-                        return hash;
-                    }
-                }
-                else
                 {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
-                    using (SHA1 sha1 = SHA1.Create(
-#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
-                        "System.Security.Cryptography.SHA1CryptoServiceProvider"
-#endif
-                         ))
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
+                    if (hash == null)
                     {
-                        byte[] hash = sha1.ComputeHash(exc.GetOutput() as MemoryStream);
-                        if (hash == null)
-                        {
-                            throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
-                        }
-
-                        return hash;
+                        throw new CryptographicException(Win32.TRUST_E_BAD_DIGEST);
                     }
-                }
 
-#if (true) // BUGBUG: Remove before RTM when old format support is no longer needed.
+                    return hash;
+                }
             }
-#endif
         }
 
         private const string AssemblyNamespaceUri = "urn:schemas-microsoft-com:asm.v1";
@@ -739,8 +681,8 @@ namespace System.Deployment.Internal.CodeSigning
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             if (signer.UseSha256)
             {
-                signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
-            }
+                    signedXml.SignedInfo.SignatureMethod = Sha256SignatureMethodUri;
+                }
             else
             {
                 signedXml.SignedInfo.SignatureMethod = Sha1SignatureMethodUri;
@@ -817,12 +759,17 @@ namespace System.Deployment.Internal.CodeSigning
 
                 try
                 {
+#if NET
+                    Span<byte> nonce = stackalloc byte[32];
+                    RandomNumberGenerator.Fill(nonce);
+#else
                     byte[] nonce = new byte[32];
 
                     using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
                     {
                         rng.GetBytes(nonce);
                     }
+#endif
 
                     // Eventually, CryptEncodeObjectEx(...) is called on a CRYPT_TIMESTAMP_REQUEST with this nonce,
                     // and CryptEncodeObjectEx(...) interprets the nonce as a little endian, DER-encoded integer value
@@ -1044,13 +991,19 @@ namespace System.Deployment.Internal.CodeSigning
             // Insert the signature now.
             signatureParent.AppendChild(xmlDigitalSignature);
         }
+
+#if !NET
         private static readonly char[] s_hexValues = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+#endif
 
         private static string BytesToHexString(byte[] array, int start, int end)
         {
             string result = null;
             if (array != null)
             {
+#if NET
+                return Convert.ToHexStringLower(array.AsSpan(start, end - start));
+#else
                 char[] hexOrder = new char[(end - start) * 2];
                 int i = end;
                 int digit, j = 0;
@@ -1062,6 +1015,7 @@ namespace System.Deployment.Internal.CodeSigning
                     hexOrder[j++] = s_hexValues[digit];
                 }
                 result = new String(hexOrder);
+#endif
             }
             return result;
         }
@@ -1096,12 +1050,12 @@ namespace System.Deployment.Internal.CodeSigning
         private X509Certificate2Collection _certificates;
         private X509IncludeOption _includeOption;
         private CmiManifestSignerFlag _signerFlag;
-        private bool _useSha256;
+        private readonly bool _useSha256;
 
         private CmiManifestSigner2() { }
 
         internal CmiManifestSigner2(AsymmetricAlgorithm strongNameKey) :
-            this(strongNameKey, null, false)
+            this(strongNameKey, certificate: null, useSha256: false)
         { }
 
         internal CmiManifestSigner2(AsymmetricAlgorithm strongNameKey, X509Certificate2 certificate, bool useSha256)
@@ -1299,7 +1253,7 @@ namespace System.Deployment.Internal.CodeSigning
         }
 
         internal CmiAuthenticodeSignerInfo(Win32.AXL_SIGNER_INFO signerInfo,
-                                            Win32.AXL_TIMESTAMPER_INFO timestamperInfo)
+                                           Win32.AXL_TIMESTAMPER_INFO timestamperInfo)
         {
             _error = (int)signerInfo.dwError;
             if (signerInfo.pChainContext != IntPtr.Zero)

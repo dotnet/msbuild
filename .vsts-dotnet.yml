@@ -33,6 +33,8 @@ variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
+  - name: requireDefaultChannels
+    value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
@@ -51,12 +53,9 @@ variables:
   # optimization data so shipped binaries stay optimized. SkipApplyOptimizationData is
   # therefore governed solely by the pipeline variable (default 'false' = apply existing data).
   - name: EnableReleaseOneLocBuild
-    value: false # Disable loc for vs17.14
+    value: false # Disable loc for vs18.0
   - name: Codeql.Enabled
     value: true
-  # ensures we don't build and push experimental versions to official feeds as release versions
-  - name: IsExperimental
-    value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
   - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel

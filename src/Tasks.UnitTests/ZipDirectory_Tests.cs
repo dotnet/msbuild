@@ -11,16 +11,31 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
-#nullable disable
-
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class ZipDirectory_Tests
     {
         private readonly MockEngine _mockEngine = new MockEngine();
 
-        [Fact]
-        public void CanZipDirectory()
+        public enum CompressionSupportKind
+        {
+            NotSupported,
+            NotSupportedOnNetFramework,
+            Supported,
+        }
+
+        [Theory]
+        [InlineData(null, CompressionSupportKind.Supported)]
+        [InlineData("Optimal", CompressionSupportKind.Supported)]
+        [InlineData("Fastest", CompressionSupportKind.Supported)]
+        [InlineData("NoCompression", CompressionSupportKind.Supported)]
+#if NET
+        [InlineData("SmallestSize", CompressionSupportKind.Supported)]
+#elif NETFRAMEWORK
+        [InlineData("SmallestSize", CompressionSupportKind.NotSupportedOnNetFramework)]
+#endif
+        [InlineData("RandomUnsupportedValue", CompressionSupportKind.NotSupported)]
+        public void CanZipDirectory(string? compressionLevel, CompressionSupportKind compressionSupportKind)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -34,14 +49,32 @@ namespace Microsoft.Build.Tasks.UnitTests
                 ZipDirectory zipDirectory = new ZipDirectory
                 {
                     BuildEngine = _mockEngine,
+                    CompressionLevel = compressionLevel,
                     DestinationFile = new TaskItem(zipFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.Path)
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
                 };
 
                 zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
 
                 _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
                 _mockEngine.Log.ShouldContain(zipFilePath, customMessage: _mockEngine.Log);
+
+                if (compressionSupportKind == CompressionSupportKind.NotSupported)
+                {
+                    _mockEngine.Log.ShouldContain("MSB3944", customMessage: _mockEngine.Log);
+                }
+                else if (compressionSupportKind == CompressionSupportKind.NotSupportedOnNetFramework)
+                {
+                    _mockEngine.Log.ShouldContain("MSB3945", customMessage: _mockEngine.Log);
+                }
+                else
+                {
+                    Assert.Equal(CompressionSupportKind.Supported, compressionSupportKind);
+
+                    // Should not contain any warnings between MSB3941 - MSB3950
+                    _mockEngine.Log.ShouldNotContain("MSB394", customMessage: _mockEngine.Log); // Prefix
+                    _mockEngine.Log.ShouldNotContain("MSB3950", customMessage: _mockEngine.Log);
+                }
 
                 using (FileStream stream = new FileStream(zipFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
@@ -50,18 +83,17 @@ namespace Microsoft.Build.Tasks.UnitTests
                         .Select(i => i.FullName)
                         .ToList()
                         .ShouldBe(
-                            new List<string>
-                            {
+                            [
                                 "6DE6060259C44DB6B145159376751C22.txt",
                                 "CDA3DD8C25A54A7CAC638A444CB1EAD0.txt"
-                            },
+                            ],
                             ignoreOrder: true);
                 }
             }
         }
 
         [Fact]
-        public void CanOvewriteExistingFile()
+        public void CanOverwriteExistingFile()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -92,11 +124,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                         .Select(i => i.FullName)
                         .ToList()
                         .ShouldBe(
-                            new List<string>
-                            {
+                            [
                                 "F1C22D660B0D4DAAA296C1B980320B03.txt",
                                 "AA825D1CB154492BAA58E1002CE1DFEB.txt"
-                            },
+                            ],
                             ignoreOrder: true);
                 }
             }

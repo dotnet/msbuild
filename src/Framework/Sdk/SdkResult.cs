@@ -26,6 +26,7 @@ namespace Microsoft.Build.Framework
         private protected IList<string> _additionalPaths;
         private protected IDictionary<string, string> _propertiesToAdd;
         private protected IDictionary<string, SdkResultItem> _itemsToAdd;
+        private protected IDictionary<string, string> _environmentVariablesToAdd;
         private protected SdkReference _sdkReference;
 
         /// <summary>
@@ -65,6 +66,11 @@ namespace Microsoft.Build.Framework
         /// Items that should be added to the evaluation.  This allows an SDK resolver to provide information to the build
         /// </summary>
         public virtual IDictionary<string, SdkResultItem> ItemsToAdd { get => _itemsToAdd; protected set => _itemsToAdd = value; }
+
+        /// <summary>
+        /// Environment variables that should be added to the evaluation.  This allows an SDK resolver to provide information to the build
+        /// </summary>
+        public virtual IDictionary<string, string> EnvironmentVariablesToAdd { get => _environmentVariablesToAdd; protected set => _environmentVariablesToAdd = value; }
 
         /// <summary>
         ///     The Sdk reference

@@ -4741,6 +4741,31 @@ $(
             TestPropertyFunction("$(X.Split($([System.Convert]::ToString(`.`).ToCharArray())).GetValue($([System.Convert]::ToInt32(0))))", "X", "ab.cd", "ab");
         }
 
+        /// <summary>
+        /// Test that Char.IsDigit fast-path works correctly
+        /// </summary>
+        [Theory]
+        // Test with digit characters - single char version
+        [InlineData("$([System.Char]::IsDigit('0'))", "True")]
+        [InlineData("$([System.Char]::IsDigit('5'))", "True")]
+        [InlineData("$([System.Char]::IsDigit('9'))", "True")]
+        // Test with non-digit characters - single char version
+        [InlineData("$([System.Char]::IsDigit('a'))", "False")]
+        [InlineData("$([System.Char]::IsDigit(' '))", "False")]
+        [InlineData("$([System.Char]::IsDigit('/'))", "False")]
+        [InlineData("$([System.Char]::IsDigit(':'))", "False")]
+        // Test with string and index version
+        [InlineData("$([System.Char]::IsDigit('abc123def', 3))", "True")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 4))", "True")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 5))", "True")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 0))", "False")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 2))", "False")]
+        [InlineData("$([System.Char]::IsDigit('hello789', 5))", "True")]
+        public void PropertyFunctionCharIsDigit(string expression, string expected)
+        {
+            TestPropertyFunction(expression, "dummy", "", expected);
+        }
+
         private void TestPropertyFunction(string expression, string propertyName, string propertyValue, string expected)
         {
             var properties = new PropertyDictionary<ProjectPropertyInstance>();
