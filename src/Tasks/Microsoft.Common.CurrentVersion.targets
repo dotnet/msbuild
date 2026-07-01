@@ -4913,6 +4913,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CopyBuildOutputToOutputDirectory Condition="'$(CopyBuildOutputToOutputDirectory)'==''">true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory Condition="'$(CopyOutputSymbolsToOutputDirectory)'==''">true</CopyOutputSymbolsToOutputDirectory>
       <CopyDocumentationFileToOutputDirectory Condition="'$(CopyDocumentationFileToOutputDirectory)'==''">true</CopyDocumentationFileToOutputDirectory>
+      <_WroteMainAssemblyToOutputDirectory>false</_WroteMainAssemblyToOutputDirectory>
     </PropertyGroup>
 
     <!-- Copy the build product (.dll or .exe). -->
@@ -4931,6 +4932,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+      <Output TaskParameter="WroteAtLeastOneFile" PropertyName="_WroteMainAssemblyToOutputDirectory"/>
 
     </Copy>
 
@@ -4947,6 +4949,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </CopyRefAssembly>
 
     <Message Importance="High" Text="$(MSBuildProjectName) -&gt; @(MainAssembly->'%(FullPath)')" Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
+
+    <!--
+      If this project produces reference assemblies and its implementation assembly changed,
+      subsequent builds of projects that depend on it may need to copy the updated implementation.
+      Touch the marker considered by those projects' up-to-date checks. This is separate from
+      _CopyFilesMarkedCopyLocal so implementation-only changes can advance the marker even when
+      no copy-local references were copied.
+    -->
+    <Touch Files="@(CopyUpToDateMarker)"
+      AlwaysCreate="true"
+      Condition="'$(ProduceReferenceAssembly)' == 'true' and '$(_WroteMainAssemblyToOutputDirectory)' == 'true'" />
+
+    <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
+      <FileWrites Include="@(CopyUpToDateMarker)" />
+    </ItemGroup>
 
     <!-- Copy the additional modules. -->
     <Copy

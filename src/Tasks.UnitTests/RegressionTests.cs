@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -101,6 +102,98 @@ namespace Microsoft.Build.Tasks.UnitTests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.txt", "foo");
             MockLogger logger = new MockLogger(_output);
             ObjectModelHelpers.BuildTempProjectFileExpectSuccess("Myapp.proj", logger);
+        }
+
+        /// <summary>
+        /// Test for https://github.com/dotnet/msbuild/issues/13478.
+        /// </summary>
+        [Fact]
+        public void CopyUpToDateMarkerTracksImplementationAssemblyWrites()
+        {
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+            CreateCopyMarkerTestProject(produceReferenceAssembly: true);
+
+            MockLogger logger = new MockLogger(_output);
+
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("MarkerTest.csproj", logger);
+
+            string markerPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "obj", "Debug", "MarkerTest.csproj.Up2Date");
+            Assert.True(File.Exists(markerPath), $"Expected marker to exist at {markerPath}");
+            DateTime markerAfterFirstBuild = File.GetLastWriteTimeUtc(markerPath);
+
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("MarkerTest.csproj", logger);
+
+            DateTime markerAfterNoOpBuild = File.GetLastWriteTimeUtc(markerPath);
+            Assert.Equal(markerAfterFirstBuild, markerAfterNoOpBuild);
+
+            string intermediateRefAssemblyPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "obj", "Debug", "refint", "MarkerTest.dll");
+            Assert.True(File.Exists(intermediateRefAssemblyPath), $"Expected intermediate reference assembly to exist at {intermediateRefAssemblyPath}");
+
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+            File.WriteAllText(intermediateRefAssemblyPath, "Reference output changed");
+
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("MarkerTest.csproj", logger);
+
+            DateTime markerAfterReferenceAssemblyOnlyChange = File.GetLastWriteTimeUtc(markerPath);
+            Assert.Equal(markerAfterNoOpBuild, markerAfterReferenceAssemblyOnlyChange);
+
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+            File.WriteAllText(Path.Combine(ObjectModelHelpers.TempProjectDir, "input.txt"), "changed");
+
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("MarkerTest.csproj", logger);
+
+            DateTime markerAfterImplementationChange = File.GetLastWriteTimeUtc(markerPath);
+            Assert.True(
+                markerAfterImplementationChange > markerAfterReferenceAssemblyOnlyChange,
+                $"Expected marker to advance from {markerAfterReferenceAssemblyOnlyChange:O}, but it was {markerAfterImplementationChange:O}.");
+        }
+
+        /// <summary>
+        /// Test for https://github.com/dotnet/msbuild/issues/13478.
+        /// </summary>
+        [Fact]
+        public void CopyUpToDateMarkerIsNotCreatedForMainAssemblyWritesWhenReferenceAssembliesAreNotProduced()
+        {
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+            CreateCopyMarkerTestProject(produceReferenceAssembly: false);
+
+            MockLogger logger = new MockLogger(_output);
+
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("MarkerTest.csproj", logger);
+
+            string markerPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "obj", "Debug", "MarkerTest.csproj.Up2Date");
+            Assert.False(File.Exists(markerPath), $"Did not expect marker to exist at {markerPath}");
+        }
+
+        private static void CreateCopyMarkerTestProject(bool produceReferenceAssembly)
+        {
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("input.txt", "initial");
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("MarkerTest.csproj", $@"
+<Project DefaultTargets=""Build"" xmlns=""msbuildnamespace"" ToolsVersion=""msbuilddefaulttoolsversion"">
+  <Import Project=""$(MSBuildToolsPath)\Microsoft.Common.props"" />
+
+  <PropertyGroup>
+    <AssemblyName>MarkerTest</AssemblyName>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
+    <ProduceReferenceAssembly>{produceReferenceAssembly.ToString().ToLowerInvariant()}</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
+
+  <Target Name=""CoreCompile""
+          Inputs=""input.txt""
+          Outputs=""@(IntermediateAssembly)"">
+    <MakeDir Directories=""@(IntermediateAssembly->'%(RootDir)%(Directory)');@(IntermediateRefAssembly->'%(RootDir)%(Directory)')"" />
+    <WriteLinesToFile File=""@(IntermediateAssembly)""
+                      Lines=""Implementation output""
+                      Overwrite=""true"" />
+    <WriteLinesToFile File=""@(IntermediateRefAssembly)""
+                      Lines=""Reference output""
+                      Overwrite=""true""
+                      Condition=""'@(IntermediateRefAssembly)' != '' and !Exists('@(IntermediateRefAssembly)')"" />
+  </Target>
+</Project>");
         }
     }
 }
