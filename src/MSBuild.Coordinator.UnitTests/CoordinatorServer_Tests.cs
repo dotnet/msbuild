@@ -391,6 +391,80 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
+    public async Task DisposedWaitingConnection_DoesNotBlockOtherDeferredGrants()
+    {
+        using CoordinatorServer server = CreateServer(totalNodeBudget: 2);
+        Task serverTask = server.RunAsync(_cts.Token);
+
+        const int activeProcessId = 10001;
+        const int disposedWaiterProcessId = 10002;
+        const int alreadyGrantedWaiterProcessId = 10003;
+        const int appendedWaiterProcessId = 10004;
+
+        using NamedPipeClientStream activeClient = await ConnectClientPipeAsync();
+        using BinaryWriter activeWriter = new(activeClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader activeReader = new(activeClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(activeWriter, activeReader, processId: activeProcessId);
+        activeWriter.Write(new RequestNodesMessage(requestedNodes: 2));
+        activeReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(2);
+
+        using NamedPipeClientStream disposedWaiterClient = await ConnectClientPipeAsync();
+        using BinaryWriter disposedWaiterWriter = new(disposedWaiterClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader disposedWaiterReader = new(disposedWaiterClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(disposedWaiterWriter, disposedWaiterReader, processId: disposedWaiterProcessId);
+        disposedWaiterWriter.Write(new RequestNodesMessage(requestedNodes: 2));
+        disposedWaiterReader.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+
+        using NamedPipeClientStream alreadyGrantedWaiterClient = await ConnectClientPipeAsync();
+        using BinaryWriter alreadyGrantedWaiterWriter = new(alreadyGrantedWaiterClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader alreadyGrantedWaiterReader = new(alreadyGrantedWaiterClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(alreadyGrantedWaiterWriter, alreadyGrantedWaiterReader, processId: alreadyGrantedWaiterProcessId);
+        alreadyGrantedWaiterWriter.Write(new RequestNodesMessage(requestedNodes: 2));
+        alreadyGrantedWaiterReader.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+
+        using NamedPipeClientStream appendedWaiterClient = await ConnectClientPipeAsync();
+        using BinaryWriter appendedWaiterWriter = new(appendedWaiterClient, Encoding.UTF8, leaveOpen: true);
+        using BinaryReader appendedWaiterReader = new(appendedWaiterClient, Encoding.UTF8, leaveOpen: true);
+
+        SendHandshake(appendedWaiterWriter, appendedWaiterReader, processId: appendedWaiterProcessId);
+        appendedWaiterWriter.Write(new RequestNodesMessage(requestedNodes: 2));
+        appendedWaiterReader.ReadServerMessage().ShouldBeOfType<WaitMessage>();
+
+        bool disposedWaiter = false;
+        _output.OnWriteLine = line =>
+        {
+            if (!disposedWaiter
+                && line.Contains("Granting", StringComparison.Ordinal)
+                && line.Contains($"PID {disposedWaiterProcessId}", StringComparison.Ordinal))
+            {
+                disposedWaiter = true;
+                DisposeServerConnectionForProcess(server, disposedWaiterProcessId);
+            }
+        };
+
+        activeWriter.Write(ReleaseNodesMessage.Instance);
+
+        ServerMessage alreadyGrantedWaiterResponse = await ReadServerMessageWithTimeout(alreadyGrantedWaiterReader);
+        alreadyGrantedWaiterResponse.ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(1);
+
+        ServerMessage appendedWaiterResponse = await ReadServerMessageWithTimeout(appendedWaiterReader);
+        appendedWaiterResponse.ShouldBeOfType<NodeGrantMessage>()
+            .GrantedNodes.ShouldBe(1);
+        disposedWaiter.ShouldBeTrue();
+
+        alreadyGrantedWaiterWriter.Write(ReleaseNodesMessage.Instance);
+        appendedWaiterWriter.Write(ReleaseNodesMessage.Instance);
+        _cts.Cancel();
+
+        await serverTask;
+    }
+
+    [Fact]
     public async Task Heartbeat_DoesNotCauseError()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -609,6 +683,19 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
             processId is int pid ? pid : EnvironmentUtilities.CurrentProcessId,
             supportsNestedGrants ? [Capabilities.NestedGrants] : []));
         reader.ReadServerMessage().ShouldBeOfType<ServerHandshakeMessage>();
+    }
+
+    private static async Task<ServerMessage> ReadServerMessageWithTimeout(BinaryReader reader)
+    {
+        Task<ServerMessage> readTask = Task.Run(() => reader.ReadServerMessage());
+        Task completedTask = await Task.WhenAny(readTask, Task.Delay(TimeSpan.FromSeconds(5)));
+        completedTask.ShouldBeSameAs(readTask);
+        return await readTask;
+    }
+
+    private static void DisposeServerConnectionForProcess(CoordinatorServer server, int processId)
+    {
+        CoordinatorServer.TestAccessor.TryDisposeConnectionForProcess(server, processId).ShouldBeTrue();
     }
 
     private CoordinatorServer CreateServer(int totalNodeBudget)
