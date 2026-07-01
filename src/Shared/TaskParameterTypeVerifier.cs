@@ -29,8 +29,8 @@ namespace Microsoft.Build.BackEnd
         ];
 
         /// <summary>
-        /// Checks if a type is the provided generic TaskItem type where T is a path-like type
-        /// (AbsolutePath, FileInfo, or DirectoryInfo).
+        /// Checks if a type is the provided generic TaskItem type where T is a supported value type
+        /// (including AbsolutePath) or FileInfo/DirectoryInfo.
         /// </summary>
         internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
             => TaskItemTypeDetector.IsPathLikeTaskItemOfT(parameterType, genericTaskItemTypeDefinitionFullName);

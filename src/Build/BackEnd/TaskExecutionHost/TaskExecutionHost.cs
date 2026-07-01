@@ -757,7 +757,8 @@ namespace Microsoft.Build.BackEnd
         #region Local Methods
 
         /// <summary>
-        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is path-like.
+        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is a supported value type
+        /// (including AbsolutePath) or FileInfo/DirectoryInfo.
         /// </summary>
         private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
             => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
