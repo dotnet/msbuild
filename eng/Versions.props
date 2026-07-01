@@ -64,6 +64,30 @@
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
+    <!--
+        $(RuntimePackageVersion_CompileTime) is the version MSBuild COMPILES against and declares as its
+        own NuGet package dependencies. It is deliberately the same for every target framework
+        so that restore never sees a version downgrade: with central transitive pinning on, a
+        TargetFramework-conditioned version here would leak the higher version into leaf
+        packaging/test projects (which pin the unconditioned version directly) and fail with
+        NU1109.
+
+        For net472 we additionally REDISTRIBUTE a newer servicing build of these assemblies to
+        line up with a Visual Studio servicing event, WITHOUT changing what we compile or
+        declare against. That is driven by $(RuntimePackageVersion_VSDeploy): the newer packages
+        are downloaded and copied to the output in place of the compiled-against assemblies, and
+        the net472 binding redirects (src/MSBuild/app.config and app.amd64.config) point at them.
+        See the ReplaceRuntimeAssembliesWithServicingVersions target in src/Directory.Build.targets.
+        This mirrors the $(UseFrozenMaintenancePackageVersions) mechanism in reverse (there we
+        compile against an older build than we ship; here we ship a newer build than we compile).
+
+        These two versions are the single source of truth. src/Directory.Build.targets selects between
+        them per project and assigns the individual System.* runtime package versions from the result;
+        the selection lives there because it depends on $(IsUnitTestProject) and $(TargetFramework),
+        which are not yet set this early.
+    -->
+    <RuntimePackageVersion_CompileTime>9.0.0</RuntimePackageVersion_CompileTime>
+    <RuntimePackageVersion_VSDeploy>10.0.8</RuntimePackageVersion_VSDeploy>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
