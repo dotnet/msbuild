@@ -12,7 +12,7 @@ using Microsoft.Build.Execution;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// How an invariant payload (e.g. the build process environment or the solution-config blob) is transferred
+    /// How an invariant payload (e.g. the build process environment or the global properties) is transferred
     /// across a task-host connection. Only meaningful when the negotiated packet version is &gt;= 5.
     /// </summary>
     internal enum InvariantPayloadTransfer : byte
@@ -56,19 +56,9 @@ namespace Microsoft.Build.BackEnd
         private InvariantPayloadTransfer _environmentMode = InvariantPayloadTransfer.Full;
 
         /// <summary>
-        /// The build-invariant global property that dominates the global-properties payload.
+        /// How <see cref="_globalParameters"/> is represented on the wire.
         /// </summary>
-        internal const string SolutionConfigKey = "CurrentSolutionConfigurationContents";
-
-        /// <summary>
-        /// How <see cref="SolutionConfigKey"/> is represented on the wire.
-        /// </summary>
-        private InvariantPayloadTransfer _solutionConfigMode = InvariantPayloadTransfer.Full;
-
-        /// <summary>
-        /// The <see cref="SolutionConfigKey"/> value carried in its own field. Non-null only when sent in full.
-        /// </summary>
-        private string _solutionConfigValue;
+        private InvariantPayloadTransfer _globalParametersMode = InvariantPayloadTransfer.Full;
 
         /// <summary>
         /// The culture
@@ -328,38 +318,24 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How <see cref="SolutionConfigKey"/> is transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
+        /// How the global properties are transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
         /// Set by the sender, per connection.
         /// </summary>
-        internal InvariantPayloadTransfer SolutionConfigMode
+        internal InvariantPayloadTransfer GlobalParametersMode
         {
             [DebuggerStepThrough]
-            get { return _solutionConfigMode; }
+            get { return _globalParametersMode; }
             [DebuggerStepThrough]
-            set { _solutionConfigMode = value; }
+            set { _globalParametersMode = value; }
         }
 
         /// <summary>
-        /// The <see cref="SolutionConfigKey"/> value carried in its own field when sent in full.
+        /// Fills in the global properties after deserialization when they were sent as
+        /// <see cref="InvariantPayloadTransfer.Identical"/> (i.e. reconstructed from the connection's baseline).
         /// </summary>
-        internal string SolutionConfigValue
+        internal void SetResolvedGlobalParameters(Dictionary<string, string> globalParameters)
         {
-            [DebuggerStepThrough]
-            get { return _solutionConfigValue; }
-            [DebuggerStepThrough]
-            set { _solutionConfigValue = value; }
-        }
-
-        /// <summary>
-        /// Re-inserts <see cref="SolutionConfigKey"/> into the global properties from the connection baseline after
-        /// an <see cref="InvariantPayloadTransfer.Identical"/> receive. No-op when the value or the dictionary is null.
-        /// </summary>
-        internal void ApplyResolvedSolutionConfig(string value)
-        {
-            if (value != null && _globalParameters != null)
-            {
-                _globalParameters[SolutionConfigKey] = value;
-            }
+            _globalParameters = globalParameters;
         }
 
         /// <summary>
@@ -643,51 +619,20 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Translates the global properties, deduplicating the build-invariant <see cref="SolutionConfigKey"/> value
-        /// per connection. For packet version >= 5 the value is carried in its own field, preceded by a
-        /// <see cref="SolutionConfigMode"/> marker: <see cref="InvariantPayloadTransfer.Full"/> serializes it once;
-        /// <see cref="InvariantPayloadTransfer.Identical"/> omits it and the receiver rebuilds it from the connection
-        /// baseline. Older versions use the legacy full-dictionary format.
+        /// Translates the global properties. For packet version >= 5 a <see cref="GlobalParametersMode"/> marker
+        /// precedes the dictionary; <see cref="InvariantPayloadTransfer.Identical"/> omits it and the receiver rebuilds
+        /// it from the connection baseline via <see cref="SetResolvedGlobalParameters"/>. Older versions use the
+        /// legacy full-dictionary format.
         /// </summary>
         private void TranslateGlobalProperties(ITranslator translator)
         {
             if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
             {
-                if (translator.Mode == TranslationDirection.WriteToStream
-                    && _solutionConfigMode == InvariantPayloadTransfer.Full && _solutionConfigValue is null && _globalParameters is not null)
-                {
-                    _globalParameters.TryGetValue(SolutionConfigKey, out _solutionConfigValue);
-                }
+                translator.TranslateEnum(ref _globalParametersMode, (int)_globalParametersMode);
 
-                translator.TranslateEnum(ref _solutionConfigMode, (int)_solutionConfigMode);
-
-                if (_solutionConfigMode == InvariantPayloadTransfer.Full)
-                {
-                    translator.Translate(ref _solutionConfigValue);
-                }
-
-                // The blob is carried in its own field above, so it is excluded from the dictionary on the wire
-                if (translator.Mode == TranslationDirection.WriteToStream)
-                {
-                    Dictionary<string, string> globalPropertiesToSend = _globalParameters;
-                    if (globalPropertiesToSend is not null && globalPropertiesToSend.ContainsKey(SolutionConfigKey))
-                    {
-                        globalPropertiesToSend = new Dictionary<string, string>(_globalParameters, StringComparer.OrdinalIgnoreCase);
-                        globalPropertiesToSend.Remove(SolutionConfigKey);
-                    }
-
-                    translator.TranslateDictionary(ref globalPropertiesToSend, StringComparer.OrdinalIgnoreCase);
-                }
-                else
+                if (_globalParametersMode == InvariantPayloadTransfer.Full)
                 {
                     translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
-                }
-
-                // Re-insert the value into the dictionary on read. An identical send
-                // is rebuilt later from the connection baseline.
-                if (translator.Mode == TranslationDirection.ReadFromStream && _solutionConfigMode == InvariantPayloadTransfer.Full)
-                {
-                    ApplyResolvedSolutionConfig(_solutionConfigValue);
                 }
             }
             else

@@ -798,22 +798,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// With the solution-config delta wire format (packet version >= 5) and the default
-        /// <see cref="InvariantPayloadTransfer.Full"/> mode, the CurrentSolutionConfigurationContents
-        /// global property is carried in its own field (out of the dictionary) and round-trips correctly.
+        /// With the global-properties delta wire format (packet version >= 5) and the default
+        /// <see cref="InvariantPayloadTransfer.Full"/> mode, the whole global-properties dictionary
+        /// (including CurrentSolutionConfigurationContents) is serialized and round-trips correctly.
         /// </summary>
         [Fact]
-        public void TestTranslationSolutionConfigFullRoundTripsAtVersion5()
+        public void TestTranslationGlobalPropertiesFullRoundTripsAtVersion5()
         {
             const string solutionConfigValue = "<SolutionConfiguration><ProjectConfiguration>Debug|AnyCPU</ProjectConfiguration></SolutionConfiguration>";
             Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["Configuration"] = "Debug",
-                [TaskHostConfiguration.SolutionConfigKey] = solutionConfigValue,
+                ["CurrentSolutionConfigurationContents"] = solutionConfigValue,
             };
 
             TaskHostConfiguration config = CreateConfigurationWithGlobalProperties(globalProperties);
-            config.SolutionConfigMode.ShouldBe(InvariantPayloadTransfer.Full);
+            config.GlobalParametersMode.ShouldBe(InvariantPayloadTransfer.Full);
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -823,25 +823,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
-            deserializedConfig.SolutionConfigMode.ShouldBe(InvariantPayloadTransfer.Full);
+            deserializedConfig.GlobalParametersMode.ShouldBe(InvariantPayloadTransfer.Full);
             deserializedConfig.GlobalProperties.ShouldNotBeNull();
             deserializedConfig.GlobalProperties.Count.ShouldBe(globalProperties.Count);
             deserializedConfig.GlobalProperties["Configuration"].ShouldBe("Debug");
-            deserializedConfig.GlobalProperties[TaskHostConfiguration.SolutionConfigKey].ShouldBe(solutionConfigValue);
-
-            // The value travelled in its own dedicated field (the v5 own-field path), not merely inside the
-            // global-properties dictionary as the legacy format carries it.
-            deserializedConfig.SolutionConfigValue.ShouldBe(solutionConfigValue);
+            deserializedConfig.GlobalProperties["CurrentSolutionConfigurationContents"].ShouldBe(solutionConfigValue);
         }
 
         /// <summary>
-        /// With the solution-config delta wire format (packet version >= 5) and
-        /// <see cref="InvariantPayloadTransfer.Identical"/> mode, the CurrentSolutionConfigurationContents
-        /// value is omitted from the wire (saving bytes) and the receiver reconstructs it from the connection's
-        /// baseline via <see cref="TaskHostConfiguration.ApplyResolvedSolutionConfig"/>.
+        /// With the global-properties delta wire format (packet version >= 5) and
+        /// <see cref="InvariantPayloadTransfer.Identical"/> mode, the whole global-properties dictionary is
+        /// omitted from the wire (saving bytes) and the receiver reconstructs it from the connection's baseline
+        /// via <see cref="TaskHostConfiguration.SetResolvedGlobalParameters"/>.
         /// </summary>
         [Fact]
-        public void TestTranslationSolutionConfigIdenticalOmitsBlobAtVersion5()
+        public void TestTranslationGlobalPropertiesIdenticalOmitsDictionaryAtVersion5()
         {
             // A large, representative blob so the "Identical" form is clearly smaller on the wire.
             string solutionConfigValue = "<SolutionConfiguration>" + string.Concat(Enumerable.Repeat(
@@ -849,7 +845,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["Configuration"] = "Debug",
-                [TaskHostConfiguration.SolutionConfigKey] = solutionConfigValue,
+                ["CurrentSolutionConfigurationContents"] = solutionConfigValue,
             };
 
             // Serialize the same config both ways to prove the "Identical" form is smaller on the wire.
@@ -860,7 +856,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             long fullLength = TranslationHelpers.GetWriteStreamLength();
 
             TaskHostConfiguration identicalConfig = CreateConfigurationWithGlobalProperties(globalProperties);
-            identicalConfig.SolutionConfigMode = InvariantPayloadTransfer.Identical;
+            identicalConfig.GlobalParametersMode = InvariantPayloadTransfer.Identical;
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -871,21 +867,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
-            // The blob was not on the wire, so the dictionary holds only the other properties until reconstructed.
-            deserializedConfig.SolutionConfigMode.ShouldBe(InvariantPayloadTransfer.Identical);
-            deserializedConfig.GlobalProperties.ShouldNotBeNull();
-            deserializedConfig.GlobalProperties.ContainsKey(TaskHostConfiguration.SolutionConfigKey).ShouldBeFalse();
-            deserializedConfig.GlobalProperties["Configuration"].ShouldBe("Debug");
+            // The dictionary was not on the wire, so it is null until reconstructed from the baseline.
+            deserializedConfig.GlobalParametersMode.ShouldBe(InvariantPayloadTransfer.Identical);
+            deserializedConfig.GlobalProperties.ShouldBeNull();
 
-            deserializedConfig.ApplyResolvedSolutionConfig(solutionConfigValue);
-            deserializedConfig.GlobalProperties[TaskHostConfiguration.SolutionConfigKey].ShouldBe(solutionConfigValue);
+            deserializedConfig.SetResolvedGlobalParameters(globalProperties);
+            deserializedConfig.GlobalProperties["CurrentSolutionConfigurationContents"].ShouldBe(solutionConfigValue);
         }
 
         /// <summary>
         /// For a negotiated packet version below 5 (a legacy peer, e.g. a CLR2/net35 or otherwise older task host)
-        /// the delta wire format is not used: both the build process environment and the
-        /// CurrentSolutionConfigurationContents global property are serialized in the legacy full-dictionary format.
-        /// This guards the Math.Min version-negotiation fallback so older hosts keep working.
+        /// the delta wire format is not used: both the build process environment and the global properties are
+        /// serialized in the legacy full-dictionary format. This guards the Math.Min version-negotiation fallback
+        /// so older hosts keep working.
         /// </summary>
         [Fact]
         public void TestTranslationLegacyVersionKeepsFullDictionaryFormat()
@@ -894,7 +888,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["Configuration"] = "Debug",
-                [TaskHostConfiguration.SolutionConfigKey] = solutionConfigValue,
+                ["CurrentSolutionConfigurationContents"] = solutionConfigValue,
             };
 
             TaskHostConfiguration config = CreateConfigurationWithGlobalProperties(globalProperties);
@@ -907,12 +901,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 4;
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
-            // Legacy format carries the solution-config blob inside the global-properties dictionary (not in its
-            // own field), and never populates the delta-only SolutionConfigValue field.
+            // Legacy format carries the whole global-properties dictionary (including the solution-config blob).
             deserializedConfig.GlobalProperties.ShouldNotBeNull();
-            deserializedConfig.GlobalProperties[TaskHostConfiguration.SolutionConfigKey].ShouldBe(solutionConfigValue);
+            deserializedConfig.GlobalProperties["CurrentSolutionConfigurationContents"].ShouldBe(solutionConfigValue);
             deserializedConfig.GlobalProperties["Configuration"].ShouldBe("Debug");
-            deserializedConfig.SolutionConfigValue.ShouldBeNull();
 
             // The environment round-trips in full (CreateConfigurationWithGlobalProperties seeds it with PATH).
             deserializedConfig.BuildProcessEnvironment.ShouldNotBeNull();

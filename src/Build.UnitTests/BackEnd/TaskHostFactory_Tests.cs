@@ -393,6 +393,80 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Regression test for the out-of-proc task host forward global-properties delta optimization. To avoid
+        /// re-transmitting the (largely invariant) global properties in every <see cref="TaskHostConfiguration"/>,
+        /// the parent sends them in full once per connection and marks subsequent unchanged configurations
+        /// "identical" (no dictionary on the wire); the task host reconstructs them from the per-connection baseline.
+        /// This verifies that every consecutive task -- including ones whose configuration was sent as the deduped
+        /// "identical" marker -- still observes the build's global properties via <see cref="IBuildEngine6.GetGlobalProperties"/>,
+        /// including the large <c>CurrentSolutionConfigurationContents</c> property whose redundancy motivated the change.
+        /// The load-bearing assertion is that all invocations run in the SAME reused task host process (so the dedup
+        /// path was actually exercised) yet each still reads the correct values.
+        /// </summary>
+        [Fact]
+        public void TaskHostObservesGlobalPropertyAcrossConsecutiveTasks()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string propertyName = "MSBuildGlobalPropReuseTest" + Guid.NewGuid().ToString("N");
+            const string propertyValue = "global_value_123";
+            const string solutionConfigValue = "<SolutionConfiguration><ProjectConfiguration>Debug|AnyCPU</ProjectConfiguration></SolutionConfiguration>";
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ReadGlobalPropertyTask)}"" AssemblyFile=""{typeof(ReadGlobalPropertyTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name='Build'>
+        <{nameof(ReadGlobalPropertyTask)} PropertyName=""{propertyName}"">
+            <Output PropertyName=""Value1"" TaskParameter=""Value"" />
+            <Output PropertyName=""Pid1"" TaskParameter=""Pid"" />
+        </{nameof(ReadGlobalPropertyTask)}>
+        <{nameof(ReadGlobalPropertyTask)} PropertyName=""{propertyName}"">
+            <Output PropertyName=""Value2"" TaskParameter=""Value"" />
+            <Output PropertyName=""Pid2"" TaskParameter=""Pid"" />
+        </{nameof(ReadGlobalPropertyTask)}>
+        <{nameof(ReadGlobalPropertyTask)} PropertyName=""{propertyName}"">
+            <Output PropertyName=""Value3"" TaskParameter=""Value"" />
+            <Output PropertyName=""Pid3"" TaskParameter=""Pid"" />
+        </{nameof(ReadGlobalPropertyTask)}>
+        <{nameof(ReadGlobalPropertyTask)} PropertyName=""CurrentSolutionConfigurationContents"">
+            <Output PropertyName=""BlobValue"" TaskParameter=""Value"" />
+        </{nameof(ReadGlobalPropertyTask)}>
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("globalPropReuseProject.csproj", projectContents);
+
+            Dictionary<string, string> globalProperties = new()
+            {
+                [propertyName] = propertyValue,
+                ["CurrentSolutionConfigurationContents"] = solutionConfigValue,
+            };
+            ProjectInstance projectInstance = new(project.Path, globalProperties, toolsVersion: null);
+
+            projectInstance.Build().ShouldBeTrue();
+
+            // Every task invocation -- including the second and third, whose global-properties configuration was sent
+            // as the deduped "identical" marker (no dictionary on the wire) -- must still observe the global property,
+            // proving the task host reconstructs it from the per-connection baseline.
+            projectInstance.GetPropertyValue("Value1").ShouldBe(propertyValue);
+            projectInstance.GetPropertyValue("Value2").ShouldBe(propertyValue);
+            projectInstance.GetPropertyValue("Value3").ShouldBe(propertyValue);
+
+            // The large CurrentSolutionConfigurationContents property -- the redundancy this optimization targets --
+            // must also round-trip through the dedup path.
+            projectInstance.GetPropertyValue("BlobValue").ShouldBe(solutionConfigValue);
+
+            // All invocations should have run in the same task host process (so the per-connection dedup path was
+            // actually exercised) and not in the current build process.
+            string pid1 = projectInstance.GetPropertyValue("Pid1");
+            pid1.ShouldNotBeNullOrEmpty();
+            pid1.ShouldBe(projectInstance.GetPropertyValue("Pid2"));
+            pid1.ShouldBe(projectInstance.GetPropertyValue("Pid3"));
+            pid1.ShouldNotBe(Process.GetCurrentProcess().Id.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>
         /// Verifies that various parameter types can be correctly transmitted to and received from
         /// a task host process, ensuring proper serialization/deserialization of all supported types.
         /// Tests include primitive types, arrays, strings, dates, enums, and custom structures.

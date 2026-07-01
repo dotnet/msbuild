@@ -98,11 +98,11 @@ namespace Microsoft.Build.CommandLine
         private Dictionary<string, string> _forwardEnvironmentBaseline;
 
         /// <summary>
-        /// The CurrentSolutionConfigurationContents value most recently received in full from the parent on this
-        /// connection. When a <see cref="TaskHostConfiguration"/> arrives marked
-        /// <see cref="InvariantPayloadTransfer.Identical"/> it is reconstructed from this baseline.
+        /// The global properties most recently received in full from the parent on this connection. When a
+        /// <see cref="TaskHostConfiguration"/> arrives marked <see cref="InvariantPayloadTransfer.Identical"/> they
+        /// are reconstructed from this baseline.
         /// </summary>
-        private string _forwardSolutionConfigBaseline;
+        private Dictionary<string, string> _forwardGlobalParametersBaseline;
 
         /// <summary>
         /// The build process environment whose values are currently reflected in this task host process. Used to
@@ -1201,7 +1201,7 @@ namespace Microsoft.Build.CommandLine
 
             _currentConfiguration = taskHostConfiguration;
             ResolveIncomingEnvironment(taskHostConfiguration);
-            ResolveIncomingSolutionConfig(taskHostConfiguration);
+            ResolveIncomingGlobalParameters(taskHostConfiguration);
 
             // Create task execution context for this task
             var context = CreateTaskContext(taskHostConfiguration);
@@ -1235,21 +1235,21 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Resolves the CurrentSolutionConfigurationContents global property of an incoming configuration. When the
-        /// parent marked it <see cref="InvariantPayloadTransfer.Identical"/> the value was not serialized
-        /// on the wire, so it is re-inserted into the global properties from this connection's baseline; otherwise
-        /// the baseline is refreshed with the full value that was sent
+        /// Resolves the global properties of an incoming configuration. When the parent marked them
+        /// <see cref="InvariantPayloadTransfer.Identical"/> they were not serialized on the wire, so they are
+        /// reconstructed from this connection's baseline; otherwise the baseline is refreshed with the full
+        /// dictionary that was sent.
         /// </summary>
-        private void ResolveIncomingSolutionConfig(TaskHostConfiguration configuration)
+        private void ResolveIncomingGlobalParameters(TaskHostConfiguration configuration)
         {
-            if (configuration.SolutionConfigMode == InvariantPayloadTransfer.Identical)
+            if (configuration.GlobalParametersMode == InvariantPayloadTransfer.Identical)
             {
-                Assumed.NotNull(_forwardSolutionConfigBaseline, "Received a SolutionConfigIdentical TaskHostConfiguration before any full CurrentSolutionConfigurationContents value was sent on this connection.");
-                configuration.ApplyResolvedSolutionConfig(_forwardSolutionConfigBaseline);
+                Assumed.NotNull(_forwardGlobalParametersBaseline, "Received a GlobalParametersIdentical TaskHostConfiguration before any full global properties were sent on this connection.");
+                configuration.SetResolvedGlobalParameters(_forwardGlobalParametersBaseline);
             }
-            else if (configuration.SolutionConfigValue != null)
+            else
             {
-                _forwardSolutionConfigBaseline = configuration.SolutionConfigValue;
+                _forwardGlobalParametersBaseline = configuration.GlobalProperties;
             }
         }
 
@@ -1495,7 +1495,7 @@ namespace Microsoft.Build.CommandLine
                 bool canSkipEnvironmentApply = _lastAppliedConfigEnvironment is not null
                     && _blockedTaskCount == 0
                     && _activeTaskCount == 1
-                    && CommunicationsUtilities.AreEnvironmentsEquivalent(taskConfiguration.BuildProcessEnvironment, _lastAppliedConfigEnvironment);
+                    && CommunicationsUtilities.AreDictionariesEquivalent(taskConfiguration.BuildProcessEnvironment, _lastAppliedConfigEnvironment);
 
                 if (!canSkipEnvironmentApply)
                 {
@@ -1570,7 +1570,7 @@ namespace Microsoft.Build.CommandLine
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     bool environmentUnchangedByTask =
-                        CommunicationsUtilities.AreEnvironmentsEquivalent(currentEnvironment, taskConfiguration.BuildProcessEnvironment);
+                        CommunicationsUtilities.AreDictionariesEquivalent(currentEnvironment, taskConfiguration.BuildProcessEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
                     _taskCompletePacket = new TaskHostTaskComplete(

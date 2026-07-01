@@ -338,10 +338,12 @@ internal static class CommunicationsUtilities
     }
 
     /// <summary>
-    ///  Returns <see langword="true"/> when both environment dictionaries contain the same set of
-    ///  variables with the same values (keys compared case-insensitively, values compared ordinally).
+    ///  Returns <see langword="true"/> when both dictionaries contain the same set of keys with the same values
+    ///  (keys compared using the dictionaries' own comparer, values compared ordinally). Used to detect unchanged
+    ///  invariant payloads (e.g. the build process environment or the global properties) so they can be
+    ///  deduplicated on the task-host wire.
     /// </summary>
-    internal static bool AreEnvironmentsEquivalent(IDictionary<string, string>? left, IDictionary<string, string>? right)
+    internal static bool AreDictionariesEquivalent(IDictionary<string, string>? left, IDictionary<string, string>? right)
     {
         if (ReferenceEquals(left, right))
         {
