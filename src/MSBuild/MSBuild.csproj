@@ -40,6 +40,12 @@
          redirect ValueTuple _down_ to match VS. -->
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
 
+    <!-- This is the executable copy of MSBuild that Visual Studio loads, so its output is
+         where we redistribute the newer dotnet/runtime servicing assemblies for net472 (the
+         ones the net472 binding redirects in app.config / app.amd64.config point at). See the
+         ReplaceRuntimeAssembliesWithServicingVersions target in src/Directory.Build.targets. -->
+    <DeployRuntimeServicingAssemblies>true</DeployRuntimeServicingAssemblies>
+
     <IsPackable>true</IsPackable>
     <ContentTargetFolders>contentFiles</ContentTargetFolders>
     <BuildOutputTargetFolder>contentFiles\any\</BuildOutputTargetFolder>
