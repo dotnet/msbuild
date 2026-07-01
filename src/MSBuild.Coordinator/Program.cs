@@ -5,6 +5,12 @@ using Microsoft.Build.Coordinator;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Framework.Telemetry;
 
+static string FormatHighPriorityReservedNodes(int value)
+    => value == 0 ? "0 (disabled)" : value.ToString();
+
+static string FormatMaxNodesPerBuild(int value)
+    => value == 0 ? "0 (uncapped)" : value.ToString();
+
 TelemetryManager.Instance.Initialize(isStandalone: true);
 
 CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
@@ -22,6 +28,13 @@ if (!createdNew)
 Console.WriteLine($"MSBuild Coordinator starting.");
 Console.WriteLine($"  Pipe: {settings.PipeName}");
 Console.WriteLine($"  Node budget: {settings.TotalNodeBudget}");
+Console.WriteLine($"  High-priority reserved nodes: {FormatHighPriorityReservedNodes(settings.HighPriorityReservedNodes)}");
+Console.WriteLine($"  Max nodes per build: {FormatMaxNodesPerBuild(settings.MaxNodesPerBuild)}");
+if (settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
+{
+    Console.WriteLine($"  Auto strict policy active. {autoStrictPolicyOptOutMessage}");
+}
+
 Console.WriteLine($"  Heartbeat interval: {settings.HeartbeatIntervalMs}ms");
 Console.WriteLine($"  Shutdown timeout: {settings.ShutdownTimeoutMs}ms");
 

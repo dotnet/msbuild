@@ -41,7 +41,7 @@ internal sealed partial class CoordinatorClient
 
                 output.WriteLine("CoordinatorClient: Connected to test server");
 
-                return TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService: null);
+                return TryNegotiate(pipeStream, requestedNodes, GetBuildPriorityFromEnvironment(), settings, output, loggingService: null);
             }
             catch (Exception ex) when (!Debugger.IsAttached)
             {
