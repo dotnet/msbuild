@@ -1,0 +1,137 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Native AOT validation harness for the MSBuild object model.
+
+    Mirrors the in-process object-model scenarios that the .NET SDK CLI uses (see
+    documentation/aot/sdk-msbuild-object-model-audit.md) and validates that they work in a
+    Native-AOT-published test executable. Uses MSTest on Microsoft.Testing.Platform (MTP) - the
+    same runner dotnet test uses in MTP mode - because the MSTest runner is AOT-compatible.
+
+    Build/run a normal (JIT) pass:   dotnet build  + run the produced .exe
+    Native AOT pass:                 dotnet publish -r win-x64
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <!-- Native AOT. -->
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+
+    <!-- Warnings are errors: the harness must fail on any new trim/AOT warning so the remaining
+         set stays explicitly triaged (see README "What it found"). Flip to false only to survey. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- The harness keeps no WarningsNotAsErrors exemptions. Every trim/AOT/single-file warning is driven
+         to zero at the source: the engine's IL3000 (single-file Assembly.Location) sites each carry a
+         documented [UnconditionalSuppressMessage], so any NEW trim/AOT/single-file warning fails the publish. -->
+  </PropertyGroup>
+
+  <!--
+    Mirror an AOT dotnet CLI host: bake MSBuild's reflective opt-in feature switches off so the trimmer
+    substitutes them to a constant false and dead-strips the reflective branch behind each one. These are
+    set at the Microsoft.Build library level too, but a library's RuntimeHostConfigurationOption does not
+    flow to a consuming app's ILC, so the app must re-declare them.
+      - EnableSdkResolverDynamicLoading: in-box SDK resolution is a reflection-free directory probe and
+        keeps working; an SDK that needs a plugin resolver fails observably with MSB4282.
+      - EnableAllPropertyFunctions: the default property-function allowlist still works; resolving a
+        non-allowlisted receiver type by loading an assembly at runtime is the trimmed-away path.
+      - RestrictPropertyFunctionReceivers: instance property-function calls are limited to the curated,
+        trim-rooted receiver set so a runtime environment variable cannot re-open arbitrary dotting-in.
+      - EnableConfigurationFileToolsets: drops the ToolsetConfigurationReader / System.Configuration
+        (ConfigurationManager) dependency, which an AOT host (with no on-disk .config) never needs.
+      - EnableReflectiveTaskExecution: loading and running tasks reflects over task assemblies/types
+        discovered at run time; an AOT host cannot, so the reflective task-execution path is dead-stripped
+        and reaching task execution fails observably with MSB4283.
+      - EnableReflectiveTaskParameterTypes: resolving a <UsingTask> <ParameterGroup> ParameterType from
+        its name falls back to Type.GetType; with this off, the registry (intrinsics, string, ITaskItem
+        types, plus any the host registers) still resolves and an unknown name fails observably.
+      - EnableCustomPluginProbing: loading a custom build check (or other plugin) from disk reflects over
+        its assembly; an AOT host cannot, so the reflective acquisition path is dead-stripped and an
+        explicitly requested custom check fails observably instead. Built-in checks are unaffected.
+      - EnableReflectiveLoggerLoading: creating a logger from a LoggerDescription (assembly/class name)
+        reflects over the logger assembly; with this off the trimmer drops that path (and its
+        MetadataLoadContext/TypeLoader dependency), and the harness logs via pre-constructed ILogger
+        instances - the supported way to log under AOT. This is what lets an in-process build run under AOT.
+  -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableSdkResolverDynamicLoading" Value="false" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableAllPropertyFunctions" Value="false" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.RestrictPropertyFunctionReceivers" Value="true" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableConfigurationFileToolsets" Value="false" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveTaskExecution" Value="false" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveTaskParameterTypes" Value="false" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableCustomPluginProbing" Value="false" Trim="true" />
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveLoggerLoading" Value="false" Trim="true" />
+  </ItemGroup>
+
+  <!--
+    MSTest's AOT-compatible runner: the source-generated MSTest engine on Microsoft.Testing.Platform.
+    This deliberately does NOT use MSTest.TestAdapter, whose reflection-based VSTest bridge throws
+    "Running tests ... is not supported for the selected platform" under Native AOT. MSTest.SourceGeneration
+    emits the test registrations and the MTP entry point with no runtime reflection.
+  -->
+  <ItemGroup>
+    <PackageReference Include="MSTest.Engine" Version="2.0.0-alpha.26228.3" />
+    <PackageReference Include="MSTest.SourceGeneration" Version="2.0.0-alpha.26228.3" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.8.3" />
+    <!-- Generates the Microsoft.Testing.Platform entry point (Main) that wires up the engine's
+         source-generated framework via the TestingPlatformBuilderHook. MTP 2.2.x matches the engine. -->
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.2.2" />
+  </ItemGroup>
+
+  <!-- The MSBuild object model under test: this branch's AOT-enabled engine build.
+       RuntimeIdentifier is removed for the reference so Microsoft.Build builds RID-agnostic managed
+       IL (ILC compiles the whole closure to native during the harness's own AOT publish).
+       Microsoft.Build.Utilities.Core is referenced too because real SDK targets invoke
+       [Microsoft.Build.Utilities.ToolLocationHelper]::... property functions during evaluation, so its
+       assembly must be loadable (and linked into the AOT image); it is likewise IsAotCompatible. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj"
+                      GlobalPropertiesToRemove="RuntimeIdentifier" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj"
+                      GlobalPropertiesToRemove="RuntimeIdentifier" />
+    <!--
+      Microsoft.Build.Tasks.Core supplies the common built-in tasks (Message, Copy, MakeDir,
+      WriteLinesToFile, ...) that a real build runs. The harness pre-registers them with the host task
+      registry (BuiltInTasks.RegisterAll) so they execute under Native AOT with the reflective
+      task-execution path disabled. The assembly is referenced (not TrimmerRootAssembly-rooted): each
+      Task.RegisterTask<T> roots just the registered task type's constructor and properties, so ILC links
+      only the tasks actually used rather than the whole assembly. It is IsAotCompatible.
+    -->
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj"
+                      GlobalPropertiesToRemove="RuntimeIdentifier" />
+  </ItemGroup>
+
+  <!--
+    Real SDK projects evaluate NuGet-backed property functions during evaluation - e.g.
+    [MSBuild]::GetTargetFrameworkIdentifier in Microsoft.NET.TargetFrameworkInference.targets - which need
+    NuGet.Frameworks at runtime. Microsoft.Build references it with PrivateAssets="all" (in a real SDK it
+    loads the NuGet.Frameworks.dll that ships next to MSBuild.dll), so it does not flow transitively to this
+    harness. A real AOT host bundles NuGet.Frameworks into its native image; mirror that here so the assembly
+    is copied for the JIT pass and linked into the AOT image. Version tracks NuGetBuildTasksPackageVersion in
+    eng/Version.Details.props (the same version Microsoft.Build compiles against and the bootstrap SDK ships).
+  -->
+  <ItemGroup>
+    <PackageReference Include="NuGet.Frameworks" Version="7.9.0-rc.37" />
+  </ItemGroup>
+
+  <!--
+    The property-function allowlist registers cross-assembly receiver types (e.g.
+    Microsoft.Build.Utilities.ToolLocationHelper, which the SDK invokes during evaluation) by their
+    assembly-qualified name and resolves them at runtime via Type.GetType (Expander.Function.cs). Under
+    Native AOT that only succeeds if the type's reflection metadata is preserved, so root the whole
+    Microsoft.Build.Utilities.Core assembly. A real AOT host that wants these property functions to work
+    takes the same step; the assembly is IsAotCompatible, so rooting it keeps the publish warning-clean.
+  -->
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Microsoft.Build.Utilities.Core" />
+  </ItemGroup>
+
+</Project>

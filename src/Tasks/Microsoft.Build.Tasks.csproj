@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="BuiltInTasks.cs" />
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>

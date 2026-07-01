@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Resources;
 
 using Microsoft.Build.Framework;
@@ -154,6 +156,65 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <returns>true, if successful</returns>
         public abstract bool Execute();
+
+        #endregion
+
+        #region Task class registration
+
+        /// <summary>
+        /// Registers a task type under the name a target uses to invoke it (the <c>TaskName</c> of a
+        /// <c>&lt;UsingTask&gt;</c>), so MSBuild can instantiate and run it without loading its assembly or
+        /// resolving its type by reflection - the path required in a trimmed or Native AOT host.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The task type to register. It must have a public parameterless constructor. The
+        /// <c>[DynamicallyAccessedMembers]</c> roots the type's public constructor and properties so a
+        /// trimmer preserves them, keeping both construction and parameter binding working.
+        /// </typeparam>
+        /// <param name="taskName">
+        /// The name a target uses to invoke the task. This is the <c>TaskName</c> of the corresponding
+        /// <c>&lt;UsingTask&gt;</c> (typically the task's class name, optionally namespace-qualified).
+        /// </param>
+        /// <remarks>
+        /// Intended to be called once per task during host initialization, before the first build. This
+        /// method is thread-safe; registering the same name again replaces the previous registration. A
+        /// registered name takes precedence over a project-level <c>&lt;UsingTask&gt;</c> of the same name,
+        /// and registration does not participate in <c>Runtime</c>/<c>Architecture</c> task-identity
+        /// selection - the registered task is always the one the engine constructs.
+        /// </remarks>
+        public static void RegisterTask<
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] T>(
+            string taskName)
+            where T : ITask, new()
+            => TaskClassRegistry.Register<T>(taskName);
+
+        /// <summary>
+        /// Registers a task under the name a target uses to invoke it (the <c>TaskName</c> of a
+        /// <c>&lt;UsingTask&gt;</c>) with an explicit factory, so construction is fully reflection-free (the
+        /// host supplies the constructor). Use this for tasks without a public parameterless constructor or
+        /// that need custom construction.
+        /// </summary>
+        /// <param name="taskName">
+        /// The name a target uses to invoke the task. This is the <c>TaskName</c> of the corresponding
+        /// <c>&lt;UsingTask&gt;</c> (typically the task's class name, optionally namespace-qualified).
+        /// </param>
+        /// <param name="factory">A delegate that creates a new instance of the task.</param>
+        /// <remarks>
+        /// <para>
+        /// Construction is reflection-free, but binding the task's parameters still reflects over its
+        /// properties. Because the task type is not statically known through this overload, the host is
+        /// responsible for preserving that type's public properties under trimming (for example by also
+        /// registering it through <see cref="RegisterTask{T}(string)"/>, which roots them). The generic
+        /// overload is the fully trim-safe path.
+        /// </para>
+        /// <para>
+        /// Intended to be called once per task during host initialization, before the first build. This
+        /// method is thread-safe; registering the same name again replaces the previous registration. A
+        /// registered name takes precedence over a project-level <c>&lt;UsingTask&gt;</c> of the same name.
+        /// </para>
+        /// </remarks>
+        public static void RegisterTask(string taskName, Func<ITask> factory)
+            => TaskClassRegistry.Register(taskName, factory);
 
         #endregion
     }

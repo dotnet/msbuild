@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
@@ -2759,7 +2761,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             using (var env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
 
                 PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
@@ -2788,11 +2790,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string env = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS");
+            AppContext.TryGetSwitch("Microsoft.Build.EnableAllPropertyFunctions", out bool originalSwitch);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", true);
 
                 string result = expander.ExpandIntoStringLeaveEscaped("$([System.Diagnostics.Process]::GetCurrentProcess().Id)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
@@ -2802,7 +2804,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", env);
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", originalSwitch);
                 AvailableStaticMethods.Reset_ForUnitTestsOnly();
             }
         }
@@ -5347,6 +5349,14 @@ $(
         {
             using (var env = TestEnvironment.Create())
             {
+                // This is the one test that vets the environment-variable opt-in actually flows through
+                // to the feature check. Mimic a prior test having set the AppContext switch (which cannot
+                // be returned to "unset" via the public API), then clear it reflectively so FeatureSwitches
+                // falls back to the variable. Doing both makes the test deterministic regardless of test
+                // ordering and self-validates the reflective unset on every runtime (.NET Core and .NET
+                // Framework store the switch in different internal fields).
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", false);
+                UnsetAppContextSwitch("Microsoft.Build.EnableAllPropertyFunctions");
                 env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
                 var root = env.CreateFolder();
 
@@ -5481,6 +5491,49 @@ $(
             public override void Revert()
             {
                 FileUtilities.CurrentThreadWorkingDirectory = _originalValue;
+            }
+        }
+
+        /// <summary>
+        /// TransientTestState that flips the EnableAllPropertyFunctions AppContext switch on and restores
+        /// its original value on revert (deterministic; does not stick across tests).
+        /// </summary>
+        private sealed class TransientEnableAllPropertyFunctions : TransientTestState
+        {
+            private readonly bool _original;
+
+            public TransientEnableAllPropertyFunctions()
+            {
+                AppContext.TryGetSwitch("Microsoft.Build.EnableAllPropertyFunctions", out _original);
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", true);
+            }
+
+            public override void Revert() => AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", _original);
+        }
+
+        /// <summary>
+        /// Returns an AppContext switch to the "unset" state so that the FeatureSwitches check falls
+        /// back to the environment variable. AppContext can only set a switch true or false (never
+        /// unset), so the entry is removed reflectively from the runtime's private switch table. The
+        /// backing field differs by runtime (.NET Core uses `s_switches`, .NET Framework uses
+        /// `s_switchMap`), so this scans the non-public static dictionaries and clears the key from
+        /// whichever one holds it rather than hard-coding a field name.
+        /// </summary>
+        private static void UnsetAppContextSwitch(string switchName)
+        {
+            foreach (FieldInfo field in typeof(AppContext).GetFields(BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (field.GetValue(null) is IDictionary switches)
+                {
+                    lock (switches)
+                    {
+                        if (switches.Contains(switchName))
+                        {
+                            switches.Remove(switchName);
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -5717,7 +5770,7 @@ $(
         public void FileReadAllLines_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5734,7 +5787,6 @@ $(
         public void FileReadAllBytes_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5750,7 +5802,7 @@ $(
         public void FileWriteAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5766,7 +5818,7 @@ $(
         public void FileAppendAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5782,7 +5834,7 @@ $(
         public void FileDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5802,7 +5854,6 @@ $(
         public void FileGetCreationTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5820,7 +5871,6 @@ $(
         public void FileGetLastWriteTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5838,7 +5888,7 @@ $(
         public void FileGetLastAccessTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5860,7 +5910,7 @@ $(
         public void DirectoryCreateDirectory_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5875,7 +5925,7 @@ $(
         public void DirectoryDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5984,7 +6034,7 @@ $(
         public void FileCopy_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -6002,7 +6052,7 @@ $(
         public void FileMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -6020,7 +6070,7 @@ $(
         public void DirectoryMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
