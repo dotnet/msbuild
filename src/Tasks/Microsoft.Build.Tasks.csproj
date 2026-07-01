@@ -48,7 +48,6 @@
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
-    <Compile Include="..\Shared\TaskItemTypeDetector.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <!-- Source Files -->
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">

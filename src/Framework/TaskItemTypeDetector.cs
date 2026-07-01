@@ -3,16 +3,27 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
     internal static class TaskItemTypeDetector
     {
-        private const string AbsolutePathFullName = "Microsoft.Build.Framework.AbsolutePath";
+        // The generic type definitions (ITaskItem<T>/TaskItem<T>) are matched by full type name because
+        // callers pass the FullName of whichever definition they care about (see IsPathLikeTaskItemOfT).
         private const string GenericITaskItemFullName = "Microsoft.Build.Framework.ITaskItem`1";
 
-        internal static bool IsAbsolutePathType(Type type)
-            => string.Equals(type.FullName, AbsolutePathFullName, StringComparison.Ordinal);
+        internal static bool IsAbsolutePathType(Type type) => type == typeof(AbsolutePath);
+
+        /// <summary>
+        /// Returns true if <paramref name="type"/> is one of the strongly-typed path types supported as a
+        /// task parameter or as the <c>T</c> in <c>ITaskItem&lt;T&gt;</c>/<c>TaskItem&lt;T&gt;</c>
+        /// (<see cref="AbsolutePath"/>, <see cref="FileInfo"/>, or <see cref="DirectoryInfo"/>). This is the
+        /// single definition of "supported path type" shared by the engine parameter-binding code and
+        /// <c>TaskItem&lt;T&gt;</c>.
+        /// </summary>
+        internal static bool IsSupportedPathType(Type type)
+            => type == typeof(AbsolutePath) || type == typeof(FileInfo) || type == typeof(DirectoryInfo);
 
         internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
         {
@@ -34,7 +45,7 @@ namespace Microsoft.Build.Shared
             }
 
             Type typeArg = genericArguments[0];
-            return IsAbsolutePathType(typeArg) || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
+            return IsSupportedPathType(typeArg);
         }
 
         internal static bool IsPathLikeITaskItemOfT(Type parameterType)

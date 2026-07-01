@@ -63,17 +63,8 @@ namespace Microsoft.Build.Framework
 
             // For path-like types, prefer the FullPath metadata (which is always absolute)
             // over ItemSpec which may be relative.
-            string parseFrom = IsPathLikeType() ? GetFullPathOrItemSpec(item, itemSpec) : itemSpec;
+            string parseFrom = TaskItemTypeDetector.IsSupportedPathType(typeof(T)) ? GetFullPathOrItemSpec(item, itemSpec) : itemSpec;
             Value = ParseValue(parseFrom);
-        }
-
-        /// <summary>Returns true if T is a path-like type that benefits from absolute path resolution.</summary>
-        private static bool IsPathLikeType()
-        {
-            Type t = typeof(T);
-            return t == typeof(System.IO.FileInfo) ||
-                   t == typeof(System.IO.DirectoryInfo) ||
-                   t == typeof(AbsolutePath);
         }
 
         /// <summary>Returns the FullPath metadata value if non-empty, otherwise falls back to itemSpec.</summary>

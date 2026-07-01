@@ -46,7 +46,6 @@
 
     <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.ArtifactsLocationAttribute">
       <_Parameter1>$(ArtifactsShippingPackagesDir)</_Parameter1>
-      <_Parameter2>$(ArtifactsLogDir)</_Parameter2>
     </AssemblyAttribute>
 
   </ItemGroup>

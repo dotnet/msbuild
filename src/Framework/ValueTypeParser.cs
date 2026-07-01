@@ -6,8 +6,6 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 
-#nullable enable
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -37,6 +35,14 @@ namespace Microsoft.Build.Shared
         {
             try
             {
+                // Path-like types (AbsolutePath/FileInfo/DirectoryInfo) are constructed directly from
+                // 'value' without rooting it here, because callers are expected to pass an already-rooted
+                // (absolute) path. The engine's parameter-binding path roots the string via
+                // TaskEnvironment.GetAbsolutePath before calling Parse, and the TaskItem<T> path derives
+                // 'value' from the item's FullPath metadata (also absolute). Constructing FileInfo/
+                // DirectoryInfo from a relative string would silently resolve against the current working
+                // directory, so we rely on that rooting invariant rather than re-resolving here.
+
                 // Special handling for AbsolutePath
                 if (targetType == typeof(AbsolutePath))
                 {
@@ -67,38 +73,11 @@ namespace Microsoft.Build.Shared
                     return value;
                 }
 
-                // Use TypeCode-based parsing for built-in types
-                TypeCode typeCode = Type.GetTypeCode(targetType);
-                switch (typeCode)
-                {
-                    case TypeCode.Int32:
-                        return int.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.Int64:
-                        return long.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.Double:
-                        return double.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.Single:
-                        return float.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.Decimal:
-                        return decimal.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.Byte:
-                        return byte.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.SByte:
-                        return sbyte.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.Int16:
-                        return short.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.UInt16:
-                        return ushort.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.UInt32:
-                        return uint.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.UInt64:
-                        return ulong.Parse(value, CultureInfo.InvariantCulture);
-                    case TypeCode.Char:
-                        return char.Parse(value);
-                    default:
-                        // Fallback to Convert.ChangeType for other types
-                        return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
-                }
+                // Everything else (numeric types, char, etc.) is converted via Convert.ChangeType, pinned
+                // to InvariantCulture. This is deliberately permissive: a future analyzer is expected to
+                // steer authors toward the first-class supported types above and away from relying on this
+                // general-purpose conversion for parameter types we don't really intend to support.
+                return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
             }
             catch (Exception ex) when (ex is FormatException || ex is InvalidCastException || ex is OverflowException || ex is ArgumentException || ex is NotSupportedException)
             {

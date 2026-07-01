@@ -1,16 +1,19 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
-
-#nullable disable
 
 namespace Microsoft.Build.Framework
 {
     internal sealed class MutableTaskItem : ITaskItem2
     {
-        private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>();
+        // MSBuild metadata names are case-insensitive, so the backing store must use a case-insensitive
+        // comparer; otherwise GetMetadata("fullpath") and GetMetadata("FullPath") would resolve differently.
+        // (The engine's MSBuildNameIgnoreCaseComparer is not available in the Framework assembly, so we use
+        // the equivalent ordinal, case-insensitive comparer here.)
+        private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public MutableTaskItem(string itemSpec) => ItemSpec = itemSpec;
 
@@ -20,7 +23,7 @@ namespace Microsoft.Build.Framework
 
         public int MetadataCount => _metadata.Count;
 
-        public string GetMetadata(string metadataName) => _metadata.TryGetValue(metadataName, out string value) ? value : string.Empty;
+        public string GetMetadata(string metadataName) => _metadata.TryGetValue(metadataName, out string? value) ? value ?? string.Empty : string.Empty;
 
         public void SetMetadata(string metadataName, string metadataValue) => _metadata[metadataName] = metadataValue;
 

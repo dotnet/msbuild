@@ -578,7 +578,6 @@ public class EndToEndTests : IDisposable
 
         var projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
-        _env.PublishTestFile(logFile);
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-check" : string.Empty)} -bl:{logFile}",
@@ -693,7 +692,6 @@ public class EndToEndTests : IDisposable
 
         string? projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
-        _env.PublishTestFile(logFile);
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
