@@ -21,6 +21,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
 | **MSBuildTask0006** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer typed path parameter over string |
 | **MSBuildTask0007** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
+| **MSBuildTask0008** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -173,16 +174,36 @@ public class MyTask : Task
 
 **Not flagged:** Metadata access (`item.GetMetadata(...)`), `[Output]` properties, non-task classes.
 
+### MSBuildTask0008 — Unsupported `ITaskItem<T>` Type Argument
+
+When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not a type that MSBuild's `ValueTypeParser` can parse at runtime, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
+
+**Supported type arguments:** `bool`, `char`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `decimal`, `string`, `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
+
+```csharp
+// ⚠️ MSBuildTask0008: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
+public class MyTask : Task
+{
+    public ITaskItem<System.Guid> Id { get; set; }       // warning
+    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
+    public ITaskItem<int> Count { get; set; }             // OK
+}
+```
+
+No code fix is offered for MSBuildTask0008 — the resolution depends on the intended semantics (e.g., switching to `string` and parsing manually, or choosing a different supported type).
+
+**Scope:** All `ITask` implementations (not just multithreaded tasks), since using an unsupported T is always a runtime correctness problem.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005 |
+| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0008 |
 | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | MSBuildTask0006–MSBuildTask0007 |
-| Class implementing `IMultiThreadableTask` | All seven rules |
-| Class with `[MSBuildMultiThreadableTask]` attribute | All seven rules |
+| Class implementing `IMultiThreadableTask` | All eight rules |
+| Class with `[MSBuildMultiThreadableTask]` attribute | All eight rules |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
@@ -193,7 +214,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 ### Severity Levels
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0002–MSBuildTask0005** report as **Warning** for all task types.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0008** report as **Warning** for all task types.
 - **MSBuildTask0006–MSBuildTask0007** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
