@@ -32,4 +32,9 @@ internal enum ClientMessageType : byte
     ///  Join an existing node grant. Payload: Guid grantId, int requestedNodes.
     /// </summary>
     JoinGrant = 5,
+
+    /// <summary>
+    ///  Request a node grant with queue scheduling priority. Payload: int requestedNodes, int priority.
+    /// </summary>
+    RequestNodesWithPriority = 6,
 }

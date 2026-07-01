@@ -20,7 +20,7 @@ namespace Microsoft.Build.Coordinator;
 internal sealed partial class CoordinatorServer(CoordinatorSettings settings, ICoordinatorDebugOutput? output = null) : IDisposable
 {
     private readonly CoordinatorSettings _settings = settings;
-    private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget);
+    private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget, settings.HighPriorityReservedNodes, settings.MaxNodesPerBuild, settings.PriorityAgingThreshold);
     private readonly string _pipeName = settings.PipeName;
     private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
     private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
@@ -66,7 +66,11 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         // Start auto-shutdown timer.
         ResetShutdownTimer();
 
-        _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget})");
+        _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget}, high-priority reserved nodes={FormatHighPriorityReservedNodes(_settings.HighPriorityReservedNodes)}, max nodes per build={FormatMaxNodesPerBuild(_settings.MaxNodesPerBuild)}, priority aging threshold={_settings.PriorityAgingThreshold})");
+        if (_settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
+        {
+            _output.WriteLine($"CoordinatorServer: Auto strict policy active. {autoStrictPolicyOptOutMessage}");
+        }
 
         ConcurrentDictionary<Task, byte> clientTasks = [];
 
@@ -264,6 +268,17 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
             switch (clientMessage)
             {
+                case RequestNodesWithPriorityMessage { RequestedNodes: int requestedNodes, Priority: CoordinatorBuildPriority priority }:
+                    if (RejectInvalidRequestedNodes(connection, requestedNodes) ||
+                        RejectInvalidPriority(connection, priority))
+                    {
+                        grant = null;
+                        return false;
+                    }
+
+                    grant = new(connection.Id, connection.ProcessId, requestedNodes, priority, isNested: false);
+                    return true;
+
                 case RequestNodesMessage { RequestedNodes: int requestedNodes }:
                     if (RejectInvalidRequestedNodes(connection, requestedNodes))
                     {
@@ -271,7 +286,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                         return false;
                     }
 
-                    grant = new(connection.Id, connection.ProcessId, requestedNodes, isNested: false);
+                    grant = new(connection.Id, connection.ProcessId, requestedNodes, CoordinatorBuildPriority.Normal, isNested: false);
                     return true;
 
                 case JoinGrantMessage { GrantId: Guid grantId, RequestedNodes: int requestedNodes }:
@@ -304,7 +319,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
                 default:
                     _output.WriteLine($"CoordinatorServer: Rejected client — second message was {clientMessage.GetType().Name}");
-                    connection.WriteServerMessage(new ErrorMessage($"Second message must be {nameof(ClientMessageType.RequestNodes)} or {nameof(ClientMessageType.JoinGrant)}"));
+                    connection.WriteServerMessage(new ErrorMessage($"Second message must be {nameof(ClientMessageType.RequestNodes)}, {nameof(ClientMessageType.RequestNodesWithPriority)}, or {nameof(ClientMessageType.JoinGrant)}"));
 
                     grant = null;
                     return false;
@@ -330,6 +345,18 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             return true;
         }
 
+        bool RejectInvalidPriority(Connection connection, CoordinatorBuildPriority priority)
+        {
+            if (priority is >= CoordinatorBuildPriority.Low and <= CoordinatorBuildPriority.High)
+            {
+                return false;
+            }
+
+            _output.WriteLine($"CoordinatorServer: Rejected client — invalid priority ({priority})");
+            connection.WriteServerMessage(new ErrorMessage("Invalid request: Priority is invalid"));
+            return true;
+        }
+
         bool TryCreateNestedGrant(Connection connection, Guid grantId, int requestedNodes, [NotNullWhen(true)] out BuildGrant? grant)
         {
             using (_clientsLock.EnterDisposableReadLock())
@@ -337,10 +364,14 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                 if (_activeRootGrantsById.TryGetValue(grantId, out BuildGrant? rootGrant) &&
                     rootGrant.IsActive)
                 {
-                    grant = new BuildGrant(connection.Id, connection.ProcessId, requestedNodes, grantId, isNested: true)
-                    {
-                        GrantedNodes = Math.Min(requestedNodes, rootGrant.GrantedNodes),
-                    };
+                    grant = new BuildGrant(
+                        connection.Id,
+                        connection.ProcessId,
+                        requestedNodes,
+                        rootGrant.Priority,
+                        grantId,
+                        isNested: true);
+                    grant.Activate(Math.Min(requestedNodes, rootGrant.GrantedNodes));
 
                     _output.WriteLine($"CoordinatorServer: Nested client joined grant {grantId} with {grant.GrantedNodes} node(s)");
 
@@ -359,7 +390,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
         try
         {
-            _output.WriteLine($"CoordinatorServer: Client connected (PID {connection.ProcessId}, ConnectionId {connection.Id}, requested {grant.RequestedNodes} nodes)");
+            _output.WriteLine($"CoordinatorServer: Client connected (PID {connection.ProcessId}, ConnectionId {connection.Id}, requested {grant.RequestedNodes} nodes, priority {grant.Priority}, nested={grant.IsNested})");
 
             // Once a client is accepted, transfer pipe ownership to ConnectedClient so
             // cleanup and subsequent message I/O are tied to the grant lifecycle.
@@ -574,6 +605,12 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
             return false;
         }
     }
+
+    private static string FormatHighPriorityReservedNodes(int value)
+        => value == 0 ? "0 (disabled)" : value.ToString();
+
+    private static string FormatMaxNodesPerBuild(int value)
+        => value == 0 ? "0 (uncapped)" : value.ToString();
 
     /// <summary>
     ///  Resets the auto-shutdown timer. If no builds are active or waiting when the timer

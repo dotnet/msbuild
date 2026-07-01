@@ -15,7 +15,8 @@ internal abstract partial record ClientMessage
             new(ClientMessageType.RequestNodes, static (reader, _) => RequestNodesMessage.ReadPayload(reader)),
             new(ReleaseNodesMessage.Instance),
             new(HeartbeatMessage.Instance),
-            new(ClientMessageType.JoinGrant, static (reader, _) => JoinGrantMessage.ReadPayload(reader)));
+            new(ClientMessageType.JoinGrant, static (reader, _) => JoinGrantMessage.ReadPayload(reader)),
+            new(ClientMessageType.RequestNodesWithPriority, static (reader, _) => RequestNodesWithPriorityMessage.ReadPayload(reader)));
 
         private Factory(ClientMessage instance, byte supportedExtendedFields = 0)
             : base(instance.MessageType, instance, supportedExtendedFields)
