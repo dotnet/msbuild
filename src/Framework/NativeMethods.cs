@@ -813,6 +813,7 @@ internal static class NativeMethods
         try
         {
             File.CreateSymbolicLink(newFileName, existingFileName);
+            errorMessage = null;
             return true;
         }
         catch (Exception e)

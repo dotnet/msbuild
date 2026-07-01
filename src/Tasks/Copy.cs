@@ -335,7 +335,7 @@ namespace Microsoft.Build.Tasks
             // Create hard links if UseHardlinksIfPossible is true
             if (UseHardlinksIfPossible)
             {
-                TryCopyViaLink(HardLinkComment, sourceFileState, destinationFileState, out hardLinkCreated, ref errorMessage, (source, destination, ref errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
+                TryCopyViaLink(HardLinkComment, sourceFileState, destinationFileState, out hardLinkCreated, ref errorMessage, (source, destination, ref errorMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
                 if (!hardLinkCreated)
                 {
                     if (UseSymboliclinksIfPossible)
@@ -354,7 +354,7 @@ namespace Microsoft.Build.Tasks
             // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
             if (!hardLinkCreated && UseSymboliclinksIfPossible)
             {
-                TryCopyViaLink(SymbolicLinkComment, sourceFileState, destinationFileState, out symbolicLinkCreated, ref errorMessage, (source, destination, ref errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
+                TryCopyViaLink(SymbolicLinkComment, sourceFileState, destinationFileState, out symbolicLinkCreated, ref errorMessage, (source, destination, ref errorMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
                 if (!symbolicLinkCreated)
                 {
                     if (!NativeMethodsShared.IsWindows)
