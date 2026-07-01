@@ -1,0 +1,96 @@
+Public repository coordinator priority benchmark
+
+Purpose
+-------
+Exercise the coordinator against public repositories by running concurrent
+builds from isolated git worktrees. The benchmark includes examples for Roslyn
+and Aspire, both public repositories. It compares:
+
+1. coordinator-priority: normal builds use Normal priority and delayed
+   latency-sensitive builds use High priority.
+2. coordinator-all-normal: all builds use Normal priority.
+3. no-coordinator: coordinator disabled, all builds use full local node count.
+
+The benchmark uses the real coordinator protocol through environment variables:
+
+  MSBUILDUSECOORDINATOR=1
+  MSBUILDCOORDINATORBUILDREQUESTPRIORITY=Normal|High
+  MSBUILDCOORDINATORNODEBUDGET
+  MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES
+  MSBUILDCOORDINATORMAXNODESPERBUILD
+  MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD
+
+Prerequisites
+-------------
+1. Build this MSBuild checkout first so the bootstrap MSBuild is available:
+
+     .\build.cmd -v quiet
+
+2. Have a local public repository checkout. The script tries ROSLYN_REPO,
+   ASPIRE_REPO, sibling "roslyn" and "aspire" checkouts, then C:\code\roslyn
+   and C:\code\aspire.
+
+3. Restore the benchmark repository before timing, or pass -Prepare to restore
+   and warm the generated worktrees.
+
+By default, the script uses this checkout's bootstrap `MSBuild.dll` through the
+bootstrap `dotnet.exe` when available. This lets the benchmark exercise the
+local coordinator implementation even when the benchmark repository's
+`global.json` asks for a different SDK feature band. Pass `-UseDotNetBuild` to
+force `dotnet build` instead.
+
+Recommended Roslyn quick smoke
+------------------------------
+From the MSBuild checkout:
+
+  pwsh .\scripts\benchmarks\Run-PublicRepoCoordinatorBenchmark.ps1 `
+    -RoslynRoot C:\code\roslyn `
+    -BuildPath Compilers.slnf `
+    -TouchFileRelativePath src\Compilers\CSharp\Portable\CSharpCompilationOptions.cs `
+    -NormalBuildCount 2 `
+    -HighBuildCount 1 `
+    -Rounds 1 `
+    -Scenarios coordinator-priority
+
+Recommended Aspire quick smoke
+------------------------------
+
+  pwsh .\scripts\benchmarks\Run-PublicRepoCoordinatorBenchmark.ps1 `
+    -AspireRoot C:\code\aspire `
+    -BuildPath Aspire-Core.slnf `
+    -TouchFileRelativePath src\Aspire.Hosting\DistributedApplication.cs `
+    -NormalBuildCount 2 `
+    -HighBuildCount 1 `
+    -Rounds 1 `
+    -Scenarios coordinator-priority
+
+Recommended comparison
+----------------------
+
+  pwsh .\scripts\benchmarks\Run-PublicRepoCoordinatorBenchmark.ps1 `
+    -RoslynRoot C:\code\roslyn `
+    -BuildPath Compilers.slnf `
+    -NormalBuildCount 3 `
+    -HighBuildCount 1 `
+    -Rounds 3 `
+    -Prepare
+
+Outputs
+-------
+The script defaults output under the user's temp directory unless -OutputRoot is
+provided. Capture these files:
+
+  scenario-summary.csv
+  <scenario>-r<round>\runs.csv
+  <scenario>-r<round>\samples.csv
+  per-run *.out.log and *.err.log files
+
+What to report back
+-------------------
+1. Machine details: logical cores, memory, OS, dotnet --info.
+2. The configuration lines: NodeBudget, Slice, Reservation,
+   PriorityAgingThreshold, NormalBuildCount, HighBuildCount.
+3. scenario-summary.csv.
+4. Whether coordinator-priority improves delayed High build latency compared
+   with coordinator-all-normal.
+5. Whether no-coordinator creates higher process fan-out or working set.
