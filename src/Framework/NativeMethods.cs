@@ -812,7 +812,7 @@ internal static class NativeMethods
 #if NET
         try
         {
-            File.CreateSymbolicLink(existingFileName, newFileName);
+            File.CreateSymbolicLink(newFileName, existingFileName);
             return true;
         }
         catch (Exception e)
