@@ -128,8 +128,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new()
             {
                 BuildEngine = new MockEngine(_output),
-                AssemblyFiles = new ITaskItem[] { x },
-                SearchPaths = new string[] { "{RawFileName}" },
+                AssemblyFiles = [x],
+                SearchPaths = ["{RawFileName}"],
             };
 
             // Request cancellation before invoking Execute.
