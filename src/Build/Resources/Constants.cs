@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -221,8 +222,64 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
+        /// The reflection surface that property-function evaluation uses on an allowlisted receiver
+        /// type: public constructors (for <c>[Type]::new(...)</c>) plus public methods, properties, and
+        /// fields, reached as static or instance members via <c>Type.InvokeMember</c>, <c>GetMethod(s)</c>,
+        /// and <c>GetConstructor(s)</c> (see Expander.Function.Execute and LateBindExecute). The
+        /// property-function path never sets <c>BindingFlags.NonPublic</c>, so events, nested types,
+        /// interfaces, and non-public members are never reflected over.
+        /// </summary>
+        private const DynamicallyAccessedMemberTypes PropertyFunctionMembers =
+            DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.PublicFields;
+
+        /// <summary>
         /// Fill up the dictionary for first use
         /// </summary>
+        // Preserve the PropertyFunctionMembers set on every type in the property-function allowlist
+        // below. Property functions dispatch over the allowlisted receiver type by reflection (see
+        // Expander.Function), and receiver types are restricted to this allowlist unless the
+        // MSBUILDENABLEALLPROPERTYFUNCTIONS feature switch is enabled. Preserving these members is what
+        // makes the IL2072/IL2074/IL2080/IL2096 suppressions in Expander honest under trimming. Keep in
+        // sync with the entries added below.
+        [DynamicDependency(PropertyFunctionMembers, typeof(Environment))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Directory))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(File))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(RuntimeInformation))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(OSPlatform))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(CultureInfo))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(IntrinsicFunctions))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(byte))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(char))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Convert))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(DateTime))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(DateTimeOffset))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(decimal))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(double))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Enum))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Guid))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(short))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(int))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(long))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Path))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Math))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(ushort))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(uint))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(ulong))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(sbyte))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(float))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(string))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(StringComparer))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(TimeSpan))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Regex))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Uri))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(UriBuilder))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Version))]
+#if NET
+        [DynamicDependency(PropertyFunctionMembers, typeof(OperatingSystem))]
+#endif
         private static void InitializeAvailableMethods()
         {
             if (s_availableStaticMethods == null)
@@ -270,7 +327,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.Directory::GetFiles", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastAccessTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastWriteTime", directoryType);
-                        availableStaticMethods.TryAdd("System.IO.Directory::GetParent", directoryType);                      
+                        availableStaticMethods.TryAdd("System.IO.Directory::GetParent", directoryType);
 
                         availableStaticMethods.TryAdd("System.IO.File::Exists", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetCreationTime", fileType);

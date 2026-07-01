@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -841,41 +841,84 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                // Loop through all the TaskItems in our arraylist, and convert them.
-                ArrayList finalTaskInputs = new ArrayList(taskItems.Count);
-
                 Type elementType = parameterType.GetElementType();
 
-                if (parameterType != typeof(ITaskItem[]) && !IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                if (parameterType == typeof(ITaskItem[]))
                 {
-                    foreach (TaskItem item in taskItems)
+                    ITaskItem[] finalInputs = new ITaskItem[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
                     {
+                        TaskItem item = taskItems[i];
                         currentItem = item;
-                        finalTaskInputs.Add(ConvertStringToParameterValue(item.ItemSpec, elementType));
-                    }
-                }
-                else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
-                {
-                    foreach (TaskItem item in taskItems)
-                    {
-                        currentItem = item;
-                        RecordItemForDisconnectIfNecessary(item);
-                        ITaskItem taskItemOfT = CreateTaskItemOfT(elementType.GetGenericArguments()[0], item);
-                        finalTaskInputs.Add(taskItemOfT);
-                    }
-                }
-                else
-                {
-                    foreach (TaskItem item in taskItems)
-                    {
+
                         // if we've been asked to remote these items then
                         // remember them so we can disconnect them from remoting later
                         RecordItemForDisconnectIfNecessary(item);
-                        finalTaskInputs.Add(item);
+                        finalInputs[i] = item;
                     }
-                }
 
-                return InternalSetTaskParameter(parameter, finalTaskInputs.ToArray(parameterType.GetElementType()));
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                {
+                    // TaskItem<T> / ITaskItem<T> arrays: wrap each item into the closed generic TaskItem<T>.
+#if NET
+                    // AOT friendly
+                    Array finalInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        RecordItemForDisconnectIfNecessary(item);
+                        ITaskItem taskItemOfT = CreateTaskItemOfT(elementType.GetGenericArguments()[0], item);
+                        finalInputs.SetValue(taskItemOfT, i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(string[]))
+                {
+                    string[] finalInputs = new string[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = currentItem.ItemSpec;
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(bool[]))
+                {
+                    bool[] finalInputs = new bool[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = ConversionUtilities.ConvertStringToBool(currentItem.ItemSpec);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else
+                {
+                    // Fallback for custom value types and path-like scalar types (AbsolutePath/FileInfo/DirectoryInfo).
+#if NET
+                    // AOT friendly
+                    Array finalTaskInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalTaskInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        finalTaskInputs.SetValue(ConvertStringToParameterValue(item.ItemSpec, elementType), i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalTaskInputs);
+                }
             }
             catch (Exception ex)
             {
