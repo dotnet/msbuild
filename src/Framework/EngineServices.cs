@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Framework
 {
@@ -84,6 +85,6 @@ namespace Microsoft.Build.Framework
         /// receive <see langword="false"/> because the project XML and its import closure are not available there.
         /// Only call this when <see cref="Version"/> is at least <see cref="Version3"/>.
         /// </remarks>
-        public virtual bool TryGetItemSourceLocation(string itemType, string itemSpec, out string file, out int lineNumber, out int columnNumber) => throw new NotImplementedException();
+        public virtual bool TryGetItemSourceLocation(string itemType, string itemSpec, [MaybeNullWhen(false)] out string file, out int lineNumber, out int columnNumber) => throw new NotImplementedException();
     }
 }

@@ -879,6 +879,43 @@ namespace Microsoft.Build.UnitTests.BackEnd
             mockLogger.AssertLogContains("ITEMLOCAMB:False");
         }
 
+        /// <summary>
+        /// When one unconditioned literal declaration coexists with a conditioned literal declaration of the same item,
+        /// the active source cannot be determined from XML alone, so the lookup must return false rather than confidently
+        /// report the unconditioned location.
+        /// </summary>
+        [Fact]
+        public void TaskItemSourceLocationIsUnresolvedWhenConditionedDuplicateExists()
+        {
+            string projectFileContents = @"
+<Project>
+  <ItemGroup>
+    <PackageReference Include='Newtonsoft.Json' />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include='Newtonsoft.Json' Condition=""'$(Unset)' == 'true'"" />
+  </ItemGroup>
+  <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        var engineServices = ((IBuildEngine10)BuildEngine).EngineServices;
+        bool found = engineServices.TryGetItemSourceLocation(""PackageReference"", ""Newtonsoft.Json"", out _, out _, out _);
+        Log.LogMessage(MessageImportance.High, $""ITEMLOCCONDAMB:{found}"");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='Build'>
+      <test/>
+  </Target>
+</Project>";
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("itemloc-cond-amb.proj", projectFileContents);
+            MockLogger mockLogger = new MockLogger();
+            ObjectModelHelpers.BuildTempProjectFileWithTargets("itemloc-cond-amb.proj", null, null, mockLogger).ShouldBeTrue();
+
+            mockLogger.AssertLogContains("ITEMLOCCONDAMB:False");
+        }
+
         [Fact]
         public void TaskItemSourceLocationReturnsFalseOutOfProc()
         {

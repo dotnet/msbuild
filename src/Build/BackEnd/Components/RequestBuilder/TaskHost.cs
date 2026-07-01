@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -954,7 +955,7 @@ namespace Microsoft.Build.BackEnd
             private static readonly char[] s_nonLiteralIncludeChars = ['$', '@', '%', '*', '?'];
 
             /// <inheritdoc/>
-            public override bool TryGetItemSourceLocation(string itemType, string itemSpec, out string file, out int lineNumber, out int columnNumber)
+            public override bool TryGetItemSourceLocation(string itemType, string itemSpec, [MaybeNullWhen(false)] out string file, out int lineNumber, out int columnNumber)
             {
                 file = null;
                 lineNumber = 0;
@@ -991,9 +992,9 @@ namespace Microsoft.Build.BackEnd
                 // Collect the declaring XML item element across the project file and the rest of its import closure.
                 // Only already-cached XML is inspected; this best-effort diagnostic path never reloads project files
                 // from disk. To avoid reporting a confidently-wrong location, item elements declared inside a <Target>
-                // (produced at execution time, not part of the restore graph) are ignored, items carrying a Condition
-                // (on the element or an ancestor) are treated as inconclusive because their active state cannot be
-                // determined from XML alone, and the lookup returns false when more than one literal match remains.
+                // (produced at execution time, not part of the restore graph) are ignored, a literal match that carries
+                // a Condition (on the element or an ancestor) makes the result ambiguous because its active state cannot
+                // be determined from XML alone, and the lookup returns false when more than one literal match remains.
                 ElementLocation match = null;
                 bool ambiguous = false;
 
@@ -1025,8 +1026,9 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// Scans the cached XML of <paramref name="path"/> for an item element whose type and literal Include match,
-            /// accumulating into <paramref name="match"/>. Sets <paramref name="ambiguous"/> when a second match is found.
-            /// Item elements declared inside a &lt;Target&gt;, or carrying a Condition on the element or an ancestor, are ignored.
+            /// accumulating into <paramref name="match"/>. Sets <paramref name="ambiguous"/> when a second match is found,
+            /// or when a match carries a Condition on the element or an ancestor. Item elements declared inside a
+            /// &lt;Target&gt; are ignored.
             /// </summary>
             private static void CollectItemElementLocation(ProjectRootElementCacheBase cache, string path, string itemType, string itemSpec, ref ElementLocation match, ref bool ambiguous)
             {
@@ -1045,10 +1047,15 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase)
                         || !IncludeContainsLiteral(item.Include, itemSpec)
-                        || IsTargetScoped(item)
-                        || IsConditioned(item))
+                        || IsTargetScoped(item))
                     {
                         continue;
+                    }
+
+                    if (IsConditioned(item))
+                    {
+                        ambiguous = true;
+                        return;
                     }
 
                     if (match is not null)
@@ -1080,8 +1087,9 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// Returns <see langword="true"/> if the item element, or any of its ancestor containers, carries a non-empty
-            /// Condition. Such elements cannot be confirmed active from XML alone, so they are treated as inconclusive and
-            /// skipped rather than risk reporting a location that was conditioned out of the evaluated project.
+            /// Condition. Such elements cannot be confirmed active from XML alone, so a conditioned literal match is treated
+            /// as inconclusive and makes the result ambiguous rather than risk reporting a location that was conditioned in
+            /// or out of the evaluated project.
             /// </summary>
             private static bool IsConditioned(ProjectItemElement item)
             {
@@ -1122,7 +1130,7 @@ namespace Microsoft.Build.BackEnd
                         continue;
                     }
 
-                    if (string.Equals(trimmed, itemSpec, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(trimmed, itemSpec, StringComparison.Ordinal))
                     {
                         return true;
                     }
