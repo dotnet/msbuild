@@ -30,6 +30,13 @@ variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
+  # Hardcoded OptProf baseline: the latest known-good OptimizationData drop from main's
+  # MSBuild-OptProf pipeline. A freshly-cut vs* release branch has no OptProf data of its own,
+  # so it inherits this value (see the vs* block below) and its first official build succeeds
+  # without the manual OptProf bootstrap rerun. Refresh this each release in the main-bump PR
+  # (documentation/release-checklist.md, Phase 3) via scripts/Get-LatestOptProfDrop.ps1.
+  - name: OptProfBaselineDrop
+    value: 'OptimizationData/DotNet-msbuild-Trusted/main/20260623.5/14471019/1'
   - name: requireDefaultChannels
     value: false
   - name: SourceBranch
@@ -38,6 +45,14 @@ variables:
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
+  # On a vs* release branch, seed OptProf from the hardcoded baseline above instead of trying to
+  # resolve branch-specific data that does not exist yet at branch-cut time. (main is unaffected:
+  # it keeps collecting and resolving its own OptProf via SourceBranch.)
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
+    - name: OptProfDrop
+      value: $(OptProfBaselineDrop)
+    - name: SourceBranch
+      value: ''
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
