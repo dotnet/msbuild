@@ -164,7 +164,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
             output.WriteLine("CoordinatorClient: Connected to coordinator");
 
-            CoordinatorClient? client = TryNegotiate(pipeStream, requestedNodes, settings, output, loggingService);
+            CoordinatorClient? client = TryNegotiate(pipeStream, requestedNodes, GetBuildPriorityFromEnvironment(), settings, output, loggingService);
             pipeStream = null; // Ownership transferred unconditionally; TryNegotiate disposes on failure.
 
             if (client is null)
@@ -329,6 +329,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     /// </summary>
     /// <param name="pipeStream">The connected named pipe stream.</param>
     /// <param name="requestedNodes">The number of nodes to request.</param>
+    /// <param name="priority">The coordinator queue scheduling priority to request.</param>
     /// <param name="settings">Coordinator settings including heartbeat interval and process ID.</param>
     /// <param name="output">Debug trace output for diagnostic logging.</param>
     /// <param name="loggingService">Optional MSBuild logging service for user-visible messages.</param>
@@ -338,6 +339,7 @@ internal sealed partial class CoordinatorClient : IDisposable
     private static CoordinatorClient? TryNegotiate(
         NamedPipeClientStream pipeStream,
         int requestedNodes,
+        CoordinatorBuildPriority priority,
         CoordinatorSettings settings,
         ICoordinatorDebugOutput output,
         ILoggingService? loggingService)
@@ -355,7 +357,7 @@ internal sealed partial class CoordinatorClient : IDisposable
         // Root builds keep it in BuildParameters.BuildProcessEnvironment to avoid races
         // between concurrent BuildManager instances in the same process.
         if (TryGetInheritedGrantId(out Guid inheritedGrantId) &&
-            connection.ServerCapabilities.Contains(Capabilities.NestedGrants))
+            HasCapability(connection.ServerCapabilities, Capabilities.NestedGrants))
         {
             grantOwnership = GrantOwnership.Nested;
             output.WriteLine($"CoordinatorClient: Joining coordinator grant {inheritedGrantId} for {requestedNodes} nodes (PID {processId}, ConnectionId {connection.Id})");
@@ -364,8 +366,17 @@ internal sealed partial class CoordinatorClient : IDisposable
         else
         {
             grantOwnership = GrantOwnership.Root;
-            output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {processId}, ConnectionId {connection.Id})");
-            connection.WriteClientMessage(new RequestNodesMessage(requestedNodes));
+
+            if (HasCapability(connection.ServerCapabilities, Capabilities.Priority))
+            {
+                output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes at {priority} priority (PID {processId}, ConnectionId {connection.Id})");
+                connection.WriteClientMessage(new RequestNodesWithPriorityMessage(requestedNodes, priority));
+            }
+            else
+            {
+                output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {processId}, ConnectionId {connection.Id})");
+                connection.WriteClientMessage(new RequestNodesMessage(requestedNodes));
+            }
         }
 
         // Read the response.
@@ -470,6 +481,45 @@ internal sealed partial class CoordinatorClient : IDisposable
         int heartbeatIntervalMs,
         ICoordinatorDebugOutput output)
         => new(connection, grant.GrantId, grant.GrantedNodes, GrantOwnership.Nested, heartbeatIntervalMs, output);
+
+    private static bool HasCapability(ImmutableArray<string> capabilities, string capability)
+    {
+        foreach (string supportedCapability in capabilities)
+        {
+            if (StringComparer.Ordinal.Equals(supportedCapability, capability))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static CoordinatorBuildPriority GetBuildPriorityFromEnvironment()
+    {
+        string? value = Environment.GetEnvironmentVariable(Constants.BuildRequestPriorityEnvVarName);
+        if (string.IsNullOrEmpty(value))
+        {
+            return CoordinatorBuildPriority.Normal;
+        }
+
+        if (string.Equals(value, nameof(CoordinatorBuildPriority.Low), StringComparison.OrdinalIgnoreCase))
+        {
+            return CoordinatorBuildPriority.Low;
+        }
+
+        if (string.Equals(value, nameof(CoordinatorBuildPriority.Normal), StringComparison.OrdinalIgnoreCase))
+        {
+            return CoordinatorBuildPriority.Normal;
+        }
+
+        if (string.Equals(value, nameof(CoordinatorBuildPriority.High), StringComparison.OrdinalIgnoreCase))
+        {
+            return CoordinatorBuildPriority.High;
+        }
+
+        return CoordinatorBuildPriority.Normal;
+    }
 
     private static bool TryConnectToPipe(NamedPipeClientStream pipeStream, int timeoutMs)
     {

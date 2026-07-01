@@ -7,8 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 
 using Microsoft.Build.BackEnd;
@@ -18,6 +20,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -26,6 +29,7 @@ using Shouldly;
 using Xunit;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Constants = Microsoft.Build.Framework.Constants;
+using CoordinatorConstants = Microsoft.Build.Framework.Coordinator.Constants;
 
 #nullable disable
 
@@ -73,6 +77,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
 
+            _env = TestEnvironment.Create(output);
+            _env.SetEnvironmentVariable(CoordinatorConstants.BuildRequestPriorityEnvVarName, null);
+
             _logger = new MockLogger(output);
             _parameters = new BuildParameters
             {
@@ -83,7 +90,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager = new BuildManager();
             _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
-            _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
         }
 
@@ -110,6 +116,51 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BuildParametersWithNullCollection()
         {
             Assert.Throws<ArgumentNullException>(() => { new BuildParameters(null); });
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task BuildManagerPassesEnvironmentBuildRequestPriorityToCoordinator()
+        {
+            string pipeName = $"msbuild-coordinator-buildmanager-env-test-{Guid.NewGuid():N}";
+            string platformPipeName = NamedPipeUtil.GetPlatformSpecificPipeName(pipeName);
+
+            _env.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
+            _env.SetEnvironmentVariable(CoordinatorConstants.PipeNameEnvVarName, pipeName);
+            _env.SetEnvironmentVariable(CoordinatorConstants.BuildRequestPriorityEnvVarName, "High");
+
+            using NamedPipeServerStream server = new(
+                platformPipeName,
+                PipeDirection.InOut,
+                maxNumberOfServerInstances: 1,
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous);
+            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
+
+            System.Threading.Tasks.Task<ClientMessage> requestTask = ReadCoordinatorRequestAsync(server, cts.Token);
+
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+  <Target Name='test'>
+     <Message Text='[success]'/>
+  </Target>
+</Project>
+");
+
+            BuildParameters parameters = new()
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false,
+                MaxNodeCount = 4
+            };
+
+            BuildResult result = _buildManager.Build(parameters, GetBuildRequestData(contents));
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            RequestNodesWithPriorityMessage request = (await requestTask).ShouldBeOfType<RequestNodesWithPriorityMessage>();
+            request.RequestedNodes.ShouldBe(4);
+            request.Priority.ShouldBe(CoordinatorBuildPriority.High);
         }
 
         /// <summary>
@@ -4783,6 +4834,31 @@ $@"<Project InitialTargets=`Sleep`>
 
                 hasNonEmptyTraceFile.ShouldBeTrue("Expected at least one EngineTrace_*.txt file to contain trace data.");
             });
+        }
+
+        private static async System.Threading.Tasks.Task<ClientMessage> ReadCoordinatorRequestAsync(NamedPipeServerStream server, CancellationToken cancellationToken)
+        {
+            await server.WaitForConnectionAsync(cancellationToken);
+
+            using BinaryReader reader = new(server, Encoding.UTF8, leaveOpen: true);
+            using BinaryWriter writer = new(server, Encoding.UTF8, leaveOpen: true);
+
+            (await ReadCoordinatorMessageWithTimeoutAsync(reader)).ShouldBeOfType<ClientHandshakeMessage>();
+            writer.Write(new ServerHandshakeMessage([Capabilities.Priority]));
+
+            ClientMessage request = await ReadCoordinatorMessageWithTimeoutAsync(reader);
+            writer.Write(new NodeGrantMessage(grantedNodes: 1));
+
+            (await ReadCoordinatorMessageWithTimeoutAsync(reader)).ShouldBe(ReleaseNodesMessage.Instance);
+            return request;
+        }
+
+        private static async System.Threading.Tasks.Task<ClientMessage> ReadCoordinatorMessageWithTimeoutAsync(BinaryReader reader)
+        {
+            System.Threading.Tasks.Task<ClientMessage> readTask = System.Threading.Tasks.Task.Run(reader.ReadClientMessage);
+            System.Threading.Tasks.Task completedTask = await System.Threading.Tasks.Task.WhenAny(readTask, System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(30)));
+            completedTask.ShouldBeSameAs(readTask);
+            return await readTask;
         }
     }
 }
