@@ -456,8 +456,8 @@ namespace Microsoft.Build.Experimental
             var response = new ServerNodeBuildResult(buildResult.exitCode, buildResult.exitType);
             SendPacket(response);
 
-            // Shutdown server if cancel was requested. This is consistent with nodes behavior.
-            _shutdownReason = _cancelRequested ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
+            // Shutdown server after this build if a cancel was requested, or if the client asked for no reuse. This is consistent with nodes behavior.
+            _shutdownReason = (_cancelRequested || command.ShutdownAfterBuild) ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
         }
 
