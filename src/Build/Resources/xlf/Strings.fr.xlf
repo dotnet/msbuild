@@ -423,34 +423,34 @@
       </trans-unit>
       <trans-unit id="CoordinatorFailedToConnect">
         <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Échec de la connexion au coordinateur de build. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Échec du lancement du coordinateur de build. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToNegotiate">
         <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Échec de la négociation avec le coordinateur de build. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">
         <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Le délai d’attente du lancement du coordinateur de build a expiré. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>
-        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <target state="translated">Le coordinateur a accordé {0} nœud(s) pour cette compilation.</target>
         <note>
       LOCALIZATION: {0} is the number of nodes granted by the coordinator.
     </note>
       </trans-unit>
       <trans-unit id="CoordinatorWaitingForNodes">
         <source>Waiting for coordinator to grant build resources...</source>
-        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <target state="translated">En attente de l’octroi des ressources de build par le coordinateur...</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
