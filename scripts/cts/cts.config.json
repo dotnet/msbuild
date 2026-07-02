@@ -1,0 +1,51 @@
+{
+  "SourceCodeFiles": {
+    "Include": [
+      "src/**/*.cs"
+    ],
+    "Exclude": [
+      "**/obj/**",
+      "**/bin/**",
+      "**/TestAssets/**"
+    ]
+  },
+  "Files": {
+    "Exclude": [
+      "**/*.md",
+      "**/*.yml",
+      "**/*.yaml",
+      "**/*.png",
+      "documentation/**"
+    ]
+  },
+  "Modules": {
+    "Include": [],
+    "Exclude": [
+      "**/Microsoft.Testing.*.dll",
+      "**/Microsoft.TestPlatform*.dll",
+      "**/Microsoft.VisualStudio.TestPlatform*.dll",
+      "**/Microsoft.VisualStudio.CodeCoverage*.dll",
+      "**/Microsoft.DotNet.*.dll",
+      "**/xunit.*.dll",
+      "**/Xunit.*.dll",
+      "**/testhost*",
+      "**/Microsoft.Bcl.*.dll",
+      "**/Microsoft.ApplicationInsights.dll",
+      "**/Newtonsoft.Json.dll",
+      "**/Shouldly.dll",
+      "**/AwesomeAssertions.dll",
+      "**/FakeItEasy.dll",
+      "**/Verify.*.dll",
+      "**/System*.dll",
+      "**/runtimes/**"
+    ]
+  },
+  "Filter": {
+    "Include": [
+      "**/artifacts/bin/*.VSTest/Debug/net10.0/*.UnitTests.dll"
+    ],
+    "Exclude": [
+      "**/*.resources.dll"
+    ]
+  }
+}
