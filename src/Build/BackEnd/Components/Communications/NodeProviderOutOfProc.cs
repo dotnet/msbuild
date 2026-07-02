@@ -206,6 +206,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
+            // Intentionally does NOT remove the node context here. Close() runs on the pipe read/IO thread
+            // (outside the BuildManager sync lock), so removing the context here would race a concurrent
+            // scheduler SendData and could throw "Invalid node id specified" (dotnet/msbuild#12438). The
+            // context is instead removed via RemoveNodeContext on the serialized node-shutdown path. The
+            // NodeShutdown packet that drives that path is always routed before Close() is called.
+        }
+
+        /// <summary>
+        /// Removes the node context. Called on the serialized node-shutdown path (BuildManager work-queue
+        /// thread, under its sync lock) via NodeManager.RemoveNode, so it never races a concurrent SendData.
+        /// The pipe has already been disposed by NodeContext.Close. See dotnet/msbuild#12438.
+        /// </summary>
+        public void RemoveNodeContext(int nodeId)
+        {
             _nodeContexts.TryRemove(nodeId, out _);
         }
 
