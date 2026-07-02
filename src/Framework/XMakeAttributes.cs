@@ -56,6 +56,13 @@ namespace Microsoft.Build.Shared
         internal const string architecture = "Architecture";
         internal const string msbuildArchitecture = "MSBuildArchitecture";
         internal const string taskFactory = "TaskFactory";
+
+        /// <summary>
+        /// PROTOTYPE. UsingTask attribute overriding the multi-threaded task-routing decision.
+        /// See https://github.com/dotnet/msbuild/issues/13738.
+        /// </summary>
+        internal const string taskHostRouting = "TaskHostRouting";
+
         internal const string parameterType = "ParameterType";
         internal const string required = "Required";
         internal const string output = "Output";
@@ -93,6 +100,23 @@ namespace Microsoft.Build.Shared
             internal const string any = "*";
         }
 
+        /// <summary>
+        /// PROTOTYPE. Allowed values for the UsingTask <c>TaskHostRouting</c> attribute, which pins a
+        /// task to a specific execution location in multi-threaded mode.
+        /// See https://github.com/dotnet/msbuild/issues/13738.
+        /// </summary>
+        internal struct TaskHostRoutingValues
+        {
+            /// <summary>Run the task in-process within the thread node.</summary>
+            internal const string inProc = "InProc";
+
+            /// <summary>Run the task in a reusable (sidecar) TaskHost process.</summary>
+            internal const string sidecar = "Sidecar";
+
+            /// <summary>Run the task in a transient TaskHost process that terminates after execution.</summary>
+            internal const string transient = "Transient";
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////////
         // If we ever add a new MSBuild namespace (or change this one) we must update the registry key
         // we set during install to disable the XSL debugger from working on MSBuild format files.
@@ -108,6 +132,8 @@ namespace Microsoft.Build.Shared
         private static readonly HashSet<string> ValidMSBuildRuntimeValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildRuntimeValues.clr2, MSBuildRuntimeValues.clr4, MSBuildRuntimeValues.currentRuntime, MSBuildRuntimeValues.net, MSBuildRuntimeValues.any };
 
         private static readonly HashSet<string> ValidMSBuildArchitectureValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildArchitectureValues.x86, MSBuildArchitectureValues.x64, MSBuildArchitectureValues.arm64, MSBuildArchitectureValues.currentArchitecture, MSBuildArchitectureValues.any };
+
+        private static readonly HashSet<string> ValidTaskHostRoutingValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { TaskHostRoutingValues.inProc, TaskHostRoutingValues.sidecar, TaskHostRoutingValues.transient };
 
         /// <summary>
         /// Returns true if and only if the specified attribute is one of the attributes that the engine specifically recognizes
@@ -153,6 +179,12 @@ namespace Microsoft.Build.Shared
         /// Returns true if the given string is a valid member of the MSBuildArchitectureValues set
         /// </summary>
         internal static bool IsValidMSBuildArchitectureValue(string architecture) => architecture == null || ValidMSBuildArchitectureValues.Contains(architecture);
+
+        /// <summary>
+        /// PROTOTYPE. Returns true if the given string is a valid member of the TaskHostRoutingValues set.
+        /// An empty or null value means "unspecified" and is treated as valid.
+        /// </summary>
+        internal static bool IsValidTaskHostRoutingValue(string taskHostRouting) => string.IsNullOrEmpty(taskHostRouting) || ValidTaskHostRoutingValues.Contains(taskHostRouting);
 
         /// <summary>
         /// Compares two members of MSBuildRuntimeValues, returning true if they count as a match, and false otherwise.
