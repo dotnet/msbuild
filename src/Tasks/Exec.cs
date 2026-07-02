@@ -33,12 +33,21 @@ namespace Microsoft.Build.Tasks
         {
             Command = string.Empty;
 
-            // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
-            // here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
-            // doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
-            // If the cmd file contains non-ANSI characters encoding may change.
-            _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-            _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            // Wave18_8: use ANSI code page (GetACP) instead of OEM (GetOEMCP). Most native Windows tools
+            // write output using the ANSI code page (e.g., MSVC link.exe on French Windows: ANSI=CP1252,
+            // OEM=CP850). Reading with OEM garbles non-ASCII characters (e.g., 'é' → 'Ú').
+            // See: https://github.com/dotnet/msbuild/issues/12290
+            // If the cmd file contains non-ANSI characters the encoding may change later (see CreateTemporaryBatchFile).
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+            {
+                _standardOutputEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
+                _standardErrorEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
+            }
+            else
+            {
+                _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+                _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            }
         }
 
         #endregion

@@ -36,6 +36,7 @@ Change wave checks around features will be removed in the release that accompani
 ### 18.8
 - [RAR task: across multiple input properties, resolve relative paths against the project directory (not the process current directory)](https://github.com/dotnet/msbuild/pull/13319)
 - [Console, parallel console, and terminal loggers print the paths of log files written by registered loggers (e.g. file logger and binary logger) as part of the end-of-build summary.](https://github.com/dotnet/msbuild/pull/13577)
+- [ToolTask and Exec now read tool stdout/stderr using the system ANSI code page (GetACP) instead of OEM (GetOEMCP), fixing garbled output from native tools on Western locales (e.g., MSVC link.exe on French Windows). Some older console-oriented tools still emit OEM-encoded output and may now be misdecoded; if this affects you, you can temporarily opt out with `MSBUILDDISABLEFEATURESFROMVERSION=18.8`, or for `Exec` specifically set `StdOutEncoding`/`StdErrEncoding` explicitly.](https://github.com/dotnet/msbuild/issues/12290)
 
 ### 18.7
 - [Copy task retries on ERROR_ACCESS_DENIED on non-Windows platforms to handle transient lock conflicts (e.g. macOS CoW filesystems)](https://github.com/dotnet/msbuild/issues/13463)

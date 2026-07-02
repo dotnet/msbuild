@@ -494,12 +494,16 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Tests that Exec task will choose the default code page when UTF8 is not needed.
+        /// Tests that Exec task uses ANSI (GetACP) encoding by default when the command contains
+        /// only ASCII characters (no UTF-8 batch file override needed).
+        /// See: https://github.com/dotnet/msbuild/issues/12290
         /// </summary>
         [Fact]
         public void ExecTaskWithoutUnicodeCharacterInCommand()
         {
-            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            // Default stdout encoding is ANSI (GetACP) so that native tool output (e.g., MSVC v141
+            // link.exe on French Windows) is decoded correctly instead of garbled as OEM-850.
+            RunExec(false, EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
         }
 
         /// <summary>
@@ -521,26 +525,29 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command
-        /// <remarks>Exec task will fail as the cmd processor will not be able to run the command.</remarks>
+        /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command.
+        /// UseUtf8=Never only controls the batch file encoding (stays OEM, no chcp); the stdout reading
+        /// encoding remains ANSI (GetACP) independently of the batch file encoding.
+        /// <remarks>Exec task will fail as the cmd processor cannot run the garbled batch file.</remarks>
         /// </summary>
         [WindowsOnlyTheory]
         [InlineData("Never")]
         [InlineData("System")]
         public void ExecTaskUtf8NeverWithNonAnsi(string useUtf8)
         {
-            RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8, false);
+            RunExec(true, EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName, useUtf8, false);
         }
 
         /// <summary>
-        /// Exec task will NOT use UTF8 when UTF8 Never is specified and only ANSI characters are in the Command
+        /// Exec task will NOT use UTF8 when UTF8 Never is specified and only ANSI characters are in the Command.
+        /// UseUtf8=Never controls the batch file encoding only; stdout reading encoding remains ANSI (GetACP).
         /// </summary>
         [Theory]
         [InlineData("Never")]
         [InlineData("System")]
         public void ExecTaskUtf8NeverWithAnsi(string useUtf8)
         {
-            RunExec(false, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8);
+            RunExec(false, EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName, useUtf8);
         }
 
         [Theory]
@@ -1178,6 +1185,58 @@ echo line 3"" />
             exec.ValidateParametersAccessor().ShouldBeTrue();
             exec.GetWorkingDirectoryAccessor().ShouldBe(Path.Combine(projectDir.Path, "builddir"));
         }
+
+        #region stdout/stderr encoding tests
+
+        /// <summary>
+        /// Exec task constructor initialises stdout/stderr encoding to ANSI (GetACP) — not OEM (GetOEMCP).
+        /// This fixes garbled output from native tools (e.g., MSVC v141 link.exe on French Windows)
+        /// that write string resources using the ANSI code page, not OEM.
+        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// </summary>
+        [WindowsOnlyFact]
+        public void ExecTask_DefaultStdEncodingIsAnsi()
+        {
+            ChangeWaves.ResetStateForTests();
+            Exec exec = PrepareExec("echo test");
+            exec.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+            exec.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+        }
+
+        /// <summary>
+        /// When Wave18_8 is opted out, Exec falls back to OEM encoding — preserving pre-Wave18_8 behaviour.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void ExecTask_Wave18_8_OptedOut_DefaultEncodingIsOem()
+        {
+            try
+            {
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
+
+                Exec exec = PrepareExec("echo test");
+                exec.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+                exec.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        /// <summary>
+        /// UseUtf8Encoding=Always overrides the ANSI default: when the batch file needs UTF-8
+        /// (chcp 65001 is injected), the stdout encoding is also switched to UTF-8.
+        /// UseUtf8 controls the batch-file encoding; the chcp injection then also changes stdout reading.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void ExecTask_UseUtf8AlwaysOverridesAnsiDefault()
+        {
+            RunExec(false, new UTF8Encoding(false).EncodingName, "Always");
+        }
+
+        #endregion
     }
 
     internal sealed class ExecWrapper : Exec
