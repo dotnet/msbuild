@@ -233,6 +233,7 @@
     <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryCollector.cs" />
+    <Compile Include="TelemetryInfra\TasksDetailsTelemetry.cs" />
     <Compile Include="TelemetryInfra\TelemetryCollectorProvider.cs" />
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />

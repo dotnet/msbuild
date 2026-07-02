@@ -18,6 +18,7 @@ using Shouldly;
 using Xunit;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 using static Microsoft.Build.Framework.Telemetry.TelemetryDataUtils;
+using static Microsoft.Build.TelemetryInfra.TasksDetailsTelemetry;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -519,6 +520,314 @@ namespace Microsoft.Build.Engine.UnitTests
             allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key2);
             allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldNotContainKey(key, "Old data should not appear after reset");
         }
+
+        [Fact]
+        public void GetTasksDetailsProperties_ReturnsNullForNullData()
+        {
+            IWorkerNodeTelemetryData? data = null;
+            data.GetTasksDetailsProperties().ShouldBeNull();
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_ReturnsNullForEmptyData()
+        {
+            var data = new WorkerNodeTelemetryData([], []);
+            data.GetTasksDetailsProperties().ShouldBeNull();
+        }
+
+        /// <summary>
+        /// Standard three-task fixture used by the <c>GetTasksDetailsProperties_*</c> tests:
+        /// Copy (10 executions), Csc (5 executions), and a custom task (3 executions).
+        /// </summary>
+        private static Dictionary<string, string> BuildThreeTaskFixtureProperties()
+        {
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(500), 10, 2048, "AssemblyTaskFactory", null) },
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Csc", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(3000), 5, 4096, "AssemblyTaskFactory", null) },
+                { new TaskOrTargetTelemetryKey("MyCustomTask", true, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(100), 3, 512, "MyCompany.Factory", null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+            properties.ShouldNotBeNull();
+            return properties!;
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_ReportsTaskCounts()
+        {
+            Dictionary<string, string> properties = BuildThreeTaskFixtureProperties();
+
+            properties["TaskCount"].ShouldBe("3");
+            properties["TotalTaskCount"].ShouldBe("3");
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_OrdersTasksByExecutionsCountDescending()
+        {
+            Dictionary<string, string> properties = BuildThreeTaskFixtureProperties();
+
+            using var doc = System.Text.Json.JsonDocument.Parse(properties["Tasks"]);
+            var tasks = doc.RootElement;
+            tasks.ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Array);
+            tasks.GetArrayLength().ShouldBe(3);
+
+            tasks[0].GetProperty("Name").GetString().ShouldBe("Microsoft.Build.Tasks.Copy");
+            tasks[0].GetProperty("ExecutionsCount").GetInt32().ShouldBe(10);
+
+            tasks[1].GetProperty("Name").GetString().ShouldBe("Microsoft.Build.Tasks.Csc");
+            tasks[1].GetProperty("ExecutionsCount").GetInt32().ShouldBe(5);
+
+            tasks[2].GetProperty("ExecutionsCount").GetInt32().ShouldBe(3);
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_HashesCustomTaskAndFactoryNames()
+        {
+            Dictionary<string, string> properties = BuildThreeTaskFixtureProperties();
+
+            using var doc = System.Text.Json.JsonDocument.Parse(properties["Tasks"]);
+            // Custom task is sorted last (lowest ExecutionsCount).
+            var customTask = doc.RootElement[2];
+
+            customTask.GetProperty("IsCustom").GetBoolean().ShouldBeTrue();
+            customTask.GetProperty("Name").GetString().ShouldBe(GetHashed("MyCustomTask"));
+            customTask.GetProperty("FactoryName").GetString().ShouldBe(GetHashed("MyCompany.Factory"));
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_BoundsToTop100()
+        {
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
+            for (int i = 0; i < 150; i++)
+            {
+                tasksData[new TaskOrTargetTelemetryKey($"Task{i}", false, false)] =
+                    new TaskExecutionStats(TimeSpan.FromMilliseconds(i), i + 1, 0, "AssemblyTaskFactory", null);
+            }
+
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+            properties!["TaskCount"].ShouldBe("100");
+            properties["TotalTaskCount"].ShouldBe("150");
+
+            // Parse the JSON and verify array length
+            using var doc = System.Text.Json.JsonDocument.Parse(properties["Tasks"]);
+            doc.RootElement.GetArrayLength().ShouldBe(100);
+
+            // The top task by execution count should be Task149 (count=150)
+            var first = doc.RootElement[0];
+            first.GetProperty("Name").GetString().ShouldBe("Task149");
+            first.GetProperty("ExecutionsCount").GetInt32().ShouldBe(150);
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_IncludesTaskHostRuntimeWhenNonNull()
+        {
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(100), 5, 1024, "AssemblyTaskFactory", "CLR4") },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+            using var doc = System.Text.Json.JsonDocument.Parse(properties!["Tasks"]);
+            var task = doc.RootElement[0];
+            task.GetProperty("TaskHostRuntime").GetString().ShouldBe("CLR4");
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_ProducesValidJson()
+        {
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(500), 10, 2048, "AssemblyTaskFactory", null) },
+                { new TaskOrTargetTelemetryKey("MyCustomTask", true, true), new TaskExecutionStats(TimeSpan.FromMilliseconds(100), 3, 512, null, null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+            string json = properties!["Tasks"];
+
+            // Should not throw - valid JSON
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            doc.RootElement.ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Array);
+
+            // Verify all expected properties are present
+            var first = doc.RootElement[0];
+            first.GetProperty("Name").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.String);
+            first.GetProperty("ExecutionsCount").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
+            first.GetProperty("TotalMilliseconds").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
+            first.GetProperty("TotalMemoryBytes").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Number);
+            first.GetProperty("IsCustom").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.False);
+            first.GetProperty("IsNuget").ValueKind.ShouldBe(System.Text.Json.JsonValueKind.False);
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_OmitsNullFactoryNameAndTaskHostRuntime()
+        {
+            // Both FactoryName and TaskHostRuntime are null - they should be omitted from JSON,
+            // not emitted as null. This locks in JsonIgnoreCondition.WhenWritingNull behavior.
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(500), 10, 2048, null, null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+            using var doc = System.Text.Json.JsonDocument.Parse(properties!["Tasks"]);
+            var task = doc.RootElement[0];
+
+            task.TryGetProperty("FactoryName", out _).ShouldBeFalse();
+            task.TryGetProperty("TaskHostRuntime", out _).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_EscapesSpecialCharactersInFactoryName()
+        {
+            // Custom factory names are hashed (so they don't contain special chars in practice),
+            // but a built-in factory name with embedded quotes or backslashes must still round-trip
+            // through JSON without producing invalid output.
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(1), 1, 0, "Factory\"with\\special\nchars", null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+
+            // The hashed factory-name pipeline only hashes non-known factories, so this value gets hashed.
+            // What we care about here: the resulting JSON must parse cleanly regardless of input.
+            using var doc = System.Text.Json.JsonDocument.Parse(properties!["Tasks"]);
+            doc.RootElement.GetArrayLength().ShouldBe(1);
+        }
+
+        [Fact]
+        public void GetTasksDetailsProperties_EmitsNumericAndBooleanFieldsAsJsonPrimitives()
+        {
+            // Guards against regressions where numbers/bools could be accidentally serialized as strings
+            // (e.g. via a custom JsonConverter). The SDK consumer parses these as numbers in Kusto.
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                // Use ticks (1 ms = 10_000 ticks) so the fractional millisecond value round-trips on both
+                // net472 (where TimeSpan.FromMilliseconds(double) rounds to whole ms) and net10.
+                { new TaskOrTargetTelemetryKey("Microsoft.Build.Tasks.Copy", false, true), new TaskExecutionStats(TimeSpan.FromTicks(1234000), 7, 8192, "AssemblyTaskFactory", null) },
+            };
+            var data = new WorkerNodeTelemetryData(tasksData, []);
+
+            Dictionary<string, string>? properties = data.GetTasksDetailsProperties();
+
+            properties.ShouldNotBeNull();
+            using var doc = System.Text.Json.JsonDocument.Parse(properties!["Tasks"]);
+            var task = doc.RootElement[0];
+
+            task.GetProperty("ExecutionsCount").GetInt32().ShouldBe(7);
+            task.GetProperty("TotalMemoryBytes").GetInt64().ShouldBe(8192);
+            task.GetProperty("TotalMilliseconds").GetDouble().ShouldBe(123.4);
+            task.GetProperty("IsCustom").GetBoolean().ShouldBeFalse();
+            task.GetProperty("IsNuget").GetBoolean().ShouldBeTrue();
+        }
+
+#if NET
+        [Fact]
+        public void BuildManager_EmitsTasksDetailsTelemetryEvent()
+        {
+            var testProject = """
+                <Project>
+                    <UsingTask TaskName="Task01" TaskFactory="RoslynCodeTaskFactory"
+                               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                        <ParameterGroup />
+                        <Task>
+                            <Code Type="Fragment" Language="cs">Log.LogMessage("Hello, world!");</Code>
+                        </Task>
+                    </UsingTask>
+                    <Target Name="Build">
+                        <Message Text="Hello"/>
+                        <Message Text="World"/>
+                        <CreateItem Include="file.txt">
+                            <Output TaskParameter="Include" ItemName="Items"/>
+                        </CreateItem>
+                        <Task01 />
+                    </Target>
+                </Project>
+                """;
+
+            MockLogger logger = new MockLogger(_output);
+            Helpers.BuildProjectContentUsingBuildManager(
+                testProject,
+                logger,
+                new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Find the tasks details telemetry event
+            var tasksDetailsEvent = logger.TelemetryEvents
+                .FirstOrDefault(e => e.EventName == TasksDetailsTelemetry.TasksDetailsEventName);
+            tasksDetailsEvent.ShouldNotBeNull();
+
+            // Verify top-level properties
+            tasksDetailsEvent.Properties.ShouldContainKey("TaskCount");
+            int.TryParse(tasksDetailsEvent.Properties["TaskCount"], out int taskCount).ShouldBeTrue();
+            taskCount.ShouldBeGreaterThan(0);
+
+            tasksDetailsEvent.Properties.ShouldContainKey("TotalTaskCount");
+            int.TryParse(tasksDetailsEvent.Properties["TotalTaskCount"], out int totalTaskCount).ShouldBeTrue();
+            totalTaskCount.ShouldBeGreaterThan(0);
+
+            // Parse the Tasks JSON array
+            tasksDetailsEvent.Properties.ShouldContainKey("Tasks");
+            string? tasksJson = tasksDetailsEvent.Properties["Tasks"];
+            tasksJson.ShouldNotBeNull();
+            using var doc = System.Text.Json.JsonDocument.Parse(tasksJson!);
+            var tasks = doc.RootElement;
+            tasks.ValueKind.ShouldBe(System.Text.Json.JsonValueKind.Array);
+            tasks.GetArrayLength().ShouldBeGreaterThan(0);
+
+            // Verify Microsoft.Build.Tasks.Message appears with ExecutionsCount of 2
+            System.Text.Json.JsonElement? messageTask = null;
+            System.Text.Json.JsonElement? createItemTask = null;
+            System.Text.Json.JsonElement? customTask = null;
+            string expectedCustomHash = GetHashed("Task01");
+
+            foreach (var task in tasks.EnumerateArray())
+            {
+                string? name = task.GetProperty("Name").GetString();
+                if (name == "Microsoft.Build.Tasks.Message")
+                {
+                    messageTask = task;
+                }
+                else if (name == "Microsoft.Build.Tasks.CreateItem")
+                {
+                    createItemTask = task;
+                }
+                else if (name == expectedCustomHash)
+                {
+                    customTask = task;
+                }
+            }
+
+            // Verify Message task
+            messageTask.ShouldNotBeNull();
+            messageTask!.Value.GetProperty("ExecutionsCount").GetInt32().ShouldBe(2);
+            messageTask.Value.GetProperty("IsCustom").GetBoolean().ShouldBeFalse();
+
+            // Verify CreateItem task
+            createItemTask.ShouldNotBeNull();
+            createItemTask!.Value.GetProperty("ExecutionsCount").GetInt32().ShouldBe(1);
+
+            // Verify custom task (Task01) - name should be hashed, IsCustom = true
+            customTask.ShouldNotBeNull();
+            customTask!.Value.GetProperty("IsCustom").GetBoolean().ShouldBeTrue();
+            customTask.Value.GetProperty("FactoryName").GetString().ShouldBe("RoslynCodeTaskFactory");
+        }
+#endif
 
         /// <summary>
         /// <see cref="MockLoggingService"/> that records all <see cref="ILoggingService.LogBuildEvent"/> calls

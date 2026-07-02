@@ -1185,6 +1185,18 @@ namespace Microsoft.Build.Execution
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
 
+                            // Emit per-task execution details as a separate "build/tasks/details" event.
+                            // The SDK merges these into the aggregated build/tasks telemetry event,
+                            // providing parity with the Activity-based path used by VS telemetry.
+                            if (!Traits.Instance.ExcludeTasksDetailsFromTelemetry)
+                            {
+                                Dictionary<string, string>? tasksDetailsProperties = _telemetryConsumingLogger?.WorkerNodeTelemetryData.GetTasksDetailsProperties();
+                                if (tasksDetailsProperties is not null)
+                                {
+                                    loggingService.LogTelemetry(buildEventContext: null, TasksDetailsTelemetry.TasksDetailsEventName, tasksDetailsProperties);
+                                }
+                            }
+
                             EndBuildTelemetry();
 
                             // Clean telemetry to make it ready for next build submission.
