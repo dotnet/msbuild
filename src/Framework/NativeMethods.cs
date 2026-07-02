@@ -1313,6 +1313,56 @@ internal static class NativeMethods
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
 
+#if NET
+    [DllImport("libc", EntryPoint = "realpath", SetLastError = true)]
+    private static extern IntPtr realpath_native(string path, IntPtr resolved);
+
+    [DllImport("libc", EntryPoint = "free")]
+    private static extern void free_native(IntPtr ptr);
+
+    /// <summary>
+    /// Resolves <paramref name="path"/> to its canonical form via POSIX <c>realpath(3)</c>, following
+    /// symlinks. Returns <c>null</c> on Windows, on null/empty input, or when the call fails.
+    /// Unlike <see cref="System.IO.Path.GetFullPath(string)"/>, this resolves symlinks against the real
+    /// filesystem without mutating process-global state, so it is safe to call from any thread.
+    /// </summary>
+    internal static string RealPath(string path)
+    {
+        if (IsWindows || string.IsNullOrEmpty(path))
+        {
+            return null;
+        }
+
+        IntPtr ptr = IntPtr.Zero;
+        try
+        {
+            ptr = realpath_native(path, IntPtr.Zero);
+            if (ptr == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            return Marshal.PtrToStringUTF8(ptr);
+        }
+        finally
+        {
+            if (ptr != IntPtr.Zero)
+            {
+                // realpath() with NULL second arg returns a malloc()'d buffer; caller must free().
+                // Free it through libc's free() - the same library realpath() allocated it from -
+                // rather than relying on the managed runtime's allocator matching that libc.
+                free_native(ptr);
+            }
+        }
+    }
+#else
+    /// <summary>
+    /// .NET Framework builds of MSBuild only ship for Windows, where POSIX <c>realpath(3)</c> does not
+    /// exist, so this is always a no-op returning <c>null</c>.
+    /// </summary>
+    internal static string RealPath(string path) => null;
+#endif
+
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
     internal static unsafe bool SetThreadErrorMode(int newMode, out int oldMode)

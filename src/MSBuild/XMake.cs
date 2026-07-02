@@ -402,11 +402,21 @@ namespace Microsoft.Build.CommandLine
                 // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
                 // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
                 // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
+                // ProcessProjectSwitch only resolves/validates the project path (it can throw on an ambiguous or
+                // missing project) and reads no further response files, so the flag is set before it runs to keep
+                // the gathered switches on those error paths instead of forcing Execute to re-read response files.
                 switchesFullyGathered = true;
 
+                string projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                    ProcessProjectSwitch(
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                        Directory.GetFiles));
+
+                // Determine multithreaded mode from the fully-parsed switches (which include any
+                // response-file-provided switches) using the same logic as the in-proc build path.
                 multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
-                string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
                 if (commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Help] ||
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
@@ -2378,7 +2388,11 @@ namespace Microsoft.Build.CommandLine
                                                            commandLine);
                     }
 
-                    projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                        ProcessProjectSwitch(
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                            Directory.GetFiles));
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -3390,6 +3404,52 @@ namespace Microsoft.Build.CommandLine
             }
 
             return projectFile;
+        }
+
+        /// <summary>
+        /// On Unix, rebases a relative project path onto <c>$PWD</c> when <c>$PWD</c> physically resolves
+        /// to the same directory as <see cref="Directory.GetCurrentDirectory"/>, keeping
+        /// <c>$(MSBuildProjectFullPath)</c> stable across symlinked working directories.
+        /// No-op on Windows, for absolute paths or paths containing <c>..</c>, when <c>PWD</c> is
+        /// unset/relative/stale, or when change wave 18.9 is disabled.
+        /// </summary>
+        internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
+        {
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9)
+                || NativeMethodsShared.IsWindows
+                || string.IsNullOrEmpty(projectFile)
+                || Path.IsPathRooted(projectFile)
+                || FileUtilities.ContainsParentTraversalSegment(projectFile))
+            {
+                // Bail on ".." segments: lexical normalization can escape the shared physical prefix,
+                // so the logical and physical resolutions can end up pointing at different files.
+                return projectFile;
+            }
+
+            string logicalCurrentDirectory = Environment.GetEnvironmentVariable("PWD");
+            if (string.IsNullOrEmpty(logicalCurrentDirectory) || !Path.IsPathRooted(logicalCurrentDirectory))
+            {
+                return projectFile;
+            }
+
+            // Confirm $PWD physically resolves to the same directory as getcwd(); otherwise PWD is stale.
+            string physicalPwd = NativeMethodsShared.RealPath(logicalCurrentDirectory);
+            string physicalCwd = NativeMethodsShared.RealPath(Directory.GetCurrentDirectory());
+            if (physicalPwd is null || physicalCwd is null
+                || !string.Equals(physicalPwd, physicalCwd, StringComparison.Ordinal))
+            {
+                return projectFile;
+            }
+
+            string rebasedProjectFile = Path.GetFullPath(Path.Combine(logicalCurrentDirectory, projectFile));
+
+            // This runs during command-line parsing before any build logger exists, so we cannot emit a
+            // build message. Trace it via comm tracing (MSBUILDDEBUGCOMM) so the rebase is visible when
+            // diagnosing path discrepancies, including MSBuild Server scenarios where the decision is
+            // made client-side. The interpolated handler is a no-op unless comm tracing is enabled.
+            CommunicationsUtilities.Trace($"ResolveProjectPathAgainstLogicalCurrentDirectory: rebased '{projectFile}' to '{rebasedProjectFile}' via $PWD='{logicalCurrentDirectory}'.");
+
+            return rebasedProjectFile;
         }
 
         private static void ValidateExtensions(string[] projectExtensionsToIgnore)

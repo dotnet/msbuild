@@ -1365,6 +1365,38 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain("[A=1]");
         }
 
+        [UnixOnlyFact]
+        public void ResponseFileInLogicalProjectDirectoryFoundImplicitly()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "repo", "project");
+            string logicalParentDirectory = Path.Combine(root, "links");
+            string linkDirectory = Path.Combine(logicalParentDirectory, "project");
+            Directory.CreateDirectory(realDirectory);
+            Directory.CreateDirectory(logicalParentDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            string content = """
+                <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
+                    <Target Name="t"><Warning Text="[A=$(A)]" /></Target>
+                </Project>
+                """.Cleanup();
+            File.WriteAllText(Path.Combine(realDirectory, "my.proj"), content);
+            File.WriteAllText(Path.Combine(root, "repo", "Directory.Build.rsp"), "/p:A=physical");
+            File.WriteAllText(Path.Combine(logicalParentDirectory, "Directory.Build.rsp"), "/p:A=logical");
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+
+            string output = RunnerUtilities.ExecMSBuild("my.proj", out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
+
+            output.ShouldContain("[A=logical]");
+            output.ShouldNotContain("[A=physical]");
+        }
+
         [Fact]
         public void ResponseFileSwitchesAppearInCommandLine()
         {
@@ -1916,6 +1948,85 @@ namespace Microsoft.Build.UnitTests
             string[] extensionsToIgnore = { ".sln", ".vcproj" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj"); // "Expected test.proj to be only project found"
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryPreservesSymlinkFromPwd()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "real");
+            string linkDirectory = Path.Combine(root, "link");
+            Directory.CreateDirectory(realDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(Path.Combine(linkDirectory, relativeProjectPath));
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryCanBeDisabledByChangeWave()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "real");
+            string linkDirectory = Path.Combine(root, "link");
+            Directory.CreateDirectory(realDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_9.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryWithStalePwdReturnsUnchanged()
+        {
+            string root = _env.CreateFolder().Path;
+            string currentDirectory = Path.Combine(root, "current");
+            string stalePwdDirectory = Path.Combine(root, "elsewhere");
+            Directory.CreateDirectory(currentDirectory);
+            Directory.CreateDirectory(stalePwdDirectory);
+
+            // PWD points at a real directory that is not the current working directory, so it is stale.
+            _env.SetCurrentDirectory(currentDirectory);
+            _env.SetEnvironmentVariable("PWD", stalePwdDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryWithParentTraversalReturnsUnchanged()
+        {
+            string currentDirectory = _env.CreateFolder().Path;
+
+            // PWD matches the current working directory, so the only guard that fires is the ".." segment check.
+            _env.SetCurrentDirectory(currentDirectory);
+            _env.SetEnvironmentVariable("PWD", currentDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("..", "sibling", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
         }
 
         /// <summary>
