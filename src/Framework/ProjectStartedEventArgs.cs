@@ -365,6 +365,7 @@ namespace Microsoft.Build.Framework
                 writer.Write((Int32)parentProjectBuildEventContext.TaskId);
                 writer.Write((Int32)parentProjectBuildEventContext.SubmissionId);
                 writer.Write((Int32)parentProjectBuildEventContext.ProjectInstanceId);
+                writer.Write((Int32)parentProjectBuildEventContext.EvaluationId);
             }
 
             writer.WriteOptionalString(projectFile);
@@ -428,7 +429,8 @@ namespace Microsoft.Build.Framework
                 {
                     int submissionId = reader.ReadInt32();
                     int projectInstanceId = reader.ReadInt32();
-                    parentProjectBuildEventContext = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
+                    int evaluationId = reader.ReadInt32();
+                    parentProjectBuildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
                 }
                 else
                 {
