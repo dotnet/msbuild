@@ -1,0 +1,37 @@
+name: Branch freeze status
+description: >-
+  Posts the `branch-freeze` commit status on a pull request head commit, reflecting
+  whether the pull request's base branch is currently frozen. A branch is considered
+  frozen while an open issue labeled `branch-freeze` contains the marker line
+  `<!-- branch-freeze:<branch> -->` on a line by itself; the remaining issue body is
+  used as the human-readable reason.
+
+inputs:
+  sha:
+    description: Head commit SHA to attach the status to.
+    required: true
+  base-ref:
+    description: The pull request base branch name (e.g. main, vs17.14).
+    required: true
+  repository:
+    description: The owner/repo to operate on.
+    required: false
+    default: ${{ github.repository }}
+  github-token:
+    description: "Token with `statuses: write` and `issues: read` permissions."
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Post branch-freeze status
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPO: ${{ inputs.repository }}
+        SHA: ${{ inputs.sha }}
+        BASE_REF: ${{ inputs.base-ref }}
+      # Inputs are passed as positional args (data), never interpolated into the
+      # command text, so a crafted ref/sha cannot inject shell. The shared script
+      # is the single source of truth, also used by the bulk fan-out loop.
+      run: bash "${{ github.action_path }}/post-freeze-status.sh" "$SHA" "$BASE_REF"

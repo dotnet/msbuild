@@ -1,0 +1,115 @@
+name: Branch freeze command
+
+# `/freeze` and `/unfreeze` slash commands that toggle a branch merge-freeze.
+# Restricted to the @<org>/kitten team. State is stored as an open issue labeled
+# `branch-freeze` (see freeze-command.sh); after toggling, all open PRs on the
+# branch are re-stamped so the required `branch-freeze` status updates at once.
+#
+# Authorization uses a GitHub App token with org `members: read` ONLY for the
+# team-membership check; all repository mutations use the default GITHUB_TOKEN.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read        # checkout the shared scripts
+  issues: write         # create/close/label the tracking issue, react, comment
+  # `statuses: write` and `pull-requests: read` are required only by the reusable
+  # status workflow and are granted on the `fanout` job below (least privilege).
+
+concurrency:
+  # Serialize freeze/unfreeze operations so concurrent commands cannot race on
+  # the tracking issue or the fan-out.
+  group: branch-freeze-command
+  cancel-in-progress: false
+
+jobs:
+  command:
+    name: Process /freeze and /unfreeze
+    # Cheap pre-filter: a freeze command from someone with at least org-member
+    # association. Authoritative kitten-team membership is verified in-job.
+    if: >-
+      (startsWith(github.event.comment.body, '/freeze') || startsWith(github.event.comment.body, '/unfreeze')) &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.cmd.outputs.branch }}
+      changed: ${{ steps.cmd.outputs.changed }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Mint org-scoped app token (members:read)
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BRANCH_FREEZE_APP_ID }}
+          private-key: ${{ secrets.BRANCH_FREEZE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Verify kitten team membership
+        id: auth
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ORG: ${{ github.repository_owner }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          state="$(gh api "orgs/$ORG/teams/kitten/memberships/$ACTOR" --jq '.state' 2>/dev/null || true)"
+          if [ "$state" = "active" ]; then
+            echo "authorized=true" >> "$GITHUB_OUTPUT"
+            echo "@$ACTOR is an active member of @$ORG/kitten."
+          else
+            echo "authorized=false" >> "$GITHUB_OUTPUT"
+            echo "@$ACTOR is NOT an active member of @$ORG/kitten (state: '${state:-none}')."
+          fi
+
+      - name: Deny non-kitten commenter
+        if: steps.auth.outputs.authorized != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ORG: ${{ github.repository_owner }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          gh api -X POST "repos/$REPO/issues/comments/$COMMENT_ID/reactions" -f content="-1" >/dev/null 2>&1 || true
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" \
+            --body "Sorry @$ACTOR — branch freeze/unfreeze is restricted to the @$ORG/kitten team."
+
+      - name: Execute command
+        id: cmd
+        if: steps.auth.outputs.authorized == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.event.comment.user.login }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          # Untrusted comment body is passed as data via env (never interpolated
+          # into the command line) and parsed inside the script.
+          BODY: ${{ github.event.comment.body }}
+        shell: bash
+        run: bash "${GITHUB_WORKSPACE}/.github/actions/branch-freeze-status/freeze-command.sh"
+
+  # Re-stamp every open PR on the affected branch via the reusable status
+  # workflow. Running through that workflow places the fan-out in the same
+  # per-branch `branch-freeze-write-<branch>` concurrency group as the single-PR
+  # stamps, so a freeze fan-out cannot be overwritten by a concurrent stale stamp.
+  fanout:
+    needs: command
+    if: needs.command.outputs.changed == 'true'
+    uses: ./.github/workflows/branch-freeze-status.yml
+    with:
+      base_ref: ${{ needs.command.outputs.branch }}
+    permissions:
+      contents: read
+      statuses: write
+      issues: read
+      pull-requests: read

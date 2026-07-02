@@ -1,0 +1,90 @@
+name: Branch freeze status
+
+# Posts the required `branch-freeze` commit status on pull requests, reflecting
+# whether the PR's base branch is currently frozen (see
+# .github/actions/branch-freeze-status). Three entry points:
+#
+#   * pull_request_target  - stamp the single PR that triggered the event. Works
+#                            for fork PRs because the base-repo GITHUB_TOKEN has
+#                            write access under pull_request_target.
+#   * workflow_dispatch    - manually bulk re-stamp open PRs (used once at rollout
+#                            to seed every open PR with a green status).
+#   * workflow_call        - bulk re-stamp invoked by the /freeze /unfreeze command
+#                            workflow after it toggles freeze state.
+#
+# Security: this workflow runs in the trusted base-repo context. It deliberately
+# never checks out or executes pull-request HEAD content - only the trusted base
+# checkout (which carries the composite action and shared script) is used, and
+# PR-controlled values (sha, base ref) are passed to the script as data args.
+
+on:
+  pull_request_target:
+    # `edited` is included so that retargeting a PR onto a different (possibly
+    # frozen) base branch re-evaluates the status on the same head commit;
+    # otherwise a stale green status could allow a merge into a frozen branch.
+    types: [opened, synchronize, reopened, edited]
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: "Limit stamping to this base branch (blank = all open PRs)."
+        required: false
+        default: ""
+  workflow_call:
+    inputs:
+      base_ref:
+        description: "Limit stamping to this base branch (blank = all open PRs)."
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read       # checkout the local composite action / shared script
+  statuses: write      # post the branch-freeze commit status
+  issues: read         # read the branch-freeze tracking issues
+  pull-requests: read  # enumerate open PRs for bulk stamping
+
+# Per-branch write serialization (set at the JOB level below) guarantees that a
+# freeze/unfreeze fan-out and any concurrent single-PR stamp for the SAME base
+# branch cannot run at once - so whichever runs last reads the freshest freeze
+# state and a stale status can never be the final word for that branch.
+
+jobs:
+  single:
+    name: Stamp pull request
+    # Always run for opened/synchronize/reopened. For `edited`, only re-stamp when
+    # the base branch actually changed (ignore title/body edits).
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      (github.event.action != 'edited' || github.event.changes.base != null)
+    runs-on: ubuntu-latest
+    concurrency:
+      group: branch-freeze-write-${{ github.event.pull_request.base.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/branch-freeze-status
+        with:
+          sha: ${{ github.event.pull_request.head.sha }}
+          base-ref: ${{ github.event.pull_request.base.ref }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  bulk:
+    name: Bulk stamp open pull requests
+    if: github.event_name != 'pull_request_target'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: branch-freeze-write-${{ inputs.base_ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Stamp open pull requests
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BASE_REF: ${{ inputs.base_ref }}
+        shell: bash
+        run: bash "${GITHUB_WORKSPACE}/.github/actions/branch-freeze-status/stamp-open-prs.sh" "$BASE_REF"
