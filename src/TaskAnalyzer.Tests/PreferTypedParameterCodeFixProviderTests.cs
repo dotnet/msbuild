@@ -139,6 +139,76 @@ public class PreferTypedParameterCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_0007_ConvertToInt32_RetypesTaskItemAndUsesValue()
+    {
+        await CreateFixTest(
+            testCode: """
+                using System;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public ITaskItem Item { get; set; } = null!;
+                    public override bool Execute()
+                    {
+                        int value = {|#0:Convert.ToInt32(Item.ItemSpec)|};
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using System;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public ITaskItem<int> Item { get; set; } = null!;
+                    public override bool Execute()
+                    {
+                        int value = Item.Value;
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.PreferTypedTaskItem).WithLocation(0)
+                .WithArguments("Item", "ITaskItem", "int", "")).RunAsync();
+    }
+
+    [Fact]
+    public async Task Fix_0007_GetAbsolutePath_RetypesTaskItemAndUsesValue()
+    {
+        await CreateFixTest(
+            testCode: """
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public ITaskItem Item { get; set; } = null!;
+                    public override bool Execute()
+                    {
+                        var path = {|#0:TaskEnvironment.GetAbsolutePath(Item.ItemSpec)|};
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public ITaskItem<AbsolutePath> Item { get; set; } = null!;
+                    public override bool Execute()
+                    {
+                        var path = Item.Value;
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.PreferTypedTaskItem).WithLocation(0)
+                .WithArguments("Item", "ITaskItem", "AbsolutePath", "")).RunAsync();
+    }
+
+    [Fact]
     public async Task Fix_0007_ArrayForeach_RetypesArrayAndUsesValue()
     {
         await CreateFixTest(

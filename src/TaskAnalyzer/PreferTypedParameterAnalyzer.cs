@@ -532,15 +532,18 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// Determines the parsed target type from a Parse/TryParse/Convert method call.
+        /// Determines the parsed target type from a Parse/Convert method call.
         /// Returns the simple type name suitable for ITaskItem&lt;T&gt; suggestion, or null if not a recognized parse call.
         /// Only returns suggestions for types supported by ValueTypeParser.
         /// </summary>
         private static string? GetParsedTypeFromMethod(IMethodSymbol method)
         {
-            // Static Parse/TryParse on value types: int.Parse, bool.Parse, etc.
+            // Static Parse on value types: int.Parse, bool.Parse, etc.
+            // TryParse is deliberately excluded: it is defensive (bool result + out parameter), the suggested
+            // ITaskItem<T> would change error handling to a bind-time throw, and its multi-argument shape is
+            // never rewritable by the code fix, so flagging it would only produce unfixable false positives.
             // Restrict to types supported by ValueTypeParser to avoid suggesting unsupported types like Guid.
-            if ((method.Name == "Parse" || method.Name == "TryParse") &&
+            if (method.Name == "Parse" &&
                 method.IsStatic &&
                 method.ContainingType is not null &&
                 method.ContainingType.IsValueType)

@@ -367,6 +367,28 @@ public class PreferTypedParameterAnalyzerTests
     }
 
     [Fact]
+    public async Task TryParse_FromItemSpec_ProducesNoDiagnostic()
+    {
+        // TryParse is defensive (bool result + out parameter). Suggesting ITaskItem<int> would change
+        // error handling to a bind-time throw, and the code fix can never rewrite its multi-argument shape,
+        // so the analyzer must not flag it.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem Count { get; set; } = null!;
+                public override bool Execute()
+                {
+                    return int.TryParse(Count.ItemSpec, out _);
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+    }
+
+    [Fact]
     public async Task NewAbsolutePath_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""

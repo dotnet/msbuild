@@ -388,16 +388,28 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     break;
 
                 case InvocationExpressionSyntax invocation when invocation.Expression is MemberAccessExpressionSyntax memberAccess:
-                    // For the path rule only TaskEnvironment.GetAbsolutePath qualifies; for the item rule, a Parse call.
                     string methodName = memberAccess.Name.Identifier.Text;
-                    if (!isItemRule && methodName != "GetAbsolutePath")
+                    if (!isItemRule)
                     {
-                        return false;
+                        // Path rule: only TaskEnvironment.GetAbsolutePath qualifies.
+                        if (methodName != "GetAbsolutePath")
+                        {
+                            return false;
+                        }
                     }
-
-                    if (isItemRule && methodName != "Parse")
+                    else
                     {
-                        return false;
+                        // Item rule: Parse, Convert.ToXxx, or TaskEnvironment.GetAbsolutePath. These mirror the
+                        // conversions the analyzer reports as MSBuildTask0007; the result-type equality check
+                        // below guarantees the rewrite to .Value preserves the statically observed type.
+                        bool isConvertMethod = methodName.StartsWith("To", System.StringComparison.Ordinal) &&
+                            semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is IMethodSymbol convertMethod &&
+                            convertMethod.ContainingType?.ToDisplayString() == "System.Convert";
+
+                        if (methodName != "Parse" && methodName != "GetAbsolutePath" && !isConvertMethod)
+                        {
+                            return false;
+                        }
                     }
 
                     break;
