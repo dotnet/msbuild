@@ -326,11 +326,29 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
-            if (!useTaskFactory
-                && _loadedType?.Type != null
-                && buildComponentHost?.BuildParameters?.MultiThreaded == true)
+            // PROTOTYPE / TESTING ONLY: an environment variable may explicitly override the routing
+            // decision (in-proc / transient / sidecar). See https://github.com/dotnet/msbuild/issues/13738.
+            bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
+            TaskHostRoutingOverride routingOverride = TaskHostRoutingOverride.None;
+            if (isMultiThreaded && _loadedType?.Type != null)
             {
-                if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
+                routingOverride = TaskRouter.GetEnvironmentRoutingOverride(_loadedType.Type);
+            }
+
+            if (!useTaskFactory
+                && isMultiThreaded
+                && _loadedType?.Type != null)
+            {
+                bool needsTaskHost = routingOverride switch
+                {
+                    // An explicit in-proc override asserts the task is safe to run in the thread node.
+                    TaskHostRoutingOverride.InProc => false,
+                    TaskHostRoutingOverride.Sidecar => true,
+                    TaskHostRoutingOverride.Transient => true,
+                    _ => TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type),
+                };
+
+                if (needsTaskHost)
                 {
                     useTaskFactory = true;
                 }
@@ -340,10 +358,11 @@ namespace Microsoft.Build.BackEnd
             // (e.g., NuGet RestoreTask). In MT mode or when MSBuild server is active, these tasks
             // must run in a transient (non-sidecar) TaskHost so static state is cleaned up after
             // each invocation. See https://github.com/dotnet/msbuild/issues/13315
+            // An explicit Transient routing override (prototype/testing) has the same effect.
             bool forceTransientTaskHost = false;
-            if (_loadedType?.Type != null && TaskRouter.RequiresTransientTaskHost(_loadedType.Type))
+            if (_loadedType?.Type != null
+                && (routingOverride == TaskHostRoutingOverride.Transient || TaskRouter.RequiresTransientTaskHost(_loadedType.Type)))
             {
-                bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
                 bool isLongLivedHost = buildComponentHost?.BuildParameters?.IsLongLivedHost == true;
 
                 if (isMultiThreaded || isLongLivedHost)

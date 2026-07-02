@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
 {
@@ -44,6 +45,52 @@ namespace Microsoft.Build.Framework
         /// equivalent to passing -multiThreaded / -mt on the command line.
         /// </summary>
         public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMULTITHREADED") == "1";
+
+        /// <summary>
+        /// PROTOTYPE / TESTING ONLY. Comma- or semicolon-delimited list of task full names
+        /// (Namespace.TaskName) that should be forced to run in-process within the thread node
+        /// in multi-threaded mode, overriding the engine's routing decision.
+        /// See https://github.com/dotnet/msbuild/issues/13738.
+        /// </summary>
+        public readonly ICollection<string> ForceTasksInProcHostList = ParseTaskRoutingList(Environment.GetEnvironmentVariable("MSBUILDFORCETASKSINPROCHOSTLIST"));
+
+        /// <summary>
+        /// PROTOTYPE / TESTING ONLY. Comma- or semicolon-delimited list of task full names
+        /// (Namespace.TaskName) that should be forced to run in a transient (non-reused) TaskHost
+        /// process in multi-threaded mode, overriding the engine's routing decision.
+        /// See https://github.com/dotnet/msbuild/issues/13738.
+        /// </summary>
+        public readonly ICollection<string> ForceTasksTransientHostList = ParseTaskRoutingList(Environment.GetEnvironmentVariable("MSBUILDFORCETASKSTRANSIENTHOSTLIST"));
+
+        /// <summary>
+        /// PROTOTYPE / TESTING ONLY. Comma- or semicolon-delimited list of task full names
+        /// (Namespace.TaskName) that should be forced to run in a reusable (sidecar) TaskHost
+        /// process in multi-threaded mode, overriding the engine's routing decision.
+        /// See https://github.com/dotnet/msbuild/issues/13738.
+        /// </summary>
+        public readonly ICollection<string> ForceTasksSidecarHostList = ParseTaskRoutingList(Environment.GetEnvironmentVariable("MSBUILDFORCETASKSSIDECARHOSTLIST"));
+
+        /// <summary>
+        /// Parses a comma- or semicolon-delimited list of task full names into a case-insensitive set.
+        /// Returns an empty set when the value is null or empty.
+        /// </summary>
+        private static HashSet<string> ParseTaskRoutingList(string? value)
+        {
+            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                foreach (string entry in value!.Split([',', ';'], StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string trimmed = entry.Trim();
+                    if (trimmed.Length > 0)
+                    {
+                        set.Add(trimmed);
+                    }
+                }
+            }
+
+            return set;
+        }
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
