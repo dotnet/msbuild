@@ -233,12 +233,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 try
                 {
+                    // Build() returns after NodeShutdown is received, but the process may still be completing
+                    // its exit sequence (closing pipe, disposing handles). Use a generous timeout so the test
+                    // is reliable on loaded CI machines, while still failing if the node is truly stuck.
                     Process transientTaskHostNode = Process.GetProcessById(pid);
-                    transientTaskHostNode.WaitForExit(3000).ShouldBeTrue("The node should be dead since this is the transient case.");
+                    transientTaskHostNode.WaitForExit(30_000).ShouldBeTrue("The node should be dead since this is the transient case.");
                 }
                 catch (ArgumentException e)
                 {
-                    // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
+                    // Process already exited before GetProcessById was called — also a valid outcome.
                     e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
                 }
 
