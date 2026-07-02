@@ -809,6 +809,19 @@ internal static class NativeMethods
 
     internal static bool MakeSymbolicLink(string newFileName, string existingFileName, ref string errorMessage)
     {
+#if NET
+        try
+        {
+            File.CreateSymbolicLink(newFileName, existingFileName);
+            errorMessage = null;
+            return true;
+        }
+        catch (Exception e)
+        {
+            errorMessage = e.Message;
+            return false;
+        }
+#else
         bool symbolicLinkCreated;
 #if FEATURE_WINDOWSINTEROP
         if (IsWindows)
@@ -831,6 +844,7 @@ internal static class NativeMethods
         }
 
         return symbolicLinkCreated;
+#endif
     }
 
     /// <summary>

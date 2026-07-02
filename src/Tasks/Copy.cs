@@ -335,7 +335,7 @@ namespace Microsoft.Build.Tasks
             // Create hard links if UseHardlinksIfPossible is true
             if (UseHardlinksIfPossible)
             {
-                TryCopyViaLink(HardLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, out hardLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
+                TryCopyViaLink(HardLinkComment, sourceFileState, destinationFileState, out hardLinkCreated, ref errorMessage, (source, destination, ref errorMessage) => NativeMethods.MakeHardLink(destination, source, ref errorMessage, Log));
                 if (!hardLinkCreated)
                 {
                     if (UseSymboliclinksIfPossible)
@@ -354,7 +354,7 @@ namespace Microsoft.Build.Tasks
             // Create symbolic link if UseSymboliclinksIfPossible is true and hard link is not created
             if (!hardLinkCreated && UseSymboliclinksIfPossible)
             {
-                TryCopyViaLink(SymbolicLinkComment, MessageImportance.Normal, sourceFileState, destinationFileState, out symbolicLinkCreated, ref errorMessage, (source, destination, errMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
+                TryCopyViaLink(SymbolicLinkComment, sourceFileState, destinationFileState, out symbolicLinkCreated, ref errorMessage, (source, destination, ref errorMessage) => NativeMethodsShared.MakeSymbolicLink(destination, source, ref errorMessage));
                 if (!symbolicLinkCreated)
                 {
                     if (!NativeMethodsShared.IsWindows)
@@ -397,12 +397,14 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
+        private delegate bool CreateLinkProc(string source, string destination, ref string errorMessage);
+
+        private void TryCopyViaLink(string linkComment, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, CreateLinkProc createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.Path, destinationFileState.Path);
 
-            linkCreated = createLink(sourceFileState.Path, destinationFileState.Path, errorMessage);
+            linkCreated = createLink(sourceFileState.Path, destinationFileState.Path, ref errorMessage);
         }
 
         /// <summary>
