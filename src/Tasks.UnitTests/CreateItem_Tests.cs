@@ -442,5 +442,218 @@ namespace Microsoft.Build.UnitTests
                     Helpers.ExpectedBuildResult.SucceedWithWarning,
                     _testOutput);
         }
+
+        /// <summary>
+        /// Relative wildcard Include resolves against TaskEnvironment.ProjectDirectory, not cwd.
+        /// </summary>
+        [Fact]
+        public void WildcardInclude_ResolvesAgainstProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            // Create a project directory with a file.
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(projectDir, "alpha.txt", "alpha");
+
+            // Create a separate directory that is NOT the project directory and put a different file there.
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(otherDir, "beta.txt", "beta");
+
+            // Set cwd to otherDir so that if the task used cwd, it would find beta.txt instead.
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem("*.txt") },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe("alpha.txt");
+        }
+
+        /// <summary>
+        /// Relative wildcard Exclude resolves against TaskEnvironment.ProjectDirectory, not cwd.
+        /// The *.log exclude should match SampleFile.log in the project directory and filter it out.
+        /// </summary>
+        [Fact]
+        public void WildcardExclude_ResolvesAgainstProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(projectDir, "SampleFile.log", "SampleFile");
+
+            // cwd points elsewhere — Exclude must still resolve *.log against projectDir.
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem("*.log") },
+                Exclude = new ITaskItem[] { new TaskItem("*.log") },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.ShouldBeEmpty();
+        }
+
+        /// <summary>
+        /// RecursiveDir metadata is correctly set when wildcard expansion uses a custom ProjectDirectory.
+        /// </summary>
+        [Fact]
+        public void RecursiveDir_WithCustomProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            string sampleSubdirectory = Path.Combine(projectDir.Path, "SampleSubdirectory");
+            Directory.CreateDirectory(sampleSubdirectory);
+            File.WriteAllText(Path.Combine(sampleSubdirectory, "SampleFile.txt"), "content");
+
+            // Set cwd somewhere else to prove ProjectDirectory is used.
+            TransientTestFolder otherDir = env.CreateFolder(createFolder: true);
+            env.SetCurrentDirectory(otherDir.Path);
+
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem($"**{Path.DirectorySeparatorChar}*.txt") },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+
+            string recursiveDir = t.Include[0].GetMetadata("RecursiveDir");
+            recursiveDir.ShouldBe("SampleSubdirectory" + Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Absolute wildcard patterns are unaffected by ProjectDirectory — the same files are returned
+        /// regardless of what ProjectDirectory is set to.
+        /// </summary>
+        [Fact]
+        public void AbsoluteWildcard_IgnoresProjectDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder targetDir = env.CreateFolder(createFolder: true);
+            env.CreateFile(targetDir, "SampleFile.txt", "content");
+
+            // Use an unrelated ProjectDirectory.
+            TransientTestFolder unrelatedDir = env.CreateFolder(createFolder: true);
+
+            string absolutePattern = Path.Combine(targetDir.Path, "*.txt");
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem(absolutePattern) },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(unrelatedDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            // Absolute pattern returns absolute path.
+            Path.GetFileName(t.Include[0].ItemSpec).ShouldBe("SampleFile.txt");
+        }
+
+        /// <summary>
+        /// When a relative wildcard ItemSpec has a multi-segment fixed directory containing a tilde
+        /// (e.g. "SubDir/ALONGD~1/*.txt"), GetLongPathName inside SplitFileSpec resolves the tilde
+        /// segment against CWD instead of TaskEnvironment.ProjectDirectory. If CWD contains a
+        /// directory whose 8.3 short name matches but whose long name differs, the resolution
+        /// produces the wrong long name, the absolutized path doesn't exist in the project directory,
+        /// and GetFiles returns no results.
+        ///
+        /// This test sets CWD to a directory whose "SubDir" contains a long-named child that maps
+        /// to the same 8.3 short name as the project directory's child. It then verifies that
+        /// CreateItem still finds the file in the project directory — which currently fails.
+        /// </summary>
+        [WindowsOnlyFact(additionalMessage: "8.3 short names are Windows-only.")]
+        public void WildcardWithShortName_ResolvesAgainstProjectDirectory_NotCwd()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
+
+            // Project directory: SubDir/ALongDirectoryNameHere/test.txt
+            TransientTestFolder projectDir = env.CreateFolder(createFolder: true);
+            string projectSubDir = Path.Combine(projectDir.Path, "SubDir");
+            string projectChild = Path.Combine(projectSubDir, "ALongDirectoryNameHere");
+            Directory.CreateDirectory(projectChild);
+            File.WriteAllText(Path.Combine(projectChild, "test.txt"), "project-content");
+
+            // Determine the 8.3 short name for the child directory.
+            string shortChildPath = NativeMethodsShared.GetShortFilePath(projectChild);
+            string shortChildName = Path.GetFileName(shortChildPath);
+
+            // If 8.3 names are disabled on this volume, the short name won't contain '~' — skip.
+            if (!shortChildName.Contains("~"))
+            {
+                _testOutput.WriteLine($"Skipping: 8.3 names appear disabled (short name was '{shortChildName}').");
+                return;
+            }
+
+            // CWD directory: SubDir/ALongDirectoryNameThere/decoy.txt
+            // "ALongDirectoryNameThere" shares the first 6 characters with "ALongDirectoryNameHere",
+            // so in its own parent it also gets short name ALONGD~1.
+            TransientTestFolder cwdDir = env.CreateFolder(createFolder: true);
+            string cwdSubDir = Path.Combine(cwdDir.Path, "SubDir");
+            string cwdChild = Path.Combine(cwdSubDir, "ALongDirectoryNameThere");
+            Directory.CreateDirectory(cwdChild);
+            File.WriteAllText(Path.Combine(cwdChild, "decoy.txt"), "decoy-content");
+
+            // Verify the decoy also gets the same short name.
+            string shortDecoyPath = NativeMethodsShared.GetShortFilePath(cwdChild);
+            string shortDecoyName = Path.GetFileName(shortDecoyPath);
+            shortDecoyName.ShouldBe(shortChildName, customMessage:
+                "Both directories should have the same 8.3 short name since they share the first 6 characters.",
+                options: StringCompareShould.IgnoreCase);
+
+            // Set CWD to cwdDir — GetLongPathName will resolve the short name against this directory.
+            env.SetCurrentDirectory(cwdDir.Path);
+
+            // ItemSpec uses the 8.3 short name in a multi-segment relative path.
+            // SplitFileSpec splits into fixedDir = "SubDir/ALONGD~1/", GetLongPathName resolves
+            // "ALONGD~1" under "SubDir" in CWD → gets "ALongDirectoryNameThere" (WRONG).
+            // GetFileSearchData then absolutizes to "{projectDir}/SubDir/ALongDirectoryNameThere/"
+            // which doesn't exist → returns empty.
+            string itemSpec = Path.Combine("SubDir", shortChildName, "*.txt");
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem(itemSpec) },
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1, $"Expected 1 file from project directory, but got {t.Include.Length}. " +
+                "GetLongPathName likely resolved the short name against CWD instead of ProjectDirectory.");
+            Path.GetFileName(t.Include[0].ItemSpec).ShouldBe("test.txt");
+        }
+
+        /// <summary>
+        /// Pre-expanded literal items (no wildcards) produce identical output regardless of
+        /// ProjectDirectory, Exclude, and AdditionalMetadata settings.
+        /// </summary>
+        [Fact]
+        public void LiteralItems_UnaffectedByProjectDirectory()
+        {
+            CreateItem t = new CreateItem
+            {
+                BuildEngine = new MockEngine(_testOutput),
+                Include = new ITaskItem[] { new TaskItem("A.txt"), new TaskItem("B.txt") },
+                Exclude = new ITaskItem[] { new TaskItem("B.txt") },
+                AdditionalMetadata = new string[] { "Tag=Value" },
+            };
+
+            t.Execute().ShouldBeTrue();
+            t.Include.Length.ShouldBe(1);
+            t.Include[0].ItemSpec.ShouldBe("A.txt");
+            t.Include[0].GetMetadata("Tag").ShouldBe("Value");
+        }
     }
 }
