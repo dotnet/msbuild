@@ -404,29 +404,34 @@ namespace Microsoft.Build.Engine.UnitTests
             // Make sure we start with no server running.
             MSBuildClient.ShutdownServer(CancellationToken.None);
 
-            // -mt forces the server on even though node reuse is disabled.
-            string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success1, false, _output);
-            success1.ShouldBeTrue();
-            int clientPid1 = ParseNumber(output1, "Process ID is ");
-            int serverPid1 = ParseNumber(output1, "TaskRanInPID=");
-            // Register cleanup before any assertion so the server does not leak if an assertion throws.
-            _env.WithTransientProcess(serverPid1);
+            try
+            {
+                // -mt forces the server on even though node reuse is disabled.
+                string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success1, false, _output);
+                success1.ShouldBeTrue();
+                int clientPid1 = ParseNumber(output1, "Process ID is ");
+                int serverPid1 = ParseNumber(output1, "TaskRanInPID=");
+                // Register cleanup before any assertion so the server does not leak if an assertion throws.
+                _env.WithTransientProcess(serverPid1);
 
-            // The build ran in a separate server process: proof the server was engaged despite -nr:false.
-            serverPid1.ShouldNotBe(clientPid1, "Even with node reuse disabled, -mt must run the build in the server node, not the entry process.");
+                // The build ran in a separate server process: proof the server was engaged despite -nr:false.
+                serverPid1.ShouldNotBe(clientPid1, "Even with node reuse disabled, -mt must run the build in the server node, not the entry process.");
 
-            // Because node reuse is disabled, the server must not persist past the build: its process should exit.
-            WaitForProcessExit(serverPid1).ShouldBeTrue($"Server process {serverPid1} should have been shut down after the build when node reuse is disabled.");
+                // Because node reuse is disabled, the server must not persist past the build: its process should exit.
+                WaitForProcessExit(serverPid1).ShouldBeTrue($"Server process {serverPid1} should have been shut down after the build when node reuse is disabled.");
 
-            // A second build cannot reuse the (now gone) server, so it must launch a fresh server process.
-            string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success2, false, _output);
-            success2.ShouldBeTrue();
-            int serverPid2 = ParseNumber(output2, "TaskRanInPID=");
-            _env.WithTransientProcess(serverPid2);
-            serverPid2.ShouldNotBe(serverPid1, "With node reuse disabled, each -mt build should get a fresh, non-persistent server process.");
-
-            // Clean up the second server.
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+                // A second build cannot reuse the (now gone) server, so it must launch a fresh server process.
+                string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success2, false, _output);
+                success2.ShouldBeTrue();
+                int serverPid2 = ParseNumber(output2, "TaskRanInPID=");
+                _env.WithTransientProcess(serverPid2);
+                serverPid2.ShouldNotBe(serverPid1, "With node reuse disabled, each -mt build should get a fresh, non-persistent server process.");
+            }
+            finally
+            {
+                // Ensure any server we spun up is torn down even if an assertion above fails.
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            }
         }
 
         /// <summary>
