@@ -19,6 +19,8 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
+| **MSBuildTask0006** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer typed path parameter over string |
+| **MSBuildTask0007** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -97,6 +99,80 @@ These APIs may cause version conflicts or other issues in a shared task host.
 | `Activator.CreateInstanceFrom` | May cause version conflicts |
 | `AppDomain.Load`, `CreateInstance`, `CreateInstanceFrom` | May cause version conflicts |
 
+### MSBuildTask0006 — Prefer Typed Path Parameters
+
+When a task has a `string` input property and converts it to `AbsolutePath`, `FileInfo`, or `DirectoryInfo` inside the task body, the analyzer suggests changing the property type directly. MSBuild can bind these types automatically.
+
+**Detected patterns:**
+
+```csharp
+// ⚠️ MSBuildTask0006: Consider changing 'InputPath' from 'string' to 'AbsolutePath'
+public class MyTask : Task
+{
+    public string InputPath { get; set; }
+
+    public override bool Execute()
+    {
+        var abs = new AbsolutePath(InputPath);           // flagged
+        var abs2 = TaskEnvironment.GetAbsolutePath(InputPath); // flagged
+        var fi = new FileInfo(InputPath);                 // flagged (suggests FileInfo)
+        var di = new DirectoryInfo(InputPath);            // flagged (suggests DirectoryInfo)
+        return true;
+    }
+}
+```
+
+**Not flagged:** `[Output]` properties, non-public properties, read-only properties, values from method calls or literals.
+
+### MSBuildTask0007 — Prefer `ITaskItem<T>` Over ItemSpec Parsing
+
+When a task has an `ITaskItem` or `ITaskItem[]` input property and parses `ItemSpec` to a value type or path type, the analyzer suggests using `ITaskItem<T>` instead.
+
+**Detected patterns:**
+
+```csharp
+// ⚠️ MSBuildTask0007: Consider changing 'Item' from 'ITaskItem' to 'ITaskItem<int>'
+public class MyTask : Task
+{
+    public ITaskItem Item { get; set; }
+    public ITaskItem[] Items { get; set; }
+
+    public override bool Execute()
+    {
+        int value = int.Parse(Item.ItemSpec);             // flagged
+        bool flag = Convert.ToBoolean(Item.ItemSpec);     // flagged
+        var abs = new AbsolutePath(Item.ItemSpec);        // flagged (suggests ITaskItem<AbsolutePath>)
+
+        foreach (var item in Items)
+        {
+            int v = int.Parse(item.ItemSpec);             // flagged (suggests ITaskItem<int>[])
+        }
+
+        // FileInfo/DirectoryInfo through AbsolutePath intermediary:
+        AbsolutePath absPath = TaskEnvironment.GetAbsolutePath(Item.ItemSpec);
+        var fi = new FileInfo(absPath);                   // flagged (suggests ITaskItem<FileInfo>)
+        var di = new DirectoryInfo(absPath);              // flagged (suggests ITaskItem<DirectoryInfo>)
+
+        // System.IO consumption sites infer the most specific type:
+        File.Delete(TaskEnvironment.GetAbsolutePath(Item.ItemSpec));   // flagged (suggests ITaskItem<FileInfo>)
+        Directory.CreateDirectory(absPath);                            // flagged (suggests ITaskItem<DirectoryInfo>)
+        using var s = new FileStream(Item.ItemSpec, FileMode.Open);    // flagged (suggests ITaskItem<FileInfo>)
+
+        var combined = Path.Combine(Item.ItemSpec, "sub");             // flagged (suggests ITaskItem<AbsolutePath>)
+
+        return true;
+    }
+}
+```
+
+**Biasing toward `FileInfo`/`DirectoryInfo`:** When a rooted path flows into a `System.IO.File.*` call or a `FileStream`/`StreamReader`/`StreamWriter` constructor, the analyzer suggests `ITaskItem<FileInfo>`; when it flows into a `System.IO.Directory.*` call, it suggests `ITaskItem<DirectoryInfo>`. These more specific suggestions replace the generic `ITaskItem<AbsolutePath>` for the same property. Tracing follows both a direct `item.ItemSpec` and an `AbsolutePath` intermediary, including a local that is declared and then assigned once (the common `AbsolutePath? p = null; try { p = GetAbsolutePath(...); }` pattern). If one property is used as both a file and a directory, the analyzer falls back to `ITaskItem<AbsolutePath>`.
+
+**`Path.Combine`:** A task input flowing into *any* argument position of `Path.Combine` is flagged (each distinct property is reported once per call), since the value is being used to build an absolute path.
+
+**Array properties:** When the source property is `ITaskItem[]`, the suggestion correctly formats as `ITaskItem<T>[]` (brackets outside the angle brackets), e.g., `ITaskItem<AbsolutePath>[]`.
+
+**Not flagged:** Metadata access (`item.GetMetadata(...)`), `[Output]` properties, non-task classes.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
@@ -104,9 +180,10 @@ The analyzer determines what to check based on the type declaration:
 | Type | Rules Applied |
 |---|---|
 | Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005 |
-| Class implementing `IMultiThreadableTask` | All five rules |
-| Class with `[MSBuildMultiThreadableTask]` attribute | All five rules |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | All five rules |
+| Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | MSBuildTask0006–MSBuildTask0007 |
+| Class implementing `IMultiThreadableTask` | All seven rules |
+| Class with `[MSBuildMultiThreadableTask]` attribute | All seven rules |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
 The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
@@ -117,6 +194,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0002–MSBuildTask0005** report as **Warning** for all task types.
+- **MSBuildTask0006–MSBuildTask0007** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
 
@@ -131,8 +209,14 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0002: `Environment.CurrentDirectory` | → `TaskEnvironment.ProjectDirectory` |
 | MSBuildTask0002: `Directory.GetCurrentDirectory()` | → `TaskEnvironment.ProjectDirectory` |
 | MSBuildTask0003: `File.Exists(relativePath)` | → `File.Exists(TaskEnvironment.GetAbsolutePath(relativePath))` |
+| MSBuildTask0006: `new AbsolutePath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and replace conversion with direct property usage |
+| MSBuildTask0006: `new FileInfo(FilePath)` / `new DirectoryInfo(DirPath)` | → Retype property to `FileInfo`/`DirectoryInfo` and replace conversion with direct property usage |
+| MSBuildTask0007: `int.Parse(Item.ItemSpec)` | → Retype `Item` to ``ITaskItem<int>`` and replace parse with `Item.Value` |
+| MSBuildTask0007: `new FileInfo(item.ItemSpec)` in `foreach` over `ITaskItem[]` | → Retype source property to ``ITaskItem<FileInfo>[]`` and replace with `item.Value` |
 
 The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
+
+The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated.
 
 ## Compiler Diagnostic Suppressions
 
@@ -223,7 +307,7 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-111 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+135 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
 
 ```
 cd src/TaskAnalyzer.Tests
@@ -238,8 +322,9 @@ dotnet test
 | `MultiThreadableTaskCodeFixProvider.cs` | Code fixes for MSBuildTask0002 and MSBuildTask0003 |
 | `BannedApiDefinitions.cs` | ~50 banned API entries resolved via `DocumentationCommentId` for O(1) symbol lookup |
 | `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
-| `DiagnosticDescriptors.cs` | Five diagnostic descriptors in category `MSBuild.TaskAuthoring` |
-| `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0005` |
+| `DiagnosticDescriptors.cs` | Seven diagnostic descriptors in category `MSBuild.TaskAuthoring` |
+| `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0007` |
+| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006 and MSBuildTask0007 — detects manual path construction, ItemSpec parsing, Path.Combine usage (any argument position), helper method wrapping, FileInfo/DirectoryInfo construction through AbsolutePath intermediaries, and System.IO consumption sites (`File.*`/`Directory.*`/`FileStream`/`StreamReader`/`StreamWriter`) that bias suggestions toward `FileInfo`/`DirectoryInfo` |
 
 ### Performance
 

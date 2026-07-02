@@ -1,0 +1,963 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
+
+using static Microsoft.Build.TaskAuthoring.Analyzer.SharedAnalyzerHelpers;
+
+namespace Microsoft.Build.TaskAuthoring.Analyzer
+{
+    /// <summary>
+    /// Roslyn analyzer that suggests using strongly-typed task parameters instead of
+    /// manual path construction or ItemSpec parsing inside task bodies.
+    ///
+    /// MSBuildTask0006: Prefer AbsolutePath/FileInfo/DirectoryInfo parameters over converting from string.
+    /// MSBuildTask0007: Prefer ITaskItem&lt;T&gt; parameters over parsing ItemSpec manually.
+    /// </summary>
+    [DiagnosticAnalyzer(LanguageNames.CSharp)]
+    public sealed class PreferTypedParameterAnalyzer : DiagnosticAnalyzer
+    {
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
+            ImmutableArray.Create(
+                DiagnosticDescriptors.PreferTypedPathParameter,
+                DiagnosticDescriptors.PreferTypedTaskItem);
+
+        // Structured metadata carried on each diagnostic so deduplication can reason over the
+        // inferred property and suggested type without parsing the human-readable message.
+        private const string PropertyNameKey = "PropertyName";
+        private const string SuggestedTypeKey = "SuggestedType";
+
+        public override void Initialize(AnalysisContext context)
+        {
+            context.EnableConcurrentExecution();
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+            context.RegisterCompilationStartAction(OnCompilationStart);
+        }
+
+        private static void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
+        {
+            // The class must implement ITask to be considered a task at all
+            var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
+            if (iTaskType is null)
+            {
+                return;
+            }
+
+            // Additionally, the task must opt into multithreaded support
+            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
+            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
+            if (iMultiThreadableTaskType is null && multiThreadableTaskAttributeType is null)
+            {
+                return;
+            }
+
+            var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
+            var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
+            var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
+            var outputAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.OutputAttributeFullName);
+            var fileInfoType = compilationContext.Compilation.GetTypeByMetadataName("System.IO.FileInfo");
+            var directoryInfoType = compilationContext.Compilation.GetTypeByMetadataName("System.IO.DirectoryInfo");
+
+            compilationContext.RegisterSymbolStartAction(symbolStartContext =>
+            {
+                var namedType = (INamedTypeSymbol)symbolStartContext.Symbol;
+
+                // Gate 1: Must be an ITask implementation
+                if (!ImplementsInterface(namedType, iTaskType))
+                {
+                    return;
+                }
+
+                // Gate 2: Must have opted into multithreaded support
+                bool isMultiThreadable =
+                    (iMultiThreadableTaskType is not null && ImplementsInterface(namedType, iMultiThreadableTaskType)) ||
+                    (multiThreadableTaskAttributeType is not null && namedType.GetAttributes().Any(
+                        attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, multiThreadableTaskAttributeType)));
+
+                if (!isMultiThreadable)
+                {
+                    return;
+                }
+
+                // Collect string-typed task input properties (candidates for MSBuildTask0006)
+                var stringInputProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+                // Collect ITaskItem/ITaskItem[]-typed task input properties (candidates for MSBuildTask0007)
+                var taskItemInputProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+
+                foreach (var member in namedType.GetMembers().OfType<IPropertySymbol>())
+                {
+                    if (member.DeclaredAccessibility != Accessibility.Public)
+                    {
+                        continue;
+                    }
+
+                    if (member.SetMethod is null || member.SetMethod.DeclaredAccessibility != Accessibility.Public)
+                    {
+                        continue;
+                    }
+
+                    // Exclude [Output] properties — they are set by the task, not MSBuild
+                    if (outputAttributeType is not null && member.GetAttributes().Any(
+                        a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, outputAttributeType)))
+                    {
+                        continue;
+                    }
+
+                    if (member.Type.SpecialType == SpecialType.System_String)
+                    {
+                        stringInputProps.Add(member);
+                    }
+                    else if (iTaskItemType is not null)
+                    {
+                        if (SymbolEqualityComparer.Default.Equals(member.Type, iTaskItemType))
+                        {
+                            taskItemInputProps.Add(member);
+                        }
+                        else if (member.Type is IArrayTypeSymbol arrayType &&
+                                 SymbolEqualityComparer.Default.Equals(arrayType.ElementType, iTaskItemType))
+                        {
+                            taskItemInputProps.Add(member);
+                        }
+                    }
+                }
+
+                if (stringInputProps.Count == 0 && taskItemInputProps.Count == 0)
+                {
+                    return;
+                }
+
+                // Collect diagnostics during operation analysis, then deduplicate in SymbolEndAction.
+                // This allows suppressing AbsolutePath suggestions when a more specific
+                // FileInfo/DirectoryInfo suggestion exists for the same property.
+                var pendingDiagnostics = new ConcurrentBag<Diagnostic>();
+
+                symbolStartContext.RegisterOperationAction(ctx =>
+                {
+                    AnalyzeOperation(ctx, pendingDiagnostics, stringInputProps, taskItemInputProps,
+                        absolutePathType, taskEnvironmentType, iTaskItemType,
+                        fileInfoType, directoryInfoType);
+                },
+                OperationKind.ObjectCreation,
+                OperationKind.Invocation);
+
+                symbolStartContext.RegisterSymbolEndAction(endCtx =>
+                {
+                    // Group diagnostics by property name + rule ID using structured metadata,
+                    // then resolve AbsolutePath vs FileInfo/DirectoryInfo overlaps:
+                    //   - exactly one specific type inferred  => suppress AbsolutePath, keep the specific type
+                    //   - both FileInfo AND DirectoryInfo     => suppress the specifics, fall back to AbsolutePath
+                    var diagnosticsList = pendingDiagnostics.ToList();
+
+                    var suggestedTypesByProp = new Dictionary<string, HashSet<string>>(System.StringComparer.Ordinal);
+                    foreach (var diag in diagnosticsList)
+                    {
+                        if (TryGetDiagnosticKey(diag, out string key, out string suggestedType))
+                        {
+                            if (!suggestedTypesByProp.TryGetValue(key, out var set))
+                            {
+                                set = new HashSet<string>(System.StringComparer.Ordinal);
+                                suggestedTypesByProp[key] = set;
+                            }
+
+                            set.Add(suggestedType);
+                        }
+                    }
+
+                    foreach (var diag in diagnosticsList.OrderBy(d => d.Location.SourceSpan.Start))
+                    {
+                        if (TryGetDiagnosticKey(diag, out string key, out string suggestedType) &&
+                            suggestedTypesByProp.TryGetValue(key, out var set))
+                        {
+                            bool hasFile = set.Contains("FileInfo");
+                            bool hasDir = set.Contains("DirectoryInfo");
+
+                            if (suggestedType == "AbsolutePath")
+                            {
+                                // Suppress when exactly one specific type was inferred (no file/dir conflict).
+                                if (hasFile ^ hasDir)
+                                {
+                                    continue;
+                                }
+                            }
+                            else if ((suggestedType == "FileInfo" || suggestedType == "DirectoryInfo") &&
+                                     hasFile && hasDir && set.Contains("AbsolutePath"))
+                            {
+                                // Conflicting file/dir inference: prefer the AbsolutePath fallback.
+                                continue;
+                            }
+                        }
+
+                        endCtx.ReportDiagnostic(diag);
+                    }
+                });
+            }, SymbolKind.NamedType);
+        }
+
+        private static void AnalyzeOperation(
+            OperationAnalysisContext context,
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
+            HashSet<IPropertySymbol> stringInputProps,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? taskEnvironmentType,
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? fileInfoType,
+            INamedTypeSymbol? directoryInfoType)
+        {
+            switch (context.Operation)
+            {
+                case IObjectCreationOperation creation:
+                    AnalyzeObjectCreation(pendingDiagnostics, creation, stringInputProps, taskItemInputProps,
+                        absolutePathType, taskEnvironmentType, iTaskItemType, fileInfoType, directoryInfoType);
+                    break;
+
+                case IInvocationOperation invocation:
+                    AnalyzeInvocation(pendingDiagnostics, invocation, stringInputProps, taskItemInputProps,
+                        absolutePathType, taskEnvironmentType, iTaskItemType,
+                        fileInfoType, directoryInfoType);
+                    break;
+            }
+        }
+
+        private static bool TryGetDiagnosticKey(Diagnostic diagnostic, out string key, out string suggestedType)
+        {
+            if (diagnostic.Properties.TryGetValue(PropertyNameKey, out var propName) && propName is not null &&
+                diagnostic.Properties.TryGetValue(SuggestedTypeKey, out var type) && type is not null)
+            {
+                key = diagnostic.Id + "|" + propName;
+                suggestedType = type;
+                return true;
+            }
+
+            key = string.Empty;
+            suggestedType = string.Empty;
+            return false;
+        }
+
+        private static Diagnostic CreatePathDiagnostic(Location location, string propertyName, string suggestedType)
+        {
+            var properties = ImmutableDictionary<string, string?>.Empty
+                .Add(PropertyNameKey, propertyName)
+                .Add(SuggestedTypeKey, suggestedType);
+
+            return Diagnostic.Create(
+                DiagnosticDescriptors.PreferTypedPathParameter,
+                location,
+                properties,
+                propertyName, "string", suggestedType);
+        }
+
+        private static Diagnostic CreateItemDiagnostic(Location location, string propertyName, bool isArray, string suggestedType)
+        {
+            var properties = ImmutableDictionary<string, string?>.Empty
+                .Add(PropertyNameKey, propertyName)
+                .Add(SuggestedTypeKey, suggestedType);
+
+            string currentType = isArray ? "ITaskItem[]" : "ITaskItem";
+            return Diagnostic.Create(
+                DiagnosticDescriptors.PreferTypedTaskItem,
+                location,
+                properties,
+                propertyName, currentType, suggestedType, isArray ? "[]" : "");
+        }
+
+        /// <summary>
+        /// Reports an <c>ITaskItem&lt;T&gt;</c> suggestion for every distinct task input property whose
+        /// ItemSpec (directly, or through an AbsolutePath intermediary) flows into a path-like argument of a
+        /// System.IO consumption site (e.g. <c>File.ReadAllLines(...)</c>, <c>Directory.CreateDirectory(...)</c>).
+        /// </summary>
+        private static void ReportPathConsumers(
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
+            ImmutableArray<IArgumentOperation> arguments,
+            Location location,
+            string suggestedType,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType,
+            INamedTypeSymbol? taskEnvironmentType)
+        {
+            var flagged = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+            foreach (var arg in arguments)
+            {
+                if (arg.Parameter is null || !IsPathParameterName(arg.Parameter.Name))
+                {
+                    continue;
+                }
+
+                var itemProp = FindPathConsumerSource(arg.Value, taskItemInputProps, iTaskItemType, taskEnvironmentType);
+                if (itemProp is not null && flagged.Add(itemProp))
+                {
+                    pendingDiagnostics.Add(CreateItemDiagnostic(
+                        location, itemProp.Name, itemProp.Type is IArrayTypeSymbol, suggestedType));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Traces a path argument back to a source ITaskItem property, either directly via
+        /// <c>item.ItemSpec</c> or through an AbsolutePath intermediary.
+        /// </summary>
+        private static IPropertySymbol? FindPathConsumerSource(
+            IOperation argument,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType,
+            INamedTypeSymbol? taskEnvironmentType)
+        {
+            var (direct, _) = FindItemSpecSource(argument, taskItemInputProps, iTaskItemType);
+            if (direct is not null)
+            {
+                return direct;
+            }
+
+            if (taskEnvironmentType is not null)
+            {
+                return FindItemSpecSourceThroughAbsolutePath(argument, taskItemInputProps, iTaskItemType, taskEnvironmentType);
+            }
+
+            return null;
+        }
+
+        private static void AnalyzeObjectCreation(
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
+            IObjectCreationOperation creation,
+            HashSet<IPropertySymbol> stringInputProps,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? taskEnvironmentType,
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? fileInfoType,
+            INamedTypeSymbol? directoryInfoType)
+        {
+            var createdType = creation.Type;
+            if (createdType is null || creation.Arguments.Length == 0)
+            {
+                return;
+            }
+
+            // MSBuildTask0006: new AbsolutePath(stringProp), new FileInfo(stringProp), new DirectoryInfo(stringProp)
+            if (stringInputProps.Count > 0)
+            {
+                string? suggestedType = null;
+                if (absolutePathType is not null && SymbolEqualityComparer.Default.Equals(createdType, absolutePathType))
+                {
+                    suggestedType = "AbsolutePath";
+                }
+                else if (fileInfoType is not null && SymbolEqualityComparer.Default.Equals(createdType, fileInfoType))
+                {
+                    suggestedType = "FileInfo";
+                }
+                else if (directoryInfoType is not null && SymbolEqualityComparer.Default.Equals(createdType, directoryInfoType))
+                {
+                    suggestedType = "DirectoryInfo";
+                }
+
+                if (suggestedType is not null)
+                {
+                    var sourceProp = FindSourceProperty(creation.Arguments[0].Value, stringInputProps);
+                    if (sourceProp is not null)
+                    {
+                        pendingDiagnostics.Add(CreatePathDiagnostic(
+                            creation.Syntax.GetLocation(), sourceProp.Name, suggestedType));
+                        return;
+                    }
+                }
+            }
+
+            // MSBuildTask0007: new AbsolutePath(item.ItemSpec), new FileInfo(item.ItemSpec), new DirectoryInfo(item.ItemSpec)
+            if (taskItemInputProps.Count > 0 && iTaskItemType is not null)
+            {
+                string? suggestedTypeArg = null;
+                if (absolutePathType is not null && SymbolEqualityComparer.Default.Equals(createdType, absolutePathType))
+                {
+                    suggestedTypeArg = "AbsolutePath";
+                }
+                else if (fileInfoType is not null && SymbolEqualityComparer.Default.Equals(createdType, fileInfoType))
+                {
+                    suggestedTypeArg = "FileInfo";
+                }
+                else if (directoryInfoType is not null && SymbolEqualityComparer.Default.Equals(createdType, directoryInfoType))
+                {
+                    suggestedTypeArg = "DirectoryInfo";
+                }
+
+                if (suggestedTypeArg is not null)
+                {
+                    // Direct: new FileInfo(item.ItemSpec) or new AbsolutePath(item.ItemSpec)
+                    var (sourceProp, _) = FindItemSpecSource(creation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
+                    if (sourceProp is not null)
+                    {
+                        pendingDiagnostics.Add(CreateItemDiagnostic(
+                            creation.Syntax.GetLocation(), sourceProp.Name, sourceProp.Type is IArrayTypeSymbol, suggestedTypeArg));
+                        return;
+                    }
+
+                    // Indirect via AbsolutePath: new FileInfo(absLocal) where absLocal = GetAbsolutePath(item.ItemSpec)
+                    if (suggestedTypeArg != "AbsolutePath" && taskEnvironmentType is not null)
+                    {
+                        var itemProp = FindItemSpecSourceThroughAbsolutePath(
+                            creation.Arguments[0].Value, taskItemInputProps, iTaskItemType, taskEnvironmentType);
+                        if (itemProp is not null)
+                        {
+                            pendingDiagnostics.Add(CreateItemDiagnostic(
+                                creation.Syntax.GetLocation(), itemProp.Name, itemProp.Type is IArrayTypeSymbol, suggestedTypeArg));
+                        }
+                    }
+                }
+            }
+
+            // MSBuildTask0007: new FileStream/StreamReader/StreamWriter(item.ItemSpec) consuming an ItemSpec => FileInfo
+            if (taskItemInputProps.Count > 0 && iTaskItemType is not null)
+            {
+                string createdTypeName = createdType.ToDisplayString();
+                if (createdTypeName is "System.IO.FileStream" or "System.IO.StreamReader" or "System.IO.StreamWriter")
+                {
+                    ReportPathConsumers(pendingDiagnostics, creation.Arguments, creation.Syntax.GetLocation(),
+                        "FileInfo", taskItemInputProps, iTaskItemType, taskEnvironmentType);
+                }
+            }
+        }
+
+        private static void AnalyzeInvocation(
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
+            IInvocationOperation invocation,
+            HashSet<IPropertySymbol> stringInputProps,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? taskEnvironmentType,
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? fileInfoType,
+            INamedTypeSymbol? directoryInfoType)
+        {
+            var method = invocation.TargetMethod;
+
+            // MSBuildTask0006: TaskEnvironment.GetAbsolutePath(stringProp)
+            if (stringInputProps.Count > 0 &&
+                taskEnvironmentType is not null &&
+                method.Name == "GetAbsolutePath" &&
+                SymbolEqualityComparer.Default.Equals(method.ContainingType, taskEnvironmentType) &&
+                invocation.Arguments.Length > 0)
+            {
+                var sourceProp = FindSourceProperty(invocation.Arguments[0].Value, stringInputProps);
+                if (sourceProp is not null)
+                {
+                    pendingDiagnostics.Add(CreatePathDiagnostic(
+                        invocation.Syntax.GetLocation(), sourceProp.Name, "AbsolutePath"));
+                    return;
+                }
+            }
+
+            // MSBuildTask0007: Parse methods on ItemSpec
+            if (taskItemInputProps.Count > 0 && iTaskItemType is not null && invocation.Arguments.Length > 0)
+            {
+                // Check for Type.Parse(item.ItemSpec) and Convert.ToType(item.ItemSpec)
+                string? suggestedTypeArg = GetParsedTypeFromMethod(method);
+
+                // Check for TaskEnvironment.GetAbsolutePath(item.ItemSpec)
+                if (suggestedTypeArg is null &&
+                    taskEnvironmentType is not null &&
+                    method.Name == "GetAbsolutePath" &&
+                    SymbolEqualityComparer.Default.Equals(method.ContainingType, taskEnvironmentType))
+                {
+                    suggestedTypeArg = "AbsolutePath";
+                }
+
+                if (suggestedTypeArg is not null)
+                {
+                    var (sourceProp, _) = FindItemSpecSource(invocation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
+                    if (sourceProp is not null)
+                    {
+                        pendingDiagnostics.Add(CreateItemDiagnostic(
+                            invocation.Syntax.GetLocation(), sourceProp.Name, sourceProp.Type is IArrayTypeSymbol, suggestedTypeArg));
+                    }
+                }
+            }
+
+            // MSBuildTask0007: File.X(path)/Directory.X(path) consuming an ItemSpec => FileInfo/DirectoryInfo
+            if (taskItemInputProps.Count > 0 && iTaskItemType is not null && invocation.Arguments.Length > 0)
+            {
+                string? consumerType = method.ContainingType?.ToDisplayString() switch
+                {
+                    "System.IO.File" => "FileInfo",
+                    "System.IO.Directory" => "DirectoryInfo",
+                    _ => null
+                };
+
+                if (consumerType is not null)
+                {
+                    ReportPathConsumers(pendingDiagnostics, invocation.Arguments, invocation.Syntax.GetLocation(),
+                        consumerType, taskItemInputProps, iTaskItemType, taskEnvironmentType);
+                }
+            }
+
+            // Path.Combine(...) — any argument tracing to a task input property indicates that
+            // property is used to build an absolute path, regardless of its position in the call.
+            if (method.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                method.Name == "Combine" &&
+                invocation.Arguments.Length >= 2)
+            {
+                var flaggedStringProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+                var flaggedItemProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+
+                foreach (var arg in invocation.Arguments)
+                {
+                    // MSBuildTask0006: Path.Combine(..., stringProp, ...)
+                    if (stringInputProps.Count > 0)
+                    {
+                        var sourceProp = FindSourceProperty(arg.Value, stringInputProps);
+                        if (sourceProp is not null && flaggedStringProps.Add(sourceProp))
+                        {
+                            pendingDiagnostics.Add(CreatePathDiagnostic(
+                                invocation.Syntax.GetLocation(), sourceProp.Name, "AbsolutePath"));
+                            continue;
+                        }
+                    }
+
+                    // MSBuildTask0007: Path.Combine(..., item.ItemSpec, ...)
+                    if (taskItemInputProps.Count > 0 && iTaskItemType is not null)
+                    {
+                        var (itemProp, _) = FindItemSpecSource(arg.Value, taskItemInputProps, iTaskItemType);
+                        if (itemProp is not null && flaggedItemProps.Add(itemProp))
+                        {
+                            pendingDiagnostics.Add(CreateItemDiagnostic(
+                                invocation.Syntax.GetLocation(), itemProp.Name, itemProp.Type is IArrayTypeSymbol, "AbsolutePath"));
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines the parsed target type from a Parse/TryParse/Convert method call.
+        /// Returns the simple type name suitable for ITaskItem&lt;T&gt; suggestion, or null if not a recognized parse call.
+        /// Only returns suggestions for types supported by ValueTypeParser.
+        /// </summary>
+        private static string? GetParsedTypeFromMethod(IMethodSymbol method)
+        {
+            // Static Parse/TryParse on value types: int.Parse, bool.Parse, etc.
+            // Restrict to types supported by ValueTypeParser to avoid suggesting unsupported types like Guid.
+            if ((method.Name == "Parse" || method.Name == "TryParse") &&
+                method.IsStatic &&
+                method.ContainingType is not null &&
+                method.ContainingType.IsValueType)
+            {
+                string typeName = method.ContainingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+                return s_supportedValueTypeNames.Contains(typeName) ? typeName : null;
+            }
+
+            // Convert.ToXxx methods
+            if (method.IsStatic &&
+                method.ContainingType?.ToDisplayString() == "System.Convert" &&
+                method.Name.StartsWith("To", System.StringComparison.Ordinal))
+            {
+                switch (method.Name)
+                {
+                    case "ToInt32": return "int";
+                    case "ToInt64": return "long";
+                    case "ToBoolean": return "bool";
+                    case "ToDouble": return "double";
+                    case "ToSingle": return "float";
+                    case "ToDecimal": return "decimal";
+                    case "ToByte": return "byte";
+                    case "ToSByte": return "sbyte";
+                    case "ToInt16": return "short";
+                    case "ToUInt16": return "ushort";
+                    case "ToUInt32": return "uint";
+                    case "ToUInt64": return "ulong";
+                    case "ToChar": return "char";
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Value type names (as minimal C# names) that ValueTypeParser supports.
+        /// Only these types should be suggested by the analyzer.
+        /// </summary>
+        private static readonly System.Collections.Generic.HashSet<string> s_supportedValueTypeNames =
+            new(System.StringComparer.Ordinal)
+            {
+                "bool",
+                "char",
+                "byte",
+                "sbyte",
+                "short",
+                "ushort",
+                "int",
+                "uint",
+                "long",
+                "ulong",
+                "float",
+                "double",
+                "decimal",
+            };
+
+        /// <summary>
+        /// Checks if the given operation traces back (with at most one level of local indirection)
+        /// to one of the collected string task input properties.
+        /// </summary>
+        private static IPropertySymbol? FindSourceProperty(
+            IOperation operation,
+            HashSet<IPropertySymbol> candidateProps)
+        {
+            // Unwrap conversions
+            while (operation is IConversionOperation conversion)
+            {
+                operation = conversion.Operand;
+            }
+
+            // Direct property reference: this.MyProp or MyProp
+            if (operation is IPropertyReferenceOperation propRef &&
+                candidateProps.Contains(propRef.Property))
+            {
+                return propRef.Property;
+            }
+
+            // One level of local indirection: var x = this.MyProp; ... use x ...
+            if (operation is ILocalReferenceOperation localRef)
+            {
+                var local = localRef.Local;
+                if (local.DeclaringSyntaxReferences.Length == 1)
+                {
+                    var syntax = local.DeclaringSyntaxReferences[0].GetSyntax();
+                    var semanticModel = operation.SemanticModel;
+                    if (semanticModel is not null)
+                    {
+                        var declOp = semanticModel.GetOperation(syntax);
+                        if (declOp is IVariableDeclaratorOperation declarator &&
+                            declarator.Initializer?.Value is IOperation initValue)
+                        {
+                            return FindSourcePropertyDirect(initValue, candidateProps);
+                        }
+                    }
+                }
+            }
+
+            // One level of method call wrapping: SomeMethod(stringProp)
+            // e.g., FileUtilities.FixFilePath(stringProp)
+            if (operation is IInvocationOperation wrappingCall && wrappingCall.Arguments.Length > 0)
+            {
+                foreach (var arg in wrappingCall.Arguments)
+                {
+                    var result = FindSourcePropertyDirect(arg.Value, candidateProps);
+                    if (result is not null)
+                    {
+                        return result;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Direct property reference check without local indirection (prevents infinite recursion).
+        /// </summary>
+        private static IPropertySymbol? FindSourcePropertyDirect(
+            IOperation operation,
+            HashSet<IPropertySymbol> candidateProps)
+        {
+            while (operation is IConversionOperation conversion)
+            {
+                operation = conversion.Operand;
+            }
+
+            if (operation is IPropertyReferenceOperation propRef &&
+                candidateProps.Contains(propRef.Property))
+            {
+                return propRef.Property;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Checks if the given operation is an access to .ItemSpec on an ITaskItem
+        /// that traces back to one of the collected task input properties.
+        /// Returns the source property and whether it came from an array element.
+        /// Also traces through one level of method call wrapping (e.g., FixFilePath(item.ItemSpec)).
+        /// </summary>
+        private static (IPropertySymbol? sourceProp, bool fromArray) FindItemSpecSource(
+            IOperation operation,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType)
+        {
+            // Unwrap conversions
+            while (operation is IConversionOperation conversion)
+            {
+                operation = conversion.Operand;
+            }
+
+            // One level of local indirection for the ItemSpec value:
+            // var spec = item.ItemSpec; int.Parse(spec);
+            if (operation is ILocalReferenceOperation specLocal)
+            {
+                var local = specLocal.Local;
+                if (local.DeclaringSyntaxReferences.Length == 1)
+                {
+                    var syntax = local.DeclaringSyntaxReferences[0].GetSyntax();
+                    var semanticModel = operation.SemanticModel;
+                    if (semanticModel is not null)
+                    {
+                        var declOp = semanticModel.GetOperation(syntax);
+                        if (declOp is IVariableDeclaratorOperation declarator &&
+                            declarator.Initializer?.Value is IOperation initValue)
+                        {
+                            return FindItemSpecSourceDirect(initValue, taskItemInputProps, iTaskItemType);
+                        }
+                    }
+                }
+
+                return (null, false);
+            }
+
+            // One level of method call wrapping: SomeMethod(item.ItemSpec)
+            // e.g., FileUtilities.FixFilePath(item.ItemSpec)
+            if (operation is IInvocationOperation wrappingCall && wrappingCall.Arguments.Length > 0)
+            {
+                foreach (var arg in wrappingCall.Arguments)
+                {
+                    var result = FindItemSpecSourceDirect(arg.Value, taskItemInputProps, iTaskItemType);
+                    if (result.sourceProp is not null)
+                    {
+                        return result;
+                    }
+                }
+            }
+
+            return FindItemSpecSourceDirect(operation, taskItemInputProps, iTaskItemType);
+        }
+
+        /// <summary>
+        /// Direct check: is this operation item.ItemSpec where item traces to a task property?
+        /// </summary>
+        private static (IPropertySymbol? sourceProp, bool fromArray) FindItemSpecSourceDirect(
+            IOperation operation,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType)
+        {
+            while (operation is IConversionOperation conversion)
+            {
+                operation = conversion.Operand;
+            }
+
+            // Check for .ItemSpec property access
+            if (operation is IPropertyReferenceOperation itemSpecRef &&
+                itemSpecRef.Property.Name == "ItemSpec")
+            {
+                var receiverType = itemSpecRef.Property.ContainingType;
+                if (receiverType is not null &&
+                    (SymbolEqualityComparer.Default.Equals(receiverType, iTaskItemType) ||
+                     ImplementsInterface(receiverType, iTaskItemType)))
+                {
+                    // Check if the receiver traces to a task input property
+                    var receiver = itemSpecRef.Instance;
+                    if (receiver is not null)
+                    {
+                        return FindTaskItemPropertySource(receiver, taskItemInputProps);
+                    }
+                }
+            }
+
+            return (null, false);
+        }
+
+        /// <summary>
+        /// Traces an ITaskItem receiver back to a task input property,
+        /// including through foreach iteration variables and array indexing.
+        /// </summary>
+        private static (IPropertySymbol? sourceProp, bool fromArray) FindTaskItemPropertySource(
+            IOperation operation,
+            HashSet<IPropertySymbol> taskItemInputProps)
+        {
+            while (operation is IConversionOperation conversion)
+            {
+                operation = conversion.Operand;
+            }
+
+            // Direct property reference: this.MyItemProp.ItemSpec
+            if (operation is IPropertyReferenceOperation propRef &&
+                taskItemInputProps.Contains(propRef.Property))
+            {
+                return (propRef.Property, false);
+            }
+
+            // Local variable tracing (foreach variable or simple assignment)
+            if (operation is ILocalReferenceOperation localRef)
+            {
+                var local = localRef.Local;
+                var syntaxRef = local.DeclaringSyntaxReferences.FirstOrDefault();
+                if (syntaxRef is not null)
+                {
+                    var syntax = syntaxRef.GetSyntax();
+                    var semanticModel = operation.SemanticModel;
+                    if (semanticModel is not null)
+                    {
+                        var declOp = semanticModel.GetOperation(syntax);
+
+                        // Simple local assignment: var item = this.MyItemProp;
+                        if (declOp is IVariableDeclaratorOperation declarator &&
+                            declarator.Initializer?.Value is IOperation initValue)
+                        {
+                            return FindTaskItemPropertySource(initValue, taskItemInputProps);
+                        }
+
+                        // Foreach iteration variable: walk up syntax to find the foreach statement
+                        // The variable's declaring syntax may be the identifier token or designation
+                        // within a ForEachStatementSyntax
+                        var current = syntax;
+                        while (current is not null)
+                        {
+                            var op = semanticModel.GetOperation(current);
+                            if (op is IForEachLoopOperation foreachOp)
+                            {
+                                return FindTaskItemPropertySource(foreachOp.Collection, taskItemInputProps);
+                            }
+
+                            current = current.Parent;
+                        }
+                    }
+                }
+            }
+
+            // Array element access: this.MyItems[i].ItemSpec
+            if (operation is IArrayElementReferenceOperation arrayRef)
+            {
+                return FindTaskItemPropertySource(arrayRef.ArrayReference, taskItemInputProps);
+            }
+
+            return (null, false);
+        }
+
+        /// <summary>
+        /// Traces through an AbsolutePath intermediary to find the original ITaskItem source.
+        /// Handles patterns like:
+        ///   AbsolutePath abs = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+        ///   new FileInfo(abs);  // abs traces back to item.ItemSpec
+        /// </summary>
+        private static IPropertySymbol? FindItemSpecSourceThroughAbsolutePath(
+            IOperation operation,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType,
+            INamedTypeSymbol taskEnvironmentType)
+            => FindItemSpecSourceThroughAbsolutePath(operation, taskItemInputProps, iTaskItemType, taskEnvironmentType, visitedLocals: null);
+
+        private static IPropertySymbol? FindItemSpecSourceThroughAbsolutePath(
+            IOperation operation,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType,
+            INamedTypeSymbol taskEnvironmentType,
+            HashSet<ILocalSymbol>? visitedLocals)
+        {
+            // Unwrap conversions
+            while (operation is IConversionOperation conversion)
+            {
+                operation = conversion.Operand;
+            }
+
+            // Direct: new FileInfo(TaskEnvironment.GetAbsolutePath(item.ItemSpec))
+            if (operation is IInvocationOperation invocation &&
+                invocation.TargetMethod.Name == "GetAbsolutePath" &&
+                SymbolEqualityComparer.Default.Equals(invocation.TargetMethod.ContainingType, taskEnvironmentType) &&
+                invocation.Arguments.Length > 0)
+            {
+                var (sourceProp, _) = FindItemSpecSource(invocation.Arguments[0].Value, taskItemInputProps, iTaskItemType);
+                return sourceProp;
+            }
+
+            // Local indirection. Handles both:
+            //   AbsolutePath abs = TaskEnvironment.GetAbsolutePath(item.ItemSpec); ... use abs ...
+            //   AbsolutePath? abs = null; try { abs = TaskEnvironment.GetAbsolutePath(item.ItemSpec); } ... use abs ...
+            if (operation is ILocalReferenceOperation localRef)
+            {
+                var local = localRef.Local;
+
+                // Guard against cycles (e.g. self-referencing assignments).
+                visitedLocals ??= new HashSet<ILocalSymbol>(SymbolEqualityComparer.Default);
+                if (!visitedLocals.Add(local))
+                {
+                    return null;
+                }
+
+                // (a) Declaration initializer: AbsolutePath abs = GetAbsolutePath(item.ItemSpec);
+                if (local.DeclaringSyntaxReferences.Length == 1 && operation.SemanticModel is SemanticModel declModel)
+                {
+                    var syntax = local.DeclaringSyntaxReferences[0].GetSyntax();
+                    if (declModel.GetOperation(syntax) is IVariableDeclaratorOperation declarator &&
+                        declarator.Initializer?.Value is IOperation initValue)
+                    {
+                        var fromInitializer = FindItemSpecSourceThroughAbsolutePath(
+                            initValue, taskItemInputProps, iTaskItemType, taskEnvironmentType, visitedLocals);
+                        if (fromInitializer is not null)
+                        {
+                            return fromInitializer;
+                        }
+                    }
+                }
+
+                // (b) A single unconditional assignment elsewhere in the method body.
+                return FindLocalAssignmentSource(localRef, local, taskItemInputProps, iTaskItemType, taskEnvironmentType, visitedLocals);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds the ITaskItem source for a local that is assigned (rather than initialized) via
+        /// <c>local = TaskEnvironment.GetAbsolutePath(item.ItemSpec)</c>. Returns the source property only
+        /// when every resolvable assignment to the local maps to the same property; otherwise returns null
+        /// to stay conservative in the face of ambiguous data flow.
+        /// </summary>
+        private static IPropertySymbol? FindLocalAssignmentSource(
+            ILocalReferenceOperation localRef,
+            ILocalSymbol local,
+            HashSet<IPropertySymbol> taskItemInputProps,
+            INamedTypeSymbol iTaskItemType,
+            INamedTypeSymbol taskEnvironmentType,
+            HashSet<ILocalSymbol> visitedLocals)
+        {
+            if (localRef.SemanticModel is not SemanticModel semanticModel ||
+                local.ContainingSymbol is not IMethodSymbol method ||
+                method.DeclaringSyntaxReferences.Length != 1)
+            {
+                return null;
+            }
+
+            var methodSyntax = method.DeclaringSyntaxReferences[0].GetSyntax();
+            var methodOperation = semanticModel.GetOperation(methodSyntax);
+            if (methodOperation is null)
+            {
+                return null;
+            }
+
+            IPropertySymbol? found = null;
+            foreach (var descendant in methodOperation.Descendants())
+            {
+                if (descendant is ISimpleAssignmentOperation assignment &&
+                    assignment.Target is ILocalReferenceOperation targetRef &&
+                    SymbolEqualityComparer.Default.Equals(targetRef.Local, local))
+                {
+                    var prop = FindItemSpecSourceThroughAbsolutePath(
+                        assignment.Value, taskItemInputProps, iTaskItemType, taskEnvironmentType, visitedLocals);
+                    if (prop is not null)
+                    {
+                        if (found is not null && !SymbolEqualityComparer.Default.Equals(found, prop))
+                        {
+                            // The local is assigned from more than one distinct property — ambiguous.
+                            return null;
+                        }
+
+                        found = prop;
+                    }
+                }
+            }
+
+            return found;
+        }
+    }
+}

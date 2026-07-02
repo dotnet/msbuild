@@ -7,3 +7,5 @@ MSBuildTask0002 | MSBuild.TaskAuthoring | Warning | APIs that should use TaskEnv
 MSBuildTask0003 | MSBuild.TaskAuthoring | Warning | File APIs that need absolute paths
 MSBuildTask0004 | MSBuild.TaskAuthoring | Warning | APIs that may cause issues in multithreaded task execution
 MSBuildTask0005 | MSBuild.TaskAuthoring | Warning | Transitive unsafe API usage detected in task call chain
+MSBuildTask0006 | MSBuild.TaskAuthoring | Info | Prefer typed path parameter (AbsolutePath/FileInfo/DirectoryInfo) over string (code fix available)
+MSBuildTask0007 | MSBuild.TaskAuthoring | Info | Prefer ITaskItem<T> over manual ItemSpec parsing (code fix available)
