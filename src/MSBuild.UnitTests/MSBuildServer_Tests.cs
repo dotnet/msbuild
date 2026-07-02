@@ -3,10 +3,13 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
+using System.Resources;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.CommandLine;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
@@ -142,6 +145,75 @@ namespace Microsoft.Build.Engine.UnitTests
             newPidOfInitialProcess.ShouldNotBe(pidOfInitialProcess, "Process started by two MSBuild executions should be different.");
             newPidOfInitialProcess.ShouldNotBe(newServerProcessId, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
+        }
+
+        [Fact]
+        public void ServerSpawnAndReuseAreLoggedToBuildLog()
+        {
+            // Ensure a clean slate so the first build below deterministically spawns a new server node.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            // First (cold) build: the server node is spawned for this build. The lifecycle message is
+            // logged at low importance, so it only appears at diagnostic verbosity (and in a binary log).
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int serverPid = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(serverPid);
+            ParseNumber(output, "Process ID is ").ShouldNotBe(serverPid, "The build should have run on a separate server node.");
+
+            string spawnedMessage = GetServerStatusMessage("MSBuildServerNodeSpawned", serverPid);
+            string reusedMessage = GetServerStatusMessage("MSBuildServerNodeReused", serverPid);
+
+            output.ShouldContain(spawnedMessage);
+            output.ShouldNotContain(reusedMessage);
+
+            // Second (warm) build: the running server node is reused.
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Server ID is ").ShouldBe(serverPid, "The second build should reuse the same server node.");
+
+            output.ShouldContain(reusedMessage);
+            output.ShouldNotContain(spawnedMessage);
+        }
+
+        [Fact]
+        public void ServerNotUsedReasonIsLoggedToBuildLog()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            // MSBuild Server is requested via the environment variable, but /nodereuse:false makes the
+            // command line incompatible with the server, so the build falls back to running in-process.
+            // The specific reason (node reuse disabled) must be recorded in the build log.
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} /nodereuse:false -verbosity:diagnostic", out bool success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Process ID is ").ShouldBe(ParseNumber(output, "Server ID is "), "The build should have run in-process, not on a server node.");
+
+            string reason = GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled");
+            string notUsedMessage = GetServerStatusMessage("MSBuildServerNotUsedForBuild", reason);
+
+            output.ShouldContain(notUsedMessage);
+        }
+
+        [Fact]
+        public void ServerLifecycleMessagesAreAbsentForPlainBuild()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+
+            // MSBuild Server is not requested for this invocation, so none of the server lifecycle messages
+            // should be logged even at diagnostic verbosity (and the build runs in-process).
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "");
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out bool success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Process ID is ").ShouldBe(ParseNumber(output, "Server ID is "), "The build should have run in-process, not on a server node.");
+
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", ParseNumber(output, "Server ID is ")));
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeReused", ParseNumber(output, "Server ID is ")));
+            // The not-used template (with its substituted reason) must not appear because the server was never requested.
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNotUsedForBuild", GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled")));
         }
 
         /// <summary>
@@ -605,6 +677,19 @@ namespace Microsoft.Build.Engine.UnitTests
             Regex regex = new(@$"{toFind}(\d+)");
             Match match = regex.Match(searchString);
             return int.Parse(match.Groups[1].Value);
+        }
+
+        /// <summary>
+        /// Resolves an MSBuild Server status message from the MSBuild executable's own resources so the
+        /// assertions stay locale-independent (the child build process and this resource lookup share the
+        /// same culture and resource set).
+        /// </summary>
+        private static string GetServerStatusMessage(string resourceName, params object[] args)
+        {
+            ResourceManager resourceManager = new("MSBuild.Strings", typeof(MSBuildApp).Assembly);
+            string format = resourceManager.GetString(resourceName, CultureInfo.CurrentUICulture)
+                ?? throw new InvalidOperationException($"Resource '{resourceName}' was not found in the MSBuild executable resources.");
+            return args.Length == 0 ? format : string.Format(CultureInfo.CurrentCulture, format, args);
         }
     }
 }
