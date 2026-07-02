@@ -2171,6 +2171,8 @@ namespace Microsoft.Build.Execution
                 throw new BuildAbortedException();
             }
 
+            ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+
             LogMessage(
                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                     "StaticGraphConstructionStarted"));
@@ -2214,6 +2216,37 @@ namespace Microsoft.Build.Execution
                     });
             }
 
+            BuildEventContext? solutionBuildEventContext = null;
+            if (projectGraph.Solution is not null)
+            {
+                string targetNames = submission.BuildRequestData.TargetNames is { Count: > 0 }
+                    ? string.Join(
+                        ";",
+                        submission.BuildRequestData.TargetNames.Where(target => !string.IsNullOrEmpty(target)))
+                    : string.Empty;
+
+                var solutionProjectStartedEvent = new ProjectStartedEventArgs(
+                    ProjectStartedEventArgs.InvalidProjectId,
+                    message: string.Empty,
+                    helpKeyword: string.Empty,
+                    projectFile: projectGraph.Solution.FullPath,
+                    targetNames: targetNames,
+                    properties: null,
+                    items: null,
+                    parentBuildEventContext: BuildEventContext.Invalid,
+                    globalProperties: null,
+                    toolsVersion: null);
+
+                solutionBuildEventContext = loggingService.CreateProjectCacheBuildEventContext(
+                    submission.SubmissionId,
+                    BuildEventContext.InvalidEvaluationId,
+                    BuildEventContext.InvalidProjectInstanceId,
+                    projectGraph.Solution.FullPath);
+
+                solutionProjectStartedEvent.BuildEventContext = solutionBuildEventContext;
+                loggingService.LogProjectStarted(solutionProjectStartedEvent);
+            }
+
             LogMessage(
                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                     "StaticGraphConstructionMetrics",
@@ -2222,37 +2255,53 @@ namespace Microsoft.Build.Execution
                     projectGraph.ConstructionMetrics.EdgeCount));
 
             Dictionary<ProjectGraphNode, BuildResult>? resultsPerNode = null;
+            bool graphBuildSucceeded = false;
 
-            if (submission.BuildRequestData.GraphBuildOptions.Build)
+            try
             {
-                _projectCacheService!.InitializePluginsForGraph(projectGraph, submission.BuildRequestData.TargetNames, _executionCancellationTokenSource!.Token);
 
-                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
-
-                DumpGraph(projectGraph, targetsPerNode);
-
-                // Non-graph builds verify this in RequestBuilder, but for graph builds we need to disambiguate
-                // between entry nodes and other nodes in the graph since only entry nodes should error. Just do
-                // the verification explicitly before the build even starts.
-                foreach (ProjectGraphNode entryPointNode in projectGraph.EntryPointNodes)
+                if (submission.BuildRequestData.GraphBuildOptions.Build)
                 {
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(entryPointNode.ProjectInstance.Targets.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
+                    _projectCacheService!.InitializePluginsForGraph(projectGraph, submission.BuildRequestData.TargetNames, _executionCancellationTokenSource!.Token);
+
+                    IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = projectGraph.GetTargetLists(submission.BuildRequestData.TargetNames);
+
+                    DumpGraph(projectGraph, targetsPerNode);
+
+                    // Non-graph builds verify this in RequestBuilder, but for graph builds we need to disambiguate
+                    // between entry nodes and other nodes in the graph since only entry nodes should error. Just do
+                    // the verification explicitly before the build even starts.
+                    foreach (ProjectGraphNode entryPointNode in projectGraph.EntryPointNodes)
+                    {
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(entryPointNode.ProjectInstance.Targets.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
+                    }
+
+                    resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
+
+                    graphBuildSucceeded = resultsPerNode.Values.All(result => result.OverallResult == BuildResultCode.Success);
+                }
+                else
+                {
+                    DumpGraph(projectGraph);
+
+                    graphBuildSucceeded = true;
                 }
 
-                resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
+                Assumed.Null(submission.BuildResult?.Exception, "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
+
+                // The overall submission is complete, so report it as complete
+                ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(
+                    new GraphBuildResult(
+                        submission.SubmissionId,
+                        new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
             }
-            else
+            finally
             {
-                DumpGraph(projectGraph);
+                if (solutionBuildEventContext is not null)
+                {
+                    loggingService.LogProjectFinished(solutionBuildEventContext, projectGraph.Solution!.FullPath, graphBuildSucceeded);
+                }
             }
-
-            Assumed.Null(submission.BuildResult?.Exception, "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
-
-            // The overall submission is complete, so report it as complete
-            ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(
-                new GraphBuildResult(
-                    submission.SubmissionId,
-                    new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
 
             static void DumpGraph(ProjectGraph graph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>>? targetList = null)
             {
