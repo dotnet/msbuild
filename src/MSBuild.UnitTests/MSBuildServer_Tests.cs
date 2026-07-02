@@ -386,6 +386,7 @@ namespace Microsoft.Build.Engine.UnitTests
             MSBuildClient.ShutdownServer(CancellationToken.None);
         }
 
+#if NET
         /// <summary>
         /// Disabling node reuse (e.g. <c>-nr:false</c>, as <c>dotnet restore</c> does) must NOT prevent a
         /// multithreaded (/mt) build from using the server. Instead of skipping the server, the no-reuse intent is
@@ -445,6 +446,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 return true;
             }
         }
+#endif
 
         [Fact]
         public void PropertyMSBuildStartupDirectoryOnServer()
