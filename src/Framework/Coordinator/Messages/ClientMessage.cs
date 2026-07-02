@@ -22,6 +22,7 @@ internal abstract record ClientMessage
             ClientMessageType.RequestNodes => RequestNodesMessage.ReadPayload(reader),
             ClientMessageType.ReleaseNodes => ReleaseNodesMessage.Instance,
             ClientMessageType.Heartbeat => HeartbeatMessage.Instance,
+            ClientMessageType.JoinGrant => JoinGrantMessage.ReadPayload(reader),
 
             _ => Assumed.Unreachable<ClientMessage>($"Unknown client message type: {messageType}"),
         };

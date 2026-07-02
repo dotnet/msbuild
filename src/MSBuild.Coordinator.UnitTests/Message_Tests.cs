@@ -59,6 +59,14 @@ public class Message_Tests
     }
 
     [Fact]
+    public void JoinGrant_RoundTrips()
+    {
+        Guid grantId = Guid.NewGuid();
+        ClientMessage message = WriteAndReadClientMessage(new JoinGrantMessage(grantId, requestedNodes: 16));
+        message.ShouldBe(new JoinGrantMessage(grantId, requestedNodes: 16));
+    }
+
+    [Fact]
     public void ReleaseNodes_RoundTrips()
     {
         ClientMessage message = WriteAndReadClientMessage(ReleaseNodesMessage.Instance);
@@ -77,6 +85,14 @@ public class Message_Tests
     {
         ServerMessage message = WriteAndReadServerMessage(new NodeGrantMessage(grantedNodes: 4));
         message.ShouldBe(new NodeGrantMessage(4));
+    }
+
+    [Fact]
+    public void NodeGrantWithId_RoundTrips()
+    {
+        Guid grantId = Guid.NewGuid();
+        ServerMessage message = WriteAndReadServerMessage(new NodeGrantWithIdMessage(grantId, grantedNodes: 4));
+        message.ShouldBe(new NodeGrantWithIdMessage(grantId, grantedNodes: 4));
     }
 
     [Fact]
@@ -101,6 +117,7 @@ public class Message_Tests
 
         writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId: 12345, []));
         writer.Write(new RequestNodesMessage(requestedNodes: 8));
+        writer.Write(new JoinGrantMessage(Guid.NewGuid(), requestedNodes: 4));
         writer.Write(HeartbeatMessage.Instance);
         writer.Write(ReleaseNodesMessage.Instance);
 
@@ -109,6 +126,7 @@ public class Message_Tests
 
         reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
         reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
+        reader.ReadClientMessage().ShouldBeOfType<JoinGrantMessage>();
         reader.ReadClientMessage().ShouldBe(HeartbeatMessage.Instance);
         reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }
