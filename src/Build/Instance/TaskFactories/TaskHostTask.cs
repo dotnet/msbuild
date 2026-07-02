@@ -593,8 +593,11 @@ namespace Microsoft.Build.BackEnd
             // If it crashed, or if it failed, it didn't succeed.
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
-            // Update the task environment with the environment changes from the task host execution
-            _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            // Update the task environment with the environment changes from the task host execution.
+            if (taskHostTaskComplete.EnvironmentMode != InvariantPayloadTransfer.Identical)
+            {
+                _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            }
 
             // If it crashed during the execution phase, then we can effectively replicate the inproc task execution
             // behaviour by just throwing here and letting the taskbuilder code take care of it the way it would
