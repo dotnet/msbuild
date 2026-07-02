@@ -1226,7 +1226,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
-        <target state="new">MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</target>
+        <target state="translated">MSB3821: nie można przetworzyć pliku {0}, ponieważ znajduje się on w Internet lub w strefie ograniczonej albo zawiera znacznik sieci Web w pliku. Usuń znacznik sieci Web, jeśli ufasz tym plikom i chcesz je przetworzyć. Postępuj zgodnie z najlepszymi rozwiązaniami dotyczącymi bezpiecznego użycia programu MSBuild — https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
