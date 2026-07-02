@@ -69,6 +69,9 @@ namespace Microsoft.Build.BackEnd.Logging
             }
         }
 
+        /// <inheritdoc />
+        internal override string ProjectFullPath => _projectLoggingContext?.ProjectFullPath;
+
         /// <summary>
         /// Retrieves the target.
         /// </summary>
