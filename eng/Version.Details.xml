@@ -104,6 +104,21 @@
       <Sha>
       </Sha>
     </Dependency>
+    <!-- Roslyn packages consumed compile-time (PrivateAssets="all") by the Microsoft.Build.TaskAuthoring.Analyzer
+         (src/TaskAnalyzer). Necessary for source-build: this allows the live (source-built) Roslyn version to be
+         used, avoiding prebuilt package violations. Non-source builds use the versions pinned below. -->
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp" Version="4.12.0">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha />
+    </Dependency>
+    <Dependency Name="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
+      <Uri>https://github.com/dotnet/roslyn</Uri>
+      <Sha />
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26324.4">
