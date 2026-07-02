@@ -166,6 +166,68 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        /// <summary>
+        /// With a custom encoding, WriteOnlyWhenDifferent must compare using that encoding (BOM included).
+        /// </summary>
+        [Theory]
+        [InlineData("utf-8")]
+        [InlineData("unicode")]
+        [InlineData("utf-32")]
+        public void WriteOnlyWhenDifferentRespectsEncoding(string encoding)
+        {
+            var file = FileUtilities.GetTemporaryFile();
+            try
+            {
+                // Initial write.
+                var a = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+                a.Execute().ShouldBeTrue();
+
+                var writeTime = DateTime.Now.AddHours(-1);
+                File.SetLastWriteTime(file, writeTime);
+
+                // Same contents: write is skipped, timestamp preserved.
+                var a2 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+                a2.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
+
+                // Different contents: file is rewritten.
+                var a3 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Encoding = encoding,
+                    Lines = new ITaskItem[] { new TaskItem("File contents2") }
+                };
+                a3.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBeGreaterThan(writeTime.AddSeconds(1));
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
         [Fact]
         public void RedundantParametersAreLogged()
         {
