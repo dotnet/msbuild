@@ -121,12 +121,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
             pump.PacketReceivedEvent.Set();
             pump.PacketPumpCompleted.Set();
 
-            MSBuildClientExitResult result = client.ProcessSeededPacketsForTests(pump);
+            // Capture stdout so we can assert the dropped-summary symptom directly (and keep the seeded
+            // console write out of the real test-run output).
+            MSBuildClientExitResult result;
+            using StringWriter capturedConsole = new StringWriter();
+            TextWriter originalConsoleOut = Console.Out;
+            Console.SetOut(capturedConsole);
+            try
+            {
+                result = client.ProcessSeededPacketsForTests(pump);
+            }
+            finally
+            {
+                Console.SetOut(originalConsoleOut);
+            }
 
             // The build result must be surfaced, not dropped: the client stays Success and forwards the
             // server's exit type string (which MSBuildClientApp maps to a zero process exit code).
             result.MSBuildClientExitType.ShouldBe(MSBuildClientExitType.Success);
             result.MSBuildAppExitTypeString.ShouldBe("Success");
+
+            // The trailing console write queued right before the result - the "Build succeeded." summary
+            // that #14172 dropped - must also be flushed, not stranded behind the drained result.
+            capturedConsole.ToString().ShouldContain("Build succeeded.");
         }
     }
 }
