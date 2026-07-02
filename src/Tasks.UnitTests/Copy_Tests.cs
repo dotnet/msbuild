@@ -3291,5 +3291,60 @@ namespace Microsoft.Build.UnitTests
                 }
             }
         }
+
+        /// <summary>
+        /// Regression test: MSB3030 when copying a long-path file in a multi-targeting build.
+        /// devenv.exe is not longPathAware; the net472 test host has the same condition.
+        /// </summary>
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Long-path regression only reproduces in a non-longPathAware process; the .NET Core test host is longPathAware.")]
+        public void CopyFileWithLongPath()
+        {
+            if (NativeMethodsShared.HasMaxPath)
+            {
+                Assert.Skip("Requires Windows long path support to be enabled (LongPathsEnabled=1).");
+            }
+
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+
+            // Exact filename from the bug report (%27 = apostrophe in the csproj Include attribute).
+            string longFileName = new string('A', 218) + "' [[]] === .binf";
+            string tempBase = env.CreateFolder().Path;
+            string sourceDir = Path.Combine(tempBase, "Serializer", "Data", "BinaryFormatterSerializedModels");
+            string sourcePath = Path.Combine(sourceDir, longFileName);
+            string destDir = Path.Combine(tempBase, "bin", "Debug", "net48");
+            string destPath = Path.Combine(destDir, "Serializer", "Data", "BinaryFormatterSerializedModels", longFileName);
+
+            Directory.CreateDirectory(sourceDir);
+
+            try
+            {
+                sourcePath.Length.ShouldBeGreaterThan(NativeMethodsShared.MAX_PATH,
+                    $"Test setup error: source path length {sourcePath.Length} should exceed MAX_PATH ({NativeMethodsShared.MAX_PATH}).");
+
+                // Use \\?\ for creation — the net472 test host is not longPathAware.
+                File.WriteAllText(@"\\?\" + sourcePath, "content");
+
+                // Simulate CopyToOutputDirectory=PreserveNewest copying to the net48 output folder.
+                var engine = new MockEngine(true);
+                var task = new Copy
+                {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    BuildEngine = engine,
+                    SourceFiles = [new TaskItem(sourcePath)],
+                    DestinationFiles = [new TaskItem(destPath)],
+                    RetryDelayMilliseconds = 1,
+                };
+
+                task.Execute().ShouldBeTrue(engine.Log);
+                task.WroteAtLeastOneFile.ShouldBeTrue();
+                File.Exists(@"\\?\" + destPath).ShouldBeTrue("Destination file should exist after copying long-path file.");
+            }
+            finally
+            {
+                // Delete the long files via \\?\ so the env's plain-path cleanup can remove the rest.
+                FileUtilities.DeleteNoThrow(@"\\?\" + sourcePath);
+                FileUtilities.DeleteNoThrow(@"\\?\" + destPath);
+            }
+        }
     }
 }

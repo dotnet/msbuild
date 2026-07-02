@@ -289,7 +289,7 @@ namespace Microsoft.Build.Tasks
 
             if (!string.IsNullOrEmpty(destinationFolder) && !_directoriesKnownToExist.ContainsKey(destinationFolder))
             {
-                if (!FileSystems.Default.DirectoryExists(destinationFolder))
+                if (!FileSystems.Default.DirectoryExists(NativeMethodsShared.EnsureExtendedLengthPath(destinationFolder)))
                 {
                     if (FailIfNotIncremental)
                     {
@@ -299,7 +299,7 @@ namespace Microsoft.Build.Tasks
                     else
                     {
                         Log.LogMessage(MessageImportance.Normal, CreatesDirectory, originalDestinationFolder);
-                        Directory.CreateDirectory(destinationFolder);
+                        Directory.CreateDirectory(NativeMethodsShared.EnsureExtendedLengthPath(destinationFolder));
                     }
                 }
 
@@ -325,7 +325,7 @@ namespace Microsoft.Build.Tasks
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {
-                FileUtilities.DeleteNoThrow(destinationFileState.Path);
+                FileUtilities.DeleteNoThrow(NativeMethodsShared.EnsureExtendedLengthPath(destinationFileState.Path));
             }
 
             bool symbolicLinkCreated = false;
@@ -379,7 +379,10 @@ namespace Microsoft.Build.Tasks
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.Path, destinationFileState.Path);
 
-                File.Copy(sourceFileState.Path, destinationFileState.Path, true);
+                File.Copy(
+                    NativeMethodsShared.EnsureExtendedLengthPath(sourceFileState.Path),
+                    NativeMethodsShared.EnsureExtendedLengthPath(destinationFileState.Path),
+                    true);
             }
 
             // If the destinationFile file exists, then make sure it's read-write.
@@ -402,7 +405,10 @@ namespace Microsoft.Build.Tasks
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.Path, destinationFileState.Path);
 
-            linkCreated = createLink(sourceFileState.Path, destinationFileState.Path, errorMessage);
+            linkCreated = createLink(
+                NativeMethodsShared.EnsureExtendedLengthPath(sourceFileState.Path),
+                NativeMethodsShared.EnsureExtendedLengthPath(destinationFileState.Path),
+                errorMessage);
         }
 
         /// <summary>
@@ -420,7 +426,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Path.OriginalValue);
                     }
 
-                    File.SetAttributes(file.Path, FileAttributes.Normal);
+                    File.SetAttributes(NativeMethodsShared.EnsureExtendedLengthPath(file.Path), FileAttributes.Normal);
                     file.Reset();
                 }
             }
