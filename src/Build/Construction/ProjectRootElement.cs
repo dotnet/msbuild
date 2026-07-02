@@ -176,7 +176,7 @@ namespace Microsoft.Build.Construction
 
             IsExplicitlyLoaded = isExplicitlyLoaded;
             ProjectRootElementCache = projectRootElementCache;
-            _directory = NativeMethodsShared.GetCurrentDirectory();
+            _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
             XmlDocumentWithLocation document = LoadDocument(xmlReader, preserveFormatting);
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Construction
             ArgumentNullException.ThrowIfNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
-            _directory = NativeMethodsShared.GetCurrentDirectory();
+            _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
             var document = new XmlDocumentWithLocation();
@@ -258,7 +258,7 @@ namespace Microsoft.Build.Construction
             ArgumentNullException.ThrowIfNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
-            _directory = NativeMethodsShared.GetCurrentDirectory();
+            _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
             ProjectParser.Parse(document, this);

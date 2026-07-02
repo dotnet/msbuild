@@ -318,7 +318,7 @@ namespace Microsoft.Build.BackEnd
                     Assumed.NotNull(_taskHostProvider);
                 }
 
-                string taskLocation = AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly);
+                string taskLocation = _taskType.Type.Assembly.Location;
                 if (string.IsNullOrEmpty(taskLocation))
                 {
                     // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
@@ -628,7 +628,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     exceptionMessageArgs = [_taskType.Type.Name,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        _taskType.Type.Assembly.Location,
                         string.Empty];
                 }
 

@@ -6,13 +6,13 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Win32;
 #if FEATURE_WINDOWSINTEROP
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Windows.Win32;
@@ -600,7 +600,7 @@ internal static class NativeMethods
         {
             if (s_frameworkCurrentPath == null)
             {
-                var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).Assembly);
+                var baseTypeLocation = typeof(string).Assembly.Location;
 
                 s_frameworkCurrentPath =
                     Path.GetDirectoryName(baseTypeLocation)
@@ -1181,34 +1181,6 @@ internal static class NativeMethods
         return myChildren;
     }
 #endif
-
-    /// <summary>
-    /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
-    /// </summary>
-    internal static string GetCurrentDirectory()
-    {
-#if FEATURE_LEGACY_GETCURRENTDIRECTORY
-        if (IsWindows)
-        {
-            using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-            int pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-
-            if (pathLength > buffer.Length)
-            {
-                buffer.EnsureCapacity(pathLength);
-                pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-            }
-
-            if (pathLength != 0)
-            {
-                return buffer.Slice(0, pathLength).ToString();
-            }
-
-            HRESULT.FromLastError().ThrowOnFailure();
-        }
-#endif
-        return Directory.GetCurrentDirectory();
-    }
 
     internal static bool SetCurrentDirectory(string path)
     {

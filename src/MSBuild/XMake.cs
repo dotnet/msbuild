@@ -783,6 +783,7 @@ namespace Microsoft.Build.CommandLine
             // because tasks in the build can (and occasionally do) load MSBuild format files
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
+            string oldMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
             ArgumentException.ThrowIfNullOrEmpty(commandLine);
@@ -1236,6 +1237,8 @@ namespace Microsoft.Build.CommandLine
 
                 NativeMethodsShared.RestoreConsoleMode(s_originalConsoleMode);
 
+                Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldMSBuildLoadMicrosoftTargetsReadOnly);
+
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();
 
@@ -1662,11 +1665,7 @@ namespace Microsoft.Build.CommandLine
 
                     parameters.EnableNodeReuse = enableNodeReuse;
                     parameters.LowPriority = lowPriority;
-#if FEATURE_ASSEMBLY_LOCATION
-                    parameters.NodeExeLocation = Assembly.GetExecutingAssembly().Location;
-#else
                     parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-#endif
                     parameters.MaxNodeCount = cpuCount;
                     parameters.MultiThreaded = multiThreaded;
                     parameters.Loggers = projectCollection.Loggers;
@@ -3827,7 +3826,7 @@ namespace Microsoft.Build.CommandLine
             loggerParameters += ";FORWARDPROJECTCONTEXTEVENTS";
 
             // Gets the currently loaded assembly in which the specified class is defined
-            Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
+            Assembly engineAssembly = typeof(ProjectCollection).Assembly;
             string loggerClassName = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
             string loggerAssemblyName = engineAssembly.GetName().FullName;
             LoggerDescription forwardingLoggerDescription = new LoggerDescription(loggerClassName, loggerAssemblyName, null, loggerParameters, effectiveVerbosity);
@@ -3886,7 +3885,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Gets the currently loaded assembly in which the specified class is defined
-                Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
+                Assembly engineAssembly = typeof(ProjectCollection).Assembly;
                 string loggerClassName = "Microsoft.Build.Logging.DistributedFileLogger";
                 string loggerAssemblyName = engineAssembly.GetName().FullName;
                 // Node the verbosity parameter is not used by the Distributed file logger so changing it here has no effect. It must be changed in the distributed file logger
