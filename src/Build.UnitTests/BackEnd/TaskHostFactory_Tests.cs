@@ -95,13 +95,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         string capturedName = SafeGetProcessField(() => taskHostNode.ProcessName);
                         string capturedStart = SafeGetProcessField(() => taskHostNode.StartTime.ToString("O", CultureInfo.InvariantCulture));
 
-                        // The task host should exit shortly after the build completes. Use a generous
-                        // timeout because slow CI agents have been observed to take up to ~10s for the
-                        // child process to drain stdio and exit.
-                        // TELEMETRY: elapsedMs is logged so a future iteration can tune this back down
-                        // to a tight-but-safe value. If observed elapsed never approaches the timeout,
-                        // shrink TaskHostExitTimeoutMs in a follow-up PR.
-                        const int TaskHostExitTimeoutMs = 15000;
+                        // The task host should exit shortly after the build completes. Use a
+                        // tight-but-safe timeout based on 24h of post-merge telemetry from
+                        // dnceng-public pipeline 75 (net10/x64 p95=44ms max=191ms; net472/x86
+                        // p95=129ms max=136ms across 57 runs on main). 2000ms gives ~10x of the
+                        // worst observed elapsed without bringing back the original 3000ms flake
+                        // that motivated #13828.
+                        // TELEMETRY: elapsedMs is still logged so future regressions are visible
+                        // in the test output without another bump.
+                        const int TaskHostExitTimeoutMs = 5000;
                         Stopwatch sw = Stopwatch.StartNew();
                         bool exited = taskHostNode.WaitForExit(TaskHostExitTimeoutMs);
                         sw.Stop();
