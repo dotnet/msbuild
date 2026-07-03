@@ -426,12 +426,27 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string? Code { get; }
 
+            /// <summary>
+            /// When set, the deferred message is logged as an <see cref="ExtendedBuildMessageEventArgs"/> that
+            /// carries this discriminator (see <see cref="IExtendedBuildEventArgs.ExtendedType"/>) instead of a
+            /// plain message. This lets tooling recognize and structure the payload, while older binary-log
+            /// readers and the console still surface the human-readable <see cref="Text"/> as an ordinary message.
+            /// </summary>
+            public string? ExtendedType { get; }
+
+            /// <summary>
+            /// Optional structured, non-localized metadata accompanying <see cref="ExtendedType"/>.
+            /// </summary>
+            public Dictionary<string, string?>? ExtendedMetadata { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
                 FilePath = null;
                 Code = null;
+                ExtendedType = null;
+                ExtendedMetadata = null;
             }
 
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
@@ -440,6 +455,8 @@ namespace Microsoft.Build.Execution
                 Text = text;
                 FilePath = filePath;
                 Code = null;
+                ExtendedType = null;
+                ExtendedMetadata = null;
             }
 
             /// <summary>
@@ -455,6 +472,27 @@ namespace Microsoft.Build.Execution
                 FilePath = null;
                 Code = code;
                 MessageSeverity = messageSeverity;
+                ExtendedType = null;
+                ExtendedMetadata = null;
+            }
+
+            /// <summary>
+            /// Creates a deferred message that is logged as an <see cref="ExtendedBuildMessageEventArgs"/>. Tooling
+            /// can recognize the payload via <paramref name="extendedType"/> and <paramref name="extendedMetadata"/>,
+            /// while older binary-log readers and the console still surface <paramref name="text"/> as a message.
+            /// </summary>
+            /// <param name="text">The human-readable message text.</param>
+            /// <param name="importance">The importance of the message.</param>
+            /// <param name="extendedType">The extended-event discriminator (see <see cref="IExtendedBuildEventArgs.ExtendedType"/>).</param>
+            /// <param name="extendedMetadata">Optional structured, non-localized metadata.</param>
+            public DeferredBuildMessage(string text, MessageImportance importance, string extendedType, Dictionary<string, string?>? extendedMetadata)
+            {
+                Importance = importance;
+                Text = text;
+                FilePath = null;
+                Code = null;
+                ExtendedType = extendedType;
+                ExtendedMetadata = extendedMetadata;
             }
         }
 
@@ -3381,6 +3419,26 @@ namespace Microsoft.Build.Execution
                         helpKeyword: null,
                         file: BuildEventFileInfo.Empty,
                         message: message.Text);
+                }
+                else if (message.ExtendedType is not null)
+                {
+                    // Log as an extended build message so tooling (e.g. binlog viewers, Terminal Logger) can
+                    // recognize the structured payload via its ExtendedType, while older binary-log readers and
+                    // the console still surface the human-readable text as an ordinary low-importance message.
+                    // On the wire this is a BinaryLogRecordKind.Message record (the Extended data rides along in
+                    // an optional field), so it is forward-compatible with readers that predate the payload.
+                    ExtendedBuildMessageEventArgs extendedMessage = new(
+                        message.ExtendedType,
+                        message.Text,
+                        helpKeyword: null,
+                        senderName: "MSBuild",
+                        message.Importance,
+                        DateTime.UtcNow)
+                    {
+                        BuildEventContext = BuildEventContext.Invalid,
+                        ExtendedMetadata = message.ExtendedMetadata,
+                    };
+                    loggingService.LogBuildEvent(extendedMessage);
                 }
                 else
                 {

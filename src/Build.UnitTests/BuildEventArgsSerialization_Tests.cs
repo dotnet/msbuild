@@ -539,6 +539,70 @@ namespace Microsoft.Build.UnitTests
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
+        /// <summary>
+        /// The MSBuild Server lifecycle messages are logged as <see cref="ExtendedBuildMessageEventArgs"/> so they
+        /// carry structured, tooling-consumable data (kind/processId/reason) while staying forward-compatible:
+        /// on the wire the event is an ordinary <see cref="BinaryLogRecordKind.Message"/> record (the extended
+        /// payload rides in an optional field), so binary-log readers/viewers that predate the payload still
+        /// surface it as a build message, and the console still prints its <see cref="BuildEventArgs.Message"/>.
+        /// The ExtendedType literal here must stay in sync with <c>MSBuildApp.ServerLifecycleExtendedType</c>.
+        /// </summary>
+        [Fact]
+        public void ExtendedBuildMessageEventArgs_ServerLifecycle_IsForwardCompatibleAsMessage()
+        {
+            const string ServerLifecycleExtendedType = "msbuild-server";
+            var args = new ExtendedBuildMessageEventArgs(
+                ServerLifecycleExtendedType,
+                "MSBuild Server node started for this build (process ID 1234).",
+                helpKeyword: null,
+                senderName: "MSBuild",
+                MessageImportance.Low)
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+                ExtendedMetadata = new Dictionary<string, string> { { "kind", "spawned" }, { "processId", "1234" } },
+            };
+
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            // Forward compatibility: the event serializes as a plain Message record kind, not a new/unknown kind,
+            // so old readers do not skip it and instead render the human-readable text as a message. (String and
+            // NameValueList auxiliary records — the latter carrying the extended metadata — precede the event.)
+            memoryStream.Position = 0;
+            using (var rawReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(rawReader, BinaryLogger.FileFormatVersion))
+            {
+                BinaryLogRecordKind eventRecordKind;
+                do
+                {
+                    eventRecordKind = eventsReader.ReadRaw().RecordKind;
+                }
+                while (eventRecordKind is BinaryLogRecordKind.String
+                    or BinaryLogRecordKind.NameValueList
+                    or BinaryLogRecordKind.ProjectImportArchive);
+
+                eventRecordKind.ShouldBe(BinaryLogRecordKind.Message);
+            }
+
+            // A current reader reconstructs the structured event (used by msbuildlog.com to render it nicely),
+            // and it remains a BuildMessageEventArgs so -v:diag and older viewers show it as a message.
+            memoryStream.Position = 0;
+            using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion))
+            {
+                var deserialized = eventsReader.Read().ShouldBeOfType<ExtendedBuildMessageEventArgs>();
+                deserialized.ShouldBeAssignableTo<BuildMessageEventArgs>();
+                deserialized.ExtendedType.ShouldBe(ServerLifecycleExtendedType);
+                deserialized.Message.ShouldBe("MSBuild Server node started for this build (process ID 1234).");
+                deserialized.ExtendedMetadata.ShouldNotBeNull();
+                deserialized.ExtendedMetadata["kind"].ShouldBe("spawned");
+                deserialized.ExtendedMetadata["processId"].ShouldBe("1234");
+            }
+        }
+
         [Fact]
         public void RoundtripAssemblyLoadBuild()
         {
