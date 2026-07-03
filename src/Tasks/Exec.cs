@@ -37,9 +37,6 @@ namespace Microsoft.Build.Tasks
             // here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
             // doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
             // If the cmd file contains non-ANSI characters encoding may change.
-            // Callers whose tool writes output using the system ANSI code page (e.g., MSVC link.exe/cl.exe on
-            // Western locales) can opt into ANSI decoding by setting StdOutEncoding/StdErrEncoding to "ansi".
-            // See: https://github.com/dotnet/msbuild/issues/12290
             _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
             _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
         }
@@ -65,11 +62,8 @@ namespace Microsoft.Build.Tasks
         private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
 
         /// <summary>
-        /// Special value accepted by <see cref="StdOutEncoding"/> and <see cref="StdErrEncoding"/> that selects
-        /// the current system ANSI code page (GetACP) instead of a named encoding. This lets callers decode output
-        /// from native tools (e.g., MSVC link.exe/cl.exe) that write using the ANSI code page rather than the OEM
-        /// code page, without hard-coding a machine-specific code page number.
-        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// Special value for <see cref="StdOutEncoding"/>/<see cref="StdErrEncoding"/> that selects the current system
+        /// ANSI code page (GetACP), e.g. for native tools like link.exe/cl.exe.
         /// </summary>
         private const string AnsiEncodingName = "ansi";
 
@@ -147,11 +141,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
         /// </summary>
-        /// <remarks>
-        /// In addition to named encodings (e.g., "utf-8", "windows-1252"), the special value "ansi" selects the
-        /// current system ANSI code page (GetACP). This is useful for native tools that emit ANSI-encoded output.
-        /// See: https://github.com/dotnet/msbuild/issues/12290
-        /// </remarks>
+        /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
         public string StdOutEncoding
         {
@@ -173,11 +163,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard error stream
         /// </summary>
-        /// <remarks>
-        /// In addition to named encodings (e.g., "utf-8", "windows-1252"), the special value "ansi" selects the
-        /// current system ANSI code page (GetACP). This is useful for native tools that emit ANSI-encoded output.
-        /// See: https://github.com/dotnet/msbuild/issues/12290
-        /// </remarks>
+        /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
         public string StdErrEncoding
         {
@@ -216,9 +202,8 @@ namespace Microsoft.Build.Tasks
         #region Methods
 
         /// <summary>
-        /// Resolves an encoding name supplied to <see cref="StdOutEncoding"/> or <see cref="StdErrEncoding"/>.
-        /// The special value <see cref="AnsiEncodingName"/> ("ansi") maps to the current system ANSI code page
-        /// (GetACP); any other value is resolved through <see cref="Encoding.GetEncoding(string)"/>.
+        /// Resolves an encoding name for <see cref="StdOutEncoding"/>/<see cref="StdErrEncoding"/>. The special value
+        /// "ansi" maps to the current system ANSI code page (GetACP); anything else goes through <see cref="Encoding.GetEncoding(string)"/>.
         /// </summary>
         private static Encoding ParseEncoding(string value) =>
             string.Equals(value, AnsiEncodingName, StringComparison.OrdinalIgnoreCase)

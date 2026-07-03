@@ -43,14 +43,8 @@ namespace Microsoft.Build.Shared
         internal static Encoding CurrentSystemOemEncoding => s_currentOemEncoding ??= GetCurrentSystemEncoding(useOemCodePage: true);
 
         /// <summary>
-        /// Get the current system locale code page, ANSI version (GetACP). ANSI code pages are used
-        /// by most native Windows tools for string resources compiled into their binaries.
-        /// This differs from OEM code pages which are used for console I/O historically.
-        /// For example, on a French Windows system: ANSI = CP1252, OEM = CP850.
-        ///
-        /// Many native build tools (e.g., MSVC v141 link.exe, cl.exe) write output using the ANSI
-        /// code page rather than the OEM code page, so reading their output with ANSI decodes correctly.
-        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// Get the current system locale code page, ANSI version (GetACP). Many native Windows tools
+        /// (e.g., MSVC link.exe, cl.exe) write output using the ANSI code page rather than the OEM code page.
         /// </summary>
         internal static Encoding CurrentSystemAnsiEncoding => s_currentAnsiEncoding ??= GetCurrentSystemEncoding(useOemCodePage: false);
 

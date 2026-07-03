@@ -1194,10 +1194,8 @@ echo line 3"" />
         }
 
         /// <summary>
-        /// Callers can opt into decoding tool output with the current system ANSI code page (GetACP) by setting
-        /// StdOutEncoding/StdErrEncoding to the special value "ansi" (case-insensitive). This fixes garbled output
-        /// from native tools (e.g., MSVC v141 link.exe on French Windows) that write using the ANSI code page.
-        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// Setting StdOutEncoding/StdErrEncoding to the special value "ansi" (case-insensitive) selects the
+        /// current system ANSI code page (GetACP).
         /// </summary>
         [WindowsOnlyTheory]
         [InlineData("ansi")]
