@@ -12,24 +12,6 @@ using Microsoft.Build.Execution;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// How an invariant payload (e.g. the build process environment or the global properties) is transferred
-    /// across a task-host connection. Only meaningful when the negotiated packet version is &gt;= 5.
-    /// </summary>
-    internal enum InvariantPayloadTransfer : byte
-    {
-        /// <summary>
-        /// The full payload is on the wire. Used for the first config on a connection or whenever it changed.
-        /// </summary>
-        Full = 0,
-
-        /// <summary>
-        /// The payload matches the connection's baseline, so it is not on the wire and the receiver reconstructs
-        /// it from that baseline.
-        /// </summary>
-        Identical = 1,
-    }
-
-    /// <summary>
     /// TaskHostConfiguration contains information needed for the task host to
     /// configure itself for to execute a particular task.
     /// </summary>
@@ -53,12 +35,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// How <see cref="_buildProcessEnvironment"/> is represented on the wire.
         /// </summary>
-        private InvariantPayloadTransfer _environmentMode = InvariantPayloadTransfer.Full;
+        private InvariantPayloadTransferMode _environmentMode = InvariantPayloadTransferMode.Full;
 
         /// <summary>
         /// How <see cref="_globalParameters"/> is represented on the wire.
         /// </summary>
-        private InvariantPayloadTransfer _globalParametersMode = InvariantPayloadTransfer.Full;
+        private InvariantPayloadTransferMode _globalParametersMode = InvariantPayloadTransferMode.Full;
 
         /// <summary>
         /// The culture
@@ -297,10 +279,10 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
+        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransferMode"/>.
         /// Set by the sender (per connection) when the negotiated packet version supports environment delta transfer.
         /// </summary>
-        internal InvariantPayloadTransfer EnvironmentMode
+        internal InvariantPayloadTransferMode EnvironmentMode
         {
             [DebuggerStepThrough]
             get { return _environmentMode; }
@@ -310,7 +292,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Fills in the build process environment after deserialization when it was sent as
-        /// <see cref="InvariantPayloadTransfer.Identical"/> (i.e. reconstructed from the connection's baseline).
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> (i.e. reconstructed from the connection's baseline).
         /// </summary>
         internal void SetResolvedBuildProcessEnvironment(Dictionary<string, string> environment)
         {
@@ -318,10 +300,10 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How the global properties are transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
+        /// How the global properties are transferred on the wire. See <see cref="InvariantPayloadTransferMode"/>.
         /// Set by the sender, per connection.
         /// </summary>
-        internal InvariantPayloadTransfer GlobalParametersMode
+        internal InvariantPayloadTransferMode GlobalParametersMode
         {
             [DebuggerStepThrough]
             get { return _globalParametersMode; }
@@ -331,7 +313,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Fills in the global properties after deserialization when they were sent as
-        /// <see cref="InvariantPayloadTransfer.Identical"/> (i.e. reconstructed from the connection's baseline).
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> (i.e. reconstructed from the connection's baseline).
         /// </summary>
         internal void SetResolvedGlobalParameters(Dictionary<string, string> globalParameters)
         {
@@ -596,18 +578,18 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Translates the build process environment. For packet version >= 5 an <see cref="EnvironmentMode"/> marker
-        /// precedes the dictionary; <see cref="InvariantPayloadTransfer.Identical"/> omits it and the receiver rebuilds
-        /// it from the connection baseline via <see cref="SetResolvedBuildProcessEnvironment"/>. Older versions use the
-        /// legacy full-dictionary format.
+        /// Translates the build process environment.
         /// </summary>
         private void TranslateBuildProcessEnvironment(ITranslator translator)
         {
+            // For packet version >= 5 an EnvironmentMode marker precedes the dictionary; InvariantPayloadTransferMode.Identical
+            // omits the dictionary and the receiver rebuilds it from the connection baseline via SetResolvedBuildProcessEnvironment.
+            // Older versions use the legacy full-dictionary format.
             if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
             {
                 translator.TranslateEnum(ref _environmentMode, (int)_environmentMode);
 
-                if (_environmentMode == InvariantPayloadTransfer.Full)
+                if (_environmentMode == InvariantPayloadTransferMode.Full)
                 {
                     translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
                 }
@@ -619,18 +601,18 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Translates the global properties. For packet version >= 5 a <see cref="GlobalParametersMode"/> marker
-        /// precedes the dictionary; <see cref="InvariantPayloadTransfer.Identical"/> omits it and the receiver rebuilds
-        /// it from the connection baseline via <see cref="SetResolvedGlobalParameters"/>. Older versions use the
-        /// legacy full-dictionary format.
+        /// Translates the global properties.
         /// </summary>
         private void TranslateGlobalProperties(ITranslator translator)
         {
+            // For packet version >= 5 a GlobalParametersMode marker precedes the dictionary; InvariantPayloadTransferMode.Identical
+            // omits the dictionary and the receiver rebuilds it from the connection baseline via SetResolvedGlobalParameters.
+            // Older versions use the legacy full-dictionary format.
             if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
             {
                 translator.TranslateEnum(ref _globalParametersMode, (int)_globalParametersMode);
 
-                if (_globalParametersMode == InvariantPayloadTransfer.Full)
+                if (_globalParametersMode == InvariantPayloadTransferMode.Full)
                 {
                     translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
                 }

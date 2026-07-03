@@ -91,9 +91,9 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// How <see cref="_buildProcessEnvironment"/> is represented on the wire. Defaults to
-        /// <see cref="InvariantPayloadTransfer.Full"/> so older (legacy) code paths keep their existing behavior.
+        /// <see cref="InvariantPayloadTransferMode.Full"/> so older (legacy) code paths keep their existing behavior.
         /// </summary>
-        private InvariantPayloadTransfer _environmentMode = InvariantPayloadTransfer.Full;
+        private InvariantPayloadTransferMode _environmentMode = InvariantPayloadTransferMode.Full;
 
 
 #pragma warning disable CS1572 // XML comment has a param tag, but there is no parameter by that name. Justification: xmldoc doesn't seem to interact well with #ifdef of params.
@@ -219,11 +219,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransfer"/>.
+        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransferMode"/>.
         /// Set by the task host when the negotiated packet version supports environment delta transfer and the task
         /// did not change the environment.
         /// </summary>
-        internal InvariantPayloadTransfer EnvironmentMode
+        internal InvariantPayloadTransferMode EnvironmentMode
         {
             [DebuggerStepThrough]
             get { return _environmentMode; }
@@ -277,7 +277,7 @@ namespace Microsoft.Build.BackEnd
             {
                 translator.TranslateEnum(ref _environmentMode, (int)_environmentMode);
 
-                if (_environmentMode == InvariantPayloadTransfer.Full)
+                if (_environmentMode == InvariantPayloadTransferMode.Full)
                 {
                     translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
                 }

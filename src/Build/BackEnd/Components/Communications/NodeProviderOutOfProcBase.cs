@@ -1015,7 +1015,7 @@ namespace Microsoft.Build.BackEnd
             /// A snapshot of the build process environment most recently sent in full to this task-host connection.
             /// Used to avoid re-transmitting the (invariant) environment in every <see cref="TaskHostConfiguration"/>:
             /// when an outgoing configuration's environment matches this baseline it is sent as
-            /// <see cref="InvariantPayloadTransfer.Identical"/> instead.
+            /// <see cref="InvariantPayloadTransferMode.Identical"/> instead.
             /// </summary>
             private Dictionary<string, string> _forwardEnvironmentBaseline;
 
@@ -1023,7 +1023,7 @@ namespace Microsoft.Build.BackEnd
             /// A snapshot of the global properties most recently sent in full to this task-host connection.
             /// Used to avoid re-transmitting the (largely invariant) global properties in every
             /// <see cref="TaskHostConfiguration"/>: when an outgoing configuration's global properties match this
-            /// baseline they are sent as <see cref="InvariantPayloadTransfer.Identical"/> instead. Held as a defensive
+            /// baseline they are sent as <see cref="InvariantPayloadTransferMode.Identical"/> instead. Held as a defensive
             /// copy for robustness and for consistency with <see cref="_forwardEnvironmentBaseline"/>; unlike the
             /// environment, the configuration's global-properties dictionary is freshly allocated per configuration
             /// today, so it is not actually aliased to a mutated-in-place source.
@@ -1186,45 +1186,45 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Marks an outgoing config <see cref="InvariantPayloadTransfer.Identical"/> when its
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its
             /// environment matches the connection baseline (leaving the dictionary off the wire); otherwise sends
             /// it in full and updates the baseline. Only <see cref="DrainPacketQueue"/> calls this, in wire order,
             /// and the child applies the same updates in the same order, so the baselines never drift and no
             /// locking is needed.
             /// </summary>
-            private void PrepareEnvironmentForSend(TaskHostConfiguration configuration)
+            private void MarkEnvironmentTransferMode(TaskHostConfiguration configuration)
             {
                 Dictionary<string, string> environment = configuration.BuildProcessEnvironment;
 
                 if (_forwardEnvironmentBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(environment, _forwardEnvironmentBaseline))
                 {
-                    configuration.EnvironmentMode = InvariantPayloadTransfer.Identical;
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Identical;
                 }
                 else
                 {
-                    configuration.EnvironmentMode = InvariantPayloadTransfer.Full;
+                    configuration.EnvironmentMode = InvariantPayloadTransferMode.Full;
                     _forwardEnvironmentBaseline = new Dictionary<string, string>(environment, CommunicationsUtilities.EnvironmentVariableComparer);
                 }
             }
 
             /// <summary>
-            /// Marks an outgoing config <see cref="InvariantPayloadTransfer.Identical"/> when its global properties
+            /// Marks an outgoing config <see cref="InvariantPayloadTransferMode.Identical"/> when its global properties
             /// match the connection baseline (leaving the dictionary off the wire); otherwise sends them in full and
-            /// snapshots them as the new baseline. As in <see cref="PrepareEnvironmentForSend"/>, only
+            /// snapshots them as the new baseline. As in <see cref="MarkEnvironmentTransferMode"/>, only
             /// <see cref="DrainPacketQueue"/> calls this in wire order, so the baselines never drift and no locking
             /// is needed.
             /// </summary>
-            private void PrepareGlobalParametersForSend(TaskHostConfiguration configuration)
+            private void MarkGlobalParametersTransferMode(TaskHostConfiguration configuration)
             {
                 Dictionary<string, string> globalParameters = configuration.GlobalProperties;
 
                 if (_forwardGlobalParametersBaseline != null && CommunicationsUtilities.AreDictionariesEquivalent(globalParameters, _forwardGlobalParametersBaseline))
                 {
-                    configuration.GlobalParametersMode = InvariantPayloadTransfer.Identical;
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Identical;
                 }
                 else
                 {
-                    configuration.GlobalParametersMode = InvariantPayloadTransfer.Full;
+                    configuration.GlobalParametersMode = InvariantPayloadTransferMode.Full;
                     _forwardGlobalParametersBaseline = globalParameters == null
                         ? null
                         : new Dictionary<string, string>(globalParameters, StringComparer.OrdinalIgnoreCase);
@@ -1281,8 +1281,8 @@ namespace Microsoft.Build.BackEnd
                             // as unchanged on the wire.
                             if (packet is TaskHostConfiguration taskHostConfiguration && writeTranslator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
                             {
-                                context.PrepareEnvironmentForSend(taskHostConfiguration);
-                                context.PrepareGlobalParametersForSend(taskHostConfiguration);
+                                context.MarkEnvironmentTransferMode(taskHostConfiguration);
+                                context.MarkGlobalParametersTransferMode(taskHostConfiguration);
                             }
 
                             packet.Translate(writeTranslator);

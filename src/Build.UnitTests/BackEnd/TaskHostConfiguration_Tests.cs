@@ -715,7 +715,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the environment-delta wire format (packet version >= 5) and the default
-        /// <see cref="InvariantPayloadTransfer.Full"/> mode, the build process environment
+        /// <see cref="InvariantPayloadTransferMode.Full"/> mode, the build process environment
         /// is serialized in full and round-trips correctly.
         /// </summary>
         [Fact]
@@ -728,7 +728,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             };
 
             TaskHostConfiguration config = CreateConfigurationWithEnvironment(environment);
-            config.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Full);
+            config.EnvironmentMode.ShouldBe(InvariantPayloadTransferMode.Full);
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -739,7 +739,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
-            deserializedConfig.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Full);
+            deserializedConfig.EnvironmentMode.ShouldBe(InvariantPayloadTransferMode.Full);
             deserializedConfig.BuildProcessEnvironment.ShouldNotBeNull();
             deserializedConfig.BuildProcessEnvironment.Count.ShouldBe(environment.Count);
             deserializedConfig.BuildProcessEnvironment["PATH"].ShouldBe(environment["PATH"]);
@@ -757,7 +757,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the environment-delta wire format (packet version >= 5) and
-        /// <see cref="InvariantPayloadTransfer.Identical"/> mode, the build process environment
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> mode, the build process environment
         /// dictionary is omitted from the wire (saving bytes) and the receiver reconstructs it from the
         /// connection's baseline via <see cref="TaskHostConfiguration.SetResolvedBuildProcessEnvironment"/>.
         /// </summary>
@@ -778,7 +778,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             long fullLength = TranslationHelpers.GetWriteStreamLength();
 
             TaskHostConfiguration identicalConfig = CreateConfigurationWithEnvironment(environment);
-            identicalConfig.EnvironmentMode = InvariantPayloadTransfer.Identical;
+            identicalConfig.EnvironmentMode = InvariantPayloadTransferMode.Identical;
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -790,7 +790,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
             // The dictionary was not on the wire, so it is null until reconstructed from the baseline.
-            deserializedConfig.EnvironmentMode.ShouldBe(InvariantPayloadTransfer.Identical);
+            deserializedConfig.EnvironmentMode.ShouldBe(InvariantPayloadTransferMode.Identical);
             deserializedConfig.BuildProcessEnvironment.ShouldBeNull();
 
             deserializedConfig.SetResolvedBuildProcessEnvironment(environment);
@@ -799,7 +799,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the global-properties delta wire format (packet version >= 5) and the default
-        /// <see cref="InvariantPayloadTransfer.Full"/> mode, the whole global-properties dictionary
+        /// <see cref="InvariantPayloadTransferMode.Full"/> mode, the whole global-properties dictionary
         /// (including CurrentSolutionConfigurationContents) is serialized and round-trips correctly.
         /// </summary>
         [Fact]
@@ -813,7 +813,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             };
 
             TaskHostConfiguration config = CreateConfigurationWithGlobalProperties(globalProperties);
-            config.GlobalParametersMode.ShouldBe(InvariantPayloadTransfer.Full);
+            config.GlobalParametersMode.ShouldBe(InvariantPayloadTransferMode.Full);
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -823,7 +823,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             readTranslator.NegotiatedPacketVersion = 5;
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
-            deserializedConfig.GlobalParametersMode.ShouldBe(InvariantPayloadTransfer.Full);
+            deserializedConfig.GlobalParametersMode.ShouldBe(InvariantPayloadTransferMode.Full);
             deserializedConfig.GlobalProperties.ShouldNotBeNull();
             deserializedConfig.GlobalProperties.Count.ShouldBe(globalProperties.Count);
             deserializedConfig.GlobalProperties["Configuration"].ShouldBe("Debug");
@@ -832,7 +832,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// With the global-properties delta wire format (packet version >= 5) and
-        /// <see cref="InvariantPayloadTransfer.Identical"/> mode, the whole global-properties dictionary is
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> mode, the whole global-properties dictionary is
         /// omitted from the wire (saving bytes) and the receiver reconstructs it from the connection's baseline
         /// via <see cref="TaskHostConfiguration.SetResolvedGlobalParameters"/>.
         /// </summary>
@@ -856,7 +856,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             long fullLength = TranslationHelpers.GetWriteStreamLength();
 
             TaskHostConfiguration identicalConfig = CreateConfigurationWithGlobalProperties(globalProperties);
-            identicalConfig.GlobalParametersMode = InvariantPayloadTransfer.Identical;
+            identicalConfig.GlobalParametersMode = InvariantPayloadTransferMode.Identical;
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             writeTranslator.NegotiatedPacketVersion = 5;
@@ -868,7 +868,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskHostConfiguration deserializedConfig = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
             // The dictionary was not on the wire, so it is null until reconstructed from the baseline.
-            deserializedConfig.GlobalParametersMode.ShouldBe(InvariantPayloadTransfer.Identical);
+            deserializedConfig.GlobalParametersMode.ShouldBe(InvariantPayloadTransferMode.Identical);
             deserializedConfig.GlobalProperties.ShouldBeNull();
 
             deserializedConfig.SetResolvedGlobalParameters(globalProperties);

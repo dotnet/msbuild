@@ -393,6 +393,85 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// When a task running in the out-of-proc task host mutates the environment (here, by setting a variable),
+        /// that changed environment must be sent in <see cref="InvariantPayloadTransferMode.Full"/> mode -- both back
+        /// to the parent on task completion and forward to the next task's configuration -- rather than being
+        /// deduplicated as "identical". Full mode makes the mutation the new per-connection baseline, so it
+        /// propagates to subsequent tasks. This verifies the mutation reaches a later task, and that once it has
+        /// become the baseline it also reaches a third task whose configuration is sent as the deduped "identical"
+        /// marker (reconstructed from the updated baseline). If the mutated environment had instead been marked
+        /// "identical", the readers would reconstruct a stale environment and observe an empty value.
+        /// </summary>
+        [Fact]
+        public void TaskHostSendsFullEnvironmentWhenTaskMutatesItAndLaterTasksObserveChange()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string variableName = "MSBUILD_ENV_MUTATE_TEST_" + Guid.NewGuid().ToString("N");
+            const string changedValue = "set_by_first_task";
+
+            // The variable is deliberately absent from the build environment, so the only way a later task can observe
+            // it is if the first task's mutation is propagated in full through the parent to the subsequent tasks.
+            Environment.GetEnvironmentVariable(variableName).ShouldBeNull();
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(SetEnvironmentVariableTask)}"" AssemblyFile=""{typeof(SetEnvironmentVariableTask).Assembly.Location}"" />
+    <UsingTask TaskName=""{nameof(ReadEnvironmentVariableTask)}"" AssemblyFile=""{typeof(ReadEnvironmentVariableTask).Assembly.Location}"" />
+    <Target Name='Build'>
+        <{nameof(SetEnvironmentVariableTask)} VariableName=""{variableName}"" Value=""{changedValue}"">
+            <Output PropertyName=""SetPid"" TaskParameter=""Pid"" />
+        </{nameof(SetEnvironmentVariableTask)}>
+        <{nameof(ReadEnvironmentVariableTask)} VariableName=""{variableName}"">
+            <Output PropertyName=""ObservedValue1"" TaskParameter=""Value"" />
+            <Output PropertyName=""ReadPid1"" TaskParameter=""Pid"" />
+        </{nameof(ReadEnvironmentVariableTask)}>
+        <{nameof(ReadEnvironmentVariableTask)} VariableName=""{variableName}"">
+            <Output PropertyName=""ObservedValue2"" TaskParameter=""Value"" />
+            <Output PropertyName=""ReadPid2"" TaskParameter=""Pid"" />
+        </{nameof(ReadEnvironmentVariableTask)}>
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("envMutateProject.proj", projectContents);
+
+            MockLogger logger = new(_output);
+            BuildParameters buildParameters = new()
+            {
+                MultiThreaded = true,
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+            };
+
+            BuildRequestData buildRequestData = new(
+                project.Path,
+                new Dictionary<string, string>(),
+                null,
+                ["Build"],
+                null,
+                BuildRequestDataFlags.ProvideProjectStateAfterBuild);
+
+            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            ProjectInstance state = result.ProjectStateAfterBuild;
+            state.ShouldNotBeNull();
+
+            // The tasks must have actually run out of proc (pid differs from this process); otherwise the environment
+            // would be shared within a single process and the test would pass regardless of the delta logic.
+            string setPid = state.GetPropertyValue("SetPid");
+            setPid.ShouldNotBeNullOrEmpty();
+            setPid.ShouldNotBe(Process.GetCurrentProcess().Id.ToString(CultureInfo.InvariantCulture));
+
+            // Both reader tasks must observe the value the first task set: the second because its configuration is sent
+            // in full after the change, the third because the change became the connection baseline it reconstructs from.
+            state.GetPropertyValue("ObservedValue1").ShouldBe(changedValue);
+            state.GetPropertyValue("ObservedValue2").ShouldBe(changedValue);
+        }
+
+        /// <summary>
         /// Regression test for the out-of-proc task host forward global-properties delta optimization. To avoid
         /// re-transmitting the (largely invariant) global properties in every <see cref="TaskHostConfiguration"/>,
         /// the parent sends them in full once per connection and marks subsequent unchanged configurations

@@ -92,14 +92,14 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// The build process environment most recently received in full from the parent on this connection.
-        /// When a <see cref="TaskHostConfiguration"/> arrives marked <see cref="InvariantPayloadTransfer.Identical"/>
+        /// When a <see cref="TaskHostConfiguration"/> arrives marked <see cref="InvariantPayloadTransferMode.Identical"/>
         /// it is reconstructed from this baseline.
         /// </summary>
         private Dictionary<string, string> _forwardEnvironmentBaseline;
 
         /// <summary>
         /// The global properties most recently received in full from the parent on this connection. When a
-        /// <see cref="TaskHostConfiguration"/> arrives marked <see cref="InvariantPayloadTransfer.Identical"/> they
+        /// <see cref="TaskHostConfiguration"/> arrives marked <see cref="InvariantPayloadTransferMode.Identical"/> they
         /// are reconstructed from this baseline.
         /// </summary>
         private Dictionary<string, string> _forwardGlobalParametersBaseline;
@@ -1217,13 +1217,13 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Resolves the build process environment of an incoming configuration. When the parent marked it
-        /// <see cref="InvariantPayloadTransfer.Identical"/> the environment was not serialized on the
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> the environment was not serialized on the
         /// wire, so it is reconstructed from this connection's baseline; otherwise the baseline is refreshed
         /// with the full environment that was sent.
         /// </summary>
         private void ResolveIncomingEnvironment(TaskHostConfiguration configuration)
         {
-            if (configuration.EnvironmentMode == InvariantPayloadTransfer.Identical)
+            if (configuration.EnvironmentMode == InvariantPayloadTransferMode.Identical)
             {
                 Assumed.NotNull(_forwardEnvironmentBaseline, "Received an EnvironmentIdentical TaskHostConfiguration before any full build process environment was sent on this connection.");
                 configuration.SetResolvedBuildProcessEnvironment(_forwardEnvironmentBaseline);
@@ -1236,13 +1236,13 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Resolves the global properties of an incoming configuration. When the parent marked them
-        /// <see cref="InvariantPayloadTransfer.Identical"/> they were not serialized on the wire, so they are
+        /// <see cref="InvariantPayloadTransferMode.Identical"/> they were not serialized on the wire, so they are
         /// reconstructed from this connection's baseline; otherwise the baseline is refreshed with the full
         /// dictionary that was sent.
         /// </summary>
         private void ResolveIncomingGlobalParameters(TaskHostConfiguration configuration)
         {
-            if (configuration.GlobalParametersMode == InvariantPayloadTransfer.Identical)
+            if (configuration.GlobalParametersMode == InvariantPayloadTransferMode.Identical)
             {
                 Assumed.NotNull(_forwardGlobalParametersBaseline, "Received a GlobalParametersIdentical TaskHostConfiguration before any full global properties were sent on this connection.");
                 configuration.SetResolvedGlobalParameters(_forwardGlobalParametersBaseline);
@@ -1582,7 +1582,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (NodePacketTypeExtensions.GetNegotiatedPacketVersion(_parentPacketVersion) >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion && environmentUnchangedByTask)
                     {
-                        _taskCompletePacket.EnvironmentMode = InvariantPayloadTransfer.Identical;
+                        _taskCompletePacket.EnvironmentMode = InvariantPayloadTransferMode.Identical;
                     }
 
 #if FEATURE_APPDOMAIN
