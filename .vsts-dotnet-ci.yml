@@ -101,6 +101,8 @@ jobs:
       arguments: '-onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
     env:
       ForceUseXCopyMSBuild: 1
+      MSBUILDUSESERVER: "1"
+      DOTNET_CLI_USE_MSBUILD_SERVER: "1"
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
@@ -213,6 +215,7 @@ jobs:
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
     env:
       MSBUILDUSESERVER: "1"
+      DOTNET_CLI_USE_MSBUILD_SERVER: "1"
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
@@ -292,6 +295,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
+      DOTNET_CLI_USE_MSBUILD_SERVER: "1"
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -327,14 +331,20 @@ jobs:
     displayName: cibuild.cmd
     inputs:
       filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release -test'
+      arguments: '-configuration Release -test /mt'
     condition: eq(variables.onlyDocChanged, 0)
+    env:
+      MSBUILDUSESERVER: "1"
+      DOTNET_CLI_USE_MSBUILD_SERVER: "1"
   - task: BatchScript@1
     displayName: cibuild.cmd without test
     inputs:
       filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release'
+      arguments: '-configuration Release /mt'
     condition: eq(variables.onlyDocChanged, 1)
+    env:
+      MSBUILDUSESERVER: "1"
+      DOTNET_CLI_USE_MSBUILD_SERVER: "1"
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
@@ -413,6 +423,7 @@ jobs:
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
+        DOTNET_CLI_USE_MSBUILD_SERVER: "1"
   - task: Bash@3
     displayName: Process coverage reports
     continueOnError: false
@@ -501,6 +512,7 @@ jobs:
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
+        DOTNET_CLI_USE_MSBUILD_SERVER: "1"
   - task: Bash@3
     displayName: Process coverage reports
     continueOnError: false
