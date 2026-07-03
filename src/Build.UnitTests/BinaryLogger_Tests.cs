@@ -1,4 +1,4 @@
-∩╗┐// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -554,7 +554,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Regression test for dotnet/dotnet#5433 ΓÇö ClearCacheDirectory must not destroy the
+        /// Regression test for dotnet/dotnet#5433 — ClearCacheDirectory must not destroy the
         /// ProjectImports archive before it is embedded in the binlog.
         /// </summary>
         [Fact]
@@ -565,7 +565,7 @@ namespace Microsoft.Build.UnitTests
             var collector = new ProjectImportsCollector(logFilePath, createFile: false, runOnBackground: false);
             collector.AddFileFromMemory("testfile.proj", "<Project />");
 
-            // This is what XMake.cs does after EndBuild ΓÇö wipes the cache directory.
+            // This is what XMake.cs does after EndBuild — wipes the cache directory.
             FileUtilities.ClearCacheDirectory();
 
             // ProcessResult must still read the archive after the cache dir is gone.
