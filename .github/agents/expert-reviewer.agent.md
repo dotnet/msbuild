@@ -324,7 +324,7 @@ See `../../documentation/wiki/Nodes-Orchestration.md`, `../../documentation/spec
 - [ ] Naming inconsistent with adjacent code
 - [ ] Boolean parameter meaning unclear
 - [ ] Test method names don't describe what they test
-- [ ] Misleading names: a method name implies an effect different from what it actually does
+- [ ] Misleading names: a name implies semantics different from what the member actually represents or does
 
 ---
 
