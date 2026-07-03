@@ -114,6 +114,11 @@ namespace Microsoft.Build.Experimental
         private readonly bool _multiThreaded;
 
         /// <summary>
+        /// Whether the server should shut itself down once this build completes instead of staying resident for reuse. 
+        /// </summary>
+        private readonly bool _shutdownServerAfterBuild;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="commandLine">The command line to process. The first argument
@@ -135,6 +140,22 @@ namespace Microsoft.Build.Experimental
         /// <param name="multiThreaded">Whether this build is multithreaded (/mt). When true, the launched
         /// server process is started with Server GC.</param>
         public MSBuildClient(string[] commandLine, string msbuildLocation, bool multiThreaded)
+            : this(commandLine, msbuildLocation, multiThreaded, shutdownServerAfterBuild: false)
+        {
+        }
+
+        /// <summary>
+        /// Public constructor with parameters.
+        /// </summary>
+        /// <param name="commandLine">The command line to process. The first argument
+        /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        /// <param name="multiThreaded">Whether this build is multithreaded (/mt). When true, the launched
+        /// server process is started with Server GC.</param>
+        /// <param name="shutdownServerAfterBuild">Whether the server should shut itself down once this build
+        /// completes instead of staying resident for reuse (e.g. a /mt build with -nodeReuse:false).</param>
+        public MSBuildClient(string[] commandLine, string msbuildLocation, bool multiThreaded, bool shutdownServerAfterBuild)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
@@ -143,6 +164,7 @@ namespace Microsoft.Build.Experimental
             _commandLine = commandLine;
             _msbuildLocation = msbuildLocation;
             _multiThreaded = multiThreaded;
+            _shutdownServerAfterBuild = shutdownServerAfterBuild;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -587,7 +609,8 @@ namespace Microsoft.Build.Experimental
                         CultureInfo.CurrentCulture,
                         CultureInfo.CurrentUICulture,
                         _consoleConfiguration!,
-                        partialBuildTelemetry);
+                        partialBuildTelemetry,
+                        _shutdownServerAfterBuild);
         }
 
         private ServerNodeHandshake GetHandshake() => new(CommunicationsUtilities.GetHandshakeOptions(
