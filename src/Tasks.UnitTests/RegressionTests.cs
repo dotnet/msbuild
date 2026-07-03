@@ -7,6 +7,7 @@ using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 
 #nullable disable
