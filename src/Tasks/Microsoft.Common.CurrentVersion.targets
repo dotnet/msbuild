@@ -4913,7 +4913,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CopyBuildOutputToOutputDirectory Condition="'$(CopyBuildOutputToOutputDirectory)'==''">true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory Condition="'$(CopyOutputSymbolsToOutputDirectory)'==''">true</CopyOutputSymbolsToOutputDirectory>
       <CopyDocumentationFileToOutputDirectory Condition="'$(CopyDocumentationFileToOutputDirectory)'==''">true</CopyDocumentationFileToOutputDirectory>
-      <_WroteMainAssemblyToOutputDirectory>false</_WroteMainAssemblyToOutputDirectory>
     </PropertyGroup>
 
     <!-- Copy the build product (.dll or .exe). -->
