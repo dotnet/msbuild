@@ -1084,6 +1084,58 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
+        [Fact]
+        public void DeferredExtendedBuildMessageIsWrittenToBinlogWithMetadata()
+        {
+            // Regression coverage for the LogDeferredMessages "glue": a DeferredBuildMessage carrying an
+            // ExtendedType + metadata must be logged as an ExtendedBuildMessageEventArgs and land in the binary
+            // log with its structured metadata intact (mirrors how XMake records the MSBuild Server lifecycle).
+            var binaryLogger = new BinaryLogger { Parameters = _logFile };
+
+            var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["kind"] = "spawned",
+                ["processId"] = "1234",
+            };
+            var deferredMessages = new[]
+            {
+                new BuildManager.DeferredBuildMessage(
+                    "MSBuild Server node started for this build (process ID 1234).",
+                    MessageImportance.Low,
+                    "msbuild-server",
+                    metadata),
+            };
+
+            var parameters = new BuildParameters
+            {
+                Loggers = new ILogger[] { binaryLogger },
+            };
+
+            using (var buildManager = new BuildManager())
+            {
+                buildManager.BeginBuild(parameters, deferredMessages);
+                buildManager.EndBuild();
+            }
+
+            ExtendedBuildMessageEventArgs serverMessage = null;
+            var replay = new BinaryLogReplayEventSource();
+            replay.AnyEventRaised += (_, e) =>
+            {
+                if (e is ExtendedBuildMessageEventArgs ext && ext.ExtendedType == "msbuild-server")
+                {
+                    serverMessage = ext;
+                }
+            };
+            replay.Replay(_logFile);
+
+            serverMessage.ShouldNotBeNull();
+            serverMessage.Importance.ShouldBe(MessageImportance.Low);
+            serverMessage.Message.ShouldBe("MSBuild Server node started for this build (process ID 1234).");
+            serverMessage.ExtendedMetadata.ShouldNotBeNull();
+            serverMessage.ExtendedMetadata["kind"].ShouldBe("spawned");
+            serverMessage.ExtendedMetadata["processId"].ShouldBe("1234");
+        }
+
         public void Dispose()
         {
             _env.Dispose();

@@ -37,6 +37,7 @@ The contract is stable and versionable (new metadata keys can be added over time
 | `ExtendedMetadata["kind"]` | `spawned`, `reused`, or `not-used` (stable, non-localized) |
 | `ExtendedMetadata["processId"]` | The server node's process ID (for `spawned`/`reused`) |
 | `ExtendedMetadata["reason"]` | The localized fall-back reason (for `not-used`) |
+| `ExtendedMetadata["reasonCode"]` | A stable, non-localized code for the fall-back cause (for `not-used`): `node-reuse-disabled`, `stdout-redirected`, `incompatible-invocation`, `command-line-parse-error`, `server-busy`, `server-crashed`, `server-state-unknown`, or `server-unreachable` |
 | `Message` | The localized, human-readable sentence shown above |
 
 

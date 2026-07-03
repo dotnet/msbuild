@@ -319,7 +319,8 @@ namespace Microsoft.Build.CommandLine
                 out bool multiThreaded,
                 out CommandLineSwitches switchesFromAutoResponseFile,
                 out CommandLineSwitches switchesNotFromAutoResponseFile,
-                out string serverDisabledReason);
+                out string serverDisabledReason,
+                out string serverDisabledReasonCode);
 
             int exitCode;
             bool shouldUseServer = ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason);
@@ -355,6 +356,9 @@ namespace Microsoft.Build.CommandLine
                     s_serverNotUsedReason = canRunServer
                         ? ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonStdOutForChildNodes")
                         : serverDisabledReason;
+                    s_serverNotUsedReasonCode = canRunServer
+                        ? ServerNotUsedReasonCodeStdOutRedirected
+                        : serverDisabledReasonCode;
                 }
 
                 // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
@@ -398,13 +402,15 @@ namespace Microsoft.Build.CommandLine
             out bool multiThreaded,
             out CommandLineSwitches switchesFromAutoResponseFile,
             out CommandLineSwitches switchesNotFromAutoResponseFile,
-            out string serverDisabledReason)
+            out string serverDisabledReason,
+            out string serverDisabledReasonCode)
         {
             bool canRunServer = true;
             multiThreaded = false;
             switchesFromAutoResponseFile = null;
             switchesNotFromAutoResponseFile = null;
             serverDisabledReason = null;
+            serverDisabledReasonCode = null;
             bool switchesFullyGathered = false;
             try
             {
@@ -437,6 +443,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     canRunServer = false;
                     serverDisabledReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerDisabledForBuild");
+                    serverDisabledReasonCode = ServerNotUsedReasonCodeIncompatibleInvocation;
                     if (KnownTelemetry.PartialBuildTelemetry is not null)
                     {
                         KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
@@ -448,6 +455,7 @@ namespace Microsoft.Build.CommandLine
                     // (and the in-process build still proceeds), so give it a specific message.
                     canRunServer = false;
                     serverDisabledReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonNodeReuseDisabled");
+                    serverDisabledReasonCode = ServerNotUsedReasonCodeNodeReuseDisabled;
                     if (KnownTelemetry.PartialBuildTelemetry is not null)
                     {
                         KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
@@ -458,6 +466,7 @@ namespace Microsoft.Build.CommandLine
             {
                 CommunicationsUtilities.Trace($"Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {ex}");
                 serverDisabledReason = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerDisabledForBuild");
+                serverDisabledReasonCode = ServerNotUsedReasonCodeCommandLineParseError;
                 if (KnownTelemetry.PartialBuildTelemetry is not null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
@@ -2016,6 +2025,16 @@ namespace Microsoft.Build.CommandLine
             }
             else if (!string.IsNullOrEmpty(s_serverNotUsedReason))
             {
+                Dictionary<string, string> notUsedMetadata = new(StringComparer.Ordinal)
+                {
+                    ["kind"] = "not-used",
+                    ["reason"] = s_serverNotUsedReason,
+                };
+                if (!string.IsNullOrEmpty(s_serverNotUsedReasonCode))
+                {
+                    notUsedMetadata["reasonCode"] = s_serverNotUsedReasonCode;
+                }
+
                 messages.Add(
                     new BuildManager.DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -2023,11 +2042,7 @@ namespace Microsoft.Build.CommandLine
                             s_serverNotUsedReason),
                         MessageImportance.Low,
                         ServerLifecycleExtendedType,
-                        new Dictionary<string, string>(StringComparer.Ordinal)
-                        {
-                            ["kind"] = "not-used",
-                            ["reason"] = s_serverNotUsedReason,
-                        }));
+                        notUsedMetadata));
             }
 
             NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
@@ -2251,6 +2266,23 @@ namespace Microsoft.Build.CommandLine
         /// binary log records why the server was not used. Null when the server was not requested or was used.
         /// </summary>
         internal static string s_serverNotUsedReason;
+
+        /// <summary>
+        /// A stable, non-localized companion to <see cref="s_serverNotUsedReason"/> that identifies *why* the
+        /// requested server was not used, so tooling can branch on it without parsing localized text. Surfaced
+        /// as the "reasonCode" extended-metadata value. Null when the server was not requested or was used.
+        /// </summary>
+        internal static string s_serverNotUsedReasonCode;
+
+        /// <summary>Stable "reasonCode" values for <see cref="s_serverNotUsedReasonCode"/>.</summary>
+        internal const string ServerNotUsedReasonCodeIncompatibleInvocation = "incompatible-invocation";
+        internal const string ServerNotUsedReasonCodeNodeReuseDisabled = "node-reuse-disabled";
+        internal const string ServerNotUsedReasonCodeStdOutRedirected = "stdout-redirected";
+        internal const string ServerNotUsedReasonCodeCommandLineParseError = "command-line-parse-error";
+        internal const string ServerNotUsedReasonCodeServerBusy = "server-busy";
+        internal const string ServerNotUsedReasonCodeServerCrashed = "server-crashed";
+        internal const string ServerNotUsedReasonCodeServerStateUnknown = "server-state-unknown";
+        internal const string ServerNotUsedReasonCodeServerUnreachable = "server-unreachable";
 
         /// <summary>
         /// Stable, non-localized <see cref="IExtendedBuildEventArgs.ExtendedType"/> discriminator for the MSBuild
