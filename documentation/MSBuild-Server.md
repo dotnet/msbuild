@@ -21,6 +21,10 @@ MSBuild Server is a form of node reuse: the whole point of the server is to stay
 
 The client makes a single, response-file-aware determination and sets the `ShutdownAfterBuild` flag on the `ServerNodeBuildCommand` packet if server needs shutdown.
 
+### Per-root keying of transient servers
+
+A resident (reusable) server is keyed one-per-machine (per architecture/user/version/etc.) so any compatible client reuses it. A **transient** server - a `/mt` build with node reuse off, which shuts down after its build - is instead keyed **per build root**: the entry project's full path (or the current directory when none is resolved) is folded into the handshake salt. This means parallel builds of *different* roots each launch and use their own short-lived Server-GC server, instead of contending for a single machine-wide server where all but one build would find it busy and fall back to an in-process, Workstation-GC build. Builds of the *same* root still share one server (the second concurrent build of the same root falls back), so it is "one transient server per root", not one unbounded server per invocation. Because the salt drives the pipe and mutex names (see [Pipe name convention & handshake](#pipe-name-convention--handshake)) and the launched server inherits the client's environment, both the client and its server derive the same per-root names.
+
 ## Communication protocol
 
 The server node uses same IPC approach as current worker nodes - named pipes. This solution allows to reuse existing code. When process starts, pipe with deterministic name is opened and waiting for commands. Client has following worfklow:

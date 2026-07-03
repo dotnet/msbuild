@@ -319,6 +319,7 @@ namespace Microsoft.Build.CommandLine
                 args,
                 out bool multiThreaded,
                 out bool shutdownServerAfterBuild,
+                out string serverRootKey,
                 out CommandLineSwitches switchesFromAutoResponseFile,
                 out CommandLineSwitches switchesNotFromAutoResponseFile);
 
@@ -333,6 +334,18 @@ namespace Microsoft.Build.CommandLine
                 if (KnownTelemetry.PartialBuildTelemetry is not null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerEnableReason = serverEnableReason;
+                }
+
+                // A transient server (a /mt build with node reuse off) is not shared for reuse, so it is
+                // keyed per build root instead of one-per-machine: parallel builds of different roots each
+                // get their own short-lived Server-GC server rather than contending for a single machine-wide
+                // server (where all but one would fall back to an in-process, Workstation-GC build). The root
+                // is folded into the handshake salt, which both this client and the server it launches (which
+                // inherits this environment) read, so their pipe and mutex names differ per root.
+                if (shutdownServerAfterBuild && !string.IsNullOrEmpty(serverRootKey))
+                {
+                    string existingSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? string.Empty;
+                    Environment.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", $"{existingSalt}|root={serverRootKey}");
                 }
 
                 // Hand the build off to the MSBuild Server client. The server (not this process) decides
@@ -373,6 +386,11 @@ namespace Microsoft.Build.CommandLine
         /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path.</param>
         /// <param name="shutdownServerAfterBuild">Set to <see langword="true"/> when the server should tear itself
         /// down after this build instead of staying resident for reuse.</param>
+        /// <param name="serverRootKey">Set to a per-build-root key (the normalized full path of the entry
+        /// project, or the current directory when none is resolved) when <paramref name="shutdownServerAfterBuild"/>
+        /// is <see langword="true"/>; otherwise <see langword="null"/>. A transient server is keyed per root so
+        /// parallel builds of different roots each get their own short-lived server instead of one machine-wide
+        /// server. Reusable servers stay machine-wide (this is <see langword="null"/> for them).</param>
         /// <param name="switchesFromAutoResponseFile">The gathered response-file switches (auto-response file plus any
         /// project <c>Directory.Build.rsp</c>), or <see langword="null"/> if parsing failed.</param>
         /// <param name="switchesNotFromAutoResponseFile">The gathered command-line/environment switches, or
@@ -381,12 +399,14 @@ namespace Microsoft.Build.CommandLine
             string[] commandLine,
             out bool multiThreaded,
             out bool shutdownServerAfterBuild,
+            out string serverRootKey,
             out CommandLineSwitches switchesFromAutoResponseFile,
             out CommandLineSwitches switchesNotFromAutoResponseFile)
         {
             bool canRunServer = true;
             multiThreaded = false;
             shutdownServerAfterBuild = false;
+            serverRootKey = null;
             switchesFromAutoResponseFile = null;
             switchesNotFromAutoResponseFile = null;
             bool switchesFullyGathered = false;
@@ -440,6 +460,16 @@ namespace Microsoft.Build.CommandLine
 
                 // When /mt forced the server on despite node reuse being disabled, the server must not persist past this build. 
                 shutdownServerAfterBuild = canRunServer && multiThreaded && !nodeReuse;
+
+                // A transient (non-reused) server is keyed per build root, so parallel builds of different
+                // roots each get their own short-lived Server-GC server instead of contending for one
+                // machine-wide server. The entry project's full path identifies the root; fall back to the
+                // current directory when no project was resolved (e.g. a directory-only invocation).
+                if (shutdownServerAfterBuild)
+                {
+                    string root = string.IsNullOrEmpty(projectFile) ? Directory.GetCurrentDirectory() : projectFile;
+                    serverRootKey = Path.GetFullPath(root);
+                }
             }
             catch (Exception ex)
             {

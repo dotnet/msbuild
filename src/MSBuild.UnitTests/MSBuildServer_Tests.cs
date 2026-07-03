@@ -468,6 +468,88 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
+        /// A transient (/mt with node reuse off) server is keyed per build root, not one-per-machine. Two builds
+        /// of <em>different</em> roots running concurrently must therefore each get their own Server-GC server
+        /// process, rather than contending for a single machine-wide server (where the second would find it busy
+        /// and fall back to an in-process, Workstation-GC build). This verifies that two concurrent distinct-root
+        /// builds run in two distinct, simultaneously-alive server processes, both with Server GC, and that both
+        /// servers shut down afterward (honoring the no-reuse intent).
+        /// </summary>
+        [Fact]
+        public void TransientServerIsKeyedPerRootAllowingConcurrentServers()
+        {
+            if (Environment.ProcessorCount < 2)
+            {
+                Assert.Skip("Server GC can report as Workstation GC on single-processor machines.");
+            }
+
+            // Clear MSBUILDUSESERVER so we exercise the -mt-implies-server path, and isolate this test's servers
+            // with a unique base handshake salt (each root then adds its own suffix on top of it).
+            PrepareIsolatedServerEnv(useServer: false);
+
+            // Two different roots: distinct project files => distinct entry-project full paths => distinct salts.
+            TransientTestFile markerA = _env.ExpectFile();
+            TransientTestFile markerB = _env.ExpectFile();
+            TransientTestFile projectA = _env.CreateFile("rootA.proj", GetConcurrentServerGCProbeProjectContents(markerA.Path, sleepMs: 6000));
+            TransientTestFile projectB = _env.CreateFile("rootB.proj", GetConcurrentServerGCProbeProjectContents(markerB.Path, sleepMs: 6000));
+
+            // Make sure we start with no server running.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            string exePath = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+            bool successA = false, successB = false;
+            string? outputA = null, outputB = null;
+            try
+            {
+                // Launch both builds concurrently. Each build's task sleeps a few seconds, guaranteeing the two
+                // builds overlap in time so their servers must coexist.
+                Task<string> buildA = Task.Run(() => RunnerUtilities.ExecMSBuild(exePath, $"{projectA.Path} -mt -nr:false", out successA, false, _output));
+                Task<string> buildB = Task.Run(() => RunnerUtilities.ExecMSBuild(exePath, $"{projectB.Path} -mt -nr:false", out successB, false, _output));
+
+                // While both builds are still sleeping, capture the two server PIDs from their markers and prove
+                // both processes are alive at the same time - two concurrent servers, which a single machine-wide
+                // server could not provide.
+                int serverPidA = WaitForMarkerPid(markerA.Path);
+                int serverPidB = WaitForMarkerPid(markerB.Path);
+                _env.WithTransientProcess(serverPidA);
+                _env.WithTransientProcess(serverPidB);
+
+                serverPidA.ShouldNotBe(serverPidB, "Concurrent builds of different roots must run in different server processes when the transient server is keyed per root.");
+                IsProcessAlive(serverPidA).ShouldBeTrue($"Server process {serverPidA} for root A should be alive concurrently with root B's server.");
+                IsProcessAlive(serverPidB).ShouldBeTrue($"Server process {serverPidB} for root B should be alive concurrently with root A's server.");
+
+                outputA = buildA.GetAwaiter().GetResult();
+                outputB = buildB.GetAwaiter().GetResult();
+            }
+            finally
+            {
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            }
+
+            successA.ShouldBeTrue();
+            successB.ShouldBeTrue();
+
+            // Both builds completed successfully above, so their outputs are populated.
+            string resultA = outputA!;
+            string resultB = outputB!;
+
+            // Each build ran in its own server node (not the entry process) with Server GC.
+            int clientPidA = ParseNumber(resultA, "Process ID is ");
+            int clientPidB = ParseNumber(resultB, "Process ID is ");
+            int serverTaskPidA = ParseNumber(resultA, "TaskRanInPID=");
+            int serverTaskPidB = ParseNumber(resultB, "TaskRanInPID=");
+            serverTaskPidA.ShouldNotBe(clientPidA, "Root A's build should run in its server node, not the entry process.");
+            serverTaskPidB.ShouldNotBe(clientPidB, "Root B's build should run in its server node, not the entry process.");
+            serverTaskPidA.ShouldNotBe(serverTaskPidB, "Each root should build in its own dedicated server process.");
+            resultA.ShouldContain("TaskNodeServerGC=True", customMessage: "Root A's transient /mt server should run with Server GC.");
+            resultB.ShouldContain("TaskNodeServerGC=True", customMessage: "Root B's transient /mt server should run with Server GC.");
+
+            // Transient: because node reuse is disabled, both server processes must be gone after their builds.
+            WaitForProcessExit(serverTaskPidA).ShouldBeTrue($"Server {serverTaskPidA} should shut down after root A's build (node reuse disabled).");
+            WaitForProcessExit(serverTaskPidB).ShouldBeTrue($"Server {serverTaskPidB} should shut down after root B's build (node reuse disabled).");
+        }
+
+        /// <summary>
         /// Waits up to <paramref name="timeoutMs"/> for the process with the given PID to exit. Returns true if
         /// the process exited (or was already gone), false if it was still running when the timeout elapsed.
         /// </summary>
@@ -482,6 +564,56 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 // No process with that PID is running - it has already exited.
                 return true;
+            }
+        }
+
+        /// <summary>
+        /// Polls <paramref name="markerPath"/> until the probe task has written a server PID into it (or the
+        /// timeout elapses). Used to observe a running server while its build sleeps.
+        /// </summary>
+        private static int WaitForMarkerPid(string markerPath, int timeoutMs = 30000)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            while (stopwatch.ElapsedMilliseconds < timeoutMs)
+            {
+                if (File.Exists(markerPath))
+                {
+                    string? text = null;
+                    try
+                    {
+                        text = File.ReadAllText(markerPath).Trim();
+                    }
+                    catch (IOException)
+                    {
+                        // The probe may still be writing the file; retry.
+                    }
+
+                    if (!string.IsNullOrEmpty(text) && int.TryParse(text, out int pid))
+                    {
+                        return pid;
+                    }
+                }
+
+                Thread.Sleep(50);
+            }
+
+            throw new TimeoutException($"Marker file '{markerPath}' did not report a server PID within {timeoutMs} ms.");
+        }
+
+        /// <summary>
+        /// Returns true if a process with the given PID currently exists and has not exited.
+        /// </summary>
+        private static bool IsProcessAlive(int pid)
+        {
+            try
+            {
+                using Process process = Process.GetProcessById(pid);
+                return !process.HasExited;
+            }
+            catch (ArgumentException)
+            {
+                // No process with that PID is running.
+                return false;
             }
         }
 #endif
@@ -548,6 +680,31 @@ namespace Microsoft.Build.Engine.UnitTests
         </ProcessIdTask>
         <Message Text=""[Work around GitHub issue #9667 with --interactive]TaskRanInPID=$(PID)"" Importance=""High"" />
         <Message Text=""TaskNodeServerGC=$(SERVERGC)"" Importance=""High"" />
+    </Target>
+</Project>";
+        }
+
+        /// <summary>
+        /// Like <see cref="GetServerGCProbeProjectContents"/> but, after reporting its PID and GC mode, records the
+        /// executing process's PID to <paramref name="markerFile"/> and then sleeps for <paramref name="sleepMs"/>
+        /// milliseconds. The marker lets a test observe the running server, and the sleep keeps concurrent builds of
+        /// different roots overlapping in time so their servers must coexist.
+        /// </summary>
+        private static string GetConcurrentServerGCProbeProjectContents(string markerFile, int sleepMs)
+        {
+            return $@"
+<Project>
+<UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+<UsingTask TaskName=""SleepingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <Target Name='Probe'>
+        <ProcessIdTask>
+            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
+            <Output PropertyName=""SERVERGC"" TaskParameter=""IsServerGC"" />
+        </ProcessIdTask>
+        <WriteLinesToFile File=""{markerFile}"" Lines=""$(PID)"" Overwrite=""true"" />
+        <Message Text=""[Work around GitHub issue #9667 with --interactive]TaskRanInPID=$(PID)"" Importance=""High"" />
+        <Message Text=""TaskNodeServerGC=$(SERVERGC)"" Importance=""High"" />
+        <SleepingTask SleepTime=""{sleepMs}"" />
     </Target>
 </Project>";
         }
