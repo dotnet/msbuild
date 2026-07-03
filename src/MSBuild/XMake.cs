@@ -3412,11 +3412,11 @@ namespace Microsoft.Build.CommandLine
         /// to the same directory as <see cref="Directory.GetCurrentDirectory"/>, keeping
         /// <c>$(MSBuildProjectFullPath)</c> stable across symlinked working directories.
         /// No-op on Windows, for absolute paths or paths containing <c>..</c>, when <c>PWD</c> is
-        /// unset/relative/stale, or when change wave 18.9 is disabled.
+        /// unset/relative/stale, or when change wave 18.10 is disabled.
         /// </summary>
         internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
         {
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9)
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
                 || NativeMethodsShared.IsWindows
                 || string.IsNullOrEmpty(projectFile)
                 || Path.IsPathRooted(projectFile)

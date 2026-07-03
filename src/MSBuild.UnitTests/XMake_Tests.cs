@@ -1981,7 +1981,7 @@ namespace Microsoft.Build.UnitTests
 
             _env.SetCurrentDirectory(linkDirectory);
             _env.SetEnvironmentVariable("PWD", linkDirectory);
-            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_9.ToString());
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
             ChangeWaves.ResetStateForTests();
 
             string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
