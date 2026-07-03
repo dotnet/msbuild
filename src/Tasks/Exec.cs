@@ -33,21 +33,15 @@ namespace Microsoft.Build.Tasks
         {
             Command = string.Empty;
 
-            // Wave18_8: use ANSI code page (GetACP) instead of OEM (GetOEMCP). Most native Windows tools
-            // write output using the ANSI code page (e.g., MSVC link.exe on French Windows: ANSI=CP1252,
-            // OEM=CP850). Reading with OEM garbles non-ASCII characters (e.g., 'é' → 'Ú').
+            // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding
+            // here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
+            // doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
+            // If the cmd file contains non-ANSI characters encoding may change.
+            // Callers whose tool writes output using the system ANSI code page (e.g., MSVC link.exe/cl.exe on
+            // Western locales) can opt into ANSI decoding by setting StdOutEncoding/StdErrEncoding to "ansi".
             // See: https://github.com/dotnet/msbuild/issues/12290
-            // If the cmd file contains non-ANSI characters the encoding may change later (see CreateTemporaryBatchFile).
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
-            {
-                _standardOutputEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
-                _standardErrorEncoding = EncodingUtilities.CurrentSystemAnsiEncoding;
-            }
-            else
-            {
-                _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-                _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-            }
+            _standardOutputEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            _standardErrorEncoding = EncodingUtilities.CurrentSystemOemEncoding;
         }
 
         #endregion
@@ -69,6 +63,15 @@ namespace Microsoft.Build.Tasks
 
         // '^' before _any_ character escapes that character, don't escape it.
         private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
+
+        /// <summary>
+        /// Special value accepted by <see cref="StdOutEncoding"/> and <see cref="StdErrEncoding"/> that selects
+        /// the current system ANSI code page (GetACP) instead of a named encoding. This lets callers decode output
+        /// from native tools (e.g., MSVC link.exe/cl.exe) that write using the ANSI code page rather than the OEM
+        /// code page, without hard-coding a machine-specific code page number.
+        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// </summary>
+        private const string AnsiEncodingName = "ansi";
 
         #endregion
 
@@ -144,6 +147,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
         /// </summary>
+        /// <remarks>
+        /// In addition to named encodings (e.g., "utf-8", "windows-1252"), the special value "ansi" selects the
+        /// current system ANSI code page (GetACP). This is useful for native tools that emit ANSI-encoded output.
+        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// </remarks>
         [Output]
         public string StdOutEncoding
         {
@@ -152,7 +160,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    _standardOutputEncoding = Encoding.GetEncoding(value);
+                    _standardOutputEncoding = ParseEncoding(value);
                 }
                 catch (ArgumentException)
                 {
@@ -165,6 +173,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard error stream
         /// </summary>
+        /// <remarks>
+        /// In addition to named encodings (e.g., "utf-8", "windows-1252"), the special value "ansi" selects the
+        /// current system ANSI code page (GetACP). This is useful for native tools that emit ANSI-encoded output.
+        /// See: https://github.com/dotnet/msbuild/issues/12290
+        /// </remarks>
         [Output]
         public string StdErrEncoding
         {
@@ -173,7 +186,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    _standardErrorEncoding = Encoding.GetEncoding(value);
+                    _standardErrorEncoding = ParseEncoding(value);
                 }
                 catch (ArgumentException)
                 {
@@ -201,6 +214,17 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Resolves an encoding name supplied to <see cref="StdOutEncoding"/> or <see cref="StdErrEncoding"/>.
+        /// The special value <see cref="AnsiEncodingName"/> ("ansi") maps to the current system ANSI code page
+        /// (GetACP); any other value is resolved through <see cref="Encoding.GetEncoding(string)"/>.
+        /// </summary>
+        private static Encoding ParseEncoding(string value) =>
+            string.Equals(value, AnsiEncodingName, StringComparison.OrdinalIgnoreCase)
+                ? EncodingUtilities.CurrentSystemAnsiEncoding
+                : Encoding.GetEncoding(value);
+
         /// <summary>
         /// Write out a temporary batch file with the user-specified command in it.
         /// </summary>
