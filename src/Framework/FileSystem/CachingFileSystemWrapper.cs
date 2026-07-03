@@ -12,10 +12,10 @@ namespace Microsoft.Build.Shared.FileSystem
     internal sealed class CachingFileSystemWrapper : IFileSystem
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ConcurrentDictionary<string, bool> _directoryExistenceCache = new ConcurrentDictionary<string, bool>();
-        private readonly ConcurrentDictionary<string, bool> _fileExistenceCache = new ConcurrentDictionary<string, bool>();
-        private readonly ConcurrentDictionary<string, bool> _fileOrDirectoryExistenceCache = new ConcurrentDictionary<string, bool>();
-        private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>();
+        private readonly ConcurrentDictionary<string, bool> _directoryExistenceCache = new();
+        private readonly ConcurrentDictionary<string, bool> _fileExistenceCache = new();
+        private readonly ConcurrentDictionary<string, bool> _fileOrDirectoryExistenceCache = new();
+        private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new();
 
         public CachingFileSystemWrapper(IFileSystem fileSystem)
         {
@@ -24,6 +24,13 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public bool FileOrDirectoryExists(string path)
         {
+            // A positive result from either specific cache implies existence, so we can avoid a redundant filesystem stat.
+            if ((_fileExistenceCache.TryGetValue(path, out bool fileExists) && fileExists) ||
+                (_directoryExistenceCache.TryGetValue(path, out bool directoryExists) && directoryExists))
+            {
+                return true;
+            }
+
             return _fileOrDirectoryExistenceCache.GetOrAdd(path, p => _fileSystem.FileOrDirectoryExists(p));
         }
 
