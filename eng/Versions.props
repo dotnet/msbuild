@@ -81,7 +81,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.300</BootstrapSdkVersion>
+    <!-- TEMPORARY (this PR only): bump stage-1/bootstrap SDK to a 10.0.4xx daily.
+         SDK 10.0.300's MSBuild (18.6.3) crashes instead of falling back when
+         DOTNET_CLI_USE_MSBUILD_SERVER=1 and the server can't be reached, which broke the
+         Linux/macOS Core legs once we enabled the server. Keep in sync with global.json. -->
+    <BootstrapSdkVersion>10.0.400-preview.0.26352.102</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
