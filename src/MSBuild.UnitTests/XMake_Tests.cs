@@ -2616,6 +2616,27 @@ $@"<Project>
         }
 
         /// <summary>
+        /// Verifies restore sets the ExcludeRestorePackageImports global property so that NuGet's restore reuses the initial
+        /// evaluation instead of forcing a second evaluation of every project.
+        /// </summary>
+        [Fact]
+        public void RestoreSetsExcludeRestorePackageImports()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project>
+  <Target Name=""Restore"">
+    <Message Text=""ExcludeRestorePackageImports=[$(ExcludeRestorePackageImports)]"" Importance=""High"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:restore");
+
+            // The value must be the literal lowercase "true" to exactly match the global property NuGet's restore passes
+            // (NuGet.targets sets ExcludeRestorePackageImports=true), otherwise evaluation reuse would not occur.
+            logContents.ShouldContain("ExcludeRestorePackageImports=[true]");
+        }
+
+        /// <summary>
         /// We check if there is only one target name specified and this logic caused a regression: https://github.com/dotnet/msbuild/issues/3317
         /// </summary>
         [Fact]
