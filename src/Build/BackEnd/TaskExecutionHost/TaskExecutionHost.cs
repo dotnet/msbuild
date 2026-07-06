@@ -6,9 +6,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -938,6 +936,20 @@ namespace Microsoft.Build.BackEnd
         {
             Func<ITaskItem, ITaskItem> factory = s_taskItemOfTFactories.GetOrAdd(genericArgument, static t =>
             {
+#if NET
+                if (!RuntimeFeature.IsDynamicCodeSupported)
+                {
+                    // Wrapping an ITaskItem into a closed-generic TaskItem<T> requires Type.MakeGenericType
+                    // plus an expression-tree Compile(), both of which need runtime code generation. Fail
+                    // observably under trimming / Native AOT rather than silently mis-binding the typed task
+                    // parameter. (See documentation/aot/follow-up-work.md - the typed TaskItem<T> parameter
+                    // feature still needs a proper AOT-safe binding strategy.)
+                    throw new NotSupportedException(
+                        "Task parameters typed as TaskItem<T> or ITaskItem<T> require runtime code generation " +
+                        "(Type.MakeGenericType and expression compilation) and are not supported when MSBuild " +
+                        "runs trimmed or with Native AOT.");
+                }
+#endif
                 ConstructorInfo constructor = typeof(TaskItem<>).MakeGenericType(t).GetConstructor([typeof(ITaskItem)]);
                 ParameterExpression itemParameter = Expression.Parameter(typeof(ITaskItem), "item");
                 return Expression.Lambda<Func<ITaskItem, ITaskItem>>(

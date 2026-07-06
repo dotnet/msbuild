@@ -56,6 +56,14 @@ All work here still follows the strategy guide's rule: **fail observably, never 
 - **Expected shape:** inspect the SDK publish response file or equivalent output and confirm the `Microsoft.Build.*` feature settings are supplied without manual duplication.
 - **Deeper context:** [managing-trimming-and-aot.md §6.5](managing-trimming-and-aot.md#65-how-a-librarys-switch-reaches-a-consumer-transitivity-defaulting-override) and [sdk-msbuild-object-model-audit.md](sdk-msbuild-object-model-audit.md).
 
+### 7. Design an AOT-safe binding for typed `TaskItem<T>` / `ITaskItem<T>` parameters
+
+- **Strategy:** S3 feature check today (a `RuntimeFeature.IsDynamicCodeSupported` guard that fails observably); a durable strategy likely needs closed-world registration or a source-generated wrapper factory.
+- **Implementation surface:** `CreateTaskItemOfT` in [`TaskExecutionHost`](../../src/Build/BackEnd/TaskExecutionHost/TaskExecutionHost.cs).
+- **Why it remains:** the typed task-parameter feature (`TaskItem<T>` / `ITaskItem<T>`) was integrated from upstream after the initial AOT annotation work. Wrapping an `ITaskItem` into a closed-generic `TaskItem<T>` uses `Type.MakeGenericType` plus an expression-tree `Compile()`, both of which require runtime code generation (IL3050). To keep the AOT analyzers clean after the rebase, the wrapper is guarded with `RuntimeFeature.IsDynamicCodeSupported` and throws `NotSupportedException` under trimming / Native AOT — which fails observably but disables the feature in an AOT host.
+- **Expected shape:** keep JIT behavior unchanged; provide an AOT-safe path (for example a registered or source-generated `ITaskItem` → `TaskItem<T>` factory for the closed generic arguments a task actually declares) so typed task-item parameters can bind without `MakeGenericType` / expression compilation, replacing the observable-failure stopgap.
+- **Deeper context:** [managing-trimming-and-aot.md §5.3](managing-trimming-and-aot.md#53-dynamic-code-runtime-code-generation).
+
 ## Backlog and non-goals
 
 - **`Microsoft.Build.Tasks` as a fully trim/AOT-enabled assembly.** The Tasks assembly still has Backlog suppressions. One pending bucket is XML handling (`XmlSerializer`, `XslCompiledTransform`, `SignedXml`); other rows cover attribute reflection and assembly metadata. Some task entry points now fail gracefully under Native AOT with `RuntimeFeature.IsDynamicCodeSupported` guards, but the assembly still needs feature work before it can be treated as trimmable. The durable strategy is in [aot-trimming-strategy.md](aot-trimming-strategy.md), and the guard mechanics are in [managing-trimming-and-aot.md](managing-trimming-and-aot.md#53-dynamic-code-runtime-code-generation).
