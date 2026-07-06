@@ -2069,7 +2069,7 @@ namespace Microsoft.Build.CommandLine
             // Setting it up front here means the initial evaluation already matches, so it is reused instead of being discarded.
             // The value must match NuGet's exactly (the literal lowercase "true" from NuGet.targets) because global property values
             // are compared case-sensitively when matching build configurations for evaluation reuse.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10))
             {
                 restoreGlobalProperties[MSBuildConstants.ExcludeRestorePackageImports] = MSBuildConstants.ExcludeRestorePackageImportsValue;
             }
