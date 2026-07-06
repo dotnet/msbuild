@@ -88,6 +88,13 @@ namespace Microsoft.Build.Shared
         internal const string ExcludeRestorePackageImports = nameof(ExcludeRestorePackageImports);
 
         /// <summary>
+        /// The value MSBuild assigns to <see cref="ExcludeRestorePackageImports"/> during restore. It must match the literal value NuGet passes
+        /// (lowercase "true" from NuGet.targets) because global property values are compared case-sensitively when matching build configurations
+        /// for evaluation reuse.
+        /// </summary>
+        internal const string ExcludeRestorePackageImportsValue = "true";
+
+        /// <summary>
         /// The most current VSGeneralAssemblyVersion known to this version of MSBuild.
         /// </summary>
         internal const string CurrentAssemblyVersion = "15.1.0.0";

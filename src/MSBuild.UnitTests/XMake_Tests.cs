@@ -2633,7 +2633,7 @@ $@"<Project>
 
             // The value must be the literal lowercase "true" to exactly match the global property NuGet's restore passes
             // (NuGet.targets sets ExcludeRestorePackageImports=true), otherwise evaluation reuse would not occur.
-            logContents.ShouldContain("ExcludeRestorePackageImports=[true]");
+            logContents.ShouldContain($"ExcludeRestorePackageImports=[{MSBuildConstants.ExcludeRestorePackageImportsValue}]");
         }
 
         /// <summary>

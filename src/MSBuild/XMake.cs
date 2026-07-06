@@ -2071,7 +2071,7 @@ namespace Microsoft.Build.CommandLine
             // are compared case-sensitively when matching build configurations for evaluation reuse.
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9))
             {
-                restoreGlobalProperties[MSBuildConstants.ExcludeRestorePackageImports] = "true";
+                restoreGlobalProperties[MSBuildConstants.ExcludeRestorePackageImports] = MSBuildConstants.ExcludeRestorePackageImportsValue;
             }
 
             // Create a new request with a Restore target only and specify:
