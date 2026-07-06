@@ -77,6 +77,7 @@ namespace Microsoft.Build.Shared
             var possibleLocations = new Func<BuildEnvironment>[]
             {
                 TryFromEnvironmentVariable,
+                TryFromSdkRoot,
                 TryFromVisualStudioProcess,
                 TryFromMSBuildProcess,
                 TryFromMSBuildAppHost,
@@ -144,6 +145,25 @@ namespace Microsoft.Build.Shared
             return msBuildExePath == null
                 ? null
                 : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
+        }
+
+        private static BuildEnvironment TryFromSdkRoot()
+        {
+            // When the .NET SDK hosts MSBuild in a trimmed or Native AOT process, the process path,
+            // AppContext.BaseDirectory, and Assembly.Location point at the muxer / install root rather
+            // than the versioned SDK directory that actually contains MSBuild. The SDK publishes that
+            // directory through the "Microsoft.DotNet.Sdk.Root" AppContext value (see DotNetSdkPaths);
+            // prefer it when present. A normal JIT MSBuild that discovers itself by path leaves the value
+            // unset, so this simply falls through to the process/assembly-based discovery below.
+            var sdkRoot = s_getSdkRootFromAppContext();
+            if (string.IsNullOrEmpty(sdkRoot))
+            {
+                return null;
+            }
+
+            // Prioritize MSBuild[.exe] over MSBuild.dll, mirroring TryFromAppContextBaseDirectory.
+            return TryFromStandaloneMSBuildExe(Path.Combine(sdkRoot, Constants.MSBuildExecutableName))
+                ?? TryFromStandaloneMSBuildExe(Path.Combine(sdkRoot, Constants.MSBuildAssemblyName));
         }
 
         private static BuildEnvironment TryFromVisualStudioProcess()
@@ -456,6 +476,11 @@ namespace Microsoft.Build.Shared
             return AppContext.BaseDirectory;
         }
 
+        private static string GetSdkRootFromAppContext()
+        {
+            return DotNetSdkPaths.SdkRootFromAppContext;
+        }
+
         private static string GetEnvironmentVariable(string variable)
         {
             return Environment.GetEnvironmentVariable(variable);
@@ -468,13 +493,15 @@ namespace Microsoft.Build.Shared
             Func<string> getExecutingAssemblyPath = null, Func<string> getAppContextBaseDirectory = null,
             Func<IEnumerable<VisualStudioInstance>> getVisualStudioInstances = null,
             Func<string, string> getEnvironmentVariable = null,
-            Func<bool> runningTests = null)
+            Func<bool> runningTests = null,
+            Func<string> getSdkRootFromAppContext = null)
         {
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssemblyPath = getExecutingAssemblyPath ?? GetExecutingAssemblyPath;
             s_getAppContextBaseDirectory = getAppContextBaseDirectory ?? GetAppContextBaseDirectory;
             s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
             s_getEnvironmentVariable = getEnvironmentVariable ?? GetEnvironmentVariable;
+            s_getSdkRootFromAppContext = getSdkRootFromAppContext ?? GetSdkRootFromAppContext;
 
             // Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
             s_runningTests = runningTests ?? CheckIfRunningTests;
@@ -495,6 +522,7 @@ namespace Microsoft.Build.Shared
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
         private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
+        private static Func<string> s_getSdkRootFromAppContext = GetSdkRootFromAppContext;
         private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
         private static Func<bool> s_runningTests = CheckIfRunningTests;
