@@ -6,7 +6,7 @@
 
 ## Overview
 
-The **MSBuild Build Coordinator** is a resource management system that orchestrates and enforces fair-share allocation of build nodes across multiple simultaneous MSBuild processes. It prevents system resource exhaustion by maintaining a global node budget and granting available nodes as builds start and finish.
+The **MSBuild Build Coordinator** is a resource management system that orchestrates and enforces fair-share allocation of build nodes across multiple simultaneous MSBuild processes. It prevents system resource exhaustion by maintaining a global node budget and dynamically distributing available nodes among competing builds.
 
 The coordinator runs as a **separate process** (`MSBuild.Coordinator`), not inside `MSBuild.exe`. MSBuild clients connect to it over named pipes, request grants, and continue building with the granted node count.
 
@@ -21,8 +21,8 @@ When multiple MSBuild processes run concurrently (common in user multi-tasking),
 The coordinator solves this by:
 1. **Enforcing a global node budget** (defaults to processor count)
 2. **Capping individual grants** so one build does not assume it owns the whole machine
-3. **Prioritizing queued builds** when hosts identify latency-sensitive work
-4. **Reserving high-priority capacity** so interactive builds can start predictably
+3. **Prioritizing queued builds** when clients identify higher priority builds
+4. **Reserving high-priority capacity** so high-priority builds can start predictably
 5. **Allowing nested build processes to share root grants** without consuming additional global budget
 6. **Monitoring build health** via periodic heartbeats
 7. **Auto-shutting down** after a timeout period
@@ -235,20 +235,22 @@ Nested grants are capability-gated. Older clients that do not advertise `nested-
 
 ### Core Concept
 
-When multiple builds compete for limited nodes, the coordinator either computes a fair share per grant or uses fixed-size node slices, depending on configuration.
+When multiple builds compete for limited nodes, the coordinator either computes a fair share per grant or grants up to a fixed per-build cap, depending on configuration.
+
+The coordinator first resolves the high-priority reservation and the per-build cap. By default, total node budgets below 8 use no reservation and no per-build cap; total node budgets 8 and above reserve 4 nodes for high-priority requests and cap each build at 4 nodes.
 
 New requests that arrive while same- or higher-priority builds are already queued are placed in the wait queue in both capped and uncapped modes.
 
-When `MSBUILDCOORDINATORMAXNODESPERBUILD` is `0`, there is no per-build cap. During wait-queue draining, this preserves the previous fair-share behavior:
+When the resolved per-build cap is `0`, deferred grants use fair-share sizing:
 
 ```
 fair_share = max(1, available_nodes / same_effective_priority_waiting_builds)
 granted_nodes = min(fair_share, requested_nodes)
 ```
 
-`same_effective_priority_waiting_builds` includes the build currently being evaluated for a grant. Effective priority includes deterministic aging, so a lower-priority request can eventually participate in a higher-priority fair-share group after higher-priority work has bypassed it enough times. By default, a queued request ages upward by one effective priority level after 3 bypasses. Set `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` to a positive integer to tune that threshold.
+`same_effective_priority_waiting_builds` includes the build currently being evaluated for a grant. Effective priority includes aging: after higher-priority work bypasses a queued request a fixed number of times, that request is considered at the next higher effective priority. By default, a queued request ages upward by one effective priority level after 3 bypasses. Set `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` to a positive integer to tune that threshold.
 
-When `MSBUILDCOORDINATORMAXNODESPERBUILD` is positive, each build can receive at most that many nodes. Requests for at least the effective cap are only granted when a full slice is available:
+When `MSBUILDCOORDINATORMAXNODESPERBUILD` is positive, each build can receive at most that many nodes. Requests for at least the effective cap are only granted when enough nodes are available to grant that cap:
 
 ```
 effective_cap = max_nodes_per_build for High, or min(max_nodes_per_build, low_normal_pool) for Low/Normal
@@ -256,9 +258,9 @@ desired_nodes = min(requested_nodes, effective_cap)
 granted_nodes = desired_nodes if available_nodes >= desired_nodes, otherwise wait
 ```
 
-For `Low` and `Normal` priority builds, the coordinator rounds usable non-high-priority capacity down to a full-slice boundary when a cap is configured. For example, with a 10-node budget, 4 high-priority reserved nodes, and a 4-node cap, only one 4-node normal build is started by default; the leftover 2 nodes are not used to start a large 2-node normal build. This avoids creating under-provisioned long-running builds. If an explicit cap is larger than the non-high-priority pool, that pool size becomes the effective slice for `Low` and `Normal` builds so they can still make progress.
+For builds with low or normal priority, when a cap is configured, the coordinator does not use leftover non-high-priority capacity that is smaller than the effective cap for a waiting build. For example, with a 10-node budget, 4 high-priority reserved nodes, and a 4-node cap, one 4-node normal build starts; the remaining 2 nodes are left idle instead of starting another normal build with only 2 nodes. This avoids starting builds with fewer nodes than their effective cap. If an explicit cap is larger than the non-high-priority pool, that pool size becomes the effective cap for builds with low or normal priority so they can still make progress.
 
-Capped-mode queue draining preserves FIFO ordering within the same effective priority for builds competing for the same capacity pool. If an older request needs a full 4-node slice and only 1-3 nodes are free, a later same-priority request for fewer nodes does not bypass it. Those partial fragments may remain idle until the older request can receive its slice. A genuine `High` request can still use high-priority reserved capacity when an aged non-`High` waiter cannot use the non-high-priority pool, because those requests draw from different pools.
+Capped-mode queue draining preserves FIFO ordering within the same effective priority for builds competing for the same capacity pool. If an older request needs a 4-node grant and only 1-3 nodes are free, a later same-priority request for fewer nodes does not bypass it. Those unused nodes may remain idle until the older request can receive its grant. A request whose raw priority is `High` can still use high-priority reserved capacity when an aged `Low` or `Normal` waiter cannot use the non-high-priority pool, because those requests draw from different pools.
 
 Wait-queue drain ordering:
 
@@ -270,70 +272,72 @@ grant next build at the selected priority if enough capacity is available
 This ensures:
 - Each grant is capped by what the build requested and by the configured per-build cap
 - Uncapped mode divides available nodes across wait-queue contenders in the current drain phase
-- Capped mode grants full slices and may leave partial fragments idle to preserve FIFO ordering
+- Capped mode grants up to the per-build cap and may leave partial capacity idle to preserve FIFO ordering
 - Wait-queue entries are processed FIFO within the same effective priority and capacity pool
 - Higher-priority queued builds are drained before lower-priority queued builds
 - Lower-priority builds age as higher-priority builds bypass them, preventing starvation
 
-All requests default to `Normal` priority. Older clients use `RequestNodesMessage`, which the coordinator treats as `Normal`. If every queued build is `Normal`, the priority-aware scheduler preserves FIFO ordering. Set both strict policy variables to `0` to restore uncapped, no-reservation sizing; deferred grants then use the fair-share behavior described above. When auto strict policy is active, grants may be capped or reserved as described above.
+All requests default to `Normal` priority. Older clients use `RequestNodesMessage`, which the coordinator treats as `Normal`. If every queued build is `Normal`, the priority-aware scheduler preserves FIFO ordering. Set both reservation and per-build cap variables to `0` to restore uncapped, no-reservation sizing; deferred grants then use the fair-share behavior described above. When the computed defaults enable a reservation or per-build cap, grants may be capped or reserved as described above.
 
-Priority is intentionally generalized. Hosts should map their own intent to `Low`, `Normal`, or `High`; for example, a UI-blocking design-time build can request `High`, while background refresh work can request `Low`. Hosts can set `MSBUILDCOORDINATORBUILDREQUESTPRIORITY=Low`, `Normal`, or `High` in the build process environment. The coordinator does not inspect project properties such as `DesignTimeBuild`.
+Priority is intentionally generalized. Clients should map their own intent to `Low`, `Normal`, or `High`; for example, a UI-blocking design-time build can request `High`, while background refresh work can request `Low`. Clients can set `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` to `Low`, `Normal`, or `High` in the build process environment. The coordinator does not inspect project properties such as `DesignTimeBuild`.
 
-### Strict Node Slices and High-Priority Reserved Nodes
+Scope `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` to the build process that needs priority. Setting it globally affects every coordinator request from that environment.
 
-The coordinator can reserve a fixed amount of capacity for `High` priority requests. The reservation is configured by `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES`. The per-build slice is configured by `MSBUILDCOORDINATORMAXNODESPERBUILD`.
+### Per-Build Caps and High-Priority Reserved Nodes
 
-By default these settings are auto-computed from the coordinator node budget:
+The coordinator can reserve a fixed amount of capacity for high-priority requests. The reservation is configured by `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES`. The per-build cap is configured by `MSBUILDCOORDINATORMAXNODESPERBUILD`.
+
+By default these settings are computed from the coordinator node budget:
 
 | Total node budget | High-priority reservation | Max nodes per build |
 | ---: | ---: | ---: |
 | 1-7 | 0 | 0 (uncapped) |
 | 8+ | 4 | 4 |
 
-Set either variable to `0` to disable that part of the strict policy. Set a positive integer to force a specific value; values larger than the node budget are clamped to the effective range. Missing, negative, or non-integer values use the auto-computed value.
+Set either variable to `0` to disable that setting. Set a positive integer to force a specific value; values larger than the node budget are clamped to the effective range. Missing, empty, negative, or non-integer values use the computed value.
 
-When a reservation is configured, `Low` and `Normal` requests are granted from `TotalNodeBudget - HighPriorityReservedNodes`, clamped so that at least one node remains available to non-high-priority builds. When a per-build cap is configured, that non-high-priority pool is also rounded down to full per-build slices. `High` requests may use the full node budget, but still respect `MSBUILDCOORDINATORMAXNODESPERBUILD` when a per-build cap is configured. This keeps headroom available for latency-sensitive work without adding runtime node expansion, shrink, oversubscription, or preemption of already-running builds.
+When a reservation is configured, Low and Normal requests are granted from `TotalNodeBudget - HighPriorityReservedNodes`, clamped so that at least one node remains available to non-high-priority builds. When a per-build cap is configured, that non-high-priority pool may leave capacity idle if the remaining capacity is too small for the next waiting build. High requests may use the full node budget, but still respect `MSBUILDCOORDINATORMAXNODESPERBUILD` when a per-build cap is configured. This keeps capacity available for high-priority work without changing grants that are already running.
 
-The reservation is intentionally generalized. A design-time-build host can map UI-blocking work to `High`, but the coordinator only sees priority; it does not contain DTB-specific logic.
+The reservation is intentionally generalized. A design-time-build client can map UI-blocking work to `High`, but the coordinator only sees priority; it does not contain DTB-specific logic.
 
-Overflow capacity does not need a separate policy knob. Users who intentionally want to experiment with oversubscription can set `MSBUILDCOORDINATORNODEBUDGET` higher than the processor count while keeping the same reservation and per-build cap policy.
+Overflow capacity does not need a separate setting. Users who intentionally want to experiment with oversubscription can set `MSBUILDCOORDINATORNODEBUDGET` higher than the processor count while keeping the same reservation and per-build cap values.
 
 ### Example Scenarios
 
-**First Normal Build Requests Full Budget** (8 total nodes, auto strict policy)
+**First Normal Build Requests Full Budget** (8 total nodes, computed defaults)
 - No builds are active and no builds are waiting
 - Build A requests 8 nodes
-- Auto policy reserves 4 nodes for high-priority work and caps one build at 4 nodes
+- Computed defaults reserve 4 nodes for high-priority work and cap one build at 4 nodes
 - Build A is `Normal`, so it is granted 4 nodes
 
-**Normal Build Plus High-Priority Build** (8 total nodes, auto strict policy)
+**Normal Build Plus High-Priority Build** (8 total nodes, computed defaults)
 - Build A is `Normal` and requests 8 nodes
 - Build A is granted 4 nodes
 - Build B is `High` and requests 8 nodes
 - Build B can use the reserved capacity and is granted 4 nodes
 
-**Three Full-Budget Requests Launched Together** (16 total nodes, strict policy disabled)
+**Three Full-Budget Requests Launched Together** (16 total nodes, reservation and per-build cap disabled)
 - Builds A, B, and C are launched at roughly the same time, each requesting 16 nodes
-  - *Note*: This is the default request when `/m` is specified without a value on a 16-logical-processor machine, or when a host explicitly sets `MaxNodeCount` to 16
-- Strict policy is disabled by setting both `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES=0` and `MSBUILDCOORDINATORMAXNODESPERBUILD=0`
+  - *Note*: This is the default request when `/m` is specified without a value on a 16-logical-processor machine, or when a caller explicitly sets `MaxNodeCount` to 16
+- Reservation and per-build cap are disabled by setting both `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES=0` and `MSBUILDCOORDINATORMAXNODESPERBUILD=0`
 - Build A gets all 16 nodes
 - Builds B and C receive `WaitMessage`
 - When Build A releases, the wait queue drains with available 16 and 2 waiters
 - Build B: fair_share = max(1, 16 / 2) = 8 -> granted min(8, 16) = 8
 - Build C: fair_share = max(1, 8 / 1) = 8 -> granted min(8, 16) = 8
 
-**Three Full-Budget Requests Launched Together** (16 total nodes, auto strict policy)
+**Three Full-Budget Requests Launched Together** (16 total nodes, computed defaults)
 - Builds A, B, and C are launched at roughly the same time, each requesting 16 nodes
-- Auto policy reserves 4 nodes for high-priority work and caps one build at 4 nodes
-- Each normal build gets one 4-node slice, for 12 active normal nodes total
+- Computed defaults reserve 4 nodes for high-priority work and cap one build at 4 nodes
+- Each normal build gets one 4-node grant, for 12 active normal nodes total
 
-**Queued Full-Budget Request** (16 total nodes, auto strict policy)
+**Queued Full-Budget Request** (16 total nodes, computed defaults)
 - Three normal builds are active with 4 nodes each
 - A fourth normal build requests 16 nodes
 - Only reserved high-priority capacity remains, so the fourth normal build receives `WaitMessage`
 - A high-priority build requesting 16 nodes can still receive a 4-node grant
 
-**Uncapped Fair-Share Scenario** (8 total nodes, strict policy disabled)
+**Uncapped Fair-Share Scenario** (8 total nodes, reservation and per-build cap disabled)
 - Build A and Build X are active with 4 nodes each (budget fully allocated)
 - Build B requests 6 and Build C requests 8 while available is 0, so both are queued
 - When Build A releases, drain begins with available 4 and 2 waiters
@@ -388,12 +392,12 @@ Overflow capacity does not need a separate policy knob. Users who intentionally 
 | `MSBUILDCOORDINATORHEARTBEAT` | 5000 | Override heartbeat interval (ms) |
 | `MSBUILDCOORDINATORSHUTDOWNTIMEOUT` | 60000 | Override shutdown timeout (ms) |
 | `MSBUILDCOORDINATORGRANTID` | (empty) | Internal token used by child processes to join an active root grant |
-| `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` | `Normal` | Request coordinator queue priority for this build. Valid values are `Low`, `Normal`, and `High`; missing or invalid values use `Normal`. |
-| `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES` | Auto: 0 for budgets below 8; otherwise 4 | Reserve nodes from low/normal-priority grants for high-priority requests. Set to 0 to disable. Missing, negative, or non-integer values use Auto. |
-| `MSBUILDCOORDINATORMAXNODESPERBUILD` | Auto: uncapped for budgets below 8; otherwise 4 | Cap the number of nodes granted to one build. Set to 0 to disable. Missing, negative, or non-integer values use Auto. |
-| `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` | 3 | Number of bypasses required before a queued request ages upward by one effective priority level. Missing, non-positive, or non-integer values use 3. |
+| `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` | `Normal` | Request coordinator queue priority for this build. Valid values are `Low`, `Normal`, and `High`; missing, empty, or invalid values use `Normal`. |
+| `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES` | Computed default: 0 for budgets below 8; otherwise 4 | Reserve nodes from low/normal-priority grants for high-priority requests. Set to 0 to disable. Missing, empty, negative, or non-integer values use the computed default. |
+| `MSBUILDCOORDINATORMAXNODESPERBUILD` | Computed default: uncapped for budgets below 8; otherwise 4 | Cap the number of nodes granted to one build. Set to 0 to disable. Missing, empty, negative, or non-integer values use the computed default. |
+| `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` | 3 | Number of bypasses required before a queued request ages upward by one effective priority level. Missing, empty, non-positive, or non-integer values use 3. |
 
-*Note*: `MSBUILDCOORDINATORNODEBUDGET` remains the primary knob for total machine budget. Set it higher than the processor count to intentionally experiment with oversubscription. For example, on a 16-core machine, `MSBUILDCOORDINATORNODEBUDGET=20` with auto strict policy allows four 4-node normal slices plus 4 nodes reserved for high-priority work. When auto strict policy resolves to an active reservation or cap, coordinator startup/debug output includes the resolved policy and the relevant opt-out environment variables.
+*Note*: `MSBUILDCOORDINATORNODEBUDGET` controls the total machine budget. Set it higher than the processor count to intentionally experiment with oversubscription. For example, on a 16-core machine, `MSBUILDCOORDINATORNODEBUDGET=20` with computed defaults allows four 4-node normal grants plus 4 nodes reserved for high-priority work. When the computed defaults enable a reservation or cap, coordinator startup/debug output includes the resolved values and the relevant opt-out environment variables.
 
 ---
 
@@ -427,7 +431,7 @@ The coordinator detects stalled or crashed clients through periodic heartbeats:
 
 When a build completes normally:
 
-1. Client sends `ReleaseNodesMessage` for its connection
+1. Client sends `ReleaseNodesMessage` for the grant associated with its connection
 2. Coordinator frees those nodes
 3. Processes waiting queue to allocate freed nodes to waiting builds
 4. If no active or waiting clients remain, coordinator enters timeout mode
