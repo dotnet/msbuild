@@ -116,9 +116,9 @@
          in our public surface). At runtime we still bind to whatever NuGet.Frameworks.dll the
          host SDK ships, so per the toolset-vs-product test in dotnet/arcade-services'
          docs/Darc.md this is a toolset dependency, not a product one. -->
-    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.61">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.72">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>cb56946c2b640233513200754ed2948ef0e4880b</Sha>
+      <Sha>5628a8b06b87cbd0e05eadb9695c7737c3c59cbe</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.9.0-1.26328.17">
       <Uri>https://github.com/dotnet/roslyn</Uri>
