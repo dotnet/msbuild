@@ -2064,6 +2064,14 @@ namespace Microsoft.Build.CommandLine
             // Add a property to indicate that a Restore is executing
             restoreGlobalProperties[MSBuildConstants.MSBuildIsRestoring] = bool.TrueString;
 
+            // Add the property that NuGet passes when it re-invokes the build during restore. NuGet's restore targets pass
+            // ExcludeRestorePackageImports=true as a global property, which normally forces a second evaluation of every project.
+            // Setting it up front here means the initial evaluation already matches, so it is reused instead of being discarded.
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9))
+            {
+                restoreGlobalProperties[MSBuildConstants.ExcludeRestorePackageImports] = bool.TrueString;
+            }
+
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
             //  - BuildRequestDataFlags.SkipNonexistentTargets to ignore missing targets since Restore does not require that all targets exist
