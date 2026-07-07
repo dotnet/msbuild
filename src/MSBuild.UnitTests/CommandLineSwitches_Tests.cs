@@ -1133,6 +1133,7 @@ namespace Microsoft.Build.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.10");
+                ChangeWaves.ResetStateForTests();
 
                 CommandLineSwitches switches = new CommandLineSwitches();
                 switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:Clean;Build", "\"Clean;Build\"", true, true, false);

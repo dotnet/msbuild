@@ -127,6 +127,16 @@
         <target state="translated">Visual Studio のバージョン "{0}" はサポートされていません。列挙 Microsoft.Build.Utilities.VisualStudioVersion から値を指定してください。</target>
         <note />
       </trans-unit>
+      <trans-unit id="_0_contains_no_elements">
+        <source>'{0}' contains no elements.</source>
+        <target state="new">'{0}' contains no elements.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="_0_does_not_contain_matching_element">
+        <source>'{0}' does not contain matching element.</source>
+        <target state="new">'{0}' does not contain matching element.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

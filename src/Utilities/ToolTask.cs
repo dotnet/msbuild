@@ -58,7 +58,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     // INTERNAL WARNING: DO NOT USE the Log property in this class! Log points to resources in the task assembly itself, and
     // we want to use resources from Utilities. Use LogPrivate (for private Utilities resources) and LogShared (for shared MSBuild resources)
-    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask
+    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
         private static readonly bool s_preserveTempFiles = string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
 
@@ -213,6 +213,8 @@ namespace Microsoft.Build.Utilities
         /// which cannot be set from an MSBuild project.
         /// </remarks>
         public string[] EnvironmentVariables { get; set; }
+
+        public virtual TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Project visible property that allows the user to specify an amount of time after which the task executable
@@ -529,7 +531,7 @@ namespace Microsoft.Build.Utilities
                 pathToTool = Path.Combine(ToolPath, ToolExe);
             }
 
-            if (string.IsNullOrWhiteSpace(pathToTool) || (ToolPath == null && !FileSystems.Default.FileExists(pathToTool)))
+            if (string.IsNullOrWhiteSpace(pathToTool) || (ToolPath == null && !FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(pathToTool))))
             {
                 // Otherwise, try to find the tool ourselves.
                 pathToTool = GenerateFullPathToTool();
@@ -550,7 +552,7 @@ namespace Microsoft.Build.Utilities
                 bool isOnlyFileName = Path.GetFileName(pathToTool).Length == pathToTool.Length;
                 if (!isOnlyFileName)
                 {
-                    bool isExistingFile = FileSystems.Default.FileExists(pathToTool);
+                    bool isExistingFile = FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(pathToTool));
                     if (!isExistingFile)
                     {
                         LogPrivate.LogErrorWithCodeFromResources("ToolTask.ToolExecutableNotFound", pathToTool);
@@ -657,7 +659,9 @@ namespace Microsoft.Build.Utilities
                 LogPrivate.LogWarningWithCodeFromResources("ToolTask.CommandTooLong", GetType().Name);
             }
 
-            ProcessStartInfo startInfo = new ProcessStartInfo(pathToTool, commandLine);
+            ProcessStartInfo startInfo = TaskEnvironment.GetProcessStartInfo();
+            startInfo.FileName = pathToTool;
+            startInfo.Arguments = commandLine;
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardError = true;
@@ -676,11 +680,15 @@ namespace Microsoft.Build.Utilities
 
             // Generally we won't set a working directory, and it will use the current directory
             string workingDirectory = GetWorkingDirectory();
-            if (workingDirectory != null)
+            if (!string.IsNullOrEmpty(workingDirectory))
             {
-                startInfo.WorkingDirectory = workingDirectory;
+                startInfo.WorkingDirectory = TaskEnvironment.GetAbsolutePath(workingDirectory);
             }
 
+            // Apply task-level environment variable overrides (both the obsolete EnvironmentOverride
+            // and the current EnvironmentVariables). Prefers the pre-parsed _environmentVariablePairs
+            // populated by Execute(), falling back to parsing EnvironmentVariables directly for
+            // callers outside the normal Execute() path.
             // Old style environment overrides
 #pragma warning disable 0618 // obsolete
             Dictionary<string, string> envOverrides = EnvironmentOverride;
@@ -699,6 +707,19 @@ namespace Microsoft.Build.Utilities
                 foreach (KeyValuePair<string, string> variable in _environmentVariablePairs)
                 {
                     startInfo.Environment[variable.Key] = variable.Value;
+                }
+            }
+            else if (EnvironmentVariables != null)
+            {
+                // Fallback for callers outside the normal Execute() path
+                // where _environmentVariablePairs hasn't been populated yet.
+                foreach (string entry in EnvironmentVariables)
+                {
+                    string[] nameValuePair = entry.Split(s_equalsSplitter, 2);
+                    if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
+                    {
+                        startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
+                    }
                 }
             }
 
@@ -747,8 +768,8 @@ namespace Microsoft.Build.Utilities
 
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
-                _standardOutputEOF = new ManualResetEvent(false);
-                _standardErrorEOF = new ManualResetEvent(false);
+                // One count each for the stdout and stderr EOF notifications.
+                _eofCountdown = new CountdownEvent(2);
             }
 
             _toolExited = new ManualResetEvent(false);
@@ -844,8 +865,8 @@ namespace Microsoft.Build.Utilities
                     _standardErrorDataAvailable.Dispose();
                     _standardOutputDataAvailable.Dispose();
 
-                    _standardOutputEOF?.Dispose();
-                    _standardErrorEOF?.Dispose();
+                    _eofCountdown?.Dispose();
+                    _eofCountdown = null;
 
                     _toolExited.Dispose();
                     _toolTimeoutExpired.Dispose();
@@ -869,23 +890,35 @@ namespace Microsoft.Build.Utilities
         /// <param name="fileName">File to delete</param>
         protected void DeleteTempFile(string fileName)
         {
+            AbsolutePath filePath = !string.IsNullOrEmpty(fileName) ? TaskEnvironment.GetAbsolutePath(fileName) : new AbsolutePath(fileName, ignoreRootedCheck: true);
+            DeleteTempFile(filePath);
+        }
+
+        /// <summary>
+        /// Overload of <see cref="DeleteTempFile(string)"/> that accepts an <see cref="AbsolutePath"/>.
+        /// If the delete fails for some reason (e.g. file locked by anti-virus) then
+        /// the call will not throw an exception. Instead a warning will be logged, but the build will not fail.
+        /// </summary>
+        /// <param name="filePath">Absolute path to file to delete</param>
+        protected void DeleteTempFile(AbsolutePath filePath)
+        {
             if (s_preserveTempFiles)
             {
-                Log.LogMessageFromText($"Preserving temporary file '{fileName}'", MessageImportance.Low);
+                Log.LogMessageFromText($"Preserving temporary file '{filePath.OriginalValue}'", MessageImportance.Low);
                 return;
             }
 
             try
             {
-                File.Delete(fileName);
+                File.Delete(filePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(fileName);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message, lockedFileMessage);
+                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
             }
         }
 
@@ -1027,7 +1060,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 int timeout = TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
-                string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
+                string timeoutFromEnvironment = TaskEnvironment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
                 {
                     if (int.TryParse(timeoutFromEnvironment, out int result) && result >= 0)
@@ -1096,10 +1129,21 @@ namespace Microsoft.Build.Utilities
                 //
                 // Use a bounded timeout as a safety net for the grandchild case where
                 // EOF never arrives because grand child inherited the pipe and keeps it open.
-                const int eofTimeoutSec = 2;
+                const int eofTimeoutSec = 30;
 
-                WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                // CountdownEvent.Wait is STA-safe (it falls back to a single-handle wait),
+                // unlike WaitHandle.WaitAll over multiple handles which throws
+                // NotSupportedException on STA threads (for example when a task such as
+                // AspNetCompiler runs on an STA thread).
+                bool allEOFReceived = _eofCountdown.Wait(TimeSpan.FromSeconds(eofTimeoutSec));
+                if (!allEOFReceived)
+                {
+                    // Timeout: a grandchild process likely still holds the pipe open.
+                    // Drain whatever data has already arrived before returning.
+                    LogMessagesFromStandardError();
+                    LogMessagesFromStandardOutput();
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.PipeEOFTimeout", eofTimeoutSec);
+                }
             }
             else
             {
@@ -1274,18 +1318,14 @@ namespace Microsoft.Build.Utilities
         {
             if (e.Data == null)
             {
-                // The AsyncStreamReader sends Data=null when the pipe reaches EOF.
-                // Signal the appropriate EOF event so WaitForProcessExit knows
-                // all data from this stream has been delivered.
-                ManualResetEvent eofEvent = (dataQueue == _standardErrorData) ? _standardErrorEOF : _standardOutputEOF;
-                if (eofEvent != null)
+                // The AsyncStreamReader sends Data=null exactly once per stream when the
+                // pipe reaches EOF. Count it down so WaitForProcessExit knows when all
+                // data from both streams has been delivered.
+                lock (_eventCloseLock)
                 {
-                    lock (_eventCloseLock)
+                    if (!_eventsDisposed && _eofCountdown is { IsSet: false })
                     {
-                        if (!_eventsDisposed)
-                        {
-                            eofEvent.Set();
-                        }
+                        _eofCountdown.Signal();
                     }
                 }
 
@@ -1380,17 +1420,22 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="filename"></param>
         /// <returns>The location of the file, or null if file not found.</returns>
-        internal static string FindOnPath(string filename)
+        internal string FindOnPath(string filename)
         {
             // Get path from the environment and split path separator
-            return Environment.GetEnvironmentVariable("PATH")?
+            return TaskEnvironment.GetEnvironmentVariable("PATH")?
                 .Split(MSBuildConstants.PathSeparatorChar)?
                 .Where(path =>
                 {
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        return false;
+                    }
+
                     try
                     {
                         // The PATH can contain anything, including bad characters
-                        return FileSystems.Default.DirectoryExists(path);
+                        return FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(path));
                     }
                     catch (Exception)
                     {
@@ -1398,7 +1443,7 @@ namespace Microsoft.Build.Utilities
                     }
                 })
                 .Select(folderPath => Path.Combine(folderPath, filename))
-                .FirstOrDefault(fullPath => !string.IsNullOrEmpty(fullPath) && FileSystems.Default.FileExists(fullPath));
+                .FirstOrDefault(fullPath => !string.IsNullOrEmpty(fullPath) && FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(fullPath)));
         }
 
         #endregion
@@ -1823,16 +1868,11 @@ namespace Microsoft.Build.Utilities
         private bool _eventsDisposed;
 
         /// <summary>
-        /// Signalled when the stdout AsyncStreamReader reaches EOF (sends Data=null).
-        /// Used by WaitForProcessExit to know when all stdout data has been delivered.
+        /// Counts down once for each of stdout/stderr when its AsyncStreamReader reaches
+        /// EOF (sends Data=null). Used by WaitForProcessExit to know when all data from
+        /// both streams has been delivered.
         /// </summary>
-        private ManualResetEvent _standardOutputEOF;
-
-        /// <summary>
-        /// Signalled when the stderr AsyncStreamReader reaches EOF (sends Data=null).
-        /// Used by WaitForProcessExit to know when all stderr data has been delivered.
-        /// </summary>
-        private ManualResetEvent _standardErrorEOF;
+        private CountdownEvent _eofCountdown;
 
         /// <summary>
         /// List of name, value pairs to be passed to the spawned tool's environment.

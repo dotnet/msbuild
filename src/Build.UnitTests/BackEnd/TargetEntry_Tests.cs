@@ -17,7 +17,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
-using Xunit.Abstractions;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable

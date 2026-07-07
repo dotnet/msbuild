@@ -15,7 +15,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Exception = System.Exception;
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;

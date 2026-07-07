@@ -5,20 +5,25 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <!-- Not a standard MSBuild unit test — uses Roslyn analyzer testing infra.
-         IsUnitTestProject=false prevents Directory.Build.targets from adding
-         shared test files (TestAssemblyInfo.cs, TestProgram.cs). -->
-    <IsUnitTestProject>false</IsUnitTestProject>
-    <!-- CodeAnalysis.Testing packages have transitive NuGet dependencies
-         that conflict with the repo's centrally-managed NuGet versions. -->
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+         DisableTestSharedFiles=true prevents Directory.Build.targets from adding
+         shared test files (TestAssemblyInfo.cs). -->
+    <DisableTestSharedFiles>true</DisableTestSharedFiles>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.2" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
-    <PackageReference Include="Shouldly" Version="4.3.0" />
-    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Shouldly" />
+
+    <!-- Re-declares deps of roslyn testing packages. MSBuild pins NuGet to 7.x, while testing packages are on 6.x -->
+    <!-- They are not binary compatible and so we must ensure to keep the same version as the testing packages. -->
+    <!-- Note that MSBuild uses CentralPackageTransitivePinningEnabled -->
+    <PackageReference Include="NuGet.Common" VersionOverride="6.3.4" />
+    <PackageReference Include="NuGet.Packaging" VersionOverride="6.3.4" />
+    <PackageReference Include="NuGet.Protocol" VersionOverride="6.3.4" />
+    <PackageReference Include="NuGet.Resolver" VersionOverride="6.3.4" />
+    <PackageReference Include="NuGet.Frameworks" VersionOverride="6.3.4" />
   </ItemGroup>
 
   <ItemGroup>
