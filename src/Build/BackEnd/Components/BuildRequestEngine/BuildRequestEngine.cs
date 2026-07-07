@@ -1270,7 +1270,8 @@ namespace Microsoft.Build.BackEnd
                             request: newRequest,
                             configInitialTargets: matchingConfig.ProjectInitialTargets,
                             configDefaultTargets: matchingConfig.ProjectDefaultTargets,
-                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
+                            allowedTopLevelTargets: GetIsolationAllowedTopLevelTargets(issuingEntry.RequestConfiguration, matchingConfig, newRequest));
 
                         if (response.Type == ResultsCacheResponseType.Satisfied)
                         {
@@ -1347,6 +1348,41 @@ namespace Microsoft.Build.BackEnd
                     ActivateBuildRequest(issuingEntry);
                 }
             }
+        }
+
+        /// <summary>
+        /// Computes the set of top-level targets that a cross-project reference is allowed to be satisfied from the local
+        /// results cache for in a strictly isolated build, or null if no such restriction applies.
+        /// </summary>
+        /// <remarks>
+        /// In an isolated static graph build, target results produced merely as a dependency (via DependsOnTargets) can
+        /// accumulate in a node's local results cache and satisfy a cross-project reference to an undeclared target when the
+        /// referenced project happened to build on the same node. That makes the build result depend on node scheduling.
+        /// Restricting cache satisfaction to the referenced configuration's explicitly requested (graph-declared) targets
+        /// forces the reference to the scheduler where the isolation constraint check fires deterministically.
+        /// </remarks>
+        private IReadOnlyCollection<string> GetIsolationAllowedTopLevelTargets(BuildRequestConfiguration parentConfig, BuildRequestConfiguration requestConfig, BuildRequest request)
+        {
+            // Only enforce for strict isolation. Non-isolated and message-only modes keep their existing behavior.
+            if (_componentHost.BuildParameters.ProjectIsolationMode != ProjectIsolationMode.True
+                || parentConfig == null
+                || request.IsRootRequest
+                || request.SkipStaticGraphIsolationConstraints)
+            {
+                return null;
+            }
+
+            // Allow self references (a project building itself, potentially with different global properties) without restriction.
+            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            IReadOnlyCollection<string> requestedTargets = requestConfig.RequestedTargets;
+
+            // If the referenced configuration has no explicitly requested targets recorded, do not restrict; preserve
+            // existing behavior for this edge case (graph nodes are always requested with explicit targets).
+            return requestedTargets != null && requestedTargets.Count > 0 ? requestedTargets : null;
         }
 
         /// <summary>

@@ -159,10 +159,31 @@ namespace Microsoft.Build.BackEnd
         /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
+        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets = null)
         {
             Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
+
+            // In isolated builds a cross-project reference may only be satisfied from the cache for targets that were
+            // explicitly requested for the referenced configuration (i.e. declared via ProjectReferenceTargets and built
+            // by the static graph). A target that merely has a cached result because it ran as a dependency of another
+            // target must not satisfy the reference, otherwise the build result would depend on node scheduling (whether
+            // the dependency happened to run on the same node). Treat such requests as a cache miss so the isolation
+            // constraint check runs and deterministically reports the incomplete graph protocol.
+            if (allowedTopLevelTargets != null)
+            {
+                List<string> targetsToCheck = request.Targets.Count > 0 ? request.Targets : configDefaultTargets;
+                if (targetsToCheck != null)
+                {
+                    foreach (string target in targetsToCheck)
+                    {
+                        if (!ContainsIgnoreCase(allowedTopLevelTargets, target))
+                        {
+                            return response;
+                        }
+                    }
+                }
+            }
 
             lock (_resultsByConfiguration)
             {
@@ -297,6 +318,22 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.Equal(componentType, BuildComponentType.ResultsCache, $"Cannot create components of type {componentType}");
             return new ResultsCache();
+        }
+
+        /// <summary>
+        /// Determines whether the given collection contains the specified target name, ignoring case.
+        /// </summary>
+        private static bool ContainsIgnoreCase(IReadOnlyCollection<string> targets, string target)
+        {
+            foreach (string candidate in targets)
+            {
+                if (string.Equals(candidate, target, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
