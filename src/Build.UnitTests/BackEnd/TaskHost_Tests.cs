@@ -57,6 +57,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private MockIRequestBuilderCallback _mockRequestCallback;
 
         /// <summary>
+        /// Creates a stub TaskEnvironment for testing that uses the current process environment.
+        /// </summary>
+        private static TaskEnvironment CreateStubTaskEnvironment() => TaskEnvironmentHelper.CreateForTest();
+
+        /// <summary>
         /// Set up and initialize before each test is run
         /// </summary>
         public TaskHost_Tests()
@@ -77,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             configuration.Project = new ProjectInstance(ProjectRootElement.Create());
 
-            BuildRequestEntry entry = new BuildRequestEntry(buildRequest, configuration);
+            BuildRequestEntry entry = new BuildRequestEntry(buildRequest, configuration, CreateStubTaskEnvironment());
 
             BuildResult buildResult = new BuildResult(buildRequest, false);
             buildResult.AddResultsForTarget("Build", new TargetResult(new TaskItem[] { new TaskItem("IamSuper", configuration.ProjectFullPath) }, BuildResultUtilities.GetSkippedResult()));

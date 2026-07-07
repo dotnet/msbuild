@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.IO;
-using Microsoft.Build.Shared;
 
 #nullable disable
 

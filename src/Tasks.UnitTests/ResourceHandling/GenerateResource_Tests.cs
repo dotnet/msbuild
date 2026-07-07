@@ -446,6 +446,55 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
+        /// <summary>
+        /// Force out-of-date with ShouldRebuildResgenOutputFile on a linked text file.
+        /// This is the regression test for the bug where linked text files
+        /// were not tracked in the dependency cache, so modifying them did not trigger
+        /// resource regeneration.
+        /// </summary>
+        [Fact]
+        public void ForceOutOfDateLinkedTextFile()
+        {
+            var folder = _env.CreateFolder(createFolder: true);
+            var linkedTextFile = folder.CreateFile("linked.txt", "original content");
+
+            // Build a resx that references the text file via ResXFileRef as System.String,
+            string linkedTextData =
+                "  <data name='LinkedText' type='System.Resources.ResXFileRef, System.Windows.Forms'>\xd\xa"
+                + "    <value>" + linkedTextFile.Path + ";System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>\xd\xa"
+                + "  </data>\xd\xa";
+
+            string resxFile = Utilities.WriteTestResX(false, null, linkedTextData, _env.CreateFile(folder, ".resx").Path, includeDefaultString: false);
+            string stateFile = _env.GetTempFile(".cache").Path;
+
+            // First run: generate resources.
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized: true, _env);
+            t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+            t.StateFile = new TaskItem(stateFile);
+            Utilities.ExecuteTask(t);
+
+            Path.GetExtension(t.OutputResources[0].ItemSpec).ShouldBe(".resources");
+            Utilities.AssertStateFileWasWritten(t);
+
+            // Read back the compiled .resources and verify it contains the original content.
+            Utilities.ReadResourceValue(t.OutputResources[0].ItemSpec, "LinkedText").ShouldBe("original content");
+
+            // Update the linked text file with new content and set its timestamp
+            // unambiguously into the future so the task detects it as newer than the output,
+            // regardless of filesystem timestamp granularity.
+            File.WriteAllText(linkedTextFile.Path, "updated content");
+            File.SetLastWriteTime(linkedTextFile.Path, DateTime.Now.AddDays(1));
+
+            // Second run: should detect the linked text file is newer and regenerate.
+            GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized: true, _env);
+            t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+            t2.StateFile = new TaskItem(stateFile);
+            Utilities.ExecuteTask(t2);
+
+            // Read back the compiled .resources and verify it contains the updated content.
+            Utilities.ReadResourceValue(t2.OutputResources[0].ItemSpec, "LinkedText").ShouldBe("updated content");
+        }
+
         [Fact]
         public void QuestionOutOfDateByDeletion()
         {
@@ -1664,6 +1713,227 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         public void STRWithResourcesNamespaceAndSTRNamespaceVB()
         {
             Utilities.STRNamespaceTestHelper("VB", "MyResourcesNamespace", "MySTClassNamespace", _output);
+        }
+
+        /// <summary>
+        /// When a resource key matches a reserved name,
+        /// the STR property is skipped and a warning MSB3827 is logged.
+        /// The task should still succeed.
+        /// </summary>
+        [Fact]
+        public void StronglyTypedResources_ReservedName_LogsWarning()
+        {
+            GenerateResource t = Utilities.CreateTask(_output);
+            try
+            {
+                // Create a resx with a "ResourceManager" and "Culture" keys, which collides with the
+                // reserved property name added by StronglyTypedResourceBuilder.
+                string resxFile = Utilities.WriteTestResX(false, null,
+                    "  <data name=\"ResourceManager\">\r\n" +
+                    "    <value>ShouldBeSkipped</value>\r\n" +
+                    "  </data>\r\n" +
+                    "  <data name=\"Culture\">\r\n" +
+                    "    <value>ShouldBeSkipped</value>\r\n" +
+                    "  </data>\r\n");
+
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                t.StronglyTypedLanguage = "CSharp";
+                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+                Utilities.ExecuteTask(t);
+
+                // The file should still be generated — only the reserved-name properties are skipped.
+                File.Exists(t.StronglyTypedFileName).ShouldBeTrue();
+                string generatedCode = File.ReadAllText(t.StronglyTypedFileName);
+
+                // "MyString" (the standard test resource) should still appear.
+                generatedCode.ShouldContain("MyString");
+
+                // The skipped resources should NOT have a GetString accessor in the generated code.
+                generatedCode.ShouldNotContain("GetString(\"ResourceManager\"");
+                generatedCode.ShouldNotContain("GetString(\"Culture\"");
+
+                // Warning about the reserved name should be logged.
+                Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedReservedName", "ResourceManager", "ResourceManager, Culture");
+                Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedReservedName", "Culture", "ResourceManager, Culture");
+
+                // Exactly 2 warnings (one per reserved name), no errors.
+                ((MockEngine)t.BuildEngine).Warnings.ShouldBe(2);
+                ((MockEngine)t.BuildEngine).Errors.ShouldBe(0);
+            }
+            finally
+            {
+                File.Delete(t.Sources[0].ItemSpec);
+                if (t.StronglyTypedFileName != null)
+                {
+                    FileUtilities.DeleteNoThrow(t.StronglyTypedFileName);
+                }
+
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    FileUtilities.DeleteNoThrow(item.ItemSpec);
+                }
+            }
+        }
+
+        /// <summary>
+        /// When a resource key cannot be converted to a valid identifier (e.g. "=", "`"),
+        /// the STR property is skipped and a warning MSB3828 is logged.
+        /// The "=" characters are not in the s_charsToReplace list, so they survive
+        /// character replacement, and cannot become a valid C# identifier even after
+        /// CreateValidIdentifier and underscore-prepend attempts.
+        /// </summary>
+        [Fact]
+        public void StronglyTypedResources_InvalidIdentifier_LogsWarning()
+        {
+            GenerateResource t = Utilities.CreateTask(_output);
+            try
+            {
+                string resxFile = Utilities.WriteTestResX(false, null,
+                    "  <data name=\"=\">\r\n" +
+                    "    <value>EqualSign</value>\r\n" +
+                    "  </data>\r\n" +
+                    "  <data name=\"`\">\r\n" +
+                    "    <value>Backtick</value>\r\n" +
+                    "  </data>\r\n");
+
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                t.StronglyTypedLanguage = "CSharp";
+                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+                Utilities.ExecuteTask(t);
+
+                File.Exists(t.StronglyTypedFileName).ShouldBeTrue();
+                string generatedCode = File.ReadAllText(t.StronglyTypedFileName);
+                generatedCode.ShouldContain("MyString");
+
+                // The skipped resource should NOT have a GetString accessor in the generated code.
+                generatedCode.ShouldNotContain("GetString(\"=\"");
+                generatedCode.ShouldNotContain("GetString(\"`\"");
+
+                // Warning about invalid identifier should be logged.
+                Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedInvalidIdentifier", "=");
+                Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedInvalidIdentifier", "`");
+
+                // Exactly 2 warnings, no errors.
+                ((MockEngine)t.BuildEngine).Warnings.ShouldBe(2);
+                ((MockEngine)t.BuildEngine).Errors.ShouldBe(0);
+            }
+            finally
+            {
+                File.Delete(t.Sources[0].ItemSpec);
+                if (t.StronglyTypedFileName != null)
+                {
+                    FileUtilities.DeleteNoThrow(t.StronglyTypedFileName);
+                }
+
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    FileUtilities.DeleteNoThrow(item.ItemSpec);
+                }
+            }
+        }
+
+        /// <summary>
+        /// When two resource keys collide after identifier normalization (e.g. "foo-bar" and "foo_bar"),
+        /// both are skipped and a warning MSB3829 is logged for each, mentioning the other colliding key.
+        /// </summary>
+        [Fact]
+        public void StronglyTypedResources_NameCollision_LogsWarning()
+        {
+            GenerateResource t = Utilities.CreateTask(_output);
+            try
+            {
+                // "foo-bar" normalizes to "foo_bar", which collides with "foo_bar".
+                string resxFile = Utilities.WriteTestResX(false, null,
+                    "  <data name=\"foo-bar\">\r\n" +
+                    "    <value>Value1</value>\r\n" +
+                    "  </data>\r\n" +
+                    "  <data name=\"foo_bar\">\r\n" +
+                    "    <value>Value2</value>\r\n" +
+                    "  </data>\r\n");
+
+                t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+                t.StronglyTypedLanguage = "CSharp";
+                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+                Utilities.ExecuteTask(t);
+
+                File.Exists(t.StronglyTypedFileName).ShouldBeTrue();
+                string generatedCode = File.ReadAllText(t.StronglyTypedFileName);
+
+                // "MyString" should still be generated.
+                generatedCode.ShouldContain("MyString");
+
+                // Neither colliding key should produce a property.
+                generatedCode.ShouldNotContain("foo_bar");
+
+                // Both colliding keys should have a warning referencing the other.
+                Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedNameCollision", "foo-bar", "foo_bar");
+                Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedNameCollision", "foo_bar", "foo-bar");
+
+                // Exactly 2 warnings (one per colliding key), no errors.
+                ((MockEngine)t.BuildEngine).Warnings.ShouldBe(2);
+                ((MockEngine)t.BuildEngine).Errors.ShouldBe(0);
+            }
+            finally
+            {
+                File.Delete(t.Sources[0].ItemSpec);
+                if (t.StronglyTypedFileName != null)
+                {
+                    FileUtilities.DeleteNoThrow(t.StronglyTypedFileName);
+                }
+
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    FileUtilities.DeleteNoThrow(item.ItemSpec);
+                }
+            }
+        }
+
+        /// <summary>
+        /// When all resources are valid, no skip warnings are logged —
+        /// verifies that warnings are only emitted when needed.
+        /// </summary>
+        [Fact]
+        public void StronglyTypedResources_NoProblematicKeys_NoSkipWarnings()
+        {
+            GenerateResource t = Utilities.CreateTask(_output);
+            try
+            {
+                string textFile = Utilities.WriteTestText(null, null);
+                t.Sources = new ITaskItem[] { new TaskItem(textFile) };
+                t.StronglyTypedLanguage = "CSharp";
+                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+
+                Utilities.ExecuteTask(t);
+
+                File.Exists(t.StronglyTypedFileName).ShouldBeTrue();
+
+                // None of the skip warnings should appear.
+                string log = ((MockEngine)t.BuildEngine).Log;
+                log.ShouldNotContain("MSB3827");
+                log.ShouldNotContain("MSB3828");
+                log.ShouldNotContain("MSB3829");
+                log.ShouldNotContain("MSB3830");
+
+                // No warnings or errors at all.
+                ((MockEngine)t.BuildEngine).Warnings.ShouldBe(0);
+                ((MockEngine)t.BuildEngine).Errors.ShouldBe(0);
+            }
+            finally
+            {
+                File.Delete(t.Sources[0].ItemSpec);
+                if (t.StronglyTypedFileName != null)
+                {
+                    FileUtilities.DeleteNoThrow(t.StronglyTypedFileName);
+                }
+
+                foreach (ITaskItem item in t.FilesWritten)
+                {
+                    FileUtilities.DeleteNoThrow(item.ItemSpec);
+                }
+            }
         }
     }
 
@@ -3816,6 +4086,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         }
 
         /// <summary>
+        /// Reads a single resource value by key from a compiled .resources file.
+        /// </summary>
+        public static object ReadResourceValue(string resourcesFilePath, string resourceName)
+        {
+            using var reader = new System.Resources.ResourceReader(resourcesFilePath);
+            IDictionaryEnumerator enumerator = reader.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                if ((string)enumerator.Key == resourceName)
+                {
+                    return enumerator.Value;
+                }
+            }
+
+            throw new KeyNotFoundException($"Resource '{resourceName}' not found in '{resourcesFilePath}'.");
+        }
+        
+        /// <summary>
         /// Given an array of ITaskItems, checks to make sure that at least one read tlog and at least one
         /// write tlog exist, and that they were written to disk.  If that is not true, asserts.
         /// </summary>
@@ -4013,7 +4301,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The content of the resx blob as a string</returns>
         /// <returns>The name of the text file</returns>
-        public static string GetTestResXContent(bool useType, string linkedBitmap, string extraToken, bool useInvalidType)
+        public static string GetTestResXContent(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, bool includeDefaultString = true)
         {
             StringBuilder resgenFileContents = new StringBuilder();
 
@@ -4032,11 +4320,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 + "    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\xd\xa"
                 + "  </resheader>\xd\xa");
 
-            resgenFileContents.Append(
-                 // A plain old string value.
-                 "  <data name=\"MyString\">\xd\xa"
-                + "    <value>MyValue</value>\xd\xa"
-                + "  </data>\xd\xa");
+            if (includeDefaultString)
+            {
+                resgenFileContents.Append(
+                     // A plain old string value.
+                     "  <data name=\"MyString\">\xd\xa"
+                    + "    <value>MyValue</value>\xd\xa"
+                    + "  </data>\xd\xa");
+            }
 
             if (extraToken != null)
             {
@@ -4091,9 +4382,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null, bool includeDefaultString = true)
         {
-            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite);
+            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite, includeDefaultString: includeDefaultString);
         }
 
         /// <summary>
@@ -4102,11 +4393,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, string resxFileToWrite = null, TestEnvironment env = null)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, string resxFileToWrite = null, TestEnvironment env = null, bool includeDefaultString = true)
         {
             string resgenFile = resxFileToWrite;
 
-            string contents = GetTestResXContent(useType, linkedBitmap, extraToken, useInvalidType);
+            string contents = GetTestResXContent(useType, linkedBitmap, extraToken, useInvalidType, includeDefaultString);
 
             if (env == null)
             {

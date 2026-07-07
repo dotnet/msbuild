@@ -118,11 +118,8 @@ namespace Microsoft.Build.BackEnd
                 { return TranslationDirection.ReadFromStream; }
             }
 
-            /// <summary>
-            /// Gets or sets the packet version associated with the stream.
-            /// This can be used to exclude various fields from translation for backwards compatibility.
-            /// </summary>
-            public byte PacketVersion { get; set; }
+            /// <inheritdoc/>
+            public byte? NegotiatedPacketVersion { get; set; }
 
             /// <summary>
             /// Translates a boolean.
@@ -191,6 +188,37 @@ namespace Microsoft.Build.BackEnd
 
             /// <inheritdoc/>
             public void Translate(ref uint unsignedInteger) => unsignedInteger = _reader.ReadUInt32();
+
+            /// <summary>
+            /// Translates a TaskHostParameters.
+            /// </summary>
+            /// <param name="value">The TaskHostParameters to be translated.</param>
+            public void Translate(ref TaskHostParameters value)
+            {
+                string runtime = null;
+                string architecture = null;
+                string dotnetHostPath = null;
+                string msBuildAssemblyPath = null;
+                bool? isTaskHostFactory = null;
+
+                Translate(ref runtime);
+                Translate(ref architecture);
+                Translate(ref dotnetHostPath);
+                Translate(ref msBuildAssemblyPath);
+
+                bool hasTaskHostFactory = _reader.ReadBoolean();
+                if (hasTaskHostFactory)
+                {
+                    isTaskHostFactory = _reader.ReadBoolean();
+                }
+
+                value = new TaskHostParameters(
+                    runtime: runtime,
+                    architecture: architecture,
+                    dotnetHostPath: dotnetHostPath,
+                    msBuildAssemblyPath: msBuildAssemblyPath,
+                    taskHostFactoryExplicitlyRequested: isTaskHostFactory);
+            }
 
             /// <summary>
             /// Translates an <see langword="int"/> array.
@@ -447,11 +475,6 @@ namespace Microsoft.Build.BackEnd
                 value = new System.TimeSpan(ticks);
             }
 
-            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.
-            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to
-            // compile this method out of that assembly.
-#if !CLR2COMPATIBILITY
-
             /// <summary>
             /// Translates a BuildEventContext
             /// </summary>
@@ -471,7 +494,6 @@ namespace Microsoft.Build.BackEnd
                     _reader.ReadInt32(),
                     _reader.ReadInt32());
             }
-#endif
 
             /// <summary>
             /// Translates a CultureInfo
@@ -481,38 +503,8 @@ namespace Microsoft.Build.BackEnd
             {
                 string cultureName = _reader.ReadString();
 
-#if CLR2COMPATIBILITY
-                // It may be that some culture codes are accepted on later .net framework versions
-                // but not on the older 3.5 or 2.0. Fallbacks are required in this case to prevent
-                // exceptions
-                value = LoadCultureWithFallback(cultureName);
-#else
                 value = new CultureInfo(cultureName);
-#endif
             }
-
-#if CLR2COMPATIBILITY
-            private static CultureInfo LoadCultureWithFallback(string cultureName)
-            {
-                CultureInfo cultureInfo;
-
-                return TryLoadCulture(cultureName, out cultureInfo) ? cultureInfo : CultureInfo.CurrentCulture;
-            }
-
-            private static bool TryLoadCulture(string cultureName, out CultureInfo cultureInfo)
-            {
-                try
-                {
-                    cultureInfo = new CultureInfo(cultureName);
-                    return true;
-                }
-                catch
-                {
-                    cultureInfo = null;
-                    return false;
-                }
-            }
-#endif
 
             /// <summary>
             /// Translates an enumeration.
@@ -977,11 +969,8 @@ namespace Microsoft.Build.BackEnd
                 { return TranslationDirection.WriteToStream; }
             }
 
-            /// <summary>
-            /// Gets or sets the packet version associated with the stream.
-            /// This can be used to exclude various fields from translation for backwards compatibility.
-            /// </summary>
-            public byte PacketVersion { get; set; }
+            /// <inheritdoc/>
+            public byte? NegotiatedPacketVersion { get; set; }
 
             /// <summary>
             /// Translates a boolean.
@@ -1087,6 +1076,30 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref double value)
             {
                 _writer.Write(value);
+            }
+
+            /// <summary>
+            /// Translates a TaskHostParameters.
+            /// </summary>
+            /// <param name="value">The TaskHostParameters to be translated.</param>
+            public void Translate(ref TaskHostParameters value)
+            {
+                string runtime = value.Runtime;
+                string architecture = value.Architecture;
+                string dotnetHostPath = value.DotnetHostPath;
+                string msBuildExecutablePath = value.MSBuildAssemblyPath;
+
+                Translate(ref runtime);
+                Translate(ref architecture);
+                Translate(ref dotnetHostPath);
+                Translate(ref msBuildExecutablePath);
+
+                bool hasTaskHostFactory = value.TaskHostFactoryExplicitlyRequested.HasValue;
+                _writer.Write(hasTaskHostFactory);
+                if (hasTaskHostFactory)
+                {
+                    _writer.Write(value.TaskHostFactoryExplicitlyRequested.Value);
+                }
             }
 
             /// <summary>
@@ -1288,11 +1301,6 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.Ticks);
             }
 
-            // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.
-            // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to
-            // compile this method out of that assembly.
-#if !CLR2COMPATIBILITY
-
             /// <summary>
             /// Translates a BuildEventContext
             /// </summary>
@@ -1311,7 +1319,6 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.TargetId);
                 _writer.Write(value.TaskId);
             }
-#endif
 
             /// <summary>
             /// Translates a CultureInfo

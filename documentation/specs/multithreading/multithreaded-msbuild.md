@@ -138,6 +138,8 @@ The scheduler is already capable of juggling multiple projects, and there's alre
 
 The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, CLI or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode creating all the thread nodes in the entry process for simplicity--in final production these will be in an [MSBuild Server process](#msbuild-server-integration).
 
+In the current implementation, enabling multithreaded mode implies that all worker nodes are in-proc. Out-of-proc worker-node topologies for multithreaded execution remain future work.
+
 ```mermaid
 sequenceDiagram
 
@@ -217,17 +219,36 @@ With a sidecar TaskHost per node, tasks will get the same constraints and freedo
 
 ## Thread-safe tasks
 
-To mark that a task is multithreaded-MSBuild-aware, we will introduce a new interface that tasks can implement. We will provide a new `TaskExecutionContext` object with information about the task invocation, including the current environment and working directory, so that tasks can access the same information they would have in a single-threaded or out-of-process execution.
+To mark that a task is multithreaded-MSBuild-aware, we use the `MSBuildMultiThreadableTaskAttribute` attribute. Tasks may also implement the `IMultiThreadableTask` interface to gain access to the `TaskEnvironment` object with information about the task invocation, including the current environment and working directory.
 
-To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the object provided by the engine (such as `context.GetEnvironmentVariable`).
+### Task Routing Strategy
+
+In multithreaded mode, MSBuild determines where each task should execute based on:
+
+* **Thread-safe tasks** (marked with `MSBuildMultiThreadableTaskAttribute`) run **in-process** within thread nodes
+* **All other tasks** (without the attribute) run in **sidecar TaskHost processes** to maintain isolation and compatibility
+
+#### Attribute Semantics
+
+The `MSBuildMultiThreadableTaskAttribute` is **non-inheritable** (`Inherited = false`): each task class must explicitly declare its thread-safety capability. This ensures that:
+
+* Task authors must consciously opt into multithreaded execution for each task class
+* Derived classes cannot accidentally inherit thread-safety assumptions from base classes
+* The routing decision is always explicit and visible in the task's source code
+
+Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior. If task implements `IMultiThreadableTask`, `TaskEnvironment` should be backed by `MultiProcessTaskEnvironmentDriver.Instance`, which acts as a fallback for explicit instantiation and task host scenarios.
 
 ## Tasks transition
 
-In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to implement and use the new thread-safe task interface. As these tasks become thread-safe, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they implement the new interface.
+In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to add the `MSBuildMultiThreadableTaskAttribute` and ensure thread-safety. As these tasks are marked with the attribute, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they add the attribute to their task classes.
+
+To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the `TaskEnvironment` object (for tasks that also implement `IMultiThreadableTask`).
 
 ## Interaction with `DisableInProcNode`
 
 We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
+
+This section describes the intended Visual Studio topology, not the current implementation invariant that multithreaded mode implies all worker nodes are in-proc.
 
 ```mermaid
 sequenceDiagram

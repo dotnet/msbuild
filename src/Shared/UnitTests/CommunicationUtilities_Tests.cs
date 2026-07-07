@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Shouldly;
 using Xunit;
+using Microsoft.Build.Framework;
 using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 
 namespace Microsoft.Build.UnitTests
@@ -18,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetEnvVars()
         {
-            IDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
+            IDictionary<string, string> envVars = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
             IDictionary referenceVars = Environment.GetEnvironmentVariables();
             IDictionary<string, string> referenceVars2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -42,23 +43,23 @@ namespace Microsoft.Build.UnitTests
             // A long value exceeding the former limit of 32,767 characters.
             string testValue = new string('a', 1_000_000);
 
-            CommunicationsUtilities.SetEnvironmentVariable(testName1, testValue);
+            FrameworkCommunicationsUtilities.SetEnvironmentVariable(testName1, testValue);
             try
             {
-                IDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
+                IDictionary<string, string> envVars = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
 
-                CommunicationsUtilities.SetEnvironmentVariable(testName1, null);
-                CommunicationsUtilities.SetEnvironmentVariable(testName2, testValue);
+                FrameworkCommunicationsUtilities.SetEnvironmentVariable(testName1, null);
+                FrameworkCommunicationsUtilities.SetEnvironmentVariable(testName2, testValue);
 
-                CommunicationsUtilities.SetEnvironment(envVars);
+                FrameworkCommunicationsUtilities.SetEnvironment(envVars);
 
                 Environment.GetEnvironmentVariable(testName1).ShouldBe(testValue);
                 Environment.GetEnvironmentVariable(testName2).ShouldBe(null);
             }
             finally
             {
-                CommunicationsUtilities.SetEnvironmentVariable(testName1, null);
-                CommunicationsUtilities.SetEnvironmentVariable(testName2, null);
+                FrameworkCommunicationsUtilities.SetEnvironmentVariable(testName1, null);
+                FrameworkCommunicationsUtilities.SetEnvironmentVariable(testName2, null);
             }
         }
     }

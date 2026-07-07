@@ -10,14 +10,10 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
-
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Framework.Logging;
-#endif
-
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 #nullable disable
@@ -291,11 +287,7 @@ internal static class NativeMethods
         /// </summary>
         public MemoryStatus()
         {
-#if CLR2COMPATIBILITY
-            _length = (uint)Marshal.SizeOf(typeof(MemoryStatus));
-#else
             _length = (uint)Marshal.SizeOf<MemoryStatus>();
-#endif
         }
 
         /// <summary>
@@ -396,11 +388,7 @@ internal static class NativeMethods
     {
         public SecurityAttributes()
         {
-#if (CLR2COMPATIBILITY)
-            _nLength = (uint)Marshal.SizeOf(typeof(SecurityAttributes));
-#else
             _nLength = (uint)Marshal.SizeOf<SecurityAttributes>();
-#endif
         }
 
         private uint _nLength;
@@ -762,68 +750,51 @@ internal static class NativeMethods
     [SupportedOSPlatformGuard("linux")]
     internal static bool IsLinux
     {
-#if CLR2COMPATIBILITY
-        get { return false; }
-#else
         get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); }
-#endif
     }
 
     /// <summary>
     /// Gets a flag indicating if we are running under flavor of BSD (NetBSD, OpenBSD, FreeBSD)
     /// </summary>
+    [SupportedOSPlatformGuard("freebsd")]
     internal static bool IsBSD
     {
-#if CLR2COMPATIBILITY
-        get { return false; }
-#else
         get
         {
             return RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")) ||
                    RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ||
                    RuntimeInformation.IsOSPlatform(OSPlatform.Create("OPENBSD"));
         }
-#endif
     }
 
-#if !CLR2COMPATIBILITY
     private static bool? _isWindows;
-#endif
+
     /// <summary>
     /// Gets a flag indicating if we are running under some version of Windows
     /// </summary>
     [SupportedOSPlatformGuard("windows")]
     internal static bool IsWindows
     {
-#if CLR2COMPATIBILITY
-        get { return true; }
-#else
         get
         {
             _isWindows ??= RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
             return _isWindows.Value;
         }
-#endif
     }
 
-#if !CLR2COMPATIBILITY
     private static bool? _isOSX;
-#endif
 
     /// <summary>
     /// Gets a flag indicating if we are running under Mac OSX
     /// </summary>
+    [SupportedOSPlatformGuard("macos")]
     internal static bool IsOSX
     {
-#if CLR2COMPATIBILITY
-        get { return false; }
-#else
         get
         {
             _isOSX ??= RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
             return _isOSX.Value;
         }
-#endif
     }
 
     /// <summary>
@@ -864,6 +835,29 @@ internal static class NativeMethods
     {
         get { return IsLinux; }
     }
+
+    /// <summary>
+    /// Determines whether the file system is case sensitive by creating a test file.
+    /// Copied from FileUtilities.GetIsFileSystemCaseSensitive() in Shared.
+    /// FIXME: shared code should be consolidated to Framework https://github.com/dotnet/msbuild/issues/6984
+    /// </summary>
+    private static readonly Lazy<bool> s_isFileSystemCaseSensitive = new(() =>
+    {
+        try
+        {
+            string pathWithUpperCase = Path.Combine(Path.GetTempPath(), $"INTCASESENSITIVETEST{Guid.NewGuid():N}");
+            using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
+            {
+                return !File.Exists(pathWithUpperCase.ToLowerInvariant());
+            }
+        }
+        catch
+        {
+            return OSUsesCaseSensitivePaths;
+        }
+    });
+
+    internal static bool IsFileSystemCaseSensitive => s_isFileSystemCaseSensitive.Value;
 
     /// <summary>
     /// The base directory for all framework paths in Mono
@@ -1152,7 +1146,6 @@ internal static class NativeMethods
     /// </remarks>
     internal static DateTime GetLastWriteFileUtcTime(string fullPath)
     {
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
         if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
         {
             return LastWriteFileUtcTime(fullPath);
@@ -1175,9 +1168,6 @@ internal static class NativeMethods
         }
 
         return modifiedTime;
-#else
-        return LastWriteFileUtcTime(fullPath);
-#endif
 
         DateTime LastWriteFileUtcTime(string path)
         {
@@ -1380,7 +1370,6 @@ internal static class NativeMethods
     internal static int GetParentProcessId(int processId)
     {
         int ParentID = 0;
-#if !CLR2COMPATIBILITY
         if (IsUnixLike)
         {
             string line = null;
@@ -1415,7 +1404,6 @@ internal static class NativeMethods
             }
         }
         else
-#endif
         {
             using SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
             {
@@ -1554,24 +1542,7 @@ internal static class NativeMethods
     /// <returns>True only if the contents of <paramref name="s"/> and the first <paramref name="len"/> characters in <paramref name="buffer"/> are identical.</returns>
     private static unsafe bool AreStringsEqual(char* buffer, int len, string s)
     {
-#if CLR2COMPATIBILITY
-        if (len != s.Length)
-        {
-            return false;
-        }
-
-        foreach (char ch in s)
-        {
-            if (ch != *buffer++)
-            {
-                return false;
-            }
-        }
-
-        return true;
-#else
         return s.AsSpan().SequenceEqual(new ReadOnlySpan<char>(buffer, len));
-#endif
     }
 
     internal static void VerifyThrowWin32Result(int result)
@@ -1584,7 +1555,6 @@ internal static class NativeMethods
         }
     }
 
-#if !CLR2COMPATIBILITY
     internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(StreamHandleType handleType = StreamHandleType.StdOut)
     {
         if (Console.IsOutputRedirected)
@@ -1656,7 +1626,6 @@ internal static class NativeMethods
             _ = SetConsoleMode(stdOut, originalConsoleMode.Value);
         }
     }
-#endif // !CLR2COMPATIBILITY
 
     #endregion
 
@@ -1884,5 +1853,4 @@ internal static class NativeMethods
     }
 
     #endregion
-
 }

@@ -30,7 +30,7 @@ If you encounter errors, see [Something's wrong in my build](Something's-wrong-i
 
 ## Tests
 
-`./build.sh --test`
+`./build.sh --test` runs all tests in the repo.
 
 # Getting .Net Core MSBuild binaries without building the code
 
@@ -40,7 +40,12 @@ The best way to get .NET Core MSBuild is by installing the [.NET Core SDK](https
 
 ## Wait in Main
 
-Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually after it starts.
+Set the environment variable `MSBUILDDEBUGONSTART` to control debugger behavior at startup:
+- `1`: Launch debugger for all processes (main MSBuild and TaskHost child processes)
+- `2`: Wait for manual debugger attach for all processes
+- `3`: Launch debugger for main MSBuild process only, skip TaskHost child processes
+
+For example, set `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the process manually after it starts.
 
 ## Using the repository binaries to perform builds
 
@@ -48,7 +53,6 @@ Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugge
 
 ```shell
 build.cmd # to have a full build first
-.\artifacts\msbuild-build-env.bat
 cd test\YOURTEST.Tests # cd to the test folder that contains the test csproj file
 dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
 ```
@@ -59,8 +63,7 @@ Use developer command prompt for Visual Studio or put devenv on you PATH
 
 ```shell
 build.cmd # to have a full build first
-.\artifacts\msbuild-build-env.bat
-devenv MSBuild.sln
+devenv MSBuild.slnx
 ```
 
 Note again that in Visual studio "Use previews of the .NET SDK (requires restart)" must be checked. See the above comment for how to enable this.

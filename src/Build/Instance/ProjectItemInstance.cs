@@ -554,6 +554,8 @@ namespace Microsoft.Build.Execution
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata) => _taskItem.ImportMetadata(metadata);
 
+        void IMetadataContainer.RemoveMetadataRange(IEnumerable<string> metadataNames) => _taskItem.RemoveMetadataRange(metadataNames);
+
         #region IMetadataTable Members
 
         /// <summary>
@@ -741,7 +743,8 @@ namespace Microsoft.Build.Execution
             if (itemDefinitions == null || !useItemDefinitionsWithoutModification)
             {
                 // TaskItems don't have an item type. So for their benefit, we have to lookup and add the regular item definition.
-                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions);
+                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions.Count + 1);
+                ((List<ProjectItemDefinitionInstance>)inheritedItemDefinitions)?.AddRange(itemDefinitions);
 
                 ProjectItemDefinitionInstance itemDefinition;
                 if (projectToUse.ItemDefinitions.TryGetValue(itemTypeToUse, out itemDefinition))
@@ -814,9 +817,9 @@ namespace Microsoft.Build.Execution
             private IReadOnlyDictionary<string, string> _directMetadata;
 
             /// <summary>
-            /// Cached value of the fullpath metadata. All other metadata are computed on demand.
+            /// Cached values of derivable item-spec modifiers. All time-based metadata are computed on demand.
             /// </summary>
-            private string _fullPath;
+            private ItemSpecModifiers.Cache _cachedModifiers;
 
             /// <summary>
             /// All the item definitions that apply to this item, in order of
@@ -890,7 +893,7 @@ namespace Microsoft.Build.Execution
                 _includeEscaped = source._includeEscaped;
                 _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
                 source.CopyMetadataTo(this, addOriginalItemSpec);
-                _fullPath = source._fullPath;
+                _cachedModifiers = source._cachedModifiers;
                 _definingFileEscaped = source._definingFileEscaped;
             }
 
@@ -933,7 +936,7 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
 
                     _includeEscaped = value;
-                    _fullPath = null; // Clear cached value
+                    _cachedModifiers.Clear(); // Clear cached values
                 }
             }
 
@@ -971,14 +974,17 @@ namespace Microsoft.Build.Execution
                 {
                     ImmutableDictionary<string, string> metadataCollection = MetadataCollection;
 
-                    List<string> names = new List<string>(capacity: metadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length);
+                    List<string> names = new List<string>(capacity: metadataCollection.Count + ItemSpecModifiers.All.Length);
 
                     foreach (KeyValuePair<string, string> metadatum in metadataCollection)
                     {
                         names.Add(metadatum.Key);
                     }
 
-                    names.AddRange(FileUtilities.ItemSpecModifiers.All);
+                    foreach (string name in ItemSpecModifiers.All)
+                    {
+                        names.Add(name);
+                    }
 
                     return names;
                 }
@@ -1051,7 +1057,7 @@ namespace Microsoft.Build.Execution
 
                     ErrorUtilities.VerifyThrowArgumentLength(value, "IncludeEscaped");
                     _includeEscaped = value;
-                    _fullPath = null; // Clear cached value
+                    _cachedModifiers.Clear(); // Clear cached values
                 }
             }
 
@@ -1138,6 +1144,20 @@ namespace Microsoft.Build.Execution
             /// <param name="metadata">The metadata to set.</param>
             public void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata) =>
                 ImportMetadata(metadata, validateKeys: true);
+
+            /// <summary>
+            /// Removes any metadata matching the given names.
+            /// </summary>
+            /// <param name="metadataNames">The metadata names to remove.</param>
+            public void RemoveMetadataRange(IEnumerable<string> metadataNames)
+            {
+                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
+
+                if (DirectMetadataCount > 0)
+                {
+                    _directMetadata = DirectMetadata.RemoveRange(metadataNames);
+                }
+            }
 
             /// <summary>
             /// Sets the given metadata.
@@ -1408,19 +1428,18 @@ namespace Microsoft.Build.Execution
                     return escapedValue;
                 }
 
-                ProjectMetadataInstance metadatum;
-                metadatum = GetItemDefinitionMetadata(metadataName);
+                escapedValue = GetItemDefinitionMetadataEscaped(metadataName);
 
-                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                if (escapedValue != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(escapedValue))
                 {
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
-                    return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
+                    return expander.ExpandIntoStringLeaveEscaped(escapedValue, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
                 }
-                else if (metadatum != null)
+                else if (escapedValue != null)
                 {
-                    return metadatum.EvaluatedValueEscaped;
+                    return escapedValue;
                 }
 
                 string value = GetBuiltInMetadataEscaped(metadataName);
@@ -1801,8 +1820,8 @@ namespace Microsoft.Build.Execution
             public bool HasMetadata(string name)
             {
                 if ((_directMetadata?.ContainsKey(name) == true) ||
-                     FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
-                    GetItemDefinitionMetadata(name) != null)
+                     ItemSpecModifiers.IsItemSpecModifier(name) ||
+                    GetItemDefinitionMetadataEscaped(name) != null)
                 {
                     return true;
                 }
@@ -1921,19 +1940,14 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal ProjectMetadataInstance GetMetadataObject(string name)
             {
-                ProjectMetadataInstance value = null;
-
-                if (_directMetadata != null && _directMetadata.TryGetValue(name, out string escapedValue))
+                if (_directMetadata == null || !_directMetadata.TryGetValue(name, out string escapedValue))
                 {
-                    value = new ProjectMetadataInstance(name, escapedValue, allowItemSpecModifiers: true);
+                    escapedValue = GetItemDefinitionMetadataEscaped(name);
                 }
 
-                if (value == null)
-                {
-                    value = GetItemDefinitionMetadata(name);
-                }
-
-                return value;
+                return escapedValue != null
+                    ? new ProjectMetadataInstance(name, escapedValue, allowItemSpecModifiers: true)
+                    : null;
             }
 
             /// <summary>
@@ -2001,7 +2015,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
+                if (!ItemSpecModifiers.IsDerivableItemSpecModifier(name))
                 {
                     ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers(name);
                     _directMetadata = DirectMetadata.SetItem(name, evaluatedValueEscaped ?? string.Empty);
@@ -2014,7 +2028,7 @@ namespace Microsoft.Build.Execution
                 _directMetadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
 
                 var metadata = items
-                    .Where(item => !FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key));
+                    .Where(item => !ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key));
 
                 _directMetadata = DirectMetadata.SetItems(metadata, ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers);
             }
@@ -2070,22 +2084,15 @@ namespace Microsoft.Build.Execution
             /// If value is not available, returns empty string.
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
-            {
-                string value = String.Empty;
-
-                if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
-                {
-                    value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
-                }
-
-                return value;
-            }
+                => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
+                    ? BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, modifierKind, ref _cachedModifiers)
+                    : string.Empty;
 
             /// <summary>
             /// Retrieves the named metadata from the item definition, if any.
             /// If it is not present, returns null.
             /// </summary>
-            private ProjectMetadataInstance GetItemDefinitionMetadata(string metadataName)
+            private string GetItemDefinitionMetadataEscaped(string metadataName)
             {
                 // Check any inherited item definition metadata first. It's more like
                 // direct metadata, but we didn't want to copy the tables.
@@ -2093,11 +2100,11 @@ namespace Microsoft.Build.Execution
                 {
                     for (int i = 0; i < _itemDefinitions.Count; i++)
                     {
-                        ProjectMetadataInstance metadataFromDefinition = _itemDefinitions[i].GetMetadata(metadataName);
+                        string metadataValue = ((IMetadataTable)_itemDefinitions[i]).GetEscapedValueIfPresent(itemType: null, metadataName);
 
-                        if (metadataFromDefinition != null)
+                        if (metadataValue != null)
                         {
-                            return metadataFromDefinition;
+                            return metadataValue;
                         }
                     }
                 }
@@ -2174,9 +2181,9 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    if (_itemSpecModifiersIndex < FileUtilities.ItemSpecModifiers.All.Length)
+                    if (_itemSpecModifiersIndex < ItemSpecModifiers.All.Length)
                     {
-                        Current = FileUtilities.ItemSpecModifiers.All[_itemSpecModifiersIndex];
+                        Current = ItemSpecModifiers.All[_itemSpecModifiersIndex];
                         ++_itemSpecModifiersIndex;
 
                         return true;

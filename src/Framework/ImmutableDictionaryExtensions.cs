@@ -29,23 +29,17 @@ namespace Microsoft.Build.Framework
             IEnumerable<KeyValuePair<string, string>> items,
             Action<string> verifyThrowKey)
         {
-            return dictionary.SetItems(ValidateItems(items, verifyThrowKey));
+            ImmutableDictionary<string, string>.Builder builder = dictionary.ToBuilder();
 
-            // PERF: This extra allocation is still faster than enumerating ImmutableDictionary after modification.
-            static IEnumerable<KeyValuePair<string, string>> ValidateItems(
-                IEnumerable<KeyValuePair<string, string>> items,
-                Action<string> verifyThrowKey)
+            foreach (KeyValuePair<string, string> item in items)
             {
-                foreach (KeyValuePair<string, string> item in items)
-                {
-                    verifyThrowKey(item.Key);
+                verifyThrowKey(item.Key);
 
-                    // Set null as empty string to match behavior with ProjectMetadataInstance.
-                    yield return item.Value == null
-                        ? new KeyValuePair<string, string>(item.Key, string.Empty)
-                        : item;
-                }
+                // Set null as empty string to match behavior with ProjectMetadataInstance.
+                builder[item.Key] = item.Value ?? string.Empty;
             }
+
+            return builder.ToImmutable();
         }
     }
 }

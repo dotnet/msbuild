@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../SR.resx">
+    <body>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
+        <source>{0} ('{1}') must be equal to '{2}'.</source>
+        <target state="translated">{0} (“{1}”)必须等于“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
+        <source>{0} ('{1}') must be greater than '{2}'.</source>
+        <target state="translated">{0} (“{1}”)必须大于“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
+        <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
+        <target state="translated">{0} (“{1}”)必须大于或等于“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
+        <source>{0} ('{1}') must be less than '{2}'.</source>
+        <target state="translated">{0} (“{1}”)必须小于“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
+        <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
+        <target state="translated">{0} (“{1}”)必须小于或等于“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
+        <source>{0} ('{1}') must be a non-negative value.</source>
+        <target state="translated">{0} (“{1}”)必须为非负值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
+        <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
+        <target state="translated">{0} (“{1}”)必须是非负值和非零值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
+        <source>{0} ('{1}') must be a non-zero value.</source>
+        <target state="translated">{0} (“{1}”)必须为非零值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
+        <source>{0} ('{1}') must not be equal to '{2}'.</source>
+        <target state="translated">{0} (“{1}”)不得等于“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyOrWhiteSpaceString">
+        <source>The value cannot be an empty string or composed entirely of whitespace.</source>
+        <target state="translated">该值不能为空字符串，也不能完全由空格组成。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyString">
+        <source>The value cannot be an empty string.</source>
+        <target state="translated">值不能为空字符串。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">无法将字符串“{0}”转换为布尔值(true/false)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">此集合是只读的。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">尝试从路径“{0}”和框架名字对象“{1}”生成引用程序集路径时出错。{2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">用于调试日志的路径 "{0}" 太长。使用 MSBUILDDEBUGPATH 环境变量将其设置为较短值，或更改系统配置以允许长路径。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">未能创建临时文件。临时文件文件夹已满或其路径不正确。{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">使用 glob 展开 fileSpec 时发生异常: fileSpec:“{0}”，系统假定它是文件名。异常: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">项“{0}”具有值为“{2}”的特性“{1}”，该值未能转换为“{3}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">无法将项元数据“%({0})”应用于路径“{1}”。{2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">参数“{0}”只能是文件名，不能包含目录。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathMustBeRooted">
+        <source>Path must be rooted.</source>
+        <target state="translated">路径必须是根路径。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">路径: {0} 超过 OS 最大路径限制。完全限定的文件名必须少于 {1} 个字符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">不支持 .NET Framework 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中的某个值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">当明确以 Windows SDK 为目标时，不支持 .NET Framework 版本“{0}”，Windows SDK 只在 .NET 4.5 及更高版本上受支持。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中 Version45 或以上的值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">不支持 Visual Studio 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.VisualStudioVersion 中的某个值。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

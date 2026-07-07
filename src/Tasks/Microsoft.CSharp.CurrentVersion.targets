@@ -162,7 +162,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
 <!--
       The XamlPreCompile target must remain identical to
-      the CoreCompile target in Microsoft.CSharp.Core.targets.
+      the CoreCompile target in Microsoft.CSharp.Core.targets,
+      except that GeneratedFilesOutputPath is intentionally omitted.
       Any updates to one must be made to the other.
 -->
      <Target
@@ -266,7 +267,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          InterceptorsNamespaces="$(InterceptorsNamespaces)"
          InterceptorsPreviewNamespaces="$(InterceptorsPreviewNamespaces)"
          FileAlignment="$(FileAlignment)"
-         GeneratedFilesOutputPath="$(CompilerGeneratedFilesOutputPath)"
          GenerateFullPaths="$(GenerateFullPaths)"
          HighEntropyVA="$(HighEntropyVA)"
          Instrument="$(Instrument)"
