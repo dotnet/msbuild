@@ -82,6 +82,25 @@ function Get-ProjectTag {
     return "local-$($Project.Key.ToLower())"
 }
 
+function ConvertTo-ProcessArgumentList {
+    # Start-Process -ArgumentList joins array items with a single space and does
+    # NOT quote them, so any value containing whitespace (e.g. a repo path with
+    # spaces) is split into multiple arguments by the target process. Quote each
+    # token that needs it and escape embedded quotes so `cts` receives exactly
+    # the intended arguments.
+    param([Parameter(Mandatory)] [object[]]$Arguments)
+    $quoted = foreach ($a in $Arguments) {
+        $s = [string]$a
+        if ($s -eq '' -or $s -match '[\s"]') {
+            '"' + ($s -replace '"', '\"') + '"'
+        }
+        else {
+            $s
+        }
+    }
+    return ($quoted -join ' ')
+}
+
 function Assert-CleanRepo {
     Push-Location $script:RepoRoot
     try { $dirty = git status --porcelain; $gitExit = $LASTEXITCODE }

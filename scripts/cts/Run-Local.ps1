@@ -70,7 +70,7 @@ foreach ($p in $projects) {
     )
 
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $proc = Start-Process -FilePath cts -ArgumentList $ctsArgs `
+    $proc = Start-Process -FilePath cts -ArgumentList (ConvertTo-ProcessArgumentList $ctsArgs) `
         -RedirectStandardOutput $logFile -RedirectStandardError $errFile -PassThru -NoNewWindow
     if (-not $proc.WaitForExit($TimeoutMinutes * 60 * 1000)) {
         Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue

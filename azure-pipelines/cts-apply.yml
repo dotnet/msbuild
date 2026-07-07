@@ -99,6 +99,12 @@ parameters:
   # passing `--parameters collectSourceBranch=refs/heads/<branch>` to
   # `az pipelines run`.
   default: refs/heads/main
+# Explicit `cts` tool version to install. Empty => latest prerelease. Keep this
+# in lockstep with cts-collect.yml's `ctsToolVersion` so apply and collect run
+# the same tool build (baseline format compatibility).
+- name: ctsToolVersion
+  type: string
+  default: ''
 
 variables:
   BuildConfiguration: Debug
@@ -122,6 +128,7 @@ jobs:
       collectPipelineId: ${{ parameters.collectPipelineId }}
       collectProject: ${{ parameters.collectProject }}
       collectSourceBranch: ${{ parameters.collectSourceBranch }}
+      ctsToolVersion: ${{ parameters.ctsToolVersion }}
 
 - job: Apply_Linux
   displayName: CTS apply (Linux, non-blocking)
@@ -139,3 +146,4 @@ jobs:
       collectPipelineId: ${{ parameters.collectPipelineId }}
       collectProject: ${{ parameters.collectProject }}
       collectSourceBranch: ${{ parameters.collectSourceBranch }}
+      ctsToolVersion: ${{ parameters.ctsToolVersion }}

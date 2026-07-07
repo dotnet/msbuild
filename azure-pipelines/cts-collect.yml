@@ -2,7 +2,7 @@
 #
 # Daily Clever Test Selection (CTS) baseline collector.
 #
-# Trigger: scheduled, 06:00 UTC every day, against `main` only. Does not run
+# Trigger: scheduled, 03:00 UTC every day, against `main` only. Does not run
 # on PR or push. The published artifacts are consumed by cts-apply.yml.
 #
 # Storage: cts writes a snapshot directory locally; we publish it as a
@@ -41,6 +41,12 @@ parameters:
 - name: ctsFeed
   type: string
   default: https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
+# Explicit `cts` tool version to install. Empty => latest prerelease. Pin this
+# to the same value in cts-apply.yml so the daily baseline and the per-PR apply
+# run stay on the same tool build (baseline format compatibility).
+- name: ctsToolVersion
+  type: string
+  default: ''
 
 variables:
   BuildConfiguration: Debug
@@ -59,6 +65,7 @@ jobs:
     parameters:
       osTag: windows
       ctsFeed: ${{ parameters.ctsFeed }}
+      ctsToolVersion: ${{ parameters.ctsToolVersion }}
 
 - job: Collect_Linux
   displayName: Collect (Linux)
@@ -72,3 +79,4 @@ jobs:
     parameters:
       osTag: linux
       ctsFeed: ${{ parameters.ctsFeed }}
+      ctsToolVersion: ${{ parameters.ctsToolVersion }}

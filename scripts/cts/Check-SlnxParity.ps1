@@ -14,8 +14,10 @@
     MSBuild.VSTest.slnx and every src/* project in MSBuild.slnx that is
     not a *.UnitTests* / *.Tests project; the two sets must match.
 
-    Intended to be wired up as a step in a future PR-time validation
-    (a unit test or a tiny lint job).
+    Wired into azure-pipelines/cts-apply.yml as a non-blocking PR-time step
+    (see the "Check MSBuild.VSTest.slnx parity" step). Runs standalone with no
+    dependency on the `cts` tool, so it can also be used as a local pre-commit
+    check: `pwsh ./scripts/cts/Check-SlnxParity.ps1`.
 #>
 [CmdletBinding()]
 param()

@@ -33,11 +33,28 @@ parameters:
 - name: collectSourceBranch
   type: string
   default: refs/heads/main
+- name: ctsToolVersion
+  # Optional explicit version of the `cts` global tool to install (e.g.
+  # "1.2.3-preview"). Leave empty to float to the latest prerelease. Pin it
+  # to the SAME value used by cts-collect.yml so apply and collect always run
+  # the same tool build — otherwise a prerelease published between the daily
+  # collect and a PR apply can change the baseline serialization format and
+  # make `cts apply` silently fall back. Bump the pin intentionally.
+  type: string
+  default: ''
 
 steps:
 - checkout: self
   fetchDepth: 0   # Need history for baselineAgeCommits.
   clean: true
+
+# Drift guard: MSBuild.VSTest.slnx must mirror MSBuild.slnx's production graph
+# (see scripts/cts/Check-SlnxParity.ps1). Non-blocking so it never gates a PR —
+# a failure surfaces as succeededWithIssues and the "Present/Missing" project
+# lists are printed to the step log for triage.
+- pwsh: ./scripts/cts/Check-SlnxParity.ps1
+  displayName: Check MSBuild.VSTest.slnx parity (non-blocking)
+  continueOnError: true
 
 - task: UseDotNet@2
   # cts itself is built against net8.0; see collect-steps.yml.
@@ -78,7 +95,10 @@ steps:
       '</configuration>'
     )
     Set-Content -Path $cfgPath -Value $lines -Encoding utf8
-    dotnet tool update cts --global --prerelease --configfile "$cfgPath"
+    $installArgs = @('tool', 'update', 'cts', '--global', '--prerelease', '--configfile', "$cfgPath")
+    $toolVersion = '${{ parameters.ctsToolVersion }}'
+    if ($toolVersion) { $installArgs += @('--version', $toolVersion) }
+    dotnet @installArgs
     if ($LASTEXITCODE -ne 0) { throw "cts install/update failed" }
     $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
     Write-Host "##vso[task.prependpath]$toolsDir"

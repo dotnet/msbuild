@@ -17,6 +17,15 @@ parameters:
   type: string
 - name: ctsFeed
   type: string
+- name: ctsToolVersion
+  # Optional explicit version of the `cts` global tool to install (e.g.
+  # "1.2.3-preview"). Leave empty to float to the latest prerelease. Pinning
+  # keeps the daily collect run and the per-PR apply run on the SAME tool
+  # build, so a mid-day prerelease can't change the baseline serialization
+  # format out from under `cts apply` (which would surface only as an opaque
+  # fallbackReason=baseline-download-failed). Bump the pin intentionally.
+  type: string
+  default: ''
 
 steps:
 - checkout: self
@@ -73,7 +82,10 @@ steps:
     Set-Content -Path $cfgPath -Value $lines -Encoding utf8
     # `tool update` is idempotent: installs if missing, updates if outdated.
     # Avoids the "tool already installed" exit on warm self-hosted agents.
-    dotnet tool update cts --global --prerelease --configfile "$cfgPath"
+    $installArgs = @('tool', 'update', 'cts', '--global', '--prerelease', '--configfile', "$cfgPath")
+    $toolVersion = '${{ parameters.ctsToolVersion }}'
+    if ($toolVersion) { $installArgs += @('--version', $toolVersion) }
+    dotnet @installArgs
     if ($LASTEXITCODE -ne 0) { throw "cts install/update failed" }
     $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
     Write-Host "##vso[task.prependpath]$toolsDir"

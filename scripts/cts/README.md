@@ -82,7 +82,7 @@ target Windows; the CI pipelines invoke `cts` directly and do not source
 CI runs the same `cts` tool but against ADO pipeline artifacts as the
 snapshot store. Two pipelines drive it:
 
-* `azure-pipelines/cts-collect.yml` — scheduled daily at 06:00 UTC against
+* `azure-pipelines/cts-collect.yml` — scheduled daily at 03:00 UTC against
   `main`; uses `--storage-type filesystem` locally on the agent and
   publishes the snapshot directory as `cts-baseline-<os>` (one slot per
   OS, overwritten daily) plus a sibling `cts-collect-metrics-<os>`
@@ -99,8 +99,10 @@ Both pipelines emit `cts-metrics.json` per OS (schema documented in
 CTS achieves.
 
 `Check-SlnxParity.ps1` verifies that `MSBuild.VSTest.slnx`'s production
-project list matches `MSBuild.slnx`'s; wire it as a CI step so additions
-to one solution don't silently skip the other.
+project list matches `MSBuild.slnx`'s so additions to one solution don't
+silently skip the other. It is wired into `azure-pipelines/cts-apply.yml` as
+a **non-blocking** PR-time step, and can also be run locally:
+`pwsh ./scripts/cts/Check-SlnxParity.ps1`.
 
 ## Notes
 

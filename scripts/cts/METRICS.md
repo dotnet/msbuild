@@ -2,8 +2,9 @@
 
 Both `azure-pipelines/cts-collect.yml` and `azure-pipelines/cts-apply.yml`
 emit a single `cts-metrics.json` file per OS per run and publish it as a
-pipeline artifact. They also echo it inside an `##[group]CTS metrics`
-log block so the data is searchable in pipeline logs.
+pipeline artifact. They also echo it inside a `##[group]CTS apply metrics`
+or `##[group]CTS collect metrics` log block (depending on phase) so the
+data is searchable in pipeline logs.
 
 The schema is intentionally flat so it can be ingested later into Kusto /
 App Insights without remodelling. Unknown fields should be ignored by
@@ -39,6 +40,13 @@ consumers; new fields will be added at the end of this list.
 | `baselineAgeCommits` | int \| null | `git rev-list --count <baselineSha>..<prHeadSha>`. |
 | `baselineAgeMinutes` | int \| null | Wall-clock age of the baseline. |
 | `fallbackReason` | string \| null | `null` on happy path. Known values: `"collect-pipeline-not-configured"` (apply yaml's `collectPipelineId == 0`), `"baseline-download-failed"`, `"baseline-metadata-missing"`, `"cts-apply-error"`. |
+| `selectedTestCount` | int \| null | Tests CTS selected as impacted (headline number). `null` on fallback. |
+| `totalCandidateTestCount` | int \| null | Total candidate tests considered (headline number). `null` on fallback. |
+| `incrementalityPercent` | number \| null | Percentage reduction achieved by the selection. `null` on fallback. |
+| `executedTestCount` | int \| null | Tests actually executed by the apply run. `null` on fallback. |
+| `passedTestCount` | int \| null | Executed tests that passed. `null` on fallback. |
+| `failedTestCount` | int \| null | Executed tests that failed. `null` on fallback. |
+| `skippedTestCount` | int \| null | Executed tests that were skipped. `null` on fallback. |
 
 ## Coverage note
 
@@ -52,7 +60,6 @@ PR pipeline continues to provide net472 signal. See `scripts/cts/README.md`
 The following fields are intentionally absent from v1 of the schema; they
 require parsing the `cts` log/JSON output and will be added in a follow-up:
 
-* `selectedTestCount`, `totalCandidateTestCount`, `selectionRatio` (apply)
 * `testCount`, `moduleCount`, `coverageBytes` (collect)
 
 ## Conventions
