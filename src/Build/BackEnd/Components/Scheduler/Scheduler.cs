@@ -1772,7 +1772,7 @@ namespace Microsoft.Build.BackEnd
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
-                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), GetIsolationAllowedTopLevelTargets(parentRequest, request));
                 if (response != null)
                 {
                     TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) satisfied from the cache.");
@@ -1914,7 +1914,7 @@ namespace Microsoft.Build.BackEnd
             int nodeForResults = (request.Parent != null) ? request.Parent.AssignedNode : InvalidNodeId;
 
             // Do we already have results?  If so, just return them.
-            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), GetIsolationAllowedTopLevelTargets(request.Parent, request.BuildRequest));
             if (response != null)
             {
                 if (response.Action == ScheduleActionType.SubmissionComplete)
@@ -2017,10 +2017,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to get a result from the cache to satisfy the request, and returns the appropriate response if possible.
         /// </summary>
-        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss)
+        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets = null)
         {
             BuildRequestConfiguration config = _configCache[request.ConfigurationId];
-            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, skippedResultsDoNotCauseCacheMiss);
+            ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, skippedResultsDoNotCauseCacheMiss, allowedTopLevelTargets);
 
             if (resultsResponse.Type == ResultsCacheResponseType.Satisfied)
             {
@@ -2030,8 +2030,45 @@ namespace Microsoft.Build.BackEnd
             return null;
         }
 
-        /// <returns>True if caches misses are allowed, false otherwise</returns>
-        private bool CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses, bool emitNonErrorLogs)
+        /// <summary>
+        /// Computes the set of top-level targets that a cross-project reference is allowed to be satisfied from the cache for
+        /// in a strictly isolated build, or null if no such restriction applies.
+        /// </summary>
+        /// <remarks>
+        /// In an isolated static graph build the presence of a result in the cache is the de-facto validation of the
+        /// ProjectReferenceTargets protocol: the graph pre-builds each node with its declared entry targets, so only those
+        /// results land in the engine cache. However, target results produced merely as a dependency (via DependsOnTargets)
+        /// also accumulate in a node's local results cache and, for in-proc or same-node builds, can satisfy a cross-project
+        /// reference to an undeclared target. That makes the build result depend on node scheduling. Restricting cache
+        /// satisfaction to the referenced configuration's explicitly requested (graph-declared) targets makes the isolation
+        /// check fire deterministically regardless of scheduling.
+        /// </remarks>
+        private IReadOnlyCollection<string> GetIsolationAllowedTopLevelTargets(SchedulableRequest parentRequest, BuildRequest request)
+        {
+            // Only enforce for strict isolation. Non-isolated and message-only modes keep their existing behavior.
+            if (_componentHost.BuildParameters.ProjectIsolationMode != ProjectIsolationMode.True
+                || parentRequest == null
+                || request.IsRootRequest
+                || request.SkipStaticGraphIsolationConstraints)
+            {
+                return null;
+            }
+
+            BuildRequestConfiguration requestConfig = _configCache[request.ConfigurationId];
+            BuildRequestConfiguration parentConfig = _configCache[parentRequest.BuildRequest.ConfigurationId];
+
+            // Allow self references (a project building itself, potentially with different global properties) without restriction.
+            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            IReadOnlyCollection<string> requestedTargets = requestConfig.RequestedTargets;
+
+            // If the referenced configuration has no explicitly requested targets recorded, do not restrict; preserve
+            // existing behavior for this edge case (graph nodes are always requested with explicit targets).
+            return requestedTargets != null && requestedTargets.Count > 0 ? requestedTargets : null;
+        }
         {
             ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
 

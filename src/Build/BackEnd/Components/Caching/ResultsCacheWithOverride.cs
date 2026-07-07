@@ -73,13 +73,15 @@ namespace Microsoft.Build.Execution
             BuildRequest request,
             List<string> configInitialTargets,
             List<string> configDefaultTargets,
-            bool skippedResultsDoNotCauseCacheMiss)
+            bool skippedResultsDoNotCauseCacheMiss,
+            IReadOnlyCollection<string>? allowedTopLevelTargets = null)
         {
             var overrideRequest = _override.SatisfyRequest(
                 request,
                 configInitialTargets,
                 configDefaultTargets,
-                skippedResultsDoNotCauseCacheMiss);
+                skippedResultsDoNotCauseCacheMiss,
+                allowedTopLevelTargets);
 
             if (overrideRequest.Type == ResultsCacheResponseType.Satisfied)
             {
@@ -88,7 +90,8 @@ namespace Microsoft.Build.Execution
                         request,
                         configInitialTargets,
                         configDefaultTargets,
-                        skippedResultsDoNotCauseCacheMiss)
+                        skippedResultsDoNotCauseCacheMiss,
+                        allowedTopLevelTargets)
                         .Type, ResultsCacheResponseType.NotSatisfied, "caches should not overlap");
 #endif
                 return overrideRequest;
@@ -98,7 +101,8 @@ namespace Microsoft.Build.Execution
                 request,
                 configInitialTargets,
                 configDefaultTargets,
-                skippedResultsDoNotCauseCacheMiss);
+                skippedResultsDoNotCauseCacheMiss,
+                allowedTopLevelTargets);
         }
 
         public void ClearResultsForConfiguration(int configurationId)
