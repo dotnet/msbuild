@@ -47,6 +47,10 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public sealed class XslTransformation_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public XslTransformation_Tests(ITestOutputHelper output) => _output = output;
+
         /// <summary>
         /// The "surround" regex.
         /// </summary>
@@ -63,9 +67,19 @@ namespace Microsoft.Build.UnitTests
         private readonly string _xmlDocument2 = "<root></root>";
 
         /// <summary>
+        /// The contents of an XML document that includes a DTD declaration.
+        /// </summary>
+        private readonly string _xmlDocumentWithDtd = "<!DOCTYPE note SYSTEM \"Note.dtd\"><root Name=\"param1\" Value=\"value111\"><abc><cde/></abc></root>";
+
+        /// <summary>
         /// The contents of xsl document for tests.
         /// </summary>
         private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
+
+        /// <summary>
+        /// The contents of an XSLT document that includes a DTD declaration.
+        /// </summary>
+        private readonly string _xslDocumentWithDtd = "<!DOCTYPE note SYSTEM \"Note.dtd\"><xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"/\"><root /></xsl:template></xsl:stylesheet>";
 
 
         /// <summary>
@@ -739,6 +753,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Assert.False(t.Execute()); // "This test should've failed (bad params1)."
                     Console.WriteLine(engine.Log);
+                    engine.Log.ShouldContain("MSB3702");
                 }
                 catch (Exception e)
                 {
@@ -1091,6 +1106,101 @@ namespace Microsoft.Build.UnitTests
             engine.Log.ShouldContain("MSB3703"); // "The log should contain MSB3703 error message at XslDocumentFunctionWorks test"
 
             CleanUp(dir);
+        }
+
+        [Fact]
+        public void TransformDtdShowsTaskSpecificErrorMessageByDefault()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var outputPath = env.GetTempFile(".xml");
+            MockEngine engine = new(_output);
+
+            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            task.BuildEngine = engine;
+            task.OutputPaths = [new TaskItem(outputPath.Path)];
+            task.XmlContent = _xmlDocumentWithDtd;
+            task.XslContent = _xslDocument;
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3703");
+            engine.Log.ShouldContain("DTD");
+            engine.Log.ShouldContain(nameof(XslTransformation));
+            engine.Log.ShouldContain("ProhibitDtd");
+        }
+
+        [Fact]
+        public void XsltWithDtdShowsTaskSpecificLoadErrorByDefault()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var outputPath = env.GetTempFile(".xml");
+            MockEngine engine = new(_output);
+
+            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            task.BuildEngine = engine;
+            task.OutputPaths = [new TaskItem(outputPath.Path)];
+            task.XmlContent = _xmlDocument;
+            task.XslContent = _xslDocumentWithDtd;
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3704");
+            engine.Log.ShouldContain(nameof(XslTransformation));
+            engine.Log.ShouldContain(nameof(XslTransformation.ProhibitDtd));
+        }
+
+        [Fact]
+        public void BadXsltParametersShowGenericArgumentsError()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var outputPath = env.GetTempFile(".xml");
+            MockEngine engine = new(_output);
+
+            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            task.BuildEngine = engine;
+            task.OutputPaths = [new TaskItem(outputPath.Path)];
+            task.XmlContent = _xmlDocument;
+            task.XslContent = _xslParameterDocument;
+            task.Parameters = "<<>>";
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3702");
+            engine.Log.ShouldNotContain("contains a DTD");
+        }
+
+        [Fact]
+        public void MalformedXsltShowsGenericLoadError()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var outputPath = env.GetTempFile(".xml");
+            MockEngine engine = new(_output);
+
+            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            task.BuildEngine = engine;
+            task.OutputPaths = [new TaskItem(outputPath.Path)];
+            task.XmlContent = _xmlDocument;
+            task.XslContent = _errorXslDocument;
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3704");
+            engine.Log.ShouldNotContain("contains a DTD");
+        }
+
+        [Fact]
+        public void MissingXmlFileShowsGenericTransformError()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var outputPath = env.GetTempFile(".xml");
+            var xslInput = env.CreateFile("transform.xsl", _xslDocument);
+            MockEngine engine = new(_output);
+
+            XslTransformation task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            task.BuildEngine = engine;
+            task.OutputPaths = [new TaskItem(outputPath.Path)];
+            task.XmlInputPaths = [new TaskItem(Path.Combine(env.DefaultTestDirectory.Path, "missing.xml"))];
+            task.XslInputPath = new TaskItem(xslInput.Path);
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3703");
+            engine.Log.ShouldNotContain("contains a DTD");
         }
 
         /// <summary>

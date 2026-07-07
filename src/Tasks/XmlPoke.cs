@@ -48,6 +48,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string Namespaces { get; set; }
 
+        /// <summary>
+        /// Set to true to prohibit loading XML with embedded DTD. By default, DTDs are prohibited. Ignored otherwise.
+        /// </summary>
+        public bool ProhibitDtd { get; set; } = true;
+
         #endregion
 
         /// <summary>
@@ -65,13 +70,13 @@ namespace Microsoft.Build.Tasks
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();
 
-            AbsolutePath inputPath;
+            AbsolutePath inputPath = default;
             try
             {
                 inputPath = TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec);
                 using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    XmlReaderSettings xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                    XmlReaderSettings xrs = XmlTaskUtility.CreateReaderSettings(ProhibitDtd);
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
                     {
                         xmlDoc.Load(sr);
@@ -80,7 +85,15 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
+                if (XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, () => XmlTaskUtility.ContainsDtd(inputPath)))
+                {
+                    Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputDtdProhibited", nameof(ProhibitDtd), nameof(XmlPoke));
+                }
+                else
+                {
+                    Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
+                }
+
                 return false;
             }
 
@@ -167,7 +180,7 @@ namespace Microsoft.Build.Tasks
             var doc = new XmlDocument();
             try
             {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var settings = XmlTaskUtility.CreateReaderSettings(prohibitDtd: false);
                 using (XmlReader reader = XmlReader.Create(new StringReader("<Namespaces>" + namepaces + "</Namespaces>"), settings))
                 {
                     doc.Load(reader);

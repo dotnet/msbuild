@@ -23,6 +23,9 @@ namespace Microsoft.Build.UnitTests
     public sealed class XmlPoke_Tests
     {
         private const string XmlNamespaceUsedByTests = "http://nsurl";
+        private readonly ITestOutputHelper _output;
+
+        public XmlPoke_Tests(ITestOutputHelper output) => _output = output;
 
         private const string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
 
@@ -41,6 +44,14 @@ namespace Microsoft.Build.UnitTests
   <variable Type='String' Name='c'></variable>
   <method AccessModifier='public static' Name='GetVal' />
 </class>";
+
+        private const string _xmlFileNoNsWithDtd = @"<?xml version='1.0' encoding='utf-8'?>
+
+<!DOCTYPE note SYSTEM ""Note.dtd"">
+<class AccessModifier='public' Name='test'>
+  <variable Type='String' Name='a'></variable>
+</class>";
+        private const string _malformedXml = "<class>";
 
         [Fact]
         public void PokeWithNamespace()
@@ -190,6 +201,50 @@ namespace Microsoft.Build.UnitTests
             };
 
             task.Execute().ShouldBeTrue();
+        }
+
+        [Fact]
+        public void PokeDtdShowsTaskSpecificErrorMessageByDefault()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var xmlInput = env.CreateFile("doc.xml", _xmlFileNoNsWithDtd);
+            MockEngine engine = new(_output);
+
+            XmlPoke task = new()
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInput.Path),
+                Query = "//variable/@Name",
+                Value = new TaskItem("Mert"),
+            };
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3733");
+            engine.Log.ShouldContain("DTD");
+            engine.Log.ShouldContain(nameof(XmlPoke));
+            engine.Log.ShouldContain("ProhibitDtd");
+        }
+
+        [Fact]
+        public void PokeMalformedXmlShowsGenericInputFileError()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var xmlInput = env.CreateFile("doc.xml", _malformedXml);
+            MockEngine engine = new(_output);
+
+            XmlPoke task = new()
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInput.Path),
+                Query = "//variable/@Name",
+                Value = new TaskItem("Mert"),
+            };
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3733");
+            engine.Log.ShouldNotContain("contains a DTD");
         }
 
         [Fact]
