@@ -362,28 +362,32 @@ namespace Microsoft.Build.Tasks
                         return false;
                     }
 
-                    // Compare bytes in chunks to avoid loading entire file into memory.
-                    // The on-disk stream starts with the preamble (if any), followed by the encoded content.
+                    // The on-disk stream starts with the preamble (BOM), if any. Compare it once up front
+                    // (it is at most a few bytes) so the content comparison below stays a simple offset.
+                    for (int i = 0; i < preamble.Length; i++)
+                    {
+                        if (fileStream.ReadByte() != preamble[i])
+                        {
+                            return false;
+                        }
+                    }
+
+                    // Compare the encoded content in chunks to avoid loading the entire file into memory.
                     byte[] fileBuffer = new byte[4096];
-                    long fileOffset = 0;
+                    int contentOffset = 0;
 
                     int bytesRead;
                     while ((bytesRead = fileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0)
                     {
                         for (int i = 0; i < bytesRead; i++)
                         {
-                            long position = fileOffset + i;
-                            byte expectedByte = position < preamble.Length
-                                ? preamble[(int)position]
-                                : newContentBytes[(int)(position - preamble.Length)];
-
-                            if (fileBuffer[i] != expectedByte)
+                            if (fileBuffer[i] != newContentBytes[contentOffset + i])
                             {
                                 return false; // Difference found, files are not identical
                             }
                         }
 
-                        fileOffset += bytesRead;
+                        contentOffset += bytesRead;
                     }
 
                     // All bytes matched
