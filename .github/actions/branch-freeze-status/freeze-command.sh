@@ -83,7 +83,10 @@ existing_nums="$(gh issue list --repo "$REPO" --label "$label" --state open --li
 if [ "$action" = "freeze" ]; then
   [ -n "$reason" ] || fail_usage "A reason is required to freeze \`$branch\`."
 
-  issue_body="${reason}"$'\n\n'"${marker}"
+  # The branch marker makes the issue machine-detectable; the actor marker records
+  # who froze the branch so the blocking status can name them. Both marker lines
+  # are stripped from the human-readable reason by post-freeze-status.sh.
+  issue_body="${reason}"$'\n\n'"${marker}"$'\n'"<!-- branch-freeze-by:${ACTOR} -->"
 
   # Reconcile existing tracking issues: keep the first, close any duplicates.
   primary=""

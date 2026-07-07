@@ -8,9 +8,10 @@
 # A branch is considered FROZEN while an open issue labeled `branch-freeze`
 # contains the marker `<!-- branch-freeze:<branch> -->` on a line by itself
 # (surrounding whitespace / CR tolerated). The remaining issue body is used as
-# the human-readable reason. Matching the marker as a WHOLE LINE - not a
-# substring - prevents an issue that merely mentions the marker from freezing a
-# branch.
+# the human-readable reason, and an optional `<!-- branch-freeze-by:<login> -->`
+# marker names who froze it (surfaced in the status description). Matching the
+# marker as a WHOLE LINE - not a substring - prevents an issue that merely
+# mentions the marker from freezing a branch.
 set -euo pipefail
 
 sha="${1:?head sha required}"
@@ -35,15 +36,25 @@ match="$(printf '%s' "$issues" \
 
 if [ -n "$match" ]; then
   issue_url="$(printf '%s' "$match" | jq -r '.url')"
+  body="$(printf '%s' "$match" | jq -r '.body // ""')"
 
-  reason="$(printf '%s' "$match" \
-    | jq -r --arg m "$marker" \
-        '(.body // "") | split("\n") | map(select((gsub("^\\s+|\\s+$";"")) != $m)) | join("\n")' \
+  # Who froze it, from the machine-readable actor marker (if present).
+  actor="$(printf '%s' "$body" \
+    | sed -nE 's@^[[:space:]]*<!--[[:space:]]*branch-freeze-by:[[:space:]]*([^[:space:]>]+)[[:space:]]*-->[[:space:]]*$@\1@p' \
+    | head -n1)"
+
+  # Human-readable reason = body minus any branch-freeze marker lines.
+  reason="$(printf '%s' "$body" \
+    | grep -vE '^[[:space:]]*<!--[[:space:]]*branch-freeze.*-->[[:space:]]*$' \
     | tr '\n' ' ' \
     | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
   [ -n "$reason" ] || reason="(no reason provided)"
 
-  description="Frozen: ${reason}"
+  if [ -n "$actor" ]; then
+    description="Frozen by @${actor}: ${reason}"
+  else
+    description="Frozen: ${reason}"
+  fi
   # GitHub truncates status descriptions at 140 chars; trim with an ellipsis.
   if [ "${#description}" -gt 140 ]; then
     description="${description:0:137}..."

@@ -1,0 +1,44 @@
+name: Branch freeze tests
+
+# Runs the branch-freeze shell unit tests (and a shellcheck pass) whenever the
+# branch-freeze scripts, workflows, or allowlist change. This validates the
+# freeze/unfreeze logic without needing a live repo or the real GitHub CLI.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/branch-freeze-command.yml"
+      - ".github/workflows/branch-freeze-status.yml"
+      - ".github/workflows/branch-freeze-tests.yml"
+      - ".github/actions/branch-freeze-status/**"
+      - ".github/branch-freeze-allowlist.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Shell unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: shellcheck
+        shell: bash
+        # Fail only on errors; style warnings/info are non-blocking here.
+        run: |
+          set -euo pipefail
+          shellcheck --severity=error \
+            .github/actions/branch-freeze-status/is-allowed.sh \
+            .github/actions/branch-freeze-status/post-freeze-status.sh \
+            .github/actions/branch-freeze-status/stamp-open-prs.sh \
+            .github/actions/branch-freeze-status/freeze-command.sh \
+            .github/actions/branch-freeze-status/tests/mock-gh \
+            .github/actions/branch-freeze-status/tests/run-tests.sh
+
+      - name: Run unit tests
+        shell: bash
+        run: bash .github/actions/branch-freeze-status/tests/run-tests.sh
