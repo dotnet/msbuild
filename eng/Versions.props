@@ -3,9 +3,9 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.9.0</VersionPrefix>
+    <VersionPrefix>18.10.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.8.0-preview-26276-02</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>18.9.0-preview-26330-01</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!-- differentiate experimental insertions to avoid package id conflicts, 

@@ -86,13 +86,13 @@ Windows-only files are excluded via `<Compile Remove>` instead — no `#if` insi
 | Guard | When | Runtime check? |
 |-------|------|----------------|
 | `#if FEATURE_WINDOWSINTEROP` | Multi-TFM Windows calls | Yes |
-| `#if FEATURE_WINDOWSINTEROP && NET` | Manual COM structs that use static-abstract `IComIID` (e.g. WMI). CsWin32-generated COM types via `ComScope<T>` work on net472 via the `IComIID` polyfill — see [cswin32-com](../cswin32-com/SKILL.md#icomiid-polyfill-for-net472) | Yes |
+| `#if FEATURE_WINDOWSINTEROP && NET` | Manual COM structs gated .NET-only (e.g. WMI). CsWin32-generated COM types via `ComScope<T>` work on net472 too — the generator emits `IComIID` on every TFM (see [cswin32-com](../cswin32-com/SKILL.md#icomiid-across-tfms)) | Yes |
 | `#if FEATURE_WINDOWSINTEROP && !NETSTANDARD` | CsWin32 types without `static abstract` (net472 + net10) | Yes |
 | `#if !NET` / `#if FEATURE_MSCOREE` | net472-only = inherently Windows | No |
 
 **Namespace imports** must be inside `#if FEATURE_WINDOWSINTEROP`. WDK APIs use `Windows.Wdk` namespace.
 
-**Files**: `src/Framework/Windows/` (CsWin32 partials), `src/Shared/Win32/` (COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs), `src/Framework/Polyfills/IComIID*.cs` (net472/netstandard2.0 polyfills, gated `#if !NET`).
+**Files**: `src/Framework/Windows/` (CsWin32 partials), `src/Shared/Win32/` (COM helpers), `src/Framework/Utilities/Wmi/` (.NET-only COM structs).
 
 ### Constant Replacements
 
@@ -109,6 +109,8 @@ Windows-only files are excluded via `<Compile Remove>` instead — no `#if` insi
 - Shell folder → `KNOWN_FOLDER_FLAG`
 
 Cast `int`/`uint` return codes via `(WIN32_ERROR)res` for `switch` and equality. Add the enum to `NativeMethods.txt` if not yet generated, then check `obj/.../generated/Microsoft.Windows.CsWin32/.../Windows.Win32.<EnumName>.g.cs`.
+
+**Some flag values are standalone constants, not enum members.** A Win32 `#define` outside a `typedef enum` generates as an `internal const` on `PInvoke`. Example: the `LoadTypeLibEx` flags are `PInvoke.LOAD_TLB_AS_32BIT` / `_64BIT` (`uint`), **not** members of `REGKIND` (which has only `REGKIND_DEFAULT/REGISTER/NONE`). Add the *constant name* to `NativeMethods.txt` like any API. OR it onto an enum at the constant's width and cast back: `(REGKIND)((uint)REGKIND.REGKIND_NONE | PInvoke.LOAD_TLB_AS_32BIT)`. Don't reintroduce a local `const` CsWin32 already emits.
 
 **Match local types to the CsWin32 type.** Instead of `int res = (int)PInvoke.RmStartSession(...)` and casting at every comparison, declare `WIN32_ERROR res = PInvoke.RmStartSession(...)` and let helpers like `GetException(WIN32_ERROR res, ...)` take the typed value. Cast to `int`/`uint` only at the boundary where a non-CsWin32 API needs it (e.g. `new Win32Exception((int)res, ...)`). The same applies to `HRESULT`, `BOOL`, `HANDLE`, `PROCESS_CREATION_FLAGS`, etc.
 
@@ -181,4 +183,4 @@ dotnet msbuild MSBuild.SourceBuild.slnf /p:DotNetBuildSourceOnly=true -v:q
 - **CA1823**: Unused private fields (e.g. constants only consumed inside the guard)
 - **CS1587**: XML doc comments (move inside `#if`, not before)
 
-The same applies when adding **polyfills** in `src/Framework/Polyfills/` (e.g. `IComIID`, `SpanExtensions`, `IndexOfAnyExcept`): polyfills usually live behind `#if !NET` (or similar TFM guards) but are still consumed from `#if FEATURE_WINDOWSINTEROP` code paths. Always run the source-build to confirm the polyfill, its callers, and any helper members compile cleanly when interop is disabled — a polyfill referenced only by Windows-only code will trip IDE0051/CA1823 in source-only builds.
+The same applies when adding **polyfills** in `src/Framework/Polyfills/` (e.g. `SpanExtensions`, `IndexOfAnyExcept`): polyfills usually live behind `#if !NET` (or similar TFM guards) but are still consumed from `#if FEATURE_WINDOWSINTEROP` code paths. Always run the source-build to confirm the polyfill, its callers, and any helper members compile cleanly when interop is disabled — a polyfill referenced only by Windows-only code will trip IDE0051/CA1823 in source-only builds.

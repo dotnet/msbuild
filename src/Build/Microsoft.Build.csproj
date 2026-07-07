@@ -41,6 +41,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      Property functions resolve receiver types outside the curated allowlist (by probing and loading
+      assemblies at runtime) only when MSBUILDENABLEALLPROPERTYFUNCTIONS=1. That reflection is
+      incompatible with trimming, so the feature switch defaults to disabled for trim analysis, which
+      lets the trimmer remove the unreachable probing path. The environment variable is still honored
+      at run time (this library emits no runtimeconfig.json, so the AppContext switch stays unset).
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableAllPropertyFunctions" Value="false" Trim="true" />
+    <!--
+      Instance "dotting in" is limited to a curated set of receiver types (see PropertyFunctionReceiver.cs)
+      so the members reachable by reflection are predictable and statically known. The switch defaults to
+      enabled for trim analysis, letting the trimmer remove the unrestricted path; untrimmed it stays off
+      (it has no environment variable, and this library emits no runtimeconfig.json so the AppContext
+      switch stays unset).
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.RestrictPropertyFunctionReceivers" Value="true" Trim="true" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
 
     <!-- Display files included by the Microsoft.CodeAnalysis.Collections source package in a 'SourcePackages\Collections' folder -->
@@ -78,6 +97,23 @@
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <!-- On .NET Core, take a direct compile-time reference to NuGet.Frameworks so that
+         property functions in NuGetFrameworkWrapper can call into it without reflection.
+
+         Note that this is intentionally a compile-time reference only. At run time MSBuild
+         always loads the NuGet.Frameworks.dll that ships in the host SDK directory next to
+         MSBuild.dll, which is typically a NEWER version than the one we reference here,
+         because the MSBuild repo updates NuGet only weekly, and should consume the same
+         NuGet channel that is flowing to SDK. That's similar to the old reflection-based
+         path. This introduces some risk of version drift, but the members we call have been
+         stable in NuGet.Frameworks for many years.
+
+         On .NET Framework we still load NuGet.Frameworks dynamically into a secondary
+         AppDomain for NGEN reasons; see documentation/NETFramework-NGEN.md. -->
+    <PackageReference Include="NuGet.Frameworks" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
@@ -111,7 +147,6 @@
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
@@ -122,6 +157,7 @@
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
@@ -131,6 +167,9 @@
     <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.DefaultDebugOutput.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.TestAccessor.cs" />
     <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
@@ -162,9 +201,25 @@
     <Compile Include="Collections\IKeyed.cs" />
     <Compile Include="Collections\IValueDictionaryConverter.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
+    <Compile Include="Evaluation\Expander.Function.cs" />
+    <Compile Include="Evaluation\Expander.FunctionBuilder.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.cs" />
+    <Compile Include="Evaluation\Expander.TransformEntry.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.MetadataMatch.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.MetadataMatchType.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.Transforms.OneOrMultipleMetadataMatches.cs" />
+    <Compile Include="Evaluation\Expander.ItemExpander.TransformKind.cs" />
+    <Compile Include="Evaluation\Expander.MetadataExpander.cs" />
+    <Compile Include="Evaluation\Expander.PropertyExpander.cs" />
+    <Compile Include="Evaluation\Expander.SpanBasedConcatenator.cs" />
+    <Compile Include="Evaluation\ExpanderOptions.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Evaluation\IntrinsicFunctionOverload.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
+    <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />
+    <Compile Include="FeatureSwitches.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
@@ -182,7 +237,6 @@
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />
-    <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
     <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />
@@ -197,6 +251,8 @@
     <Compile Include="Logging\TargetConsoleConfiguration.cs" />
     <Compile Include="Utilities\ImmutableCollectionsExtensions.cs" />
     <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
+    <Compile Include="Utilities\NuGetFrameworkWrapper.Reflection.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <Compile Include="Utilities\NuGetFrameworkWrapper.Direct.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
     <Compile Include="ObjectModelRemoting\LinkedObjectFactory.cs" />
@@ -206,6 +262,7 @@
     <Compile Include="Evaluation\PropertyTrackingEvaluatorDataWrapper.cs" />
     <Compile Include="Graph\GraphBuilder.cs" />
     <Compile Include="Graph\ParallelWorkSet.cs" />
+    <Compile Include="Graph\ProjectGraphOptions.cs" />
     <Compile Include="Graph\ProjectInterpretation.cs" />
     <Compile Include="Graph\GraphBuildResult.cs" />
     <Compile Include="Graph\GraphBuildSubmission.cs" />

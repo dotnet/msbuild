@@ -25,8 +25,8 @@ public class EditorConfig_Tests
         private static bool CanBeNull()
         {
             var type = typeof(T);
-            return !type.GetTypeInfo().IsValueType ||
-                (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
+            return !type.IsValueType ||
+                (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>));
         }
 
         public static bool IsNull(T @object)

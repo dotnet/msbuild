@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           sparse-checkout: |
             .github/skills
@@ -118,7 +118,7 @@ jobs:
 
       - name: Restore skill-validator from cache
         id: cache-sv
-        uses: actions/cache/restore@https://github.com/actions/download-artifact/commit/3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v5.0.5
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: skill-validator-bin
           key: skill-validator-linux-x64-${{ steps.cache-date.outputs.date }}
@@ -141,7 +141,7 @@ jobs:
 
       - name: Save skill-validator to cache
         if: steps.cache-sv.outputs.cache-hit != 'true'
-        uses: actions/cache/save@https://github.com/actions/download-artifact/commit/3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v5.0.5
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: skill-validator-bin
           key: skill-validator-linux-x64-${{ steps.cache-date.outputs.date }}
@@ -232,7 +232,7 @@ jobs:
 
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: skill-validator-results
           path: sv-results/

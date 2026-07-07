@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
@@ -27,6 +28,7 @@ namespace Microsoft.Build.Shared
         /// <param name="architecture">Assembly architecture extracted from PE flags</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         internal LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
             Type type,
             AssemblyLoadInfo assemblyLoadInfo,
             Assembly loadedAssembly,
@@ -192,7 +194,7 @@ namespace Microsoft.Build.Shared
             // we changed to running all tasks in MTA.
             if (String.Equals("Microsoft.Build.Tasks.Xaml.PartialClassGenerationTask", Type.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                AssemblyName assemblyName = Type.GetTypeInfo().Assembly.GetName();
+                AssemblyName assemblyName = Type.Assembly.GetName();
                 Version lastVersionToForce = new Version(3, 5);
                 if (assemblyName.Version?.CompareTo(lastVersionToForce) > 0)
                 {

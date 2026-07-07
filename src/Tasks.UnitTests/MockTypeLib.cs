@@ -1,11 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Build.Tasks;
 using Xunit;
+using COMException = System.Runtime.InteropServices.COMException;
 using Marshal = System.Runtime.InteropServices.Marshal;
 
 #nullable disable
@@ -164,7 +167,16 @@ namespace Microsoft.Build.UnitTests
         {
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeLib_GetTypeInfo);
 
-            Assert.True(index >= 0 && index < _containedTypeInfos.Count);
+            // A real ITypeLib returns a failure HRESULT for an out-of-range index rather than crashing.
+            // This matters when the GetTypeInfoCount failure point is injected: that method projects to a
+            // plain uint across the COM (CCW) boundary and cannot surface a managed exception, so the walker
+            // observes a bogus (large) count and over-iterates. Throwing here lets the struct-based walker
+            // catch the COMException, matching real-world behavior, instead of an Assert escaping it.
+            if (index < 0 || index >= _containedTypeInfos.Count)
+            {
+                throw new COMException("MockTypeLib.GetTypeInfo: type info index out of range.");
+            }
+
             ppTI = _containedTypeInfos[index];
         }
 
@@ -232,8 +244,7 @@ namespace Microsoft.Build.UnitTests
 
         #region Stubbed ITypeLib2 Members
 
-        public void GetAllCustData(IntPtr pCustData)
-        {
+        public void GetAllCustData(IntPtr pCustData)        {
             throw new Exception("The method or operation is not implemented.");
         }
 
@@ -250,3 +261,5 @@ namespace Microsoft.Build.UnitTests
         #endregion
     }
 }
+
+#endif

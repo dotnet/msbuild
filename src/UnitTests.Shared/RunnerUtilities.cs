@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -61,6 +62,18 @@ namespace Microsoft.Build.UnitTests.Shared
         {
             return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables());
         }
+
+        public static Task<(bool SuccessfulExit, string BuildOutput)> ExecBootstrappedMSBuildAsync(
+            string msbuildParameters,
+            bool shellExecute = false,
+            ITestOutputHelper outputHelper = null,
+            bool attachProcessId = true,
+            int timeoutMilliseconds = 30_000)
+            => Task.Run(() =>
+            {
+                string buildOutput = ExecBootstrapedMSBuild(msbuildParameters, out bool successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
+                return (successfulExit, buildOutput);
+            });
 
         public static string ExecBootstrapedMSBuild(
             string msbuildParameters,
