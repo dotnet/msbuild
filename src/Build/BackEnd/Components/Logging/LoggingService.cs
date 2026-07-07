@@ -1135,24 +1135,36 @@ namespace Microsoft.Build.BackEnd.Logging
                 centralLogger = new NullCentralLogger();
             }
 
-            // create an eventSourceSink which the central logger will register with to receive the events from the forwarding logger
-            EventSourceSink eventSourceSink = new EventSourceSink();
-
             // If the logger is already in the list it should not be registered again.
-            // Note here that we are checking for direct equivalence (fast)
-            // and if we're dealing with a reusable logger, we need to check its original logger (slower)
-            if (_loggers.Contains(centralLogger) || _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger))
+            if (_loggers.Contains(centralLogger))
             {
                 return false;
             }
+
+            // If the central logger is already registered as a ReusableLogger wrapper (e.g., it was passed to
+            // ProjectCollection for eval-time logging and then included in BuildParameters.Loggers), we must
+            // not call InitializeLogger on the central logger again — it's already initialized and connected to
+            // the build event source via the ReusableLogger.  We still need to register the forwarding logger
+            // so that it is initialized on out-of-proc nodes and its Initialize method is called.  Events
+            // forwarded by the user's forwarding logger on those nodes will arrive at the dedicated sink below;
+            // the central logger also receives all build events through the CentralForwardingLogger path (via
+            // the ReusableLogger), so no events are lost.
+            bool centralLoggerAlreadyInitialized = _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger);
+
+            // create an eventSourceSink which the forwarding logger will direct events to on this node
+            EventSourceSink eventSourceSink = new EventSourceSink();
 
             // Assign a unique logger Id to this distributed logger
             int sinkId = _nextSinkId++;
             forwardingLogger.LoggerId = sinkId;
             eventSourceSink.Name = $"Sink for forwarding logger \"{sinkId}\".";
 
-            // Initialize and register the central logger
-            InitializeLogger(centralLogger, eventSourceSink);
+            if (!centralLoggerAlreadyInitialized)
+            {
+                // Initialize and register the central logger against the dedicated event sink so it receives
+                // events forwarded by the paired forwarding logger.
+                InitializeLogger(centralLogger, eventSourceSink);
+            }
 
             EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
             localForwardingLogger.BuildEventRedirector = newRedirector;

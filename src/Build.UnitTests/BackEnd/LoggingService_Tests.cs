@@ -593,6 +593,41 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Single(_initializedService.RegisteredSinkNames);
             Assert.Single(_initializedService.LoggerDescriptions);
         }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/14237.
+        /// When a central logger is already registered via RegisterLogger as a ReusableLogger wrapper
+        /// (because it was passed to ProjectCollection for eval-time logging and then flowed into
+        /// BuildParameters.Loggers), RegisterDistributedLogger must still initialize the forwarding
+        /// logger and add it to the logger descriptions — it must NOT return false and skip the whole
+        /// distributed registration.
+        /// </summary>
+        [Fact]
+        public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrappedInReusableLogger_ForwardingLoggerIsRegistered()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
+
+            RegularILogger centralLogger = new RegularILogger();
+            // Simulate the ProjectCollection-then-BuildParameters path: wrap the central logger in a
+            // ReusableLogger and register it as a regular logger (as BuildManager does when it processes
+            // parameters.Loggers coming from projectCollection.Loggers).
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            // Now register the same underlying logger as the central logger of a distributed pair.
+            // This must succeed and register the forwarding logger.
+            bool result = _initializedService.RegisterDistributedLogger(centralLogger, description);
+
+            result.ShouldBeTrue("RegisterDistributedLogger should return true when the central logger is already registered only as a ReusableLogger wrapper, not as a direct registration.");
+
+            // The forwarding logger must have been initialized and added to the logger descriptions so
+            // that it can be dispatched to out-of-proc nodes.
+            _initializedService.LoggerDescriptions.ShouldNotBeEmpty("The forwarding logger description must be present so it is propagated to out-of-proc nodes.");
+            _initializedService.RegisteredLoggerTypeNames.ShouldContain(
+                "Microsoft.Build.Logging.ConfigurableForwardingLogger",
+                "The forwarding logger must have been initialized.");
+        }
         #endregion
 
         #region Test Properties
