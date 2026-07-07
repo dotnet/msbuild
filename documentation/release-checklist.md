@@ -177,7 +177,7 @@ Move contents of `PublicAPI.Unshipped.txt` → `PublicAPI.Shipped.txt` for all p
   - [ ] **4.2b** **Re-run the official build manually** for `vs{{THIS_RELEASE_VERSION}}` with the OptProf override from `main` — set `Optional OptProfDrop Override` to `main`'s latest OptProf drop path (`pwsh ./scripts/Get-LatestOptProfDrop.ps1`).
 - [ ] **4.3** Get M2 or QB approval as necessary per the VS schedule. \
 _**Only required if we are behind the VS schedule** — i.e. the insertion didn't land in VS `main` before `{{INSIDERS_SNAP_DATE}}` (4.4 was missed) and a milestone-gate approval is now needed. If the insertion made the schedule, **skip this step**._
-- [ ] **4.4** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The final-branded bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \
+- [ ] **4.4** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The inserted bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \
 The insertion PR contains the inserted package versions — useful for the nuget.org publishing step.
 
 **After insiders snap** (only if a backport to insiders is needed):

@@ -16,7 +16,7 @@ MSBuild is a **component** inserted into Visual Studio. VS ships monthly; MSBuil
   - vs* builds auto-insert into VS main
 * Before INSIDERS_SNAP_DATE — Phase 4
   - OptProf bootstrap
-  - Final-branded bits land in VS main
+  - Release branch bits land in VS main
 * VS snaps
   - VS snaps main → rel/insiders
   - VS promotes rel/insiders → rel/stable
