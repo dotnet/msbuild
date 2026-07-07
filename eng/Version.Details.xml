@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="075b33c13177aed004ddbb1439410cc970601273" BarId="317615" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="f2c93f81b35ddc48dd5ad22c759821277db6dfdf" BarId="321285" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.8">
@@ -106,9 +106,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26304.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26324.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>7b306e34463421cef2816352743b943c6547dfab</Sha>
+      <Sha>1373629deb1e04f3e8e66fb68bb48ae36479c5ef</Sha>
     </Dependency>
     <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
          version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
@@ -116,17 +116,17 @@
          in our public surface). At runtime we still bind to whatever NuGet.Frameworks.dll the
          host SDK ships, so per the toolset-vs-product test in dotnet/arcade-services'
          docs/Darc.md this is a toolset dependency, not a product one. -->
-    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.30">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.72">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>551e8bafd7ec41484f2d8d7fadcd0750f7db173a</Sha>
+      <Sha>5628a8b06b87cbd0e05eadb9695c7737c3c59cbe</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.9.0-1.26314.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.10.0-1.26352.10">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>94180ea43ae879ba286300360d677cc72f0a1369</Sha>
+      <Sha>83ca1a6465bb861e28a51cdbb4b56074b69cb5eb</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26304.4">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26324.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>7b306e34463421cef2816352743b943c6547dfab</Sha>
+      <Sha>1373629deb1e04f3e8e66fb68bb48ae36479c5ef</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

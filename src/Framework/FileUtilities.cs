@@ -1475,7 +1475,7 @@ namespace Microsoft.Build.Framework
             bool hasMaxPath = NativeMethods.HasMaxPath;
             int maxPath = NativeMethods.MaxPath;
             // >= not > because MAX_PATH assumes a trailing null
-            return hasMaxPath && !IsRootedNoThrow(path) && NativeMethods.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
+            return hasMaxPath && !IsRootedNoThrow(path) && Environment.CurrentDirectory.Length + path.Length + 1 /* slash */ >= maxPath;
         }
 
         /// <summary>

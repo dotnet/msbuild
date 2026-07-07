@@ -1275,6 +1275,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic case
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14194", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLine()
         {
@@ -1290,6 +1291,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Quoted path
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14192", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLineQuotedExe()
         {
@@ -1313,6 +1315,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// On path
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14196", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLineQuotedExeOnPath()
         {

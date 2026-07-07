@@ -94,7 +94,7 @@ namespace Microsoft.Build.Tasks
 
         [UnconditionalSuppressMessage("SingleFile", "IL3002:RequiresAssemblyFiles",
             Justification = "RoslynCodeTaskFactory compiles task source against reference assemblies on disk, so it does not support single-file deployment; the module path is only used to locate those on-disk references.")]
-        private static string GetThisAssemblyDirectory() => Path.GetDirectoryName(typeof(RoslynCodeTaskFactory).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName);
+        private static string GetThisAssemblyDirectory() => Path.GetDirectoryName(typeof(RoslynCodeTaskFactory).Assembly.ManifestModule.FullyQualifiedName);
 
         /// <summary>
         /// Stores an instance of a <see cref="TaskLoggingHelper"/> for logging messages.

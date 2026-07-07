@@ -2,31 +2,15 @@
 name: "Flaky Test Auto-Fixer"
 description: "Scheduled daily workflow that proposes evidence-based fixes for tests that are ALREADY quarantined ([ActiveIssue]) but STILL FLAKING in the quarantine pipeline (definition 344). It mines the accumulated over-time failure evidence (consistent error signatures + stack traces), diagnoses a minimal TEST-ONLY root cause without any local reproduction, and opens one individual ready-for-review PR per confidently-fixable test. By default it KEEPS the [ActiveIssue] in place so the quarantine pipeline validates the fix over the following days and the separate detector workflow un-quarantines once green. When confidence is VERY high (a fully-explained deterministic root cause with a complete fix), it ALSO removes the [ActiveIssue] in the same PR so normal PR CI runs the test as additional pre-merge validation, and says so in the PR body."
 on:
-  # Pinned ~1 hour after the detector (which runs at 11:38 UTC) so the fixer sees the detector's
+  # Pinned ~1 hour after the detector (which runs at 11:47 UTC) so the fixer sees the detector's
   # latest quarantine/un-quarantine state before it proposes fixes. Explicit cron (not `daily`) so
   # the time stays fixed and is not re-scattered on recompile.
   schedule:
-    - cron: "38 12 * * *"
+    - cron: "47 12 * * *"
   workflow_dispatch: # Allow manual triggering
+  permissions: {}
 
-  # Run the imported pat_pool job before the activation gate so its pat_number
-  # output is available to the activation and agent jobs (which consume it in
-  # engine.env). See: shared/pat_pool.README.md.
-  needs: [pat_pool]
-
-# ###############################################################
-# Select a PAT from the pool and override COPILOT_GITHUB_TOKEN.
-# When org-level billing is available, this will be removed.
-# See `shared/pat_pool.README.md` for more information.
-# ###############################################################
-imports:
-  - shared/pat_pool.md
-
-engine:
-  id: copilot
-  env:
-    # If none of the COPILOT_GITHUB_TOKEN[_#] pool secrets were selected, the default COPILOT_GITHUB_TOKEN is used.
-    COPILOT_GITHUB_TOKEN: ${{ case(needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_GITHUB_TOKEN, needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_GITHUB_TOKEN_2, needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_GITHUB_TOKEN_3, needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_GITHUB_TOKEN_4, needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_GITHUB_TOKEN_5, needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_GITHUB_TOKEN_6, needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_GITHUB_TOKEN_7, needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_GITHUB_TOKEN_8, secrets.COPILOT_GITHUB_TOKEN) }}
+if: ${{ github.event_name == 'workflow_dispatch' || !github.event.repository.fork }}
 
 permissions:
   contents: read
@@ -92,6 +76,38 @@ safe-outputs:
 # One quarantine-pipeline scan (artifact downloads) plus one whole-repo build to validate the fixes
 # compile. No local reproduction loops, so a moderate budget suffices.
 timeout-minutes: 60
+
+# ###############################################################
+# Select a PAT from the pool and override COPILOT_GITHUB_TOKEN.
+# Run agentic jobs in an isolated `copilot-pat-pool` environment.
+#
+# When org-level billing is available, this will be removed.
+# See `shared/pat_pool.README.md` for more information.
+# ###############################################################
+imports:
+  - uses: shared/pat_pool.md
+    with:
+      environment: copilot-pat-pool
+
+environment: copilot-pat-pool
+
+engine:
+  id: copilot
+  env:
+     COPILOT_GITHUB_TOKEN: |
+      ${{ case(
+        needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0,
+        needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1,
+        needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2,
+        needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3,
+        needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4,
+        needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5,
+        needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6,
+        needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7,
+        needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8,
+        needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9,
+        'NO COPILOT PAT AVAILABLE')
+      }}
 ---
 
 # Flaky Test Auto-Fixer (scheduled daily)
