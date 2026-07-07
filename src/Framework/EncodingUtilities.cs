@@ -37,6 +37,11 @@ namespace Microsoft.Build.Shared
         internal const string UseUtf8True = "TRUE";
 
         /// <summary>
+        /// Special value for tool stdout/stderr encoding parameters that selects the current system ANSI code page (GetACP).
+        /// </summary>
+        internal const string UseAnsiEncoding = "ansi";
+
+        /// <summary>
         /// Get the current system locale code page, OEM version. OEM code pages are used for console-based input/output
         /// for historical reasons.
         /// </summary>
@@ -47,6 +52,15 @@ namespace Microsoft.Build.Shared
         /// (e.g., MSVC link.exe, cl.exe) write output using the ANSI code page rather than the OEM code page.
         /// </summary>
         internal static Encoding CurrentSystemAnsiEncoding => s_currentAnsiEncoding ??= GetCurrentSystemEncoding(useOemCodePage: false);
+
+        /// <summary>
+        /// Resolves an encoding from a user-supplied encoding name. The special value "ansi" (case-insensitive) selects the
+        /// current system ANSI code page (GetACP); any other value is resolved via <see cref="Encoding.GetEncoding(string)"/>.
+        /// </summary>
+        internal static Encoding GetEncodingFromName(string encodingName) =>
+            string.Equals(encodingName, UseAnsiEncoding, StringComparison.OrdinalIgnoreCase)
+                ? CurrentSystemAnsiEncoding
+                : Encoding.GetEncoding(encodingName);
 
         /// <summary>
         /// Resolves the current system locale code page encoding, either the OEM code page (GetOEMCP)

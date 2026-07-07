@@ -61,12 +61,6 @@ namespace Microsoft.Build.Tasks
         // '^' before _any_ character escapes that character, don't escape it.
         private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
 
-        /// <summary>
-        /// Special value for <see cref="StdOutEncoding"/>/<see cref="StdErrEncoding"/> that selects the current system
-        /// ANSI code page (GetACP), e.g. for native tools like link.exe/cl.exe.
-        /// </summary>
-        private const string AnsiEncodingName = "ansi";
-
         #endregion
 
         #region Properties
@@ -143,14 +137,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
-        public string StdOutEncoding
+        public override string StdOutEncoding
         {
             get => StandardOutputEncoding.EncodingName;
             set
             {
                 try
                 {
-                    _standardOutputEncoding = ParseEncoding(value);
+                    _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
                 }
                 catch (ArgumentException)
                 {
@@ -165,14 +159,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
-        public string StdErrEncoding
+        public override string StdErrEncoding
         {
             get => StandardErrorEncoding.EncodingName;
             set
             {
                 try
                 {
-                    _standardErrorEncoding = ParseEncoding(value);
+                    _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
                 }
                 catch (ArgumentException)
                 {
@@ -200,15 +194,6 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
-
-        /// <summary>
-        /// Resolves an encoding name for <see cref="StdOutEncoding"/>/<see cref="StdErrEncoding"/>. The special value
-        /// "ansi" maps to the current system ANSI code page (GetACP); anything else goes through <see cref="Encoding.GetEncoding(string)"/>.
-        /// </summary>
-        private static Encoding ParseEncoding(string value) =>
-            string.Equals(value, AnsiEncodingName, StringComparison.OrdinalIgnoreCase)
-                ? EncodingUtilities.CurrentSystemAnsiEncoding
-                : Encoding.GetEncoding(value);
 
         /// <summary>
         /// Write out a temporary batch file with the user-specified command in it.
