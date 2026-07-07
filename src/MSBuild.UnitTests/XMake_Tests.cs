@@ -2637,6 +2637,28 @@ $@"<Project>
         }
 
         /// <summary>
+        /// Verifies restore does not set the ExcludeRestorePackageImports global property when change wave 18.10 is disabled,
+        /// preserving the prior behavior for repositories that opt out.
+        /// </summary>
+        [Fact]
+        public void RestoreDoesNotSetExcludeRestorePackageImportsWhenWaveDisabled()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project>
+  <Target Name=""Restore"">
+    <Message Text=""ExcludeRestorePackageImports=[$(ExcludeRestorePackageImports)]"" Importance=""High"" />
+  </Target>
+</Project>");
+
+            Dictionary<string, string> envVars = new() { { "MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString() } };
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, envsToCreate: envVars, arguments: "/t:restore");
+
+            // When the wave is disabled, the property must not be injected.
+            logContents.ShouldContain("ExcludeRestorePackageImports=[]");
+        }
+
+        /// <summary>
         /// We check if there is only one target name specified and this logic caused a regression: https://github.com/dotnet/msbuild/issues/3317
         /// </summary>
         [Fact]
