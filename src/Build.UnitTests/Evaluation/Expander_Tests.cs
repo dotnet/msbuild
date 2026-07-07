@@ -2512,6 +2512,34 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// When a static property function's arguments cannot be matched to any overload of the
+        /// requested method, MSB4186 should include the resolved argument types and the parameter
+        /// types of the available overloads so the mismatch is easier to diagnose (for example when
+        /// a nested property function returned an unexpected type). See issue #11782.
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionNoMatchingOverloadReportsTypes()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            // [MSBuild]::Add has overloads Add(double, double) and Add(long, long). A nested
+            // [System.DateTime]::Now argument stays typed as a DateTime, which cannot be coerced to
+            // either overload, so no overload matches.
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
+                expander.ExpandIntoStringLeaveEscaped("$([MSBuild]::Add($([System.DateTime]::Now), 1))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+            exception.ErrorCode.ShouldBe("MSB4186");
+            exception.Message.ShouldContain("Add");
+            // The resolved argument types are reported.
+            exception.Message.ShouldContain("System.DateTime");
+            // The parameter types of the available overloads are reported.
+            exception.Message.ShouldContain("System.Double");
+            exception.Message.ShouldContain("System.Int64");
+        }
+
+        /// <summary>
         /// Expand property function that is invalid - properties don't take arguments
         /// </summary>
         [Fact]

@@ -1288,6 +1288,19 @@ internal partial class Expander<P, I>
             }
             else if (!isConstructor)
             {
+                // We couldn't find any method overload whose parameter types matched the
+                // resolved argument values. Rather than surfacing the generic framework
+                // "method not found" message, enrich the error with the argument types we
+                // actually resolved and the parameter types of the available overloads.
+                // This makes it much easier to diagnose type mismatches, for example when a
+                // nested property function returned an unexpected type because of a changed
+                // build input.
+                string detailedMessage = GenerateNoMatchingOverloadMessage(args);
+                if (detailedMessage != null)
+                {
+                    throw new MissingMethodException(detailedMessage);
+                }
+
                 throw ex;
             }
 
@@ -1297,6 +1310,39 @@ internal partial class Expander<P, I>
             }
 
             return functionResult;
+        }
+
+        /// <summary>
+        /// Builds a descriptive message listing the types of the resolved arguments and the
+        /// parameter types of the available overloads for the method being invoked. Returns
+        /// <see langword="null"/> if there are no overloads to describe (in which case the
+        /// caller should fall back to the original framework exception).
+        /// </summary>
+        private string GenerateNoMatchingOverloadMessage(object[] args)
+        {
+            // Determine the types of the resolved argument values.
+            string providedTypes = args == null
+                ? String.Empty
+                : String.Join(", ", args.Select(static arg => arg?.GetType().FullName ?? "null"));
+
+            // Gather the parameter-type signatures of the available overloads matching the method name.
+            List<string> overloads = new();
+            foreach (MethodInfo method in _receiverType.GetMethods(_bindingFlags).Where(m => String.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase)))
+            {
+                overloads.Add($"{_methodMethodName}({String.Join(", ", method.GetParameters().Select(static p => p.ParameterType.FullName))})");
+            }
+
+            if (overloads.Count == 0)
+            {
+                // We have nothing more specific to say than the original exception.
+                return null;
+            }
+
+            return ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                "InvalidFunctionNoMatchingOverload",
+                providedTypes,
+                _methodMethodName,
+                String.Join(", ", overloads));
         }
     }
 }

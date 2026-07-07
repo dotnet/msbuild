@@ -597,6 +597,14 @@
         <target state="translated">MSB4255: Les fichiers cache des résultats d'entrée suivants n'existent pas : "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidFunctionNoMatchingOverload">
+        <source>The arguments provided have the types "({0})", but no overload of the method "{1}" accepts those types. The available overloads have the following parameter types: {2}.</source>
+        <target state="new">The arguments provided have the types "({0})", but no overload of the method "{1}" accepts those types. The available overloads have the following parameter types: {2}.</target>
+        <note>
+      UE: This message is embedded in MSB4186 when a property function's arguments cannot be matched to any overload of the requested method. It lists the resolved argument types and the parameter types of the available overloads to make it easier to diagnose type mismatches (for example when a nested property function returned an unexpected type).
+      LOCALIZATION: "{0}" is a comma-separated list of the resolved argument types. "{1}" is the method name. "{2}" is a comma-separated list of the available method overload signatures.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">La chaîne de version n'était pas au format approprié.</target>
