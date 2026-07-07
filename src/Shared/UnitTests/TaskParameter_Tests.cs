@@ -165,6 +165,135 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(value[1].ToString(CultureInfo.InvariantCulture), stringArray[1]);
         }
 
+        /// <summary>
+        /// A default <see cref="AbsolutePath"/> (null Value) must serialize cleanly. This is the
+        /// scenario that crashed the out-of-proc task host: a struct-typed output is never null, so
+        /// it always gets serialized, and the old code threw InvalidCastException because AbsolutePath
+        /// is not IConvertible. See https://github.com/dotnet/msbuild/pull/13016.
+        /// </summary>
+        [Fact]
+        public void DefaultAbsolutePathParameter()
+        {
+            TaskParameter t = new TaskParameter(default(AbsolutePath));
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            // A default AbsolutePath has a null Value and serializes to the empty string.
+            Assert.Equal(string.Empty, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void AbsolutePathParameter()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "TaskParameterTests_file.txt");
+            AbsolutePath value = new AbsolutePath(path);
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            // Path types are serialized using the same canonical conversion as the in-process engine.
+            Assert.Equal(value.Value, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void AbsolutePathArrayParameter()
+        {
+            AbsolutePath[] value = new AbsolutePath[]
+            {
+                new AbsolutePath(Path.Combine(Path.GetTempPath(), "a.txt")),
+                new AbsolutePath(Path.Combine(Path.GetTempPath(), "b.txt")),
+            };
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
+            Assert.Equal(value[0].Value, stringArray[0]);
+            Assert.Equal(value[1].Value, stringArray[1]);
+        }
+
+        [Fact]
+        public void FileInfoParameter()
+        {
+            FileInfo value = new FileInfo(Path.Combine(Path.GetTempPath(), "TaskParameterTests_file.txt"));
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            // FileInfo is serialized as its full path, matching ValueTypeParser/the in-process engine.
+            Assert.Equal(value.FullName, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void DirectoryInfoParameter()
+        {
+            DirectoryInfo value = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "TaskParameterTests_dir"));
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal(value.FullName, t2.WrappedParameter);
+            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+        }
+
+        [Fact]
+        public void FileInfoArrayParameter()
+        {
+            FileInfo[] value = new FileInfo[]
+            {
+                new FileInfo(Path.Combine(Path.GetTempPath(), "a.txt")),
+                new FileInfo(Path.Combine(Path.GetTempPath(), "b.txt")),
+            };
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
+            Assert.Equal(value[0].FullName, stringArray[0]);
+            Assert.Equal(value[1].FullName, stringArray[1]);
+        }
+
+        [Fact]
+        public void DirectoryInfoArrayParameter()
+        {
+            DirectoryInfo[] value = new DirectoryInfo[]
+            {
+                new DirectoryInfo(Path.Combine(Path.GetTempPath(), "dirA")),
+                new DirectoryInfo(Path.Combine(Path.GetTempPath(), "dirB")),
+            };
+            TaskParameter t = new TaskParameter(value);
+
+            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
+            Assert.Equal(value[0].FullName, stringArray[0]);
+            Assert.Equal(value[1].FullName, stringArray[1]);
+        }
+
         private enum TestEnumForParameter
         {
             Something,

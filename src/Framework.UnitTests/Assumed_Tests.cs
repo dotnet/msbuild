@@ -94,6 +94,12 @@ public class Assumed_Tests
     }
 
     [Fact]
+    public void True_DoesNotThrow_WithMessage_WhenTrue()
+    {
+        Assumed.True(true, "msbuild rules");
+    }
+
+    [Fact]
     public void True_Throws_WhenFalse()
     {
         Should.Throw<InternalErrorException>(() => Assumed.True(false));
@@ -106,6 +112,38 @@ public class Assumed_Tests
         {
             Assumed.True(false, $"condition failed");
         });
+    }
+
+    [Fact]
+    public void True_InterpolatedHandler_DoesNotFormat_WhenConditionIsTrue()
+    {
+        bool formatted = false;
+        Assumed.True(true, $"message {FormatSideEffect(ref formatted)}");
+        formatted.ShouldBeFalse("Interpolated string should not have been formatted when condition is true");
+    }
+
+    [Fact]
+    public void True_InterpolatedHandler_FormatsMessage_WhenConditionIsFalse()
+    {
+        bool formatted = false;
+        var ex = Should.Throw<InternalErrorException>(() =>
+        {
+            Assumed.True(false, $"error: {FormatSideEffect(ref formatted)}");
+        });
+
+        formatted.ShouldBeTrue("Interpolated string should have been formatted when condition is false");
+        ex.Message.ShouldContain("error: formatted");
+    }
+
+    [Fact]
+    public void True_InterpolatedHandler_FormatsMultipleArgs_WhenConditionIsFalse()
+    {
+        var ex = Should.Throw<InternalErrorException>(() =>
+        {
+            Assumed.True(false, $"a={1} b={2} c={"three"}");
+        });
+
+        ex.Message.ShouldContain("a=1 b=2 c=three");
     }
 
     [Fact]
@@ -715,5 +753,11 @@ public class Assumed_Tests
         List<string>? myCollection = null;
         var ex = Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty(myCollection));
         ex.Message.ShouldContain("myCollection");
+    }
+
+    private static string FormatSideEffect(ref bool formatted)
+    {
+        formatted = true;
+        return "formatted";
     }
 }

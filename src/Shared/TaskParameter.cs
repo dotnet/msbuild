@@ -4,8 +4,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Collections;
 
@@ -41,12 +41,14 @@ namespace Microsoft.Build.BackEnd
         PrimitiveTypeArray,
 
         /// <summary>
-        /// Parameter is a value type.  Note:  Must be <see cref="IConvertible"/>.
+        /// Parameter is a non-primitive value serialized as a string (for example a value type
+        /// such as <see cref="AbsolutePath"/>, or <see cref="FileInfo"/>/<see cref="DirectoryInfo"/>).
         /// </summary>
         ValueType,
 
         /// <summary>
-        /// Parameter is an array of value types.  Note:  Must be <see cref="IConvertible"/>.
+        /// Parameter is an array of non-primitive values serialized as strings (for example an array
+        /// of value types, or <see cref="FileInfo"/>[]/<see cref="DirectoryInfo"/>[]).
         /// </summary>
         ValueTypeArray,
 
@@ -141,8 +143,11 @@ namespace Microsoft.Build.BackEnd
 
                     _wrappedParameter = taskItemArrayParameter;
                 }
-                else if (wrappedParameterType.GetElementType().IsValueType)
+                else if (wrappedParameterType.GetElementType().IsValueType
+                    || wrappedParameterType.GetElementType() == typeof(FileInfo)
+                    || wrappedParameterType.GetElementType() == typeof(DirectoryInfo))
                 {
+                    // Value-type arrays as well as FileInfo[]/DirectoryInfo[] are serialized as strings.
                     _parameterType = TaskParameterType.ValueTypeArray;
                     _wrappedParameter = wrappedParameter;
                 }
@@ -176,8 +181,11 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.ITaskItem;
                     _wrappedParameter = new TaskParameterTaskItem((ITaskItem)wrappedParameter);
                 }
-                else if (wrappedParameterType.IsValueType)
+                else if (wrappedParameterType.IsValueType
+                    || wrappedParameterType == typeof(FileInfo)
+                    || wrappedParameterType == typeof(DirectoryInfo))
                 {
+                    // Value types as well as FileInfo/DirectoryInfo are serialized as strings.
                     _parameterType = TaskParameterType.ValueType;
                     _wrappedParameter = wrappedParameter;
                 }
@@ -390,8 +398,6 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Serializes or deserializes an array of primitive type values wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
-        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
-            Justification = "The element type is always one of the primitive value types selected by the TypeCode switch below, so Array.CreateInstance does not need to generate code for an unknown type.")]
         private void TranslatePrimitiveTypeArray(ITranslator translator)
         {
             translator.TranslateEnum(ref _parameterTypeCode, (int)_parameterTypeCode);
@@ -433,27 +439,31 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        Type elementType = _parameterTypeCode switch
+                        Type arrayType = _parameterTypeCode switch
                         {
-                            TypeCode.Char => typeof(char),
-                            TypeCode.SByte => typeof(sbyte),
-                            TypeCode.Byte => typeof(byte),
-                            TypeCode.Int16 => typeof(short),
-                            TypeCode.UInt16 => typeof(ushort),
-                            TypeCode.UInt32 => typeof(uint),
-                            TypeCode.Int64 => typeof(long),
-                            TypeCode.UInt64 => typeof(ulong),
-                            TypeCode.Single => typeof(float),
-                            TypeCode.Double => typeof(double),
-                            TypeCode.Decimal => typeof(decimal),
-                            TypeCode.DateTime => typeof(DateTime),
+                            TypeCode.Char => typeof(char[]),
+                            TypeCode.SByte => typeof(sbyte[]),
+                            TypeCode.Byte => typeof(byte[]),
+                            TypeCode.Int16 => typeof(short[]),
+                            TypeCode.UInt16 => typeof(ushort[]),
+                            TypeCode.UInt32 => typeof(uint[]),
+                            TypeCode.Int64 => typeof(long[]),
+                            TypeCode.UInt64 => typeof(ulong[]),
+                            TypeCode.Single => typeof(float[]),
+                            TypeCode.Double => typeof(double[]),
+                            TypeCode.Decimal => typeof(decimal[]),
+                            TypeCode.DateTime => typeof(DateTime[]),
                             _ => throw new NotImplementedException(),
                         };
 
                         int length = 0;
                         translator.Translate(ref length);
 
-                        Array array = Array.CreateInstance(elementType, length);
+#if NET
+                        Array array = Array.CreateInstanceFromArrayType(arrayType, length);
+#else
+                        Array array = Array.CreateInstance(arrayType.GetElementType(), length);
+#endif
                         for (int i = 0; i < length; i++)
                         {
                             string valueString = null;
@@ -467,37 +477,39 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Serializes or deserializes the value type instance wrapped by this <see cref="TaskParameter"/>.
+        /// Serializes or deserializes the value instance wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
         /// <remarks>
-        /// The value type is converted to/from string using the <see cref="Convert"/> class. Note that we require
-        /// task parameter types to be <see cref="IConvertible"/> so this conversion is guaranteed to work for parameters
-        /// that have made it this far.
+        /// The value is converted to a string on the write side using <see cref="TaskParameterValueStringConverter.ToString"/>,
+        /// the same canonical conversion the in-process engine uses when gathering task outputs
+        /// (see TaskExecutionHost.GetValueOutputs). This guarantees identical string output across the
+        /// in-process and out-of-process task host paths. The value is not converted back to its original
+        /// type on the read side: this is fine because output task parameters are anyway converted to strings
+        /// by the engine and input task parameters of custom value types are not supported.
         /// </remarks>
         private void TranslateValueType(ITranslator translator)
         {
             string valueString = null;
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                valueString = (string)Convert.ChangeType(_wrappedParameter, typeof(string), CultureInfo.InvariantCulture);
+                valueString = TaskParameterValueStringConverter.ToString(_wrappedParameter);
             }
 
             translator.Translate(ref valueString);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                // We don't know how to convert the string back to the original value type. This is fine because output
-                // task parameters are anyway converted to strings by the engine (see TaskExecutionHost.GetValueOutputs)
-                // and input task parameters of custom value types are not supported.
                 _wrappedParameter = valueString;
             }
         }
 
         /// <summary>
-        /// Serializes or deserializes the value type array instance wrapped by this <see cref="TaskParameter"/>.
+        /// Serializes or deserializes the array instance wrapped by this <see cref="TaskParameter"/>.
         /// </summary>
         /// <remarks>
-        /// The array is assumed to be non-null.
+        /// The array is assumed to be non-null. Each element is converted to a string on the write side
+        /// using <see cref="TaskParameterValueStringConverter.ToString"/>, the same canonical conversion the in-process engine
+        /// uses when gathering task outputs.
         /// </remarks>
         private void TranslateValueTypeArray(ITranslator translator)
         {
@@ -510,7 +522,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < length; i++)
                 {
-                    string valueString = Convert.ToString(array.GetValue(i), CultureInfo.InvariantCulture);
+                    string valueString = TaskParameterValueStringConverter.ToString(array.GetValue(i));
                     translator.Translate(ref valueString);
                 }
             }
