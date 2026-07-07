@@ -87,7 +87,7 @@ namespace Microsoft.Build.Internal
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
 
 
-            // // loadAsReadOnly is currently ignored.
+            // loadAsReadOnly is currently ignored.
             // Compatibility note: XmlReader.Create normalizes whitespace/newlines in ways that changed
             // observed project values (for example, multiline Exec commands and metadata), breaking
             // existing builds. We intentionally keep XmlTextReader behavior here to preserve those
