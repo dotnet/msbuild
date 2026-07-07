@@ -5,6 +5,7 @@
   <PropertyGroup>
     <VersionPrefix>18.10.0</VersionPrefix>
     <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.9.0-preview-26330-01</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
