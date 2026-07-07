@@ -181,6 +181,9 @@ namespace Microsoft.Build.Tasks.UnitTests
 
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />
 
+  <Target Name=""GetReferenceAssemblyPaths"" />
+  <Target Name=""ResolveAssemblyReferences"" />
+
   <Target Name=""CoreCompile""
           Inputs=""input.txt""
           Outputs=""@(IntermediateAssembly)"">
