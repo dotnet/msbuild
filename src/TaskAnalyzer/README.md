@@ -21,6 +21,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
 | **MSBuildTask0006** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer typed path parameter over string |
 | **MSBuildTask0007** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
+| **MSBuildTask0008** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Initialize a relative-default path property in `Execute()` |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -126,7 +127,7 @@ public class MyTask : Task
 
 ### MSBuildTask0007 — Prefer `ITaskItem<T>` Over ItemSpec Parsing
 
-When a task has an `ITaskItem` or `ITaskItem[]` input property and parses `ItemSpec` to a value type or path type, the analyzer suggests using `ITaskItem<T>` instead.
+When a task has an `ITaskItem` or `ITaskItem[]` input property and parses `ItemSpec` (or reads the item's absolute path via `GetMetadata("FullPath")`) to a value type or path type, the analyzer suggests using `ITaskItem<T>` instead.
 
 **Detected patterns:**
 
@@ -142,6 +143,7 @@ public class MyTask : Task
         int value = int.Parse(Item.ItemSpec);             // flagged
         bool flag = Convert.ToBoolean(Item.ItemSpec);     // flagged
         var abs = new AbsolutePath(Item.ItemSpec);        // flagged (suggests ITaskItem<AbsolutePath>)
+        var abs2 = new AbsolutePath(Item.GetMetadata("FullPath")); // flagged (GetMetadata("FullPath") is the item's absolute path)
 
         foreach (var item in Items)
         {
@@ -167,11 +169,55 @@ public class MyTask : Task
 
 **Biasing toward `FileInfo`/`DirectoryInfo`:** When a rooted path flows into a `System.IO.File.*` call or a `FileStream`/`StreamReader`/`StreamWriter` constructor, the analyzer suggests `ITaskItem<FileInfo>`; when it flows into a `System.IO.Directory.*` call, it suggests `ITaskItem<DirectoryInfo>`. These more specific suggestions replace the generic `ITaskItem<AbsolutePath>` for the same property. Tracing follows both a direct `item.ItemSpec` and an `AbsolutePath` intermediary, including a local that is declared and then assigned once (the common `AbsolutePath? p = null; try { p = GetAbsolutePath(...); }` pattern). If one property is used as both a file and a directory, the analyzer falls back to `ITaskItem<AbsolutePath>`.
 
-**`Path.Combine`:** A task input flowing into *any* argument position of `Path.Combine` is flagged (each distinct property is reported once per call), since the value is being used to build an absolute path.
+**`Path.Combine`:** A task input flowing into the **first** argument position of `Path.Combine` is flagged, since that first segment is the base the combined absolute path is built from. Later argument positions are intentionally *not* flagged: `Path.Combine` restarts from the last rooted segment, so retyping a later argument to an absolute (rooted) path would discard the earlier segments and silently change the result.
 
 **Array properties:** When the source property is `ITaskItem[]`, the suggestion correctly formats as `ITaskItem<T>[]` (brackets outside the angle brackets), e.g., `ITaskItem<AbsolutePath>[]`.
 
-**Not flagged:** Metadata access (`item.GetMetadata(...)`), `[Output]` properties, non-task classes.
+**`GetMetadata("FullPath")`:** `ITaskItem.GetMetadata("FullPath")` (metadata name compared case-insensitively) returns the item's absolute path as a `string`, so it is treated the same as `item.ItemSpec` — both as a detection source and, when wrapped in a conversion, as a fixable site rewritten to `item.Value`. Other metadata names (e.g. `item.GetMetadata("Culture")`) are not flagged.
+
+**Not flagged:** Non-`FullPath` metadata access (`item.GetMetadata("Culture")`), `[Output]` properties, non-task classes.
+
+### MSBuildTask0008 — Initialize a Relative-Default Path Property in `Execute()`
+
+MSBuildTask0006 offers to retype a `string` path property and reproduce any string default in the property initializer. That only works when the default is already **fully qualified**: rooting a *relative* default requires `TaskEnvironment`, which the engine only supplies **after** the task is constructed, so it is unavailable inside a property initializer (which runs in the constructor).
+
+When a property flagged by MSBuildTask0006 has a **relative** string default, the analyzer suppresses the 0006 suggestion for that property and instead reports MSBuildTask0008 on the initializer:
+
+```csharp
+[MSBuildMultiThreadableTask]
+public class MyTask : Task
+{
+    // ⚠️ MSBuildTask0008: 'InputPath' has a relative default; initialize it in Execute()
+    public string InputPath { get; set; } = "obj";
+
+    public override bool Execute()
+    {
+        var abs = new AbsolutePath(InputPath);   // the 0006-style conversion
+        return true;
+    }
+}
+```
+
+The code fix retypes the property (leaving it with an *unset* default) and moves the default into the top of `Execute()` as a **guarded** assignment, so a value bound by MSBuild from the project XML is not overwritten:
+
+```csharp
+public AbsolutePath InputPath { get; set; } = default;
+
+public override bool Execute()
+{
+    if (InputPath == default)
+    {
+        InputPath = TaskEnvironment.GetAbsolutePath("obj");
+    }
+
+    var abs = InputPath;
+    return true;
+}
+```
+
+For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-coalescing assignment built through the `string` → `AbsolutePath` → `FileInfo`/`DirectoryInfo` chain, e.g. `LogPath ??= new FileInfo(TaskEnvironment.GetAbsolutePath("logs"));`.
+
+**Fix skipped (diagnostic still reported):** when there is no editable `Execute()` in the current document, when `Execute()` is expression-bodied (no statement block to prepend to), or when the task has no accessible `TaskEnvironment` member to root the path through.
 
 ## Analysis Scope
 
@@ -180,7 +226,7 @@ The analyzer determines what to check based on the type declaration:
 | Type | Rules Applied |
 |---|---|
 | Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005 |
-| Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | MSBuildTask0006–MSBuildTask0007 |
+| Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | MSBuildTask0006–MSBuildTask0008 |
 | Class implementing `IMultiThreadableTask` | All seven rules |
 | Class with `[MSBuildMultiThreadableTask]` attribute | All seven rules |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
@@ -194,7 +240,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0002–MSBuildTask0005** report as **Warning** for all task types.
-- **MSBuildTask0006–MSBuildTask0007** report as **Info** — these are modernization suggestions, not correctness issues.
+- **MSBuildTask0006–MSBuildTask0008** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
 
@@ -213,10 +259,14 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0006: `new FileInfo(FilePath)` / `new DirectoryInfo(DirPath)` | → Retype property to `FileInfo`/`DirectoryInfo` and replace conversion with direct property usage |
 | MSBuildTask0007: `int.Parse(Item.ItemSpec)` | → Retype `Item` to ``ITaskItem<int>`` and replace parse with `Item.Value` |
 | MSBuildTask0007: `new FileInfo(item.ItemSpec)` in `foreach` over `ITaskItem[]` | → Retype source property to ``ITaskItem<FileInfo>[]`` and replace with `item.Value` |
+| MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
+| MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
 
 The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
 
-The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated.
+The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property — across all partial declarations of the task type, in the current document — can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated. If the property is referenced from another file (a partial class spread across documents) in a way this single-document fix can't rewrite, no fix is offered.
+
+When the property has a meaningful default (a non-empty string literal), the fixer only preserves it when the literal is **already fully qualified** (e.g. `= "C:/logs"`), re-expressing it through the `AbsolutePath` constructor: `= new AbsolutePath("C:/logs")` for an `AbsolutePath` property, and `= new FileInfo(new AbsolutePath("C:/logs"))` / `= new DirectoryInfo(new AbsolutePath("C:/logs"))` for the `FileInfo`/`DirectoryInfo` cases (mirroring the engine's string → `AbsolutePath` → `FileInfo`/`DirectoryInfo` chain). A **relative** default (such as `= "obj"`) is deliberately *not* rewritten: MSBuild roots a relative path via `TaskEnvironment.GetAbsolutePath`, but `TaskEnvironment` is only set by the engine *after* the task is constructed, so it isn't available inside a property initializer (which runs in the constructor). Emitting `new AbsolutePath("obj")` there would throw at construction time, so the fix is skipped instead. The fix is likewise skipped when the default isn't a compile-time constant or isn't a plausible path value, rather than dropping or corrupting the default.
 
 ## Compiler Diagnostic Suppressions
 
@@ -307,7 +357,7 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-135 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+182 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
 
 ```
 cd src/TaskAnalyzer.Tests
@@ -322,9 +372,10 @@ dotnet test
 | `MultiThreadableTaskCodeFixProvider.cs` | Code fixes for MSBuildTask0002 and MSBuildTask0003 |
 | `BannedApiDefinitions.cs` | ~50 banned API entries resolved via `DocumentationCommentId` for O(1) symbol lookup |
 | `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
-| `DiagnosticDescriptors.cs` | Seven diagnostic descriptors in category `MSBuild.TaskAuthoring` |
-| `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0007` |
-| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006 and MSBuildTask0007 — detects manual path construction, ItemSpec parsing, Path.Combine usage (any argument position), helper method wrapping, FileInfo/DirectoryInfo construction through AbsolutePath intermediaries, and System.IO consumption sites (`File.*`/`Directory.*`/`FileStream`/`StreamReader`/`StreamWriter`) that bias suggestions toward `FileInfo`/`DirectoryInfo` |
+| `DiagnosticDescriptors.cs` | Eight diagnostic descriptors in category `MSBuild.TaskAuthoring` |
+| `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0008` |
+| `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006, MSBuildTask0007, and MSBuildTask0008 — detects manual path construction, ItemSpec parsing, Path.Combine usage (first argument only), helper method wrapping, FileInfo/DirectoryInfo construction through AbsolutePath intermediaries, System.IO consumption sites (`File.*`/`Directory.*`/`FileStream`/`StreamReader`/`StreamWriter`) that bias suggestions toward `FileInfo`/`DirectoryInfo`, and relative default paths that must be initialized in `Execute()` |
+| `PathDefaultClassifier.cs` | Shared classification of string path defaults as fully-qualified vs relative (host-independent, netstandard2.0-safe) |
 
 ### Performance
 

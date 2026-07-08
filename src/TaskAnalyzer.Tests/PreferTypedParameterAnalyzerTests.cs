@@ -42,6 +42,55 @@ public class PreferTypedParameterAnalyzerTests
     }
 
     [Fact]
+    public async Task RelativeDefault_EmitsMoveToExecute_AndSuppressesPathDiagnostic()
+    {
+        // A relative default can't be rooted in the initializer, so the property is redirected from
+        // MSBuildTask0006 to MSBuildTask0008 (initialize in Execute()); only the 0008 diagnostic is reported.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string InputPath { get; set; } = "obj";
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(InputPath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.Length.ShouldBe(1);
+        diags[0].Id.ShouldBe(DiagnosticIds.InitializeRelativeDefaultInExecute);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
+        diags[0].GetMessage().ShouldContain("InputPath");
+        diags[0].GetMessage().ShouldContain("AbsolutePath");
+    }
+
+    [Fact]
+    public async Task FullyQualifiedDefault_StaysOnPathDiagnostic()
+    {
+        // A fully-qualified default can be reproduced in the initializer, so it stays on MSBuildTask0006.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string InputPath { get; set; } = "C:/work/obj";
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(InputPath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.Length.ShouldBe(1);
+        diags[0].Id.ShouldBe(DiagnosticIds.PreferTypedPathParameter);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.InitializeRelativeDefaultInExecute);
+    }
+
+    [Fact]
     public async Task NewFileInfo_FromStringProp_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -432,6 +481,69 @@ public class PreferTypedParameterAnalyzerTests
     }
 
     [Fact]
+    public async Task NewAbsolutePath_FromGetMetadataFullPath_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem PathItem { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(PathItem.GetMetadata("FullPath"));
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+        diags[0].GetMessage().ShouldContain("AbsolutePath");
+    }
+
+    [Fact]
+    public async Task NewFileInfo_FromGetMetadataFullPath_CaseInsensitive_ProducesDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem FileItem { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var fi = new FileInfo(FileItem.GetMetadata("fullpath"));
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+        diags[0].GetMessage().ShouldContain("FileInfo");
+    }
+
+    [Fact]
+    public async Task NewAbsolutePath_FromGetMetadataOtherName_DoesNotProduceItemDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem PathItem { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(PathItem.GetMetadata("Culture"));
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+    }
+
+    [Fact]
     public async Task GetAbsolutePath_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -537,11 +649,54 @@ public class PreferTypedParameterAnalyzerTests
             }
             """);
 
-        // Every argument that flows from a task input is flagged, not just the first.
+        // Only the first argument is flagged: Path.Combine restarts from the last rooted segment, so making
+        // a later argument absolute could change the result. OutputDir (first) is flagged; OutputFile is not.
         var task7 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ToArray();
-        task7.Length.ShouldBe(2);
-        task7.ShouldContain(d => d.GetMessage().Contains("OutputDir"));
-        task7.ShouldContain(d => d.GetMessage().Contains("OutputFile"));
+        task7.Length.ShouldBe(1);
+        task7[0].GetMessage().ShouldContain("OutputDir");
+    }
+
+    [Fact]
+    public async Task PathCombine_StringProp_NotFirstArgument_ProducesNoDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string SubPath { get; set; } = "";
+                public override bool Execute()
+                {
+                    var combined = Path.Combine("base", SubPath);
+                    return true;
+                }
+            }
+            """);
+
+        // SubPath only appears in a non-first position, where suggesting AbsolutePath could change semantics.
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
+    }
+
+    [Fact]
+    public async Task PathCombine_ItemSpec_NotFirstArgument_ProducesNoDiagnostic()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem SubItem { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var combined = Path.Combine("base", SubItem.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
     [Fact]

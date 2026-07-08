@@ -76,6 +76,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "MSBuild can bind ITaskItem<T> task parameters that provide a strongly-typed Value property parsed from ItemSpec for tasks that opt into multithreaded support. Using ITaskItem<T> avoids manual parsing in the task body.");
 
+        public static readonly DiagnosticDescriptor InitializeRelativeDefaultInExecute = new(
+            id: DiagnosticIds.InitializeRelativeDefaultInExecute,
+            title: "Initialize relative default path in Execute()",
+            messageFormat: "Task property '{0}' has a relative default path; initialize it in Execute() so it can be rooted through TaskEnvironment when the property is changed to '{1}'",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: true,
+            description: "A relative default path cannot be rooted in a property initializer because the MSBuild engine only assigns TaskEnvironment after the task is constructed. Move the default into Execute(), where TaskEnvironment.GetAbsolutePath can resolve it, guarding the assignment so a value bound from the project is not overwritten.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -83,6 +92,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             PotentialIssue,
             TransitiveUnsafeCall,
             PreferTypedPathParameter,
-            PreferTypedTaskItem);
+            PreferTypedTaskItem,
+            InitializeRelativeDefaultInExecute);
     }
 }

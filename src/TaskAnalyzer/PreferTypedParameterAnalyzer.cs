@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -26,7 +28,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
             ImmutableArray.Create(
                 DiagnosticDescriptors.PreferTypedPathParameter,
-                DiagnosticDescriptors.PreferTypedTaskItem);
+                DiagnosticDescriptors.PreferTypedTaskItem,
+                DiagnosticDescriptors.InitializeRelativeDefaultInExecute);
 
         // Structured metadata carried on each diagnostic so deduplication can reason over the
         // inferred property and suggested type without parsing the human-readable message.
@@ -169,6 +172,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         }
                     }
 
+                    // First, determine which path/item diagnostics survive the type-resolution dedup.
+                    var surviving = new List<Diagnostic>();
                     foreach (var diag in diagnosticsList.OrderBy(d => d.Location.SourceSpan.Start))
                     {
                         if (TryGetDiagnosticKey(diag, out string key, out string suggestedType) &&
@@ -193,7 +198,48 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                             }
                         }
 
+                        surviving.Add(diag);
+                    }
+
+                    // A path property (MSBuildTask0006) with a relative default cannot be rooted in a property
+                    // initializer, so instead of the 0006 "retype" suggestion (whose fix is inapplicable here)
+                    // we redirect it to MSBuildTask0008: initialize the property in Execute() where
+                    // TaskEnvironment is available. Record such properties, keyed by name, with the resolved type.
+                    var relativeDefaultProps = new Dictionary<string, (IPropertySymbol Property, string ResolvedType, Location Location)>(System.StringComparer.Ordinal);
+                    foreach (var diag in surviving)
+                    {
+                        if (diag.Id != DiagnosticIds.PreferTypedPathParameter ||
+                            !diag.Properties.TryGetValue(PropertyNameKey, out var propName) || propName is null ||
+                            !diag.Properties.TryGetValue(SuggestedTypeKey, out var suggestedType) || suggestedType is null ||
+                            relativeDefaultProps.ContainsKey(propName))
+                        {
+                            continue;
+                        }
+
+                        var propSymbol = stringInputProps.FirstOrDefault(p => p.Name == propName);
+                        if (propSymbol is not null &&
+                            TryGetRelativeDefaultInitializerLocation(propSymbol, endCtx.CancellationToken, out Location initializerLocation))
+                        {
+                            relativeDefaultProps[propName] = (propSymbol, suggestedType, initializerLocation);
+                        }
+                    }
+
+                    foreach (var diag in surviving)
+                    {
+                        // Suppress the 0006 diagnostics for properties redirected to 0008.
+                        if (diag.Id == DiagnosticIds.PreferTypedPathParameter &&
+                            diag.Properties.TryGetValue(PropertyNameKey, out var pn) && pn is not null &&
+                            relativeDefaultProps.ContainsKey(pn))
+                        {
+                            continue;
+                        }
+
                         endCtx.ReportDiagnostic(diag);
+                    }
+
+                    foreach (var entry in relativeDefaultProps.Values)
+                    {
+                        endCtx.ReportDiagnostic(CreateMoveDefaultDiagnostic(entry.Location, entry.Property.Name, entry.ResolvedType));
                     }
                 });
             }, SymbolKind.NamedType);
@@ -238,6 +284,50 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             key = string.Empty;
             suggestedType = string.Empty;
             return false;
+        }
+
+        /// <summary>
+        /// If <paramref name="property"/> has exactly one declaration whose initializer is a string literal
+        /// holding a relative path, returns true and sets <paramref name="location"/> to the initializer value's
+        /// location. Such defaults cannot be rooted in a property initializer and are redirected to
+        /// MSBuildTask0008. Only plain string literals are considered (the realistic default form); other
+        /// initializer shapes leave the property on the standard 0006 path.
+        /// </summary>
+        private static bool TryGetRelativeDefaultInitializerLocation(
+            IPropertySymbol property,
+            System.Threading.CancellationToken cancellationToken,
+            out Location location)
+        {
+            location = Location.None;
+
+            if (property.DeclaringSyntaxReferences.Length != 1 ||
+                property.DeclaringSyntaxReferences[0].GetSyntax(cancellationToken) is not PropertyDeclarationSyntax declaration ||
+                declaration.Initializer?.Value is not LiteralExpressionSyntax literal ||
+                !literal.IsKind(SyntaxKind.StringLiteralExpression))
+            {
+                return false;
+            }
+
+            if (PathDefaultClassifier.IsRelativePathDefault(literal.Token.ValueText))
+            {
+                location = literal.GetLocation();
+                return true;
+            }
+
+            return false;
+        }
+
+        private static Diagnostic CreateMoveDefaultDiagnostic(Location location, string propertyName, string suggestedType)
+        {
+            var properties = ImmutableDictionary<string, string?>.Empty
+                .Add(PropertyNameKey, propertyName)
+                .Add(SuggestedTypeKey, suggestedType);
+
+            return Diagnostic.Create(
+                DiagnosticDescriptors.InitializeRelativeDefaultInExecute,
+                location,
+                properties,
+                propertyName, suggestedType);
         }
 
         private static Diagnostic CreatePathDiagnostic(Location location, string propertyName, string suggestedType)
@@ -494,38 +584,38 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // Path.Combine(...) — any argument tracing to a task input property indicates that
-            // property is used to build an absolute path, regardless of its position in the call.
+            // Path.Combine(...) — only the FIRST argument is safe to suggest as an absolute path.
+            // Path.Combine restarts from the last rooted segment: if any argument after the first is an
+            // absolute (rooted) path, all preceding segments are discarded. Retyping a non-first argument
+            // to AbsolutePath would normalize it to a rooted path and silently change the result
+            // (e.g. Path.Combine("C:\\base", "sub") == "C:\\base\\sub", but if "sub" becomes rooted the
+            // result changes to that rooted path). The first argument is always the base, so typing it as
+            // an absolute path preserves the combine semantics.
             if (method.ContainingType?.ToDisplayString() == "System.IO.Path" &&
                 method.Name == "Combine" &&
                 invocation.Arguments.Length >= 2)
             {
-                var flaggedStringProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
-                var flaggedItemProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+                IOperation firstArg = invocation.Arguments[0].Value;
 
-                foreach (var arg in invocation.Arguments)
+                // MSBuildTask0006: Path.Combine(stringProp, ...)
+                if (stringInputProps.Count > 0)
                 {
-                    // MSBuildTask0006: Path.Combine(..., stringProp, ...)
-                    if (stringInputProps.Count > 0)
+                    var sourceProp = FindSourceProperty(firstArg, stringInputProps);
+                    if (sourceProp is not null)
                     {
-                        var sourceProp = FindSourceProperty(arg.Value, stringInputProps);
-                        if (sourceProp is not null && flaggedStringProps.Add(sourceProp))
-                        {
-                            pendingDiagnostics.Add(CreatePathDiagnostic(
-                                invocation.Syntax.GetLocation(), sourceProp.Name, "AbsolutePath"));
-                            continue;
-                        }
+                        pendingDiagnostics.Add(CreatePathDiagnostic(
+                            invocation.Syntax.GetLocation(), sourceProp.Name, "AbsolutePath"));
                     }
+                }
 
-                    // MSBuildTask0007: Path.Combine(..., item.ItemSpec, ...)
-                    if (taskItemInputProps.Count > 0 && iTaskItemType is not null)
+                // MSBuildTask0007: Path.Combine(item.ItemSpec, ...)
+                if (taskItemInputProps.Count > 0 && iTaskItemType is not null)
+                {
+                    var (itemProp, _) = FindItemSpecSource(firstArg, taskItemInputProps, iTaskItemType);
+                    if (itemProp is not null)
                     {
-                        var (itemProp, _) = FindItemSpecSource(arg.Value, taskItemInputProps, iTaskItemType);
-                        if (itemProp is not null && flaggedItemProps.Add(itemProp))
-                        {
-                            pendingDiagnostics.Add(CreateItemDiagnostic(
-                                invocation.Syntax.GetLocation(), itemProp.Name, itemProp.Type is IArrayTypeSymbol, "AbsolutePath"));
-                        }
+                        pendingDiagnostics.Add(CreateItemDiagnostic(
+                            invocation.Syntax.GetLocation(), itemProp.Name, itemProp.Type is IArrayTypeSymbol, "AbsolutePath"));
                     }
                 }
             }
@@ -737,7 +827,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// Direct check: is this operation item.ItemSpec where item traces to a task property?
+        /// Direct check: is this operation <c>item.ItemSpec</c> or <c>item.GetMetadata("FullPath")</c> where
+        /// item traces to a task property? <c>GetMetadata("FullPath")</c> is the documented way to obtain an
+        /// item's absolute path, so it is treated the same as reading the item's path directly.
         /// </summary>
         private static (IPropertySymbol? sourceProp, bool fromArray) FindItemSpecSourceDirect(
             IOperation operation,
@@ -764,6 +856,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         return FindTaskItemPropertySource(receiver, taskItemInputProps);
                     }
+                }
+            }
+
+            // Check for item.GetMetadata("FullPath") — the documented way to get an item's absolute path.
+            if (operation is IInvocationOperation getMetadataCall &&
+                getMetadataCall.TargetMethod.Name == "GetMetadata" &&
+                getMetadataCall.Arguments.Length == 1 &&
+                getMetadataCall.Instance is IOperation metadataReceiver &&
+                getMetadataCall.Arguments[0].Value.ConstantValue is { HasValue: true, Value: string metadataName } &&
+                string.Equals(metadataName, "FullPath", System.StringComparison.OrdinalIgnoreCase))
+            {
+                var receiverType = getMetadataCall.TargetMethod.ContainingType;
+                if (receiverType is not null &&
+                    (SymbolEqualityComparer.Default.Equals(receiverType, iTaskItemType) ||
+                     ImplementsInterface(receiverType, iTaskItemType)))
+                {
+                    return FindTaskItemPropertySource(metadataReceiver, taskItemInputProps);
                 }
             }
 

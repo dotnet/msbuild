@@ -29,5 +29,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task input property should use ITaskItem&lt;T&gt; instead of ITaskItem with manual ItemSpec parsing.</summary>
         public const string PreferTypedTaskItem = "MSBuildTask0007";
+
+        /// <summary>Task input property has a relative default path that should be initialized in Execute() where TaskEnvironment can root it.</summary>
+        public const string InitializeRelativeDefaultInExecute = "MSBuildTask0008";
     }
 }

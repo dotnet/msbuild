@@ -48,12 +48,17 @@ internal static class TestHelpers
                 public System.Diagnostics.ProcessStartInfo GetProcessStartInfo() => new();
             }
 
-            public struct AbsolutePath
+            public struct AbsolutePath : System.IEquatable<AbsolutePath>
             {
                 public AbsolutePath(string path) { Value = path; OriginalValue = path; }
                 public string Value { get; }
                 public string OriginalValue { get; }
                 public static implicit operator string(AbsolutePath p) => p.Value;
+                public bool Equals(AbsolutePath other) => Value == other.Value;
+                public override bool Equals(object? obj) => obj is AbsolutePath other && Equals(other);
+                public override int GetHashCode() => Value is null ? 0 : Value.GetHashCode();
+                public static bool operator ==(AbsolutePath left, AbsolutePath right) => left.Equals(right);
+                public static bool operator !=(AbsolutePath left, AbsolutePath right) => !left.Equals(right);
             }
 
             public interface ITaskItem
