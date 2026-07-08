@@ -36,6 +36,8 @@ By default the binary logger will collect the source code of all project files a
 
 Note that only `*.csproj`, `*.targets` and other MSBuild project formats are collected. No other source files (`*.cs`, `*.cpp` etc) are collected.
 
+You can embed additional arbitrary files in the binary log by adding them to the `EmbedInBinlog` item. Prefer absolute paths: a relative `Include` path is resolved against the directory of the project that declares the item, so that items emitted by child projects in a multi-project build are captured correctly.
+
 If the binary log contains the projects/imports files the MSBuild Structured Log Viewer will display all the files contained in the log, let you search through them and even display preprocessed view for any project where all imported projects are inlined (similar to `msbuild /pp` switch).
 
 # Logging all environment variables

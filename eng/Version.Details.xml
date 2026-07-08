@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="075b33c13177aed004ddbb1439410cc970601273" BarId="317615" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="f2c93f81b35ddc48dd5ad22c759821277db6dfdf" BarId="321285" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.8">
@@ -116,13 +116,13 @@
          in our public surface). At runtime we still bind to whatever NuGet.Frameworks.dll the
          host SDK ships, so per the toolset-vs-product test in dotnet/arcade-services'
          docs/Darc.md this is a toolset dependency, not a product one. -->
-    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.37">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.9.0-rc.72">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>b67e16eecf51af828f4e9e6e3a7113b8c6403d7b</Sha>
+      <Sha>5628a8b06b87cbd0e05eadb9695c7737c3c59cbe</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.9.0-1.26319.6">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.10.0-1.26352.10">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>db649bc3ca504bd1236a119d1cd86c7f8050e95b</Sha>
+      <Sha>83ca1a6465bb861e28a51cdbb4b56074b69cb5eb</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="10.0.0-beta.26324.4">
       <Uri>https://github.com/dotnet/arcade</Uri>

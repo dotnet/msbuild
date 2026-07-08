@@ -125,6 +125,7 @@
       <Link>SharedUtilities\StringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
+    <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
@@ -157,6 +158,7 @@
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
