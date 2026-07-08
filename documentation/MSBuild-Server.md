@@ -23,14 +23,7 @@ The client makes a single, response-file-aware determination and sets the `Shutd
 
 ## Diagnostics: server lifecycle messages
 
-Each build involving MSBuild Server logs one low-importance message (in a binary log and at `-v:diag`) as a dedicated `MSBuildServerLifecycleEventArgs` — its own binary-log record kind (bumps the format version). Tooling can render it structurally; older readers skip the unknown record, and the console still prints its text.
-
-- **Spawned** — `MSBuild Server node started for this build (process ID N).`
-- **Spawned, short-lived** (`/mt` with node reuse off) — `... started for this build only; it will shut down afterward (process ID N).`
-- **Reused** — `Reusing the running MSBuild Server node for this build (process ID N).`
-- **Not used** — `MSBuild Server was requested but not used for this build: {reason}.`
-
-Fields: `Kind` (Spawned/Reused/NotUsed), `ShortLived`, `ProcessId`, and for `NotUsed` a localized `Reason` plus a stable `ReasonCode` (e.g. `node-reuse-disabled`).
+Every build that uses MSBuild Server now records what happened to the server — whether it started a new one, reused a running one, or ran without one (and why). This appears in binary logs and at diagnostic verbosity, so server behavior is easy to see when troubleshooting.
 
 ## Communication protocol
 
