@@ -19,9 +19,9 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
-| **MSBuildTask0006** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer typed path parameter over string |
-| **MSBuildTask0007** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
-| **MSBuildTask0008** | Info | Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | Initialize a relative-default path property in `Execute()` |
+| **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
+| **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
+| **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -226,11 +226,12 @@ The analyzer determines what to check based on the type declaration:
 | Type | Rules Applied |
 |---|---|
 | Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005 |
-| Multithreaded tasks (`IMultiThreadableTask` or `[MSBuildMultiThreadableTask]`) | MSBuildTask0006–MSBuildTask0008 |
-| Class implementing `IMultiThreadableTask` | All seven rules |
-| Class with `[MSBuildMultiThreadableTask]` attribute | All seven rules |
+| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
+| Class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 only |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
+
+MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
 The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
 
@@ -357,7 +358,7 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-182 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+184 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
 
 ```
 cd src/TaskAnalyzer.Tests

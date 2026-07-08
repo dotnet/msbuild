@@ -388,5 +388,28 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             return false;
         }
+
+        /// <summary>
+        /// Enumerates the properties declared on <paramref name="type"/> and all of its base types,
+        /// most-derived first. A property hidden or overridden in a more derived type is yielded only
+        /// once, via its most-derived declaration (matched by name). The <see cref="object"/> base is
+        /// skipped since it declares no task-relevant properties.
+        /// </summary>
+        internal static IEnumerable<IPropertySymbol> GetPropertiesIncludingBaseTypes(INamedTypeSymbol type)
+        {
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            for (INamedTypeSymbol? current = type;
+                 current is not null && current.SpecialType != SpecialType.System_Object;
+                 current = current.BaseType)
+            {
+                foreach (var member in current.GetMembers())
+                {
+                    if (member is IPropertySymbol property && seen.Add(property.Name))
+                    {
+                        yield return property;
+                    }
+                }
+            }
+        }
     }
 }

@@ -181,6 +181,7 @@ public class PreferTypedParameterCodeFixProviderTests
         await CreateFixTest(
             testCode: """
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -194,6 +195,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 """,
             fixedCode: """
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -407,6 +409,7 @@ public class PreferTypedParameterCodeFixProviderTests
         await CreateFixTest(
             testCode: """
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -420,6 +423,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 """,
             fixedCode: """
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -449,6 +453,7 @@ public class PreferTypedParameterCodeFixProviderTests
             testCode: """
                 using System.IO;
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -463,6 +468,7 @@ public class PreferTypedParameterCodeFixProviderTests
             fixedCode: """
                 using System.IO;
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -486,6 +492,7 @@ public class PreferTypedParameterCodeFixProviderTests
             testCode: """
                 using System.IO;
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -500,6 +507,7 @@ public class PreferTypedParameterCodeFixProviderTests
             fixedCode: """
                 using System.IO;
                 using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
                 {
                     public TaskEnvironment TaskEnvironment { get; set; }
@@ -548,6 +556,7 @@ public class PreferTypedParameterCodeFixProviderTests
             """
             using System.IO;
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
             {
                 public TaskEnvironment TaskEnvironment { get; set; }

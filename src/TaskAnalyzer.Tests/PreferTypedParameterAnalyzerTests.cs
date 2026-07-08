@@ -138,6 +138,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Framework.IMultiThreadableTask
             {
                 public IBuildEngine BuildEngine { get; set; } = null!;
@@ -548,6 +549,7 @@ public class PreferTypedParameterAnalyzerTests
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
             using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Framework.IMultiThreadableTask
             {
                 public IBuildEngine BuildEngine { get; set; } = null!;
@@ -556,6 +558,58 @@ public class PreferTypedParameterAnalyzerTests
                 public bool Execute()
                 {
                     var abs = TaskEnvironment.GetAbsolutePath(PathItem.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+        diags[0].GetMessage().ShouldContain("AbsolutePath");
+    }
+
+    [Fact]
+    public async Task InheritsMultiThreadableInterface_WithoutAttribute_ProducesNoDiagnostic()
+    {
+        // The task derives from a base that implements IMultiThreadableTask but does not itself carry the
+        // [MSBuildMultiThreadableTask] attribute (which is Inherited = false), so it has not opted into
+        // multithreaded support and must not be analyzed.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            public abstract class BaseTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+            }
+            public class MyTask : BaseTask
+            {
+                public ITaskItem PathItem { get; set; } = null!;
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(PathItem.ItemSpec);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
+    }
+
+    [Fact]
+    public async Task InputPropertyDeclaredOnBaseClass_WithAttribute_ProducesDiagnostic()
+    {
+        // The input property is declared on a base class while the attribute is on the derived task. Applicability
+        // must consider inherited properties, not just those declared directly on the attributed type.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            public abstract class BaseTask : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem PathItem { get; set; } = null!;
+            }
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : BaseTask
+            {
+                public override bool Execute()
+                {
+                    var abs = new AbsolutePath(PathItem.ItemSpec);
                     return true;
                 }
             }

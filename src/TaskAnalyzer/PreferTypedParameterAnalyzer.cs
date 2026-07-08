@@ -52,10 +52,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Additionally, the task must opt into multithreaded support
-            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
+            // Additionally, the task must opt into multithreaded support by applying the
+            // [MSBuildMultiThreadableTask] attribute. Implementing IMultiThreadableTask is not
+            // sufficient: the attribute is Inherited = false, so a task that merely derives from a
+            // base class implementing the interface has not itself opted into multithreaded support.
             var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
-            if (iMultiThreadableTaskType is null && multiThreadableTaskAttributeType is null)
+            if (multiThreadableTaskAttributeType is null)
             {
                 return;
             }
@@ -77,11 +79,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
 
-                // Gate 2: Must have opted into multithreaded support
-                bool isMultiThreadable =
-                    (iMultiThreadableTaskType is not null && ImplementsInterface(namedType, iMultiThreadableTaskType)) ||
-                    (multiThreadableTaskAttributeType is not null && namedType.GetAttributes().Any(
-                        attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, multiThreadableTaskAttributeType)));
+                // Gate 2: Must have opted into multithreaded support via the attribute applied
+                // directly to this type. GetAttributes() returns only directly-applied attributes,
+                // which matches the attribute's Inherited = false semantics.
+                bool isMultiThreadable = namedType.GetAttributes().Any(
+                    attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, multiThreadableTaskAttributeType));
 
                 if (!isMultiThreadable)
                 {
@@ -93,7 +95,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Collect ITaskItem/ITaskItem[]-typed task input properties (candidates for MSBuildTask0007)
                 var taskItemInputProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
 
-                foreach (var member in namedType.GetMembers().OfType<IPropertySymbol>())
+                // Enumerate input properties declared on this type and all base types (most-derived
+                // first). A task can declare its ITaskItem/string inputs on a base class, so limiting
+                // to namedType.GetMembers() would miss them. Properties hidden or overridden in a more
+                // derived type are processed once, via their most-derived declaration.
+                foreach (var member in GetPropertiesIncludingBaseTypes(namedType))
                 {
                     if (member.DeclaredAccessibility != Accessibility.Public)
                     {
