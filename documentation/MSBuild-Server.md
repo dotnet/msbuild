@@ -23,34 +23,14 @@ The client makes a single, response-file-aware determination and sets the `Shutd
 
 ## Diagnostics: server lifecycle messages
 
-At the start of each build that involves MSBuild Server, a single low-importance message records how the build relates to the server. These are only visible in a binary log (`-bl`) and at diagnostic verbosity (`-v:diag`); default console output is unchanged, and ordinary builds that never request the server log nothing.
+Each build involving MSBuild Server logs one low-importance message (in a binary log and at `-v:diag`) as a dedicated `MSBuildServerLifecycleEventArgs` — its own binary-log record kind (bumps the format version). Tooling can render it structurally; older readers skip the unknown record, and the console still prints its text.
 
-| Situation | Message (English) |
-|---|---|
-| A freshly spawned server node serves its first build | `MSBuild Server node started for this build (process ID N).` |
-| A freshly spawned *short-lived* server serves this build only (`/mt` with node reuse off) | `MSBuild Server node started for this build only; it will shut down afterward (process ID N).` |
-| An already-running server node is reused | `Reusing the running MSBuild Server node for this build (process ID N).` |
-| The server was requested but the build ran in-process | `MSBuild Server was requested but not used for this build: {reason}.` |
+- **Spawned** — `MSBuild Server node started for this build (process ID N).`
+- **Spawned, short-lived** (`/mt` with node reuse off) — `... started for this build only; it will shut down afterward (process ID N).`
+- **Reused** — `Reusing the running MSBuild Server node for this build (process ID N).`
+- **Not used** — `MSBuild Server was requested but not used for this build: {reason}.`
 
-### Dedicated, versionable event type
-
-To let tooling recognize and render these without parsing localized text, each event is logged as a dedicated [`MSBuildServerLifecycleEventArgs`](https://learn.microsoft.com/dotnet/api/microsoft.build.framework) (a `BuildMessageEventArgs` subclass) rather than an ad-hoc message. It is recorded in the binary log under its own record kind (`BinaryLogRecordKind.MSBuildServerLifecycle`), which required a binary-log format version bump.
-
-- Because the binary log is forward-compatible (records are length-prefixed), readers that predate the record kind — including older versions of https://msbuildlog.com — **skip it gracefully** rather than failing. The event's minimum-reader-version is unchanged (it is optional to understand), so old readers still open the whole log.
-- Because the event derives from `BuildMessageEventArgs`, the console at `-v:diag` still prints the human-readable `Message`.
-- Newer tooling reconstructs the strongly-typed event and can render it specially (e.g. a dedicated node/icon).
-
-The contract is stable and versionable (new fields can be appended to the serialization in later format versions):
-
-| Field | Value |
-|---|---|
-| `Kind` | `Spawned`, `Reused`, or `NotUsed` (enum) |
-| `ShortLived` | `true` when a spawned server will shut down after this build (`/mt` with node reuse off) |
-| `ProcessId` | The server node's process ID (for `Spawned`/`Reused`; `0` otherwise) |
-| `Reason` | The localized fall-back reason (for `NotUsed`) |
-| `ReasonCode` | A stable, non-localized code for the fall-back cause (for `NotUsed`): `node-reuse-disabled`, `stdout-redirected`, `incompatible-invocation`, `command-line-parse-error`, `server-busy`, `server-crashed`, `server-state-unknown`, or `server-unreachable` |
-| `Message` | The localized, human-readable sentence shown above |
-
+Fields: `Kind` (Spawned/Reused/NotUsed), `ShortLived`, `ProcessId`, and for `NotUsed` a localized `Reason` plus a stable `ReasonCode` (e.g. `node-reuse-disabled`).
 
 ## Communication protocol
 
