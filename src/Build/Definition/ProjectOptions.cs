@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
@@ -59,6 +60,23 @@ namespace Microsoft.Build.Definition
         /// The <see cref="ProjectEvaluationStage"/> controlling how far evaluation should proceed.
         /// Defaults to <see cref="ProjectEvaluationStage.Full"/> (a complete evaluation).
         /// </summary>
-        public ProjectEvaluationStage EvaluationStage { get; set; } = ProjectEvaluationStage.Full;
+        public ProjectEvaluationStage EvaluationStage
+        {
+            get => _evaluationStage;
+            set
+            {
+                // The enum intentionally leaves a large numeric gap between UsingTasks and Full. Reject any
+                // undefined value so a stray stage cannot slip through and cause the evaluator to run every
+                // pass while the object-model guards still (incorrectly) report the state as unavailable.
+                if (!Enum.IsDefined(typeof(ProjectEvaluationStage), value))
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
+                }
+
+                _evaluationStage = value;
+            }
+        }
+
+        private ProjectEvaluationStage _evaluationStage = ProjectEvaluationStage.Full;
     }
 }

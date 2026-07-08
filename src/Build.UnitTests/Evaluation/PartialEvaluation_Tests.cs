@@ -12,16 +12,30 @@ using Microsoft.Build.Execution;
 using Shouldly;
 using Xunit;
 
-#nullable disable
-
 namespace Microsoft.Build.UnitTests.Evaluation
 {
     /// <summary>
     /// Tests for the opt-in partial (stop-after-pass) evaluation model exposed via
     /// <see cref="ProjectOptions.EvaluationStage"/>.
     /// </summary>
-    public class PartialEvaluation_Tests
+    public class PartialEvaluation_Tests : IDisposable
     {
+        private readonly ITestOutputHelper _output;
+        private readonly TestEnvironment _env;
+        private readonly ProjectCollection _collection = new ProjectCollection();
+
+        public PartialEvaluation_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+            _env = TestEnvironment.Create(_output);
+        }
+
+        public void Dispose()
+        {
+            _collection.Dispose();
+            _env.Dispose();
+        }
+
         private const string ProjectXml = """
             <Project>
               <PropertyGroup>
@@ -50,16 +64,26 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return ProjectRootElement.Create(reader);
         }
 
-        private static ProjectOptions OptionsFor(ProjectEvaluationStage stage) => new ProjectOptions
+        private ProjectOptions OptionsFor(ProjectEvaluationStage stage) => new ProjectOptions
         {
             EvaluationStage = stage,
-            ProjectCollection = new ProjectCollection(),
+            ProjectCollection = _collection,
         };
 
         [Fact]
         public void DefaultProjectOptionsStageIsFull()
         {
             new ProjectOptions().EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(5)]
+        [InlineData(-1)]
+        [InlineData(int.MaxValue - 1)]
+        public void EvaluationStage_RejectsUndefinedValues(int value)
+        {
+            Should.Throw<ArgumentOutOfRangeException>(() => new ProjectOptions { EvaluationStage = (ProjectEvaluationStage)value });
         }
 
         [Fact]
@@ -134,7 +158,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void FullStage_IsDefault_AndExposesEverything()
         {
-            ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), new ProjectOptions { ProjectCollection = new ProjectCollection() });
+            ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), new ProjectOptions { ProjectCollection = _collection });
 
             instance.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
             instance.GetItems("Compile").Count.ShouldBe(2);
@@ -180,33 +204,24 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void CacheDoesNotServePartialProjectForFullLoad()
         {
-            using ProjectCollection collection = new ProjectCollection();
-            string path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".proj");
-            File.WriteAllText(path, ProjectXml);
+            TransientTestFile file = _env.CreateFile("test.proj", ProjectXml);
 
-            try
+            Project partial = Project.FromFile(file.Path, new ProjectOptions
             {
-                Project partial = Project.FromFile(path, new ProjectOptions
-                {
-                    EvaluationStage = ProjectEvaluationStage.Properties,
-                    ProjectCollection = collection,
-                });
-                partial.EvaluationStage.ShouldBe(ProjectEvaluationStage.Properties);
+                EvaluationStage = ProjectEvaluationStage.Properties,
+                ProjectCollection = _collection,
+            });
+            partial.EvaluationStage.ShouldBe(ProjectEvaluationStage.Properties);
 
-                // A subsequent full LoadProject on the same key must return a fully-evaluated project
-                // (the cached partial one is upgraded in place), never partial state.
-                Project full = collection.LoadProject(path);
-                full.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
-                full.Targets.ShouldContainKey("Build");
+            // A subsequent full LoadProject on the same key must return a fully-evaluated project
+            // (the cached partial one is upgraded in place), never partial state.
+            Project full = _collection.LoadProject(file.Path);
+            full.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
+            full.Targets.ShouldContainKey("Build");
 
-                // The partial and full references point at the same upgraded cached project.
-                ReferenceEquals(partial, full).ShouldBeTrue();
-                partial.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
-            }
-            finally
-            {
-                File.Delete(path);
-            }
+            // The partial and full references point at the same upgraded cached project.
+            ReferenceEquals(partial, full).ShouldBeTrue();
+            partial.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
         }
     }
 }

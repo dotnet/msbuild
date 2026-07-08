@@ -1588,8 +1588,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>This collection cannot convert from the specified value to the backing value.</value>
   </data>
   <data name="OM_PartialEvaluationMemberUnavailable" xml:space="preserve">
-    <value>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with a later evaluation stage to access this member.</value>
-    <comment>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to.</comment>
+    <value>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</value>
+    <comment>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</comment>
   </data>
   <data name="OM_PartialEvaluationCannotBuild" xml:space="preserve">
     <value>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</value>

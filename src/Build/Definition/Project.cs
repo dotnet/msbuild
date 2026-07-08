@@ -2269,7 +2269,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (_evaluationStage < requiredStage)
                 {
-                    ErrorUtilities.ThrowInvalidOperation("OM_PartialEvaluationMemberUnavailable", memberName, _evaluationStage);
+                    ErrorUtilities.ThrowInvalidOperation("OM_PartialEvaluationMemberUnavailable", memberName, _evaluationStage, requiredStage);
                 }
             }
 

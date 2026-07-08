@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.Execution
         {
             if (_evaluationStage < requiredStage)
             {
-                ErrorUtilities.ThrowInvalidOperation("OM_PartialEvaluationMemberUnavailable", memberName, _evaluationStage);
+                ErrorUtilities.ThrowInvalidOperation("OM_PartialEvaluationMemberUnavailable", memberName, _evaluationStage, requiredStage);
             }
         }
 
