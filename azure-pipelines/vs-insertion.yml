@@ -228,7 +228,7 @@ extends:
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
             AutoCompletePR: $(AutoCompleteEnabled)
             AutoCompleteMergeStrategy: Squash
-            InsertionBuildPolicies: 'Request Perf DDRITs'
+            InsertionBuildPolicies: 'Request Perf DDRITs,Request Speedometer Perf Run'
             ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'
           env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)

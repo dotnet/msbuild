@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -75,10 +75,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         public AssemblyFoldersFromConfigResolver(string searchPathElement, GetAssemblyName getAssemblyName,
             FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion,
             ProcessorArchitecture targetProcessorArchitecture, bool compareProcessorArchitecture,
-            IBuildEngine buildEngine, TaskLoggingHelper log)
+            IBuildEngine buildEngine, TaskLoggingHelper log, TaskEnvironment taskEnvironment)
             : base(
                 searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion,
-                targetProcessorArchitecture, compareProcessorArchitecture)
+                targetProcessorArchitecture, compareProcessorArchitecture, taskEnvironment)
         {
             _buildEngine = buildEngine as IBuildEngine4;
             _taskLogger = log;
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 
                     _wasMatch = true;
 
-                    bool useCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
+                    bool useCache = taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
                     string key = "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + searchPathElement;
 
                     if (useCache && _buildEngine != null)
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                         try
                         {
                             AssemblyFoldersFromConfig assemblyFolders = new AssemblyFoldersFromConfig(_assemblyFolderConfigFile, _targetRuntimeVersion, targetProcessorArchitecture);
-                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists);
+                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists, taskEnvironment);
                             if (useCache)
                             {
                                 _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);
@@ -180,7 +180,18 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                     {
                         foreach (AssemblyFoldersFromConfigInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersFromConfig)
                         {
-                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder.DirectoryPath, assembliesConsideredAndRejected);
+                            // DirectoryPath is guaranteed non-null by the AssemblyFoldersFromConfigInfo ctor's
+                            // VerifyThrowArgumentNull check, so we only need to handle the empty-string case.
+                            // Pre-MT, an empty <DirectoryPath/> in the config file silently resolved to the
+                            // project directory via process CWD. Preserve that behavior by explicitly resolving
+                            // empty entries against the project directory via TaskEnvironment.
+                            string directoryPath = assemblyFolder.DirectoryPath.Length == 0
+                                ? taskEnvironment.ProjectDirectory.Value
+                                // Absolutize via TaskEnvironment: config paths may be relative, and the
+                                // process CWD is no longer guaranteed to be the project directory under MT.
+                                : taskEnvironment.GetAbsolutePath(assemblyFolder.DirectoryPath).Value;
+
+                            string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned
                             if (candidatePath != null)

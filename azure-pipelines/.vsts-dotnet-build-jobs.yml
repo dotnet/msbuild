@@ -32,6 +32,7 @@ jobs:
       buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
       toLowerCase: false
       usePat: true
+      dropRetentionDays: '1095'
       dropMetadataContainerName: 'DropMetadata-OptProf'
       condition: and(succeeded(), ${{ parameters.enableOptProf }})
 

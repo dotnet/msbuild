@@ -4387,7 +4387,7 @@ $(
                 try
                 {
                     result = expander.ExpandIntoStringLeaveEscaped(errorTests[i], ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-                    if (String.Compare(result, errorTests[i]) == 0)
+                    if (String.Compare(result, errorTests[i], StringComparison.Ordinal) == 0)
                     {
                         Console.WriteLine(errorTests[i] + " did not expand.");
                         success = false;
