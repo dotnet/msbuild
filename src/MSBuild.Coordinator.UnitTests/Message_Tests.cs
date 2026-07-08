@@ -159,6 +159,36 @@ public class Message_Tests
         Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
     }
 
+    [Fact]
+    public void ClientMessage_WithUnsupportedExtendedFields_Throws()
+    {
+        using MemoryStream stream = new();
+        using BinaryWriter writer = new(stream);
+        writer.Write((byte)0x84); // Heartbeat with extended-fields bit set
+        writer.Write((byte)0x00); // Extended fields value present but empty
+        writer.Flush();
+
+        stream.Position = 0;
+        using BinaryReader reader = new(stream);
+
+        Should.Throw<InternalErrorException>(() => reader.ReadClientMessage());
+    }
+
+    [Fact]
+    public void ServerMessage_WithUnsupportedExtendedFields_Throws()
+    {
+        using MemoryStream stream = new();
+        using BinaryWriter writer = new(stream);
+        writer.Write((byte)0x83); // Wait with extended-fields bit set
+        writer.Write((byte)0x00); // Extended fields value present but empty
+        writer.Flush();
+
+        stream.Position = 0;
+        using BinaryReader reader = new(stream);
+
+        Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
+    }
+
     private static ClientMessage WriteAndReadClientMessage(ClientMessage message)
     {
         using MemoryStream stream = new();

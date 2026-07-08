@@ -11,19 +11,19 @@ internal abstract partial record ServerMessage
     private sealed class Factory : FactoryBase<ServerMessage, Factory>
     {
         private static readonly Group s_allFactories = new(
-            new(ServerMessageType.HandshakeResponse, static reader => ServerHandshakeMessage.ReadPayload(reader)),
-            new(ServerMessageType.NodeGrant, static reader => NodeGrantMessage.ReadPayload(reader)),
+            new(ServerMessageType.HandshakeResponse, static (reader, _) => ServerHandshakeMessage.ReadPayload(reader)),
+            new(ServerMessageType.NodeGrant, static (reader, _) => NodeGrantMessage.ReadPayload(reader)),
             new(WaitMessage.Instance),
-            new(ServerMessageType.Error, static reader => ErrorMessage.ReadPayload(reader)),
-            new(ServerMessageType.NodeGrantWithId, static reader => NodeGrantWithIdMessage.ReadPayload(reader)));
+            new(ServerMessageType.Error, static (reader, _) => ErrorMessage.ReadPayload(reader)),
+            new(ServerMessageType.NodeGrantWithId, static (reader, _) => NodeGrantWithIdMessage.ReadPayload(reader)));
 
-        private Factory(ServerMessage instance)
-            : base(instance.MessageType, instance)
+        private Factory(ServerMessage instance, byte supportedExtendedFields = 0)
+            : base(instance.MessageType, instance, supportedExtendedFields)
         {
         }
 
-        private Factory(ServerMessageType messageType, Func<BinaryReader, ServerMessage> messageCreator)
-            : base(messageType, messageCreator)
+        private Factory(ServerMessageType messageType, Func<BinaryReader, byte, ServerMessage> messageCreator, byte supportedExtendedFields = 0)
+            : base(messageType, messageCreator, supportedExtendedFields)
         {
         }
 

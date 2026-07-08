@@ -21,6 +21,7 @@ internal abstract partial record Message<TMessageType>
 
                 foreach (TFactory factory in factories)
                 {
+                    Assumed.Zero(GetTypeByte(factory.MessageType) & ExtendedBit, $"{typeof(TMessageType).Name} value {factory.MessageType} uses the reserved extended-fields bit.");
                     Assumed.False(map.ContainsKey(factory.MessageType), $"Duplicate factory for {typeof(TMessageType).Name}: {factory.MessageType}");
                     map.Add(factory.MessageType, factory);
                 }

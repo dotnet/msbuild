@@ -17,9 +17,15 @@ internal abstract partial record ServerMessage : Message<ServerMessageType>
 
     public static ServerMessage ReadFrom(BinaryReader reader)
     {
-        ServerMessageType messageType = ReadTypeByte(reader);
+        (ServerMessageType messageType, bool hasExtendedFields) = ReadTypeByte(reader);
         Factory factory = Factory.FromMessageType(messageType);
 
-        return factory.Create(reader);
+        byte extendedFields = hasExtendedFields ? ReadExtendedFieldsByte(reader) : (byte)0;
+
+        // The marker bit is only legal for message types that declare a supported extended-field mask.
+        // The factory validates that the actual field bits are within that mask.
+        Assumed.False(hasExtendedFields && !factory.SupportsExtendedFields, $"Message type {factory.MessageType} does not support extended fields.");
+
+        return factory.Create(reader, extendedFields);
     }
 }
