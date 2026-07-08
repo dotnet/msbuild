@@ -541,6 +541,7 @@ namespace Microsoft.Build.Logging
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
+                case MSBuildServerLifecycleEventArgs serverLifecycle: return Write(serverLifecycle);
 
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);
@@ -582,6 +583,16 @@ namespace Microsoft.Build.Logging
             Write(e.MVID);
             WriteDeduplicatedString(e.AppDomainDescriptor);
             return BinaryLogRecordKind.AssemblyLoad;
+        }
+
+        private BinaryLogRecordKind Write(MSBuildServerLifecycleEventArgs e)
+        {
+            WriteMessageFields(e, writeMessage: true, writeImportance: true);
+            Write((int)e.Kind);
+            Write(e.ProcessId);
+            WriteDeduplicatedString(e.Reason);
+            WriteDeduplicatedString(e.ReasonCode);
+            return BinaryLogRecordKind.MSBuildServerLifecycle;
         }
 
         private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)

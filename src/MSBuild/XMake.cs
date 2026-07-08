@@ -1997,10 +1997,9 @@ namespace Microsoft.Build.CommandLine
             };
 
             // Record the MSBuild Server lifecycle for this build so it is visible in the binary log and at
-            // diagnostic verbosity. These are logged as *extended* build messages: on the wire they are ordinary
-            // MessageImportance.Low message records (so older binlog viewers and the console still show the
-            // human-readable text), but they carry a stable ExtendedType discriminator and structured metadata so
-            // tooling (e.g. https://msbuildlog.com) can recognize and render them without parsing localized text.
+            // diagnostic verbosity. These are logged as a dedicated, versionable MSBuildServerLifecycleEventArgs
+            // (recorded under its own binary-log record kind) rather than an ad-hoc message, so tooling can
+            // recognize and render them structurally; the console still shows the human-readable text at -v:diag.
             // The s_isServerNode check must come first: it intentionally masks any s_serverNotUsedReason
             // that the server process may have set during its own startup (the server's own command line
             // can look "server requested but not used"), so the server only ever logs a spawn/reuse message.
@@ -2010,39 +2009,29 @@ namespace Microsoft.Build.CommandLine
                 // subsequent build on the same long-lived node reports that the node is being reused.
                 bool spawned = s_serverBuildCounter == 1;
                 string serverStatusResource = spawned ? "MSBuildServerNodeSpawned" : "MSBuildServerNodeReused";
-                messages.Add(
-                    new BuildManager.DeferredBuildMessage(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                            serverStatusResource,
-                            EnvironmentUtilities.CurrentProcessId),
-                        MessageImportance.Low,
-                        ServerLifecycleExtendedType,
-                        new Dictionary<string, string>(StringComparer.Ordinal)
-                        {
-                            ["kind"] = spawned ? "spawned" : "reused",
-                            ["processId"] = EnvironmentUtilities.CurrentProcessId.ToString(CultureInfo.InvariantCulture),
-                        }));
+                MSBuildServerLifecycleEventArgs lifecycleEvent = new(
+                    spawned ? MSBuildServerLifecycleKind.Spawned : MSBuildServerLifecycleKind.Reused,
+                    EnvironmentUtilities.CurrentProcessId,
+                    reason: null,
+                    reasonCode: null,
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        serverStatusResource,
+                        EnvironmentUtilities.CurrentProcessId),
+                    MessageImportance.Low);
+                messages.Add(new BuildManager.DeferredBuildMessage(lifecycleEvent, MessageImportance.Low));
             }
             else if (!string.IsNullOrEmpty(s_serverNotUsedReason))
             {
-                Dictionary<string, string> notUsedMetadata = new(StringComparer.Ordinal)
-                {
-                    ["kind"] = "not-used",
-                    ["reason"] = s_serverNotUsedReason,
-                };
-                if (!string.IsNullOrEmpty(s_serverNotUsedReasonCode))
-                {
-                    notUsedMetadata["reasonCode"] = s_serverNotUsedReasonCode;
-                }
-
-                messages.Add(
-                    new BuildManager.DeferredBuildMessage(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                            "MSBuildServerNotUsedForBuild",
-                            s_serverNotUsedReason),
-                        MessageImportance.Low,
-                        ServerLifecycleExtendedType,
-                        notUsedMetadata));
+                MSBuildServerLifecycleEventArgs lifecycleEvent = new(
+                    MSBuildServerLifecycleKind.NotUsed,
+                    processId: 0,
+                    s_serverNotUsedReason,
+                    s_serverNotUsedReasonCode,
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "MSBuildServerNotUsedForBuild",
+                        s_serverNotUsedReason),
+                    MessageImportance.Low);
+                messages.Add(new BuildManager.DeferredBuildMessage(lifecycleEvent, MessageImportance.Low));
             }
 
             NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
@@ -2270,7 +2259,8 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// A stable, non-localized companion to <see cref="s_serverNotUsedReason"/> that identifies *why* the
         /// requested server was not used, so tooling can branch on it without parsing localized text. Surfaced
-        /// as the "reasonCode" extended-metadata value. Null when the server was not requested or was used.
+        /// as <see cref="Microsoft.Build.Framework.MSBuildServerLifecycleEventArgs.ReasonCode"/>. Null when the
+        /// server was not requested or was used.
         /// </summary>
         internal static string s_serverNotUsedReasonCode;
 
@@ -2283,15 +2273,6 @@ namespace Microsoft.Build.CommandLine
         internal const string ServerNotUsedReasonCodeServerCrashed = "server-crashed";
         internal const string ServerNotUsedReasonCodeServerStateUnknown = "server-state-unknown";
         internal const string ServerNotUsedReasonCodeServerUnreachable = "server-unreachable";
-
-        /// <summary>
-        /// Stable, non-localized <see cref="IExtendedBuildEventArgs.ExtendedType"/> discriminator for the MSBuild
-        /// Server lifecycle messages (spawn/reuse/not-used). Logging these as extended messages keeps them
-        /// forward-compatible — older binary-log readers and the console still show the human-readable text — while
-        /// tooling such as https://msbuildlog.com can recognize them by this type and render the structured
-        /// metadata ("kind", "processId", "reason") instead of parsing localized text.
-        /// </summary>
-        internal const string ServerLifecycleExtendedType = "msbuild-server";
 
         /// <summary>
         /// Indicates that this process was launched as a worker node (via -nodeMode switch).

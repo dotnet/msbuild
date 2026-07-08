@@ -1085,25 +1085,23 @@ namespace Microsoft.Build.UnitTests
         #endregion
 
         [Fact]
-        public void DeferredExtendedBuildMessageIsWrittenToBinlogWithMetadata()
+        public void DeferredMSBuildServerLifecycleEventIsWrittenToBinlog()
         {
-            // Regression coverage for the LogDeferredMessages "glue": a DeferredBuildMessage carrying an
-            // ExtendedType + metadata must be logged as an ExtendedBuildMessageEventArgs and land in the binary
-            // log with its structured metadata intact (mirrors how XMake records the MSBuild Server lifecycle).
+            // Regression coverage for the LogDeferredMessages "glue": a DeferredBuildMessage backed by a
+            // pre-built BuildEventArgs must be raised as-is and land in the binary log as that exact typed event
+            // (mirrors how XMake records the MSBuild Server lifecycle under its own record kind).
             var binaryLogger = new BinaryLogger { Parameters = _logFile };
 
-            var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
-            {
-                ["kind"] = "spawned",
-                ["processId"] = "1234",
-            };
+            var lifecycleEvent = new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Spawned,
+                1234,
+                reason: null,
+                reasonCode: null,
+                "MSBuild Server node started for this build (process ID 1234).",
+                MessageImportance.Low);
             var deferredMessages = new[]
             {
-                new BuildManager.DeferredBuildMessage(
-                    "MSBuild Server node started for this build (process ID 1234).",
-                    MessageImportance.Low,
-                    "msbuild-server",
-                    metadata),
+                new BuildManager.DeferredBuildMessage(lifecycleEvent, MessageImportance.Low),
             };
 
             var parameters = new BuildParameters
@@ -1117,23 +1115,22 @@ namespace Microsoft.Build.UnitTests
                 buildManager.EndBuild();
             }
 
-            ExtendedBuildMessageEventArgs serverMessage = null;
+            MSBuildServerLifecycleEventArgs replayed = null;
             var replay = new BinaryLogReplayEventSource();
             replay.AnyEventRaised += (_, e) =>
             {
-                if (e is ExtendedBuildMessageEventArgs ext && ext.ExtendedType == "msbuild-server")
+                if (e is MSBuildServerLifecycleEventArgs serverEvent)
                 {
-                    serverMessage = ext;
+                    replayed = serverEvent;
                 }
             };
             replay.Replay(_logFile);
 
-            serverMessage.ShouldNotBeNull();
-            serverMessage.Importance.ShouldBe(MessageImportance.Low);
-            serverMessage.Message.ShouldBe("MSBuild Server node started for this build (process ID 1234).");
-            serverMessage.ExtendedMetadata.ShouldNotBeNull();
-            serverMessage.ExtendedMetadata["kind"].ShouldBe("spawned");
-            serverMessage.ExtendedMetadata["processId"].ShouldBe("1234");
+            replayed.ShouldNotBeNull();
+            replayed.Kind.ShouldBe(MSBuildServerLifecycleKind.Spawned);
+            replayed.ProcessId.ShouldBe(1234);
+            replayed.Importance.ShouldBe(MessageImportance.Low);
+            replayed.Message.ShouldBe("MSBuild Server node started for this build (process ID 1234).");
         }
 
         public void Dispose()

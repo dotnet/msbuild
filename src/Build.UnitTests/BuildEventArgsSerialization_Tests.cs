@@ -540,26 +540,23 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// The MSBuild Server lifecycle messages are logged as <see cref="ExtendedBuildMessageEventArgs"/> so they
-        /// carry structured, tooling-consumable data (kind/processId/reason) while staying forward-compatible:
-        /// on the wire the event is an ordinary <see cref="BinaryLogRecordKind.Message"/> record (the extended
-        /// payload rides in an optional field), so binary-log readers/viewers that predate the payload still
-        /// surface it as a build message, and the console still prints its <see cref="BuildEventArgs.Message"/>.
-        /// The ExtendedType literal here must stay in sync with <c>MSBuildApp.ServerLifecycleExtendedType</c>.
+        /// The MSBuild Server lifecycle events are logged as a dedicated <see cref="MSBuildServerLifecycleEventArgs"/>
+        /// recorded under its own <see cref="BinaryLogRecordKind.MSBuildServerLifecycle"/>. This keeps the data in a
+        /// specific, versionable event type (not an ad-hoc message); binary-log readers that predate the record kind
+        /// skip it via the forward-compatible, length-prefixed record framing.
         /// </summary>
         [Fact]
-        public void ExtendedBuildMessageEventArgs_ServerLifecycle_IsForwardCompatibleAsMessage()
+        public void RoundtripMSBuildServerLifecycleEventArgs()
         {
-            const string ServerLifecycleExtendedType = "msbuild-server";
-            var args = new ExtendedBuildMessageEventArgs(
-                ServerLifecycleExtendedType,
-                "MSBuild Server node started for this build (process ID 1234).",
-                helpKeyword: null,
-                senderName: "MSBuild",
+            var args = new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.NotUsed,
+                processId: 0,
+                "node reuse is disabled",
+                "node-reuse-disabled",
+                "MSBuild Server was requested but not used for this build: node reuse is disabled.",
                 MessageImportance.Low)
             {
                 BuildEventContext = BuildEventContext.Invalid,
-                ExtendedMetadata = new Dictionary<string, string> { { "kind", "spawned" }, { "processId", "1234" } },
             };
 
             var memoryStream = new MemoryStream();
@@ -568,9 +565,8 @@ namespace Microsoft.Build.UnitTests
                 new BuildEventArgsWriter(binaryWriter).Write(args);
             }
 
-            // Forward compatibility: the event serializes as a plain Message record kind, not a new/unknown kind,
-            // so old readers do not skip it and instead render the human-readable text as a message. (String and
-            // NameValueList auxiliary records — the latter carrying the extended metadata — precede the event.)
+            // The event serializes under its OWN dedicated record kind (not Message), so readers that predate it
+            // skip the unknown record via the forward-compatible length-prefixed framing rather than mis-reading it.
             memoryStream.Position = 0;
             using (var rawReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
             using (var eventsReader = new BuildEventArgsReader(rawReader, BinaryLogger.FileFormatVersion))
@@ -584,22 +580,20 @@ namespace Microsoft.Build.UnitTests
                     or BinaryLogRecordKind.NameValueList
                     or BinaryLogRecordKind.ProjectImportArchive);
 
-                eventRecordKind.ShouldBe(BinaryLogRecordKind.Message);
+                eventRecordKind.ShouldBe(BinaryLogRecordKind.MSBuildServerLifecycle);
             }
 
-            // A current reader reconstructs the structured event (used by msbuildlog.com to render it nicely),
-            // and it remains a BuildMessageEventArgs so -v:diag and older viewers show it as a message.
+            // A current reader reconstructs the strongly-typed event with all of its structured fields.
             memoryStream.Position = 0;
             using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
             using (var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion))
             {
-                var deserialized = eventsReader.Read().ShouldBeOfType<ExtendedBuildMessageEventArgs>();
-                deserialized.ShouldBeAssignableTo<BuildMessageEventArgs>();
-                deserialized.ExtendedType.ShouldBe(ServerLifecycleExtendedType);
-                deserialized.Message.ShouldBe("MSBuild Server node started for this build (process ID 1234).");
-                deserialized.ExtendedMetadata.ShouldNotBeNull();
-                deserialized.ExtendedMetadata["kind"].ShouldBe("spawned");
-                deserialized.ExtendedMetadata["processId"].ShouldBe("1234");
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(MSBuildServerLifecycleKind.NotUsed);
+                deserialized.ProcessId.ShouldBe(0);
+                deserialized.Reason.ShouldBe("node reuse is disabled");
+                deserialized.ReasonCode.ShouldBe("node-reuse-disabled");
+                deserialized.Message.ShouldBe("MSBuild Server was requested but not used for this build: node reuse is disabled.");
             }
         }
 

@@ -427,17 +427,12 @@ namespace Microsoft.Build.Execution
             public string? Code { get; }
 
             /// <summary>
-            /// When set, the deferred message is logged as an <see cref="ExtendedBuildMessageEventArgs"/> that
-            /// carries this discriminator (see <see cref="IExtendedBuildEventArgs.ExtendedType"/>) instead of a
-            /// plain message. This lets tooling recognize and structure the payload, while older binary-log
-            /// readers and the console still surface the human-readable <see cref="Text"/> as an ordinary message.
+            /// When set, the deferred message is logged by raising this pre-built event (via
+            /// <see cref="ILoggingService.LogBuildEvent"/>) instead of a plain comment. This lets a caller emit
+            /// a dedicated, structured event type (recorded under its own binary-log record kind) rather than
+            /// communicating build/system data through an ad-hoc message.
             /// </summary>
-            public string? ExtendedType { get; }
-
-            /// <summary>
-            /// Optional structured, non-localized metadata accompanying <see cref="ExtendedType"/>.
-            /// </summary>
-            public Dictionary<string, string?>? ExtendedMetadata { get; }
+            public BuildEventArgs? BuildEvent { get; }
 
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
@@ -445,8 +440,7 @@ namespace Microsoft.Build.Execution
                 Text = text;
                 FilePath = null;
                 Code = null;
-                ExtendedType = null;
-                ExtendedMetadata = null;
+                BuildEvent = null;
             }
 
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
@@ -455,8 +449,7 @@ namespace Microsoft.Build.Execution
                 Text = text;
                 FilePath = filePath;
                 Code = null;
-                ExtendedType = null;
-                ExtendedMetadata = null;
+                BuildEvent = null;
             }
 
             /// <summary>
@@ -472,27 +465,23 @@ namespace Microsoft.Build.Execution
                 FilePath = null;
                 Code = code;
                 MessageSeverity = messageSeverity;
-                ExtendedType = null;
-                ExtendedMetadata = null;
+                BuildEvent = null;
             }
 
             /// <summary>
-            /// Creates a deferred message that is logged as an <see cref="ExtendedBuildMessageEventArgs"/>. Tooling
-            /// can recognize the payload via <paramref name="extendedType"/> and <paramref name="extendedMetadata"/>,
-            /// while older binary-log readers and the console still surface <paramref name="text"/> as a message.
+            /// Creates a deferred message backed by a pre-built <see cref="BuildEventArgs"/>. The event is raised
+            /// as-is when the build begins, so a caller can emit a dedicated, structured event type instead of an
+            /// ad-hoc message. <see cref="Text"/> mirrors the event's message for callers that inspect the struct.
             /// </summary>
-            /// <param name="text">The human-readable message text.</param>
-            /// <param name="importance">The importance of the message.</param>
-            /// <param name="extendedType">The extended-event discriminator (see <see cref="IExtendedBuildEventArgs.ExtendedType"/>).</param>
-            /// <param name="extendedMetadata">Optional structured, non-localized metadata.</param>
-            public DeferredBuildMessage(string text, MessageImportance importance, string extendedType, Dictionary<string, string?>? extendedMetadata)
+            /// <param name="buildEvent">The pre-built event to raise (its <see cref="BuildEventArgs.Message"/> is used as <see cref="Text"/>).</param>
+            /// <param name="importance">The importance to report for the deferred message.</param>
+            public DeferredBuildMessage(BuildEventArgs buildEvent, MessageImportance importance)
             {
                 Importance = importance;
-                Text = text;
+                Text = buildEvent.Message ?? string.Empty;
                 FilePath = null;
                 Code = null;
-                ExtendedType = extendedType;
-                ExtendedMetadata = extendedMetadata;
+                BuildEvent = buildEvent;
             }
         }
 
@@ -3420,25 +3409,14 @@ namespace Microsoft.Build.Execution
                         file: BuildEventFileInfo.Empty,
                         message: message.Text);
                 }
-                else if (message.ExtendedType is not null)
+                else if (message.BuildEvent is not null)
                 {
-                    // Log as an extended build message so tooling (e.g. binlog viewers, Terminal Logger) can
-                    // recognize the structured payload via its ExtendedType, while older binary-log readers and
-                    // the console still surface the human-readable text as an ordinary low-importance message.
-                    // On the wire this is a BinaryLogRecordKind.Message record (the Extended data rides along in
-                    // an optional field), so it is forward-compatible with readers that predate the payload.
-                    ExtendedBuildMessageEventArgs extendedMessage = new(
-                        message.ExtendedType,
-                        message.Text,
-                        helpKeyword: null,
-                        senderName: "MSBuild",
-                        message.Importance,
-                        DateTime.UtcNow)
-                    {
-                        BuildEventContext = BuildEventContext.Invalid,
-                        ExtendedMetadata = message.ExtendedMetadata,
-                    };
-                    loggingService.LogBuildEvent(extendedMessage);
+                    // Raise the caller's pre-built event as-is so it is recorded under its own (structured)
+                    // event type / binary-log record kind, rather than being flattened into an ad-hoc message.
+                    // Deferred messages have no project/target context; give the event the Invalid context that
+                    // the text path uses so loggers (e.g. the console) that require a non-null context accept it.
+                    message.BuildEvent.BuildEventContext ??= BuildEventContext.Invalid;
+                    loggingService.LogBuildEvent(message.BuildEvent);
                 }
                 else
                 {

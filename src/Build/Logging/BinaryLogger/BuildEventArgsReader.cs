@@ -331,6 +331,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
                 BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
                 BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
+                BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
                 _ => null
             };
 
@@ -1249,6 +1250,28 @@ namespace Microsoft.Build.Logging
                 assemblyPath,
                 mvid,
                 appDomainName);
+            SetCommonFields(e, fields);
+            e.ProjectFile = fields.ProjectFile;
+
+            return e;
+        }
+
+        private MSBuildServerLifecycleEventArgs ReadMSBuildServerLifecycleEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields(readImportance: true);
+
+            MSBuildServerLifecycleKind kind = (MSBuildServerLifecycleKind)ReadInt32();
+            int processId = ReadInt32();
+            string? reason = ReadDeduplicatedString();
+            string? reasonCode = ReadDeduplicatedString();
+
+            var e = new MSBuildServerLifecycleEventArgs(
+                kind,
+                processId,
+                reason,
+                reasonCode,
+                fields.Message,
+                fields.Importance);
             SetCommonFields(e, fields);
             e.ProjectFile = fields.ProjectFile;
 

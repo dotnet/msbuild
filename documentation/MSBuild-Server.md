@@ -21,24 +21,24 @@ At the start of each build that involves MSBuild Server, a single low-importance
 | An already-running server node is reused | `Reusing the running MSBuild Server node for this build (process ID N).` |
 | The server was requested but the build ran in-process | `MSBuild Server was requested but not used for this build: {reason}.` |
 
-### Forward-compatible, structured payload
+### Dedicated, versionable event type
 
-To let tooling recognize and render these without parsing localized text, each message is logged as an [`ExtendedBuildMessageEventArgs`](https://learn.microsoft.com/dotnet/api/microsoft.build.framework.extendedbuildmessageeventargs) rather than a plain message. This keeps the data forward-compatible in both directions:
+To let tooling recognize and render these without parsing localized text, each event is logged as a dedicated [`MSBuildServerLifecycleEventArgs`](https://learn.microsoft.com/dotnet/api/microsoft.build.framework) (a `BuildMessageEventArgs` subclass) rather than an ad-hoc message. It is recorded in the binary log under its own record kind (`BinaryLogRecordKind.MSBuildServerLifecycle`), which required a binary-log format version bump.
 
-- On the wire (in a binary log) the event is an ordinary `Message` record; the structured payload rides in an optional field. Binary-log readers and viewers that predate the payload — including older versions of https://msbuildlog.com — still surface the human-readable text as a build message instead of skipping an unknown record kind.
-- Because the event still derives from `BuildMessageEventArgs`, the console at `-v:diag` prints the same human-readable text as before.
-- Current readers reconstruct the structured data, which newer tooling can render specially.
+- Because the binary log is forward-compatible (records are length-prefixed), readers that predate the record kind — including older versions of https://msbuildlog.com — **skip it gracefully** rather than failing. The event's minimum-reader-version is unchanged (it is optional to understand), so old readers still open the whole log.
+- Because the event derives from `BuildMessageEventArgs`, the console at `-v:diag` still prints the human-readable `Message`.
+- Newer tooling reconstructs the strongly-typed event and can render it specially (e.g. a dedicated node/icon).
 
-The contract is stable and versionable (new metadata keys can be added over time):
+The contract is stable and versionable (new fields can be appended to the serialization in later format versions):
 
 | Field | Value |
 |---|---|
-| `ExtendedType` | `msbuild-server` |
-| `ExtendedMetadata["kind"]` | `spawned`, `reused`, or `not-used` (stable, non-localized) |
-| `ExtendedMetadata["processId"]` | The server node's process ID (for `spawned`/`reused`) |
-| `ExtendedMetadata["reason"]` | The localized fall-back reason (for `not-used`) |
-| `ExtendedMetadata["reasonCode"]` | A stable, non-localized code for the fall-back cause (for `not-used`): `node-reuse-disabled`, `stdout-redirected`, `incompatible-invocation`, `command-line-parse-error`, `server-busy`, `server-crashed`, `server-state-unknown`, or `server-unreachable` |
+| `Kind` | `Spawned`, `Reused`, or `NotUsed` (enum) |
+| `ProcessId` | The server node's process ID (for `Spawned`/`Reused`; `0` otherwise) |
+| `Reason` | The localized fall-back reason (for `NotUsed`) |
+| `ReasonCode` | A stable, non-localized code for the fall-back cause (for `NotUsed`): `node-reuse-disabled`, `stdout-redirected`, `incompatible-invocation`, `command-line-parse-error`, `server-busy`, `server-crashed`, `server-state-unknown`, or `server-unreachable` |
 | `Message` | The localized, human-readable sentence shown above |
+
 
 
 ## Communication protocol
