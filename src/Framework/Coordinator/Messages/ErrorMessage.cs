@@ -10,11 +10,10 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record ErrorMessage : ServerMessage
 {
-    public override ServerMessageType MessageType => ServerMessageType.Error;
-
     public string Message { get; }
 
     public ErrorMessage(string message)
+        : base(ServerMessageType.Error)
     {
         Message = message;
     }

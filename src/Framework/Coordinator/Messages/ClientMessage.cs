@@ -8,35 +8,18 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// <summary>
 ///  Base type for all messages sent from an MSBuild client to the coordinator.
 /// </summary>
-internal abstract record ClientMessage
+internal abstract partial record ClientMessage : Message<ClientMessageType>
 {
-    public abstract ClientMessageType MessageType { get; }
+    protected ClientMessage(ClientMessageType messageType)
+        : base(messageType)
+    {
+    }
 
     public static ClientMessage ReadFrom(BinaryReader reader)
     {
-        var messageType = (ClientMessageType)reader.ReadByte();
+        ClientMessageType messageType = ReadTypeByte(reader);
+        Factory factory = Factory.FromMessageType(messageType);
 
-        return messageType switch
-        {
-            ClientMessageType.Handshake => ClientHandshakeMessage.ReadPayload(reader),
-            ClientMessageType.RequestNodes => RequestNodesMessage.ReadPayload(reader),
-            ClientMessageType.ReleaseNodes => ReleaseNodesMessage.Instance,
-            ClientMessageType.Heartbeat => HeartbeatMessage.Instance,
-            ClientMessageType.JoinGrant => JoinGrantMessage.ReadPayload(reader),
-
-            _ => Assumed.Unreachable<ClientMessage>($"Unknown client message type: {messageType}"),
-        };
-    }
-
-    public void WriteTo(BinaryWriter writer)
-    {
-        writer.Write((byte)MessageType);
-        WritePayload(writer);
-        writer.Flush();
-    }
-
-    protected virtual void WritePayload(BinaryWriter writer)
-    {
-        // Descendants can override.
+        return factory.Create(reader);
     }
 }

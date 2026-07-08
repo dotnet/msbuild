@@ -10,11 +10,10 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record RequestNodesMessage : ClientMessage
 {
-    public override ClientMessageType MessageType => ClientMessageType.RequestNodes;
-
     public int RequestedNodes { get; }
 
     public RequestNodesMessage(int requestedNodes)
+        : base(ClientMessageType.RequestNodes)
     {
         RequestedNodes = requestedNodes;
     }

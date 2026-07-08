@@ -11,13 +11,12 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record JoinGrantMessage : ClientMessage
 {
-    public override ClientMessageType MessageType => ClientMessageType.JoinGrant;
-
     public Guid GrantId { get; }
 
     public int RequestedNodes { get; }
 
     public JoinGrantMessage(Guid grantId, int requestedNodes)
+        : base(ClientMessageType.JoinGrant)
     {
         GrantId = grantId;
         RequestedNodes = requestedNodes;

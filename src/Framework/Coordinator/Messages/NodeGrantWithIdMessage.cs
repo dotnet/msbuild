@@ -11,13 +11,12 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record NodeGrantWithIdMessage : ServerMessage, INodeGrantMessage
 {
-    public override ServerMessageType MessageType => ServerMessageType.NodeGrantWithId;
-
     public Guid GrantId { get; }
 
     public int GrantedNodes { get; }
 
     public NodeGrantWithIdMessage(Guid grantId, int grantedNodes)
+        : base(ServerMessageType.NodeGrantWithId)
     {
         GrantId = grantId;
         GrantedNodes = grantedNodes;
