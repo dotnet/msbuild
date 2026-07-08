@@ -378,7 +378,7 @@ namespace Microsoft.Build.Logging
 
             WriteProperties(e.Properties);
 
-            WriteProjectItems(e.Items);
+            WriteProjectItems(e.Items, e.ProjectFile);
 
             var result = e.ProfilerResult;
             Write(result.HasValue);
@@ -432,7 +432,7 @@ namespace Microsoft.Build.Logging
 
             WriteProperties(e.Properties);
 
-            WriteProjectItems(e.Items);
+            WriteProjectItems(e.Items, e.ProjectFile);
 
             return BinaryLogRecordKind.ProjectStarted;
         }
@@ -592,6 +592,7 @@ namespace Microsoft.Build.Logging
             Write(e.ProcessId);
             WriteDeduplicatedString(e.Reason);
             WriteDeduplicatedString(e.ReasonCode);
+            Write(e.ShortLived);
             return BinaryLogRecordKind.MSBuildServerLifecycle;
         }
 
@@ -666,7 +667,7 @@ namespace Microsoft.Build.Logging
             if (e.Kind == TaskParameterMessageKind.AddItem
                || e.Kind == TaskParameterMessageKind.TaskOutput)
             {
-                CheckForFilesToEmbed(e.ItemType, e.Items);
+                CheckForFilesToEmbed(e.ItemType, e.Items, e.ProjectFile);
             }
             return BinaryLogRecordKind.TaskParameter;
         }
@@ -993,7 +994,7 @@ namespace Microsoft.Build.Logging
             reusableItemsList.Clear();
         }
 
-        private void WriteProjectItems(IEnumerable items)
+        private void WriteProjectItems(IEnumerable items, string projectFile)
         {
             if (items == null)
             {
@@ -1010,7 +1011,7 @@ namespace Microsoft.Build.Logging
                 {
                     WriteDeduplicatedString(itemType);
                     WriteTaskItemList(itemList);
-                    CheckForFilesToEmbed(itemType, itemList);
+                    CheckForFilesToEmbed(itemType, itemList, projectFile);
                 });
 
                 // signal the end
@@ -1023,7 +1024,7 @@ namespace Microsoft.Build.Logging
                 {
                     WriteDeduplicatedString(itemType);
                     WriteTaskItemList(itemList);
-                    CheckForFilesToEmbed(itemType, itemList);
+                    CheckForFilesToEmbed(itemType, itemList, projectFile);
                 });
 
                 // signal the end
@@ -1051,7 +1052,7 @@ namespace Microsoft.Build.Logging
                     {
                         WriteDeduplicatedString(currentItemType);
                         WriteTaskItemList(reusableProjectItemList);
-                        CheckForFilesToEmbed(currentItemType, reusableProjectItemList);
+                        CheckForFilesToEmbed(currentItemType, reusableProjectItemList, projectFile);
                         reusableProjectItemList.Clear();
                     }
 
@@ -1064,7 +1065,7 @@ namespace Microsoft.Build.Logging
                 {
                     WriteDeduplicatedString(currentItemType);
                     WriteTaskItemList(reusableProjectItemList);
-                    CheckForFilesToEmbed(currentItemType, reusableProjectItemList);
+                    CheckForFilesToEmbed(currentItemType, reusableProjectItemList, projectFile);
                     reusableProjectItemList.Clear();
                 }
 
@@ -1073,7 +1074,7 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void CheckForFilesToEmbed(string itemType, object itemList)
+        private void CheckForFilesToEmbed(string itemType, object itemList, string projectFile)
         {
             if (EmbedFile == null ||
                 !string.Equals(itemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase) ||
@@ -1086,12 +1087,41 @@ namespace Microsoft.Build.Logging
             {
                 if (item is ITaskItem taskItem && !string.IsNullOrEmpty(taskItem.ItemSpec))
                 {
-                    EmbedFile.Invoke(taskItem.ItemSpec);
+                    EmbedFile.Invoke(ResolveEmbedPath(taskItem.ItemSpec, projectFile));
                 }
                 else if (item is string itemSpec && !string.IsNullOrEmpty(itemSpec))
                 {
-                    EmbedFile.Invoke(itemSpec);
+                    EmbedFile.Invoke(ResolveEmbedPath(itemSpec, projectFile));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Resolves a relative <c>EmbedInBinlog</c> item spec against its declaring project's directory.
+        /// The logger runs on the entrypoint node, so an unresolved relative path from a child project
+        /// would be looked up against the wrong directory and silently dropped (issue #13789).
+        /// Separators are normalized so the existence check is consistent cross-platform.
+        /// </summary>
+        private static string ResolveEmbedPath(string itemSpec, string projectFile)
+        {
+            itemSpec = FileUtilities.FixFilePath(itemSpec);
+
+            try
+            {
+                if (Path.IsPathRooted(itemSpec) || string.IsNullOrEmpty(projectFile))
+                {
+                    return itemSpec;
+                }
+
+                string projectDirectory = Path.GetDirectoryName(projectFile);
+                return string.IsNullOrEmpty(projectDirectory)
+                    ? itemSpec
+                    : FileUtilities.GetFullPathNoThrow(Path.Combine(projectDirectory, itemSpec));
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                // Malformed path; fall back to the raw item spec, matching the pre-existing pass-through behavior.
+                return itemSpec;
             }
         }
 

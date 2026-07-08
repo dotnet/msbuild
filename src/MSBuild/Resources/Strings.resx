@@ -1789,6 +1789,9 @@
   <data name="MSBuildServerNodeSpawned" xml:space="preserve">
     <value>MSBuild Server node started for this build (process ID {0}).</value>
   </data>
+  <data name="MSBuildServerNodeSpawnedShortLived" xml:space="preserve">
+    <value>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</value>
+  </data>
   <data name="MSBuildServerNodeReused" xml:space="preserve">
     <value>Reusing the running MSBuild Server node for this build (process ID {0}).</value>
   </data>

@@ -414,6 +414,11 @@
         <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
         <note />
       </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
         <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>

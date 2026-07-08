@@ -124,6 +124,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private byte _parentPacketVersion;
 
+        /// <summary>
+        /// The packet version negotiated for outgoing packets: the minimum of this node's supported
+        /// version and the parent's version.
+        /// </summary>
+        private byte _negotiatedWriteVersion;
+
 #if NET
         /// <summary>
         /// The set of property names from handshake responsible for node version.
@@ -231,6 +237,7 @@ namespace Microsoft.Build.BackEnd
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
             _parentPacketVersion = parentPacketVersion;
+            _negotiatedWriteVersion = parentPacketVersion < NodePacketTypeExtensions.PacketVersion ? parentPacketVersion : NodePacketTypeExtensions.PacketVersion;
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
@@ -428,7 +435,7 @@ namespace Microsoft.Build.BackEnd
                                 CommunicationsUtilities.Trace($"Handshake failed with error: {result.ErrorMessage}");
                             }
 
-                            if (!IsHandshakePartValid(component, result.Value, index))
+                            if (!IsHandshakePartValid(component, result.Value, index, handshake))
                             {
                                 CommunicationsUtilities.Trace(
                                     $"Handshake failed. Received {result.Value} from host for {component.Key} but expected {component.Value}. Probably the host is a different MSBuild build.");
@@ -551,7 +558,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method to verify that the handshake part received from the host matches the expected values.
         /// </summary>
-        private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index)
+        private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index, Handshake handshake)
         {
             if (handshakePart == component.Value)
             {
@@ -567,6 +574,14 @@ namespace Microsoft.Build.BackEnd
                 // NET task host tolerates a worker node connecting with an architecture mismatch.
                 // The lower 24 bits carry the HandshakeOptions flags; the upper byte is the handshake version.
                 isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
+            }
+            else if (component.Key == nameof(HandshakeComponents.Salt))
+            {
+                // The .NET task host parent and child derive the tools-directory portion of the salt
+                // from different sources that, on Windows, can differ only by drive-letter casing
+                // ("D:\..." vs "d:\..."). Both spellings denote the same directory, so accept the
+                // parent's casing rather than failing the handshake with MSB4216.
+                isAllowedMismatch = handshake.IsNetTaskHostSaltMatch(handshakePart);
             }
             else
             {
@@ -768,6 +783,8 @@ namespace Microsoft.Build.BackEnd
                                 // Re-use writeTranslator; we clear _packetStream but never replace it.
                                 // If _packetStream is ever reassigned, set writeTranslator = null first.
                                 writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
+
+                                writeTranslator.NegotiatedPacketVersion = _negotiatedWriteVersion;
 
                                 packetStream.WriteByte((byte)packet.Type);
 

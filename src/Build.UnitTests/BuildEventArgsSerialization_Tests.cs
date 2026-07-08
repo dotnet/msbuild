@@ -549,12 +549,13 @@ namespace Microsoft.Build.UnitTests
         public void RoundtripMSBuildServerLifecycleEventArgs()
         {
             var args = new MSBuildServerLifecycleEventArgs(
-                MSBuildServerLifecycleKind.NotUsed,
-                processId: 0,
-                "node reuse is disabled",
-                "node-reuse-disabled",
-                "MSBuild Server was requested but not used for this build: node reuse is disabled.",
-                MessageImportance.Low)
+                MSBuildServerLifecycleKind.Spawned,
+                processId: 4321,
+                reason: null,
+                reasonCode: null,
+                "MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).",
+                MessageImportance.Low,
+                shortLived: true)
             {
                 BuildEventContext = BuildEventContext.Invalid,
             };
@@ -589,11 +590,12 @@ namespace Microsoft.Build.UnitTests
             using (var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion))
             {
                 var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
-                deserialized.Kind.ShouldBe(MSBuildServerLifecycleKind.NotUsed);
-                deserialized.ProcessId.ShouldBe(0);
-                deserialized.Reason.ShouldBe("node reuse is disabled");
-                deserialized.ReasonCode.ShouldBe("node-reuse-disabled");
-                deserialized.Message.ShouldBe("MSBuild Server was requested but not used for this build: node reuse is disabled.");
+                deserialized.Kind.ShouldBe(MSBuildServerLifecycleKind.Spawned);
+                deserialized.ShortLived.ShouldBeTrue();
+                deserialized.ProcessId.ShouldBe(4321);
+                deserialized.Reason.ShouldBeNull();
+                deserialized.ReasonCode.ShouldBeNull();
+                deserialized.Message.ShouldBe("MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).");
             }
         }
 

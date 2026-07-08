@@ -34,12 +34,19 @@ namespace Microsoft.Build.BackEnd.Logging
             WPF,
             AspNet,
             Other,
+
+            /// <summary>
+            /// Sentinel that must remain the last member. Used to size <see cref="_errorCounts"/>
+            /// without reflection (which would trigger trim/AOT warnings) while staying self-maintaining
+            /// as categories are added. Never returned by <see cref="CategorizeError"/>.
+            /// </summary>
+            Count,
         }
 
         /// <summary>
         /// Error counts by category index (using enum ordinal).
         /// </summary>
-        private readonly int[] _errorCounts = new int[Enum.GetValues(typeof(ErrorCategory)).Length];
+        private readonly int[] _errorCounts = new int[(int)ErrorCategory.Count];
 
         /// <summary>
         /// Tracks the primary failure category (category with highest count).

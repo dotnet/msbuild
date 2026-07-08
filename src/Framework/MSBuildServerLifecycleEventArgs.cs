@@ -54,25 +54,35 @@ namespace Microsoft.Build.Framework
         /// <param name="reasonCode">A stable, non-localized code for the fall-back cause (for <see cref="MSBuildServerLifecycleKind.NotUsed"/>); otherwise <see langword="null"/>.</param>
         /// <param name="message">The localized, human-readable message describing the event.</param>
         /// <param name="importance">The importance of the message.</param>
+        /// <param name="shortLived"><see langword="true"/> when a spawned server will shut down after this build
+        /// instead of staying resident for reuse (a "short-lived" server).</param>
         public MSBuildServerLifecycleEventArgs(
             MSBuildServerLifecycleKind kind,
             int processId,
             string? reason,
             string? reasonCode,
             string? message,
-            MessageImportance importance = MessageImportance.Low)
+            MessageImportance importance = MessageImportance.Low,
+            bool shortLived = false)
             : base(message, helpKeyword: null, senderName: "MSBuild", importance, DateTime.UtcNow)
         {
             Kind = kind;
             ProcessId = processId;
             Reason = reason;
             ReasonCode = reasonCode;
+            ShortLived = shortLived;
         }
 
         /// <summary>
         /// How the build related to the MSBuild Server node.
         /// </summary>
         public MSBuildServerLifecycleKind Kind { get; private set; }
+
+        /// <summary>
+        /// <see langword="true"/> when a spawned server node will tear itself down after this build instead of
+        /// staying resident for reuse (a "short-lived" server — a <c>/mt</c> build with node reuse off).
+        /// </summary>
+        public bool ShortLived { get; private set; }
 
         /// <summary>
         /// The MSBuild Server node's process id, or 0 when not applicable.
@@ -99,6 +109,7 @@ namespace Microsoft.Build.Framework
             writer.Write7BitEncodedInt(ProcessId);
             writer.WriteOptionalString(Reason);
             writer.WriteOptionalString(ReasonCode);
+            writer.Write(ShortLived);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
@@ -109,6 +120,7 @@ namespace Microsoft.Build.Framework
             ProcessId = reader.Read7BitEncodedInt();
             Reason = reader.ReadOptionalString();
             ReasonCode = reader.ReadOptionalString();
+            ShortLived = reader.ReadBoolean();
         }
     }
 }

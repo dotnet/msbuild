@@ -1,12 +1,14 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -15,6 +17,7 @@ using System.Text;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -24,7 +27,6 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
-using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -753,6 +755,41 @@ namespace Microsoft.Build.BackEnd
         }
 
         #region Local Methods
+
+        /// <summary>
+        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is path-like.
+        /// </summary>
+        private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
+            => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
+                || TaskParameterTypeVerifier.IsPathLikeTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
+
+        /// <summary>
+        /// Cache of compiled constructor delegates that wrap an <see cref="ITaskItem"/> into a
+        /// <see cref="TaskItem{T}"/>, keyed by the generic argument T. Building the closed generic type and
+        /// resolving the constructor via reflection on every parameter binding is expensive, so the delegate
+        /// is compiled once per T and reused.
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, Func<ITaskItem, ITaskItem>> s_taskItemOfTFactories = new();
+
+        /// <summary>
+        /// Wraps the given <paramref name="item"/> into a <c>TaskItem&lt;T&gt;</c> where T is
+        /// <paramref name="genericArgument"/>, using a cached compiled constructor delegate.
+        /// </summary>
+        private static ITaskItem CreateTaskItemOfT(Type genericArgument, ITaskItem item)
+        {
+            Func<ITaskItem, ITaskItem> factory = s_taskItemOfTFactories.GetOrAdd(genericArgument, static t =>
+            {
+                ConstructorInfo constructor = typeof(TaskItem<>).MakeGenericType(t).GetConstructor([typeof(ITaskItem)]);
+                ParameterExpression itemParameter = Expression.Parameter(typeof(ITaskItem), "item");
+                return Expression.Lambda<Func<ITaskItem, ITaskItem>>(
+                    Expression.Convert(Expression.New(constructor, itemParameter), typeof(ITaskItem)),
+                    itemParameter).Compile();
+            });
+
+            return factory(item);
+        }
+
+
         /// <summary>
         /// Called on the local side.
         /// </summary>
@@ -766,19 +803,33 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool SetValueParameter(TaskPropertyInfo parameter, Type parameterType, string expandedParameterValue)
         {
-            if (parameterType == typeof(bool))
+            return InternalSetTaskParameter(parameter, ConvertStringToParameterValue(expandedParameterValue, parameterType));
+        }
+
+        /// <summary>
+        /// Converts a single string value to an instance of <paramref name="targetType"/>, applying the same
+        /// conversions for both scalar parameters and the elements of array parameters.
+        /// </summary>
+        private object ConvertStringToParameterValue(string value, Type targetType)
+        {
+            // Path-like types are resolved through TaskEnvironment so the path is rooted consistently
+            // with the rest of the build before being handed to the task.
+            if (targetType == typeof(AbsolutePath))
             {
-                // Convert the string to the appropriate datatype, and set the task's parameter.
-                return InternalSetTaskParameter(parameter, ConversionUtilities.ConvertStringToBool(expandedParameterValue));
+                return TaskEnvironment.GetAbsolutePath(value);
             }
-            else if (parameterType == typeof(string))
+
+            if (targetType == typeof(FileInfo))
             {
-                return InternalSetTaskParameter(parameter, expandedParameterValue);
+                return new FileInfo(TaskEnvironment.GetAbsolutePath(value).Value);
             }
-            else
+
+            if (targetType == typeof(DirectoryInfo))
             {
-                return InternalSetTaskParameter(parameter, Convert.ChangeType(expandedParameterValue, parameterType, CultureInfo.InvariantCulture));
+                return new DirectoryInfo(TaskEnvironment.GetAbsolutePath(value).Value);
             }
+
+            return ValueTypeParser.Parse(value, targetType);
         }
 
         /// <summary>
@@ -790,41 +841,84 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                // Loop through all the TaskItems in our arraylist, and convert them.
-                ArrayList finalTaskInputs = new ArrayList(taskItems.Count);
+                Type elementType = parameterType.GetElementType();
 
-                if (parameterType != typeof(ITaskItem[]))
+                if (parameterType == typeof(ITaskItem[]))
                 {
-                    foreach (TaskItem item in taskItems)
+                    ITaskItem[] finalInputs = new ITaskItem[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
                     {
+                        TaskItem item = taskItems[i];
                         currentItem = item;
-                        if (parameterType == typeof(string[]))
-                        {
-                            finalTaskInputs.Add(item.ItemSpec);
-                        }
-                        else if (parameterType == typeof(bool[]))
-                        {
-                            finalTaskInputs.Add(ConversionUtilities.ConvertStringToBool(item.ItemSpec));
-                        }
-                        else
-                        {
-                            finalTaskInputs.Add(Convert.ChangeType(item.ItemSpec, parameterType.GetElementType(), CultureInfo.InvariantCulture));
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (TaskItem item in taskItems)
-                    {
+
                         // if we've been asked to remote these items then
                         // remember them so we can disconnect them from remoting later
                         RecordItemForDisconnectIfNecessary(item);
-
-                        finalTaskInputs.Add(item);
+                        finalInputs[i] = item;
                     }
-                }
 
-                return InternalSetTaskParameter(parameter, finalTaskInputs.ToArray(parameterType.GetElementType()));
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                {
+                    // TaskItem<T> / ITaskItem<T> arrays: wrap each item into the closed generic TaskItem<T>.
+#if NET
+                    // AOT friendly
+                    Array finalInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        RecordItemForDisconnectIfNecessary(item);
+                        ITaskItem taskItemOfT = CreateTaskItemOfT(elementType.GetGenericArguments()[0], item);
+                        finalInputs.SetValue(taskItemOfT, i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(string[]))
+                {
+                    string[] finalInputs = new string[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = currentItem.ItemSpec;
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(bool[]))
+                {
+                    bool[] finalInputs = new bool[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = ConversionUtilities.ConvertStringToBool(currentItem.ItemSpec);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else
+                {
+                    // Fallback for custom value types and path-like scalar types (AbsolutePath/FileInfo/DirectoryInfo).
+#if NET
+                    // AOT friendly
+                    Array finalTaskInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalTaskInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        finalTaskInputs.SetValue(ConvertStringToParameterValue(item.ItemSpec, elementType), i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalTaskInputs);
+                }
             }
             catch (Exception ex)
             {
@@ -864,12 +958,30 @@ namespace Microsoft.Build.BackEnd
         {
             object outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
 
-            if (!(outputs is ITaskItem[] taskItemOutputs))
+            if (outputs is ITaskItem[] taskItemOutputs)
             {
-                taskItemOutputs = [(ITaskItem)outputs];
+                return taskItemOutputs;
             }
 
-            return taskItemOutputs;
+            if (outputs == null)
+            {
+                return null;
+            }
+
+            Type outputType = outputs.GetType();
+            if (outputType.IsArray && IsPathLikeTaskItemOrITaskItemOfT(outputType.GetElementType()))
+            {
+                Array taskItemArray = (Array)outputs;
+                ITaskItem[] result = new ITaskItem[taskItemArray.Length];
+                for (int i = 0; i < taskItemArray.Length; i++)
+                {
+                    result[i] = (ITaskItem)taskItemArray.GetValue(i);
+                }
+
+                return result;
+            }
+
+            return [(ITaskItem)outputs];
         }
 
         /// <summary>
@@ -892,7 +1004,7 @@ namespace Microsoft.Build.BackEnd
                 object output = convertibleOutputs.GetValue(i);
                 if (output != null)
                 {
-                    stringOutputs[i] = (string)Convert.ChangeType(output, typeof(string), CultureInfo.InvariantCulture);
+                    stringOutputs[i] = ValueTypeParser.ToString(output);
                 }
             }
 
@@ -1239,7 +1351,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                if (parameterType == typeof(ITaskItem))
+                if (parameterType == typeof(ITaskItem) || IsPathLikeTaskItemOrITaskItemOfT(parameterType))
                 {
                     // We don't know how many items we're going to end up with, but we'll
                     // keep adding them to this arraylist as we find them.
@@ -1253,7 +1365,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (finalTaskItems.Count != 1)
                         {
-                            // We only allow a single item to be passed into a parameter of ITaskItem.
+                            // We only allow a single item to be passed into a parameter of ITaskItem or TaskItem<T>.
 
                             // Some of the computation (expansion) here is expensive, so don't switch to VerifyThrowInvalidProject.
                             ProjectErrorUtilities.ThrowInvalidProject(
@@ -1267,7 +1379,15 @@ namespace Microsoft.Build.BackEnd
 
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
 
-                        success = SetTaskItemParameter(parameter, finalTaskItems[0]);
+                        if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                        {
+                            ITaskItem taskItemOfT = CreateTaskItemOfT(parameterType.GetGenericArguments()[0], finalTaskItems[0]);
+                            success = InternalSetTaskParameter(parameter, taskItemOfT);
+                        }
+                        else
+                        {
+                            success = SetTaskItemParameter(parameter, finalTaskItems[0]);
+                        }
 
                         taskParameterSet = true;
                     }

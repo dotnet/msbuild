@@ -11,6 +11,16 @@ To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
 When a build is multithreaded (`/mt`), the server node is launched with [Server GC](https://learn.microsoft.com/dotnet/standard/garbage-collection/workstation-server-gc) enabled. Under `/mt` the server runs all project work on threads in this single process, so Server GC's higher throughput is beneficial; without `/mt` the server only orchestrates and delegates project work to separate worker nodes, so it keeps the default Workstation GC. GC mode is fixed at CLR startup, so it is set via the `DOTNET_gcServer` environment variable in the server's launch environment (decided from the launching invocation's command line). An explicit user-set `DOTNET_gcServer` is honored (e.g. set `DOTNET_gcServer=0` to keep Workstation GC in a memory-constrained environment). This is scoped to the server process only: sidecar TaskHosts and worker nodes keep the default Workstation GC.
 
+## Node reuse and server lifetime
+
+MSBuild Server is a form of node reuse: the whole point of the server is to stay resident between builds so later builds reuse its warmed-up process and caches. Consequently:
+
+- **Node reuse on (the default).** The server is eligible and, after a build, returns to listening so the next compatible client reuses it.
+- **Node reuse off (`-nodeReuse:false` / `-nr:false`) without `/mt`.** Keeping a process resident contradicts the no-reuse intent, so the build does not use the server at all (it runs entirely in the launching process). See `ServerShouldNotRunWhenNodeReuseEqualsFalse`.
+- **Node reuse off *with* `/mt`.** A `/mt` build needs the server for a different reason: multithreaded project execution runs inside the server process, which is where Server GC is applied (see [Garbage collection](#garbage-collection)). So a `/mt` build still engages the server even when node reuse is off - but it must honor the no-reuse request by **not** leaving the server resident afterwards. This is a *short-lived* server: a fresh process that tears itself down after the build.
+
+The client makes a single, response-file-aware determination and sets the `ShutdownAfterBuild` flag on the `ServerNodeBuildCommand` packet if server needs shutdown.
+
 ## Diagnostics: server lifecycle messages
 
 At the start of each build that involves MSBuild Server, a single low-importance message records how the build relates to the server. These are only visible in a binary log (`-bl`) and at diagnostic verbosity (`-v:diag`); default console output is unchanged, and ordinary builds that never request the server log nothing.
@@ -18,6 +28,7 @@ At the start of each build that involves MSBuild Server, a single low-importance
 | Situation | Message (English) |
 |---|---|
 | A freshly spawned server node serves its first build | `MSBuild Server node started for this build (process ID N).` |
+| A freshly spawned *short-lived* server serves this build only (`/mt` with node reuse off) | `MSBuild Server node started for this build only; it will shut down afterward (process ID N).` |
 | An already-running server node is reused | `Reusing the running MSBuild Server node for this build (process ID N).` |
 | The server was requested but the build ran in-process | `MSBuild Server was requested but not used for this build: {reason}.` |
 
@@ -34,11 +45,11 @@ The contract is stable and versionable (new fields can be appended to the serial
 | Field | Value |
 |---|---|
 | `Kind` | `Spawned`, `Reused`, or `NotUsed` (enum) |
+| `ShortLived` | `true` when a spawned server will shut down after this build (`/mt` with node reuse off) |
 | `ProcessId` | The server node's process ID (for `Spawned`/`Reused`; `0` otherwise) |
 | `Reason` | The localized fall-back reason (for `NotUsed`) |
 | `ReasonCode` | A stable, non-localized code for the fall-back cause (for `NotUsed`): `node-reuse-disabled`, `stdout-redirected`, `incompatible-invocation`, `command-line-parse-error`, `server-busy`, `server-crashed`, `server-state-unknown`, or `server-unreachable` |
 | `Message` | The localized, human-readable sentence shown above |
-
 
 
 ## Communication protocol

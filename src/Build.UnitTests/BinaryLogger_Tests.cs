@@ -463,6 +463,64 @@ namespace Microsoft.Build.UnitTests
                 $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
+        [Fact]
+        public void BinaryLoggerShouldEmbedFilesWithRelativePathFromChildProjects()
+        {
+            // Repro for https://github.com/dotnet/msbuild/issues/13789: EmbedInBinlog items with a
+            // relative Include path emitted by child projects must still be embedded. The binary
+            // logger runs on the entrypoint node, so a relative path coming from a child project
+            // (built on another node) has to be resolved against that child's directory, otherwise
+            // it is silently dropped.
+            //
+            // The generated file is written via an absolute path so its creation is deterministic;
+            // only the EmbedInBinlog Include uses a relative path, which is the behavior under test.
+            // MSBUILDNOINPROCNODE forces every project onto an out-of-proc worker node so the
+            // forwarded-event path (where ProjectFile is not serialized) is always exercised.
+            _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
+            TransientTestFolder rootFolder = _env.CreateFolder();
+
+            const string childProjectContents = @"
+<Project>
+    <Target Name=""Build"">
+        <WriteLinesToFile File=""$(MSBuildProjectDirectory)/generated.txt"" Lines=""generated"" Overwrite=""true"" />
+        <CreateItem Include=""generated.txt"">
+            <Output TaskParameter=""Include"" ItemName=""EmbedInBinlog"" />
+        </CreateItem>
+    </Target>
+</Project>";
+
+            string childADir = Directory.CreateDirectory(Path.Combine(rootFolder.Path, "ChildA")).FullName;
+            string childBDir = Directory.CreateDirectory(Path.Combine(rootFolder.Path, "ChildB")).FullName;
+            File.WriteAllText(Path.Combine(childADir, "ChildA.proj"), childProjectContents);
+            File.WriteAllText(Path.Combine(childBDir, "ChildB.proj"), childProjectContents);
+
+            const string parentProjectContents = @"
+<Project>
+    <ItemGroup>
+        <ChildProject Include=""ChildA\ChildA.proj"" />
+        <ChildProject Include=""ChildB\ChildB.proj"" />
+    </ItemGroup>
+    <Target Name=""Build"">
+        <MSBuild Projects=""@(ChildProject)"" Targets=""Build"" BuildInParallel=""true"" />
+    </Target>
+</Project>";
+            string parentProjectPath = Path.Combine(rootFolder.Path, "build.proj");
+            File.WriteAllText(parentProjectPath, parentProjectContents);
+
+            RunnerUtilities.ExecMSBuild(
+                $"\"{parentProjectPath}\" -m:2 -bl:\"{_logFile};ProjectImports=ZipFile\"",
+                out bool success);
+            success.ShouldBeTrue();
+
+            var projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // Both child projects' generated files must be embedded, not just the entrypoint's.
+            int generatedFileCount = zipArchive.Entries.Count(zE => zE.Name.EndsWith("generated.txt", StringComparison.Ordinal));
+            generatedFileCount.ShouldBe(2, $"Embedded files: {string.Join(",", zipArchive.Entries)}");
+        }
+
         [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {

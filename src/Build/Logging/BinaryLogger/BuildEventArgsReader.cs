@@ -1264,6 +1264,7 @@ namespace Microsoft.Build.Logging
             int processId = ReadInt32();
             string? reason = ReadDeduplicatedString();
             string? reasonCode = ReadDeduplicatedString();
+            bool shortLived = ReadBoolean();
 
             var e = new MSBuildServerLifecycleEventArgs(
                 kind,
@@ -1271,7 +1272,8 @@ namespace Microsoft.Build.Logging
                 reason,
                 reasonCode,
                 fields.Message,
-                fields.Importance);
+                fields.Importance,
+                shortLived);
             SetCommonFields(e, fields);
             e.ProjectFile = fields.ProjectFile;
 
