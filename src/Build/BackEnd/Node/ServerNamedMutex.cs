@@ -3,8 +3,8 @@
 
 using System;
 using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
