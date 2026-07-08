@@ -2069,6 +2069,9 @@ namespace Microsoft.Build.BackEnd
             // existing behavior for this edge case (graph nodes are always requested with explicit targets).
             return requestedTargets != null && requestedTargets.Count > 0 ? requestedTargets : null;
         }
+
+        /// <returns>True if caches misses are allowed, false otherwise</returns>
+        private bool CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses, bool emitNonErrorLogs)
         {
             ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
 

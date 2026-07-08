@@ -158,6 +158,9 @@ namespace Microsoft.Build.BackEnd
         /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method
         /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no
         /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
+        /// <param name="allowedTopLevelTargets">When non-null, the request is only considered satisfiable if all of its explicitly
+        /// requested targets (or the configuration's default targets when no targets are specified) are contained in this set.
+        /// Used to enforce isolation constraints deterministically for cross-project references in isolated builds.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets = null)
         {
