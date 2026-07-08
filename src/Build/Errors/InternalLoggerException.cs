@@ -10,6 +10,7 @@ using System.Security.Permissions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
+using Microsoft.Build.Framework.Telemetry;
 using System.Collections.Generic;
 
 #nullable disable
@@ -24,7 +25,7 @@ namespace Microsoft.Build.Exceptions
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public sealed class InternalLoggerException : BuildExceptionBase
+    public sealed class InternalLoggerException : BuildExceptionBase, IBuildEventArgsTelemetryProvider
     {
         #region Unusable constructors
 
@@ -89,10 +90,10 @@ namespace Microsoft.Build.Exceptions
             bool initializationException)
             : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(message), "Need error message.");
-            ErrorUtilities.VerifyThrow(innerException != null || initializationException, "Need the logger exception.");
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(errorCode), "Must specify the error message code.");
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(helpKeyword), "Must specify the help keyword for the IDE.");
+            Assumed.NotNullOrEmpty(message, "Need error message.");
+            Assumed.True(innerException != null || initializationException, "Need the logger exception.");
+            Assumed.NotNullOrEmpty(errorCode, "Must specify the error message code.");
+            Assumed.NotNullOrEmpty(helpKeyword, "Must specify the help keyword for the IDE.");
 
             this.e = e;
             this.errorCode = errorCode;
@@ -193,6 +194,14 @@ namespace Microsoft.Build.Exceptions
         }
 
         /// <summary>
+        /// Surfaces the simple type name of the <see cref="BuildEventArgs"/> being logged (if any)
+        /// for crash telemetry. Implemented explicitly so it stays off the public surface; lets
+        /// Microsoft.Build.Framework read the value via <see cref="IBuildEventArgsTelemetryProvider"/>
+        /// without reflecting over this type.
+        /// </summary>
+        string IBuildEventArgsTelemetryProvider.BuildEventArgsTypeName => e?.GetType().Name;
+
+        /// <summary>
         /// Gets the error code associated with this exception's message (not the inner exception).
         /// </summary>
         /// <value>The error code string.</value>
@@ -244,7 +253,7 @@ namespace Microsoft.Build.Exceptions
             bool initializationException,
             params string[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(messageResourceName != null, "Need error message.");
+            Assumed.NotNull(messageResourceName, "Need error message.");
 
             string errorCode;
             string helpKeyword;

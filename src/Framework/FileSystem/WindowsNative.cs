@@ -8,13 +8,12 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 
-
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>
     /// Native implementation of file system operations
     /// </summary>
-    internal static class WindowsNative
+    internal static unsafe class WindowsNative
     {
         /// <summary>
         /// Maximum path length.
@@ -254,26 +253,74 @@ namespace Microsoft.Build.Shared.FileSystem
         }
 
         /// <nodoc/>
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [SuppressMessage("Microsoft.Interoperability", "CA1401:PInvokesShouldNotBeVisible", Justification = "Needed for custom enumeration.")]
-        public static extern SafeFindFileHandle FindFirstFileW(
-            string lpFileName,
-            out Win32FindData lpFindFileData);
+        [System.Runtime.Versioning.SupportedOSPlatform("windows5.1.2600")]
+        public static SafeFindFileHandle FindFirstFileW(string lpFileName, out Win32FindData lpFindFileData)
+        {
+            Windows.Win32.Foundation.HANDLE h = Windows.Win32.PInvoke.FindFirstFile(lpFileName, out Windows.Win32.Storage.FileSystem.WIN32_FIND_DATAW raw);
+            lpFindFileData = ConvertFindData(in raw);
+            return new SafeFindFileHandle((nint)h.Value);
+        }
 
         /// <nodoc/>
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [SuppressMessage("Microsoft.Interoperability", "CA1401:PInvokesShouldNotBeVisible", Justification = "Needed for custom enumeration.")]
-        public static extern bool FindNextFileW(SafeHandle hFindFile, out Win32FindData lpFindFileData);
+        [System.Runtime.Versioning.SupportedOSPlatform("windows5.1.2600")]
+        public static bool FindNextFileW(SafeHandle hFindFile, out Win32FindData lpFindFileData)
+        {
+            // DangerousAddRef pins the SafeHandle's ref count for the duration of the
+            // native call so a concurrent Dispose() cannot invalidate the handle mid-call.
+            // Today's enumeration callers are single-threaded but the cost is negligible.
+            bool refAdded = false;
+            try
+            {
+                hFindFile.DangerousAddRef(ref refAdded);
+                bool ok = Windows.Win32.PInvoke.FindNextFile(
+                    new Windows.Win32.Foundation.HANDLE((void*)hFindFile.DangerousGetHandle()),
+                    out Windows.Win32.Storage.FileSystem.WIN32_FIND_DATAW raw);
+                lpFindFileData = ConvertFindData(in raw);
+                return ok;
+            }
+            finally
+            {
+                if (refAdded)
+                {
+                    hFindFile.DangerousRelease();
+                }
+            }
+        }
 
         /// <nodoc/>
-        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
-        [SuppressMessage("Microsoft.Interoperability", "CA1401:PInvokesShouldNotBeVisible", Justification = "Needed for creating symlinks.")]
-        public static extern int PathMatchSpecExW([In] string pszFileParam, [In] string pszSpec, [In] int flags);
+        [System.Runtime.Versioning.SupportedOSPlatform("windows6.0.6000")]
+        public static int PathMatchSpecExW(string pszFileParam, string pszSpec, int flags)
+        {
+            return Windows.Win32.PInvoke.PathMatchSpecEx(pszFileParam, pszSpec, (uint)flags);
+        }
 
         /// <nodoc/>
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool FindClose(IntPtr findFileHandle);
+        [System.Runtime.Versioning.SupportedOSPlatform("windows5.1.2600")]
+        internal static bool FindClose(IntPtr findFileHandle)
+        {
+            return Windows.Win32.PInvoke.FindClose(new Windows.Win32.Foundation.HANDLE((void*)findFileHandle));
+        }
+
+        // Adapter from CsWin32's WIN32_FIND_DATAW (fixed-size char buffers, no string marshalling)
+        // to the legacy Win32FindData shape used by callers that read CFileName as a managed string.
+        private static Win32FindData ConvertFindData(in Windows.Win32.Storage.FileSystem.WIN32_FIND_DATAW raw)
+        {
+            fixed (Windows.Win32.Storage.FileSystem.WIN32_FIND_DATAW* p = &raw)
+            {
+                return new Win32FindData
+                {
+                    DwFileAttributes = (FileAttributes)p->dwFileAttributes,
+                    FtCreationTime = p->ftCreationTime,
+                    FtLastAccessTime = p->ftLastAccessTime,
+                    FtLastWriteTime = p->ftLastWriteTime,
+                    NFileSizeHigh = p->nFileSizeHigh,
+                    NFileSizeLow = p->nFileSizeLow,
+                    DwReserved0 = p->dwReserved0,
+                    DwReserved1 = p->dwReserved1,
+                    CFileName = new string((char*)&p->cFileName),
+                    CAlternate = new string((char*)&p->cAlternateFileName),
+                };
+            }
+        }
     }
 }

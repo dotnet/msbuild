@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="new">MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</target>
+        <target state="translated">MSB3071: Wszystkie litery dysków od A: do Z: są obecnie zajęte. Ponieważ katalog roboczy „{0}” (rozpoznany jako ścieżka UNC „{1}”) wymaga mapowania UNC, zadanie „Exec” wymaga wolnej litery dysku, aby zamapować ścieżkę UNC. Odłącz się od co najmniej jednego zasobu udostępnionego, aby zwolnić litery dysków, lub określ lokalny katalog roboczy przed ponownym użyciem tego polecenia.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -566,7 +566,7 @@
       </trans-unit>
       <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
         <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
-        <target state="new">MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</target>
+        <target state="translated">MSB4311: Wartość InputUrl „{0}” nie jest prawidłową ścieżką w systemie Windows, ponieważ składa się wyłącznie z białych znaków.</target>
         <note>{StrBegin="MSB4311: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
@@ -1225,8 +1225,8 @@
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
-        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
-        <target state="translated">MSB3821: Nie można przetworzyć pliku {0}, ponieważ znajduje się on w strefie Internet lub Witryny z ograniczeniami albo zawiera znacznik strony internetowej. Jeśli chcesz przetwarzać te pliki, usuń znacznik strony internetowej.</target>
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
+        <target state="new">MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">

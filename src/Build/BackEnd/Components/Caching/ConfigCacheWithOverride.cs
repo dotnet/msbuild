@@ -4,7 +4,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -42,9 +41,7 @@ namespace Microsoft.Build.Execution
         }
 
         public void Translate(ITranslator translator)
-        {
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-        }
+            => Assumed.Unreachable();
 
         public BuildRequestConfiguration this[int configId]
         {
@@ -53,7 +50,7 @@ namespace Microsoft.Build.Execution
                 if (HasConfigurationInOverrideCache(configId))
                 {
 #if DEBUG
-                    ErrorUtilities.VerifyThrow(!CurrentCache.HasConfiguration(configId), "caches should not overlap");
+                    Assumed.False(CurrentCache.HasConfiguration(configId), "caches should not overlap");
 #endif
                     return _override[configId];
                 }
@@ -76,7 +73,7 @@ namespace Microsoft.Build.Execution
             if (overrideConfig != null)
             {
 #if DEBUG
-                ErrorUtilities.VerifyThrow(CurrentCache.GetMatchingConfiguration(config) == null, "caches should not overlap");
+                Assumed.Null(CurrentCache.GetMatchingConfiguration(config), "caches should not overlap");
 #endif
                 return overrideConfig;
             }
@@ -93,7 +90,7 @@ namespace Microsoft.Build.Execution
             if (overrideConfig != null)
             {
 #if DEBUG
-                ErrorUtilities.VerifyThrow(CurrentCache.GetMatchingConfiguration(configMetadata) == null, "caches should not overlap");
+                Assumed.Null(CurrentCache.GetMatchingConfiguration(configMetadata), "caches should not overlap");
 #endif
                 return overrideConfig;
             }
@@ -115,7 +112,7 @@ namespace Microsoft.Build.Execution
             if (overrideHasConfiguration)
             {
 #if DEBUG
-                ErrorUtilities.VerifyThrow(!CurrentCache.HasConfiguration(configId), "caches should not overlap");
+                Assumed.False(CurrentCache.HasConfiguration(configId), "caches should not overlap");
 #endif
                 return overrideHasConfiguration;
             }

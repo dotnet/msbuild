@@ -264,7 +264,7 @@ internal static class EscapingUtilities
 
 #else
 
-            string result = new('\0', length);
+            string result = string.FastAllocateString(length);
 
             unsafe
             {

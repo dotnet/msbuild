@@ -6,7 +6,6 @@ using System.Collections.Generic;
 #if DEBUG
 using System.IO;
 #endif
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
@@ -22,18 +21,6 @@ namespace Microsoft.Build.Shared.Debugging
     /// </summary>
     internal sealed class PrintLineDebugger : IDisposable
     {
-        private static readonly Lazy<PropertyInfo> CommonWriterProperty = new Lazy<PropertyInfo>(
-            () =>
-            {
-                var commonWriterType = typeof(ITask).Assembly.GetType("Microsoft.Build.Shared.Debugging.CommonWriter", true, false);
-
-                var propertyInfo = commonWriterType.GetProperty("Writer", BindingFlags.Public | BindingFlags.Static);
-
-                ErrorUtilities.VerifyThrowInternalNull(propertyInfo);
-
-                return propertyInfo;
-            });
-
         public static Lazy<PrintLineDebugger> Default =
             new Lazy<PrintLineDebugger>(() => Create(null, null, false));
 
@@ -69,7 +56,10 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static CommonWriterType GetStaticWriter()
         {
-            return (CommonWriterType)CommonWriterProperty.Value.GetValue(null, null);
+            // CommonWriter is defined in Microsoft.Build.Framework and shared with this assembly via
+            // InternalsVisibleTo. Referencing it directly (rather than reflecting over it) keeps the
+            // single canonical writer instance while remaining trimming- and Native AOT-safe.
+            return CommonWriter.Writer;
         }
 
         // this setter is not thread safe because the assumption is that a writer is set once for the duration of the process (or multiple times from different tests which do not run in parallel).
@@ -78,13 +68,10 @@ namespace Microsoft.Build.Shared.Debugging
 #if DEBUG
             var currentWriter = GetStaticWriter();
 
-            if (currentWriter != null)
-            {
-                ErrorUtilities.ThrowInternalError("Cannot set a new writer over an old writer. Remove the old one first");
-            }
+            Assumed.Null(currentWriter, "Cannot set a new writer over an old writer. Remove the old one first");
 
             // wrap with a lock so multi threaded logging does not break messages apart
-            CommonWriterProperty.Value.SetValue(null, (CommonWriterType)LockWrappedWriter);
+            CommonWriter.Writer = LockWrappedWriter;
 
             void LockWrappedWriter(string id, string callsite, IEnumerable<string> message)
             {
@@ -100,12 +87,9 @@ namespace Microsoft.Build.Shared.Debugging
         {
             var currentWriter = GetStaticWriter();
 
-            if (currentWriter == null)
-            {
-                ErrorUtilities.ThrowInternalError("Cannot unset an already null writer");
-            }
+            Assumed.NotNull(currentWriter, "Cannot unset an already null writer");
 
-            CommonWriterProperty.Value.SetValue(null, null);
+            CommonWriter.Writer = null;
         }
 
         public static PrintLineDebugger Create(
@@ -164,10 +148,7 @@ namespace Microsoft.Build.Shared.Debugging
             {
                 var staticWriter = GetStaticWriter();
 
-                if (staticWriter != _writerSetByThisInstance)
-                {
-                    ErrorUtilities.ThrowInternalError($"The writer from this {nameof(PrintLineDebugger)} instance differs from the static writer.");
-                }
+                Assumed.Equal(staticWriter, _writerSetByThisInstance, $"The writer from this {nameof(PrintLineDebugger)} instance differs from the static writer.");
 
                 UnsetWriter();
             }

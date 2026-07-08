@@ -6,6 +6,7 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -89,7 +90,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Stores the path to the directory that this assembly is located in.
         /// </summary>
-        private static readonly Lazy<string> ThisAssemblyDirectoryLazy = new Lazy<string>(() => Path.GetDirectoryName(typeof(RoslynCodeTaskFactory).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName));
+        private static readonly Lazy<string> ThisAssemblyDirectoryLazy = new Lazy<string>(GetThisAssemblyDirectory);
+
+        [UnconditionalSuppressMessage("SingleFile", "IL3002:RequiresAssemblyFiles",
+            Justification = "RoslynCodeTaskFactory compiles task source against reference assemblies on disk, so it does not support single-file deployment; the module path is only used to locate those on-disk references.")]
+        private static string GetThisAssemblyDirectory() => Path.GetDirectoryName(typeof(RoslynCodeTaskFactory).Assembly.ManifestModule.FullyQualifiedName);
 
         /// <summary>
         /// Stores an instance of a <see cref="TaskLoggingHelper"/> for logging messages.
@@ -137,6 +142,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <inheritdoc cref="ITaskFactory.CreateTask(IBuildEngine)"/>
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2072:UnrecognizedReflectionPattern",
+            Justification = "TaskType is a type from an assembly compiled at runtime from user-supplied source, so its constructor cannot be statically preserved; this factory is inherently incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
             // The type of the task has already been determined and the assembly is already loaded after compilation so
@@ -165,6 +172,10 @@ namespace Microsoft.Build.Tasks
         public string GetAssemblyPath() => _assemblyPath;
 
         /// <inheritdoc cref="ITaskFactory.Initialize"/>
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
+            Justification = "RoslynCodeTaskFactory compiles and loads a task assembly at runtime and reflects over its exported types; this is inherently incompatible with trimming.")]
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2075:UnrecognizedReflectionPattern",
+            Justification = "The task type comes from an assembly compiled at runtime from user-supplied source, so its properties cannot be statically preserved.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
             _log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
@@ -558,6 +569,7 @@ namespace Microsoft.Build.Tasks
         /// Perhaps in the future this could be more powerful by using NuGet to resolve assemblies but we think
         /// that is too complicated for a simple in-line task.  If users have more complex requirements, they
         /// can compile their own task library.</remarks>
+        [RequiresUnreferencedCode("Resolves and registers task reference assemblies for loading from disk, which is incompatible with trimming.")]
         internal bool TryResolveAssemblyReferences(TaskLoggingHelper log, RoslynCodeTaskFactoryTaskInfo taskInfo, out ITaskItem[] items)
         {
             // Store the list of resolved assemblies because a user can specify a short name or a full path
@@ -689,6 +701,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object containing details about the task.</param>
         /// <param name="assembly">The <see cref="Assembly"/> if the source code be compiled and loaded, otherwise <code>null</code>.</param>
         /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>false</code>.</returns>
+        [RequiresUnreferencedCode("Compiles and loads a task assembly from disk at runtime, which is incompatible with trimming.")]
         private bool TryCompileAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
         {
             // Try to get from cache

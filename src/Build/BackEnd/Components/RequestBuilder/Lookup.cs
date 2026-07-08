@@ -101,8 +101,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(IItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems);
-            ErrorUtilities.VerifyThrowInternalNull(properties);
+            Assumed.NotNull(projectItems);
+            Assumed.NotNull(properties);
 
             _baseItems = projectItems;
             _lookupScopes = new Lookup.Scope(this, "Lookup()", properties);
@@ -262,8 +262,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LeaveScope(Lookup.Scope scopeToLeave)
         {
-            ErrorUtilities.VerifyThrow(_lookupScopes.Count >= 2, "Too many calls to Leave().");
-            ErrorUtilities.VerifyThrow(Object.ReferenceEquals(scopeToLeave, _lookupScopes), $"Attempting to leave with scope '{scopeToLeave.Description}' but scope '{_lookupScopes.Description}' is on top of the stack.");
+            Assumed.GreaterThanOrEqual(_lookupScopes.Count, 2, "Too many calls to Leave().");
+            Assumed.True(Object.ReferenceEquals(scopeToLeave, _lookupScopes), $"Attempting to leave with scope '{scopeToLeave.Description}' but scope '{_lookupScopes.Description}' is on top of the stack.");
 
             // Our lookup works by stopping the first time it finds an item group of the appropriate type.
             // So we can't apply an add directly into the table below because that could create a new group
@@ -450,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
+            Assumed.NotNullOrEmpty(name);
 
             return GetProperty(name, 0, name.Length - 1);
         }
@@ -679,7 +679,7 @@ namespace Microsoft.Build.BackEnd
 
             PrimaryTable ??= new ItemDictionarySlim();
             ICollection<ProjectItemInstance> existing = PrimaryTable[itemType];
-            ErrorUtilities.VerifyThrow(existing == null, "Cannot add an itemgroup of this type.");
+            Assumed.Null(existing, "Cannot add an itemgroup of this type.");
 
             PrimaryTable.ImportItemsOfType(itemType, group);
         }
@@ -706,7 +706,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         internal void TruncateLookupsForItemTypes(ICollection<string> itemTypes)
         {
-            ErrorUtilities.VerifyThrow(_lookupScopes.ItemTypesToTruncateAtThisScope == null, "Cannot add an itemgroup of this type.");
+            Assumed.Null(_lookupScopes.ItemTypesToTruncateAtThisScope, "Cannot add an itemgroup of this type.");
 
             // Add the item types to truncate at this scope
             _lookupScopes.ItemTypesToTruncateAtThisScope =
@@ -915,7 +915,7 @@ namespace Microsoft.Build.BackEnd
                     result[i] = cloneItem;
 
                     // This will be null if the item wasn't in the result group, ie, it had been removed after being modified
-                    ErrorUtilities.VerifyThrow(!_cloneTable.ContainsKey(cloneItem), "Should be new, not already in table!");
+                    Assumed.False(_cloneTable.ContainsKey(cloneItem), "Should be new, not already in table!");
                     _cloneTable[cloneItem] = originalItem;
                 }
             }
@@ -1046,7 +1046,7 @@ namespace Microsoft.Build.BackEnd
                 List<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
                 {
-                    ErrorUtilities.VerifyThrow(!tableOfItemsOfSameType.Contains(item), "Item should not be in table");
+                    Assumed.False(tableOfItemsOfSameType.Contains(item), "Item should not be in table");
                 }
             }
         }
@@ -1061,7 +1061,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (tableOfItemsOfSameType is not null)
                 {
-                    ErrorUtilities.VerifyThrow(!tableOfItemsOfSameType.ContainsKey(item), "Item should not be in table");
+                    Assumed.False(tableOfItemsOfSameType.ContainsKey(item), "Item should not be in table");
                 }
             }
         }
@@ -1092,7 +1092,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeOuterScope()
         {
-            ErrorUtilities.VerifyThrow(_lookupScopes.Parent != null, "Operation in outer scope not supported");
+            Assumed.NotNull(_lookupScopes.Parent, "Operation in outer scope not supported");
         }
 
         #endregion
@@ -1267,7 +1267,7 @@ namespace Microsoft.Build.BackEnd
 
                 set
                 {
-                    ErrorUtilities.VerifyThrowInternalNull(value, "value");
+                    Assumed.NotNull(value);
                     _modifications[metadataName] = value;
                 }
             }
@@ -1325,7 +1325,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="modificationType">The type of modification to make.</param>
             private MetadataModification(ModificationType modificationType)
             {
-                ErrorUtilities.VerifyThrow(modificationType != ModificationType.Update, "Modification type may only be update when a value is specified.");
+                Assumed.NotEqual(modificationType, ModificationType.Update, "Modification type may only be update when a value is specified.");
                 _remove = modificationType == ModificationType.Remove;
                 _newValue = null;
             }

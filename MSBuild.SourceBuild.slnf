@@ -5,10 +5,12 @@
       "src\\Build\\Microsoft.Build.csproj",
       "src\\Framework\\Microsoft.Build.Framework.csproj",
       "src\\MSBuild\\MSBuild.csproj",
+      "src\\MSBuild.Coordinator\\MSBuild.Coordinator.csproj",
       "src\\Package\\Localization\\Localization.csproj",
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",
       "src\\Utilities\\Microsoft.Build.Utilities.csproj",
-      "src\\StringTools\\StringTools.csproj"
+      "src\\StringTools\\StringTools.csproj",
+      "src\\TaskAnalyzer\\TaskAnalyzer.csproj"
     ]
   }
 }
