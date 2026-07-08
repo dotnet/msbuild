@@ -2247,7 +2247,14 @@ namespace Microsoft.Build.Evaluation
             /// Read-only dictionary of item definitions in this project.
             /// Keyed by item type.
             /// </summary>
-            public override IDictionary<string, ProjectItemDefinition> ItemDefinitions => _data.ItemDefinitions;
+            public override IDictionary<string, ProjectItemDefinition> ItemDefinitions
+            {
+                get
+                {
+                    VerifyThrowEvaluationStageReached(ProjectEvaluationStage.ItemDefinitions, nameof(ItemDefinitions));
+                    return _data.ItemDefinitions;
+                }
+            }
 
             /// <summary>
             /// The evaluation stage reached by the most recent evaluation. See <see cref="ProjectEvaluationStage"/>.

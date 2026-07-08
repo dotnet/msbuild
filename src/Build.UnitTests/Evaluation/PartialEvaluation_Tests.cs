@@ -74,6 +74,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Should.NotThrow(() => instance.InitialTargets);
 
             Should.Throw<InvalidOperationException>(() => instance.Items);
+            Should.Throw<InvalidOperationException>(() => instance.ItemDefinitions);
             Should.Throw<InvalidOperationException>(() => instance.GetItems("Compile"));
             Should.Throw<InvalidOperationException>(() => instance.Targets);
             Should.Throw<InvalidOperationException>(() => instance.DefaultTargets);
@@ -88,6 +89,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.GetPropertyValue("Derived").ShouldBe("Debug-x");
 
             Should.Throw<InvalidOperationException>(() => project.Items);
+            Should.Throw<InvalidOperationException>(() => project.ItemDefinitions);
             Should.Throw<InvalidOperationException>(() => project.GetItems("Compile"));
             Should.Throw<InvalidOperationException>(() => project.AllEvaluatedItems);
             Should.Throw<InvalidOperationException>(() => project.Targets);
@@ -104,6 +106,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Item references in property values expand to empty even in a full evaluation because
             // properties are evaluated before items, so both stages agree.
             partial.GetPropertyValue("FromItem").ShouldBe(full.GetPropertyValue("FromItem"));
+        }
+
+        [Fact]
+        public void ItemDefinitionsStage_ExposesItemDefinitionsButNotItemsOrTargets()
+        {
+            ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.ItemDefinitions));
+
+            instance.EvaluationStage.ShouldBe(ProjectEvaluationStage.ItemDefinitions);
+            Should.NotThrow(() => instance.ItemDefinitions);
+
+            Should.Throw<InvalidOperationException>(() => instance.Items);
+            Should.Throw<InvalidOperationException>(() => instance.Targets);
         }
 
         [Fact]

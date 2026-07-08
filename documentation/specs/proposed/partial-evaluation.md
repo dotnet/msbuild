@@ -83,8 +83,9 @@ string value = instance.GetPropertyValue("PublishRelease"); // fast: only passes
   because it is computed during pass 1.
 - **Reading not-yet-computed state fails fast.** Members that expose state from a later pass throw
   `InvalidOperationException` naming the member and the stage the object reached. Guarded members
-  include `Items`, `GetItems`, `ItemsIgnoringCondition`, `AllEvaluatedItems`, `Targets`, and
-  `DefaultTargets` (and their `ProjectInstance` equivalents).
+  include `ItemDefinitions` (available from `ItemDefinitions` onward), `Items`, `GetItems`,
+  `ItemsIgnoringCondition`, `AllEvaluatedItems`, `Targets`, and `DefaultTargets` (and their
+  `ProjectInstance` equivalents).
 - **A partial `ProjectInstance` cannot be built.** Constructing a `BuildRequestData` from a partial
   instance throws `InvalidOperationException`; a build requires a full evaluation.
 

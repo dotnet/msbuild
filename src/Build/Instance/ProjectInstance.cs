@@ -1280,9 +1280,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public IDictionary<string, ProjectItemDefinitionInstance> ItemDefinitions
         {
-            [DebuggerStepThrough]
             get
-            { return _itemDefinitions; }
+            {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.ItemDefinitions, nameof(ItemDefinitions));
+                return _itemDefinitions;
+            }
         }
 
         /// <summary>

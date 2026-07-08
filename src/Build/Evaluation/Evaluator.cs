@@ -789,6 +789,8 @@ namespace Microsoft.Build.Evaluation
                         _evaluationContext.FileSystem);
                 }
 
+                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
+
                 if (_evaluationStage <= ProjectEvaluationStage.UsingTasks)
                 {
                     _data.FinishEvaluation();
@@ -813,7 +815,6 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {
