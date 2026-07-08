@@ -96,17 +96,17 @@ export DOTNET_PERFLOG_DIR=$PerfLogDir
 export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 
 # When using bootstrapped MSBuild:
-# - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+# - Keep node reuse enabled so the MSBuild server can be used (the server is disabled when node reuse is off)
 # - Create bootstrap environment as it's required when also running tests
 # - stage2Properties are passed to all Stage 2 builds since some MSBuild switches (like /mt) may not work with the SDK MSBuild used in Stage 1
 if [ $onlyDocChanged = 0 ]
 then
     if [ "$skipTests" = true ]
     then
-        . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration $properties $extra_properties $stage2Properties
+        . "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration $properties $extra_properties $stage2Properties
     else
-        . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration $properties $extra_properties $stage2Properties
+        . "$ScriptRoot/common/build.sh" --restore --build --test --ci --configuration $configuration $properties $extra_properties $stage2Properties
     fi
 else
-    . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties $stage2Properties
+    . "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties $stage2Properties
 fi

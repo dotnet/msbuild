@@ -128,7 +128,7 @@ try {
   $env:DOTNET_HOST_PATH=$dotnetExePath
 
   # When using bootstrapped MSBuild:
-  # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+  # - Keep node reuse enabled so the MSBuild server can be used (the server is disabled when node reuse is off)
   # - Create bootstrap environment as it's required when also running tests
   # - $stage2Properties are appended to the stage 2 build only (matching cibuild_bootstrapped_msbuild.sh).
   #   Use this for switches like /mt that should not be passed to the stable MSBuild used in stage 1
@@ -143,13 +143,13 @@ try {
   # single token.
   $stage2Args = @(if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() })
   if ($onlyDocChanged) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Args
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false @properties @stage2Args
   }
   elseif ($skipTests) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties @stage2Args
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci @properties @stage2Args
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties @stage2Args
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci @properties @stage2Args
   }
 
   exit $lastExitCode

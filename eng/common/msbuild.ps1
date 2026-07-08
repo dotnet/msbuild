@@ -13,10 +13,6 @@ Param(
 . $PSScriptRoot\tools.ps1
 
 try {
-  if ($ci) {
-    $nodeReuse = $false
-  }
-
   MSBuild @extraArgs
 } 
 catch {
