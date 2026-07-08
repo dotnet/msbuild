@@ -161,6 +161,52 @@ namespace Microsoft.Build.BackEnd
         internal IReadOnlyCollection<string> RequestedTargets => _requestedTargets;
 
         /// <summary>
+        /// Computes the set of top-level targets that a cross-project reference is allowed to be satisfied from the results
+        /// cache for in a strictly isolated build, or null if no such restriction applies.
+        /// </summary>
+        /// <remarks>
+        /// In an isolated static graph build the presence of a result in the cache is the de-facto validation of the
+        /// ProjectReferenceTargets protocol: the graph pre-builds each node with its declared entry targets, so only those
+        /// results land in the engine cache. However, target results produced merely as a dependency (via DependsOnTargets)
+        /// also accumulate in a node's local results cache and, for in-proc or same-node builds, can satisfy a cross-project
+        /// reference to an undeclared target. That makes the build result depend on node scheduling. Restricting cache
+        /// satisfaction to the referenced configuration's explicitly requested (graph-declared) targets makes the isolation
+        /// check fire deterministically regardless of scheduling.
+        /// </remarks>
+        internal static IReadOnlyCollection<string> GetIsolationAllowedTopLevelTargets(
+            ProjectIsolationMode projectIsolationMode,
+            BuildRequestConfiguration parentConfig,
+            BuildRequestConfiguration requestConfig,
+            BuildRequest request)
+        {
+            // Only enforce for strict isolation. Non-isolated and message-only modes keep their existing behavior.
+            // Gated behind a change wave so builds that relied on the previous (scheduling-dependent) behavior can opt out.
+            // Requests that opt into SkipNonexistentTargets are exempted so their existing cache-satisfaction semantics
+            // (handled by the isolation constraint check) are preserved and never turned into a rebuild.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                || projectIsolationMode != ProjectIsolationMode.True
+                || parentConfig == null
+                || request.IsRootRequest
+                || request.SkipStaticGraphIsolationConstraints
+                || (request.BuildRequestDataFlags & BuildRequestDataFlags.SkipNonexistentTargets) == BuildRequestDataFlags.SkipNonexistentTargets)
+            {
+                return null;
+            }
+
+            // Allow self references (a project building itself, potentially with different global properties) without restriction.
+            if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            IReadOnlyCollection<string> requestedTargets = requestConfig.RequestedTargets;
+
+            // If the referenced configuration has no explicitly requested targets recorded, do not restrict; preserve
+            // existing behavior for this edge case (graph nodes are always requested with explicit targets).
+            return requestedTargets != null && requestedTargets.Count > 0 ? requestedTargets : null;
+        }
+
+        /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
         /// Figures out the correct tools version to use, falling back to the provided default if necessary.
         /// May throw InvalidProjectFileException.
