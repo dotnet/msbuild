@@ -1511,6 +1511,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously: needs to be async for xunit's timeout system
 #pragma warning disable IDE0390 // Method can be made synchronous
+#pragma warning disable xUnit1069 // Test method 'CancelledBuild' has a Timeout but does not reference TestContext.Current.CancellationToken
         /// <summary>
         /// A canceled build
         /// </summary>
@@ -1518,6 +1519,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public async System.Threading.Tasks.Task CancelledBuild()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 #pragma warning restore IDE0390 // Method can be made synchronous
+#pragma warning restore xUnit1069 // Test method 'CancelledBuild' has a Timeout but does not reference TestContext.Current.CancellationToken
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
@@ -4711,8 +4713,10 @@ $@"<Project InitialTargets=`Sleep`>
         /// The fix uses a static lock across all engine instances so a single trace file is safe,
         /// and catches non-critical exceptions so trace failures can never crash the build engine.
         /// </summary>
+#pragma warning disable xUnit1069 // Test method 'MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock' has a Timeout but does not reference TestContext.Current.CancellationToken
         [Fact(Timeout = 30_000)]
         public async System.Threading.Tasks.Task MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock()
+#pragma warning restore xUnit1069 // Test method 'MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock' has a Timeout but does not reference TestContext.Current.CancellationToken
         {
             await System.Threading.Tasks.Task.Run(() =>
             {

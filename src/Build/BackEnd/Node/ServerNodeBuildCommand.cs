@@ -20,6 +20,7 @@ namespace Microsoft.Build.BackEnd
         private CultureInfo _uiCulture = default!;
         private TargetConsoleConfiguration _consoleConfiguration = default!;
         private PartialBuildTelemetry? _partialBuildTelemetry = default;
+        private bool _shutdownAfterBuild;
 
         /// <summary>
         /// Retrieves the packet type.
@@ -63,6 +64,11 @@ namespace Microsoft.Build.BackEnd
         public PartialBuildTelemetry? PartialBuildTelemetry => _partialBuildTelemetry;
 
         /// <summary>
+        /// Whether the server should shut itself down once this build completes instead of staying resident for reuse.
+        /// </summary>
+        public bool ShutdownAfterBuild => _shutdownAfterBuild;
+
+        /// <summary>
         /// Private constructor for deserialization
         /// </summary>
         private ServerNodeBuildCommand()
@@ -75,7 +81,8 @@ namespace Microsoft.Build.BackEnd
             Dictionary<string, string> buildProcessEnvironment,
             CultureInfo culture, CultureInfo uiCulture,
             TargetConsoleConfiguration consoleConfiguration,
-            PartialBuildTelemetry? partialBuildTelemetry)
+            PartialBuildTelemetry? partialBuildTelemetry,
+            bool shutdownAfterBuild)
         {
             Assumed.NotNull(consoleConfiguration);
 
@@ -86,6 +93,7 @@ namespace Microsoft.Build.BackEnd
             _uiCulture = uiCulture;
             _consoleConfiguration = consoleConfiguration;
             _partialBuildTelemetry = partialBuildTelemetry;
+            _shutdownAfterBuild = shutdownAfterBuild;
         }
 
         /// <summary>
@@ -101,6 +109,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _uiCulture);
             translator.Translate(ref _consoleConfiguration, TargetConsoleConfiguration.FactoryForDeserialization);
             translator.Translate(ref _partialBuildTelemetry, PartialBuildTelemetry.FactoryForDeserialization);
+            translator.Translate(ref _shutdownAfterBuild);
         }
 
         /// <summary>
