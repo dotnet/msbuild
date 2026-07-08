@@ -752,7 +752,7 @@ namespace Microsoft.Build.UnitTests
                 try
                 {
                     Assert.False(t.Execute()); // "This test should've failed (bad params1)."
-                    Console.WriteLine(engine.Log);
+                    _output.WriteLine(engine.Log);
                     engine.Log.ShouldContain("MSB3702");
                 }
                 catch (Exception e)

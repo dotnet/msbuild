@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks
         public bool UseTrustedSettings { get; set; }
 
         /// <summary>
-        /// Set to true to prohibit loading XML with embedded DTD. By default, DTDs are prohibited.
+        /// Set to true to prohibit loading XML with embedded DTD. By default, DTDs are prohibited. Set to false to allow XML that contains a DTD (the DTD is ignored).
         /// </summary>
         public bool ProhibitDtd { get; set; } = true;
 

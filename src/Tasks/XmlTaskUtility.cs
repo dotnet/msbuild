@@ -48,6 +48,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="xml">The XML text to inspect.</param>
         /// <returns>True when a DOCTYPE declaration is present.</returns>
+        /// <remarks>This method does not throw.</remarks>
         internal static bool ContainsDtd(string xml)
         {
             return !string.IsNullOrEmpty(xml) && xml.IndexOf("<!DOCTYPE", StringComparison.OrdinalIgnoreCase) >= 0;
