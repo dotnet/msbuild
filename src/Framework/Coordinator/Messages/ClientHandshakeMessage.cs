@@ -51,7 +51,7 @@ internal sealed record ClientHandshakeMessage : ClientMessage
         }
     }
 
-    public static ClientHandshakeMessage ReadPayload(BinaryReader reader)
+    internal static ClientHandshakeMessage ReadPayload(BinaryReader reader)
     {
         Guid connectionId = reader.ReadGuid();
         int processId = reader.ReadInt32();

@@ -19,9 +19,9 @@ internal abstract record ServerMessage
         return messageType switch
         {
             ServerMessageType.HandshakeResponse => ServerHandshakeMessage.ReadPayload(reader),
-            ServerMessageType.NodeGrant => new NodeGrantMessage(grantedNodes: reader.ReadInt32()),
+            ServerMessageType.NodeGrant => NodeGrantMessage.ReadPayload(reader),
             ServerMessageType.Wait => WaitMessage.Instance,
-            ServerMessageType.Error => new ErrorMessage(message: reader.ReadString()),
+            ServerMessageType.Error => ErrorMessage.ReadPayload(reader),
             ServerMessageType.NodeGrantWithId => NodeGrantWithIdMessage.ReadPayload(reader),
 
             _ => Assumed.Unreachable<ServerMessage>($"Unknown coordinator message type: {messageType}"),

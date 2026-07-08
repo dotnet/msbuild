@@ -23,4 +23,11 @@ internal sealed record ErrorMessage : ServerMessage
     {
         writer.Write(Message);
     }
+
+    internal static ErrorMessage ReadPayload(BinaryReader reader)
+    {
+        string message = reader.ReadString();
+
+        return new(message);
+    }
 }

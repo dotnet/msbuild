@@ -26,4 +26,11 @@ internal sealed record NodeGrantMessage : ServerMessage, INodeGrantMessage
     {
         writer.Write(GrantedNodes);
     }
+
+    internal static NodeGrantMessage ReadPayload(BinaryReader reader)
+    {
+        int grantedNodes = reader.ReadInt32();
+
+        return new(grantedNodes);
+    }
 }

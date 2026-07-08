@@ -25,5 +25,9 @@ internal sealed record RequestNodesMessage : ClientMessage
     }
 
     internal static RequestNodesMessage ReadPayload(BinaryReader reader)
-        => new(requestedNodes: reader.ReadInt32());
+    {
+        int requestedNodes = reader.ReadInt32();
+
+        return new(requestedNodes: requestedNodes);
+    }
 }

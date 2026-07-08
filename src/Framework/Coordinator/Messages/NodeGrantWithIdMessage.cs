@@ -30,5 +30,10 @@ internal sealed record NodeGrantWithIdMessage : ServerMessage, INodeGrantMessage
     }
 
     internal static NodeGrantWithIdMessage ReadPayload(BinaryReader reader)
-        => new(grantId: reader.ReadGuid(), grantedNodes: reader.ReadInt32());
+    {
+        Guid grantId = reader.ReadGuid();
+        int grantedNodes = reader.ReadInt32();
+
+        return new(grantId, grantedNodes);
+    }
 }
