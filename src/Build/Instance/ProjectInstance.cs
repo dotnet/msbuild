@@ -195,6 +195,13 @@ namespace Microsoft.Build.Execution
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
+        /// How far evaluation proceeded when this instance was produced. Defaults to
+        /// <see cref="ProjectEvaluationStage.Full"/>. A partial value means later-pass state
+        /// (items, targets, and so on) was not produced and accessing it will throw.
+        /// </summary>
+        private ProjectEvaluationStage _evaluationStage = ProjectEvaluationStage.Full;
+
+        /// <summary>
         /// The property and item filter used when creating this instance, or null if this is not a filtered copy
         /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
         /// </summary>
@@ -297,9 +304,11 @@ namespace Microsoft.Build.Execution
         /// <param name="evaluationContext">The context to use for evaluation.</param>
         /// <param name="directoryCacheFactory">The directory cache factory to use for file I/O.</param>
         /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
+        /// <param name="evaluationStage">The stage after which to stop evaluation.</param>
         /// <returns>A new project instance</returns>
         private ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
-            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
+            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             ArgumentException.ThrowIfNullOrEmpty(projectFile);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -317,7 +326,7 @@ namespace Microsoft.Build.Execution
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext,
-                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory);
+                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory, evaluationStage: evaluationStage);
         }
 
         /// <summary>
@@ -539,9 +548,11 @@ namespace Microsoft.Build.Execution
         /// <param name="evaluationContext">The context to use for evaluation.</param>
         /// <param name="directoryCacheFactory">The directory cache factory to use for file I/O.</param>
         /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
+        /// <param name="evaluationStage">The stage after which to stop evaluation.</param>
         /// <returns>A new project instance</returns>
         private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
-            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
+            ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
@@ -551,7 +562,7 @@ namespace Microsoft.Build.Execution
             };
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, buildParameters, projectCollection.LoggingService, buildEventContext,
-                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory);
+                projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory, evaluationStage: evaluationStage);
         }
 
         /// <summary>
@@ -926,7 +937,8 @@ namespace Microsoft.Build.Execution
                 options.LoadSettings,
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
-                options.Interactive);
+                options.Interactive,
+                options.EvaluationStage);
         }
 
         /// <summary>
@@ -945,7 +957,8 @@ namespace Microsoft.Build.Execution
                 options.LoadSettings,
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
-                options.Interactive);
+                options.Interactive,
+                options.EvaluationStage);
         }
 
         /// <summary>
@@ -1174,6 +1187,7 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             get
             {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(Items));
                 return (_items == null) ?
                     (ICollection<ProjectItemInstance>)ReadOnlyEmptyCollection<ProjectItemInstance>.Instance :
                     new ReadOnlyCollection<ProjectItemInstance>(_items);
@@ -1211,6 +1225,30 @@ namespace Microsoft.Build.Execution
         {
             get { return _evaluationId; }
             set { _evaluationId = value; }
+        }
+
+        /// <summary>
+        /// How far evaluation proceeded when this instance was produced.
+        /// When this is not <see cref="ProjectEvaluationStage.Full"/>, the instance is the result of a
+        /// partial evaluation and members exposing state from later passes (for example items or targets)
+        /// throw <see cref="InvalidOperationException"/>.
+        /// </summary>
+        public ProjectEvaluationStage EvaluationStage
+        {
+            get { return _evaluationStage; }
+        }
+
+        /// <summary>
+        /// Throws <see cref="InvalidOperationException"/> if this instance was produced by a partial
+        /// evaluation that stopped before <paramref name="requiredStage"/>, meaning the requested
+        /// member's state was never computed.
+        /// </summary>
+        private void VerifyThrowEvaluationStageReached(ProjectEvaluationStage requiredStage, string memberName)
+        {
+            if (_evaluationStage < requiredStage)
+            {
+                ErrorUtilities.ThrowInvalidOperation("OM_PartialEvaluationMemberUnavailable", memberName, _evaluationStage);
+            }
         }
 
         /// <summary>
@@ -1268,8 +1306,16 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> DefaultTargets
         {
-            get { return _defaultTargets; }
-            private set { _defaultTargets = value; }
+            get
+            {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Full, nameof(DefaultTargets));
+                return _defaultTargets;
+            }
+
+            private set
+            {
+                _defaultTargets = value;
+            }
         }
 
         /// <summary>
@@ -1292,7 +1338,10 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return _targets; }
+            {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Full, nameof(Targets));
+                return _targets;
+            }
         }
 
         /// <summary>
@@ -2079,6 +2128,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public ICollection<ProjectItemInstance> GetItems(string itemType)
         {
+            VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(GetItems));
+
             // GetItems already returns a readonly collection
             return ((IItemProvider<ProjectItemInstance>)this).GetItems(itemType);
         }
@@ -3199,7 +3250,8 @@ namespace Microsoft.Build.Execution
             int submissionId = BuildEventContext.InvalidSubmissionId,
             ProjectLoadSettings? projectLoadSettings = null,
             EvaluationContext evaluationContext = null,
-            IDirectoryCacheFactory directoryCacheFactory = null)
+            IDirectoryCacheFactory directoryCacheFactory = null,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
@@ -3305,7 +3357,10 @@ namespace Microsoft.Build.Execution
                 sdkResolverService ?? evaluationContext.SdkResolverService, /* Use override ISdkResolverService if specified */
                 submissionId,
                 evaluationContext,
-                interactive: buildParameters.Interactive);
+                interactive: buildParameters.Interactive,
+                evaluationStage: evaluationStage);
+
+            _evaluationStage = evaluationStage;
 
             Assumed.NotEqual(EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }

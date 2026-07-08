@@ -54,5 +54,11 @@ namespace Microsoft.Build.Definition
         /// Gets or sets a value indicating if loading the project is allowed to interact with the user.
         /// </summary>
         public bool Interactive { get; set; }
+
+        /// <summary>
+        /// The <see cref="ProjectEvaluationStage"/> controlling how far evaluation should proceed.
+        /// Defaults to <see cref="ProjectEvaluationStage.Full"/> (a complete evaluation).
+        /// </summary>
+        public ProjectEvaluationStage EvaluationStage { get; set; } = ProjectEvaluationStage.Full;
     }
 }

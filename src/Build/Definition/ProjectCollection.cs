@@ -2028,8 +2028,10 @@ namespace Microsoft.Build.Evaluation
             /// There can be no more than one match.
             /// If none is found, returns null.
             /// </summary>
-            internal Project GetMatchingProjectIfAny(string fullPath, IDictionary<string, string> globalProperties, string toolsVersion)
+            internal Project GetMatchingProjectIfAny(string fullPath, IDictionary<string, string> globalProperties, string toolsVersion, ProjectEvaluationStage requestedStage = ProjectEvaluationStage.Full)
             {
+                Project match = null;
+
                 lock (_loadedProjects)
                 {
                     if (_loadedProjects.TryGetValue(fullPath, out List<Project> candidates))
@@ -2038,13 +2040,24 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (HasEquivalentGlobalPropertiesAndToolsVersion(candidate, globalProperties, toolsVersion))
                             {
-                                return candidate;
+                                match = candidate;
+                                break;
                             }
                         }
                     }
-
-                    return null;
                 }
+
+                // A cached project only satisfies the request if it was evaluated at least as far as
+                // requested. If a matching project exists but was only partially evaluated, upgrade it
+                // in place (re-evaluate) so the same cache slot is reused rather than returning stale
+                // partial state or creating a duplicate entry. Done outside the lock to avoid holding it
+                // across a full evaluation.
+                if (match != null && match.EvaluationStage < requestedStage)
+                {
+                    match.ReevaluateIfNecessary();
+                }
+
+                return match;
             }
 
             /// <summary>

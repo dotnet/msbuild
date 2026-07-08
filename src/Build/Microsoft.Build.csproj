@@ -313,6 +313,7 @@
     <Compile Include="Definition\ProjectCollectionChangedEventArgs.cs" />
     <Compile Include="Definition\ProjectImportPathMatch.cs" />
     <Compile Include="Definition\ProjectLoadSettings.cs" />
+    <Compile Include="Definition\ProjectEvaluationStage.cs" />
     <Compile Include="Definition\ToolsetLocalReader.cs" />
     <Compile Include="Evaluation\Context\EvaluationContext.cs" />
     <Compile Include="Evaluation\Profiler\EvaluationLocationMarkdownPrettyPrinter.cs" />
