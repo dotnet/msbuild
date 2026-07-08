@@ -173,7 +173,7 @@ Nested Build:
 
 ## Nested Grants
 
-Some build operations launch child MSBuild processes while the parent build still owns its coordinator grant. A common example is NuGet static graph restore, which can invoke a nested MSBuild process as part of an already-running coordinated build.
+Some build operations launch child MSBuild processes while the parent build still owns its coordinator grant. A common example is NuGet static-graph restore, which can invoke a nested process that uses the MSBuild APIs as part of an already-running coordinated build.
 
 Without nested grants, the child process could request a new root grant while the parent is still holding the full budget. If no budget is available, the child waits for resources that the parent cannot release until the child completes, causing a deadlock.
 
