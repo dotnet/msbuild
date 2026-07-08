@@ -452,7 +452,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     {
         if (client.Capabilities.Contains(Capabilities.NestedGrants))
         {
-            client.WriteServerMessage(new NodeGrantWithIdMessage(grant.GrantId, grant.GrantedNodes));
+            client.WriteServerMessage(new NodeGrantMessage(grant.GrantId, grant.GrantedNodes));
         }
         else
         {

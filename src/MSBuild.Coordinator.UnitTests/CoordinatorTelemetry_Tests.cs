@@ -208,7 +208,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         SendHandshake(rootWriter, rootReader, processId: 10001);
         rootWriter.Write(new RequestNodesMessage(requestedNodes: 4));
 
-        NodeGrantWithIdMessage rootGrant = rootReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        NodeGrantMessage rootGrant = rootReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         using NamedPipeClientStream nestedClient = await ConnectClientPipeAsync(pipeName);
         using BinaryWriter nestedWriter = new(nestedClient, Encoding.UTF8, leaveOpen: true);
@@ -216,7 +216,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
 
         SendHandshake(nestedWriter, nestedReader, processId: 10002);
         nestedWriter.Write(new JoinGrantMessage(rootGrant.GrantId, requestedNodes: 4));
-        nestedReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        nestedReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
 
         nestedWriter.Write(ReleaseNodesMessage.Instance);
         rootWriter.Write(ReleaseNodesMessage.Instance);

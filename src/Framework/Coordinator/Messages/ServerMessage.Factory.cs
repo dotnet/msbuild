@@ -12,10 +12,13 @@ internal abstract partial record ServerMessage
     {
         private static readonly Group s_allFactories = new(
             new(ServerMessageType.HandshakeResponse, static (reader, _) => ServerHandshakeMessage.ReadPayload(reader)),
-            new(ServerMessageType.NodeGrant, static (reader, _) => NodeGrantMessage.ReadPayload(reader)),
+            new(ServerMessageType.NodeGrant, static (reader, extendedFieldsByte)
+                => NodeGrantMessage.ReadPayload(
+                    reader,
+                    (NodeGrantMessage.ExtendedFields)extendedFieldsByte),
+                    (byte)NodeGrantMessage.ExtendedFields.GrantId),
             new(WaitMessage.Instance),
-            new(ServerMessageType.Error, static (reader, _) => ErrorMessage.ReadPayload(reader)),
-            new(ServerMessageType.NodeGrantWithId, static (reader, _) => NodeGrantWithIdMessage.ReadPayload(reader)));
+            new(ServerMessageType.Error, static (reader, _) => ErrorMessage.ReadPayload(reader)));
 
         private Factory(ServerMessage instance, byte supportedExtendedFields = 0)
             : base(instance.MessageType, instance, supportedExtendedFields)

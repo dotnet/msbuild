@@ -373,7 +373,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
         switch (response)
         {
-            case INodeGrantMessage grant:
+            case NodeGrantMessage grant:
                 output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
                 loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
 
@@ -414,7 +414,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
             switch (responseAfterWait)
             {
-                case INodeGrantMessage grant:
+                case NodeGrantMessage grant:
                     waitTimer.Stop();
 
                     output.WriteLine($"CoordinatorClient: Deferred grant received: {grant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
@@ -455,7 +455,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
     private static CoordinatorClient CreateRootClient(
         Connection connection,
-        INodeGrantMessage grant,
+        NodeGrantMessage grant,
         int heartbeatIntervalMs,
         ICoordinatorDebugOutput output,
         TimeSpan? waitDuration = null)
@@ -466,7 +466,7 @@ internal sealed partial class CoordinatorClient : IDisposable
 
     private static CoordinatorClient CreateNestedClient(
         Connection connection,
-        INodeGrantMessage grant,
+        NodeGrantMessage grant,
         int heartbeatIntervalMs,
         ICoordinatorDebugOutput output)
         => new(connection, grant.GrantId, grant.GrantedNodes, GrantOwnership.Nested, heartbeatIntervalMs, output);

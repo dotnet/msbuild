@@ -92,7 +92,7 @@ The coordinator solves this by:
 **Protocol** ([src/Framework/Coordinator/](../src/Framework/Coordinator/))
 - Handshake messages: `ClientHandshakeMessage`, `ServerHandshakeMessage`
 - Client messages: `RequestNodesMessage`, `JoinGrantMessage`, `HeartbeatMessage`, `ReleaseNodesMessage`
-- Server messages: `NodeGrantMessage`, `NodeGrantWithIdMessage`, `WaitMessage`, `ErrorMessage`
+- Server messages: `NodeGrantMessage`, `WaitMessage`, `ErrorMessage`
 - `Capabilities.cs` - Capability constants for feature negotiation
 - `CoordinatorSettings.cs` - Configuration management
 
@@ -131,8 +131,7 @@ After the handshake, the coordinator uses a binary protocol with these message t
 - `ReleaseNodesMessage` - Sent when build completes, releases allocated nodes
 
 **Server → Client:**
-- `NodeGrantMessage` - Grants nodes to a build
-- `NodeGrantWithIdMessage` - Grants nodes and includes a root grant token (requires `nested-grants` capability)
+- `NodeGrantMessage` - Grants nodes to a build and optionally includes a root grant token (when both sides support `nested-grants`)
 - `WaitMessage` - Indicates build is queued, no nodes immediately available
 - `ErrorMessage` - Indicates an error condition
 
@@ -161,12 +160,12 @@ Nested Build:
   Root Build → ClientHandshakeMessage(..., capabilities: nested-grants)
   Root Build ← ServerHandshakeMessage(..., capabilities: nested-grants)
   Root Build → RequestNodesMessage(4)
-  Root Build ← NodeGrantWithIdMessage(grantId, 4)
+  Root Build ← NodeGrantMessage(grantId, 4)
   Nested Build inherits grantId from the root build process environment
   Nested Build → ClientHandshakeMessage(..., capabilities: nested-grants)
   Nested Build ← ServerHandshakeMessage(..., capabilities: nested-grants)
   Nested Build → JoinGrantMessage(grantId, 4)
-  Nested Build ← NodeGrantWithIdMessage(grantId, 4)
+  Nested Build ← NodeGrantMessage(grantId, 4)
 ```
 
 ---
@@ -179,7 +178,7 @@ Without nested grants, the child process could request a new root grant while th
 
 Nested grants avoid this by treating child processes as participants in the parent grant:
 
-1. The root build receives a grant token in `NodeGrantWithIdMessage`.
+1. The root build receives a grant token in `NodeGrantMessage`.
 2. `BuildManager` records that token in the build process environment as `MSBUILDCOORDINATORGRANTID`, so task-launched child processes inherit it.
 3. A child process that sees the token and a server that supports `nested-grants` sends `JoinGrantMessage`.
 4. The coordinator validates that the root grant is still active.
@@ -190,7 +189,7 @@ Nested grants do not implement a scheduler within the root grant. Each nested pr
 
 Nested grant validation happens when the nested process joins the root grant. If the root grant is released later, the coordinator rejects new joins for that grant ID, but it does not revoke nested grants that were already issued. Those nested builds continue until they release or disconnect.
 
-Nested grants are capability-gated. Older clients that do not advertise `nested-grants` continue to receive the legacy `NodeGrantMessage` shape, and clients only send `JoinGrantMessage` when the server advertises the capability.
+Nested grants are capability-gated. Older peers that do not advertise `nested-grants` continue to exchange `NodeGrantMessage` using the legacy int-only wire shape (`GrantId` is `Guid.Empty` and never sent on the wire), and clients only send `JoinGrantMessage` when the server advertises the capability.
 
 ---
 
