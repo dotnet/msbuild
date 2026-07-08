@@ -118,10 +118,16 @@ public class MyTask : Task
         var abs2 = TaskEnvironment.GetAbsolutePath(InputPath); // flagged
         var fi = new FileInfo(InputPath);                 // flagged (suggests FileInfo)
         var di = new DirectoryInfo(InputPath);            // flagged (suggests DirectoryInfo)
+        var full = Path.GetFullPath(InputPath);           // flagged (suggests AbsolutePath)
+        File.Delete(InputPath);                           // flagged (suggests FileInfo)
+        Directory.CreateDirectory(InputPath);             // flagged (suggests DirectoryInfo)
+        using var s = new FileStream(InputPath, FileMode.Open); // flagged (suggests FileInfo)
         return true;
     }
 }
 ```
+
+The last four patterns are the same raw-string shapes that MSBuildTask0002 (`Path.GetFullPath`) and MSBuildTask0003 (a raw string flowing into a `System.IO` path parameter) flag. Surfacing them under MSBuildTask0006 as well means the property can be retyped in **one shot** instead of first applying the 0002/0003 fix (which only introduces a conversion) and then being told to apply 0006. The code fix rewrites each raw site as part of the retype: `Path.GetFullPath(prop)` collapses to `prop` (or `prop.FullName`), and a raw string consumption is fed through `prop.FullName` for `FileInfo`/`DirectoryInfo` (or left unchanged for `AbsolutePath`, which converts to `string` implicitly). Arguments already rooted through `TaskEnvironment.GetAbsolutePath`/`new AbsolutePath(...)` are not re-flagged.
 
 **Not flagged:** `[Output]` properties, non-public properties, read-only properties, values from method calls or literals.
 
@@ -258,6 +264,8 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0003: `File.Exists(relativePath)` | → `File.Exists(TaskEnvironment.GetAbsolutePath(relativePath))` |
 | MSBuildTask0006: `new AbsolutePath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and replace conversion with direct property usage |
 | MSBuildTask0006: `new FileInfo(FilePath)` / `new DirectoryInfo(DirPath)` | → Retype property to `FileInfo`/`DirectoryInfo` and replace conversion with direct property usage |
+| MSBuildTask0006: `Path.GetFullPath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and collapse the call to the property (one-shot for the 0002 shape) |
+| MSBuildTask0006: `File.Delete(Target)` / `Directory.CreateDirectory(Folder)` | → Retype property to `FileInfo`/`DirectoryInfo` and feed the string API through `.FullName` (one-shot for the 0003 shape) |
 | MSBuildTask0007: `int.Parse(Item.ItemSpec)` | → Retype `Item` to ``ITaskItem<int>`` and replace parse with `Item.Value` |
 | MSBuildTask0007: `new FileInfo(item.ItemSpec)` in `foreach` over `ITaskItem[]` | → Retype source property to ``ITaskItem<FileInfo>[]`` and replace with `item.Value` |
 | MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
@@ -358,7 +366,7 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-184 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+193 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
 
 ```
 cd src/TaskAnalyzer.Tests

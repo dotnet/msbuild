@@ -418,6 +418,48 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             return null;
         }
 
+        /// <summary>
+        /// Reports an AbsolutePath/FileInfo/DirectoryInfo suggestion (MSBuildTask0006) for every distinct string
+        /// task input property whose raw value flows into a path-like argument of a System.IO consumption site
+        /// (e.g. <c>File.Delete(prop)</c>, <c>new FileStream(prop, ...)</c>). Arguments that are already safely
+        /// wrapped (e.g. <c>GetAbsolutePath(prop)</c>, <c>new AbsolutePath(prop)</c>) are skipped — those are the
+        /// resolved forms already handled by the other 0006 branches.
+        /// </summary>
+        private static void ReportStringPathConsumers(
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
+            ImmutableArray<IArgumentOperation> arguments,
+            Location location,
+            string suggestedType,
+            HashSet<IPropertySymbol> stringInputProps,
+            INamedTypeSymbol? taskEnvironmentType,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? iTaskItemType)
+        {
+            var flagged = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+            foreach (var arg in arguments)
+            {
+                if (arg.Parameter is null ||
+                    arg.Parameter.Type.SpecialType != SpecialType.System_String ||
+                    !IsPathParameterName(arg.Parameter.Name))
+                {
+                    continue;
+                }
+
+                // Only raw (unwrapped) string arguments represent the daisy-chain scenario. A safely-wrapped
+                // argument is either already correct or covered by the existing 0006 conversion branches.
+                if (IsWrappedSafely(arg.Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    continue;
+                }
+
+                var sourceProp = FindSourceProperty(arg.Value, stringInputProps);
+                if (sourceProp is not null && flagged.Add(sourceProp))
+                {
+                    pendingDiagnostics.Add(CreatePathDiagnostic(location, sourceProp.Name, suggestedType));
+                }
+            }
+        }
+
         private static void AnalyzeObjectCreation(
             ConcurrentBag<Diagnostic> pendingDiagnostics,
             IObjectCreationOperation creation,
@@ -516,6 +558,18 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         "FileInfo", taskItemInputProps, iTaskItemType, taskEnvironmentType);
                 }
             }
+
+            // MSBuildTask0006: new FileStream/StreamReader/StreamWriter(stringProp) consuming a raw string => FileInfo.
+            // Mirrors the ITaskItem consumption above so a raw string path property gets the same one-shot retype.
+            if (stringInputProps.Count > 0)
+            {
+                string createdTypeName = createdType.ToDisplayString();
+                if (createdTypeName is "System.IO.FileStream" or "System.IO.StreamReader" or "System.IO.StreamWriter")
+                {
+                    ReportStringPathConsumers(pendingDiagnostics, creation.Arguments, creation.Syntax.GetLocation(),
+                        "FileInfo", stringInputProps, taskEnvironmentType, absolutePathType, iTaskItemType);
+                }
+            }
         }
 
         private static void AnalyzeInvocation(
@@ -536,6 +590,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 taskEnvironmentType is not null &&
                 method.Name == "GetAbsolutePath" &&
                 SymbolEqualityComparer.Default.Equals(method.ContainingType, taskEnvironmentType) &&
+                invocation.Arguments.Length > 0)
+            {
+                var sourceProp = FindSourceProperty(invocation.Arguments[0].Value, stringInputProps);
+                if (sourceProp is not null)
+                {
+                    pendingDiagnostics.Add(CreatePathDiagnostic(
+                        invocation.Syntax.GetLocation(), sourceProp.Name, "AbsolutePath"));
+                    return;
+                }
+            }
+
+            // MSBuildTask0006: Path.GetFullPath(stringProp). This is the raw normalization pattern that
+            // MSBuildTask0002 also flags; surfacing it here too lets the user retype the property in one shot
+            // instead of first applying the 0002 fix (which introduces a conversion) and only then seeing 0006.
+            if (stringInputProps.Count > 0 &&
+                method.Name == "GetFullPath" &&
+                method.ContainingType?.ToDisplayString() == "System.IO.Path" &&
                 invocation.Arguments.Length > 0)
             {
                 var sourceProp = FindSourceProperty(invocation.Arguments[0].Value, stringInputProps);
@@ -587,6 +658,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 {
                     ReportPathConsumers(pendingDiagnostics, invocation.Arguments, invocation.Syntax.GetLocation(),
                         consumerType, taskItemInputProps, iTaskItemType, taskEnvironmentType);
+                }
+            }
+
+            // MSBuildTask0006: File.X(path)/Directory.X(path) consuming a raw string property => FileInfo/DirectoryInfo.
+            // This is the raw consumption pattern that MSBuildTask0003 flags; surfacing it here as well lets the
+            // user retype the property in one shot instead of daisy-chaining through the 0003 fix first.
+            if (stringInputProps.Count > 0 && invocation.Arguments.Length > 0)
+            {
+                string? consumerType = method.ContainingType?.ToDisplayString() switch
+                {
+                    "System.IO.File" => "FileInfo",
+                    "System.IO.Directory" => "DirectoryInfo",
+                    _ => null
+                };
+
+                if (consumerType is not null)
+                {
+                    ReportStringPathConsumers(pendingDiagnostics, invocation.Arguments, invocation.Syntax.GetLocation(),
+                        consumerType, stringInputProps, taskEnvironmentType, absolutePathType, iTaskItemType);
                 }
             }
 

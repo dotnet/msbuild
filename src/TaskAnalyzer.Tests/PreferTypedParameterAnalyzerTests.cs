@@ -1163,6 +1163,165 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldNotContain("DirectoryInfo");
     }
 
+    // ── MSBuildTask0006 over raw-string 0002/0003 scenarios (one-shot instead of daisy-chaining) ──
+
+    [Fact]
+    public async Task PathGetFullPath_OnStringProp_SuggestsAbsolutePath()
+    {
+        // Path.GetFullPath(prop) is the raw normalization that MSBuildTask0002 flags. MSBuildTask0006 also
+        // surfaces it so the property can be retyped in one shot.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public string InputPath { get; set; } = "";
+            public override bool Execute()
+            {
+                var full = Path.GetFullPath(InputPath);
+                return true;
+            }
+        }
+        """);
+
+        var task6 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedPathParameter).ToArray();
+        task6.Length.ShouldBe(1);
+        task6[0].GetMessage().ShouldContain("InputPath");
+        task6[0].GetMessage().ShouldContain("AbsolutePath");
+    }
+
+    [Fact]
+    public async Task FileDelete_OnStringProp_SuggestsFileInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public string Target { get; set; } = "";
+            public override bool Execute()
+            {
+                File.Delete(Target);
+                return true;
+            }
+        }
+        """);
+
+        var task6 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedPathParameter).ToArray();
+        task6.Length.ShouldBe(1);
+        task6[0].GetMessage().ShouldContain("Target");
+        task6[0].GetMessage().ShouldContain("FileInfo");
+    }
+
+    [Fact]
+    public async Task DirectoryCreate_OnStringProp_SuggestsDirectoryInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public string DestinationFolder { get; set; } = "";
+            public override bool Execute()
+            {
+                Directory.CreateDirectory(DestinationFolder);
+                return true;
+            }
+        }
+        """);
+
+        var task6 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedPathParameter).ToArray();
+        task6.Length.ShouldBe(1);
+        task6[0].GetMessage().ShouldContain("DestinationFolder");
+        task6[0].GetMessage().ShouldContain("DirectoryInfo");
+    }
+
+    [Fact]
+    public async Task NewFileStream_OnStringProp_SuggestsFileInfo()
+    {
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public string InputPath { get; set; } = "";
+            public override bool Execute()
+            {
+                using var stream = new FileStream(InputPath, FileMode.Open);
+                return true;
+            }
+        }
+        """);
+
+        var task6 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedPathParameter).ToArray();
+        task6.Length.ShouldBe(1);
+        task6[0].GetMessage().ShouldContain("InputPath");
+        task6[0].GetMessage().ShouldContain("FileInfo");
+    }
+
+    [Fact]
+    public async Task FileDelete_OnAlreadyWrappedStringProp_SuggestsAbsolutePathNotFileInfo()
+    {
+        // The argument is already rooted through TaskEnvironment.GetAbsolutePath, so the raw-consumption rule
+        // must not fire a FileInfo suggestion. The inner GetAbsolutePath(prop) still yields the standard
+        // AbsolutePath suggestion.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public string Target { get; set; } = "";
+            public override bool Execute()
+            {
+                File.Delete(TaskEnvironment.GetAbsolutePath(Target));
+                return true;
+            }
+        }
+        """);
+
+        var task6 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedPathParameter).ToArray();
+        task6.Length.ShouldBe(1);
+        task6[0].GetMessage().ShouldContain("AbsolutePath");
+        task6[0].GetMessage().ShouldNotContain("FileInfo");
+    }
+
+    [Fact]
+    public async Task FileWriteAllText_DoesNotFlagNonPathContentsArgument_StringProp()
+    {
+        // Only the path-named parameter is flagged; the "contents" string argument is not a path.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public string OutputFile { get; set; } = "";
+            public string Contents { get; set; } = "";
+            public override bool Execute()
+            {
+                File.WriteAllText(OutputFile, Contents);
+                return true;
+            }
+        }
+        """);
+
+        var task6 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedPathParameter).ToArray();
+        task6.Length.ShouldBe(1);
+        task6[0].GetMessage().ShouldContain("OutputFile");
+        task6[0].GetMessage().ShouldContain("FileInfo");
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // Fix #5: Restrict to ValueTypeParser-supported types only
     // ═══════════════════════════════════════════════════════════════════════

@@ -326,6 +326,118 @@ public class PreferTypedParameterCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_0006_PathGetFullPath_RetypesToAbsolutePathAndRemovesCall()
+    {
+        // Path.GetFullPath(prop) is the raw MSBuildTask0002 normalization. Retyping the property to AbsolutePath
+        // makes the value already-absolute, so the whole call collapses to the property (one-shot, no daisy-chain).
+        await CreateFixTest(
+            testCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public string InputPath { get; set; } = "";
+                    public override bool Execute()
+                    {
+                        var full = {|#0:Path.GetFullPath(InputPath)|};
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public AbsolutePath InputPath { get; set; } = default;
+                    public override bool Execute()
+                    {
+                        var full = InputPath;
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.PreferTypedPathParameter).WithLocation(0)
+                .WithArguments("InputPath", "string", "AbsolutePath")).RunAsync();
+    }
+
+    [Fact]
+    public async Task Fix_0006_FileConsumption_RetypesToFileInfoAndUsesFullName()
+    {
+        // File.Delete(prop) is the raw MSBuildTask0003 consumption. Retyping to FileInfo requires feeding the
+        // string API through .FullName (FileInfo has no implicit string conversion).
+        await CreateFixTest(
+            testCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public string Target { get; set; } = "";
+                    public override bool Execute()
+                    {
+                        {|#0:File.Delete(Target)|};
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public FileInfo Target { get; set; } = null!;
+                    public override bool Execute()
+                    {
+                        File.Delete(Target.FullName);
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.PreferTypedPathParameter).WithLocation(0)
+                .WithArguments("Target", "string", "FileInfo")).RunAsync();
+    }
+
+    [Fact]
+    public async Task Fix_0006_DirectoryConsumption_RetypesToDirectoryInfoAndUsesFullName()
+    {
+        await CreateFixTest(
+            testCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public string DestinationFolder { get; set; } = "";
+                    public override bool Execute()
+                    {
+                        {|#0:Directory.CreateDirectory(DestinationFolder)|};
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public DirectoryInfo DestinationFolder { get; set; } = null!;
+                    public override bool Execute()
+                    {
+                        Directory.CreateDirectory(DestinationFolder.FullName);
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.PreferTypedPathParameter).WithLocation(0)
+                .WithArguments("DestinationFolder", "string", "DirectoryInfo")).RunAsync();
+    }
+
+    [Fact]
     public async Task Fix_0006_AbsolutePathDefault_NormalizedThroughAbsolutePath()
     {
         // A fully-qualified string default is preserved after retyping by constructing the AbsolutePath in the

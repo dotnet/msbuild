@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.CodeAnalysis.Simplification;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer
@@ -558,8 +559,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// MSBuildTask0006: rewrites <c>new T(prop)</c> or <c>TaskEnvironment.GetAbsolutePath(prop)</c> to just
-        /// <c>prop</c> after the property is retyped to <paramref name="suggestedType"/>.
+        /// MSBuildTask0006: rewrites the site where a retyped path property is used. Handles three shapes:
+        /// <list type="bullet">
+        /// <item><c>new T(prop)</c> / <c>TaskEnvironment.GetAbsolutePath(prop)</c> collapses to <c>prop</c>.</item>
+        /// <item><c>Path.GetFullPath(prop)</c> (the banned normalization) collapses to <c>prop</c> for AbsolutePath,
+        /// or <c>prop.FullName</c> for FileInfo/DirectoryInfo, since the retyped value is already absolute.</item>
+        /// <item>A raw string consumption (<c>File.Delete(prop)</c>, <c>new FileStream(prop, ...)</c>) needs no edit
+        /// for AbsolutePath (it converts to string implicitly), or <c>prop.FullName</c> for FileInfo/DirectoryInfo.</item>
+        /// </list>
+        /// Returns false for any other reference shape so the conservative "all references rewritable" guarantee holds.
         /// </summary>
         private static bool TryRewritePathConversion(
             SemanticModel semanticModel,
@@ -569,19 +577,133 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             List<(SyntaxNode, SyntaxNode)> siteEdits,
             CancellationToken cancellationToken)
         {
+            // Conversion site: new T(prop) / TaskEnvironment.GetAbsolutePath(prop) => prop
             var conversion = GetSingleArgumentConversion(propertyAccess);
-            if (conversion is null || !IsExpectedConversion(semanticModel, conversion, suggestedType, expectedResultType, isItemRule: false, cancellationToken))
+            if (conversion is not null &&
+                IsExpectedConversion(semanticModel, conversion, suggestedType, expectedResultType, isItemRule: false, cancellationToken))
+            {
+                var replacement = propertyAccess
+                    .WithoutTrivia()
+                    .WithTriviaFrom(conversion)
+                    .WithAdditionalAnnotations(Formatter.Annotation);
+
+                siteEdits.Add((conversion, replacement));
+                return true;
+            }
+
+            // Banned normalization site: Path.GetFullPath(prop). The retyped value is already absolute, so the
+            // whole call collapses to the property (AbsolutePath, implicitly a string) or its absolute string.
+            if (IsPathGetFullPathInvocation(semanticModel, propertyAccess, cancellationToken, out var getFullPath))
+            {
+                ExpressionSyntax replacement = (suggestedType == "AbsolutePath"
+                        ? (ExpressionSyntax)propertyAccess.WithoutTrivia()
+                        : AppendFullName(propertyAccess))
+                    .WithTriviaFrom(getFullPath)
+                    .WithAdditionalAnnotations(Formatter.Annotation);
+
+                siteEdits.Add((getFullPath, replacement));
+                return true;
+            }
+
+            // Raw string consumption: prop passed where a string is expected (File.Delete(prop), new FileStream(prop)).
+            if (IsStringArgument(semanticModel, propertyAccess, cancellationToken))
+            {
+                // AbsolutePath converts to string implicitly, so the call still compiles unchanged; the retype
+                // alone is the fix. FileInfo/DirectoryInfo have no implicit string conversion, so pass .FullName.
+                if (suggestedType != "AbsolutePath")
+                {
+                    var replacement = AppendFullName(propertyAccess)
+                        .WithTriviaFrom(propertyAccess)
+                        .WithAdditionalAnnotations(Formatter.Annotation);
+
+                    siteEdits.Add((propertyAccess, replacement));
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Builds <c>prop.FullName</c> — the absolute path string exposed by FileInfo/DirectoryInfo (via
+        /// FileSystemInfo) — used to feed a retyped path property into APIs that still expect a string.
+        /// </summary>
+        private static ExpressionSyntax AppendFullName(ExpressionSyntax propertyAccess) =>
+            SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                propertyAccess.WithoutTrivia(),
+                SyntaxFactory.IdentifierName("FullName"));
+
+        /// <summary>
+        /// True when <paramref name="propertyAccess"/> is the single argument of a <c>System.IO.Path.GetFullPath</c>
+        /// call; outputs that invocation so it can be replaced wholesale.
+        /// </summary>
+        private static bool IsPathGetFullPathInvocation(
+            SemanticModel semanticModel,
+            ExpressionSyntax propertyAccess,
+            CancellationToken cancellationToken,
+            out InvocationExpressionSyntax invocation)
+        {
+            invocation = null!;
+
+            if (propertyAccess.Parent is not ArgumentSyntax argument ||
+                argument.Parent is not ArgumentListSyntax argumentList ||
+                argumentList.Arguments.Count != 1 ||
+                argumentList.Parent is not InvocationExpressionSyntax candidate)
             {
                 return false;
             }
 
-            var replacement = propertyAccess
-                .WithoutTrivia()
-                .WithTriviaFrom(conversion)
-                .WithAdditionalAnnotations(Formatter.Annotation);
+            if (semanticModel.GetSymbolInfo(candidate, cancellationToken).Symbol is not IMethodSymbol method ||
+                method.Name != "GetFullPath" ||
+                method.ContainingType?.ToDisplayString() != "System.IO.Path")
+            {
+                return false;
+            }
 
-            siteEdits.Add((conversion, replacement));
+            invocation = candidate;
             return true;
+        }
+
+        /// <summary>
+        /// True when <paramref name="propertyAccess"/> is an argument bound to a <c>string</c> parameter of an
+        /// invocation or object creation, i.e. a site where a retyped path property must be converted back to a
+        /// string (AbsolutePath implicitly, FileInfo/DirectoryInfo via <c>.FullName</c>).
+        /// </summary>
+        private static bool IsStringArgument(
+            SemanticModel semanticModel,
+            ExpressionSyntax propertyAccess,
+            CancellationToken cancellationToken)
+        {
+            if (propertyAccess.Parent is not ArgumentSyntax argument ||
+                argument.Parent is not ArgumentListSyntax argumentList ||
+                argumentList.Parent is not (InvocationExpressionSyntax or ObjectCreationExpressionSyntax))
+            {
+                return false;
+            }
+
+            ImmutableArray<IArgumentOperation> argumentOperations = semanticModel.GetOperation(argumentList.Parent, cancellationToken) switch
+            {
+                IInvocationOperation invocation => invocation.Arguments,
+                IObjectCreationOperation creation => creation.Arguments,
+                _ => default,
+            };
+
+            if (argumentOperations.IsDefault)
+            {
+                return false;
+            }
+
+            foreach (var argumentOperation in argumentOperations)
+            {
+                if (argumentOperation.Syntax == argument)
+                {
+                    return argumentOperation.Parameter?.Type.SpecialType == SpecialType.System_String;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
