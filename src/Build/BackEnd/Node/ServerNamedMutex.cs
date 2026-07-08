@@ -3,6 +3,8 @@
 
 using System;
 using System.Threading;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
@@ -34,10 +36,19 @@ namespace Microsoft.Build.Execution
 
         public static bool WasOpen(string mutexName)
         {
-            bool result = Mutex.TryOpenExisting(mutexName, out Mutex? mutex);
-            mutex?.Dispose();
+            try
+            {
+                bool result = Mutex.TryOpenExisting(mutexName, out Mutex? mutex);
+                mutex?.Dispose();
 
-            return result;
+                return result;
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                CommunicationsUtilities.Trace($"Failed to open mutex '{mutexName}', treating it as not open. Exception: {ex}");
+
+                return false;
+            }
         }
 
         public void Dispose()
