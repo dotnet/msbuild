@@ -183,6 +183,11 @@ namespace Microsoft.Build.BackEnd
             // Gated behind a change wave so builds that relied on the previous (scheduling-dependent) behavior can opt out.
             // Requests that opt into SkipNonexistentTargets are exempted so their existing cache-satisfaction semantics
             // (handled by the isolation constraint check) are preserved and never turned into a rebuild.
+            //
+            // INVARIANT: the exemption conditions below must stay the mirror image of the allow-conditions in
+            // Scheduler.CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot. A forced cache miss produced here is
+            // expected to route to that check and surface MSB4252; if the two drift, a gated miss could instead be silently
+            // rebuilt, violating isolation without any diagnostic. Keep both in sync.
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
                 || projectIsolationMode != ProjectIsolationMode.True
                 || parentConfig == null

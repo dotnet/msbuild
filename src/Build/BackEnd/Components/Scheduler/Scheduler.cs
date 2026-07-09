@@ -1772,7 +1772,7 @@ namespace Microsoft.Build.BackEnd
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
-                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), GetIsolationAllowedTopLevelTargets(parentRequest, request));
+                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), allowedTopLevelTargets: GetIsolationAllowedTopLevelTargets(parentRequest, request));
                 if (response != null)
                 {
                     TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) satisfied from the cache.");
@@ -1914,7 +1914,7 @@ namespace Microsoft.Build.BackEnd
             int nodeForResults = (request.Parent != null) ? request.Parent.AssignedNode : InvalidNodeId;
 
             // Do we already have results?  If so, just return them.
-            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), GetIsolationAllowedTopLevelTargets(request.Parent, request.BuildRequest));
+            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), allowedTopLevelTargets: GetIsolationAllowedTopLevelTargets(request.Parent, request.BuildRequest));
             if (response != null)
             {
                 if (response.Action == ScheduleActionType.SubmissionComplete)
@@ -2053,6 +2053,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <returns>True if caches misses are allowed, false otherwise</returns>
+        /// <remarks>
+        /// INVARIANT: the allow-conditions below are the mirror image of the exemption conditions in
+        /// <see cref="BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets"/>. That gate forces a cache miss for an
+        /// undeclared cross-project reference expecting this method to report MSB4252; if the two drift, a gated miss could be
+        /// silently rebuilt, violating isolation without any diagnostic. Keep both in sync.
+        /// </remarks>
         private bool CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses, bool emitNonErrorLogs)
         {
             ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
