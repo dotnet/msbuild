@@ -12,6 +12,10 @@
 
     <EnableDefaultItems>false</EnableDefaultItems>
 
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
+
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
          only their contents redisted within the SDK. -->
@@ -38,25 +42,6 @@
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--
-      Property functions resolve receiver types outside the curated allowlist (by probing and loading
-      assemblies at runtime) only when MSBUILDENABLEALLPROPERTYFUNCTIONS=1. That reflection is
-      incompatible with trimming, so the feature switch defaults to disabled for trim analysis, which
-      lets the trimmer remove the unreachable probing path. The environment variable is still honored
-      at run time (this library emits no runtimeconfig.json, so the AppContext switch stays unset).
-    -->
-    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableAllPropertyFunctions" Value="false" Trim="true" />
-    <!--
-      Instance "dotting in" is limited to a curated set of receiver types (see PropertyFunctionReceiver.cs)
-      so the members reachable by reflection are predictable and statically known. The switch defaults to
-      enabled for trim analysis, letting the trimmer remove the unrestricted path; untrimmed it stays off
-      (it has no environment variable, and this library emits no runtimeconfig.json so the AppContext
-      switch stays unset).
-    -->
-    <RuntimeHostConfigurationOption Include="Microsoft.Build.RestrictPropertyFunctionReceivers" Value="true" Trim="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -125,6 +110,7 @@
       <Link>SharedUtilities\StringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
+    <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
@@ -219,7 +205,6 @@
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="Evaluation\PropertyFunctionReceiver.cs" />
     <Compile Include="Evaluation\ToolsetElement.cs" />
-    <Compile Include="FeatureSwitches.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
@@ -597,6 +582,7 @@
     <Compile Include="Instance\ProjectTaskOutputItemInstance.cs" />
     <Compile Include="Instance\ProjectTaskOutputPropertyInstance.cs" />
     <Compile Include="Instance\TaskFactories\AssemblyTaskFactory.cs" />
+    <Compile Include="Instance\TaskFactories\RegisteredTaskFactory.cs" />
     <Compile Include="Instance\TaskFactories\TaskHostTask.cs" />
     <Compile Include="Instance\TaskFactoryEngineContext.cs" />
     <Compile Include="Instance\TaskFactoryWrapper.cs" />

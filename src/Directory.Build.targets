@@ -64,13 +64,27 @@
     <XUnitCoreSettingsFile>$(XUnitDesktopSettingsFile)</XUnitCoreSettingsFile>
   </PropertyGroup>
 
+  <!-- Wrapper invariant for CTS: the resulting test DLL must not be named
+       "<something>.VSTest", because InternalsVisibleTo grants in the
+       production assemblies name the original test assembly. Each wrapper
+       sets AssemblyName before Import; an inner csproj that also sets
+       AssemblyName wins (which is fine — it picks the original name). The
+       failure mode this catches: a future wrapper forgets to set
+       AssemblyName AND the inner csproj doesn't set it either, leaving the
+       default of MSBuildProjectName = "<X>.UnitTests.VSTest" and silently
+       breaking IVT. -->
+  <Target Name="_AssertVSTestWrapperAssemblyName" BeforeTargets="CoreCompile" Condition="'$(IsVSTestForCtsProject)' == 'true'">
+    <Error Text="VSTest wrapper produced AssemblyName '$(AssemblyName)', which ends in '.VSTest'. This would break InternalsVisibleTo grants. The wrapper csproj must set &lt;AssemblyName&gt; (pre-Import) and/or the inner csproj must set it; otherwise it defaults to MSBuildProjectName."
+           Condition="$(AssemblyName.EndsWith('.VSTest'))" />
+  </Target>
+
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
     <!-- As of 17.3, one TF of Microsoft.NET.Test.Sdk depends on Newtonsoft.Json
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
     <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(IsVSTestForCtsProject)' != 'true'" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />

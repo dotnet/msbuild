@@ -1,0 +1,32 @@
+<Project>
+
+  <!--
+    VSTest-mode variant used by Clever Test Selection (CTS). See scripts/cts/Collect-Local.ps1
+    and Run-Local.ps1. This wrapper Imports the original .csproj so the project stays
+    in sync; override only what's needed via PropertyGroup above the Import. The inner
+    csproj carries the Sdk="Microsoft.NET.Sdk" attribute that drives Sdk.props/Sdk.targets.
+  -->
+  <PropertyGroup>
+    <!-- Force the AssemblyName to match the original (some originals don't set it; their
+         default comes from MSBuildProjectName, which differs here). This keeps the
+         resulting test DLL named identically so InternalsVisibleTo grants still apply. -->
+    <AssemblyName>$(MSBuildProjectName.Replace('.VSTest',''))</AssemblyName>
+
+    <!-- Our filename doesn't end in .UnitTests so Arcade won't auto-set this; force it. -->
+    <IsUnitTestProject>true</IsUnitTestProject>
+    <IsTestLibrary>true</IsTestLibrary>
+    <OutputType>Library</OutputType>
+    <UseMicrosoftTestingPlatformRunner>false</UseMicrosoftTestingPlatformRunner>
+
+    <!-- Marker checked by src/Directory.Build.targets to suppress MTP-specific package additions. -->
+    <IsVSTestForCtsProject>true</IsVSTestForCtsProject>
+  </PropertyGroup>
+
+  <Import Project="Microsoft.Build.BuildCheck.UnitTests.csproj" />
+  <!-- Pin to net10.0 *after* the inner Import overrides the multi-TFM list. xunit.v3
+       rejects the net472 TFM because we set OutputType=Library above. -->
+  <PropertyGroup>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+</Project>
