@@ -3880,6 +3880,7 @@ elementFormDefault="qualified">
                 <xs:extension base="msb:TaskType">
                     <xs:attribute name="OutputPaths" use="required" />
                     <xs:attribute name="Parameters" />
+                    <xs:attribute name="UseTrustedSettings" />
                     <xs:attribute name="XmlContent" />
                     <xs:attribute name="XmlInputPaths" />
                     <xs:attribute name="XslCompiledDllPath" />
