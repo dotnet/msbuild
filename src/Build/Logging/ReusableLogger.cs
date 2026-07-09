@@ -377,6 +377,40 @@ internal class ReusableLogger : INodeLogger, IEventSource5
     #endregion
 
     /// <summary>
+    /// Moves all of the wrapped logger's event subscriptions from its currently-active event source to
+    /// <paramref name="newEventSource"/>.
+    /// </summary>
+    /// <remarks>
+    /// This is used when a central logger was pre-registered as a plain logger (for example, seeded into a
+    /// <see cref="Evaluation.ProjectCollection"/> for eval-time logging and then flowed into
+    /// <c>BuildParameters.Loggers</c>) and is therefore wired to the all-events <c>CentralForwardingLogger</c>
+    /// sink, but is subsequently paired with a dedicated forwarding logger via a distributed-logger
+    /// registration. To honor that forwarding logger's filtering, the wrapped logger must receive only the
+    /// subset of events the forwarding logger forwards, so its subscription is re-pointed at the forwarding
+    /// logger's dedicated sink. This deliberately does not re-initialize the wrapped logger.
+    /// </remarks>
+    internal void RerouteActiveEventSource(IEventSource newEventSource)
+    {
+        ArgumentNullException.ThrowIfNull(newEventSource);
+
+        // Once we have transitioned to build-time the active source is the build-time one; before that it is
+        // the design-time source. Move the subscription from whichever is active to the new source.
+        if (_buildTimeEventSource != null)
+        {
+            UnregisterForEvents(_buildTimeEventSource);
+            _buildTimeEventSource = newEventSource;
+            RegisterForEvents(_buildTimeEventSource);
+        }
+        else
+        {
+            Assumed.NotNull(_designTimeEventSource, "ReusableLogger must be initialized before its event source can be rerouted.");
+            UnregisterForEvents(_designTimeEventSource!);
+            _designTimeEventSource = newEventSource;
+            RegisterForEvents(_designTimeEventSource);
+        }
+    }
+
+    /// <summary>
     /// Registers for all of the events on the specified event source.
     /// </summary>
     private void RegisterForEvents(IEventSource eventSource)

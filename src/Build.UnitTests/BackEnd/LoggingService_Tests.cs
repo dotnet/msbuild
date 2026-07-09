@@ -628,6 +628,56 @@ namespace Microsoft.Build.UnitTests.Logging
                 "Microsoft.Build.Logging.ConfigurableForwardingLogger",
                 "The forwarding logger must have been initialized.");
         }
+
+        /// <summary>
+        /// Companion to the regression test above. When the central logger is pre-registered as a
+        /// ReusableLogger wrapper (and therefore wired to the all-events CentralForwardingLogger sink),
+        /// pairing it with a dedicated forwarding logger must honor that forwarding logger's filtering:
+        /// the central logger should receive only the forwarded subset of events, exactly once, and must
+        /// not receive events the forwarding logger filtered out. Here the forwarding logger forwards only
+        /// error events, so logging both a message and an error must deliver only the error to the central
+        /// logger. Before the fix, the central logger received the unfiltered stream via the
+        /// CentralForwardingLogger path, so it would also have seen the message.
+        /// </summary>
+        [Fact]
+        public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrapped_HonorsForwardingLoggerFiltering()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+
+            // Forward ONLY error events so we can observe that the central logger receives the filtered
+            // subset rather than the full, unfiltered stream.
+            LoggerDescription description = new LoggerDescription(
+                className,
+                typeof(ProjectCollection).Assembly.FullName,
+                null,
+                "ErrorEvent",
+                LoggerVerbosity.Diagnostic);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            _initializedService.RegisterDistributedLogger(centralLogger, description).ShouldBeTrue();
+
+            BuildEventContext context = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+
+            BuildMessageEventArgs messageArgs = new("message text", null, "sender", MessageImportance.High)
+            {
+                BuildEventContext = context,
+            };
+            BuildErrorEventArgs errorArgs = new("subcategory", "ERR001", "file", 0, 0, 0, 0, "error message", null, "sender")
+            {
+                BuildEventContext = context,
+            };
+
+            _initializedService.LogBuildEvent(messageArgs);
+            _initializedService.LogBuildEvent(errorArgs);
+
+            // The forwarding logger forwards only errors, so the central logger must see the error exactly
+            // once (no double delivery) and must not see the message that was filtered out.
+            centralLogger.ErrorCount.ShouldBe(1, "The central logger should receive the forwarded error exactly once (no duplicate delivery).");
+            centralLogger.MessageCount.ShouldBe(0, "The central logger must not receive events the forwarding logger filtered out.");
+        }
         #endregion
 
         #region Test Properties
@@ -1541,6 +1591,24 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             /// <summary>
+            /// Number of error events received.
+            /// </summary>
+            internal int ErrorCount
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
+            /// Number of message events received.
+            /// </summary>
+            internal int MessageCount
+            {
+                get;
+                set;
+            }
+
+            /// <summary>
             /// Initialize
             /// </summary>
             public void Initialize(IEventSource eventSource)
@@ -1570,6 +1638,16 @@ namespace Microsoft.Build.UnitTests.Logging
                 if (eventArgs is BuildFinishedEventArgs)
                 {
                     ++BuildFinishedCount;
+                }
+
+                if (eventArgs is BuildErrorEventArgs)
+                {
+                    ++ErrorCount;
+                }
+
+                if (eventArgs is BuildMessageEventArgs)
+                {
+                    ++MessageCount;
                 }
             }
         }
