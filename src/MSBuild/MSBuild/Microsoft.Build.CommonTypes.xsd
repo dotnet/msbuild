@@ -2611,6 +2611,31 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->XML files that specify assemblies, types, and their members that should not be trimmed.</xs:documentation>
       </xs:annotation>
     </xs:element>
+    <xs:element name="PublishRelease" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishRelease" _locComment="" -->Indicates whether 'dotnet publish' should use the Release configuration by default.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PublishSelfContained" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishSelfContained" _locComment="" -->Indicates whether the application should be published as self-contained, bundling the .NET runtime with the application.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="PublishIISAssets" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishIISAssets" _locComment="" -->Indicates whether IIS assets such as web.config should be included during publish.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TrimMode" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TrimMode" _locComment="" -->Controls the trimming granularity when publishing trimmed. Common values are 'full' and 'partial'.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="StripSymbols" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="StripSymbols" _locComment="" -->Indicates whether debug symbols should be stripped from native binaries produced during publish.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
 
     <!-- ======================== XAMARIN.ANDROID PROPERTIES ======================== -->
 
