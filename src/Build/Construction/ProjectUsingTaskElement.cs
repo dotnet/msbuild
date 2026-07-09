@@ -143,6 +143,22 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// PROTOTYPE. Gets and sets the value of the TaskHostRouting attribute, which pins the task to a
+        /// specific execution location (InProc, Sidecar, or Transient) in multi-threaded mode.
+        /// Returns empty string if it is not present.
+        /// See https://github.com/dotnet/msbuild/issues/13738.
+        /// </summary>
+        public string TaskHostRouting
+        {
+            get => GetAttributeValue(XMakeAttributes.taskHostRouting);
+
+            set
+            {
+                SetOrRemoveAttribute(XMakeAttributes.taskHostRouting, value, "Set usingtask TaskHostRouting {0}", value);
+            }
+        }
+
+        /// <summary>
         /// Get any contained TaskElement.
         /// </summary>
         public ProjectUsingTaskBodyElement TaskBody
@@ -200,6 +216,11 @@ namespace Microsoft.Build.Construction
         /// Location of the Override attribute, if any
         /// </summary>
         public ElementLocation OverrideLocation => GetAttributeLocation(XMakeAttributes.overrideUsingTask);
+
+        /// <summary>
+        /// PROTOTYPE. Location of the TaskHostRouting attribute, if any
+        /// </summary>
+        public ElementLocation TaskHostRoutingLocation => GetAttributeLocation(XMakeAttributes.taskHostRouting);
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:

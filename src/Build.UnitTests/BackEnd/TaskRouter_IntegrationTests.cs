@@ -635,6 +635,206 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("RestoreTask executed");
         }
 
+        #region UsingTask TaskHostRouting attribute (prototype) tests
+
+        /// <summary>
+        /// PROTOTYPE. A task that would normally be routed to a TaskHost (no thread-safety attribute)
+        /// is forced in-process by TaskHostRouting="InProc" on its UsingTask.
+        /// </summary>
+        [Fact]
+        public void UsingTaskRouting_InProc_RunsInProcess_InMultiThreadedMode()
+        {
+            string projectContent = CreateTestProjectWithRouting("PidLoggingTestTask", "InProc");
+            string projectFile = Path.Combine(_testProjectsDir, "RoutingInProc.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            MockLogger logger = BuildRoutingProject(projectFile, multiThreaded: true, out BuildResult result);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "PidLoggingTestTask");
+
+            int[] pids = ExtractReportedPids(logger.FullLog, "PidLoggingTestTask");
+            pids.Length.ShouldBe(1, $"Expected one invocation. Log:{Environment.NewLine}{logger.FullLog}");
+            pids[0].ShouldBe(Process.GetCurrentProcess().Id, "Task pinned to InProc must run in the build process.");
+        }
+
+        /// <summary>
+        /// PROTOTYPE. A task that would normally run in-process (marked with the thread-safety attribute)
+        /// is forced into a sidecar TaskHost by TaskHostRouting="Sidecar".
+        /// </summary>
+        [Fact]
+        public void UsingTaskRouting_Sidecar_RunsInTaskHost_InMultiThreadedMode()
+        {
+            string projectContent = CreateTestProjectWithRouting("PidLoggingMultiThreadableTestTask", "Sidecar");
+            string projectFile = Path.Combine(_testProjectsDir, "RoutingSidecar.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            MockLogger logger = BuildRoutingProject(projectFile, multiThreaded: true, out BuildResult result);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "PidLoggingMultiThreadableTestTask");
+
+            int[] pids = ExtractReportedPids(logger.FullLog, "PidLoggingMultiThreadableTestTask");
+            pids.Length.ShouldBe(1, $"Expected one invocation. Log:{Environment.NewLine}{logger.FullLog}");
+            pids[0].ShouldNotBe(Process.GetCurrentProcess().Id, "Task pinned to Sidecar must run out of process.");
+        }
+
+        /// <summary>
+        /// PROTOTYPE. A task pinned to a transient TaskHost by TaskHostRouting="Transient" gets a fresh
+        /// process on each build, even with node reuse enabled.
+        /// </summary>
+        [Fact]
+        public void UsingTaskRouting_Transient_GetsFreshProcess_InMultiThreadedMode()
+        {
+            string projectContent = CreateTestProjectWithRouting("PidLoggingMultiThreadableTestTask", "Transient");
+            string projectFile = Path.Combine(_testProjectsDir, "RoutingTransient.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = true,
+                Loggers = [logger],
+                DisableInProcNode = false,
+
+                // Reuse stays ON: a transient TaskHost must still die between builds.
+                EnableNodeReuse = true,
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                ["TestTarget"],
+                null);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult result1 = buildManager.Build(buildParameters, buildRequestData);
+            BuildResult result2 = buildManager.Build(buildParameters, buildRequestData);
+
+            result1.OverallResult.ShouldBe(BuildResultCode.Success);
+            result2.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "PidLoggingMultiThreadableTestTask");
+
+            int[] pids = ExtractReportedPids(logger.FullLog, "PidLoggingMultiThreadableTestTask");
+            pids.Length.ShouldBe(2, $"Expected two invocations to log a PID. Log:{Environment.NewLine}{logger.FullLog}");
+            pids[0].ShouldNotBe(pids[1], "Each build must spawn a fresh transient TaskHost.");
+            pids.ShouldNotContain(Process.GetCurrentProcess().Id, "Transient TaskHost must be out-of-process.");
+        }
+
+        /// <summary>
+        /// PROTOTYPE. The TaskHostRouting override has no effect outside multi-threaded mode.
+        /// </summary>
+        [Fact]
+        public void UsingTaskRouting_Ignored_WhenNotMultiThreaded()
+        {
+            string projectContent = CreateTestProjectWithRouting("PidLoggingMultiThreadableTestTask", "Sidecar");
+            string projectFile = Path.Combine(_testProjectsDir, "RoutingIgnored.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            MockLogger logger = BuildRoutingProject(projectFile, multiThreaded: false, out BuildResult result);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "PidLoggingMultiThreadableTestTask");
+        }
+
+        /// <summary>
+        /// PROTOTYPE. An invalid TaskHostRouting value is rejected during evaluation.
+        /// </summary>
+        [Fact]
+        public void UsingTaskRouting_InvalidValue_FailsEvaluation()
+        {
+            string projectContent = CreateTestProjectWithRouting("PidLoggingTestTask", "Bogus");
+            string projectFile = Path.Combine(_testProjectsDir, "RoutingInvalid.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            MockLogger logger = BuildRoutingProject(projectFile, multiThreaded: true, out BuildResult result);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            // The attribute name is an invariant token in the InvalidAttributeValue diagnostic.
+            logger.FullLog.ShouldContain("TaskHostRouting");
+        }
+
+        /// <summary>
+        /// PROTOTYPE. TaskHostRouting values map to the expected routing override (case-insensitive),
+        /// and unknown/empty values yield no override.
+        /// </summary>
+        [Theory]
+        [InlineData("InProc", nameof(TaskHostRoutingOverride.InProc))]
+        [InlineData("inproc", nameof(TaskHostRoutingOverride.InProc))]
+        [InlineData("Sidecar", nameof(TaskHostRoutingOverride.Sidecar))]
+        [InlineData("Transient", nameof(TaskHostRoutingOverride.Transient))]
+        [InlineData("", nameof(TaskHostRoutingOverride.None))]
+        [InlineData("Bogus", nameof(TaskHostRoutingOverride.None))]
+        public void ParseRoutingOverride_MapsValues(string value, string expected)
+        {
+            TaskRouter.ParseRoutingOverride(value).ToString().ShouldBe(expected);
+        }
+
+        /// <summary>
+        /// PROTOTYPE. The TaskHostRouting attribute round-trips through the construction object model.
+        /// </summary>
+        [Fact]
+        public void ProjectUsingTaskElement_TaskHostRouting_RoundTrips()
+        {
+            var root = Microsoft.Build.Construction.ProjectRootElement.Create();
+            Microsoft.Build.Construction.ProjectUsingTaskElement usingTask = root.AddUsingTask("MyTask", "MyAssembly.dll", null);
+
+            usingTask.TaskHostRouting.ShouldBe(string.Empty);
+
+            usingTask.TaskHostRouting = "Sidecar";
+            usingTask.TaskHostRouting.ShouldBe("Sidecar");
+        }
+
+        #endregion
+
+        private MockLogger BuildRoutingProject(string projectFile, bool multiThreaded, out BuildResult result)
+        {
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = multiThreaded,
+                Loggers = [logger],
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                ["TestTarget"],
+                null);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            result = buildManager.Build(buildParameters, buildRequestData);
+            return logger;
+        }
+
+        private string CreateTestProjectWithRouting(string taskName, string routing)
+        {
+            return $@"
+<Project>
+    <UsingTask TaskName=""{taskName}"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" TaskHostRouting=""{routing}"" />
+
+    <Target Name=""TestTarget"">
+        <{taskName} />
+    </Target>
+</Project>";
+        }
+
+        private static int[] ExtractReportedPids(string log, string taskName)
+        {
+            var pids = new List<int>();
+            foreach (Match m in Regex.Matches(log, Regex.Escape(taskName) + @" executed in PID=(\d+)"))
+            {
+                pids.Add(int.Parse(m.Groups[1].Value));
+            }
+
+            return pids.ToArray();
+        }
+
         private string CreateTestProject(string taskName, string taskClass)
         {
             return $@"
@@ -728,6 +928,37 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public override bool Execute()
         {
             Log.LogMessage(MessageImportance.High, "TaskWithAttribute executed");
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// PROTOTYPE. A non-enlightened task (no attribute, normally routed to a TaskHost in
+    /// multi-threaded mode) that logs the PID of the process it runs in, so tests can verify the
+    /// UsingTask TaskHostRouting override actually changed where it executed.
+    /// </summary>
+    public class PidLoggingTestTask : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, $"PidLoggingTestTask executed in PID={Process.GetCurrentProcess().Id}");
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// PROTOTYPE. A task marked with MSBuildMultiThreadableTaskAttribute (normally runs in-process in
+    /// multi-threaded mode) that logs its PID, used to verify the UsingTask TaskHostRouting override
+    /// can push it into a sidecar or transient TaskHost.
+    /// </summary>
+#pragma warning disable CS0436 // Type conflicts with imported type - intentional for testing
+    [MSBuildMultiThreadableTask]
+#pragma warning restore CS0436
+    public class PidLoggingMultiThreadableTestTask : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, $"PidLoggingMultiThreadableTestTask executed in PID={Process.GetCurrentProcess().Id}");
             return true;
         }
     }

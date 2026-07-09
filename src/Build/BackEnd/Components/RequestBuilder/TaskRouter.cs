@@ -3,9 +3,41 @@
 
 using System;
 using System.Collections.Concurrent;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// Describes an explicit override of the engine's multi-threaded task-routing decision.
+    /// </summary>
+    /// <remarks>
+    /// PROTOTYPE. In this design the override is expressed by the <c>TaskHostRouting</c> metadata on a
+    /// <c>UsingTask</c> element. It only has meaning in multi-threaded mode.
+    /// See https://github.com/dotnet/msbuild/issues/13738.
+    /// </remarks>
+    internal enum TaskHostRoutingOverride
+    {
+        /// <summary>
+        /// No override; the engine applies its default routing decision.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Force the task to run in-process within the thread node.
+        /// </summary>
+        InProc,
+
+        /// <summary>
+        /// Force the task to run in a reusable (sidecar) TaskHost process.
+        /// </summary>
+        Sidecar,
+
+        /// <summary>
+        /// Force the task to run in a transient TaskHost process that terminates after execution.
+        /// </summary>
+        Transient,
+    }
+
     /// <summary>
     /// Determines where a task should be executed in multi-threaded mode.
     /// In multi-threaded execution mode, tasks implementing IMultiThreadableTask or marked with
@@ -112,6 +144,38 @@ namespace Microsoft.Build.BackEnd
             }
 
             return string.Equals(fullName, TaskRequiringTransientTaskHostFullName, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// PROTOTYPE. Maps the value of a <c>UsingTask</c> <c>TaskHostRouting</c> attribute to a
+        /// <see cref="TaskHostRoutingOverride"/>. Recognizes InProc / Sidecar / Transient case-insensitively;
+        /// any other value (including empty) yields <see cref="TaskHostRoutingOverride.None"/>.
+        /// </summary>
+        /// <param name="taskHostRouting">The attribute value from the UsingTask element.</param>
+        /// <returns>The corresponding routing override.</returns>
+        public static TaskHostRoutingOverride ParseRoutingOverride(string taskHostRouting)
+        {
+            if (string.IsNullOrEmpty(taskHostRouting))
+            {
+                return TaskHostRoutingOverride.None;
+            }
+
+            if (string.Equals(taskHostRouting, XMakeAttributes.TaskHostRoutingValues.inProc, StringComparison.OrdinalIgnoreCase))
+            {
+                return TaskHostRoutingOverride.InProc;
+            }
+
+            if (string.Equals(taskHostRouting, XMakeAttributes.TaskHostRoutingValues.sidecar, StringComparison.OrdinalIgnoreCase))
+            {
+                return TaskHostRoutingOverride.Sidecar;
+            }
+
+            if (string.Equals(taskHostRouting, XMakeAttributes.TaskHostRoutingValues.transient, StringComparison.OrdinalIgnoreCase))
+            {
+                return TaskHostRoutingOverride.Transient;
+            }
+
+            return TaskHostRoutingOverride.None;
         }
 
         /// <summary>

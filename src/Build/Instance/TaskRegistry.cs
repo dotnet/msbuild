@@ -424,6 +424,17 @@ namespace Microsoft.Build.Execution
             string architecture = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Architecture, expanderOptions, projectUsingTaskXml.ArchitectureLocation);
             string overrideUsingTask = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Override, expanderOptions, projectUsingTaskXml.OverrideLocation);
 
+            // PROTOTYPE: TaskHostRouting pins the task to a specific execution location in multi-threaded
+            // mode. See https://github.com/dotnet/msbuild/issues/13738.
+            string taskHostRouting = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.TaskHostRouting, expanderOptions, projectUsingTaskXml.TaskHostRoutingLocation);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                XMakeAttributes.IsValidTaskHostRoutingValue(taskHostRouting),
+                projectUsingTaskXml.TaskHostRoutingLocation,
+                "InvalidAttributeValue",
+                taskHostRouting,
+                XMakeAttributes.taskHostRouting,
+                XMakeElements.usingTask);
+
             if ((runtime != string.Empty) || (architecture != string.Empty))
             {
                 taskFactoryParameters = new TaskHostParameters(
@@ -439,7 +450,8 @@ namespace Microsoft.Build.Execution
                 parameterGroupAndTaskElementRecord,
                 loggingContext,
                 projectUsingTaskXml,
-                ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
+                ConversionUtilities.ValidBooleanTrue(overrideUsingTask),
+                taskHostRouting);
         }
 
         /// <summary>
@@ -672,7 +684,8 @@ namespace Microsoft.Build.Execution
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
             LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
-            bool overrideTask)
+            bool overrideTask,
+            string taskHostRouting)
         {
             Assumed.NotNullOrEmpty(taskName);
             Assumed.NotNull(assemblyLoadInfo);
@@ -700,7 +713,8 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters,
                 inlineTaskRecord,
                 Interlocked.Increment(ref _nextRegistrationOrderId),
-                projectUsingTaskInXml.ContainingProject.FullPath);
+                projectUsingTaskInXml.ContainingProject.FullPath,
+                taskHostRouting);
 
             if (overrideTask)
             {
@@ -1088,6 +1102,13 @@ namespace Microsoft.Build.Execution
             private string _definingFileFullPath;
 
             /// <summary>
+            /// PROTOTYPE. The value of the UsingTask TaskHostRouting attribute, which pins the task to a
+            /// specific execution location (InProc / Sidecar / Transient) in multi-threaded mode.
+            /// Empty when unspecified. See https://github.com/dotnet/msbuild/issues/13738.
+            /// </summary>
+            private string _taskHostRouting = string.Empty;
+
+            /// <summary>
             /// Execution statistics for the tasks.
             /// Not translatable - the statistics are anyway expected to be reset after each project request.
             /// </summary>
@@ -1142,7 +1163,8 @@ namespace Microsoft.Build.Execution
                 in TaskHostParameters taskFactoryParameters,
                 ParameterGroupAndTaskElementRecord inlineTask,
                 int registrationOrderId,
-                string containingFileFullPath)
+                string containingFileFullPath,
+                string taskHostRouting = null)
             {
                 ArgumentNullException.ThrowIfNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
@@ -1151,6 +1173,7 @@ namespace Microsoft.Build.Execution
                 _taskIdentity = new RegisteredTaskIdentity(registeredName, taskFactoryParameters);
                 _parameterGroupAndTaskBody = inlineTask;
                 _registrationOrderId = registrationOrderId;
+                _taskHostRouting = taskHostRouting ?? string.Empty;
 
                 if (string.IsNullOrEmpty(taskFactory))
                 {
@@ -1241,6 +1264,16 @@ namespace Microsoft.Build.Execution
             {
                 [DebuggerStepThrough]
                 get => _taskFactoryParameters;
+            }
+
+            /// <summary>
+            /// PROTOTYPE. Gets the value of the UsingTask TaskHostRouting attribute (empty when unspecified).
+            /// See https://github.com/dotnet/msbuild/issues/13738.
+            /// </summary>
+            internal string TaskHostRouting
+            {
+                [DebuggerStepThrough]
+                get => _taskHostRouting;
             }
 
             /// <summary>
@@ -1427,7 +1460,7 @@ namespace Microsoft.Build.Execution
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile, TaskHostRouting);
                         factory = taskFactory;
                     }
                     else
@@ -1909,6 +1942,7 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _registrationOrderId);
                 translator.Translate(ref _definingFileFullPath);
                 translator.Translate(ref _taskFactoryParameters);
+                translator.Translate(ref _taskHostRouting);
             }
 
             internal static RegisteredTaskRecord FactoryForDeserialization(ITranslator translator)
