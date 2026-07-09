@@ -60,7 +60,7 @@ internal static class TaskClassRegistry
     /// </summary>
     /// <typeparam name="T">The task type to register.</typeparam>
     /// <param name="taskName">The name a target uses to invoke the task (the <c>TaskName</c> of a <c>&lt;UsingTask&gt;</c>).</param>
-    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] T>(string taskName)
+    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(string taskName)
         where T : ITask, new()
     {
         ArgumentException.ThrowIfNullOrEmpty(taskName);
@@ -116,7 +116,7 @@ internal static class TaskClassRegistry
     /// with synthetic assembly-name load info so no assembly is loaded by path.
     /// </summary>
     internal static LoadedType CreateLoadedType(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] Type taskType)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type taskType)
     {
         Assembly assembly = taskType.Assembly;
         return new LoadedType(taskType, AssemblyLoadInfo.Create(assembly.FullName, null), assembly, typeof(ITaskItem));

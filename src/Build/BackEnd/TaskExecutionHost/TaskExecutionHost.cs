@@ -437,7 +437,7 @@ namespace Microsoft.Build.BackEnd
         /// (<see cref="TryCreateIntrinsicTaskFactory"/>) so the two constructions cannot drift.
         /// </summary>
         private TaskFactoryWrapper CreateIntrinsicTaskFactoryWrapper(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicTaskType)
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicTaskType)
         {
             Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
             return new TaskFactoryWrapper(

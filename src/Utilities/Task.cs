@@ -183,7 +183,7 @@ namespace Microsoft.Build.Utilities
         /// selection - the registered task is always the one the engine constructs.
         /// </remarks>
         public static void RegisterTask<
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] T>(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(
             string taskName)
             where T : ITask, new()
             => TaskClassRegistry.Register<T>(taskName);

@@ -39,6 +39,7 @@ namespace Microsoft.Build.Shared
             int taskLine,
             int taskColumn,
             LogError logError,
+            TaskEnvironment? taskEnvironment,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
             Action<AppDomain> appDomainCreated,
@@ -116,6 +117,14 @@ namespace Microsoft.Build.Shared
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
+                    // If the task declares a constructor that accepts a TaskEnvironment, prefer it so the task
+                    // can compute environment-dependent default values during construction. The engine still
+                    // sets the TaskEnvironment property separately after construction.
+                    if (loadedType.HasTaskEnvironmentConstructor)
+                    {
+                        return (ITask?)Activator.CreateInstance(loadedType.Type, new object[] { taskEnvironment ?? TaskEnvironment.Fallback });
+                    }
+
                     return (ITask?)Activator.CreateInstance(loadedType.Type);
                 }
 

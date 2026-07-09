@@ -31,7 +31,7 @@ namespace Microsoft.Build.Shared
         /// <param name="architecture">Assembly architecture extracted from PE flags</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         internal LoadedType(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)]
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
             Type type,
             AssemblyLoadInfo assemblyLoadInfo,
             Assembly loadedAssembly,
@@ -52,6 +52,7 @@ namespace Microsoft.Build.Shared
             LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
             Architecture = architecture;
             Runtime = runtime;
+            HasTaskEnvironmentConstructor = DetectTaskEnvironmentConstructor(type, loadedViaMetadataLoadContext);
 
             // Assembly.Location is empty for inline tasks loaded from bytes, and for every assembly in a
             // single-file/Native AOT host; in those cases fall back to the original load path. On .NET the
@@ -182,6 +183,14 @@ namespace Microsoft.Build.Shared
         public bool HasLoadInSeparateAppDomainAttribute { get; }
 
         /// <summary>
+        /// Gets whether this type declares a public instance constructor that accepts a single
+        /// <see cref="TaskEnvironment"/> parameter. When present, the engine prefers this constructor
+        /// over the parameterless one so the task can compute environment-dependent default values
+        /// (for example, rooting a default output path) during construction.
+        /// </summary>
+        public bool HasTaskEnvironmentConstructor { get; }
+
+        /// <summary>
         /// Gets whether there's a STAThread attribute on the Execute method of this type.
         /// </summary>
         public bool HasSTAThreadAttribute { get; }
@@ -219,13 +228,47 @@ namespace Microsoft.Build.Shared
             return false;
         }
 
+        /// <summary>
+        /// Determines whether the given type exposes a public instance constructor that takes a single
+        /// <see cref="TaskEnvironment"/> parameter. The comparison is done by full type name so that it
+        /// also works for types loaded via MetadataLoadContext, whose <see cref="TaskEnvironment"/> is a
+        /// distinct <see cref="Type"/> identity from the one loaded in the current context.
+        /// </summary>
+        private static bool DetectTaskEnvironmentConstructor(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+            Type type,
+            bool loadedViaMetadataLoadContext)
+        {
+            try
+            {
+                foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    ParameterInfo[] parameters = constructor.GetParameters();
+                    if (parameters.Length == 1 &&
+                        string.Equals(parameters[0].ParameterType.FullName, TaskEnvironmentTypeFullName, StringComparison.Ordinal))
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch when (loadedViaMetadataLoadContext)
+            {
+                // Reflecting over constructors of a MetadataLoadContext-loaded type can fail; such types are
+                // executed in a task host rather than instantiated in-proc, so it is safe to report false here.
+            }
+
+            return false;
+        }
+
+        private static readonly string TaskEnvironmentTypeFullName = typeof(TaskEnvironment).FullName!;
+
         #region Properties
 
         /// <summary>
         /// Gets the type that was loaded from an assembly.
         /// </summary>
         /// <value>The loaded type.</value>
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)]
         internal Type Type { get; private set; }
 
         internal AssemblyName LoadedAssemblyName { get; private set; }
