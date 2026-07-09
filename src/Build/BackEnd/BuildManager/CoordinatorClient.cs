@@ -370,7 +370,7 @@ internal sealed partial class CoordinatorClient : IDisposable
             if (HasCapability(connection.ServerCapabilities, Capabilities.Priority))
             {
                 output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes at {priority} priority (PID {processId}, ConnectionId {connection.Id})");
-                connection.WriteClientMessage(new RequestNodesWithPriorityMessage(requestedNodes, priority));
+                connection.WriteClientMessage(new RequestNodesMessage(requestedNodes, priority));
             }
             else
             {

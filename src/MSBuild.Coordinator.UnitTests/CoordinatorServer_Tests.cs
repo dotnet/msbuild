@@ -89,7 +89,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader reader = new(client, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(writer, reader);
-        writer.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.High));
+        writer.Write(new RequestNodesMessage(requestedNodes: 4, CoordinatorBuildPriority.High));
 
         ServerMessage response = reader.ReadServerMessage();
 
@@ -395,7 +395,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader normalReader = new(normalClient, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(normalWriter, normalReader, processId: 10001, capabilities: [Capabilities.Priority]);
-        normalWriter.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.Normal));
+        normalWriter.Write(new RequestNodesMessage(requestedNodes: 4, CoordinatorBuildPriority.Normal));
         normalReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(3);
 
@@ -404,7 +404,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader highReader = new(highClient, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(highWriter, highReader, processId: 10002, capabilities: [Capabilities.Priority]);
-        highWriter.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.High));
+        highWriter.Write(new RequestNodesMessage(requestedNodes: 4, CoordinatorBuildPriority.High));
 
         highReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(1);
@@ -432,7 +432,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader normalReader1 = new(normalClient1, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(normalWriter1, normalReader1, processId: 10001, capabilities: [Capabilities.Priority]);
-        normalWriter1.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        normalWriter1.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
         normalReader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 
@@ -441,7 +441,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader normalReader2 = new(normalClient2, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(normalWriter2, normalReader2, processId: 10002, capabilities: [Capabilities.Priority]);
-        normalWriter2.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        normalWriter2.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
         normalReader2.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 
@@ -450,7 +450,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader normalReader3 = new(normalClient3, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(normalWriter3, normalReader3, processId: 10003, capabilities: [Capabilities.Priority]);
-        normalWriter3.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        normalWriter3.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
         normalReader3.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 
@@ -459,7 +459,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader normalReader4 = new(normalClient4, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(normalWriter4, normalReader4, processId: 10004, capabilities: [Capabilities.Priority]);
-        normalWriter4.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
+        normalWriter4.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
         (await ReadServerMessageWithTimeout(normalReader4)).ShouldBeOfType<WaitMessage>();
 
         using NamedPipeClientStream highClient = await ConnectClientPipeAsync();
@@ -467,7 +467,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         using BinaryReader highReader = new(highClient, Encoding.UTF8, leaveOpen: true);
 
         SendHandshake(highWriter, highReader, processId: 10005, capabilities: [Capabilities.Priority]);
-        highWriter.Write(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
+        highWriter.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
         highReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 

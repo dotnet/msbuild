@@ -67,12 +67,12 @@ public class Message_Tests
     }
 
     [Fact]
-    public void RequestNodesWithPriority_RoundTrips()
+    public void RequestNodes_WithPriorityRoundTrips()
     {
         ClientMessage message = WriteAndReadClientMessage(
-            new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
+            new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
 
-        message.ShouldBe(new RequestNodesWithPriorityMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
+        message.ShouldBe(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class Message_Tests
         writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId: 12345, []));
         writer.Write(new RequestNodesMessage(requestedNodes: 8));
         writer.Write(new JoinGrantMessage(Guid.NewGuid(), requestedNodes: 4));
-        writer.Write(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.Low));
+        writer.Write(new RequestNodesMessage(requestedNodes: 4, CoordinatorBuildPriority.Low));
         writer.Write(HeartbeatMessage.Instance);
         writer.Write(ReleaseNodesMessage.Instance);
 
@@ -137,7 +137,7 @@ public class Message_Tests
         reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
         reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
         reader.ReadClientMessage().ShouldBeOfType<JoinGrantMessage>();
-        reader.ReadClientMessage().ShouldBe(new RequestNodesWithPriorityMessage(requestedNodes: 4, CoordinatorBuildPriority.Low));
+        reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 4, CoordinatorBuildPriority.Low));
         reader.ReadClientMessage().ShouldBe(HeartbeatMessage.Instance);
         reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }

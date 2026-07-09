@@ -127,8 +127,7 @@ This design avoids the "version bump" problem where a single version number forc
 After the handshake, the coordinator uses a binary protocol with these message types:
 
 **Client → Server:**
-- `RequestNodesMessage` - Requests a node grant (contains requested node count)
-- `RequestNodesWithPriorityMessage` - Requests a node grant with queue scheduling priority (`Low`, `Normal`, or `High`)
+- `RequestNodesMessage` - Requests a node grant and may include queue scheduling priority (`Low`, `Normal`, or `High`) when both peers support priority scheduling
 - `JoinGrantMessage` - Requests to join an existing root grant (requires `nested-grants` capability)
 - `HeartbeatMessage` - Periodic keep-alive message (default: every 5 seconds)
 - `ReleaseNodesMessage` - Sent when build completes, releases allocated nodes
@@ -146,7 +145,7 @@ After the handshake, the coordinator uses a binary protocol with these message t
 Successful Grant:
   Build → ClientHandshakeMessage(ConnectionId, PID, capabilities)
   Build ← ServerHandshakeMessage(capabilities)
-  Build → RequestNodesMessage(4) or RequestNodesWithPriorityMessage(4, Normal)
+  Build → RequestNodesMessage(4) or RequestNodesMessage(4, priority: Normal)
   Build ← NodeGrantMessage(4)
   Build → Heartbeat (every 5s)
   Build → ReleaseNodesMessage (on completion)
@@ -154,7 +153,7 @@ Successful Grant:
 Build Queued:
   Build → ClientHandshakeMessage(ConnectionId, PID, capabilities)
   Build ← ServerHandshakeMessage(capabilities)
-  Build → RequestNodesMessage(4) or RequestNodesWithPriorityMessage(4, Normal)
+  Build → RequestNodesMessage(4) or RequestNodesMessage(4, priority: Normal)
   Build ← WaitMessage
   Build → Heartbeat (every 5s while waiting)
   Eventually: Build ← NodeGrantMessage(N)
@@ -165,7 +164,7 @@ Build Queued:
 Nested Build:
   Root Build → ClientHandshakeMessage(..., capabilities: nested-grants)
   Root Build ← ServerHandshakeMessage(..., capabilities: nested-grants)
-  Root Build → RequestNodesMessage(4) or RequestNodesWithPriorityMessage(4, High)
+  Root Build → RequestNodesMessage(4) or RequestNodesMessage(4, priority: High)
   Root Build ← NodeGrantMessage(grantId, 4)
   Nested Build inherits grantId from the root build process environment
   Nested Build → ClientHandshakeMessage(..., capabilities: nested-grants)
@@ -353,7 +352,7 @@ Overflow capacity does not need a separate setting. Users who intentionally want
 
 1. BuildManager checks if `MSBUILDUSECOORDINATOR` environment variable is set
 2. If enabled, `CoordinatorClient` attempts to connect to the coordinator
-3. Sends a node request with desired node count (the value of `/maxcpucount` passed to MSBuild — defaults to 1 if omitted, or the logical processor count if `/m` is passed without a value). The request priority comes from `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` when set. New clients send `RequestNodesWithPriorityMessage` when the server advertises priority support; otherwise they send `RequestNodesMessage`.
+3. Sends a node request with desired node count (the value of `/maxcpucount` passed to MSBuild — defaults to 1 if omitted, or the logical processor count if `/m` is passed without a value). The request priority comes from `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` when set. New clients include the priority extended field in `RequestNodesMessage` when the server advertises priority support; otherwise they send the legacy `RequestNodesMessage` shape.
 4. Receives either `NodeGrantMessage` (nodes granted) or `WaitMessage` (queued)
    - *Note*: If `WaitMessage` is received, `CoordinatorClient` starts sending periodic heartbeats while waiting for the deferred `NodeGrantMessage`, so the coordinator doesn't consider it stale during the queue wait.
 5. Initializes the build's maximum node count from the grant

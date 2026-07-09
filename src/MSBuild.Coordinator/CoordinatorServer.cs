@@ -238,7 +238,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
             switch (clientMessage)
             {
-                case RequestNodesWithPriorityMessage { RequestedNodes: int requestedNodes, Priority: CoordinatorBuildPriority priority }:
+                case RequestNodesMessage { RequestedNodes: int requestedNodes, Priority: CoordinatorBuildPriority priority }:
                     if (RejectInvalidRequestedNodes(connection, requestedNodes) ||
                         RejectInvalidPriority(connection, priority))
                     {
@@ -247,16 +247,6 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                     }
 
                     grant = new(connection.Id, connection.ProcessId, requestedNodes, priority, isNested: false);
-                    return true;
-
-                case RequestNodesMessage { RequestedNodes: int requestedNodes }:
-                    if (RejectInvalidRequestedNodes(connection, requestedNodes))
-                    {
-                        grant = null;
-                        return false;
-                    }
-
-                    grant = new(connection.Id, connection.ProcessId, requestedNodes, CoordinatorBuildPriority.Normal, isNested: false);
                     return true;
 
                 case JoinGrantMessage { GrantId: Guid grantId, RequestedNodes: int requestedNodes }:
@@ -289,7 +279,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
                 default:
                     _output.WriteLine($"CoordinatorServer: Rejected client — second message was {clientMessage.GetType().Name}");
-                    connection.WriteServerMessage(new ErrorMessage($"Second message must be {nameof(ClientMessageType.RequestNodes)}, {nameof(ClientMessageType.RequestNodesWithPriority)}, or {nameof(ClientMessageType.JoinGrant)}"));
+                    connection.WriteServerMessage(new ErrorMessage($"Second message must be {nameof(ClientMessageType.RequestNodes)} or {nameof(ClientMessageType.JoinGrant)}"));
 
                     grant = null;
                     return false;

@@ -75,7 +75,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
             client.GrantedNodes.ShouldBe(1);
         }
 
-        RequestNodesWithPriorityMessage request = (await requestTask).ShouldBeOfType<RequestNodesWithPriorityMessage>();
+        RequestNodesMessage request = (await requestTask).ShouldBeOfType<RequestNodesMessage>();
         request.RequestedNodes.ShouldBe(4);
         request.Priority.ToString().ShouldBe(expectedPriorityName);
     }
@@ -408,7 +408,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
         writer.Write(new ServerHandshakeMessage([Capabilities.Priority]));
 
-        reader.ReadClientMessage().ShouldBeOfType<RequestNodesWithPriorityMessage>();
+        reader.ReadClientMessage().ShouldBeOfType<RequestNodesMessage>();
         writer.Write(WaitMessage.Instance);
 
         ClientMessage waitHeartbeat = await ReadClientMessageWithTimeout(reader);

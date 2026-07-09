@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            RequestNodesWithPriorityMessage request = (await requestTask).ShouldBeOfType<RequestNodesWithPriorityMessage>();
+            RequestNodesMessage request = (await requestTask).ShouldBeOfType<RequestNodesMessage>();
             request.RequestedNodes.ShouldBe(4);
             request.Priority.ShouldBe(CoordinatorBuildPriority.High);
         }
