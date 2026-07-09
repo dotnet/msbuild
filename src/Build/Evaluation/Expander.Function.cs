@@ -1362,6 +1362,8 @@ internal partial class Expander<P, I>
         /// <see langword="null"/> if there are no overloads to describe (in which case the
         /// caller should fall back to the original framework exception).
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2080:UnrecognizedReflectionPattern",
+            Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
         private string GenerateNoMatchingOverloadMessage(object[] args)
         {
             // Determine the types of the resolved argument values.
