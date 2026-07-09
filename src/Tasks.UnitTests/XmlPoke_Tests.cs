@@ -247,6 +247,29 @@ namespace Microsoft.Build.UnitTests
             engine.Log.ShouldNotContain("contains a DTD");
         }
 
+        [WindowsOnlyFact]
+        public void PokeDtd_WhenReReadFails_ShouldNotThrowOutOfExecute()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var xmlInput = env.CreateFile("doc.xml", _xmlFileNoNsWithDtd);
+            MockEngine engine = new(_output);
+
+            using var lingeringWriter =
+                new FileStream(xmlInput.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+
+            XmlPoke task = new()
+            {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInput.Path),
+                Query = "//variable/@Name",
+                Value = new TaskItem("x"),
+            };
+
+            Should.NotThrow(() => task.Execute().ShouldBeFalse());
+            engine.Log.ShouldContain("MSB3733");
+        }
+
         [Fact]
         // https://github.com/dotnet/msbuild/issues/5814
         public void XmlPokeWithEmptyValue()
