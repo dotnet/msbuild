@@ -237,10 +237,9 @@ namespace Microsoft.Build.Experimental
                     return _exitResult;
                 }
             }
-            catch (IOException ex) when (ex is not PathTooLongException)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
             {
-                // For unknown root cause, Mutex.TryOpenExisting can sometimes throw 'Connection timed out' exception preventing to obtain the build server state through it (Running or not, Busy or not).
-                // See: https://github.com/dotnet/msbuild/issues/7993
+                // In unexpected state fall back to non-server execution.
                 CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
                 CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
@@ -480,7 +479,6 @@ namespace Microsoft.Build.Experimental
 
             try
             {
-                // For unknown root cause, opening mutex can sometimes throw 'Connection timed out' exception. See: https://github.com/dotnet/msbuild/issues/7993
                 using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
 
                 if (!mutexCreatedNew)
@@ -491,9 +489,10 @@ namespace Microsoft.Build.Experimental
                     return false;
                 }
             }
-            catch (IOException ex) when (ex is not PathTooLongException)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
+                // In unexpected state fall back to non-server execution.
+                CommunicationsUtilities.Trace($"Failed to acquire server launch mutex '{serverLaunchMutexName}': {ex}");
                 CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
