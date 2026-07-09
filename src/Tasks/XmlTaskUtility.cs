@@ -40,7 +40,20 @@ namespace Microsoft.Build.Tasks
         /// <returns>True when the failure is consistent with DTD prohibition.</returns>
         internal static bool IsDtdProhibitedException(Exception exception, bool prohibitDtd, Func<bool> containsDtd)
         {
-            return prohibitDtd && ContainsXmlException(exception) && containsDtd();
+            if (!prohibitDtd || !ContainsXmlException(exception))
+            {
+                return false;
+            }
+
+            try
+            {
+                return containsDtd();
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                // If we cannot re-read/inspect input, don't classify as DTD-prohibited.
+                return false;
+            }
         }
 
         /// <summary>
@@ -48,10 +61,32 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="xml">The XML text to inspect.</param>
         /// <returns>True when a DOCTYPE declaration is present.</returns>
-        /// <remarks>This method does not throw.</remarks>
         internal static bool ContainsDtd(string xml)
         {
-            return !string.IsNullOrEmpty(xml) && xml.IndexOf("<!DOCTYPE", StringComparison.OrdinalIgnoreCase) >= 0;
+            if (string.IsNullOrEmpty(xml))
+            {
+                return false;
+            }
+
+            try
+            {
+                var settings = new XmlReaderSettings
+                {
+                    DtdProcessing = DtdProcessing.Parse,
+                    XmlResolver = null,
+                    MaxCharactersFromEntities = 0
+                };
+
+                using (var reader = XmlReader.Create(new System.IO.StringReader(xml), settings))
+                {
+                    return ContainsDtd(reader);
+                }
+            }
+            catch (XmlException)
+            {
+                // Let the actual XML parsing handle the malformed XML error.
+                return false;
+            }
         }
 
         /// <summary>
@@ -61,7 +96,26 @@ namespace Microsoft.Build.Tasks
         /// <returns>True when a DOCTYPE declaration is present.</returns>
         internal static bool ContainsDtd(AbsolutePath filePath)
         {
-            return ContainsDtd(File.ReadAllText(filePath.Value));
+            try
+            {
+                var settings = new XmlReaderSettings
+                {
+                    DtdProcessing = DtdProcessing.Parse,
+                    XmlResolver = null,
+                    MaxCharactersFromEntities = 0
+                };
+
+                using (var stream = File.OpenRead(filePath.Value))
+                using (var reader = XmlReader.Create(stream, settings, filePath.Value))
+                {
+                    return ContainsDtd(reader);
+                }
+            }
+            catch (XmlException)
+            {
+                // Let the actual XML parsing handle the malformed XML error.
+                return false;
+            }
         }
 
         /// <summary>
@@ -76,6 +130,25 @@ namespace Microsoft.Build.Tasks
                 if (current is XmlException)
                 {
                     return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ContainsDtd(XmlReader reader)
+        {
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.DocumentType)
+                {
+                    return true;
+                }
+
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    // A DOCTYPE declaration must appear before the root element.
+                    return false;
                 }
             }
 
