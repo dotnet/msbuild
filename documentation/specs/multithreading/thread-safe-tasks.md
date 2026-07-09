@@ -71,6 +71,8 @@ public sealed class MyTask : Task, IMultiThreadableTask
 
 In multi-process execution (out-of-proc task host) and when a task is instantiated outside the engine, `TaskEnvironment.Fallback` is supplied to the constructor. A task that declares only a `TaskEnvironment` constructor (no parameterless constructor) is therefore still instantiable everywhere the engine runs it. This should not be combined with `LoadInSeparateAppDomain`, because `TaskEnvironment` is not marshalable across AppDomain boundaries.
 
+Constructor injection also applies to host-registered tasks (the reflection-free `Microsoft.Build.Utilities.Task.RegisterTask` path used for trimming/Native AOT). The generic `RegisterTask<T>(string)` overload injects the `TaskEnvironment` when `T` declares such a constructor (its public constructors are already trim-rooted). Because that overload's `new()` constraint requires a parameterless constructor, a task whose *only* constructor takes a `TaskEnvironment` is registered through the `RegisterTask(string, Func<TaskEnvironment, ITask>)` factory overload, which hands the environment to the factory. See [task-class-registration-api.md](../task-class-registration-api.md).
+
 Task authors who want to support older MSBuild versions need to:
 - Maintain both thread-safe and legacy implementations.
 - Use conditional task declarations based on MSBuild version to select which assembly to load the task from.

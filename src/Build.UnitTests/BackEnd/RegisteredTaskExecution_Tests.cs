@@ -135,6 +135,54 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.AssertLogContains("RegisteredEchoTestTask ran: x!");
             logger.AssertLogContains("SideTargetRan");
         }
+
+        /// <summary>
+        /// A task registered through the generic overload whose type declares both a parameterless and a
+        /// <see cref="TaskEnvironment"/> constructor is constructed through the <see cref="TaskEnvironment"/>
+        /// constructor (injecting the current environment), mirroring the reflective task-load path.
+        /// </summary>
+        [Fact]
+        public void RegisterTaskGeneric_TaskWithTaskEnvironmentConstructor_InjectsEnvironment()
+        {
+            Task.RegisterTask<RegisteredEnvCtorTestTask>("RegTaskTest_GenericEnvCtor");
+
+            string project = """
+                <Project DefaultTargets="Build">
+                  <Target Name="Build">
+                    <RegTaskTest_GenericEnvCtor />
+                  </Target>
+                </Project>
+                """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(project, _output);
+
+            logger.AssertLogContains("RegisteredEnvCtorTestTask used env ctor: True");
+            logger.AssertLogContains("RegisteredEnvCtorTestTask ctor env was null: False");
+        }
+
+        /// <summary>
+        /// A task registered through the <see cref="System.Func{TaskEnvironment, ITask}"/> overload receives
+        /// the current <see cref="TaskEnvironment"/> at construction, so a task whose only constructor takes a
+        /// <see cref="TaskEnvironment"/> (and thus cannot use the generic <c>new()</c> overload) can still be
+        /// registered and run reflection-free.
+        /// </summary>
+        [Fact]
+        public void RegisterTaskEnvironmentFactory_InjectsEnvironment()
+        {
+            Task.RegisterTask("RegTaskTest_EnvFactory", static env => new RegisteredEnvOnlyCtorTestTask(env));
+
+            string project = """
+                <Project DefaultTargets="Build">
+                  <Target Name="Build">
+                    <RegTaskTest_EnvFactory />
+                  </Target>
+                </Project>
+                """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(project, _output);
+
+            logger.AssertLogContains("RegisteredEnvOnlyCtorTestTask ctor env was null: False");
+        }
     }
 
     /// <summary>
@@ -165,6 +213,62 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public override bool Execute()
         {
             Log.LogMessage(MessageImportance.High, "RegisteredMarkerTestTask ran");
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A host-registered task that declares both a parameterless and a <see cref="TaskEnvironment"/>
+    /// constructor, used to prove the registered-task path prefers the environment-injecting constructor.
+    /// </summary>
+    public sealed class RegisteredEnvCtorTestTask : Task, IMultiThreadableTask
+    {
+        private readonly bool _usedEnvironmentConstructor;
+        private readonly bool _ctorEnvironmentWasNull;
+
+        public RegisteredEnvCtorTestTask()
+        {
+            _usedEnvironmentConstructor = false;
+            _ctorEnvironmentWasNull = true;
+        }
+
+        public RegisteredEnvCtorTestTask(TaskEnvironment taskEnvironment)
+        {
+            _usedEnvironmentConstructor = true;
+            _ctorEnvironmentWasNull = taskEnvironment is null;
+            TaskEnvironment = taskEnvironment!;
+        }
+
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "RegisteredEnvCtorTestTask used env ctor: " + _usedEnvironmentConstructor);
+            Log.LogMessage(MessageImportance.High, "RegisteredEnvCtorTestTask ctor env was null: " + _ctorEnvironmentWasNull);
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A host-registered task whose only constructor takes a <see cref="TaskEnvironment"/>. It cannot be
+    /// registered through the generic <c>new()</c> overload, so it is registered via the
+    /// <see cref="System.Func{TaskEnvironment, ITask}"/> factory overload that supplies the environment.
+    /// </summary>
+    public sealed class RegisteredEnvOnlyCtorTestTask : Task, IMultiThreadableTask
+    {
+        private readonly bool _ctorEnvironmentWasNull;
+
+        public RegisteredEnvOnlyCtorTestTask(TaskEnvironment taskEnvironment)
+        {
+            _ctorEnvironmentWasNull = taskEnvironment is null;
+            TaskEnvironment = taskEnvironment!;
+        }
+
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "RegisteredEnvOnlyCtorTestTask ctor env was null: " + _ctorEnvironmentWasNull);
             return true;
         }
     }

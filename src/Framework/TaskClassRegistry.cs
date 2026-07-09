@@ -68,7 +68,17 @@ internal static class TaskClassRegistry
         // typeof(T) carries T's [DynamicallyAccessedMembers] here, so building the LoadedType (a
         // GetProperties walk) is trim-safe and is done once, eagerly, at registration.
         LoadedType loadedType = CreateLoadedType(typeof(T));
-        s_tasksByName[taskName] = new TaskClassRegistration(static () => new T(), loadedType);
+
+        // A task that declares a constructor taking a TaskEnvironment gets it injected at construction time
+        // (mirroring the reflective task-load path), so property initializers that depend on the environment
+        // can run. The invocation via Activator over typeof(T) stays trim-safe because T's public constructors
+        // are rooted by the [DynamicallyAccessedMembers] above. Tasks without such a constructor use the
+        // reflection-free new T().
+        Func<TaskEnvironment, ITask> factory = loadedType.HasTaskEnvironmentConstructor
+            ? static taskEnvironment => (ITask)Activator.CreateInstance(typeof(T), taskEnvironment)!
+            : static _ => new T();
+
+        s_tasksByName[taskName] = new TaskClassRegistration(factory, loadedType);
         s_hasRegistrations = true;
     }
 
@@ -86,7 +96,24 @@ internal static class TaskClassRegistry
         // The host-supplied factory's task type is not statically known here, so the LoadedType (needed to
         // bind parameters) is built lazily from the first constructed instance's type. The host is
         // responsible for preserving that type's public properties under trimming (for example via the
-        // generic Register<T> overload or a TrimmerRootAssembly entry).
+        // generic Register<T> overload or a TrimmerRootAssembly entry). This factory does not receive the
+        // TaskEnvironment; a host whose task needs it during construction registers the overload below.
+        s_tasksByName[taskName] = new TaskClassRegistration(_ => factory());
+        s_hasRegistrations = true;
+    }
+
+    /// <summary>
+    /// Registers a task under the given name with a factory that receives the <see cref="TaskEnvironment"/> the
+    /// engine is running the task with, so a task can consume it during construction (for example to compute
+    /// property defaults that depend on the environment). Construction is fully reflection-free.
+    /// </summary>
+    /// <param name="taskName">The name a target uses to invoke the task (the <c>TaskName</c> of a <c>&lt;UsingTask&gt;</c>).</param>
+    /// <param name="factory">A delegate that creates a new instance of the task given the current <see cref="TaskEnvironment"/>.</param>
+    internal static void Register(string taskName, Func<TaskEnvironment, ITask> factory)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(taskName);
+        ArgumentNullException.ThrowIfNull(factory);
+
         s_tasksByName[taskName] = new TaskClassRegistration(factory);
         s_hasRegistrations = true;
     }

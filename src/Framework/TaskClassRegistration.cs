@@ -16,17 +16,23 @@ namespace Microsoft.Build.Framework;
 /// overload it is supplied eagerly at registration (where the task type is trim-rooted). For the
 /// <see cref="TaskClassRegistry.Register(string, Func{ITask})"/> overload - where only an untyped factory is
 /// known - it is built lazily from the first constructed instance's type.
+/// <para>
+/// The construction factory takes the <see cref="TaskEnvironment"/> the engine is running the task with, so a
+/// task that declares a constructor accepting a <see cref="TaskEnvironment"/> can receive it during
+/// construction (mirroring the reflective task-load path). Factories for tasks that do not need it simply
+/// ignore the argument.
+/// </para>
 /// </remarks>
 internal sealed class TaskClassRegistration
 {
-    private readonly Func<ITask> _createInstance;
+    private readonly Func<TaskEnvironment, ITask> _createInstance;
     private readonly object _loadedTypeLock = new();
     private volatile LoadedType? _loadedType;
 
     /// <summary>
     /// Creates a registration whose <see cref="LoadedType"/> is already known (the generic, trim-rooted path).
     /// </summary>
-    internal TaskClassRegistration(Func<ITask> createInstance, LoadedType loadedType)
+    internal TaskClassRegistration(Func<TaskEnvironment, ITask> createInstance, LoadedType loadedType)
     {
         _createInstance = createInstance;
         _loadedType = loadedType;
@@ -36,12 +42,16 @@ internal sealed class TaskClassRegistration
     /// Creates a registration backed only by a factory; the <see cref="LoadedType"/> is computed lazily from
     /// the first instance's type.
     /// </summary>
-    internal TaskClassRegistration(Func<ITask> createInstance) => _createInstance = createInstance;
+    internal TaskClassRegistration(Func<TaskEnvironment, ITask> createInstance) => _createInstance = createInstance;
 
     /// <summary>
-    /// Constructs a new instance of the registered task. Reflection-free: it invokes the registered factory.
+    /// Constructs a new instance of the registered task. Reflection-free unless the registered task type
+    /// declares a <see cref="TaskEnvironment"/> constructor (which is invoked via <see cref="Activator"/> over
+    /// the trim-rooted type). The engine still assigns the task's <see cref="TaskEnvironment"/> property after
+    /// construction.
     /// </summary>
-    internal ITask CreateInstance() => _createInstance();
+    /// <param name="taskEnvironment">The environment supplied to a task that declares a <see cref="TaskEnvironment"/> constructor.</param>
+    internal ITask CreateInstance(TaskEnvironment taskEnvironment) => _createInstance(taskEnvironment ?? TaskEnvironment.Fallback);
 
     /// <summary>
     /// Gets the reflected type metadata the engine uses to discover and bind the task's parameters.
@@ -70,5 +80,5 @@ internal sealed class TaskClassRegistration
             "through the generic RegisterTask<T> overload, which roots them, or via a TrimmerRootAssembly entry). The generic overload, " +
             "which the built-in tasks and most hosts use, supplies the LoadedType eagerly and is fully trim-safe.")]
     private LoadedType CreateLoadedTypeFromFactory()
-        => TaskClassRegistry.CreateLoadedType(_createInstance().GetType());
+        => TaskClassRegistry.CreateLoadedType(_createInstance(TaskEnvironment.Fallback).GetType());
 }

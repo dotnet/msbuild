@@ -216,6 +216,35 @@ namespace Microsoft.Build.Utilities
         public static void RegisterTask(string taskName, Func<ITask> factory)
             => TaskClassRegistry.Register(taskName, factory);
 
+        /// <summary>
+        /// Registers a task under the name a target uses to invoke it (the <c>TaskName</c> of a
+        /// <c>&lt;UsingTask&gt;</c>) with a factory that receives the <see cref="TaskEnvironment"/> the engine
+        /// is running the task with, so the task can consume it during construction. Use this for tasks whose
+        /// property defaults (or other constructor logic) depend on the <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskName">
+        /// The name a target uses to invoke the task. This is the <c>TaskName</c> of the corresponding
+        /// <c>&lt;UsingTask&gt;</c> (typically the task's class name, optionally namespace-qualified).
+        /// </param>
+        /// <param name="factory">A delegate that creates a new instance of the task given the current <see cref="TaskEnvironment"/>.</param>
+        /// <remarks>
+        /// <para>
+        /// Construction is reflection-free, but binding the task's parameters still reflects over its
+        /// properties. Because the task type is not statically known through this overload, the host is
+        /// responsible for preserving that type's public properties under trimming (for example by also
+        /// registering it through <see cref="RegisterTask{T}(string)"/>, which roots them). The engine still
+        /// assigns the task's <see cref="TaskEnvironment"/> property after construction, so a task that reads
+        /// the injected environment in its constructor should also store it into that property.
+        /// </para>
+        /// <para>
+        /// Intended to be called once per task during host initialization, before the first build. This
+        /// method is thread-safe; registering the same name again replaces the previous registration. A
+        /// registered name takes precedence over a project-level <c>&lt;UsingTask&gt;</c> of the same name.
+        /// </para>
+        /// </remarks>
+        public static void RegisterTask(string taskName, Func<TaskEnvironment, ITask> factory)
+            => TaskClassRegistry.Register(taskName, factory);
+
         #endregion
     }
 }

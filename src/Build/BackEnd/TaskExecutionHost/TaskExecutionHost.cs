@@ -484,7 +484,7 @@ namespace Microsoft.Build.BackEnd
                 // Reflection-free construction via the host-supplied factory. This deliberately avoids the
                 // [RequiresUnreferencedCode] ITaskFactory.CreateTask interface member, so the registered-task
                 // path carries no trim warning and runs under Native AOT.
-                TaskInstance = _registeredTaskFactory.CreateRegisteredTask();
+                TaskInstance = _registeredTaskFactory.CreateRegisteredTask(TaskEnvironment);
             }
             else if (!FeatureSwitches.EnableReflectiveTaskExecution && _taskFactoryWrapper.TaskFactory is IntrinsicTaskFactory intrinsicTaskFactory)
             {
