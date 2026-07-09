@@ -2993,6 +2993,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="Code" />
                     <xs:attribute name="File" />
                     <xs:attribute name="HelpKeyword" />
+                    <xs:attribute name="HelpLink" />
                     <xs:attribute name="Text" />
                 </xs:extension>
             </xs:complexContent>
@@ -3814,6 +3815,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="Code" />
                     <xs:attribute name="File" />
                     <xs:attribute name="HelpKeyword" />
+                    <xs:attribute name="HelpLink" />
                     <xs:attribute name="Text" />
                 </xs:extension>
             </xs:complexContent>
