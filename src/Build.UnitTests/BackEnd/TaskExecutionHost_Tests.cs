@@ -1507,6 +1507,53 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// In a trimmed / Native AOT host, reflective task loading/execution is disabled
+        /// (EnableReflectiveTaskExecution is substituted false). FindTask - the leaf that loads a task
+        /// factory/type by reflection - must fail observably with a reported project error (MSB4283)
+        /// rather than crashing in reflection, so the host can detect the unsupported path and fall back
+        /// to a JIT MSBuild.
+        /// </summary>
+        [Fact]
+        public void ReflectiveTaskExecutionDisabledFailsObservably()
+        {
+            bool switchWasSet = AppContext.TryGetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", out bool originalValue);
+            try
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", false);
+
+                using var host = new TaskExecutionHost();
+                TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+
+                ProjectInstance project = CreateTestProject();
+                host.InitializeForTask(
+                    this,
+                    tlc,
+                    project,
+                    "TaskWithNoUsingTask",
+                    ElementLocation.Create("none", 1, 1),
+                    this,
+                    false,
+                    projectFile: "proj.proj",
+#if FEATURE_APPDOMAIN
+                    null,
+#endif
+                    null,
+                    false,
+                    CancellationToken.None,
+                    TaskEnvironmentHelper.CreateForTest());
+
+                InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() => host.FindTask(TaskHostParameters.Empty));
+                exception.ErrorCode.ShouldBe("MSB4283");
+            }
+            finally
+            {
+                // AppContext switches cannot be returned to "unset"; restore the prior value (the default
+                // is enabled when unset) so other tests keep reflective task execution on.
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", !switchWasSet || originalValue);
+            }
+        }
+
+        /// <summary>
         /// https://github.com/dotnet/msbuild/issues/8864
         /// </summary>
         [Fact]
@@ -1694,16 +1741,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region Validation Routines
 
         /// <summary>
-        /// Is the class a task factory
-        /// </summary>
-        private static bool IsTaskFactoryClass(Type type, object unused)
-        {
-            return type.IsClass &&
-                !type.IsAbstract &&
-                (type.GetInterface("Microsoft.Build.Framework.ITaskFactory") != null);
-        }
-
-        /// <summary>
         /// Initialize the host object
         /// </summary>
         private void InitializeHost()
@@ -1717,7 +1754,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Set up a temporary project and add some items to it.
             ProjectInstance project = CreateTestProject();
 
-            TypeLoader typeLoader = new TypeLoader(IsTaskFactoryClass);
+            TypeLoader typeLoader = TypeLoader.Create<ITaskFactory>();
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
 #else
