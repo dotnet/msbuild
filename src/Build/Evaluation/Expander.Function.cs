@@ -1296,7 +1296,7 @@ internal partial class Expander<P, I>
                 // nested property function returned an unexpected type because of a changed
                 // build input.
                 string detailedMessage = GenerateNoMatchingOverloadMessage(args);
-                if (detailedMessage != null)
+                if (detailedMessage is not null)
                 {
                     throw new MissingMethodException(detailedMessage);
                 }
@@ -1321,7 +1321,7 @@ internal partial class Expander<P, I>
         private string GenerateNoMatchingOverloadMessage(object[] args)
         {
             // Determine the types of the resolved argument values.
-            string providedTypes = args == null
+            string providedTypes = args is null
                 ? String.Empty
                 : String.Join(", ", args.Select(static arg => arg?.GetType().FullName ?? "null"));
 
