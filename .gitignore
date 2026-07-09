@@ -17,6 +17,7 @@ artifacts/
 .dotnet/
 .tools/
 .packages/
+.cts/
 BenchmarkDotNet.Artifacts/
 
 # Local scratch / experimentation output
