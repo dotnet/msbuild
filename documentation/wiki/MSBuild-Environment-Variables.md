@@ -36,5 +36,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
   - Set this to force all inline tasks to run out of process. It is not compatible with custom TaskFactories.
 - `MSBUILDFORCEMULTITHREADED=1`
   - Set this to force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build), equivalent to passing `-multiThreaded` / `-mt` on the command line. Useful for opting in without modifying command lines.
+- `MSBUILDFORCETASKSINPROCHOSTLIST`, `MSBUILDFORCETASKSTRANSIENTHOSTLIST`, `MSBUILDFORCETASKSSIDECARHOSTLIST`
+  - **Prototype / testing only.** In multi-threaded mode these override the engine's per-task routing decision. Each is a comma- or semicolon-delimited list of task full names (`Namespace.TaskName`) that should be forced to run, respectively, in-process within the thread node, in a transient TaskHost that terminates after execution, or in a reusable (sidecar) TaskHost. If a task appears in more than one list, in-proc wins over transient, which wins over sidecar. These variables are intended to unblock testing of multi-threaded execution against tasks whose source cannot be changed; they are not a supported production configuration. See [dotnet/msbuild#13738](https://github.com/dotnet/msbuild/issues/13738).
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
   - It opts out automatic console encoding UTF-8. Make Console use default encoding in the system.
