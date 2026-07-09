@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -115,6 +116,128 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var method = typeof(ProjectTelemetry).GetMethod("GetMSBuildTaskSubclassProperties",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             return (System.Collections.Generic.Dictionary<string, string>)method!.Invoke(telemetry, null)!;
+        }
+
+        /// <summary>
+        /// Helper method to get task properties (totals and task host reason counts) from telemetry using reflection
+        /// </summary>
+        private System.Collections.Generic.Dictionary<string, string> GetTaskProperties(ProjectTelemetry telemetry)
+        {
+            var method = typeof(ProjectTelemetry).GetMethod("GetTaskProperties",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            return (System.Collections.Generic.Dictionary<string, string>)method!.Invoke(telemetry, null)!;
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution does not record any task host reason counts for in-proc tasks.
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_InProc_RecordsNoTaskHostCounts()
+        {
+            var telemetry = new ProjectTelemetry();
+
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: false);
+
+            var properties = GetTaskProperties(telemetry);
+
+            properties.ShouldContainKeyAndValue("TasksExecutedCount", "1");
+            properties.ShouldNotContainKey("TaskHostTasksExecutedCount");
+            properties.ShouldNotContainKey("TaskHostExplicitlyRequestedCount");
+            properties.ShouldNotContainKey("TaskHostRuntimeOrArchitectureMismatchCount");
+            properties.ShouldNotContainKey("TaskHostNonMultiThreadedTaskCount");
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution records the correct count when a task host is used because it was explicitly requested.
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_TaskHost_RecordsExplicitlyRequestedCount()
+        {
+            var telemetry = new ProjectTelemetry();
+
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.ExplicitlyRequested);
+
+            var properties = GetTaskProperties(telemetry);
+
+            properties.ShouldContainKeyAndValue("TaskHostTasksExecutedCount", "1");
+            properties.ShouldContainKeyAndValue("TaskHostExplicitlyRequestedCount", "1");
+            properties.ShouldNotContainKey("TaskHostRuntimeOrArchitectureMismatchCount");
+            properties.ShouldNotContainKey("TaskHostNonMultiThreadedTaskCount");
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution records the correct count when a task host is used due to a runtime/architecture mismatch.
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_TaskHost_RecordsRuntimeOrArchitectureMismatchCount()
+        {
+            var telemetry = new ProjectTelemetry();
+
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.RuntimeOrArchitectureMismatch);
+
+            var properties = GetTaskProperties(telemetry);
+
+            properties.ShouldContainKeyAndValue("TaskHostTasksExecutedCount", "1");
+            properties.ShouldContainKeyAndValue("TaskHostRuntimeOrArchitectureMismatchCount", "1");
+            properties.ShouldNotContainKey("TaskHostExplicitlyRequestedCount");
+            properties.ShouldNotContainKey("TaskHostNonMultiThreadedTaskCount");
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution records the correct count when a non-MT task is routed to a task host.
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_TaskHost_RecordsNonMultiThreadedTaskCount()
+        {
+            var telemetry = new ProjectTelemetry();
+
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.NonMultiThreadedTask);
+
+            var properties = GetTaskProperties(telemetry);
+
+            properties.ShouldContainKeyAndValue("TaskHostTasksExecutedCount", "1");
+            properties.ShouldContainKeyAndValue("TaskHostNonMultiThreadedTaskCount", "1");
+            properties.ShouldNotContainKey("TaskHostExplicitlyRequestedCount");
+            properties.ShouldNotContainKey("TaskHostRuntimeOrArchitectureMismatchCount");
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution aggregates task host reason counts across multiple invocations.
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_TaskHost_AggregatesReasonCounts()
+        {
+            var telemetry = new ProjectTelemetry();
+
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.ExplicitlyRequested);
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.RuntimeOrArchitectureMismatch);
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.NonMultiThreadedTask);
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.NonMultiThreadedTask);
+
+            var properties = GetTaskProperties(telemetry);
+
+            properties.ShouldContainKeyAndValue("TaskHostTasksExecutedCount", "4");
+            properties.ShouldContainKeyAndValue("TaskHostExplicitlyRequestedCount", "1");
+            properties.ShouldContainKeyAndValue("TaskHostRuntimeOrArchitectureMismatchCount", "1");
+            properties.ShouldContainKeyAndValue("TaskHostNonMultiThreadedTaskCount", "2");
+        }
+
+        /// <summary>
+        /// Test that a task host execution with an unspecified reason still increments the total but no reason bucket.
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_TaskHost_NoneReason_OnlyIncrementsTotal()
+        {
+            var telemetry = new ProjectTelemetry();
+
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: true, taskHostReason: TaskHostReason.None);
+
+            var properties = GetTaskProperties(telemetry);
+
+            properties.ShouldContainKeyAndValue("TaskHostTasksExecutedCount", "1");
+            properties.ShouldNotContainKey("TaskHostExplicitlyRequestedCount");
+            properties.ShouldNotContainKey("TaskHostRuntimeOrArchitectureMismatchCount");
+            properties.ShouldNotContainKey("TaskHostNonMultiThreadedTaskCount");
         }
 
         /// <summary>

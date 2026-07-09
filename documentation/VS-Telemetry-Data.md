@@ -82,6 +82,18 @@ Tracks which task factories are being used.
 | `XamlTaskFactoryTasksExecutedCount` | int | Tasks created via XamlTaskFactory |
 | `CustomTaskFactoryTasksExecutedCount` | int | Tasks from custom task factories |
 
+### Tasks Event (`build/tasks`)
+
+Tracks task execution totals, including how many tasks ran out-of-process in a TaskHost and why.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `TasksExecutedCount` | int | Total number of tasks executed |
+| `TaskHostTasksExecutedCount` | int | Tasks executed out-of-process in a TaskHost |
+| `TaskHostExplicitlyRequestedCount` | int | TaskHost tasks routed out-of-proc because the task/project explicitly opted in (e.g. `TaskHostFactory`, or force-out-of-proc knobs for inline task factories) |
+| `TaskHostRuntimeOrArchitectureMismatchCount` | int | TaskHost tasks routed out-of-proc because they requested an `MSBuildRuntime`/`MSBuildArchitecture` that does not match the current process |
+| `TaskHostNonMultiThreadedTaskCount` | int | TaskHost tasks routed out-of-proc in multi-threaded mode for isolation: tasks that are not MT-enlightened (lack `MSBuildMultiThreadableTaskAttribute`), including those force-routed to a transient TaskHost as a temporary workaround (e.g. NuGet's `RestoreTask`) |
+
 ## 4. Build Incrementality Telemetry
 
 Classifies builds as full or incremental based on target execution patterns.

@@ -7,6 +7,39 @@ using System.Collections.Concurrent;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// Describes why a task was dispatched to an out-of-process TaskHost rather than executed in-process.
+    /// Used for telemetry to understand the distribution of task host usage across real-world builds.
+    /// </summary>
+    internal enum TaskHostReason
+    {
+        /// <summary>
+        /// The task ran in-process and was not routed to a TaskHost.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// The task or project explicitly opted into out-of-process execution, e.g. via
+        /// <c>TaskHostFactory</c> (or the <c>MSBUILDFORCEALLTASKSOUTOFPROC</c> /
+        /// <c>MSBUILDNOINPROCNODE</c> style force-out-of-proc knobs for inline task factories).
+        /// </summary>
+        ExplicitlyRequested,
+
+        /// <summary>
+        /// The task requested a specific <c>MSBuildRuntime</c>/<c>MSBuildArchitecture</c> that does
+        /// not match the current process, so it must run in a TaskHost matching that identity.
+        /// </summary>
+        RuntimeOrArchitectureMismatch,
+
+        /// <summary>
+        /// The build is running in multi-threaded mode and the task is routed to a sidecar
+        /// TaskHost for isolation. This covers tasks that are not MT-enlightened (they lack the
+        /// <c>MSBuildMultiThreadableTaskAttribute</c>), as well as tasks force-routed to a
+        /// transient TaskHost as a temporary workaround (e.g. NuGet's <c>RestoreTask</c>).
+        /// </summary>
+        NonMultiThreadedTask,
+    }
+
+    /// <summary>
     /// Determines where a task should be executed in multi-threaded mode.
     /// In multi-threaded execution mode, tasks implementing IMultiThreadableTask or marked with
     /// MSBuildMultiThreadableTaskAttribute run in-process within thread nodes, while legacy tasks

@@ -37,6 +37,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private int _taskHostTasksExecutedCount = 0;
 
+        // Reasons a task was routed to an out-of-process TaskHost. See TaskHostReason.
+        private int _taskHostExplicitlyRequestedCount = 0;
+        private int _taskHostRuntimeOrArchitectureMismatchCount = 0;
+        private int _taskHostNonMultiThreadedTaskCount = 0;
+
         // Telemetry for non-sealed subclasses of Microsoft-owned MSBuild tasks
         // Maps Microsoft task names to counts of their non-sealed usage
         private readonly Dictionary<string, int> _msbuildTaskSubclassUsage = new();
@@ -44,11 +49,29 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Adds a task execution to the telemetry data.
         /// </summary>
-        public void AddTaskExecution(string taskFactoryTypeName, bool isTaskHost)
+        public void AddTaskExecution(string taskFactoryTypeName, bool isTaskHost, TaskHostReason taskHostReason = TaskHostReason.None)
         {
             if (isTaskHost)
             {
                 _taskHostTasksExecutedCount++;
+
+                switch (taskHostReason)
+                {
+                    case TaskHostReason.ExplicitlyRequested:
+                        _taskHostExplicitlyRequestedCount++;
+                        break;
+
+                    case TaskHostReason.RuntimeOrArchitectureMismatch:
+                        _taskHostRuntimeOrArchitectureMismatchCount++;
+                        break;
+
+                    case TaskHostReason.NonMultiThreadedTask:
+                        _taskHostNonMultiThreadedTaskCount++;
+                        break;
+
+                    default:
+                        break;
+                }
             }
 
             switch (taskFactoryTypeName)
@@ -170,6 +193,9 @@ namespace Microsoft.Build.BackEnd.Logging
             _customTaskFactoryTasksExecutedCount = 0;
 
             _taskHostTasksExecutedCount = 0;
+            _taskHostExplicitlyRequestedCount = 0;
+            _taskHostRuntimeOrArchitectureMismatchCount = 0;
+            _taskHostNonMultiThreadedTaskCount = 0;
 
             _msbuildTaskSubclassUsage.Clear();
         }
@@ -209,6 +235,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
             AddCountIfNonZero(properties, "TasksExecutedCount", totalTasksExecuted);
             AddCountIfNonZero(properties, "TaskHostTasksExecutedCount", _taskHostTasksExecutedCount);
+            AddCountIfNonZero(properties, "TaskHostExplicitlyRequestedCount", _taskHostExplicitlyRequestedCount);
+            AddCountIfNonZero(properties, "TaskHostRuntimeOrArchitectureMismatchCount", _taskHostRuntimeOrArchitectureMismatchCount);
+            AddCountIfNonZero(properties, "TaskHostNonMultiThreadedTaskCount", _taskHostNonMultiThreadedTaskCount);
 
             return properties;
         }

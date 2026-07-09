@@ -332,6 +332,18 @@ namespace Microsoft.Build.BackEnd
                 useTaskFactory = _loadedType.LoadedViaMetadataLoadContext || !TaskHostParametersMatchCurrentProcess(mergedParameters);
             }
 
+            // Determine and track the reason a task is routed to a TaskHost for telemetry.
+            // If useTaskFactory is already true at this point, the task is forced out-of-process
+            // either because TaskHostFactory was explicitly requested, or because a specific
+            // MSBuildRuntime/MSBuildArchitecture was requested that doesn't match the current process.
+            TaskHostReason taskHostReason = TaskHostReason.None;
+            if (useTaskFactory)
+            {
+                taskHostReason = (_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
+                    ? TaskHostReason.ExplicitlyRequested
+                    : TaskHostReason.RuntimeOrArchitectureMismatch;
+            }
+
             // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
             if (!useTaskFactory
                 && _loadedType?.Type != null
@@ -340,6 +352,7 @@ namespace Microsoft.Build.BackEnd
                 if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
                 {
                     useTaskFactory = true;
+                    taskHostReason = TaskHostReason.NonMultiThreadedTask;
                 }
             }
 
@@ -357,10 +370,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     useTaskFactory = true;
                     forceTransientTaskHost = true;
+
+                    // The transient TaskHost workaround is temporary; count it together with the
+                    // non-MT-enlightened tasks rather than giving it its own telemetry bucket.
+                    taskHostReason = TaskHostReason.NonMultiThreadedTask;
                 }
             }
 
-            taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+            taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory, taskHostReason: taskHostReason);
 
             if (useTaskFactory)
             {
