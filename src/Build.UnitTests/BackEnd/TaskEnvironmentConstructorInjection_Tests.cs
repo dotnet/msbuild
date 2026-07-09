@@ -12,7 +12,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -48,6 +48,19 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // The engine still sets the TaskEnvironment property, and it is the same instance passed to the constructor.
             logger.FullLog.ShouldContain("CtorMatchesProperty=True");
+
+            // In multi-threaded mode the attributed task runs in-process and the engine injects a real
+            // per-request environment (not the shared TaskEnvironment.Fallback singleton). In single-threaded
+            // mode the request environment is Fallback. This proves a concrete, usable environment reached the
+            // constructor and distinguishes the real environment from the Fallback singleton.
+            if (multiThreaded)
+            {
+                logger.FullLog.ShouldContain("CtorIsFallback=False");
+            }
+            else
+            {
+                logger.FullLog.ShouldContain("CtorIsFallback=True");
+            }
         }
 
         [Theory]
@@ -60,18 +73,38 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("UsedTaskEnvironmentConstructor=True");
         }
 
-        private MockLogger BuildTaskProject(string taskName, bool multiThreaded)
+        /// <summary>
+        /// When a task that only declares a <see cref="TaskEnvironment"/> constructor runs in the out-of-proc
+        /// task host (via TaskHostFactory), the task host must still instantiate it through that constructor.
+        /// The task host has no per-request environment, so it injects <see cref="TaskEnvironment.Fallback"/>.
+        /// </summary>
+        [Fact]
+        public void TaskWithOnlyTaskEnvironmentConstructor_InTaskHost_InjectsFallbackEnvironment()
         {
+            MockLogger logger = BuildTaskProject("TaskEnvCtorOnlyTask", multiThreaded: false, useTaskHost: true);
+
+            // The task actually ran in the external task host process.
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "TaskEnvCtorOnlyTask");
+
+            // The constructor was invoked (there is no parameterless constructor to fall back to) with the
+            // task host's Fallback environment.
+            logger.FullLog.ShouldContain("CtorEnvironmentWasNull=False");
+            logger.FullLog.ShouldContain("CtorIsFallback=True");
+        }
+
+        private MockLogger BuildTaskProject(string taskName, bool multiThreaded, bool useTaskHost = false)
+        {
+            string taskFactoryAttribute = useTaskHost ? @" TaskFactory=""TaskHostFactory""" : string.Empty;
             string projectContent = $@"
 <Project>
-    <UsingTask TaskName=""{taskName}"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <UsingTask TaskName=""{taskName}"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}""{taskFactoryAttribute} />
 
     <Target Name=""TestTarget"">
         <{taskName} />
     </Target>
 </Project>";
 
-            string projectFile = Path.Combine(_testProjectsDir, $"{taskName}_{multiThreaded}.proj");
+            string projectFile = Path.Combine(_testProjectsDir, $"{taskName}_{multiThreaded}_{useTaskHost}.proj");
             File.WriteAllText(projectFile, projectContent);
 
             MockLogger logger = new(_output);
@@ -85,12 +118,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             BuildRequestData buildRequestData = new(
                 projectFile,
-                new Dictionary<string, string>(),
+                new Dictionary<string, string?>(),
                 null,
                 new[] { "TestTarget" },
                 null);
 
             BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+
+            _output.WriteLine(logger.FullLog);
+
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
             return logger;
@@ -101,6 +137,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Task that only declares a constructor accepting a <see cref="TaskEnvironment"/>. It cannot be
     /// instantiated at all unless the engine supports constructor injection.
     /// </summary>
+    /// <remarks>
+    /// Marked with <c>[MSBuildMultiThreadableTask]</c> so that in multi-threaded mode it runs in-process
+    /// (via <c>TaskExecutionHost</c>) and therefore receives the real per-request <see cref="TaskEnvironment"/>
+    /// rather than the shared <see cref="TaskEnvironment.Fallback"/> singleton used by the out-of-proc task host.
+    /// The attribute resolves to the public test copy defined in <c>TaskRouter_IntegrationTests.cs</c>, which
+    /// intentionally shadows the internal Framework version for name-based routing detection.
+    /// </remarks>
+#pragma warning disable CS0436 // Type conflicts with imported type - intentional for testing
+    [MSBuildMultiThreadableTask]
+#pragma warning restore CS0436
     public class TaskEnvCtorOnlyTask : Task, IMultiThreadableTask
     {
         private readonly TaskEnvironment _ctorEnvironment;
@@ -117,6 +163,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             Log.LogMessage(MessageImportance.High, $"CtorEnvironmentWasNull={_ctorEnvironment is null}");
             Log.LogMessage(MessageImportance.High, $"CtorMatchesProperty={ReferenceEquals(_ctorEnvironment, TaskEnvironment)}");
+            Log.LogMessage(MessageImportance.High, $"CtorIsFallback={ReferenceEquals(_ctorEnvironment, TaskEnvironment.Fallback)}");
             return true;
         }
     }
@@ -140,7 +187,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             TaskEnvironment = taskEnvironment;
         }
 
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
 
         public override bool Execute()
         {
