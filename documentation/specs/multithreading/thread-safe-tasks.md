@@ -49,7 +49,7 @@ Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvi
 
 When the engine instantiates a task type, it first looks for a public constructor that accepts a single `TaskEnvironment` parameter. If one exists, the engine calls it with the current `TaskEnvironment` instead of the parameterless constructor; otherwise it falls back to the parameterless constructor as before. The engine still assigns the `IMultiThreadableTask.TaskEnvironment` property after construction, so tasks that use the constructor should assign the property from within it.
 
-This exists because C# property initializers run immediately after the constructor completes—before the engine can assign the `TaskEnvironment` property—so an initializer cannot rely on the environment. Constructor injection lets a task compute environment-dependent default values (for example, rooting a default output directory) during construction:
+This exists because C# property initializers run during object construction (before the constructor body completes)—before the engine can assign the `TaskEnvironment` property—so an initializer cannot rely on the environment. Constructor injection lets a task compute environment-dependent default values (for example, rooting a default output directory) during construction:
 
 ```csharp
 [MSBuildMultiThreadableTask]
