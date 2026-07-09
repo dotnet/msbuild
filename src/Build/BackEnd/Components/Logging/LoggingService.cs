@@ -135,6 +135,17 @@ namespace Microsoft.Build.BackEnd.Logging
         private List<ILogger> _loggers;
 
         /// <summary>
+        /// Central loggers that have already been claimed by a distributed-logger registration. A direct
+        /// duplicate central-logger registration is rejected by the <c>_loggers.Contains(centralLogger)</c>
+        /// check, but a central logger reached only through a <see cref="Microsoft.Build.Logging.ReusableLogger"/>
+        /// wrapper is not present in <see cref="_loggers"/> (only the wrapper is). This list tracks the
+        /// underlying central loggers by reference identity so that a second distributed registration of the
+        /// same central logger is rejected instead of rerouting the shared wrapper to a new sink and orphaning
+        /// the first forwarding sink.
+        /// </summary>
+        private List<ILogger> _distributedCentralLoggers;
+
+        /// <summary>
         /// A list of LoggerDescriptions which describe how to create a forwarding logger on a node. These are
         /// passed to each node as they are created so that the forwarding loggers can be registered on them.
         /// </summary>
@@ -311,6 +322,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _projectFileMap = new ConcurrentDictionary<int, string>();
             _logMode = loggerMode;
             _loggers = new List<ILogger>();
+            _distributedCentralLoggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
             _eventSinkDictionary = new Dictionary<int, IBuildEventSink>();
             _nodeId = nodeId;
@@ -980,6 +992,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     CleanLoggingEventProcessing();
 
                     _loggers = new List<ILogger>();
+                    _distributedCentralLoggers = new List<ILogger>();
                     _loggerDescriptions = null;
                     _eventSinkDictionary = null;
                     _filterEventSource = null;
@@ -1141,6 +1154,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 return false;
             }
 
+            // If this central logger has already backed a distributed registration it must not be registered
+            // again. Direct duplicates are caught above via _loggers.Contains, but a central logger reached only
+            // through a ReusableLogger wrapper never enters _loggers (only the wrapper does), so we consult the
+            // dedicated tracking list. Without this guard a second registration would reroute the shared wrapper
+            // to a new sink and orphan the first forwarding logger's sink, silently dropping its events.
+            if (_distributedCentralLoggers.Any(existing => ReferenceEquals(existing, centralLogger)))
+            {
+                return false;
+            }
+
             // If the central logger is already registered as a ReusableLogger wrapper (e.g., it was passed to
             // ProjectCollection for eval-time logging and then included in BuildParameters.Loggers), it has
             // already been initialized and, via RegisterLogger, wired to the all-events CentralForwardingLogger
@@ -1176,6 +1199,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // behavior it would have had if it had been registered solely as a distributed central logger.
                 existingReusableCentralLogger.RerouteActiveEventSource(eventSourceSink);
             }
+
+            // Record that this central logger now backs a distributed registration so that any subsequent
+            // registration of the same central logger (directly or through its ReusableLogger wrapper) is
+            // rejected rather than rerouting the wrapper and orphaning this sink.
+            _distributedCentralLoggers.Add(centralLogger);
 
             EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
             localForwardingLogger.BuildEventRedirector = newRedirector;

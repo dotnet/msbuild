@@ -678,6 +678,47 @@ namespace Microsoft.Build.UnitTests.Logging
             centralLogger.ErrorCount.ShouldBe(1, "The central logger should receive the forwarded error exactly once (no duplicate delivery).");
             centralLogger.MessageCount.ShouldBe(0, "The central logger must not receive events the forwarding logger filtered out.");
         }
+
+        /// <summary>
+        /// A central logger may back only a single distributed registration. The direct-registration path
+        /// enforces this (see <see cref="RegisterDuplicateDistributedCentralLogger"/>); this test verifies the
+        /// same contract holds when the central logger is reached through a pre-registered
+        /// <see cref="ReusableLogger"/> wrapper. The second distributed registration of the same underlying
+        /// central logger must return false, and the first forwarding logger's sink must keep delivering events
+        /// (i.e. it must not be orphaned by rerouting the shared wrapper).
+        /// </summary>
+        [Fact]
+        public void RegisterDistributedLogger_DuplicateCentralViaReusableWrapper_SecondRegistrationRejected()
+        {
+            string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
+
+            LoggerDescription firstForwarder = new LoggerDescription(
+                className, typeof(ProjectCollection).Assembly.FullName, null, "ErrorEvent", LoggerVerbosity.Diagnostic);
+            LoggerDescription secondForwarder = new LoggerDescription(
+                className, typeof(ProjectCollection).Assembly.FullName, null, "ErrorEvent", LoggerVerbosity.Diagnostic);
+
+            RegularILogger centralLogger = new RegularILogger();
+            ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
+            _initializedService.RegisterLogger(reusableWrapper);
+
+            _initializedService.RegisterDistributedLogger(centralLogger, firstForwarder).ShouldBeTrue();
+
+            // Registering the same underlying central logger a second time must be rejected, exactly as the
+            // direct-registration path rejects it.
+            _initializedService.RegisterDistributedLogger(centralLogger, secondForwarder).ShouldBeFalse(
+                "A central logger already backing a distributed registration must not be registered again, even when reached through a ReusableLogger wrapper.");
+
+            // The first forwarding logger's sink must still be wired to the central logger.
+            BuildEventContext context = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            BuildErrorEventArgs errorArgs = new("subcategory", "ERR001", "file", 0, 0, 0, 0, "error message", null, "sender")
+            {
+                BuildEventContext = context,
+            };
+
+            _initializedService.LogBuildEvent(errorArgs);
+
+            centralLogger.ErrorCount.ShouldBe(1, "The first forwarding logger's sink must still deliver the forwarded error to the central logger exactly once; it must not have been orphaned by the rejected second registration.");
+        }
         #endregion
 
         #region Test Properties
