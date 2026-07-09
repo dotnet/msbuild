@@ -133,10 +133,15 @@ jobs:
     inputs:
       dropName: $(VisualStudio.DropName)
 
+  # EXPERIMENT (dotnet/msbuild#14019): force-skip applying OptProf data so this experimental
+  # insertion ships bits with no PGO/IBC data, to validate whether VS perf gates (Perf DDRITs /
+  # Speedometer) actually fail without it. Hardcoded to 'true' below instead of using the
+  # $(SkipApplyOptimizationData) variable because the MSBuild-ExpPerf pipeline defines that
+  # variable = 'false' at definition level, which overrides YAML variables.
   - script: eng/CIBuild.cmd
               -configuration $(BuildConfiguration)
               -officialBuildId $(Build.BuildNumber)
-              -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
+              -officialSkipApplyOptimizationData true
               /p:RepositoryName=$(Build.Repository.Name)
               /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
               /p:VisualStudioDropAccessToken=$(System.AccessToken)
