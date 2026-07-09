@@ -1035,6 +1035,13 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectTargets);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _projectEvaluationId);
+
+            // Persist the explicitly-requested (graph-declared) top-level targets so the strict-isolation allow-list in
+            // GetIsolationAllowedTopLevelTargets remains enforceable when a configuration is round-tripped through an
+            // input/output cache. Without this, RequestedTargets would come back empty and the deterministic MSB4252 gate
+            // (see GetIsolationAllowedTopLevelTargets / ResultsCache.SatisfyRequest) would be silently bypassed for
+            // undeclared cross-project targets satisfied from a persisted cache.
+            translator.Translate(ref _requestedTargets);
         }
 
         /// <summary>
