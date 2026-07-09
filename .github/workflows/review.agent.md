@@ -15,6 +15,14 @@ permissions:
 timeout-minutes: 60
 
 # ###############################################################
+# Disable the per-workflow daily AI Credits guardrail. Cost is
+# controlled via the slash-command trigger (contributors must
+# explicitly request a review) and the shared PAT pool budget.
+# See dotnet/msbuild#14312.
+# ###############################################################
+max-daily-ai-credits: -1
+
+# ###############################################################
 # Select a PAT from the pool and override COPILOT_GITHUB_TOKEN.
 # Run agentic jobs in an isolated `copilot-pat-pool` environment.
 #
