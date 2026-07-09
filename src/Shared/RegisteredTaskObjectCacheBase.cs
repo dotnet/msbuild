@@ -55,8 +55,23 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Registers a task object with the specified key and lifetime.
         /// </summary>
+        /// <param name="key">The key used to register the object.</param>
+        /// <param name="obj">The object to register.</param>
+        /// <param name="lifetime">The lifetime for which the object should be retained.</param>
+        /// <param name="allowEarlyCollection">
+        /// This parameter is currently ignored. It was intended to allow the registered object to be collected
+        /// before the end of its requested lifetime, but that behavior was dropped in a pre-open-source release.
+        /// Registered objects are always retained for the full requested <paramref name="lifetime"/> regardless of
+        /// the value passed here.
+        /// </param>
+        /// <remarks>
+        /// The <paramref name="allowEarlyCollection"/> argument has no effect. It is retained on the signature for
+        /// backwards compatibility with callers, but objects are never collected early — they live for the entire
+        /// requested lifetime. This has been the behavior since before MSBuild was open sourced.
+        /// </remarks>
         public void RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection)
         {
+            // Note: allowEarlyCollection is intentionally unused; see the remarks above.
             ConcurrentDictionary<object, object> dict = GetCollectionForLifetime(lifetime, dontCreate: false);
 
             dict?.TryAdd(key, obj);
