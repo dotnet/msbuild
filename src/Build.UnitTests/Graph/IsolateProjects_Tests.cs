@@ -228,6 +228,8 @@ BuildEngine5.BuildProjectFilesInParallel(
         [Fact]
         public void UndeclaredTargetSatisfiedFromDependencyResultFailsDeterministically()
         {
+            ChangeWaves.ResetStateForTests();
+
             AssertDependencyResultLeakBuild(
                 (result, logger) =>
                 {

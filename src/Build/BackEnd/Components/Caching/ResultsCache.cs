@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 
 #nullable disable
@@ -326,7 +327,7 @@ namespace Microsoft.Build.BackEnd
         {
             foreach (string candidate in targets)
             {
-                if (string.Equals(candidate, target, StringComparison.OrdinalIgnoreCase))
+                if (MSBuildNameIgnoreCaseComparer.Default.Equals(candidate, target))
                 {
                     return true;
                 }
