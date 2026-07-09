@@ -360,48 +360,72 @@ namespace Microsoft.Build.Experimental
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization, packetPump);
                 packetPump.Start();
 
-                WaitHandle[] waitHandles =
-                {
-                    cancellationToken.WaitHandle,
-                    packetPump.PacketPumpCompleted,
-                    packetPump.PacketReceivedEvent
-                };
-
-                while (!_buildFinished)
-                {
-                    int index = WaitHandle.WaitAny(waitHandles);
-                    switch (index)
-                    {
-                        case 0:
-                            HandleCancellation();
-                            // After the cancelation, we want to wait to server gracefuly finish the build.
-                            // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
-                            waitHandles[0] = CancellationToken.None.WaitHandle;
-                            break;
-
-                        case 1:
-                            HandlePacketPumpCompleted(packetPump);
-                            break;
-
-                        case 2:
-                            while (packetPump.ReceivedPacketsQueue.TryDequeue(out INodePacket? packet) &&
-                                   !_buildFinished)
-                            {
-                                if (packet != null)
-                                {
-                                    HandlePacket(packet);
-                                }
-                            }
-
-                            break;
-                    }
-                }
+                ProcessPacketsUntilBuildFinished(packetPump, cancellationToken);
             }
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace($"MSBuild client error: problem during packet handling occurred: {ex}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
+        }
+
+        /// <summary>
+        /// Consumes packets produced by <paramref name="packetPump"/> until the build finishes (the
+        /// <see cref="ServerNodeBuildResult"/> is processed), the pump completes, or cancellation is requested.
+        /// </summary>
+        private void ProcessPacketsUntilBuildFinished(MSBuildClientPacketPump packetPump, CancellationToken cancellationToken)
+        {
+            WaitHandle[] waitHandles =
+            {
+                cancellationToken.WaitHandle,
+                packetPump.PacketPumpCompleted,
+                packetPump.PacketReceivedEvent
+            };
+
+            while (!_buildFinished)
+            {
+                int index = WaitHandle.WaitAny(waitHandles);
+                switch (index)
+                {
+                    case 0:
+                        HandleCancellation();
+                        // After the cancelation, we want to wait to server gracefuly finish the build.
+                        // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
+                        waitHandles[0] = CancellationToken.None.WaitHandle;
+                        break;
+
+                    case 1:
+                        // The packet pump signals PacketPumpCompleted (a sticky ManualResetEvent at a
+                        // lower WaitAny index than PacketReceivedEvent) immediately after enqueuing the
+                        // final ServerNodeBuildResult. Drain any packets it enqueued right before
+                        // completing - that result plus trailing console writes such as the
+                        // "Build succeeded." summary - before treating the pump as finished. Otherwise a
+                        // race where WaitAny observes index 1 before the queue is drained would drop the
+                        // build result and exit 1 on a successful build (#14172).
+                        DrainPacketQueue(packetPump);
+                        if (!_buildFinished)
+                        {
+                            HandlePacketPumpCompleted(packetPump);
+                        }
+
+                        break;
+
+                    case 2:
+                        DrainPacketQueue(packetPump);
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Test hook for the #14172 regression: drives <see cref="ProcessPacketsUntilBuildFinished"/> against a
+        /// pump whose received-packets queue and completion event have already been seeded, without needing a
+        /// live server pipe, and returns the resulting <see cref="MSBuildClientExitResult"/>.
+        /// </summary>
+        internal MSBuildClientExitResult ProcessSeededPacketsForTests(MSBuildClientPacketPump packetPump)
+        {
+            ProcessPacketsUntilBuildFinished(packetPump, CancellationToken.None);
+            return _exitResult;
         }
 
         private void ConfigureAndQueryConsoleProperties()
@@ -639,6 +663,25 @@ namespace Microsoft.Build.Experimental
             }
 
             _buildFinished = true;
+        }
+
+        /// <summary>
+        /// Processes every packet currently sitting in the packet pump's received queue, stopping early
+        /// once the build result has been handled. Shared by the PacketReceivedEvent and
+        /// PacketPumpCompleted branches so that packets the pump enqueues immediately before it completes
+        /// (notably the final <see cref="ServerNodeBuildResult"/> and trailing console output) are never
+        /// dropped by an event-ordering race. See https://github.com/dotnet/msbuild/issues/14172.
+        /// </summary>
+        private void DrainPacketQueue(MSBuildClientPacketPump packetPump)
+        {
+            while (packetPump.ReceivedPacketsQueue.TryDequeue(out INodePacket? packet) &&
+                   !_buildFinished)
+            {
+                if (packet != null)
+                {
+                    HandlePacket(packet);
+                }
+            }
         }
 
         /// <summary>
