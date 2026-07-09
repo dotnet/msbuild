@@ -141,6 +141,11 @@
         <target state="translated">쓰기는 지원되지 않습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
+        <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
+        <target state="new">MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</target>
+        <note>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</note>
+      </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
         <target state="translated">이 빌드에 대해 BuildCheck를 사용할 수 있습니다.</target>
@@ -689,6 +694,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_ConfigurationFileToolsetsNotSupported">
+        <source>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</source>
+        <target state="new">Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
         <target state="translated">MatchOnMetadata를 사용하여 제거하는 경우 항목 종류를 하나만 참조할 수 있습니다.</target>
@@ -908,6 +918,16 @@
         <target state="translated">MSB4274: 프록시 빌드 요청을 내보내는 프로젝트 캐시 플러그 인을 사용할 때 inproc 노드를 사용하지 않도록 설정하면 성능이 저하됩니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReflectiveLoggerLoadingNotSupported">
+        <source>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</source>
+        <target state="new">MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</target>
+        <note>{StrBegin="MSB4285: "}</note>
+      </trans-unit>
+      <trans-unit id="ReflectiveTaskExecutionNotSupported">
+        <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
+        <target state="new">MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</target>
+        <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">파일 액세스 보고는 현재 x64 버전의 MSBuild를 사용하는 경우에만 지원됩니다.</target>
@@ -988,6 +1008,11 @@ Errors: {3}</source>
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
         <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하여 프로세스에서 상속된 값 "{2}"을(를) 재정의했습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SdkResolverDynamicLoadingNotSupported">
+        <source>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</source>
+        <target state="new">MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</target>
+        <note>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</note>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
