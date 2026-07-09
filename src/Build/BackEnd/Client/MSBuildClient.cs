@@ -217,6 +217,7 @@ namespace Microsoft.Build.Experimental
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
             {
+                // In unexpected state fall back to non-server execution.
                 CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
                 CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
@@ -468,7 +469,8 @@ namespace Microsoft.Build.Experimental
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
+                // In unexpected state fall back to non-server execution.
+                CommunicationsUtilities.Trace($"Failed to acquire server launch mutex '{serverLaunchMutexName}': {ex}");
                 CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
