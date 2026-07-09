@@ -10,9 +10,8 @@ internal sealed record ReleaseNodesMessage : ClientMessage
 {
     public static ReleaseNodesMessage Instance { get; } = new();
 
-    public override ClientMessageType MessageType => ClientMessageType.ReleaseNodes;
-
     private ReleaseNodesMessage()
+        : base(ClientMessageType.ReleaseNodes)
     {
     }
 }

@@ -122,7 +122,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         {
             if (!IsWindows)
             {
-                int exitCode = ExecuteTool("/bin/chmod", string.Empty, $"+x {scriptPath}");
+                int exitCode = ExecuteTool("/bin/chmod", string.Empty, $"+x \"{scriptPath}\"");
                 if (exitCode != 0)
                 {
                     Log.LogError($"Install-scripts can not be made executable due to the errors reported above.");

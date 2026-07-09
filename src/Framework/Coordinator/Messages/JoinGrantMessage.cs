@@ -11,13 +11,12 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record JoinGrantMessage : ClientMessage
 {
-    public override ClientMessageType MessageType => ClientMessageType.JoinGrant;
-
     public Guid GrantId { get; }
 
     public int RequestedNodes { get; }
 
     public JoinGrantMessage(Guid grantId, int requestedNodes)
+        : base(ClientMessageType.JoinGrant)
     {
         GrantId = grantId;
         RequestedNodes = requestedNodes;
@@ -30,5 +29,10 @@ internal sealed record JoinGrantMessage : ClientMessage
     }
 
     internal static JoinGrantMessage ReadPayload(BinaryReader reader)
-        => new(grantId: reader.ReadGuid(), requestedNodes: reader.ReadInt32());
+    {
+        Guid grantId = reader.ReadGuid();
+        int requestedNodes = reader.ReadInt32();
+
+        return new(grantId, requestedNodes);
+    }
 }

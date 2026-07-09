@@ -11,13 +11,12 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 internal sealed record RequestNodesWithPriorityMessage : ClientMessage
 {
-    public override ClientMessageType MessageType => ClientMessageType.RequestNodesWithPriority;
-
     public int RequestedNodes { get; }
 
     public CoordinatorBuildPriority Priority { get; }
 
     public RequestNodesWithPriorityMessage(int requestedNodes, CoordinatorBuildPriority priority)
+        : base(ClientMessageType.RequestNodesWithPriority)
     {
         if (priority is < CoordinatorBuildPriority.Low or > CoordinatorBuildPriority.High)
         {

@@ -29,11 +29,21 @@ internal static class NodePacketTypeExtensions
     /// 2: Added support for translating/reading HostServices, ProjectFile, TargetName in TaskHostConfiguration.
     /// 3: Added App Host support.
     /// 4: Added IsRunningMultipleNodes, Request/ReleaseCores, BuildProjectFile callbacks support for OOP TaskHost.
+    /// 5: Added delta transfer for the invariant payloads in TaskHostConfiguration / TaskHostTaskComplete:
+    ///    the build process environment and the CurrentSolutionConfigurationContents solution-level configuration
+    ///    blob are each sent once per connection, then only an "unchanged" marker per task.
     /// 
     /// When incrementing this version, ensure compatibility with existing
     /// task hosts and update the corresponding deserialization logic.
     /// </summary>
-    public const byte PacketVersion = 4;
+    public const byte PacketVersion = 5;
+
+    /// <summary>
+    /// The minimum negotiated packet version that supports delta transfer of the invariant
+    /// <see cref="NodePacketType.TaskHostConfiguration"/> / <see cref="NodePacketType.TaskHostTaskComplete"/>
+    /// payloads (the build process environment and the CurrentSolutionConfigurationContents blob).
+    /// </summary>
+    public const byte EnvironmentDeltaMinVersion = 5;
 
     // Flag bits in upper 2 bits
     private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000

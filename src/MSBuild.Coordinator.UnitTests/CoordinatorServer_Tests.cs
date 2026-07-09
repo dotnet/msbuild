@@ -137,7 +137,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         SendHandshake(writer, reader, supportsNestedGrants: true);
         writer.Write(new RequestNodesMessage(requestedNodes: 4));
 
-        NodeGrantWithIdMessage response = reader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        NodeGrantMessage response = reader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
         response.GrantedNodes.ShouldBe(4);
         response.GrantId.ShouldNotBe(Guid.Empty);
 
@@ -199,7 +199,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         SendHandshake(rootWriter, rootReader, processId: 10001, supportsNestedGrants: true);
         rootWriter.Write(new RequestNodesMessage(requestedNodes: 4));
 
-        NodeGrantWithIdMessage rootGrant = rootReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        NodeGrantMessage rootGrant = rootReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
         rootGrant.GrantedNodes.ShouldBe(4);
 
         using NamedPipeClientStream nestedClient = await ConnectClientPipeAsync();
@@ -209,7 +209,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         SendHandshake(nestedWriter, nestedReader, processId: 10002, supportsNestedGrants: true);
         nestedWriter.Write(new JoinGrantMessage(rootGrant.GrantId, requestedNodes: 4));
 
-        NodeGrantWithIdMessage nestedGrant = nestedReader.ReadServerMessage().ShouldBeOfType<NodeGrantWithIdMessage>();
+        NodeGrantMessage nestedGrant = nestedReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>();
         nestedGrant.GrantedNodes.ShouldBe(4);
         nestedGrant.GrantId.ShouldBe(rootGrant.GrantId);
 
@@ -227,7 +227,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         completedBeforeRootRelease.ShouldNotBeSameAs(unrelatedGrantTask);
 
         rootWriter.Write(ReleaseNodesMessage.Instance);
-        (await unrelatedGrantTask).ShouldBeOfType<NodeGrantWithIdMessage>();
+        (await unrelatedGrantTask).ShouldBeOfType<NodeGrantMessage>();
 
         unrelatedWriter.Write(ReleaseNodesMessage.Instance);
         _cts.Cancel();
