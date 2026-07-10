@@ -288,7 +288,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Erstellen von {0} in {1}s</target>
+        <target state="translated">Build {0} in {1} Sek.</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -428,34 +428,34 @@
       </trans-unit>
       <trans-unit id="CoordinatorFailedToConnect">
         <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Verbindung mit dem Buildkoordinator konnte nicht hergestellt werden. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Der Buildkoordinator konnte nicht gestartet werden. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToNegotiate">
         <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Die Aushandlung mit dem Buildkoordinator ist fehlgeschlagen. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">
         <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Zeitüberschreitung beim Warten auf den Start des Buildkoordinators. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>
-        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <target state="translated">Der Koordinator hat für diesen Build {0} Knoten zugewiesen.</target>
         <note>
       LOCALIZATION: {0} is the number of nodes granted by the coordinator.
     </note>
       </trans-unit>
       <trans-unit id="CoordinatorWaitingForNodes">
         <source>Waiting for coordinator to grant build resources...</source>
-        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <target state="translated">Es wird darauf gewartet, dass der Koordinator Buildressourcen bereitstellt...</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
@@ -943,7 +943,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">Wiederherstellen von {0} in {1}s</target>
+        <target state="translated">Wiederherstellung {0} in {1} Sek.</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
