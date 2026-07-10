@@ -21,6 +21,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class DownloadFile : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DownloadFile"/> class.
+        /// </summary>
+        public DownloadFile()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DownloadFile"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public DownloadFile(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>

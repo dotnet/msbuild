@@ -70,6 +70,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class SGen : ToolTaskExtension, ISGenTaskContract
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SGen"/> class.
+        /// </summary>
+        public SGen()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SGen"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public SGen(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
 #pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
 

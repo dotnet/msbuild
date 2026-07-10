@@ -19,6 +19,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class CreateCSharpManifestResourceName : CreateManifestResourceName
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateCSharpManifestResourceName"/> class.
+        /// </summary>
+        public CreateCSharpManifestResourceName()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateCSharpManifestResourceName"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public CreateCSharpManifestResourceName(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         protected override string SourceFileExtension => ".cs";
 
         /// <summary>

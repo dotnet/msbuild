@@ -33,6 +33,20 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal class ResGen : ToolTaskExtension
         {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ResGen"/> class.
+            /// </summary>
+            public ResGen()
+            {
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ResGen"/> class using the specified <see cref="TaskEnvironment"/>.
+            /// </summary>
+            /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+            public ResGen(TaskEnvironment taskEnvironment)
+                : this() => TaskEnvironment = taskEnvironment;
+
             #region Properties
             /*
         Microsoft (R) .NET Resource Generator

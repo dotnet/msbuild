@@ -33,6 +33,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class WriteCodeFragment : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WriteCodeFragment"/> class.
+        /// </summary>
+        public WriteCodeFragment()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WriteCodeFragment"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public WriteCodeFragment(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
         private const string TypeNameSuffix = "_TypeName";

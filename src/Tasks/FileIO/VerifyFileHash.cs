@@ -16,6 +16,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class VerifyFileHash : TaskExtension, ICancelableTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VerifyFileHash"/> class.
+        /// </summary>
+        public VerifyFileHash()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VerifyFileHash"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public VerifyFileHash(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 

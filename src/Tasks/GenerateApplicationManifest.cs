@@ -22,6 +22,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class GenerateApplicationManifest : GenerateManifestBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GenerateApplicationManifest"/> class.
+        /// </summary>
+        public GenerateApplicationManifest()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GenerateApplicationManifest"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public GenerateApplicationManifest(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         private enum _ManifestType
         {
             Native,

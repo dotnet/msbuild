@@ -18,6 +18,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class RemoveDir : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoveDir"/> class.
+        /// </summary>
+        public RemoveDir()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoveDir"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public RemoveDir(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         //-----------------------------------------------------------------------------------
         // Property:  directory to remove
         //-----------------------------------------------------------------------------------

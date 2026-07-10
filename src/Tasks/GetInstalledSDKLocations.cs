@@ -23,6 +23,20 @@ namespace Microsoft.Build.Tasks
 #pragma warning restore RS0022 // Constructor make noninheritable base class inheritable
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="GetInstalledSDKLocations"/> class.
+        /// </summary>
+        public GetInstalledSDKLocations()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetInstalledSDKLocations"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public GetInstalledSDKLocations(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
+        /// <summary>
         /// Metadata name for directory roots on installed SDK items
         /// </summary>
         internal const string DirectoryRootsMetadataName = "DirectoryRoots";

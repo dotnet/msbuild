@@ -23,6 +23,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class GetReferenceAssemblyPaths : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetReferenceAssemblyPaths"/> class.
+        /// </summary>
+        public GetReferenceAssemblyPaths()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetReferenceAssemblyPaths"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public GetReferenceAssemblyPaths(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 

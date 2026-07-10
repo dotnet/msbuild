@@ -18,6 +18,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class WriteLinesToFile : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WriteLinesToFile"/> class.
+        /// </summary>
+        public WriteLinesToFile()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WriteLinesToFile"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public WriteLinesToFile(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         // Default encoding taken from System.IO.WriteAllText()
         private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 

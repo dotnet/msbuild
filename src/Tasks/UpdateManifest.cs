@@ -20,6 +20,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class UpdateManifest : Task, IUpdateManifestTaskContract, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UpdateManifest"/> class.
+        /// </summary>
+        public UpdateManifest()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UpdateManifest"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public UpdateManifest(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         [Required]
         public string ApplicationPath { get; set; }
 

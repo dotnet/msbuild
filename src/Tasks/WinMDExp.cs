@@ -25,6 +25,20 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class WinMDExp : ToolTaskExtension, IWinMDExpTaskContract
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WinMDExp"/> class.
+        /// </summary>
+        public WinMDExp()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WinMDExp"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public WinMDExp(TaskEnvironment taskEnvironment)
+            : this() => TaskEnvironment = taskEnvironment;
+
         #region Properties
         /// <summary>
         /// Set of references to pass to the winmdexp tool.
