@@ -21,17 +21,15 @@ namespace Microsoft.Build.UnitTests.Evaluation;
 /// interaction with the <c>Microsoft.Build.EnableAllPropertyFunctions</c> escape hatch.
 /// </summary>
 /// <remarks>
-/// The restriction is driven through its AppContext switch (set explicitly per test and reset to false
-/// afterwards) because an AppContext switch, once set, cannot be returned to the "unset" state in
-/// process. The <c>EnableAllPropertyFunctions</c> escape hatch is exercised through its environment
-/// variable so that its AppContext switch stays unset, preserving the behavior the existing
-/// env-var-based tests rely on. The new restriction switch intentionally has no environment variable.
+/// Both the restriction switch and the <c>EnableAllPropertyFunctions</c> escape hatch are driven
+/// through their AppContext switches (set explicitly per test and reset to false afterwards) because
+/// an AppContext switch, once set, cannot be returned to the "unset" state in process. The new
+/// restriction switch intentionally has no environment variable.
 /// </remarks>
 public class PropertyFunctionReceiverRestriction_Tests
 {
     private const string RestrictSwitch = "Microsoft.Build.RestrictPropertyFunctionReceivers";
     private const string RestrictEnvVar = "MSBUILDRESTRICTPROPERTYFUNCTIONS";
-    private const string EnableAllEnvVar = "MSBUILDENABLEALLPROPERTYFUNCTIONS";
 
     private static string Evaluate(string expression, params (string name, string value)[] properties)
     {
@@ -211,8 +209,8 @@ public class PropertyFunctionReceiverRestriction_Tests
     public void EnableAllPropertyFunctions_BypassesRestriction()
     {
         using TestEnvironment env = TestEnvironment.Create();
-        env.SetEnvironmentVariable(EnableAllEnvVar, "1");
 
+        using (SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", true))
         using (SetSwitch(RestrictSwitch, true))
         {
             // EnableAll takes precedence over the restriction (and over the GetType block), preserving

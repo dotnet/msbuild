@@ -81,6 +81,20 @@ namespace Microsoft.Build.Shared
         internal const string MSBuildIsRestoring = nameof(MSBuildIsRestoring);
 
         /// <summary>
+        /// A property set during an implicit restore (/restore) or explicit restore (/t:restore) to instruct projects to exclude imports that are
+        /// provided by NuGet packages. NuGet passes this same global property when it re-invokes the build, so setting it up front ensures the
+        /// initial evaluation is reused rather than being discarded and re-evaluated.
+        /// </summary>
+        internal const string ExcludeRestorePackageImports = nameof(ExcludeRestorePackageImports);
+
+        /// <summary>
+        /// The value MSBuild assigns to <see cref="ExcludeRestorePackageImports"/> during restore. It must match the literal value NuGet passes
+        /// (lowercase "true" from NuGet.targets) because global property values are compared case-sensitively when matching build configurations
+        /// for evaluation reuse.
+        /// </summary>
+        internal const string ExcludeRestorePackageImportsValue = "true";
+
+        /// <summary>
         /// The most current VSGeneralAssemblyVersion known to this version of MSBuild.
         /// </summary>
         internal const string CurrentAssemblyVersion = "15.1.0.0";

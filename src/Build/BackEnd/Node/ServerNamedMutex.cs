@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Threading;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Execution
 {
@@ -34,10 +37,20 @@ namespace Microsoft.Build.Execution
 
         public static bool WasOpen(string mutexName)
         {
-            bool result = Mutex.TryOpenExisting(mutexName, out Mutex? mutex);
-            mutex?.Dispose();
+            try
+            {
+                bool result = Mutex.TryOpenExisting(mutexName, out Mutex? mutex);
+                mutex?.Dispose();
 
-            return result;
+                return result;
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
+            {
+                // In unexpected state fall back to non-server execution.
+                CommunicationsUtilities.Trace($"Failed to open mutex '{mutexName}', treating it as not open. Exception: {ex}");
+
+                return false;
+            }
         }
 
         public void Dispose()

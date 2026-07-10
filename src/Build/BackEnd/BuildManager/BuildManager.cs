@@ -465,6 +465,7 @@ namespace Microsoft.Build.Execution
         /// <param name="parameters">The build parameters.  May be null.</param>
         /// <param name="deferredBuildMessages"> Build messages to be logged before the build begins. </param>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public void BeginBuild(BuildParameters parameters, IEnumerable<DeferredBuildMessage> deferredBuildMessages)
         {
             // TEMP can be modified from the environment. Most of Traits is lasts for the duration of the process (with a manual reset for tests)
@@ -495,6 +496,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="parameters">The build parameters.  May be null.</param>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public void BeginBuild(BuildParameters parameters)
         {
 #if NETFRAMEWORK
@@ -1020,6 +1022,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         private TResultData BuildRequest<TRequestData, TResultData>(TRequestData requestData)
             where TRequestData : BuildRequestData<TRequestData, TResultData>
             where TResultData : BuildResultBase
@@ -1029,6 +1032,7 @@ namespace Microsoft.Build.Execution
         /// Convenience method. Submits a build request and blocks until the results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public BuildResult BuildRequest(BuildRequestData requestData)
             => BuildRequest<BuildRequestData, BuildResult>(requestData);
 
@@ -1036,6 +1040,7 @@ namespace Microsoft.Build.Execution
         /// Convenience method. Submits a graph build request and blocks until the results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public GraphBuildResult BuildRequest(GraphBuildRequestData requestData)
             => BuildRequest<GraphBuildRequestData, GraphBuildResult>(requestData);
 
@@ -1414,6 +1419,7 @@ namespace Microsoft.Build.Execution
         /// Convenience method.  Submits a lone build request and blocks until results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         private TResultData Build<TRequestData, TResultData>(BuildParameters parameters, TRequestData requestData)
             where TRequestData : BuildRequestData<TRequestData, TResultData>
             where TResultData : BuildResultBase
@@ -1441,6 +1447,7 @@ namespace Microsoft.Build.Execution
         /// Convenience method.  Submits a lone build request and blocks until results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public BuildResult Build(BuildParameters parameters, BuildRequestData requestData)
             => Build<BuildRequestData, BuildResult>(parameters, requestData);
 
@@ -1448,6 +1455,7 @@ namespace Microsoft.Build.Execution
         /// Convenience method.  Submits a lone graph build request and blocks until results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public GraphBuildResult Build(BuildParameters parameters, GraphBuildRequestData requestData)
             => Build<GraphBuildRequestData, GraphBuildResult>(parameters, requestData);
 
@@ -1479,6 +1487,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="node">The node from which the packet was received.</param>
         /// <param name="packet">The packet.</param>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "ProcessPacket is dispatched from the work-queue message pump; the evaluation path it reaches is reflective and unsupported under trimming.")]
         void INodePacketHandler.PacketReceived(int node, INodePacket packet)
         {
             _workQueue!.Post(() => ProcessPacket(node, packet));
@@ -1525,6 +1535,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Standard ExpectedException pattern used")]
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Complex class might need refactoring to separate scheduling elements from submission elements.")]
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         private void ExecuteSubmission(BuildSubmission submission, bool allowMainThreadBuild)
         {
             ArgumentNullException.ThrowIfNull(submission);
@@ -1648,6 +1659,7 @@ namespace Microsoft.Build.Execution
         // Cache requests on configuration N do not block future build submissions depending on configuration N.
         // It is assumed that the higher level build orchestrator (static graph scheduler, VS, quickbuild) submits a
         // project build request only when its references have finished building.
+        [RequiresUnreferencedCode("Loads project cache plugin assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         private void IssueCacheRequestForBuildSubmission(CacheRequest cacheRequest)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
@@ -1665,6 +1677,7 @@ namespace Microsoft.Build.Execution
             });
         }
 
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         internal void ExecuteSubmission<TRequestData, TResultData>(
             BuildSubmissionBase<TRequestData, TResultData> submission, bool allowMainThreadBuild)
             where TRequestData : BuildRequestDataBase
@@ -1702,6 +1715,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// This method adds the graph build request in the specified submission to the set of requests being handled by the scheduler.
         /// </summary>
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         private void ExecuteSubmission(GraphBuildSubmission submission)
         {
             VerifyStateInternal(BuildManagerState.Building);
@@ -1750,6 +1764,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates the traversal and metaproject instances necessary to represent the solution and populates new configurations with them.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates a solution's projects, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private void LoadSolutionIntoConfiguration(BuildRequestConfiguration config, BuildRequest request)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
@@ -1883,6 +1898,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Processes a packet
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates solution configurations, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private void ProcessPacket(int node, INodePacket packet)
         {
             lock (_syncLock)
@@ -2085,6 +2101,7 @@ namespace Microsoft.Build.Execution
         /// The submission is a top level build request entering the BuildManager.
         /// Sends the request to the scheduler with optional legacy threading semantics behavior.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates solution configurations, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private void IssueBuildRequestForBuildSubmission(BuildSubmission submission, BuildRequestConfiguration configuration, bool allowMainThreadBuild = false)
         {
             _workQueue!.Post(
@@ -2174,6 +2191,7 @@ namespace Microsoft.Build.Execution
             return !ExceptionHandling.IsCriticalException(e) && !ExceptionHandling.NotExpectedException(e) && e is not BuildAbortedException;
         }
 
+        [RequiresUnreferencedCode("Initializes project cache plugins, which load plugin assemblies from disk and reflect over their types; incompatible with trimming.")]
         private void ExecuteGraphBuildScheduler(GraphBuildSubmission submission)
         {
             if (_shuttingDown)
@@ -2277,6 +2295,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         private Dictionary<ProjectGraphNode, BuildResult> BuildGraph(
             ProjectGraph projectGraph,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
@@ -2556,6 +2575,7 @@ namespace Microsoft.Build.Execution
             return newConfiguration;
         }
 
+        [RequiresUnreferencedCode("Evaluates solution configurations, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         internal void PostCacheResult(CacheRequest cacheRequest, CacheResult cacheResult, int projectContextId)
         {
             _workQueue!.Post(() =>
@@ -2620,6 +2640,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Handles a new request coming from a node.
         /// </summary>
+        [RequiresUnreferencedCode("Evaluates solution configurations, which resolves SDKs and reflects over their types; incompatible with trimming.")]
         private void HandleNewRequest(int node, BuildRequestBlocker blocker)
         {
             // If we received any solution files, populate their configurations now.
@@ -3194,6 +3215,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         private ILoggingService CreateLoggingService(
             IEnumerable<ILogger>? loggers,
             IEnumerable<ForwardingLoggerRecord>? forwardingLoggers,
