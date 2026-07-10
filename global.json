@@ -11,11 +11,6 @@
   },
   "tools": {
     "dotnet": "11.0.100-preview.5.26302.115",
-    "runtimes": {
-      "dotnet": [
-        "10.0.0"
-      ]
-    },
     "vs": {
       "version": "18.6"
     }
