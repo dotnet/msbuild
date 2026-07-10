@@ -531,6 +531,16 @@ function LocateVisualStudio([object]$vsRequirements = $null){
 }
 
 function InitializeBuildTool() {
+  # Allow a caller (e.g. a bootstrap script running out-of-proc) to inject the build tool via
+  # environment variables instead of the in-proc $global:_BuildTool variable. Only Path and
+  # Command are consumed by the MSBuild function below, so those are all that's needed.
+  if ($env:_BuildToolPath) {
+    return $global:_BuildTool = @{
+      Path    = $env:_BuildToolPath
+      Command = $env:_BuildToolCommand
+    }
+  }
+
   if (Test-Path variable:global:_BuildTool) {
     # If the requested msbuild parameters do not match, clear the cached variables.
     if($global:_BuildTool.Contains('ExcludePrereleaseVS') -and $global:_BuildTool.ExcludePrereleaseVS -ne $excludePrereleaseVS) {
