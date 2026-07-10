@@ -163,18 +163,18 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     //   - both FileInfo AND DirectoryInfo     => suppress the specifics, fall back to AbsolutePath
                     var diagnosticsList = pendingDiagnostics.ToList();
 
-                    var suggestedTypesByProp = new Dictionary<string, HashSet<string>>(System.StringComparer.Ordinal);
+                    var suggestedTypesByPropertyKey = new Dictionary<string, HashSet<string>>(System.StringComparer.Ordinal);
                     foreach (var diag in diagnosticsList)
                     {
-                        if (TryGetDiagnosticKey(diag, out string key, out string suggestedType))
+                        if (TryGetDiagnosticKey(diag, out string propertyKey, out string suggestedType))
                         {
-                            if (!suggestedTypesByProp.TryGetValue(key, out var set))
+                            if (!suggestedTypesByPropertyKey.TryGetValue(propertyKey, out var suggestedTypes))
                             {
-                                set = new HashSet<string>(System.StringComparer.Ordinal);
-                                suggestedTypesByProp[key] = set;
+                                suggestedTypes = new HashSet<string>(System.StringComparer.Ordinal);
+                                suggestedTypesByPropertyKey[propertyKey] = suggestedTypes;
                             }
 
-                            set.Add(suggestedType);
+                            suggestedTypes.Add(suggestedType);
                         }
                     }
 
@@ -182,12 +182,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     var surviving = new List<Diagnostic>();
                     foreach (var diag in diagnosticsList.OrderBy(d => d.Location.SourceSpan.Start))
                     {
-                        if (TryGetDiagnosticKey(diag, out string key, out string suggestedType) &&
-                            suggestedTypesByProp.TryGetValue(key, out var set))
+                        if (TryGetDiagnosticKey(diag, out string propertyKey, out string suggestedType) &&
+                            suggestedTypesByPropertyKey.TryGetValue(propertyKey, out var suggestedTypes))
                         {
-                            bool hasFile = set.Contains("FileInfo");
-                            bool hasDir = set.Contains("DirectoryInfo");
-                            bool hasAbsolutePath = set.Contains("AbsolutePath");
+                            bool hasFile = suggestedTypes.Contains("FileInfo");
+                            bool hasDir = suggestedTypes.Contains("DirectoryInfo");
+                            bool hasAbsolutePath = suggestedTypes.Contains("AbsolutePath");
 
                             if (suggestedType == "AbsolutePath")
                             {
@@ -292,17 +292,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
         }
 
-        private static bool TryGetDiagnosticKey(Diagnostic diagnostic, out string key, out string suggestedType)
+        private static bool TryGetDiagnosticKey(Diagnostic diagnostic, out string propertyKey, out string suggestedType)
         {
             if (diagnostic.Properties.TryGetValue(PropertyNameKey, out var propName) && propName is not null &&
                 diagnostic.Properties.TryGetValue(SuggestedTypeKey, out var type) && type is not null)
             {
-                key = diagnostic.Id + "|" + propName;
+                propertyKey = diagnostic.Id + "|" + propName;
                 suggestedType = type;
                 return true;
             }
 
-            key = string.Empty;
+            propertyKey = string.Empty;
             suggestedType = string.Empty;
             return false;
         }
