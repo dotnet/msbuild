@@ -31,6 +31,11 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private readonly ICoordinatorDebugOutput _output = output ?? DefaultDebugOutput.Instance;
     private Timer? _heartbeatMonitor;
     private Timer? _shutdownTimer;
+    private int _activeConnections;
+
+    private bool HasActiveConnections => Volatile.Read(ref _activeConnections) > 0;
+
+    private bool IsIdle => _budgetManager.IsIdle && !HasActiveConnections;
 
     public void Dispose()
     {
@@ -84,7 +89,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                 // CancellationToken.None is intentional: we don't want Task.Run to cancel
                 // before HandleClientAsync starts, which would orphan the pipe stream.
                 // HandleClientAsync receives the cancellation token for its own loop.
-                Task clientTask = Task.Run(() => HandleClientAsync(pipeStream, token), CancellationToken.None);
+                Task clientTask = Task.Run(() => HandleTrackedClientAsync(pipeStream, token), CancellationToken.None);
                 clientTasks.TryAdd(clientTask, 0);
 
                 // Remove task from tracking when it completes to prevent unbounded growth.
@@ -134,12 +139,37 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         try
         {
             await pipeStream.WaitForConnectionAsync(token);
+
+            Interlocked.Increment(ref _activeConnections);
+
             return pipeStream;
         }
         catch (OperationCanceledException)
         {
             pipeStream.Dispose();
             return null;
+        }
+    }
+
+    /// <summary>
+    ///  Tracks a connected client from pipe acceptance through negotiation and its granted lifetime.
+    /// </summary>
+    /// <param name="pipeStream">The connected pipe stream for this client.</param>
+    /// <param name="token">Cancellation token to signal the client loop should exit.</param>
+    private async Task HandleTrackedClientAsync(NamedPipeServerStream pipeStream, CancellationToken token)
+    {
+        try
+        {
+            await HandleClientAsync(pipeStream, token);
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _activeConnections);
+
+            if (!_cts.IsCancellationRequested && IsIdle)
+            {
+                ResetShutdownTimer();
+            }
         }
     }
 
@@ -525,7 +555,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         var newTimer = new Timer(
             _ =>
             {
-                if (_budgetManager.IsIdle)
+                if (IsIdle)
                 {
                     _output.WriteLine("CoordinatorServer: Auto-shutdown (no active or waiting builds)");
                     _cts.Cancel();
