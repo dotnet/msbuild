@@ -1163,6 +1163,40 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldNotContain("DirectoryInfo");
     }
 
+    [Fact]
+    public async Task FileAndDirectoryConflict_NoAbsolutePathSite_StillFlagsWithAbsolutePath()
+    {
+        // A string property consumed as BOTH a file and a directory, with no AbsolutePath site to carry the
+        // suggestion. Neither FileInfo nor DirectoryInfo is safe, so the property must still be flagged, but
+        // with the AbsolutePath fallback rather than emitting two contradictory specific suggestions.
+        var diags = await GetTypedParameterDiagnosticsAsync("""
+        using System.IO;
+        using Microsoft.Build.Framework;
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public class MyTask : Microsoft.Build.Utilities.Task, Microsoft.Build.Framework.IMultiThreadableTask
+        {
+            public TaskEnvironment TaskEnvironment { get; set; } = new();
+            public string Ambiguous { get; set; } = "";
+            public override bool Execute()
+            {
+                File.Delete(Ambiguous);
+                Directory.CreateDirectory(Ambiguous);
+                return true;
+            }
+        }
+        """);
+
+        var task6 = diags.Where(d => d.Id == DiagnosticIds.PreferTypedPathParameter).ToArray();
+        task6.Length.ShouldBeGreaterThan(0);
+        foreach (var diag in task6)
+        {
+            diag.GetMessage().ShouldContain("Ambiguous");
+            diag.GetMessage().ShouldContain("AbsolutePath");
+            diag.GetMessage().ShouldNotContain("FileInfo");
+            diag.GetMessage().ShouldNotContain("DirectoryInfo");
+        }
+    }
+
     // ── MSBuildTask0006 over raw-string 0002/0003 scenarios (one-shot instead of daisy-chaining) ──
 
     [Fact]

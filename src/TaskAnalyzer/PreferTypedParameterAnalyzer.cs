@@ -187,6 +187,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             bool hasFile = set.Contains("FileInfo");
                             bool hasDir = set.Contains("DirectoryInfo");
+                            bool hasAbsolutePath = set.Contains("AbsolutePath");
 
                             if (suggestedType == "AbsolutePath")
                             {
@@ -196,11 +197,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                                     continue;
                                 }
                             }
-                            else if ((suggestedType == "FileInfo" || suggestedType == "DirectoryInfo") &&
-                                     hasFile && hasDir && set.Contains("AbsolutePath"))
+                            else if (suggestedType == "FileInfo" || suggestedType == "DirectoryInfo")
                             {
-                                // Conflicting file/dir inference: prefer the AbsolutePath fallback.
-                                continue;
+                                // The same value is consumed as both a file and a directory, so neither
+                                // specific type is safe — collapse to the AbsolutePath fallback.
+                                if (hasFile && hasDir)
+                                {
+                                    if (hasAbsolutePath)
+                                    {
+                                        // An AbsolutePath suggestion already exists for this property; drop this
+                                        // specific one and let the surviving AbsolutePath diagnostics carry it.
+                                        continue;
+                                    }
+
+                                    // No AbsolutePath site exists, so suppressing both specifics would leave the
+                                    // property unflagged. Rewrite this diagnostic to AbsolutePath so the property
+                                    // is still reported with a coherent fallback type.
+                                    surviving.Add(ToAbsolutePathFallback(diag));
+                                    continue;
+                                }
                             }
                         }
 
@@ -347,6 +362,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 location,
                 properties,
                 propertyName, "string", suggestedType);
+        }
+
+        /// <summary>
+        /// Rewrites a specific FileInfo/DirectoryInfo path diagnostic into an equivalent AbsolutePath one at
+        /// the same location. Used when a property's value is consumed as both a file and a directory (so no
+        /// single specific type is safe) and no AbsolutePath site already exists to carry the suggestion.
+        /// </summary>
+        private static Diagnostic ToAbsolutePathFallback(Diagnostic diagnostic)
+        {
+            string propertyName = diagnostic.Properties.TryGetValue(PropertyNameKey, out var name) && name is not null
+                ? name
+                : string.Empty;
+
+            return CreatePathDiagnostic(diagnostic.Location, propertyName, "AbsolutePath");
         }
 
         private static Diagnostic CreateItemDiagnostic(Location location, string propertyName, bool isArray, string suggestedType)
