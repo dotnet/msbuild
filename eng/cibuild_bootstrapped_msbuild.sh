@@ -56,7 +56,7 @@ PerfLogDir="$ArtifactsDir/log/$configuration/PerformanceLogs"
 build_script="$ScriptRoot/common/build.sh"
 
 # Arguments common to both the stage 1 and stage 2 builds, including any caller-supplied properties.
-common_build_args="--restore --build --ci --configuration $configuration $properties"
+common_build_args="--restore --build --ci --prepareMachine --configuration $configuration $properties"
 
 if [[ $build_stage1 == true ]]
 then
@@ -97,12 +97,11 @@ export DOTNET_PERFLOG_DIR="$PerfLogDir"
 export DOTNET_HOST_PATH="$bootstrapRoot/core/dotnet"
 
 # stage2Properties are passed to the stage 2 build only since some MSBuild switches (like /mt) may not
-# work with the SDK MSBuild used in stage 1. Node reuse is turned off so bootstrapped MSBuild processes
-# don't stay running and lock files. Mirroring the branches:
+# work with the SDK MSBuild used in stage 1. Mirroring the branches:
 #   onlyDocChanged=1 -> bootstrap not created (artifacts not needed downstream)
 #   skipTests        -> bootstrap IS created, tests omitted
 #   default          -> bootstrap created, tests run
-stage2_build_args="$common_build_args --nodereuse false $stage2Properties"
+stage2_build_args="$common_build_args $stage2Properties"
 if [ $onlyDocChanged = 0 ]
 then
   if [ "$skipTests" != true ]

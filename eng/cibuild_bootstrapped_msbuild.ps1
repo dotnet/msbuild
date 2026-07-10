@@ -41,7 +41,7 @@ $pwshPath = (Get-Process -Id $PID).Path
 $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 
 # Arguments common to both the stage 1 and stage 2 builds, including any caller-supplied $properties.
-$commonBuildArgs = @('-restore', '-build', '-ci', '-prepareMachine', '-msbuildEngine', $msbuildEngine) + $properties
+$commonBuildArgs = @('-restore', '-build', '-ci', '-prepareMachine', '-configuration', $configuration, '-msbuildEngine', $msbuildEngine) + $properties
 
 if ($buildStage1)
 {
