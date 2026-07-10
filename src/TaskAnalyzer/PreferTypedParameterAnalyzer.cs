@@ -284,8 +284,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName),
                 compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName),
                 compilation.GetTypeByMetadataName(WellKnownTypeNames.OutputAttributeFullName),
-                compilation.GetTypeByMetadataName("System.IO.FileInfo"),
-                compilation.GetTypeByMetadataName("System.IO.DirectoryInfo"));
+                compilation.GetTypeByMetadataName(WellKnownTypeNames.FileInfoFullName),
+                compilation.GetTypeByMetadataName(WellKnownTypeNames.DirectoryInfoFullName));
             return true;
         }
 

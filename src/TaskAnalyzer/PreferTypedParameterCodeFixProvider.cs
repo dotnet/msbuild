@@ -940,8 +940,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private static ITypeSymbol? ResolvePathTypeSymbol(Compilation compilation, string suggestedType) => suggestedType switch
         {
             "AbsolutePath" => compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName),
-            "FileInfo" => compilation.GetTypeByMetadataName("System.IO.FileInfo"),
-            "DirectoryInfo" => compilation.GetTypeByMetadataName("System.IO.DirectoryInfo"),
+            "FileInfo" => compilation.GetTypeByMetadataName(WellKnownTypeNames.FileInfoFullName),
+            "DirectoryInfo" => compilation.GetTypeByMetadataName(WellKnownTypeNames.DirectoryInfoFullName),
             _ => null,
         };
 

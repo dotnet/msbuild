@@ -208,7 +208,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             if (operation is IPropertyReferenceOperation propRef && propRef.Property.Name == "FullName")
             {
                 var containingTypeName = propRef.Property.ContainingType?.ToDisplayString();
-                if (containingTypeName is "System.IO.FileSystemInfo" or "System.IO.FileInfo" or "System.IO.DirectoryInfo")
+                if (containingTypeName is WellKnownTypeNames.FileSystemInfoFullName or WellKnownTypeNames.FileInfoFullName or WellKnownTypeNames.DirectoryInfoFullName)
                 {
                     return true;
                 }
@@ -317,8 +317,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Core System.IO file/directory types
                 "System.IO.File",
                 "System.IO.Directory",
-                "System.IO.FileInfo",
-                "System.IO.DirectoryInfo",
+                WellKnownTypeNames.FileInfoFullName,
+                WellKnownTypeNames.DirectoryInfoFullName,
                 "System.IO.FileStream",
                 "System.IO.StreamReader",
                 "System.IO.StreamWriter",

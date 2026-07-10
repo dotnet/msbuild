@@ -20,5 +20,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         internal const string AnalyzedAttributeFullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAnalyzedAttribute";
         internal const string MultiThreadableTaskAttributeFullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute";
         internal const string ConsoleFullName = "System.Console";
+        internal const string FileSystemInfoFullName = "System.IO.FileSystemInfo";
+        internal const string FileInfoFullName = "System.IO.FileInfo";
+        internal const string DirectoryInfoFullName = "System.IO.DirectoryInfo";
     }
 }
