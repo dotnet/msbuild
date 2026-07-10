@@ -296,6 +296,31 @@
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
           DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!--
+      MSBuild can target an earlier .NET runtime (e.g. net10.0) than the SDK we overlay it onto (e.g. net11.0).
+      In that case the freshly-built *.runtimeconfig.json files pin Microsoft.NETCore.App to a runtime version
+      (e.g. 10.0.0) that isn't present in the bootstrap layout, so the just-built MSBuild would fail to start.
+      Rewrite that framework version to the SDK's major runtime version (Major.Minor.0 derived from the SDK
+      version) so MSBuild runs against the runtime that ships with the overlaid SDK. This mirrors what
+      dotnet/sdk does via its UpdateRuntimeConfig task, but as a low-cost find & replace with no dedicated task.
+      We only care about Microsoft.NETCore.App, so the replacement is keyed on that framework name and leaves
+      the previous version untouched (a no-op) once MSBuild targets the same major runtime as the SDK. -->
+    <PropertyGroup>
+      <!-- The overlaid SDK's major runtime version, e.g. 11.0.100-preview.5.26302.115 => 11.0.0. -->
+      <_BootstrapSdkNetCoreVersion>$([System.Version]::Parse($(BootstrapSdkVersion.Split('-')[0])).Major).$([System.Version]::Parse($(BootstrapSdkVersion.Split('-')[0])).Minor).0</_BootstrapSdkNetCoreVersion>
+      <_BootstrapNetCoreVersionPattern>(&quot;name&quot;:\s*&quot;Microsoft\.NETCore\.App&quot;,\s*&quot;version&quot;:\s*&quot;)[^&quot;]*</_BootstrapNetCoreVersionPattern>
+      <_BootstrapNetCoreVersionReplacement>${1}$(_BootstrapSdkNetCoreVersion)</_BootstrapNetCoreVersionReplacement>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_BootstrapRuntimeConfigFile Include="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
+                                   Condition="'%(Extension)' == '.json' and $([System.String]::Copy('%(Filename)').EndsWith('.runtimeconfig'))" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="%(_BootstrapRuntimeConfigFile.Identity)"
+                      Lines="$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('%(_BootstrapRuntimeConfigFile.Identity)')), $(_BootstrapNetCoreVersionPattern), $(_BootstrapNetCoreVersionReplacement)))"
+                      Overwrite="true" />
+
     <!-- macOS Gatekeeper kills copied dotnet apphosts that lack a valid local signature.
          Ad-hoc re-sign to prevent SIGKILL (exit code 137) when tests invoke the bootstrap dotnet. -->
     <Exec Command="codesign --force --sign - &quot;$(InstallDir)dotnet&quot;"
