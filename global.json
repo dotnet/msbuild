@@ -13,8 +13,7 @@
     "dotnet": "11.0.100-preview.5.26302.115",
     "vs": {
       "version": "18.0"
-    },
-    "xcopy-msbuild": "18.0.0"
+    }
   },
   "msbuild-sdks": {
     "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.26330.1"
