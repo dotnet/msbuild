@@ -72,15 +72,11 @@ fi
 # globbed paths below point at files that actually exist.
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
-# The bootstrap installs exactly one SDK (BootstrapSdkVersion) under core/sdk/<version>, so glob it
-# rather than re-parsing Versions.props for the version.
-sdk_msbuild=( "$bootstrapRoot"/core/sdk/*/MSBuild.dll )
-
 # Communicate the bootstrapped build tool to the (out-of-proc) stage 2 build.sh via environment
 # variables so it does not require sourcing tools.sh here. tools.sh's InitializeBuildTool honors
 # _BuildToolPath / _BuildToolCommand.
 export _BuildToolPath="$bootstrapRoot/core/dotnet"
-export _BuildToolCommand="${sdk_msbuild[0]}"
+export _BuildToolCommand="msbuild"
 
 export DOTNET_ROOT="$bootstrapRoot/core"
 

@@ -72,7 +72,7 @@ if ($msbuildEngine -eq 'vs')
 else
 {
   $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
-  $buildToolCommand = (Get-Item "$bootstrapRoot\core\sdk\*\MSBuild.dll").FullName
+  $buildToolCommand = "msbuild"
   $env:DOTNET_ROOT="$bootstrapRoot\core"
 }
 
