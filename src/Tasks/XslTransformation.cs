@@ -222,7 +222,7 @@ namespace Microsoft.Build.Tasks
                 if (currentXmlInputIndex >= 0
                     && XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, () => xmlinput.ContainsDtd(currentXmlInputIndex)))
                 {
-                    string offendingPath = XmlInputPaths[currentXmlInputIndex].ItemSpec;
+                    string offendingPath = XmlInputPaths?[currentXmlInputIndex]?.ItemSpec ?? string.Empty;
                     Log.LogErrorWithCodeFromResources("XslTransform.TransformDtdProhibited", offendingPath, nameof(ProhibitDtd), nameof(XslTransformation));
                 }
                 else

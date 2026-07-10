@@ -2352,8 +2352,8 @@
     <comment>{StrBegin="MSB3703: "}</comment>
   </data>
   <data name="XslTransform.TransformDtdProhibited" xml:space="preserve">
-    <value>MSB3703: Unable to execute transformation because the XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to allow DTDs.</value>
-    <comment>{StrBegin="MSB3703: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</comment>
+    <value>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to allow DTDs.</value>
+    <comment>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</comment>
   </data>
   <data name="XslTransform.XmlInput.TooMany" xml:space="preserve">
     <value>Only one of XmlContent or XmlInputPaths arguments can be set.</value>
