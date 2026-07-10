@@ -36,6 +36,44 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private const string PropertyNameKey = "PropertyName";
         private const string SuggestedTypeKey = "SuggestedType";
 
+        /// <summary>
+        /// The set of types looked up once per compilation and reused for every analyzed task symbol.
+        /// <see cref="ITask"/> and <see cref="MultiThreadableTaskAttribute"/> are mandatory; the rest may be
+        /// null when the type is not referenced by the compilation, in which case the corresponding
+        /// suggestions are simply not produced.
+        /// </summary>
+        private readonly struct WellKnownTaskTypes
+        {
+            public WellKnownTaskTypes(
+                INamedTypeSymbol iTask,
+                INamedTypeSymbol multiThreadableTaskAttribute,
+                INamedTypeSymbol? absolutePath,
+                INamedTypeSymbol? taskEnvironment,
+                INamedTypeSymbol? iTaskItem,
+                INamedTypeSymbol? outputAttribute,
+                INamedTypeSymbol? fileInfo,
+                INamedTypeSymbol? directoryInfo)
+            {
+                ITask = iTask;
+                MultiThreadableTaskAttribute = multiThreadableTaskAttribute;
+                AbsolutePath = absolutePath;
+                TaskEnvironment = taskEnvironment;
+                ITaskItem = iTaskItem;
+                OutputAttribute = outputAttribute;
+                FileInfo = fileInfo;
+                DirectoryInfo = directoryInfo;
+            }
+
+            public INamedTypeSymbol ITask { get; }
+            public INamedTypeSymbol MultiThreadableTaskAttribute { get; }
+            public INamedTypeSymbol? AbsolutePath { get; }
+            public INamedTypeSymbol? TaskEnvironment { get; }
+            public INamedTypeSymbol? ITaskItem { get; }
+            public INamedTypeSymbol? OutputAttribute { get; }
+            public INamedTypeSymbol? FileInfo { get; }
+            public INamedTypeSymbol? DirectoryInfo { get; }
+        }
+
         public override void Initialize(AnalysisContext context)
         {
             context.EnableConcurrentExecution();
@@ -45,96 +83,32 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
-            // The class must implement ITask to be considered a task at all
-            var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
-            if (iTaskType is null)
+            if (!TryResolveWellKnownTaskTypes(compilationContext.Compilation, out WellKnownTaskTypes types))
             {
                 return;
             }
 
-            // Additionally, the task must opt into multithreaded support by applying the
-            // [MSBuildMultiThreadableTask] attribute. Implementing IMultiThreadableTask is not
-            // sufficient: the attribute is Inherited = false, so a task that merely derives from a
-            // base class implementing the interface has not itself opted into multithreaded support.
-            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
-            if (multiThreadableTaskAttributeType is null)
-            {
-                return;
-            }
-
-            var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
-            var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
-            var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
-            var outputAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.OutputAttributeFullName);
-            var fileInfoType = compilationContext.Compilation.GetTypeByMetadataName("System.IO.FileInfo");
-            var directoryInfoType = compilationContext.Compilation.GetTypeByMetadataName("System.IO.DirectoryInfo");
+            var iTaskType = types.ITask;
+            var multiThreadableTaskAttributeType = types.MultiThreadableTaskAttribute;
+            var absolutePathType = types.AbsolutePath;
+            var taskEnvironmentType = types.TaskEnvironment;
+            var iTaskItemType = types.ITaskItem;
+            var outputAttributeType = types.OutputAttribute;
+            var fileInfoType = types.FileInfo;
+            var directoryInfoType = types.DirectoryInfo;
 
             compilationContext.RegisterSymbolStartAction(symbolStartContext =>
             {
                 var namedType = (INamedTypeSymbol)symbolStartContext.Symbol;
 
-                // Gate 1: Must be an ITask implementation
-                if (!ImplementsInterface(namedType, iTaskType))
+                // Only multithreadable tasks (ITask + directly-applied [MSBuildMultiThreadableTask]) are analyzed.
+                if (!IsMultiThreadableTaskType(namedType, iTaskType, multiThreadableTaskAttributeType))
                 {
                     return;
                 }
 
-                // Gate 2: Must have opted into multithreaded support via the attribute applied
-                // directly to this type. GetAttributes() returns only directly-applied attributes,
-                // which matches the attribute's Inherited = false semantics.
-                bool isMultiThreadable = namedType.GetAttributes().Any(
-                    attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, multiThreadableTaskAttributeType));
-
-                if (!isMultiThreadable)
-                {
-                    return;
-                }
-
-                // Collect string-typed task input properties (candidates for MSBuildTask0006)
-                var stringInputProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
-                // Collect ITaskItem/ITaskItem[]-typed task input properties (candidates for MSBuildTask0007)
-                var taskItemInputProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
-
-                // Enumerate input properties declared on this type and all base types (most-derived
-                // first). A task can declare its ITaskItem/string inputs on a base class, so limiting
-                // to namedType.GetMembers() would miss them. Properties hidden or overridden in a more
-                // derived type are processed once, via their most-derived declaration.
-                foreach (var member in GetPropertiesIncludingBaseTypes(namedType))
-                {
-                    if (member.DeclaredAccessibility != Accessibility.Public)
-                    {
-                        continue;
-                    }
-
-                    if (member.SetMethod is null || member.SetMethod.DeclaredAccessibility != Accessibility.Public)
-                    {
-                        continue;
-                    }
-
-                    // Exclude [Output] properties — they are set by the task, not MSBuild
-                    if (outputAttributeType is not null && member.GetAttributes().Any(
-                        a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, outputAttributeType)))
-                    {
-                        continue;
-                    }
-
-                    if (member.Type.SpecialType == SpecialType.System_String)
-                    {
-                        stringInputProps.Add(member);
-                    }
-                    else if (iTaskItemType is not null)
-                    {
-                        if (SymbolEqualityComparer.Default.Equals(member.Type, iTaskItemType))
-                        {
-                            taskItemInputProps.Add(member);
-                        }
-                        else if (member.Type is IArrayTypeSymbol arrayType &&
-                                 SymbolEqualityComparer.Default.Equals(arrayType.ElementType, iTaskItemType))
-                        {
-                            taskItemInputProps.Add(member);
-                        }
-                    }
-                }
+                CollectInputProperties(namedType, iTaskItemType, outputAttributeType,
+                    out var stringInputProps, out var taskItemInputProps);
 
                 if (stringInputProps.Count == 0 && taskItemInputProps.Count == 0)
                 {
@@ -155,115 +129,237 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 OperationKind.ObjectCreation,
                 OperationKind.Invocation);
 
-                symbolStartContext.RegisterSymbolEndAction(endCtx =>
-                {
-                    // Group diagnostics by property name + rule ID using structured metadata,
-                    // then resolve AbsolutePath vs FileInfo/DirectoryInfo overlaps:
-                    //   - exactly one specific type inferred  => suppress AbsolutePath, keep the specific type
-                    //   - both FileInfo AND DirectoryInfo     => suppress the specifics, fall back to AbsolutePath
-                    var diagnosticsList = pendingDiagnostics.ToList();
-
-                    var suggestedTypesByPropertyKey = new Dictionary<string, HashSet<string>>(System.StringComparer.Ordinal);
-                    foreach (var diag in diagnosticsList)
-                    {
-                        if (TryGetDiagnosticKey(diag, out string propertyKey, out string suggestedType))
-                        {
-                            if (!suggestedTypesByPropertyKey.TryGetValue(propertyKey, out var suggestedTypes))
-                            {
-                                suggestedTypes = new HashSet<string>(System.StringComparer.Ordinal);
-                                suggestedTypesByPropertyKey[propertyKey] = suggestedTypes;
-                            }
-
-                            suggestedTypes.Add(suggestedType);
-                        }
-                    }
-
-                    // First, determine which path/item diagnostics survive the type-resolution dedup.
-                    var surviving = new List<Diagnostic>();
-                    foreach (var diag in diagnosticsList.OrderBy(d => d.Location.SourceSpan.Start))
-                    {
-                        if (TryGetDiagnosticKey(diag, out string propertyKey, out string suggestedType) &&
-                            suggestedTypesByPropertyKey.TryGetValue(propertyKey, out var suggestedTypes))
-                        {
-                            bool hasFile = suggestedTypes.Contains("FileInfo");
-                            bool hasDir = suggestedTypes.Contains("DirectoryInfo");
-                            bool hasAbsolutePath = suggestedTypes.Contains("AbsolutePath");
-
-                            if (suggestedType == "AbsolutePath")
-                            {
-                                // Suppress when exactly one specific type was inferred (no file/dir conflict).
-                                if (hasFile ^ hasDir)
-                                {
-                                    continue;
-                                }
-                            }
-                            else if (suggestedType == "FileInfo" || suggestedType == "DirectoryInfo")
-                            {
-                                // The same value is consumed as both a file and a directory, so neither
-                                // specific type is safe — collapse to the AbsolutePath fallback.
-                                if (hasFile && hasDir)
-                                {
-                                    if (hasAbsolutePath)
-                                    {
-                                        // An AbsolutePath suggestion already exists for this property; drop this
-                                        // specific one and let the surviving AbsolutePath diagnostics carry it.
-                                        continue;
-                                    }
-
-                                    // No AbsolutePath site exists, so suppressing both specifics would leave the
-                                    // property unflagged. Rewrite this diagnostic to AbsolutePath so the property
-                                    // is still reported with a coherent fallback type.
-                                    surviving.Add(ToAbsolutePathFallback(diag));
-                                    continue;
-                                }
-                            }
-                        }
-
-                        surviving.Add(diag);
-                    }
-
-                    // A path property (MSBuildTask0006) with a relative default cannot be rooted in a property
-                    // initializer, so instead of the 0006 "retype" suggestion (whose fix is inapplicable here)
-                    // we redirect it to MSBuildTask0008: initialize the property in Execute() where
-                    // TaskEnvironment is available. Record such properties, keyed by name, with the resolved type.
-                    var relativeDefaultProps = new Dictionary<string, (IPropertySymbol Property, string ResolvedType, Location Location)>(System.StringComparer.Ordinal);
-                    foreach (var diag in surviving)
-                    {
-                        if (diag.Id != DiagnosticIds.PreferTypedPathParameter ||
-                            !diag.Properties.TryGetValue(PropertyNameKey, out var propName) || propName is null ||
-                            !diag.Properties.TryGetValue(SuggestedTypeKey, out var suggestedType) || suggestedType is null ||
-                            relativeDefaultProps.ContainsKey(propName))
-                        {
-                            continue;
-                        }
-
-                        var propSymbol = stringInputProps.FirstOrDefault(p => p.Name == propName);
-                        if (propSymbol is not null &&
-                            TryGetRelativeDefaultInitializerLocation(propSymbol, endCtx.CancellationToken, out Location initializerLocation))
-                        {
-                            relativeDefaultProps[propName] = (propSymbol, suggestedType, initializerLocation);
-                        }
-                    }
-
-                    foreach (var diag in surviving)
-                    {
-                        // Suppress the 0006 diagnostics for properties redirected to 0008.
-                        if (diag.Id == DiagnosticIds.PreferTypedPathParameter &&
-                            diag.Properties.TryGetValue(PropertyNameKey, out var pn) && pn is not null &&
-                            relativeDefaultProps.ContainsKey(pn))
-                        {
-                            continue;
-                        }
-
-                        endCtx.ReportDiagnostic(diag);
-                    }
-
-                    foreach (var entry in relativeDefaultProps.Values)
-                    {
-                        endCtx.ReportDiagnostic(CreateMoveDefaultDiagnostic(entry.Location, entry.Property.Name, entry.ResolvedType));
-                    }
-                });
+                symbolStartContext.RegisterSymbolEndAction(
+                    endCtx => DeduplicateAndReportDiagnostics(endCtx, pendingDiagnostics, stringInputProps));
             }, SymbolKind.NamedType);
+        }
+
+        /// <summary>
+        /// Resolves overlapping path/item suggestions for each property, redirects relative-default path
+        /// properties to MSBuildTask0008, and reports the surviving diagnostics. Runs once per task symbol after
+        /// all operations have been analyzed.
+        /// </summary>
+        private static void DeduplicateAndReportDiagnostics(
+            SymbolAnalysisContext endCtx,
+            ConcurrentBag<Diagnostic> pendingDiagnostics,
+            HashSet<IPropertySymbol> stringInputProps)
+        {
+            // Group diagnostics by property name + rule ID using structured metadata,
+            // then resolve AbsolutePath vs FileInfo/DirectoryInfo overlaps:
+            //   - exactly one specific type inferred  => suppress AbsolutePath, keep the specific type
+            //   - both FileInfo AND DirectoryInfo     => suppress the specifics, fall back to AbsolutePath
+            var diagnosticsList = pendingDiagnostics.ToList();
+
+            var suggestedTypesByPropertyKey = new Dictionary<string, HashSet<string>>(System.StringComparer.Ordinal);
+            foreach (var diag in diagnosticsList)
+            {
+                if (TryGetDiagnosticKey(diag, out string propertyKey, out string suggestedType))
+                {
+                    if (!suggestedTypesByPropertyKey.TryGetValue(propertyKey, out var suggestedTypes))
+                    {
+                        suggestedTypes = new HashSet<string>(System.StringComparer.Ordinal);
+                        suggestedTypesByPropertyKey[propertyKey] = suggestedTypes;
+                    }
+
+                    suggestedTypes.Add(suggestedType);
+                }
+            }
+
+            // First, determine which path/item diagnostics survive the type-resolution dedup.
+            var surviving = new List<Diagnostic>();
+            foreach (var diag in diagnosticsList.OrderBy(d => d.Location.SourceSpan.Start))
+            {
+                if (TryGetDiagnosticKey(diag, out string propertyKey, out string suggestedType) &&
+                    suggestedTypesByPropertyKey.TryGetValue(propertyKey, out var suggestedTypes))
+                {
+                    bool hasFile = suggestedTypes.Contains("FileInfo");
+                    bool hasDir = suggestedTypes.Contains("DirectoryInfo");
+                    bool hasAbsolutePath = suggestedTypes.Contains("AbsolutePath");
+
+                    if (suggestedType == "AbsolutePath")
+                    {
+                        // Suppress when exactly one specific type was inferred (no file/dir conflict).
+                        if (hasFile ^ hasDir)
+                        {
+                            continue;
+                        }
+                    }
+                    else if (suggestedType == "FileInfo" || suggestedType == "DirectoryInfo")
+                    {
+                        // The same value is consumed as both a file and a directory, so neither
+                        // specific type is safe — collapse to the AbsolutePath fallback.
+                        if (hasFile && hasDir)
+                        {
+                            if (hasAbsolutePath)
+                            {
+                                // An AbsolutePath suggestion already exists for this property; drop this
+                                // specific one and let the surviving AbsolutePath diagnostics carry it.
+                                continue;
+                            }
+
+                            // No AbsolutePath site exists, so suppressing both specifics would leave the
+                            // property unflagged. Rewrite this diagnostic to AbsolutePath so the property
+                            // is still reported with a coherent fallback type.
+                            surviving.Add(ToAbsolutePathFallback(diag));
+                            continue;
+                        }
+                    }
+                }
+
+                surviving.Add(diag);
+            }
+
+            // A path property (MSBuildTask0006) with a relative default cannot be rooted in a property
+            // initializer, so instead of the 0006 "retype" suggestion (whose fix is inapplicable here)
+            // we redirect it to MSBuildTask0008: initialize the property in Execute() where
+            // TaskEnvironment is available. Record such properties, keyed by name, with the resolved type.
+            var relativeDefaultProps = new Dictionary<string, (IPropertySymbol Property, string ResolvedType, Location Location)>(System.StringComparer.Ordinal);
+            foreach (var diag in surviving)
+            {
+                if (diag.Id != DiagnosticIds.PreferTypedPathParameter ||
+                    !diag.Properties.TryGetValue(PropertyNameKey, out var propName) || propName is null ||
+                    !diag.Properties.TryGetValue(SuggestedTypeKey, out var suggestedType) || suggestedType is null ||
+                    relativeDefaultProps.ContainsKey(propName))
+                {
+                    continue;
+                }
+
+                var propSymbol = stringInputProps.FirstOrDefault(p => p.Name == propName);
+                if (propSymbol is not null &&
+                    TryGetRelativeDefaultInitializerLocation(propSymbol, endCtx.CancellationToken, out Location initializerLocation))
+                {
+                    relativeDefaultProps[propName] = (propSymbol, suggestedType, initializerLocation);
+                }
+            }
+
+            foreach (var diag in surviving)
+            {
+                // Suppress the 0006 diagnostics for properties redirected to 0008.
+                if (diag.Id == DiagnosticIds.PreferTypedPathParameter &&
+                    diag.Properties.TryGetValue(PropertyNameKey, out var pn) && pn is not null &&
+                    relativeDefaultProps.ContainsKey(pn))
+                {
+                    continue;
+                }
+
+                endCtx.ReportDiagnostic(diag);
+            }
+
+            foreach (var entry in relativeDefaultProps.Values)
+            {
+                endCtx.ReportDiagnostic(CreateMoveDefaultDiagnostic(entry.Location, entry.Property.Name, entry.ResolvedType));
+            }
+        }
+
+        /// <summary>
+        /// Resolves the types required for analysis. Returns false when the mandatory ITask interface or the
+        /// [MSBuildMultiThreadableTask] attribute type is unavailable in the compilation — without either, no
+        /// type can be a multithreadable task, so there is nothing to analyze.
+        /// </summary>
+        private static bool TryResolveWellKnownTaskTypes(Compilation compilation, out WellKnownTaskTypes types)
+        {
+            types = default;
+
+            // The class must implement ITask to be considered a task at all.
+            var iTaskType = compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
+            if (iTaskType is null)
+            {
+                return false;
+            }
+
+            // The task must additionally opt into multithreaded support by applying the
+            // [MSBuildMultiThreadableTask] attribute. Implementing IMultiThreadableTask is not sufficient: the
+            // attribute is Inherited = false, so a task that merely derives from a base class implementing the
+            // interface has not itself opted into multithreaded support.
+            var multiThreadableTaskAttributeType = compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
+            if (multiThreadableTaskAttributeType is null)
+            {
+                return false;
+            }
+
+            types = new WellKnownTaskTypes(
+                iTaskType,
+                multiThreadableTaskAttributeType,
+                compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName),
+                compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName),
+                compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName),
+                compilation.GetTypeByMetadataName(WellKnownTypeNames.OutputAttributeFullName),
+                compilation.GetTypeByMetadataName("System.IO.FileInfo"),
+                compilation.GetTypeByMetadataName("System.IO.DirectoryInfo"));
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true when <paramref name="namedType"/> implements ITask and directly carries the
+        /// [MSBuildMultiThreadableTask] attribute. GetAttributes() returns only directly-applied attributes,
+        /// matching the attribute's Inherited = false semantics — a type that merely derives from a
+        /// multithreadable base has not itself opted in.
+        /// </summary>
+        private static bool IsMultiThreadableTaskType(
+            INamedTypeSymbol namedType,
+            INamedTypeSymbol iTaskType,
+            INamedTypeSymbol multiThreadableTaskAttributeType)
+        {
+            return ImplementsInterface(namedType, iTaskType) &&
+                namedType.GetAttributes().Any(
+                    attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, multiThreadableTaskAttributeType));
+        }
+
+        /// <summary>
+        /// Collects the public, settable, non-[Output] input properties of a task — including those declared on
+        /// base types — partitioned into string candidates (MSBuildTask0006) and ITaskItem/ITaskItem[]
+        /// candidates (MSBuildTask0007).
+        /// </summary>
+        private static void CollectInputProperties(
+            INamedTypeSymbol namedType,
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? outputAttributeType,
+            out HashSet<IPropertySymbol> stringInputProps,
+            out HashSet<IPropertySymbol> taskItemInputProps)
+        {
+            stringInputProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+            taskItemInputProps = new HashSet<IPropertySymbol>(SymbolEqualityComparer.Default);
+
+            // Enumerate input properties declared on this type and all base types (most-derived first). A task
+            // can declare its ITaskItem/string inputs on a base class, so limiting to namedType.GetMembers()
+            // would miss them. Properties hidden or overridden in a more derived type are processed once, via
+            // their most-derived declaration.
+            foreach (var member in GetPropertiesIncludingBaseTypes(namedType))
+            {
+                if (member.DeclaredAccessibility != Accessibility.Public)
+                {
+                    continue;
+                }
+
+                if (member.SetMethod is null || member.SetMethod.DeclaredAccessibility != Accessibility.Public)
+                {
+                    continue;
+                }
+
+                // Exclude [Output] properties — they are set by the task, not MSBuild.
+                if (outputAttributeType is not null && member.GetAttributes().Any(
+                    a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, outputAttributeType)))
+                {
+                    continue;
+                }
+
+                if (member.Type.SpecialType == SpecialType.System_String)
+                {
+                    stringInputProps.Add(member);
+                }
+                else if (iTaskItemType is not null)
+                {
+                    if (SymbolEqualityComparer.Default.Equals(member.Type, iTaskItemType))
+                    {
+                        taskItemInputProps.Add(member);
+                    }
+                    else if (member.Type is IArrayTypeSymbol arrayType &&
+                             SymbolEqualityComparer.Default.Equals(arrayType.ElementType, iTaskItemType))
+                    {
+                        taskItemInputProps.Add(member);
+                    }
+                }
+            }
         }
 
         private static void AnalyzeOperation(
