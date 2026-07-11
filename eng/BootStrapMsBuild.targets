@@ -306,7 +306,7 @@
       We only care about Microsoft.NETCore.App, so the replacement is keyed on that framework name and leaves
       the previous version untouched (a no-op) once MSBuild targets the same major runtime as the SDK. -->
     <PropertyGroup>
-      <!-- The overlaid SDK's major runtime version, e.g. 11.0.100-preview.5.26302.115 => 11.0.0. -->
+      <!-- The overlaid SDK's major runtime version, e.g. 11.0.100-preview.7.26360.111 => 11.0.0. -->
       <_BootstrapSdkNetCoreVersion>$([System.Version]::Parse($(BootstrapSdkVersion.Split('-')[0])).Major).$([System.Version]::Parse($(BootstrapSdkVersion.Split('-')[0])).Minor).0</_BootstrapSdkNetCoreVersion>
       <_BootstrapNetCoreVersionPattern>(&quot;name&quot;:\s*&quot;Microsoft\.NETCore\.App&quot;,\s*&quot;version&quot;:\s*&quot;)[^&quot;]*</_BootstrapNetCoreVersionPattern>
       <_BootstrapNetCoreVersionReplacement>${1}$(_BootstrapSdkNetCoreVersion)</_BootstrapNetCoreVersionReplacement>
