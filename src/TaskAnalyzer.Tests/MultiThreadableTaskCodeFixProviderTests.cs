@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
-using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
@@ -15,6 +14,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// Uses CSharpCodeFixTest for verifying code transformations.
 /// Arguments are provided with nullable annotations matching .NET 8+ BCL.
 /// </summary>
+[TestClass]
 public class MultiThreadableTaskCodeFixProviderTests
 {
     private static CSharpCodeFixTest<MultiThreadableTaskAnalyzer, MultiThreadableTaskCodeFixProvider, DefaultVerifier> CreateFixTest(
@@ -46,7 +46,7 @@ public class MultiThreadableTaskCodeFixProviderTests
         _ => new DiagnosticResult(id, DiagnosticSeverity.Warning),
     };
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_GetEnvironmentVariable()
     {
         await CreateFixTest(
@@ -80,7 +80,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 .WithArguments("Environment.GetEnvironmentVariable(string)", "use TaskEnvironment.GetEnvironmentVariable instead")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_SetEnvironmentVariable()
     {
         await CreateFixTest(
@@ -114,7 +114,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 .WithArguments("Environment.SetEnvironmentVariable(string, string?)", "use TaskEnvironment.SetEnvironmentVariable instead")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_PathGetFullPath()
     {
         await CreateFixTest(
@@ -148,7 +148,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 .WithArguments("Path.GetFullPath(string)", "use TaskEnvironment.GetAbsolutePath instead")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_EnvironmentCurrentDirectory()
     {
         await CreateFixTest(
@@ -182,7 +182,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 .WithArguments("Environment.CurrentDirectory", "use TaskEnvironment.ProjectDirectory instead")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_FileExists_WrapsWithGetAbsolutePath()
     {
         await CreateFixTest(
@@ -216,7 +216,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_NewFileInfo_WrapsWithGetAbsolutePath()
     {
         await CreateFixTest(

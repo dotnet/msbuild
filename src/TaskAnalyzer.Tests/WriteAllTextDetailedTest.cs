@@ -3,16 +3,16 @@
 
 using System.Threading.Tasks;
 using Shouldly;
-using Xunit;
 using System.Linq;
 
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
 {
+    [TestClass]
     public class WriteAllTextDetailedTest
     {
-        [Fact]
+        [TestMethod]
         public async Task File_WriteAllText_ChecksDiagnosticCount()
         {
             var diags = await GetDiagnosticsAsync(@"

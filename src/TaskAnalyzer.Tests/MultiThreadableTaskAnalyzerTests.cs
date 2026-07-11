@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
@@ -13,13 +12,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// Tests for <see cref="MultiThreadableTaskAnalyzer"/> covering all 4 diagnostic rules.
 /// Uses manual compilation to avoid fragile message argument matching.
 /// </summary>
+[TestClass]
 public class MultiThreadableTaskAnalyzerTests
 {
     // ═══════════════════════════════════════════════════════════════════════
     // MSBuildTask0001: Critical errors
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task ConsoleWriteLine_InAnyTask_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -38,7 +38,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Length.ShouldBe(1);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConsoleWrite_MultipleOverloads_AllDetected()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -59,7 +59,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(4);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConsoleOut_PropertyAccess_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -77,7 +77,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task EnvironmentExit_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -96,7 +96,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Length.ShouldBe(1);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task EnvironmentFailFast_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -114,7 +114,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ThreadPoolSetMinMaxThreads_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -133,7 +133,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task CultureInfoDefaults_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -152,7 +152,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(2);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConsoleReadLine_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -170,7 +170,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ProcessKill_InAnyTask_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -189,7 +189,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MSBuildTask0001_FiresForRegularTask()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -212,7 +212,7 @@ public class MultiThreadableTaskAnalyzerTests
     // MSBuildTask0002: TaskEnvironment required (only for IMultiThreadableTask)
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task ProcessStart_InMultiThreadableTask_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -232,7 +232,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ProcessStartInfo_Constructor_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -252,7 +252,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task EnvironmentGetEnvVar_InRegularTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -270,7 +270,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ExpandEnvironmentVariables_InMultiThreadableTask_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -294,7 +294,7 @@ public class MultiThreadableTaskAnalyzerTests
     // MSBuildTask0003: File path requires absolute (only for IMultiThreadableTask)
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task FileReadAllText_WithStringArg_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -314,7 +314,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryExists_WithStringArg_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -334,7 +334,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewStreamReader_WithStringArg_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -358,7 +358,7 @@ public class MultiThreadableTaskAnalyzerTests
     // MSBuildTask0003 Safe Patterns: No diagnostic expected
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task FileExists_WithGetAbsolutePath_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -378,7 +378,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileExists_WithAbsolutePathVariable_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -399,7 +399,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileDelete_WithNullableAbsolutePathVariable_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -423,7 +423,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileExists_WithGetMetadataFullPath_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -447,7 +447,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileExists_WithFullNameProperty_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -472,7 +472,7 @@ public class MultiThreadableTaskAnalyzerTests
     // Safe wrapper recognition: Path.GetDirectoryName, Path.Combine, Path.GetFullPath
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryCreate_WithGetDirectoryNameOfAbsolutePath_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -494,7 +494,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryCreate_WithGetDirectoryNameOfString_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -515,7 +515,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileInfo_WithPathCombineSafeBase_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -537,7 +537,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileInfo_WithPathCombineUnsafeBase_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -558,7 +558,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileInfo_WithGetFullPathOfAbsolutePath_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -580,7 +580,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileInfo_WithGetFullPathOfRelative_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -601,7 +601,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileWriteAllText_WithNestedPathCombineGetDirectoryName_NoDiagnostic()
     {
         // Simulates WriteLinesToFile pattern: Path.Combine(Path.GetDirectoryName(AbsolutePath), random)
@@ -625,7 +625,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileInfo_WithPathCombineOfFullName_NoDiagnostic()
     {
         // Simulates DownloadFile pattern: Path.Combine(DirectoryInfo.FullName, filename)
@@ -649,7 +649,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileInfo_WithGetFullPathOfPathCombineSafe_NoDiagnostic()
     {
         // Simulates Unzip pattern: Path.GetFullPath(Path.Combine(DirectoryInfo.FullName, entry))
@@ -673,7 +673,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileApi_InRegularTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -691,7 +691,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryInfoFullName_SafePattern_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -716,7 +716,7 @@ public class MultiThreadableTaskAnalyzerTests
     // MSBuildTask0004: Potential issues (review required)
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task AssemblyLoadFrom_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -734,7 +734,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.PotentialIssue);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task AssemblyLoad_ByteArray_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -756,7 +756,7 @@ public class MultiThreadableTaskAnalyzerTests
     // Non-task classes: No diagnostics
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task NonTaskClass_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -781,7 +781,7 @@ public class MultiThreadableTaskAnalyzerTests
     // Edge Cases
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task Lambda_InsideTask_DetectsUnsafeApi()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -801,7 +801,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DerivedTask_InheritsITask_DetectsUnsafeApi()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -822,7 +822,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GenericTask_DetectsUnsafeApi()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -844,7 +844,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PropertyGetter_WithUnsafeApi_DetectsIt()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -861,7 +861,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MethodReference_AsDelegate_DetectsIt()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -881,7 +881,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MultipleUnsafeApis_AllDetected()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -910,7 +910,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Length.ShouldBe(4);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task CorrectlyMigratedTask_NoDiagnostics()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -942,7 +942,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FullyQualifiedConsole_DetectsIt()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -959,7 +959,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task TryCatchFinally_DetectsAllUnsafeApis()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -979,7 +979,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.CriticalError).Count().ShouldBe(3);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task AsyncMethod_InsideTask_DetectsUnsafeApi()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1002,7 +1002,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task StringInterpolation_WithConsole_DetectsIt()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1021,7 +1021,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task EmptyTask_NoDiagnostics()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1034,7 +1034,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GetMetadata_NonFullPath_StillTriggersWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1058,7 +1058,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NestedClass_NotTask_NoFalsePositive()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1081,7 +1081,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MSBuildTask0002_FiredForRegularTask()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1105,7 +1105,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MSBuildTask0003_FiredForRegularTask()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1124,7 +1124,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task XDocumentSave_WithStringPath_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1143,7 +1143,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task XmlReaderCreate_WithStringPath_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1161,7 +1161,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ZipFileOpenRead_WithStringPath_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1183,7 +1183,7 @@ public class MultiThreadableTaskAnalyzerTests
     // Iteration 9-13: New APIs and features
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task DirectorySetCurrentDirectory_ProducesCriticalError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1201,7 +1201,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryGetCurrentDirectory_InMultiThreadable_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1221,7 +1221,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PathGetTempPath_InMultiThreadable_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1241,7 +1241,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PathGetTempFileName_InMultiThreadable_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1261,7 +1261,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task EnvironmentGetFolderPath_InMultiThreadable_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1281,7 +1281,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConsoleSetOut_TypeLevelBan_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1299,7 +1299,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConsoleForegroundColor_TypeLevelBan_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1317,7 +1317,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConsoleTitle_TypeLevelBan_ProducesError()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1335,7 +1335,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ProcessStartWithPSI_InMultiThreadable_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1361,7 +1361,7 @@ public class MultiThreadableTaskAnalyzerTests
     // [MSBuildMultiThreadableTaskAnalyzed] attribute on helper classes
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task HelperClass_WithAttribute_AnalyzedLikeMultiThreadableTask()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1386,7 +1386,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task HelperClass_WithoutAttribute_NotAnalyzed()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1407,7 +1407,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task HelperClass_WithAttribute_ConsoleDetected()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1427,7 +1427,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task HelperClass_WithAttribute_SafePatterns_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1453,7 +1453,7 @@ public class MultiThreadableTaskAnalyzerTests
     // Multi-path parameter correctness (File.Copy has 2 path args)
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task FileCopy_SecondArgUnwrapped_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1474,7 +1474,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileCopy_BothArgsWrapped_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1496,7 +1496,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileCopy_FirstArgUnwrapped_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1521,7 +1521,7 @@ public class MultiThreadableTaskAnalyzerTests
     // Edge cases: LINQ lambdas, nested types, string literals
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task Lambda_FileExistsInsideLambda_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1542,7 +1542,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NestedClass_InsideTask_NotAnalyzedSeparately()
     {
         // Nested class within a task should NOT independently trigger analysis
@@ -1574,7 +1574,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.CriticalError).ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task StringInterpolation_ConsoleWithInterpolation_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1593,7 +1593,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task StaticMethod_InTask_DetectsUnsafeApis()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1616,7 +1616,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PropertyGetter_WithBannedApi_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1633,7 +1633,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task AsyncHelper_WithBannedApi_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1661,7 +1661,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConditionalAccess_WithBannedApi_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1682,7 +1682,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileApi_WithConstantPath_StillProducesDiagnostic()
     {
         // Even constant paths need absolutization - the task might be invoked from different directories
@@ -1704,7 +1704,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MultipleViolationsInSingleMethod_AllDetected()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1734,7 +1734,7 @@ public class MultiThreadableTaskAnalyzerTests
     // [MSBuildMultiThreadableTask] attribute on task classes
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task Task_WithMultiThreadableAttribute_AnalyzedForAllRules()
     {
         // A task with [MSBuildMultiThreadableTask] but NOT IMultiThreadableTask
@@ -1760,7 +1760,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Task_WithoutMultiThreadableAttribute_GetsAllRules()
     {
         // All rules now fire on all ITask implementations
@@ -1782,7 +1782,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task UsingStaticConsole_DetectedByTypeLevelBan()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1800,7 +1800,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.CriticalError);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileWriteAllText_NonPathStringParam_NoDiagnosticForContents()
     {
         // File.WriteAllText(string path, string contents) - "contents" should NOT be flagged
@@ -1822,7 +1822,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileAppendAllText_PathUnwrapped_FlagsPath()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -1843,7 +1843,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).Count().ShouldBe(1);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileWriteAllText_NamedArguments_HandledCorrectly()
     {
         // Named arguments can change the order of arguments in source vs parameters
@@ -1870,7 +1870,7 @@ public class MultiThreadableTaskAnalyzerTests
     // Scope option tests
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task Scope_MultithreadableOnly_PlainTask_NoDiagnostic()
     {
         var diags = await GetDiagnosticsWithScopeAsync("""
@@ -1889,7 +1889,7 @@ public class MultiThreadableTaskAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Scope_MultithreadableOnly_MultiThreadableTask_GetsDiagnostic()
     {
         var diags = await GetDiagnosticsWithScopeAsync("""

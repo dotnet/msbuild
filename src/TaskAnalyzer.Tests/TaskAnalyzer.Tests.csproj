@@ -1,13 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="MSTest.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <IsUnitTestProject>true</IsUnitTestProject>
     <!-- Not a standard MSBuild unit test — uses Roslyn analyzer testing infra.
-         DisableTestSharedFiles=true prevents Directory.Build.targets from adding
-         shared test files (TestAssemblyInfo.cs). -->
-    <DisableTestSharedFiles>true</DisableTestSharedFiles>
+         IsLibraryTestProject=true prevents Directory.Build.targets from adding
+         the MSBuild-specific shared test files (MSBuildTestMethodAttribute.cs,
+         TestAssemblyInfo.cs) which depend on the MSBuild engine assemblies this
+         project does not reference. -->
+    <IsLibraryTestProject>true</IsLibraryTestProject>
   </PropertyGroup>
 
   <ItemGroup>

@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
@@ -17,12 +16,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// Tests for <see cref="TransitiveCallChainAnalyzer"/> — verifies that unsafe API usage
 /// reachable through helper method calls is detected and reported with call chains.
 /// </summary>
+[TestClass]
 public class TransitiveCallChainAnalyzerTests
 {
-    [Theory]
-    [InlineData("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine")]
-    [InlineData("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists")]
-    [InlineData("using System;", "Environment.GetEnvironmentVariable(\"KEY\");", "GetEnvironmentVariable")]
+    [TestMethod]
+    [DataRow("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine")]
+    [DataRow("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists")]
+    [DataRow("using System;", "Environment.GetEnvironmentVariable(\"KEY\");", "GetEnvironmentVariable")]
     public async Task HelperCallingBannedApi_TransitivelyFromTask_ProducesDiagnostic(
         string usingDirective, string helperBody, string expectedApiName)
     {
@@ -50,7 +50,7 @@ public class TransitiveCallChainAnalyzerTests
         transitive[0].GetMessage().ShouldContain(expectedApiName);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task TwoLevelChain_HelperCallingHelperCallingBannedApi()
     {
         var diags = await GetAllDiagnosticsAsync("""
@@ -83,7 +83,7 @@ public class TransitiveCallChainAnalyzerTests
         msg.ShouldContain("InnerHelper.DoExit");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectCallInTask_NotReportedAsTransitive()
     {
         // Direct calls within the task should only produce direct diagnostics, not transitive
@@ -106,7 +106,7 @@ public class TransitiveCallChainAnalyzerTests
         direct.ShouldNotBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task SafeHelper_NoTransitiveDiagnostic()
     {
         var diags = await GetAllDiagnosticsAsync("""
@@ -129,7 +129,7 @@ public class TransitiveCallChainAnalyzerTests
         transitive.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task RecursiveCallChain_DoesNotStackOverflow()
     {
         var diags = await GetAllDiagnosticsAsync("""
@@ -156,7 +156,7 @@ public class TransitiveCallChainAnalyzerTests
         transitive[0].GetMessage().ShouldContain("Console.WriteLine");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task InstanceMethodHelper_TransitivelyDetected()
     {
         var diags = await GetAllDiagnosticsAsync("""
@@ -182,7 +182,7 @@ public class TransitiveCallChainAnalyzerTests
         transitive[0].GetMessage().ShouldContain("Console.Write");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MultipleViolationsInChain_AllReported()
     {
         var diags = await GetAllDiagnosticsAsync("""
@@ -212,7 +212,7 @@ public class TransitiveCallChainAnalyzerTests
         transitive.Length.ShouldBeGreaterThanOrEqualTo(3);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ChainMessageFormat_ContainsArrowSeparatedMethods()
     {
         var diags = await GetAllDiagnosticsAsync("""
