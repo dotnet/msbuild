@@ -8,16 +8,18 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.EndToEndTests
 {
     /// <summary>
     /// Tests for multithreaded MSBuild execution scenarios using test assets.
     /// </summary>
-    public class MultithreadedExecution_Tests : IClassFixture<TestSolutionAssetsFixture>, IDisposable
+    [TestClass]
+    public class MultithreadedExecution_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private static TestSolutionAssetsFixture? s_testAssetFixture;
+
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
         private readonly string _testAssetDir;
 
@@ -29,11 +31,17 @@ namespace Microsoft.Build.EndToEndTests
         // /v:minimal - Reduces log verbosity for cleaner test output and better performance
         private const string CommonMSBuildArgs = "/nodereuse:false /v:minimal";
 
-        public MultithreadedExecution_Tests(ITestOutputHelper output, TestSolutionAssetsFixture testAssetFixture)
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            s_testAssetFixture = new TestSolutionAssetsFixture();
+        }
+
+        public MultithreadedExecution_Tests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
-            _testAssetDir = testAssetFixture.TestAssetDir;
+            _testAssetDir = s_testAssetFixture!.TestAssetDir;
         }
 
         public void Dispose()
@@ -102,13 +110,13 @@ namespace Microsoft.Build.EndToEndTests
         /// <summary>
         /// Tests building projects with various multithreading flags.
         /// </summary>
-        [Theory]
-        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:2 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:8 /mt")]
+        [MSBuildTestMethod]
+        [DataRow(nameof(TestSolutionAssetsFixture.SingleProject), "/m:1 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.SingleProject), "/mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:1 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:2 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:8 /mt")]
         public void MultithreadedBuild_Success(string testAssetName, string multithreadingArgs)
         {
             BuildAndVerify(testAssetName, multithreadingArgs);
@@ -153,9 +161,9 @@ namespace Microsoft.Build.EndToEndTests
         /// <summary>
         /// Tests binary logging with multithreaded builds and verifies replay functionality.
         /// </summary>
-        [Theory]
-        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:8 /mt")]
+        [MSBuildTestMethod]
+        [DataRow(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:8 /mt")]
         public void MultithreadedBuild_BinaryLogging(string testAssetName, string multithreadingArgs)
         {
             BuildWithBinlogAndVerifyReplay(testAssetName, multithreadingArgs);
@@ -165,12 +173,12 @@ namespace Microsoft.Build.EndToEndTests
         /// Tests building non-SDK-style projects with multithreading flags.
         /// </summary>
         [WindowsOnlyTheory]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:1 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:2 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:8 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:1 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:1 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:2 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:8 /mt")]
         public void MultithreadedBuild_NonSdkStyle_Success(string testAssetName, string multithreadingArgs)
         {
             BuildAndVerify(testAssetName, multithreadingArgs);
@@ -180,8 +188,8 @@ namespace Microsoft.Build.EndToEndTests
         /// Tests binary logging with non-SDK-style multithreaded builds and verifies replay functionality.
         /// </summary>
         [WindowsOnlyTheory]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
-        [InlineData(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:8 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkSingleProject), "/m:8 /mt")]
+        [DataRow(nameof(TestSolutionAssetsFixture.NonSdkProjectWithDependencies), "/m:8 /mt")]
         public void MultithreadedBuild_NonSdkStyle_BinaryLogging(string testAssetName, string multithreadingArgs)
         {
             BuildWithBinlogAndVerifyReplay(testAssetName, multithreadingArgs);
