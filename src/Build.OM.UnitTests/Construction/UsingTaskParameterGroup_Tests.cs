@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -15,6 +14,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectUsingParameterElement class
     /// </summary>
+    [TestClass]
     public class UsingTaskParameterGroup_Tests
     {
         /// <summary>
@@ -59,25 +59,25 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read simple parameterGroup body
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadEmptyParameterGroup()
         {
             UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentEmptyParameterGroup);
-            Assert.NotNull(parameterGroup);
-            Assert.Equal(0, parameterGroup.Count);
-            Assert.Empty(parameterGroup.Parameters);
+            Assert.IsNotNull(parameterGroup);
+            Assert.AreEqual(0, parameterGroup.Count);
+            Assert.IsEmpty(parameterGroup.Parameters);
         }
 
         /// <summary>
         /// Read simple parameterGroup body
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMutipleParameters()
         {
             UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentMultipleParameters);
-            Assert.NotNull(parameterGroup);
-            Assert.Equal(2, parameterGroup.Count);
-            Assert.NotNull(parameterGroup.Parameters);
+            Assert.IsNotNull(parameterGroup);
+            Assert.AreEqual(2, parameterGroup.Count);
+            Assert.IsNotNull(parameterGroup.Parameters);
 
             bool foundFirst = false;
             bool foundSecond = false;
@@ -94,17 +94,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 }
             }
 
-            Assert.True(foundFirst);
-            Assert.True(foundSecond);
+            Assert.IsTrue(foundFirst);
+            Assert.IsTrue(foundSecond);
         }
 
         /// <summary>
         /// Read simple parameterGroup body
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadDuplicateChildParameters()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 GetParameterGroupXml(s_contentDuplicateParameters);
                 Assert.Fail();
@@ -113,10 +113,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read parameterGroup with a attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>

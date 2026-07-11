@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="MSTest.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
+    <IsUnitTestProject>true</IsUnitTestProject>
 
     <AssemblyName>Microsoft.Build.Engine.OM.UnitTests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -30,14 +31,11 @@
 
   <ItemGroup>
     <Compile Include="..\GlobalUsings.cs">
-      <Link>GlobalUsings.cs</Link>
+      <Link>GlobalUsings.Shared.cs</Link>
     </Compile>
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
-    </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -46,7 +44,6 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
-    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
   </ItemGroup>

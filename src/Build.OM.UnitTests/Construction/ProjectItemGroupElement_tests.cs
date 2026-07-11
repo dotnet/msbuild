@@ -4,7 +4,6 @@
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Xunit;
 
 #nullable disable
 
@@ -13,23 +12,24 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectItemGroupElement class
     /// </summary>
+    [TestClass]
     public class ProjectItemGroupElement_tests
     {
         /// <summary>
         /// Read item groups in an empty project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadNoItemGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Empty(project.ItemGroups);
+            Assert.AreEqual(0, Helpers.Count(project.Children));
+            Assert.IsEmpty(project.ItemGroups);
         }
 
         /// <summary>
         /// Read an empty item group
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadEmptyItemGroup()
         {
             string content = @"
@@ -42,13 +42,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 
-            Assert.Equal(0, Helpers.Count(group.Items));
+            Assert.AreEqual(0, Helpers.Count(group.Items));
         }
 
         /// <summary>
         /// Read an item group with two item children
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadItemGroupTwoItems()
         {
             string content = @"
@@ -66,15 +66,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(group.Items);
 
-            Assert.Equal(2, items.Count);
-            Assert.Equal("i1", items[0].Include);
-            Assert.Equal("i2", items[1].Include);
+            Assert.AreEqual(2, items.Count);
+            Assert.AreEqual("i1", items[0].Include);
+            Assert.AreEqual("i2", items[1].Include);
         }
 
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -84,14 +84,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemGroupElement itemGroup = Helpers.GetFirst(project.ItemGroups);
             itemGroup.Condition = "c";
 
-            Assert.Equal("c", itemGroup.Condition);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("c", itemGroup.Condition);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set the Label value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetLabel()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -101,12 +101,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemGroupElement itemGroup = Helpers.GetFirst(project.ItemGroups);
             itemGroup.Label = "c";
 
-            Assert.Equal("c", itemGroup.Label);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("c", itemGroup.Label);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
-        [Theory]
-        [InlineData("""
+        [MSBuildTestMethod]
+        [DataRow("""
             <Project>
                 <ItemGroup>
                     <PackageReference Include="A" Version="1.0.0" /><!-- some comment -->
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             </Project>
             """,
             true)] // use trailing single comment scenario
-        [InlineData("""
+        [DataRow("""
             <Project>
               <ItemGroup>
                 <PackageReference Include="A" Version="1.0.0" /><!--
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             </Project>
             """,// use multi-line trailing comment scenario
             true)]
-        [InlineData("""
+        [DataRow("""
             <Project>
                <ItemGroup>
                     <PackageReference Include="A" Version="1.0.0" />
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             </Project>
             """,
             false)] // use multi-line comment scenario
-        [InlineData(
+        [DataRow(
             """
             <Project>
               <ItemGroup>

@@ -8,7 +8,6 @@ using System.Linq;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 
@@ -17,6 +16,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for protecting imported files while editing
     /// </summary>
+    [TestClass]
     public class ProtectImports_Tests : IDisposable
     {
         #region Constants
@@ -126,10 +126,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests against edits into imported properties through the property itself.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertySetViaProperty()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectProperty property = GetProperty(project);
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Instead of editing the existing property, because it originated
         /// in an imported file, it should create a new one in the main project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertySetViaProject()
         {
             Project project = GetProject();
@@ -151,16 +151,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             project.SetProperty(PropertyName, NewValue);
 
-            Assert.Equal(NewValue, project.GetPropertyValue(PropertyName));
+            Assert.AreEqual(NewValue, project.GetPropertyValue(PropertyName));
         }
 
         /// <summary>
         /// Tests against edits into imported properties through the property itself.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyRemove()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectProperty property = GetProperty(project);
@@ -176,10 +176,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests imported item type change.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemImportedChangeType()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetImportedItem(project);
@@ -191,10 +191,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests imported item renaming.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemImportedRename()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetImportedItem(project);
@@ -206,10 +206,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests imported item SetUnevaluatedValue.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemImportedSetUnevaluatedValue()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetImportedItem(project);
@@ -221,10 +221,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests imported item removal.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemImportedRemove()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetImportedItem(project);
@@ -236,57 +236,57 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests project item type change.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemProjectChangeType()
         {
             Project project = GetProject();
             ProjectItem item = GetProjectItem(project);
 
             item.ItemType = NewValue;
-            Assert.Single(project.GetItems(NewValue)); // "Item in project didn't change name"
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.ContainsSingle(project.GetItems(NewValue)); // "Item in project didn't change name"
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests project item renaming.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemProjectRename()
         {
             Project project = GetProject();
             ProjectItem item = GetProjectItem(project);
 
             item.Rename(NewValue);
-            Assert.Equal(NewValue, item.EvaluatedInclude); // "Item in project didn't change name."
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.AreEqual(NewValue, item.EvaluatedInclude); // "Item in project didn't change name."
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests project item SetUnevaluatedValue.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemProjectSetUnevaluatedValue()
         {
             Project project = GetProject();
             ProjectItem item = GetProjectItem(project);
 
             item.UnevaluatedInclude = NewValue;
-            Assert.Equal(NewValue, item.EvaluatedInclude); // "Item in project didn't change name."
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.AreEqual(NewValue, item.EvaluatedInclude); // "Item in project didn't change name."
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests project item removal.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemProjectRemove()
         {
             Project project = GetProject();
             ProjectItem item = GetProjectItem(project);
 
             project.RemoveItem(item);
-            Assert.Single(project.GetItems(ItemType)); // "Item in project wasn't removed."
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.ContainsSingle(project.GetItems(ItemType)); // "Item in project wasn't removed."
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         #endregion
@@ -296,10 +296,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting existing metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataImportSetViaProject()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetImportedItem(project);
@@ -311,10 +311,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataImportAdd()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetImportedItem(project);
@@ -326,10 +326,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataImportSetViaMetadata()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectMetadata metadata = GetImportedMetadata(project);
@@ -341,10 +341,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests removing metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataImportRemove()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetImportedItem(project);
@@ -356,21 +356,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting existing metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataProjectSetViaItem()
         {
             Project project = GetProject();
             ProjectItem item = GetProjectItem(project);
 
             item.SetMetadataValue(ProjectMetadataName, NewValue);
-            Assert.Equal(NewValue, item.GetMetadataValue(ProjectMetadataName)); // "Metadata not saved correctly in project."
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.AreEqual(NewValue, item.GetMetadataValue(ProjectMetadataName)); // "Metadata not saved correctly in project."
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataProjectAdd()
         {
             Project project = GetProject();
@@ -378,14 +378,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             string newName = "NewMetadata";
             item.SetMetadataValue(newName, NewValue);
-            Assert.Equal(NewValue, item.GetMetadataValue(newName)); // "Metadata not saved correctly in project."
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.AreEqual(NewValue, item.GetMetadataValue(newName)); // "Metadata not saved correctly in project."
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataProjectSetViaMetadata()
         {
             Project project = GetProject();
@@ -394,22 +394,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             string newValue = "NewProjectMetadataValue";
             metadata.UnevaluatedValue = newValue;
 
-            Assert.Equal(newValue, metadata.EvaluatedValue);
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.AreEqual(newValue, metadata.EvaluatedValue);
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests removing metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataProjectRemove()
         {
             Project project = GetProject();
             ProjectItem item = GetProjectItem(project);
 
             item.RemoveMetadata(ProjectMetadataName);
-            Assert.False(item.HasMetadata(ProjectMetadataName)); // "Metadata was not removed from project."
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.IsFalse(item.HasMetadata(ProjectMetadataName)); // "Metadata was not removed from project."
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         #endregion
@@ -419,10 +419,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinitionMetadataImportSetViaMetadata()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectMetadata metadata = GetNonOverridableMetadata(project);
@@ -434,10 +434,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests removing metadata in imported item definition.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinitionMetadataImportRemove()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 Project project = GetProject();
                 ProjectItem item = GetProjectItem(project);
@@ -449,35 +449,35 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Tests setting existing metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinitionMetadataProjectSetViaProject()
         {
             Project project = GetProject();
             ProjectItem item = GetProjectItem(project);
 
             item.SetMetadataValue(OverridableMetadataName, NewValue);
-            Assert.Equal(NewValue, item.GetMetadataValue(OverridableMetadataName)); // "Metadata not set correctly in project."
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.AreEqual(NewValue, item.GetMetadataValue(OverridableMetadataName)); // "Metadata not set correctly in project."
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests setting new metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinitionMetadataProjectSetViaMetadata()
         {
             Project project = GetProject();
             ProjectMetadata metadata = GetOverridableMetadata(project);
 
             metadata.UnevaluatedValue = NewValue;
-            Assert.Equal(NewValue, metadata.EvaluatedValue);
-            Assert.True(project.IsDirty); // "Project was not marked dirty."
+            Assert.AreEqual(NewValue, metadata.EvaluatedValue);
+            Assert.IsTrue(project.IsDirty); // "Project was not marked dirty."
         }
 
         /// <summary>
         /// Tests removing metadata in import.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinitionMetadataProjectRemove()
         {
             Project project = GetProject();
@@ -486,8 +486,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item.RemoveMetadata(OverridableMetadataName);
 
             ProjectMetadata metadata = item.GetMetadata(OverridableMetadataName);
-            Assert.NotNull(metadata); // "Imported metadata not found after the project's one was removed."
-            Assert.True(metadata.IsImported); // "IsImported property is not set."
+            Assert.IsNotNull(metadata); // "Imported metadata not found after the project's one was removed."
+            Assert.IsTrue(metadata.IsImported); // "IsImported property is not set."
         }
 
         #endregion
@@ -523,10 +523,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private ProjectItem GetImportedItem(Project project)
         {
             IEnumerable<ProjectItem> items = project.GetItems(ItemType).Where(pi => pi.IsImported);
-            Assert.Single(items); // "Wrong number of items in the import."
+            Assert.ContainsSingle(items); // "Wrong number of items in the import."
 
             ProjectItem item = items.First();
-            Assert.Equal(_importFilename, item.Xml.ContainingProject.FullPath); // "Item was not found in the imported project."
+            Assert.AreEqual(_importFilename, item.Xml.ContainingProject.FullPath); // "Item was not found in the imported project."
 
             return item;
         }
@@ -540,10 +540,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             ProjectItem item = GetImportedItem(project);
             IEnumerable<ProjectMetadata> metadatum = item.Metadata.Where(m => m.Name == ImportedMetadataName);
-            Assert.Single(metadatum); // "Incorrect number of imported metadata found."
+            Assert.ContainsSingle(metadatum); // "Incorrect number of imported metadata found."
 
             ProjectMetadata metadata = metadatum.First();
-            Assert.True(metadata.IsImported); // "IsImport property is not set."
+            Assert.IsTrue(metadata.IsImported); // "IsImport property is not set."
 
             return metadata;
         }
@@ -557,10 +557,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             ProjectItem item = GetProjectItem(project);
             IEnumerable<ProjectMetadata> metadatum = item.Metadata.Where(m => m.Name == NonOverridableMetadataName);
-            Assert.Single(metadatum); // "Incorrect number of imported metadata found."
+            Assert.ContainsSingle(metadatum); // "Incorrect number of imported metadata found."
 
             ProjectMetadata metadata = metadatum.First();
-            Assert.True(metadata.IsImported); // "IsImport property is not set."
+            Assert.IsTrue(metadata.IsImported); // "IsImport property is not set."
 
             return metadata;
         }
@@ -574,10 +574,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             ProjectItem item = GetProjectItem(project);
             IEnumerable<ProjectMetadata> metadatum = item.Metadata.Where(m => m.Name == OverridableMetadataName);
-            Assert.Single(metadatum); // "Incorrect number of imported metadata found."
+            Assert.ContainsSingle(metadatum); // "Incorrect number of imported metadata found."
 
             ProjectMetadata metadata = metadatum.First();
-            Assert.False(metadata.IsImported); // "IsImport property is set."
+            Assert.IsFalse(metadata.IsImported); // "IsImport property is set."
 
             return metadata;
         }
@@ -617,8 +617,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private ProjectProperty GetProperty(Project project)
         {
             ProjectProperty property = project.GetProperty(PropertyName);
-            Assert.Equal(_importFilename, property.Xml.ContainingProject.FullPath); // "Property was not found in the imported project."
-            Assert.True(property.IsImported); // "IsImported property was not set."
+            Assert.AreEqual(_importFilename, property.Xml.ContainingProject.FullPath); // "Property was not found in the imported project."
+            Assert.IsTrue(property.IsImported); // "IsImported property was not set."
             return property;
         }
 
@@ -630,10 +630,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private ProjectItem GetProjectItem(Project project)
         {
             IEnumerable<ProjectItem> items = project.GetItems(ItemType).Where(pi => !pi.IsImported);
-            Assert.Single(items); // "Wrong number of items in the project."
+            Assert.ContainsSingle(items); // "Wrong number of items in the project."
 
             ProjectItem item = items.First();
-            Assert.Null(item.Xml.ContainingProject.FullPath); // "Item was not found in the project." // null because XML is in-memory
+            Assert.IsNull(item.Xml.ContainingProject.FullPath); // "Item was not found in the project." // null because XML is in-memory
 
             return item;
         }
@@ -647,10 +647,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             ProjectItem item = GetProjectItem(project);
             IEnumerable<ProjectMetadata> metadatum = item.Metadata.Where(m => m.Name == ProjectMetadataName);
-            Assert.Single(metadatum); // "Incorrect number of imported metadata found."
+            Assert.ContainsSingle(metadatum); // "Incorrect number of imported metadata found."
 
             ProjectMetadata metadata = metadatum.First();
-            Assert.False(metadata.IsImported); // "IsImport property is set."
+            Assert.IsFalse(metadata.IsImported); // "IsImport property is set."
 
             return metadata;
         }

@@ -11,17 +11,17 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 {
+    [TestClass]
     public class ProjectFormatting_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
-        public ProjectFormatting_Tests(ITestOutputHelper testOutput)
+        public ProjectFormatting_Tests(TestContext testOutput)
         {
             _testOutput = testOutput;
             Setup();
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             Setup();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectCommentFormatting()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyProjectReformatting(content, reformattedContent);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectWhitespaceFormatting()
         {
             // Note that there are two spaces after the <ItemGroup> tag on the second line
@@ -96,7 +96,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyProjectReformatting(content, reformattedContent);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectAddItemFormatting_StartOfGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectAddItemFormatting_MiddleOfGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectAddItemFormatting_EndOfGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectAddItemFormatting_EmptyGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -233,7 +233,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectAddItemFormatting_NoItemGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -262,7 +262,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectRemoveItemFormatting()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -301,7 +301,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectAddItemMetadataFormatting()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -343,7 +343,8 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/362")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/362")]
         public void PreprocessorFormatting()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -490,7 +491,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             Helpers.VerifyAssertLineByLine(expected, actual, false, _testOutput);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyNamespaceRemainsWhenPresent()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -505,7 +506,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyFormattingPreserved(content);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyNoNamespaceRemains()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -518,7 +519,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyFormattingPreserved(content);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefaultProjectSaveContainsAllNewFileOptions()
         {
             // XML declaration tag, namespace, and tools version must be present by default.
@@ -543,7 +544,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NewProjectSaveWithOptionsNone()
         {
             // When NewProjectFileOptions.None is specified, we should not have an XML declaration,
@@ -568,7 +569,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ChangeItemTypeNoNamespace()
         {
             string expected = ObjectModelHelpers.CleanupFileContents(@"<Project>
@@ -589,7 +590,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ChangeItemTypeWithNamespace()
         {
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=`1.0` encoding=`utf-16`?>
@@ -612,7 +613,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ChangeItemTypeWithXmlHeader()
         {
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -636,7 +637,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyUtf8WithoutBomTreatedAsUtf8()
         {
             string expected = ObjectModelHelpers.CleanupFileContents(@"<Project>
@@ -651,25 +652,25 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectFileWithBomContainsBomAfterSave()
         {
             CreateProjectAndAssertEncoding(xmlDeclaration: false, byteOrderMark: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectFileWithoutBomDoesNotContainsBomAfterSave()
         {
             CreateProjectAndAssertEncoding(xmlDeclaration: false, byteOrderMark: false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectFileWithoutBomWithXmlDeclarationDoesNotContainsBomAfterSave()
         {
             CreateProjectAndAssertEncoding(xmlDeclaration: true, byteOrderMark: false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectFileWithBomWithXmlDeclarationContainsBomAfterSave()
         {
             CreateProjectAndAssertEncoding(xmlDeclaration: true, byteOrderMark: true);
@@ -687,7 +688,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             try
             {
                 File.WriteAllText(file, content, new UTF8Encoding(encoderShouldEmitUTF8Identifier: byteOrderMark));
-                Assert.Equal(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
+                Assert.AreEqual(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
 
                 // Load and manipulate/save the project
                 var project = new Project(ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection));
@@ -705,7 +706,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 {
                     Assert.DoesNotContain(declaration, actualContents);
                 }
-                Assert.Equal(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
+                Assert.AreEqual(byteOrderMark, EncodingUtilities.FileStartsWithPreamble(file));
             }
             finally
             {

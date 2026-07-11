@@ -8,7 +8,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System;
     using System.Collections.Generic;
     using Microsoft.Build.Evaluation;
-    using Xunit;
 
     public class TestCollectionGroup : IDisposable
     {
@@ -201,7 +200,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         protected void TakeSnapshot()
         {
-            Assert.Null(this.ImmutableProjects);
+            Assert.IsNull(this.ImmutableProjects);
             var result = new Dictionary<ProjectCollectionLinker, HashSet<Project>>();
             this.Local.Importing = false;
             result.Add(this.Local, new HashSet<Project>(this.Local.Collection.LoadedProjects));

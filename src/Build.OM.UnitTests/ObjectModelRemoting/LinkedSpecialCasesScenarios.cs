@@ -9,9 +9,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Linq;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
-    using Xunit;
 
-    public class LinkedSpecialCasesScenarios : IClassFixture<LinkedSpecialCasesScenarios.MyTestCollectionGroup>
+    [TestClass]
+    public class LinkedSpecialCasesScenarios
     {
         public class MyTestCollectionGroup : TestCollectionGroup
         {
@@ -52,14 +52,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 this.Local.Importing = true;
                 {
                     var targetView = this.Local.GetLoadedProjects(this.TargetBigPath).FirstOrDefault();
-                    Assert.NotNull(targetView);
+                    Assert.IsNotNull(targetView);
                     var targetPair = new ProjectPair(targetView, this.TargetBig);
                     this.TargetXmlPair = new ProjectXmlPair(targetPair);
                 }
 
                 {
                     var guestView = this.Local.GetLoadedProjects(this.GuestBigPath).FirstOrDefault();
-                    Assert.NotNull(guestView);
+                    Assert.IsNotNull(guestView);
                     var guestPair = new ProjectPair(guestView, this.GuestBig);
                     this.GuestXmlPair = new ProjectXmlPair(guestPair);
                 }
@@ -67,10 +67,19 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         public MyTestCollectionGroup StdGroup { get; }
-        public LinkedSpecialCasesScenarios(MyTestCollectionGroup group)
+
+        private static MyTestCollectionGroup s_stdGroup;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context) => s_stdGroup = new MyTestCollectionGroup();
+
+        [ClassCleanup]
+        public static void ClassCleanup() => s_stdGroup?.Dispose();
+
+        public LinkedSpecialCasesScenarios()
         {
-            this.StdGroup = group;
-            group.ResetBeforeTests();
+            this.StdGroup = s_stdGroup;
+            s_stdGroup.ResetBeforeTests();
         }
 
         private ProjectPair GetNewInMemoryProject(string path, string content = null)
@@ -80,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var newReal = this.StdGroup.Target.LoadInMemoryWithSettings(content, ProjectLoadSettings.IgnoreMissingImports);
             newReal.Xml.FullPath = tempPath;
             var newView = this.StdGroup.Local.GetLoadedProjects(tempPath).FirstOrDefault();
-            Assert.NotNull(newView);
+            Assert.IsNotNull(newView);
 
             ViewValidation.Verify(newView, newReal);
 
@@ -94,21 +103,21 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var projectPair = GetNewInMemoryProject("Clone", TestCollectionGroup.BigProjectFile);
             var xmlPair = new ProjectXmlPair(projectPair);
 
-            Assert.True(xmlPair.View.HasUnsavedChanges);
+            Assert.IsTrue(xmlPair.View.HasUnsavedChanges);
             xmlPair.View.Save();
-            Assert.False(xmlPair.View.HasUnsavedChanges);
+            Assert.IsFalse(xmlPair.View.HasUnsavedChanges);
 
             sourceProject ??= xmlPair.View;
 
 
             // var existingItemGroup1 = sourceProject.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1");
             var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where((ig) => ig.Label == "Group1").ToList();
-            Assert.Single(existingItemGroupList);
+            Assert.ContainsSingle(existingItemGroupList);
             var existingItemGroup = existingItemGroupList[0];
 
             var cloned = (ProjectItemGroupElement)existingItemGroup.Clone();
-            Assert.NotSame(cloned, existingItemGroup);
-            Assert.False(sourceProject.HasUnsavedChanges);
+            Assert.AreNotSame(cloned, existingItemGroup);
+            Assert.IsFalse(sourceProject.HasUnsavedChanges);
 
             var sourceIsALink = ViewValidation.IsLinkedObject(sourceProject);
             ViewValidation.VerifyNotNull(cloned, sourceIsALink);
@@ -116,7 +125,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             if (externalSource)
             {
-                Assert.ThrowsAny<InvalidOperationException>(() => xmlPair.View.AppendChild(cloned));
+                Assert.ThrowsExactly<InvalidOperationException>(() => xmlPair.View.AppendChild(cloned));
             }
             else
             {
@@ -124,8 +133,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 xmlPair.QueryChildrenWithValidation<ProjectItemGroupElement>((ig) => ig == cloned || ig == clonedPair.Real, 0);
 
                 xmlPair.View.AppendChild(cloned);
-                Assert.True(xmlPair.View.HasUnsavedChanges);
-                Assert.True(xmlPair.Real.HasUnsavedChanges);
+                Assert.IsTrue(xmlPair.View.HasUnsavedChanges);
+                Assert.IsTrue(xmlPair.Real.HasUnsavedChanges);
 
                 clonedPair.VerifySame(xmlPair.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig == clonedPair.View || ig == clonedPair.Real));
                 xmlPair.QueryChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1", 2);
@@ -133,7 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 clonedPair.VerifySetter("Group2", (g) => g.Label, (g, v) => g.Label = v);
                 xmlPair.Verify();
 
-                Assert.Equal("Group1", existingItemGroup.Label);
+                Assert.AreEqual("Group1", existingItemGroup.Label);
             }
         }
 
@@ -148,16 +157,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var projectPair = GetNewInMemoryProject("CopyFrom", TestCollectionGroup.BigProjectFile);
             var xmlPair = new ProjectXmlPair(projectPair);
 
-            Assert.True(xmlPair.View.HasUnsavedChanges);
+            Assert.IsTrue(xmlPair.View.HasUnsavedChanges);
             xmlPair.View.Save();
-            Assert.False(xmlPair.View.HasUnsavedChanges);
+            Assert.IsFalse(xmlPair.View.HasUnsavedChanges);
 
             sourceProject ??= xmlPair.View;
 
             var existingItemGroupList = sourceProject.AllChildren.OfType<ProjectItemGroupElement>().Where((ig) => ig.Label == "Group1").ToList();
-            Assert.Single(existingItemGroupList);
+            Assert.ContainsSingle(existingItemGroupList);
             var existingItemGroup = existingItemGroupList[0];
-            Assert.NotNull(existingItemGroup);
+            Assert.IsNotNull(existingItemGroup);
             var realExistingItemGroup = ViewValidation.GetRealObject(existingItemGroup);
 
             var ourGroup1 = xmlPair.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1");
@@ -170,15 +179,15 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             newCopyFrom.VerifySame(xmlPair.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "CopyFrom"));
             ourGroup1.VerifySame(xmlPair.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1"));
             // children are not copied.
-            Assert.Empty(newCopyFrom.View.Items);
+            Assert.IsEmpty(newCopyFrom.View.Items);
             // but attributes are (even non standard)
-            // Assert.Equal("2", ProjectElementLink.GetAttributeValue(existingItemGroup, "FunnyAttribute", true));
-            // Assert.Equal("2", ProjectElementLink.GetAttributeValue(newCopyFrom.View, "FunnyAttribute", true));
+            // Assert.AreEqual("2", ProjectElementLink.GetAttributeValue(existingItemGroup, "FunnyAttribute", true));
+            // Assert.AreEqual("2", ProjectElementLink.GetAttributeValue(newCopyFrom.View, "FunnyAttribute", true));
             newCopyFrom.VerifyNotSame(ourGroup1);
 
 
-            Assert.True(xmlPair.View.HasUnsavedChanges);
-            Assert.False(externalSource && sourceProject.HasUnsavedChanges);
+            Assert.IsTrue(xmlPair.View.HasUnsavedChanges);
+            Assert.IsFalse(externalSource && sourceProject.HasUnsavedChanges);
 
             var newDeepCopy = xmlPair.AddNewLabeledChaildWithVerify<ProjectItemGroupElement>(ObjectType.View, "newGrop", (p, l) => p.AddItemGroup());
             newDeepCopy.View.DeepCopyFrom(existingItemGroup);
@@ -186,7 +195,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             xmlPair.QueryChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1", 2);
             // slightly cheting but we know that the large groups should be the same, even though there are not the same object
             // note do that before changing the label.
-            Assert.NotSame(realExistingItemGroup, newDeepCopy.Real);
+            Assert.AreNotSame(realExistingItemGroup, newDeepCopy.Real);
             // TODO XmlLocation is (correctly) different for the items, need to find a way to bypass it.
             var context = new ValidationContext();
             context.ValidateLocation = delegate (ElementLocation a, ElementLocation e) { return; };
@@ -197,30 +206,30 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             ourGroup1.VerifySame(xmlPair.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1"));
             newDeepCopy.VerifyNotSame(ourGroup1);
 
-            Assert.False(externalSource && sourceProject.HasUnsavedChanges);
+            Assert.IsFalse(externalSource && sourceProject.HasUnsavedChanges);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneAndAddInnerProject()
         {
             CloneAndAddInternal(null);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneAndAddCrossProjectSameCollection()
         {
             // view gets "a view" object as argument from different project (but in the same collection)
             CloneAndAddInternal(this.StdGroup.TargetXmlPair.View);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneAndAddCrossProjectLocalSource()
         {
             // view gets "a real" object as argument
             CloneAndAddInternal(this.StdGroup.LocalBig.Xml);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneAndAddCrossProjectCrossCollection()
         {
             // view gets "a view" object as argument from different project and collection (double proxy)
@@ -228,25 +237,25 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromInnerProject()
         {
             CopyFromInternal(null);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromCrossProjectSameCollection()
         {
             CopyFromInternal(this.StdGroup.TargetXmlPair.View);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromCrossProjectLocalSource()
         {
             CopyFromInternal(this.StdGroup.LocalBig.Xml);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromCrossProjectCrossCollection()
         {
             CopyFromInternal(this.StdGroup.GuestXmlPair.View);

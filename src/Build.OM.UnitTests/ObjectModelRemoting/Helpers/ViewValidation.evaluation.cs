@@ -9,7 +9,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Linq;
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.Framework;
-    using Xunit;
 
     internal sealed class ProjectPair : LinkPair<Project>
     {
@@ -20,29 +19,29 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public void ValidatePropertyValue(string name, string value)
         {
-            Assert.Equal(value, this.View.GetPropertyValue(name));
-            Assert.Equal(value, this.Real.GetPropertyValue(name));
+            Assert.AreEqual(value, this.View.GetPropertyValue(name));
+            Assert.AreEqual(value, this.Real.GetPropertyValue(name));
         }
 
         private ProjectItem VerifyAfterAddSingleItem(ObjectType where, ICollection<ProjectItem> added, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            Assert.NotNull(added);
-            Assert.Equal(1, added.Count);
+            Assert.IsNotNull(added);
+            Assert.AreEqual(1, added.Count);
             var result = added.First();
-            Assert.NotNull(result);
+            Assert.IsNotNull(result);
 
             // validate there is exactly 1 item with this include in both view and real and it is the exact same object.
-            Assert.Same(result, this.GetSingleItemWithVerify(where, result.EvaluatedInclude));
+            Assert.AreSame(result, this.GetSingleItemWithVerify(where, result.EvaluatedInclude));
 
 
             if (metadata != null)
             {
                 foreach (var m in metadata)
                 {
-                    Assert.True(result.HasMetadata(m.Key));
+                    Assert.IsTrue(result.HasMetadata(m.Key));
                     var md = result.GetMetadata(m.Key);
-                    Assert.NotNull(md);
-                    Assert.Equal(m.Value, md.UnevaluatedValue);
+                    Assert.IsNotNull(md);
+                    Assert.AreEqual(m.Value, md.UnevaluatedValue);
                 }
             }
 
@@ -74,7 +73,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 return null;
             }
 
-            Assert.Equal(1, viewItems.Count);
+            Assert.AreEqual(1, viewItems.Count);
             return which == ObjectType.View ? viewItems.First() : realItems.First();
         }
 
@@ -82,9 +81,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             var toAdd = this.Get(where);
             var added = toAdd.SetProperty(name, unevaluatedValue);
-            Assert.NotNull(added);
-            Assert.Same(added, toAdd.GetProperty(name));
-            Assert.Equal(unevaluatedValue, added.UnevaluatedValue);
+            Assert.IsNotNull(added);
+            Assert.AreSame(added, toAdd.GetProperty(name));
+            Assert.AreEqual(unevaluatedValue, added.UnevaluatedValue);
 
             var view = this.View.GetProperty(name);
             var real = this.Real.GetProperty(name);
@@ -106,13 +105,13 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             VerifyLinkedNotNull(view);
             VerifyNotLinkedNotNull(real);
 
-            Assert.Equal(real.Name, view.Name);
-            Assert.Equal(real.EvaluatedValue, view.EvaluatedValue);
-            Assert.Equal(real.UnevaluatedValue, view.UnevaluatedValue);
-            Assert.Equal(real.IsEnvironmentProperty, view.IsEnvironmentProperty);
-            Assert.Equal(real.IsGlobalProperty, view.IsGlobalProperty);
-            Assert.Equal(real.IsReservedProperty, view.IsReservedProperty);
-            Assert.Equal(real.IsImported, view.IsImported);
+            Assert.AreEqual(real.Name, view.Name);
+            Assert.AreEqual(real.EvaluatedValue, view.EvaluatedValue);
+            Assert.AreEqual(real.UnevaluatedValue, view.UnevaluatedValue);
+            Assert.AreEqual(real.IsEnvironmentProperty, view.IsEnvironmentProperty);
+            Assert.AreEqual(real.IsGlobalProperty, view.IsGlobalProperty);
+            Assert.AreEqual(real.IsReservedProperty, view.IsReservedProperty);
+            Assert.AreEqual(real.IsImported, view.IsImported);
 
             Verify(view.Xml, real.Xml);
 
@@ -120,8 +119,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             VerifyNotLinkedNotNull(real.Project);
             if (context?.Pair != null)
             {
-                Assert.Same(context.Pair.View, view.Project);
-                Assert.Same(context.Pair.Real, real.Project);
+                Assert.AreSame(context.Pair.View, view.Project);
+                Assert.AreSame(context.Pair.Real, real.Project);
             }
 
             Verify(view.Predecessor, real.Predecessor, context);
@@ -138,11 +137,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             VerifyLinkedNotNull(view);
             VerifyNotLinkedNotNull(real);
 
-            Assert.Equal(real.Name, view.Name);
-            Assert.Equal(real.EvaluatedValue, view.EvaluatedValue);
-            Assert.Equal(real.UnevaluatedValue, view.UnevaluatedValue);
-            Assert.Equal(real.ItemType, view.ItemType);
-            Assert.Equal(real.IsImported, view.IsImported);
+            Assert.AreEqual(real.Name, view.Name);
+            Assert.AreEqual(real.EvaluatedValue, view.EvaluatedValue);
+            Assert.AreEqual(real.UnevaluatedValue, view.UnevaluatedValue);
+            Assert.AreEqual(real.ItemType, view.ItemType);
+            Assert.AreEqual(real.IsImported, view.IsImported);
 
             VerifySameLocation(real.Location, view.Location);
             VerifySameLocation(real.ConditionLocation, view.ConditionLocation);
@@ -153,8 +152,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             VerifyNotLinkedNotNull(real.Project);
             if (context?.Pair != null)
             {
-                Assert.Same(context?.Pair.View, view.Project);
-                Assert.Same(context?.Pair.Real, real.Project);
+                Assert.AreSame(context?.Pair.View, view.Project);
+                Assert.AreSame(context?.Pair.Real, real.Project);
             }
 
             Verify(view.Predecessor, real.Predecessor, context);
@@ -176,8 +175,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             // This is somewhat of deficiency of MSBuild API.
             // (for example SetMetadata will always create a new ItemDefinitionElement because of that, for new metadata).
 
-            Assert.Equal(real.ItemType, view.ItemType);
-            Assert.Equal(real.MetadataCount, view.MetadataCount);
+            Assert.AreEqual(real.ItemType, view.ItemType);
+            Assert.AreEqual(real.MetadataCount, view.MetadataCount);
 
             Verify(view.Metadata, real.Metadata, Verify, context);
 
@@ -185,7 +184,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             {
                 var rv = real.GetMetadataValue(rm.Name);
                 var vv = view.GetMetadataValue(rm.Name);
-                Assert.Equal(rv, vv);
+                Assert.AreEqual(rv, vv);
 
                 var grm = real.GetMetadata(rm.Name);
                 var gvm = view.GetMetadata(rm.Name);
@@ -197,8 +196,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             VerifyNotLinkedNotNull(real.Project);
             if (context?.Pair != null)
             {
-                Assert.Same(context?.Pair.View, view.Project);
-                Assert.Same(context?.Pair.Real, real.Project);
+                Assert.AreSame(context?.Pair.View, view.Project);
+                Assert.AreSame(context?.Pair.Real, real.Project);
             }
         }
 
@@ -215,40 +214,40 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             Verify(view.Xml, real.Xml);
 
-            Assert.Equal(real.ItemType, view.ItemType);
-            Assert.Equal(real.UnevaluatedInclude, view.UnevaluatedInclude);
-            Assert.Equal(real.EvaluatedInclude, view.EvaluatedInclude);
-            Assert.Equal(real.IsImported, view.IsImported);
+            Assert.AreEqual(real.ItemType, view.ItemType);
+            Assert.AreEqual(real.UnevaluatedInclude, view.UnevaluatedInclude);
+            Assert.AreEqual(real.EvaluatedInclude, view.EvaluatedInclude);
+            Assert.AreEqual(real.IsImported, view.IsImported);
 
-            Assert.Equal(real.DirectMetadataCount, view.DirectMetadataCount);
+            Assert.AreEqual(real.DirectMetadataCount, view.DirectMetadataCount);
             Verify(view.DirectMetadata, real.DirectMetadata, Verify, context);
 
-            Assert.Equal(real.MetadataCount, view.MetadataCount);
+            Assert.AreEqual(real.MetadataCount, view.MetadataCount);
             Verify(view.Metadata, real.Metadata, Verify, context);
 
             foreach (var rm in real.Metadata)
             {
                 var rv = real.GetMetadataValue(rm.Name);
                 var vv = view.GetMetadataValue(rm.Name);
-                Assert.Equal(rv, vv);
+                Assert.AreEqual(rv, vv);
 
                 var grm = real.GetMetadata(rm.Name);
                 var gvm = view.GetMetadata(rm.Name);
 
                 Verify(gvm, grm, context);
 
-                Assert.Equal(real.HasMetadata(rm.Name), view.HasMetadata(rm.Name));
+                Assert.AreEqual(real.HasMetadata(rm.Name), view.HasMetadata(rm.Name));
             }
 
-            Assert.Equal(real.HasMetadata("random non existent"), view.HasMetadata("random non existent"));
-            Assert.Equal(real.GetMetadataValue("random non existent"), view.GetMetadataValue("random non existent"));
+            Assert.AreEqual(real.HasMetadata("random non existent"), view.HasMetadata("random non existent"));
+            Assert.AreEqual(real.GetMetadataValue("random non existent"), view.GetMetadataValue("random non existent"));
 
             VerifyLinkedNotNull(view.Project);
             VerifyNotLinkedNotNull(real.Project);
             if (context?.Pair != null)
             {
-                Assert.Same(context.Pair.View, view.Project);
-                Assert.Same(context.Pair.Real, real.Project);
+                Assert.AreSame(context.Pair.View, view.Project);
+                Assert.AreSame(context.Pair.Real, real.Project);
             }
         }
 
@@ -260,12 +259,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 return;
             }
 
-            Assert.NotNull(view);
-            Assert.NotNull(real);
+            Assert.IsNotNull(view);
+            Assert.IsNotNull(real);
 
-            Assert.Equal(real.Name, view.Name);
-            Assert.Equal(real.Version, view.Version);
-            Assert.Equal(real.MinimumVersion, view.MinimumVersion);
+            Assert.AreEqual(real.Name, view.Name);
+            Assert.AreEqual(real.Version, view.Version);
+            Assert.AreEqual(real.MinimumVersion, view.MinimumVersion);
         }
 
         private static void Verify(SdkResult view, SdkResult real, ValidationContext context = null)
@@ -275,16 +274,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 return;
             }
 
-            Assert.NotNull(view);
-            Assert.NotNull(real);
-            Assert.Equal(real.Success, view.Success);
-            Assert.Equal(real.Path, view.Path);
+            Assert.IsNotNull(view);
+            Assert.IsNotNull(real);
+            Assert.AreEqual(real.Success, view.Success);
+            Assert.AreEqual(real.Path, view.Path);
             Verify(view.SdkReference, real.SdkReference, context);
         }
 
         private static void Verify(ResolvedImport view, ResolvedImport real, ValidationContext context = null)
         {
-            Assert.Equal(real.IsImported, view.IsImported);
+            Assert.AreEqual(real.IsImported, view.IsImported);
             Verify(view.ImportingElement, real.ImportingElement);
             Verify(view.ImportedProject, real.ImportedProject);
             Verify(view.SdkResult, real.SdkResult, context);
@@ -297,13 +296,13 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 return;
             }
 
-            Assert.NotNull(viewProps);
-            Assert.NotNull(realProps);
-            Assert.Equal(realProps.Count, viewProps.Count);
+            Assert.IsNotNull(viewProps);
+            Assert.IsNotNull(realProps);
+            Assert.AreEqual(realProps.Count, viewProps.Count);
 
             for (int i = 0; i < realProps.Count; i++)
             {
-                Assert.Equal(realProps[i], viewProps[i]);
+                Assert.AreEqual(realProps[i], viewProps[i]);
             }
         }
 
@@ -338,9 +337,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Verify(view.ItemDefinitions, real.ItemDefinitions, Verify, context);
             Verify(view.ConditionedProperties, real.ConditionedProperties, Verify, context);
             Verify(view.Properties, real.Properties, Verify, context);
-            Verify(view.GlobalProperties, real.GlobalProperties, (a, b, p) => Assert.Equal(b, a), context);
+            Verify(view.GlobalProperties, real.GlobalProperties, (a, b, p) => Assert.AreEqual(b, a), context);
             Verify(view.Imports, real.Imports, Verify, context);
-            Verify(view.ItemTypes, real.ItemTypes, (a, b, p) => Assert.Equal(b, a), context);
+            Verify(view.ItemTypes, real.ItemTypes, (a, b, p) => Assert.AreEqual(b, a), context);
 
             // this can only be used if project is loaded with ProjectLoadSettings.RecordDuplicateButNotCircularImports
             // or it throws otherwise. Slightly odd and inconvenient API design, but thats how it is.
@@ -361,23 +360,23 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Verify(view.AllEvaluatedItemDefinitionMetadata, real.AllEvaluatedItemDefinitionMetadata, Verify, context);
             Verify(view.AllEvaluatedItems, real.AllEvaluatedItems, Verify, context);
 
-            Assert.NotSame(view.ProjectCollection, real.ProjectCollection);
-            Assert.Equal(real.ToolsVersion, view.ToolsVersion);
-            Assert.Equal(real.SubToolsetVersion, view.SubToolsetVersion);
-            Assert.Equal(real.DirectoryPath, view.DirectoryPath);
-            Assert.Equal(real.FullPath, view.FullPath);
-            Assert.Equal(real.SkipEvaluation, view.SkipEvaluation);
-            Assert.Equal(real.ThrowInsteadOfSplittingItemElement, view.ThrowInsteadOfSplittingItemElement);
-            Assert.Equal(real.IsDirty, view.IsDirty);
-            Assert.Equal(real.DisableMarkDirty, view.DisableMarkDirty);
-            Assert.Equal(real.IsBuildEnabled, view.IsBuildEnabled);
+            Assert.AreNotSame(view.ProjectCollection, real.ProjectCollection);
+            Assert.AreEqual(real.ToolsVersion, view.ToolsVersion);
+            Assert.AreEqual(real.SubToolsetVersion, view.SubToolsetVersion);
+            Assert.AreEqual(real.DirectoryPath, view.DirectoryPath);
+            Assert.AreEqual(real.FullPath, view.FullPath);
+            Assert.AreEqual(real.SkipEvaluation, view.SkipEvaluation);
+            Assert.AreEqual(real.ThrowInsteadOfSplittingItemElement, view.ThrowInsteadOfSplittingItemElement);
+            Assert.AreEqual(real.IsDirty, view.IsDirty);
+            Assert.AreEqual(real.DisableMarkDirty, view.DisableMarkDirty);
+            Assert.AreEqual(real.IsBuildEnabled, view.IsBuildEnabled);
 
             VerifySameLocation(real.ProjectFileLocation, view.ProjectFileLocation, context);
 
             // we currently dont support "Execution" remoting.
             // Verify(view.Targets, real.Targets, Verify, view, real);
-            Assert.Equal(real.EvaluationCounter, view.EvaluationCounter);
-            Assert.Equal(real.LastEvaluationId, view.LastEvaluationId);
+            Assert.AreEqual(real.EvaluationCounter, view.EvaluationCounter);
+            Assert.AreEqual(real.LastEvaluationId, view.LastEvaluationId);
         }
     }
 }

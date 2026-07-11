@@ -14,7 +14,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -24,6 +23,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for ProjectItem
     /// </summary>
+    [TestClass]
     public class ProjectItem_Tests : IDisposable
     {
         internal const string ItemWithIncludeAndExclude = @"
@@ -71,19 +71,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project getter
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectGetter()
         {
             Project project = new Project();
             ProjectItem item = project.AddItem("i", "i1")[0];
 
-            Assert.True(Object.ReferenceEquals(project, item.Project));
+            Assert.IsTrue(Object.ReferenceEquals(project, item.Project));
         }
 
         /// <summary>
         /// No metadata, simple case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleItemWithNoMetadata()
         {
             string content = @"
@@ -96,17 +96,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = GetOneItem(content);
 
-            Assert.NotNull(item.Xml);
-            Assert.Equal("i", item.ItemType);
-            Assert.Equal("i1", item.EvaluatedInclude);
-            Assert.Equal("i1", item.UnevaluatedInclude);
-            Assert.False(item.Metadata.GetEnumerator().MoveNext());
+            Assert.IsNotNull(item.Xml);
+            Assert.AreEqual("i", item.ItemType);
+            Assert.AreEqual("i1", item.EvaluatedInclude);
+            Assert.AreEqual("i1", item.UnevaluatedInclude);
+            Assert.IsFalse(item.Metadata.GetEnumerator().MoveNext());
         }
 
         /// <summary>
         /// Read off metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMetadata()
         {
             string content = @"
@@ -123,20 +123,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item = GetOneItem(content);
 
             var itemMetadata = Helpers.MakeList(item.Metadata);
-            Assert.Equal(2, itemMetadata.Count);
-            Assert.Equal("m1", itemMetadata[0].Name);
-            Assert.Equal("m2", itemMetadata[1].Name);
-            Assert.Equal("v1", itemMetadata[0].EvaluatedValue);
-            Assert.Equal("v2", itemMetadata[1].EvaluatedValue);
+            Assert.AreEqual(2, itemMetadata.Count);
+            Assert.AreEqual("m1", itemMetadata[0].Name);
+            Assert.AreEqual("m2", itemMetadata[1].Name);
+            Assert.AreEqual("v1", itemMetadata[0].EvaluatedValue);
+            Assert.AreEqual("v2", itemMetadata[1].EvaluatedValue);
 
-            Assert.Equal(itemMetadata[0], item.GetMetadata("m1"));
-            Assert.Equal(itemMetadata[1], item.GetMetadata("m2"));
+            Assert.AreEqual(itemMetadata[0], item.GetMetadata("m1"));
+            Assert.AreEqual(itemMetadata[1], item.GetMetadata("m2"));
         }
 
         /// <summary>
         /// Get metadata inherited from item definitions
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetMetadataObjectsFromDefinition()
         {
             string content = @"
@@ -167,14 +167,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata idm0 = definition.GetMetadata("m0");
             ProjectMetadata idm1 = definition.GetMetadata("m1");
 
-            Assert.True(Object.ReferenceEquals(m0, idm0));
-            Assert.False(Object.ReferenceEquals(m1, idm1));
+            Assert.IsTrue(Object.ReferenceEquals(m0, idm0));
+            Assert.IsFalse(Object.ReferenceEquals(m1, idm1));
         }
 
         /// <summary>
         /// Get metadata values inherited from item definitions
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetMetadataValuesFromDefinition()
         {
             string content = @"
@@ -196,40 +196,40 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = GetOneItem(content);
 
-            Assert.Equal("v0", item.GetMetadataValue("m0"));
-            Assert.Equal("v1b", item.GetMetadataValue("m1"));
-            Assert.Equal("v2", item.GetMetadataValue("m2"));
+            Assert.AreEqual("v0", item.GetMetadataValue("m0"));
+            Assert.AreEqual("v1b", item.GetMetadataValue("m1"));
+            Assert.AreEqual("v2", item.GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// Getting nonexistent metadata should return null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetNonexistentMetadata()
         {
             ProjectItem item = GetOneItemFromFragment(@"<i Include='i0'/>");
 
-            Assert.Null(item.GetMetadata("m0"));
+            Assert.IsNull(item.GetMetadata("m0"));
         }
 
         /// <summary>
         /// Getting value of nonexistent metadata should return String.Empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetNonexistentMetadataValue()
         {
             ProjectItem item = GetOneItemFromFragment(@"<i Include='i0'/>");
 
-            Assert.Equal(String.Empty, item.GetMetadataValue("m0"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("m0"));
         }
 
         /// <summary>
         /// Attempting to set metadata with an invalid XML name should fail
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidXmlNameMetadata()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
 
@@ -239,10 +239,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempting to set built-in metadata should fail
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidBuiltInMetadata()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
 
@@ -252,10 +252,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempting to set reserved metadata should fail
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidReservedMetadata()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
 
@@ -265,18 +265,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Metadata enumerator should only return custom metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataEnumeratorExcludesBuiltInMetadata()
         {
             ProjectItem item = GetOneItemFromFragment(@"<i Include='c:\foo\bar.baz'/>");
 
-            Assert.False(item.Metadata.GetEnumerator().MoveNext());
+            Assert.IsFalse(item.Metadata.GetEnumerator().MoveNext());
         }
 
         /// <summary>
         /// Read off built-in metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadata()
         {
             ProjectItem item =
@@ -294,16 +294,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // []                              %(ModifiedTime)     = last write time of item
             // []                              %(CreatedTime)      = creation time of item
             // []                              %(AccessedTime)     = last access time of item
-            Assert.Equal(
+            Assert.AreEqual(
                 NativeMethodsShared.IsWindows ? @"c:\foo\bar.baz" : "/foo/bar.baz",
                 item.GetMetadataValue("FullPath"));
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\" : "/", item.GetMetadataValue("RootDir"));
-            Assert.Equal(@"bar", item.GetMetadataValue("Filename"));
-            Assert.Equal(@".baz", item.GetMetadataValue("Extension"));
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\foo\" : "/foo/", item.GetMetadataValue("RelativeDir"));
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"foo\" : "foo/", item.GetMetadataValue("Directory"));
-            Assert.Equal(String.Empty, item.GetMetadataValue("RecursiveDir"));
-            Assert.Equal(
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\" : "/", item.GetMetadataValue("RootDir"));
+            Assert.AreEqual(@"bar", item.GetMetadataValue("Filename"));
+            Assert.AreEqual(@".baz", item.GetMetadataValue("Extension"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"c:\foo\" : "/foo/", item.GetMetadataValue("RelativeDir"));
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"foo\" : "foo/", item.GetMetadataValue("Directory"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("RecursiveDir"));
+            Assert.AreEqual(
                 NativeMethodsShared.IsWindows ? @"c:\foo\bar.baz" : "/foo/bar.baz",
                 item.GetMetadataValue("Identity"));
         }
@@ -311,7 +311,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Check file-timestamp related metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTimes()
         {
             string path = null;
@@ -325,9 +325,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 ProjectItem item = GetOneItemFromFragment(@"<i Include='" + path + "'/>");
 
-                Assert.Equal(info.LastWriteTime.ToString(fileTimeFormat), item.GetMetadataValue("ModifiedTime"));
-                Assert.Equal(info.CreationTime.ToString(fileTimeFormat), item.GetMetadataValue("CreatedTime"));
-                Assert.Equal(info.LastAccessTime.ToString(fileTimeFormat), item.GetMetadataValue("AccessedTime"));
+                Assert.AreEqual(info.LastWriteTime.ToString(fileTimeFormat), item.GetMetadataValue("ModifiedTime"));
+                Assert.AreEqual(info.CreationTime.ToString(fileTimeFormat), item.GetMetadataValue("CreatedTime"));
+                Assert.AreEqual(info.LastAccessTime.ToString(fileTimeFormat), item.GetMetadataValue("AccessedTime"));
             }
             finally
             {
@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Test RecursiveDir metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RecursiveDirMetadata()
         {
             string directory = null;
@@ -368,8 +368,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     GetOneItemFromFragment(
                         "<i Include='" + directory + (NativeMethodsShared.IsWindows ? @"\**\*'/>" : "/**/*'/>"));
 
-                Assert.Equal(NativeMethodsShared.IsWindows ? @"b\" : "b/", item.GetMetadataValue("RecursiveDir"));
-                Assert.Equal("c", item.GetMetadataValue("Filename"));
+                Assert.AreEqual(NativeMethodsShared.IsWindows ? @"b\" : "b/", item.GetMetadataValue("RecursiveDir"));
+                Assert.AreEqual("c", item.GetMetadataValue("Filename"));
             }
             finally
             {
@@ -385,7 +385,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// (This is what requires that the original include fragment [before wildcard
         /// expansion] is stored in the item.)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RecursiveDirWithSemicolonSeparatedInclude()
         {
             string directory = null;
@@ -413,10 +413,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment("<i Include='i0;" + directory + (NativeMethodsShared.IsWindows ? @"\**\*;i2'/>" : "/**/*;i2'/>"));
 
-                Assert.Equal(3, items.Count);
-                Assert.Equal("i0", items[0].EvaluatedInclude);
-                Assert.Equal(NativeMethodsShared.IsWindows ? @"b\" : "b/", items[1].GetMetadataValue("RecursiveDir"));
-                Assert.Equal("i2", items[2].EvaluatedInclude);
+                Assert.AreEqual(3, items.Count);
+                Assert.AreEqual("i0", items[0].EvaluatedInclude);
+                Assert.AreEqual(NativeMethodsShared.IsWindows ? @"b\" : "b/", items[1].GetMetadataValue("RecursiveDir"));
+                Assert.AreEqual("i2", items[2].EvaluatedInclude);
             }
             finally
             {
@@ -426,22 +426,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Theory]
-        [InlineData(@"<i Condition='false' Include='\**\*.cs'/>")]
-        [InlineData(@"<i Condition='false' Include='/**/*.cs'/>")]
-        [InlineData(@"<i Condition='false' Include='/**\*.cs'/>")]
-        [InlineData(@"<i Condition='false' Include='\**/*.cs'/>")]
+        [MSBuildTestMethod]
+        [DataRow(@"<i Condition='false' Include='\**\*.cs'/>")]
+        [DataRow(@"<i Condition='false' Include='/**/*.cs'/>")]
+        [DataRow(@"<i Condition='false' Include='/**\*.cs'/>")]
+        [DataRow(@"<i Condition='false' Include='\**/*.cs'/>")]
         public void FullFileSystemScanGlobWithFalseCondition(string itemDefinition)
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(itemDefinition, allItems: false, ignoreCondition: true);
             items.ShouldBeEmpty();
         }
 
-        [Theory]
-        [InlineData(@"<i Condition='false' Include='somedir\**\*.cs'/>")]
-        [InlineData(@"<i Condition='false' Include='somedir/**/*.cs'/>")]
-        [InlineData(@"<i Condition='false' Include='somedir/**\*.cs'/>")]
-        [InlineData(@"<i Condition='false' Include='somedir\**/*.cs'/>")]
+        [MSBuildTestMethod]
+        [DataRow(@"<i Condition='false' Include='somedir\**\*.cs'/>")]
+        [DataRow(@"<i Condition='false' Include='somedir/**/*.cs'/>")]
+        [DataRow(@"<i Condition='false' Include='somedir/**\*.cs'/>")]
+        [DataRow(@"<i Condition='false' Include='somedir\**/*.cs'/>")]
         public void PartialFileSystemScanGlobWithFalseCondition(string itemDefinition)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -457,19 +457,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Basic exclude case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Exclude()
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment("<i Include='a;b' Exclude='b;c'/>");
 
-            Assert.Single(items);
-            Assert.Equal("a", items[0].EvaluatedInclude);
+            Assert.ContainsSingle(items);
+            Assert.AreEqual("a", items[0].EvaluatedInclude);
         }
 
         /// <summary>
         /// Exclude against an include with item vectors in it
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExcludeWithIncludeVector()
         {
             string content = @"
@@ -489,14 +489,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             // Should contain a, b, c, x, z, a, c, u, w
-            Assert.Equal(9, items.Count);
+            Assert.AreEqual(9, items.Count);
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c", "x", "z", "a", "c", "u", "w" }, items);
         }
 
         /// <summary>
         /// Exclude with item vectors against an include with item vectors in it
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExcludeVectorWithIncludeVector()
         {
             string content = @"
@@ -517,62 +517,62 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
             // Should contain a, b, c, z, a, c, u
-            Assert.Equal(7, items.Count);
+            Assert.AreEqual(7, items.Count);
             ObjectModelHelpers.AssertItems(new[] { "a", "b", "c", "z", "a", "c", "u" }, items);
         }
 
-        [Theory]
+        [MSBuildTestMethod]
         // items as strings: escaped includes appear as unescaped
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "%61;%62",
             "b",
             new string[0],
             new[] { "a" })]
         // items as strings: escaped include matches non-escaped exclude
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "%61",
             "a",
             new string[0],
             new string[0])]
         // items as strings: non-escaped include matches escaped exclude
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "a",
             "%61",
             new string[0],
             new string[0])]
         // items as files: non-escaped wildcard include matches escaped non-wildcard character
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "a?b",
             "a%40b",
             new[] { "acb", "a@b" },
             new[] { "acb" })]
         // items as files: non-escaped non-wildcard include matches escaped non-wildcard character
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
            "acb;a@b",
            "a%40b",
            new string[0],
            new[] { "acb" })]
         // items as files: escaped wildcard include matches escaped non-wildcard exclude
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "a%40*b",
             "a%40bb",
             new[] { "a@b", "a@ab", "a@bb" },
             new[] { "a@ab", "a@b" })]
         // items as files: escaped wildcard include matches escaped wildcard exclude
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "a%40*b",
             "a%40?b",
             new[] { "a@b", "a@ab", "a@bb" },
             new[] { "a@b" })]
         // items as files: non-escaped recursive wildcard include matches escaped recursive wildcard exclude
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
            @"**\a*b",
            @"**\a*%78b",
            new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
            new[] { "aab", @"dir\abb" })]
         // items as files: include with non-escaped glob does not match exclude with escaped wildcard character.
         // The exclude is treated as a literal, not a glob, and therefore should not match the input files
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"**\a*b",
             @"**\a%2Axb",
             new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
@@ -582,22 +582,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             TestIncludeExcludeWithDifferentSlashes(projectContents, includeString, excludeString, inputFiles, expectedInclude);
         }
 
-        [Theory]
+        [MSBuildTestMethod]
         // items as strings: include with both escaped and unescaped glob should be treated as literal and therefore not match against files as a glob
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"**\a%2Axb",
             @"foo",
             new[] { "aab", "aaxb", @"dir\abb", @"dir\abxb" },
             new[] { @"**\a*xb" })]
         // Include with both escaped and unescaped glob does not match exclude with escaped wildcard character which has a different slash orientation
         // The presence of the escaped and unescaped glob should make things behave as strings-which-are-not-paths and not as strings-which-are-paths
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"**\a%2Axb",
             @"**/a%2Axb",
             new string[0],
             new[] { @"**\a*xb" })]
         // Slashes are not normalized when contents is not a path
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"a/b/foo::||bar;a/b/foo::||bar/;a/b/foo::||bar\;a/b\foo::||bar",
             @"a/b/foo::||bar",
             new string[0],
@@ -609,15 +609,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         public static IEnumerable<object[]> IncludesAndExcludesWithWildcardsTestData => GlobbingTestData.IncludesAndExcludesWithWildcardsTestData;
 
-        [Theory]
-        [MemberData(nameof(IncludesAndExcludesWithWildcardsTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(IncludesAndExcludesWithWildcardsTestData))]
         public void ExcludeVectorWithWildCards(string includeString, string excludeString, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute)
         {
             TestIncludeExcludeWithDifferentSlashes(ItemWithIncludeAndExclude, includeString, excludeString, inputFiles, expectedInclude, makeExpectedIncludeAbsolute);
         }
 
-        [Theory]
-        [InlineData(ItemWithIncludeAndExclude,
+        [MSBuildTestMethod]
+        [DataRow(ItemWithIncludeAndExclude,
             @"**\*",
             @"excludes\**.*",
             new[]
@@ -633,7 +633,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"excludes\b.cs",
                 @"excludes\subdir\c.cs",
             })]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"**\*",
             @"excludes\**..\*",
             new[]
@@ -649,7 +649,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"excludes\b.cs",
                 @"excludes\subdir\c.cs",
             })]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"**\*",
             @"**.*",
             new[]
@@ -665,7 +665,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"excludes\b.cs",
                 @"excludes\subdir\c.cs",
             })]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "*;**a",
             "**a",
             new[]
@@ -677,7 +677,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 "a",
                 "build.proj"
             })]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"**1;**2",
             @"**1",
             new[]
@@ -693,7 +693,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 "**2"
             })]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @":||;||:",
             @"||:",
             new string[0],
@@ -707,7 +707,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [WindowsOnlyTheory]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"src/**/*.cs",
             new[]
             {
@@ -719,7 +719,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"src/a.cs",
                 @"src/a/b/b.cs",
             })]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"src/test/**/*.cs",
             new[]
             {
@@ -731,7 +731,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"src/test/a.cs",
                 @"src/test/a/b/c.cs",
             })]
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"src/test/**/a/b/**/*.cs",
             new[]
             {
@@ -766,11 +766,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project getter that renames an item to a drive enumerating wildcard that results in an exception.
         /// </summary>
-        [Theory]
-        [InlineData(@"\**\*.log")]
-        [InlineData(@"$(empty)\**\*.log")]
-        [InlineData(@"\$(empty)**\*.log")]
-        [InlineData(@"\*$(empty)*\*.log")]
+        [MSBuildTestMethod]
+        [DataRow(@"\**\*.log")]
+        [DataRow(@"$(empty)\**\*.log")]
+        [DataRow(@"\$(empty)**\*.log")]
+        [DataRow(@"\*$(empty)*\*.log")]
         public void ProjectGetterResultsInDriveEnumerationException(string unevaluatedInclude)
         {
             using (var env = TestEnvironment.Create())
@@ -795,12 +795,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project getter that renames an item to a drive enumerating wildcard that results in a logged warning.
         /// </summary>
         [WindowsOnlyTheory]
-        [InlineData(@"%DRIVE%:\**\*.log")]
-        [InlineData(@"%DRIVE%:$(empty)\**\*.log")]
-        [InlineData(@"%DRIVE%:\**")]
-        [InlineData(@"%DRIVE%:\\**")]
-        [InlineData(@"%DRIVE%:\\\\\\\\**")]
-        [InlineData(@"%DRIVE%:\**\*.cs")]
+        [DataRow(@"%DRIVE%:\**\*.log")]
+        [DataRow(@"%DRIVE%:$(empty)\**\*.log")]
+        [DataRow(@"%DRIVE%:\**")]
+        [DataRow(@"%DRIVE%:\\**")]
+        [DataRow(@"%DRIVE%:\\\\\\\\**")]
+        [DataRow(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
             unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.Value.MappedDriveLetter);
@@ -808,10 +808,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [UnixOnlyTheory]
-        [InlineData(@"/**/*.log")]
-        [InlineData(@"$(empty)/**/*.log")]
-        [InlineData(@"/$(empty)**/*.log")]
-        [InlineData(@"/*$(empty)*/*.log")]
+        [DataRow(@"/**/*.log")]
+        [DataRow(@"$(empty)/**/*.log")]
+        [DataRow(@"/$(empty)**/*.log")]
+        [DataRow(@"/*$(empty)*/*.log")]
         public void ProjectGetterResultsInUnixDriveEnumerationWarning(string unevaluatedInclude)
         {
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
@@ -850,20 +850,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Project instance created from a file that contains a drive enumerating wildcard results in a thrown exception.
         /// </summary>
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
             ImportProjectElement,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             null)]
 
         // LazyItem.IncludeOperation
-        [InlineData(
+        [DataRow(
             ItemWithIncludeAndExclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         // LazyItem.IncludeOperation for Exclude
-        [InlineData(
+        [DataRow(
             ItemWithIncludeAndExclude,
             @"$(EmptyProperty)\*.cs",
             @"$(Microsoft_WindowsAzure_EngSys)\**")]
@@ -877,19 +877,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Project instance created from a file that contains a drive enumerating wildcard results in a logged warning on the Windows platform.
         /// </summary>
         [WindowsOnlyTheory]
-        [InlineData(
+        [DataRow(
             ImportProjectElement,
             @"%DRIVE%:\**\*.targets",
             null)]
 
         // LazyItem.IncludeOperation
-        [InlineData(
+        [DataRow(
             ItemWithIncludeAndExclude,
             @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         // LazyItem.IncludeOperation for Exclude
-        [InlineData(
+        [DataRow(
             ItemWithIncludeAndExclude,
             @"$(EmptyProperty)\*.cs",
             @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
@@ -903,19 +903,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         [UnixOnlyTheory]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
-        [InlineData(
+        [DataRow(
             ImportProjectElement,
             @"\**\*.targets",
             null)]
 
         // LazyItem.IncludeOperation
-        [InlineData(
+        [DataRow(
             ItemWithIncludeAndExclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
         // LazyItem.IncludeOperation for Exclude
-        [InlineData(
+        [DataRow(
             ItemWithIncludeAndExclude,
             @"$(EmptyProperty)\*.cs",
             @"$(Microsoft_WindowsAzure_EngSys)\**")]
@@ -996,9 +996,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, inputFiles, expectedInclude, expectedMetadataPerItem: null, normalizeSlashes: normalizeSlashes, makeExpectedIncludeAbsolute: makeExpectedIncludeAbsolute);
         }
 
-        [Theory]
+        [MSBuildTestMethod]
         // exclude matches include; file is next to project file
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"a", // include item
             @"", // path relative from projectFile. Empty string if current directory
 
@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             false) // whether the include survives the exclude (true) or not (false)
             ]
         // exclude matches include; file is below the project file
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"a",
             @"dir",
 
@@ -1025,7 +1025,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             },
             false)]
         // exclude matches include; file is above the project file
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             @"a",
             @"..",
 
@@ -1038,7 +1038,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             },
             false)]
         // exclude does not match include; file is next to project file; exclude points above the project file
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "a",
             "",
 
@@ -1051,7 +1051,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             },
             true)]
         // exclude does not match include; file is below the project file; exclude points next to the project file
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "a",
             "dir",
 
@@ -1064,7 +1064,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             },
             true)]
         // exclude does not match include; file is above the project file; exclude points next to the project file
-        [InlineData(ItemWithIncludeAndExclude,
+        [DataRow(ItemWithIncludeAndExclude,
             "a",
             "..",
 
@@ -1118,9 +1118,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             runTest(true, true);
         }
 
-        [Theory]
+        [MSBuildTestMethod]
         // exclude globbing cone at project level;
-        [InlineData(
+        [DataRow(
             "../a.cs;b.cs", // include string
             "**/*.cs", // exclude string
             new[] { "a.cs", "ProjectDir/b.cs" }, // files to create relative to the test root dir
@@ -1128,14 +1128,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             new[] { "../a.cs" }) // expected items
             ]
         // exclude globbing cone below project level;
-        [InlineData(
+        [DataRow(
             "a.cs;a/b.cs",
             "a/**/*.cs",
             new[] { "a.cs", "a/b.cs" },
             "",
             new[] { "a.cs" })]
         // exclude globbing above project level;
-        [InlineData(
+        [DataRow(
             "a.cs;../b.cs;../../c.cs",
             "../**/*.cs",
             new[] { "a/ProjectDir/a.cs", "a/b.cs", "c.cs" },
@@ -1153,8 +1153,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1576")]
-        [InlineData(
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/1576")]
+        [DataRow(
             "../**/*.cs", // include string
             "a.cs", // exclude string
             new[] { "ProjectDir/a.cs", "b.cs" }, // files to create relative to the test root dir
@@ -1176,7 +1177,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Expression like @(x) should clone metadata, but metadata should still point at the original XML objects
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromWithItemListExpressionClonesMetadata()
         {
             string content = @"
@@ -1198,11 +1199,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item1 = project.GetItems("i").First();
             ProjectItem item2 = project.GetItems("j").First();
 
-            Assert.Equal("m2", item1.GetMetadataValue("m"));
-            Assert.Equal("m1", item2.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item1.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item2.GetMetadataValue("m"));
 
             // Should still point at the same XML items
-            Assert.True(Object.ReferenceEquals(item1.GetMetadata("m").Xml, item2.GetMetadata("m").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(item1.GetMetadata("m").Xml, item2.GetMetadata("m").Xml));
         }
 
         /// <summary>
@@ -1214,7 +1215,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// the changes, by design.
         /// Just to make sure we don't change that behavior, we test it here.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromWithItemListExpressionDoesNotCloneDefinitionMetadata()
         {
             string content = @"
@@ -1241,18 +1242,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item1c = project.GetItems("i").ElementAt(2);
             ProjectItem item2 = project.GetItems("j").First();
 
-            Assert.Equal("m1", item1.GetMetadataValue("m"));
-            Assert.Equal("m1", item1b.GetMetadataValue("m"));
-            Assert.Equal("m1", item1c.GetMetadataValue("m"));
-            Assert.Equal("m1", item2.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item1b.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item1c.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item2.GetMetadataValue("m"));
 
             project.ItemDefinitions["i"].SetMetadataValue("m", "m2");
 
             // All the items will see this change
-            Assert.Equal("m2", item1.GetMetadataValue("m"));
-            Assert.Equal("m2", item1b.GetMetadataValue("m"));
-            Assert.Equal("m2", item1c.GetMetadataValue("m"));
-            Assert.Equal("m2", item2.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item1.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item1b.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item1c.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item2.GetMetadataValue("m"));
 
             // And verify we're not still pointing to the definition metadata objects
             item1.SetMetadataValue("m", "m3");
@@ -1260,13 +1261,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item1c.SetMetadataValue("m", "m5");
             item2.SetMetadataValue("m", "m6");
 
-            Assert.Equal("m2", project.ItemDefinitions["i"].GetMetadataValue("m")); // Should not have been affected
+            Assert.AreEqual("m2", project.ItemDefinitions["i"].GetMetadataValue("m")); // Should not have been affected
         }
 
         /// <summary>
         /// Expression like @(x) should not clone metadata, for perf. See comment on test above.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromWithItemListExpressionClonesDefinitionMetadata_Variation()
         {
             string content = @"
@@ -1291,23 +1292,23 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item1b = project.GetItems("i").ElementAt(1);
             ProjectItem item2 = project.GetItems("j").First();
 
-            Assert.Equal("m1", item1.GetMetadataValue("m"));
-            Assert.Equal("m1", item1b.GetMetadataValue("m"));
-            Assert.Equal("m1", item2.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item1.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item1b.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item2.GetMetadataValue("m"));
 
             project.ItemDefinitions["i"].SetMetadataValue("m", "m2");
 
             // The items should all see this change
-            Assert.Equal("m2", item1.GetMetadataValue("m"));
-            Assert.Equal("m2", item1b.GetMetadataValue("m"));
-            Assert.Equal("m2", item2.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item1.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item1b.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item2.GetMetadataValue("m"));
 
             // And verify we're not still pointing to the definition metadata objects
             item1.SetMetadataValue("m", "m3");
             item1b.SetMetadataValue("m", "m4");
             item2.SetMetadataValue("m", "m6");
 
-            Assert.Equal("m2", project.ItemDefinitions["i"].GetMetadataValue("m")); // Should not have been affected
+            Assert.AreEqual("m2", project.ItemDefinitions["i"].GetMetadataValue("m")); // Should not have been affected
         }
 
         /// <summary>
@@ -1317,7 +1318,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// 3) item definition on the next item, and so on until
         /// 4) item definition metadata on the destination item itself
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyWithItemDefinition()
         {
             string content = @"
@@ -1357,55 +1358,55 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
-            Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("i").First().GetMetadataValue("n"));
-            Assert.Equal("", project.GetItems("i").First().GetMetadataValue("o"));
-            Assert.Equal("", project.GetItems("i").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("i").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("i").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("i").First().GetMetadataValue("n"));
+            Assert.AreEqual("", project.GetItems("i").First().GetMetadataValue("o"));
+            Assert.AreEqual("", project.GetItems("i").First().GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("j").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("j").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("j").First().GetMetadataValue("n"));
-            Assert.Equal("o2", project.GetItems("j").First().GetMetadataValue("o"));
-            Assert.Equal("p2", project.GetItems("j").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("j").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("j").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("j").First().GetMetadataValue("n"));
+            Assert.AreEqual("o2", project.GetItems("j").First().GetMetadataValue("o"));
+            Assert.AreEqual("p2", project.GetItems("j").First().GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("k").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("k").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("k").First().GetMetadataValue("n"));
-            Assert.Equal("o2", project.GetItems("k").First().GetMetadataValue("o"));
-            Assert.Equal("p4", project.GetItems("k").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("k").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("k").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("k").First().GetMetadataValue("n"));
+            Assert.AreEqual("o2", project.GetItems("k").First().GetMetadataValue("o"));
+            Assert.AreEqual("p4", project.GetItems("k").First().GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("l").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("l").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("l").First().GetMetadataValue("n"));
-            Assert.Equal("o2", project.GetItems("l").First().GetMetadataValue("o"));
-            Assert.Equal("p4", project.GetItems("l").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("l").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("l").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("l").First().GetMetadataValue("n"));
+            Assert.AreEqual("o2", project.GetItems("l").First().GetMetadataValue("o"));
+            Assert.AreEqual("p4", project.GetItems("l").First().GetMetadataValue("p"));
 
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("l"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("m"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("n"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("o"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("p"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("l"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("m"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("n"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("o"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("m").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("m").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("m").First().GetMetadataValue("n"));
-            Assert.Equal("o4", project.GetItems("m").First().GetMetadataValue("o"));
-            Assert.Equal("p4", project.GetItems("m").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("m").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("m").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("m").First().GetMetadataValue("n"));
+            Assert.AreEqual("o4", project.GetItems("m").First().GetMetadataValue("o"));
+            Assert.AreEqual("p4", project.GetItems("m").First().GetMetadataValue("p"));
 
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("l"));
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("m"));
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("n"));
-            Assert.Equal("o4", project.GetItems("m").ElementAt(1).GetMetadataValue("o"));
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("p"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("l"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("m"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("n"));
+            Assert.AreEqual("o4", project.GetItems("m").ElementAt(1).GetMetadataValue("o"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("p"));
 
             // Should still point at the same XML metadata
-            Assert.True(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("l").Xml, project.GetItems("m").First().GetMetadata("l").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("m").Xml, project.GetItems("m").First().GetMetadata("m").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("n").Xml, project.GetItems("m").First().GetMetadata("n").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("o").Xml, project.GetItems("k").First().GetMetadata("o").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("k").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
-            Assert.True(!Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("l").Xml, project.GetItems("m").First().GetMetadata("l").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("m").Xml, project.GetItems("m").First().GetMetadata("m").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("n").Xml, project.GetItems("m").First().GetMetadata("n").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("o").Xml, project.GetItems("k").First().GetMetadata("o").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("k").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
+            Assert.IsTrue(!Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
         }
 
         /// <summary>
@@ -1415,7 +1416,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// 3) item definition on the next item, and so on until
         /// 4) item definition metadata on the destination item itself
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyWithItemDefinition2()
         {
             string content = @"
@@ -1455,61 +1456,61 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using ProjectFromString projectFromString = new(content);
             Project project = projectFromString.Project;
 
-            Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("i").First().GetMetadataValue("n"));
-            Assert.Equal("", project.GetItems("i").First().GetMetadataValue("o"));
-            Assert.Equal("", project.GetItems("i").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("i").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("i").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("i").First().GetMetadataValue("n"));
+            Assert.AreEqual("", project.GetItems("i").First().GetMetadataValue("o"));
+            Assert.AreEqual("", project.GetItems("i").First().GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("j").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("j").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("j").First().GetMetadataValue("n"));
-            Assert.Equal("o2", project.GetItems("j").First().GetMetadataValue("o"));
-            Assert.Equal("p2", project.GetItems("j").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("j").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("j").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("j").First().GetMetadataValue("n"));
+            Assert.AreEqual("o2", project.GetItems("j").First().GetMetadataValue("o"));
+            Assert.AreEqual("p2", project.GetItems("j").First().GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("k").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("k").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("k").First().GetMetadataValue("n"));
-            Assert.Equal("o2", project.GetItems("k").First().GetMetadataValue("o"));
-            Assert.Equal("p4", project.GetItems("k").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("k").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("k").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("k").First().GetMetadataValue("n"));
+            Assert.AreEqual("o2", project.GetItems("k").First().GetMetadataValue("o"));
+            Assert.AreEqual("p4", project.GetItems("k").First().GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("l").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("l").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("l").First().GetMetadataValue("n"));
-            Assert.Equal("o2", project.GetItems("l").First().GetMetadataValue("o"));
-            Assert.Equal("p4", project.GetItems("l").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("l").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("l").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("l").First().GetMetadataValue("n"));
+            Assert.AreEqual("o2", project.GetItems("l").First().GetMetadataValue("o"));
+            Assert.AreEqual("p4", project.GetItems("l").First().GetMetadataValue("p"));
 
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("l"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("m"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("n"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("o"));
-            Assert.Equal("", project.GetItems("l").ElementAt(1).GetMetadataValue("p"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("l"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("m"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("n"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("o"));
+            Assert.AreEqual("", project.GetItems("l").ElementAt(1).GetMetadataValue("p"));
 
-            Assert.Equal("l0", project.GetItems("m").First().GetMetadataValue("l"));
-            Assert.Equal("m1", project.GetItems("m").First().GetMetadataValue("m"));
-            Assert.Equal("n1", project.GetItems("m").First().GetMetadataValue("n"));
-            Assert.Equal("o4", project.GetItems("m").First().GetMetadataValue("o"));
-            Assert.Equal("p4", project.GetItems("m").First().GetMetadataValue("p"));
+            Assert.AreEqual("l0", project.GetItems("m").First().GetMetadataValue("l"));
+            Assert.AreEqual("m1", project.GetItems("m").First().GetMetadataValue("m"));
+            Assert.AreEqual("n1", project.GetItems("m").First().GetMetadataValue("n"));
+            Assert.AreEqual("o4", project.GetItems("m").First().GetMetadataValue("o"));
+            Assert.AreEqual("p4", project.GetItems("m").First().GetMetadataValue("p"));
 
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("l"));
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("m"));
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("n"));
-            Assert.Equal("o4", project.GetItems("m").ElementAt(1).GetMetadataValue("o"));
-            Assert.Equal("", project.GetItems("m").ElementAt(1).GetMetadataValue("p"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("l"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("m"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("n"));
+            Assert.AreEqual("o4", project.GetItems("m").ElementAt(1).GetMetadataValue("o"));
+            Assert.AreEqual("", project.GetItems("m").ElementAt(1).GetMetadataValue("p"));
 
             // Should still point at the same XML metadata
-            Assert.True(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("l").Xml, project.GetItems("m").First().GetMetadata("l").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("m").Xml, project.GetItems("m").First().GetMetadata("m").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("n").Xml, project.GetItems("m").First().GetMetadata("n").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("o").Xml, project.GetItems("k").First().GetMetadata("o").Xml));
-            Assert.True(Object.ReferenceEquals(project.GetItems("k").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
-            Assert.True(!Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("l").Xml, project.GetItems("m").First().GetMetadata("l").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("m").Xml, project.GetItems("m").First().GetMetadata("m").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("i").First().GetMetadata("n").Xml, project.GetItems("m").First().GetMetadata("n").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("o").Xml, project.GetItems("k").First().GetMetadata("o").Xml));
+            Assert.IsTrue(Object.ReferenceEquals(project.GetItems("k").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
+            Assert.IsTrue(!Object.ReferenceEquals(project.GetItems("j").First().GetMetadata("p").Xml, project.GetItems("m").First().GetMetadata("p").Xml));
         }
 
         /// <summary>
         /// Metadata on items can refer to metadata above
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataReferringToMetadataAbove()
         {
             string content = @"
@@ -1526,8 +1527,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item = GetOneItem(content);
 
             var itemMetadata = Helpers.MakeList(item.Metadata);
-            Assert.Equal(2, itemMetadata.Count);
-            Assert.Equal("v1;v2;", item.GetMetadataValue("m2"));
+            Assert.AreEqual(2, itemMetadata.Count);
+            Assert.AreEqual("v1;v2;", item.GetMetadataValue("m2"));
         }
 
         /// <summary>
@@ -1535,7 +1536,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// NOTE: To work properly, this should batch. This is a temporary "patch" to make it work for now.
         /// It will only give correct results if there is exactly one item in the Include. Otherwise Batching would be needed.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataExpression()
         {
             string content = @"
@@ -1550,13 +1551,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = GetOneItem(content);
 
-            Assert.Equal("i1", item.GetMetadataValue("m"));
+            Assert.AreEqual("i1", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Qualified built in metadata should work
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInQualifiedMetadataExpression()
         {
             string content = @"
@@ -1571,13 +1572,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = GetOneItem(content);
 
-            Assert.Equal("i1", item.GetMetadataValue("m"));
+            Assert.AreEqual("i1", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Mis-qualified built in metadata should not work
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMisqualifiedMetadataExpression()
         {
             string content = @"
@@ -1592,13 +1593,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = GetOneItem(content);
 
-            Assert.Equal(String.Empty, item.GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Metadata condition should work correctly with built-in metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataInMetadataCondition()
         {
             string content = @"
@@ -1614,17 +1615,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = GetOneItem(content);
 
-            Assert.Equal("m1", item.GetMetadataValue("m"));
-            Assert.Equal(String.Empty, item.GetMetadataValue("n"));
+            Assert.AreEqual("m1", item.GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("n"));
         }
 
         /// <summary>
         /// Metadata on item condition not allowed (currently)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataInItemCondition()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -1640,7 +1641,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Two items should each get their own values for built-in metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTwoItems()
         {
             string content = @"
@@ -1655,14 +1656,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal(@"i1.obj", items[0].GetMetadataValue("m"));
-            Assert.Equal(@"i2.obj", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"i1.obj", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(@"i2.obj", items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentMetadataItemsFromOtherList()
         {
             string content = @"
@@ -1682,14 +1683,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal(@"m1", items[0].GetMetadataValue("m"));
-            Assert.Equal(String.Empty, items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"m1", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentBuiltInMetadataItemsFromOtherList()
         {
             string content = @"
@@ -1707,14 +1708,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal(@".x", items[0].GetMetadataValue("m"));
-            Assert.Equal(@".y", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@".x", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(@".y", items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Two items coming from a transform
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTransformInInclude()
         {
             string content = @"
@@ -1732,14 +1733,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal(@"h0.baz.obj", items[0].GetMetadataValue("m"));
-            Assert.Equal(@"h1.baz.obj", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"h0.baz.obj", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(@"h1.baz.obj", items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Transform in the metadata value; no bare metadata involved
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTransformInMetadataValue()
         {
             string content = @"
@@ -1757,14 +1758,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal(@"i0;h0;h1", items[1].GetMetadataValue("m"));
-            Assert.Equal(@"i0;h0;h1", items[2].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0;h0;h1", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0;h0;h1", items[2].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Transform in the metadata value; bare metadata involved
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTransformInMetadataValueBareMetadataPresent()
         {
             string content = @"
@@ -1782,14 +1783,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal(@"i0.x;h0;h1;.y", items[1].GetMetadataValue("m"));
-            Assert.Equal(@"i0.x;h0;h1;", items[2].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0.x;h0;h1;.y", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0.x;h0;h1;", items[2].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Metadata on items can refer to item lists
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataValueReferringToItems()
         {
             string content = @"
@@ -1806,13 +1807,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal("h0;i0", items[1].GetMetadataValue("m1"));
+            Assert.AreEqual("h0;i0", items[1].GetMetadataValue("m1"));
         }
 
         /// <summary>
         /// Metadata on items' conditions can refer to item lists
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataConditionReferringToItems()
         {
             string content = @"
@@ -1830,14 +1831,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal("v1", items[1].GetMetadataValue("m1"));
-            Assert.Equal(String.Empty, items[1].GetMetadataValue("m2"));
+            Assert.AreEqual("v1", items[1].GetMetadataValue("m1"));
+            Assert.AreEqual(String.Empty, items[1].GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// Metadata on items' conditions can refer to other metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataConditionReferringToMetadataOnSameItem()
         {
             string content = @"
@@ -1854,15 +1855,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal("0", items[0].GetMetadataValue("m0"));
-            Assert.Equal("1", items[0].GetMetadataValue("m1"));
-            Assert.Equal(String.Empty, items[0].GetMetadataValue("m2"));
+            Assert.AreEqual("0", items[0].GetMetadataValue("m0"));
+            Assert.AreEqual("1", items[0].GetMetadataValue("m1"));
+            Assert.AreEqual(String.Empty, items[0].GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// Remove a metadatum
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveMetadata()
         {
             Project project = new Project();
@@ -1872,17 +1873,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             bool found = item.RemoveMetadata("m");
 
-            Assert.True(found);
-            Assert.True(project.IsDirty);
-            Assert.Equal(String.Empty, item.GetMetadataValue("m"));
-            Assert.Equal(0, Helpers.Count(item.Xml.Metadata));
+            Assert.IsTrue(found);
+            Assert.IsTrue(project.IsDirty);
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("m"));
+            Assert.AreEqual(0, Helpers.Count(item.Xml.Metadata));
         }
 
         /// <summary>
         /// Attempt to remove a metadatum originating from an item definition.
         /// Should fail if it was not overridden.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveItemDefinitionMetadataMasked()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -1892,22 +1893,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
 
             bool found = item.RemoveMetadata("m");
-            Assert.True(found);
-            Assert.Equal(0, item.DirectMetadataCount);
-            Assert.Equal(0, Helpers.Count(item.DirectMetadata));
-            Assert.Equal("m1", item.GetMetadataValue("m")); // Now originating from definition!
-            Assert.True(project.IsDirty);
-            Assert.Equal(0, item.Xml.Count);
+            Assert.IsTrue(found);
+            Assert.AreEqual(0, item.DirectMetadataCount);
+            Assert.AreEqual(0, Helpers.Count(item.DirectMetadata));
+            Assert.AreEqual("m1", item.GetMetadataValue("m")); // Now originating from definition!
+            Assert.IsTrue(project.IsDirty);
+            Assert.AreEqual(0, item.Xml.Count);
         }
 
         /// <summary>
         /// Attempt to remove a metadatum originating from an item definition.
         /// Should fail if it was not overridden.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveItemDefinitionMetadataNotMasked()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddItemDefinition("i").AddMetadata("m", "m1");
@@ -1921,7 +1922,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove a nonexistent metadatum
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveNonexistentMetadata()
         {
             Project project = new Project();
@@ -1930,17 +1931,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             bool found = item.RemoveMetadata("m");
 
-            Assert.False(found);
-            Assert.False(project.IsDirty);
+            Assert.IsFalse(found);
+            Assert.IsFalse(project.IsDirty);
         }
 
         /// <summary>
         /// Tests removing built-in metadata.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveBuiltInMetadata()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddItem("i", "i1");
@@ -1954,7 +1955,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Simple rename
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Rename()
         {
             Project project = new Project();
@@ -1962,23 +1963,23 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.ReevaluateIfNecessary();
 
             // populate built in metadata cache for this item, to verify the cache is cleared out by the rename
-            Assert.Equal("i1", item.GetMetadataValue("FileName"));
+            Assert.AreEqual("i1", item.GetMetadataValue("FileName"));
 
             item.Rename("i2");
 
-            Assert.Equal("i2", item.Xml.Include);
-            Assert.Equal("i2", item.EvaluatedInclude);
-            Assert.True(project.IsDirty);
-            Assert.Equal("i2", item.GetMetadataValue("FileName"));
+            Assert.AreEqual("i2", item.Xml.Include);
+            Assert.AreEqual("i2", item.EvaluatedInclude);
+            Assert.IsTrue(project.IsDirty);
+            Assert.AreEqual("i2", item.GetMetadataValue("FileName"));
         }
 
         /// <summary>
         /// Verifies that renaming a ProjectItem whose xml backing is a wildcard doesn't corrupt
         /// the MSBuild evaluation data.
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void RenameItemInProjectWithWildcards()
         {
             string projectDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -1994,14 +1995,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.ReevaluateIfNecessary();
 
                 var projectItem = project.Items.Single();
-                Assert.Equal(Path.GetFileName(sourceFile), projectItem.EvaluatedInclude);
-                Assert.Same(projectItem, project.GetItemsByEvaluatedInclude(projectItem.EvaluatedInclude).Single());
+                Assert.AreEqual(Path.GetFileName(sourceFile), projectItem.EvaluatedInclude);
+                Assert.AreSame(projectItem, project.GetItemsByEvaluatedInclude(projectItem.EvaluatedInclude).Single());
                 projectItem.Rename(Path.GetFileName(renamedSourceFile));
                 File.Move(sourceFile, renamedSourceFile); // repro w/ or w/o this
                 project.ReevaluateIfNecessary();
                 projectItem = project.Items.Single();
-                Assert.Equal(Path.GetFileName(renamedSourceFile), projectItem.EvaluatedInclude);
-                Assert.Same(projectItem, project.GetItemsByEvaluatedInclude(projectItem.EvaluatedInclude).Single());
+                Assert.AreEqual(Path.GetFileName(renamedSourceFile), projectItem.EvaluatedInclude);
+                Assert.AreSame(projectItem, project.GetItemsByEvaluatedInclude(projectItem.EvaluatedInclude).Single());
             }
             finally
             {
@@ -2012,7 +2013,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Change item type
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChangeItemType()
         {
             Project project = new Project();
@@ -2021,17 +2022,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             item.ItemType = "j";
 
-            Assert.Equal("j", item.ItemType);
-            Assert.True(project.IsDirty);
+            Assert.AreEqual("j", item.ItemType);
+            Assert.IsTrue(project.IsDirty);
         }
 
         /// <summary>
         /// Change item type to invalid value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChangeItemTypeInvalid()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 Project project = new Project();
                 ProjectItem item = project.AddItem("i", "i1")[0];
@@ -2043,10 +2044,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to rename imported item should fail
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RenameImported()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 string file = null;
 
@@ -2074,10 +2075,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to set metadata on imported item should fail
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetMetadataImported()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 string file = null;
 
@@ -2105,10 +2106,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to remove metadata on imported item should fail
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveMetadataImported()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 string file = null;
 
@@ -2135,7 +2136,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDirectMetadataShouldEvaluateMetadataValue()
         {
             var projectContents =
@@ -2155,12 +2156,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var metadata = project.GetItems("I").FirstOrDefault().SetMetadataValue("M", "$(P);@(Foo)", true);
 
-                Assert.Equal("p;f1;f2", metadata.EvaluatedValue);
-                Assert.Equal("$(P);@(Foo)", metadata.Xml.Value);
+                Assert.AreEqual("p;f1;f2", metadata.EvaluatedValue);
+                Assert.AreEqual("$(P);@(Foo)", metadata.Xml.Value);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDirectMetadataWhenSameMetadataComesFromDefinitionGroupShouldAddDirectMetadata()
         {
             var projectContents =
@@ -2182,18 +2183,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var item = project.GetItems("I").FirstOrDefault();
                 var metadata = item.SetMetadataValue("M", "V", true);
 
-                Assert.Equal("M", metadata.Name);
-                Assert.Equal("V", metadata.EvaluatedValue);
+                Assert.AreEqual("M", metadata.Name);
+                Assert.AreEqual("V", metadata.EvaluatedValue);
 
-                Assert.Single(item.Xml.Metadata);
+                Assert.ContainsSingle(item.Xml.Metadata);
 
                 ProjectMetadataElement metadataElement = item.Xml.Metadata.FirstOrDefault();
-                Assert.Equal("M", metadataElement.Name);
-                Assert.Equal("V", metadataElement.Value);
+                Assert.AreEqual("M", metadataElement.Name);
+                Assert.AreEqual("V", metadataElement.Value);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDirectMetadataShouldAffectAllSiblingItems()
         {
             var projectContents =
@@ -2214,46 +2215,46 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var items = project.GetItems("I");
 
-                Assert.Equal(4, items.Count);
+                Assert.AreEqual(4, items.Count);
 
-                Assert.False(project.IsDirty);
+                Assert.IsFalse(project.IsDirty);
 
                 items.First().SetMetadataValue("M2", "V2", true);
 
-                Assert.True(project.IsDirty);
+                Assert.IsTrue(project.IsDirty);
 
-                Assert.Equal(2, project.Xml.AllChildren.OfType<ProjectItemElement>().Count());
+                Assert.AreEqual(2, project.Xml.AllChildren.OfType<ProjectItemElement>().Count());
 
                 foreach (var item in items)
                 {
                     var metadata = item.Metadata;
 
-                    Assert.Equal(2, metadata.Count);
+                    Assert.AreEqual(2, metadata.Count);
 
                     var m1 = metadata.ElementAt(0);
-                    Assert.Equal("M1", m1.Name);
-                    Assert.Equal("V1", m1.EvaluatedValue);
+                    Assert.AreEqual("M1", m1.Name);
+                    Assert.AreEqual("V1", m1.EvaluatedValue);
 
                     var m2 = metadata.ElementAt(1);
-                    Assert.Equal("M2", m2.Name);
-                    Assert.Equal("V2", m2.EvaluatedValue);
+                    Assert.AreEqual("M2", m2.Name);
+                    Assert.AreEqual("V2", m2.EvaluatedValue);
                 }
 
                 var metadataElements = items.First().Xml.Metadata;
 
-                Assert.Equal(2, metadataElements.Count);
+                Assert.AreEqual(2, metadataElements.Count);
 
                 var me1 = metadataElements.ElementAt(0);
-                Assert.Equal("M1", me1.Name);
-                Assert.Equal("V1", me1.Value);
+                Assert.AreEqual("M1", me1.Name);
+                Assert.AreEqual("V1", me1.Value);
 
                 var me2 = metadataElements.ElementAt(1);
-                Assert.Equal("M2", me2.Name);
-                Assert.Equal("V2", me2.Value);
+                Assert.AreEqual("M2", me2.Name);
+                Assert.AreEqual("V2", me2.Value);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDirectMetadataShouldUpdateAlreadyExistingDirectMetadata()
         {
             var projectContents =
@@ -2274,50 +2275,50 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 var items = project.GetItems("I");
 
-                Assert.Equal(4, items.Count);
+                Assert.AreEqual(4, items.Count);
 
-                Assert.False(project.IsDirty);
+                Assert.IsFalse(project.IsDirty);
 
                 items.First().SetMetadataValue("M1", "V2", true);
 
-                Assert.True(project.IsDirty);
+                Assert.IsTrue(project.IsDirty);
 
-                Assert.Equal(2, project.Xml.AllChildren.OfType<ProjectItemElement>().Count());
+                Assert.AreEqual(2, project.Xml.AllChildren.OfType<ProjectItemElement>().Count());
 
                 foreach (var item in items)
                 {
                     var metadata = item.Metadata;
 
-                    Assert.Single(metadata);
+                    Assert.ContainsSingle(metadata);
 
                     var m1 = metadata.ElementAt(0);
-                    Assert.Equal("M1", m1.Name);
-                    Assert.Equal("V2", m1.EvaluatedValue);
+                    Assert.AreEqual("M1", m1.Name);
+                    Assert.AreEqual("V2", m1.EvaluatedValue);
                 }
 
                 var metadataElements = items.First().Xml.Metadata;
 
-                Assert.Single(metadataElements);
+                Assert.ContainsSingle(metadataElements);
 
                 var me1 = metadataElements.ElementAt(0);
-                Assert.Equal("M1", me1.Name);
-                Assert.Equal("V2", me1.Value);
+                Assert.AreEqual("M1", me1.Name);
+                Assert.AreEqual("V2", me1.Value);
             }
         }
 
         // TODO: Should remove tests go in project item tests, project item instance tests, or both?
-        [Fact]
+        [MSBuildTestMethod]
         public void Remove()
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 "<i Include='a;b' />" +
                 "<i Remove='b;c' />");
 
-            Assert.Single(items);
-            Assert.Equal("a", items[0].EvaluatedInclude);
+            Assert.ContainsSingle(items);
+            Assert.AreEqual("a", items[0].EvaluatedInclude);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveAllMatchingItems()
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
@@ -2325,22 +2326,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 "<i Include='a;b' />" +
                 "<i Remove='b;c' />");
 
-            Assert.Equal(2, items.Count);
-            Assert.Equal(@"a;a", string.Join(";", items.Select(i => i.EvaluatedInclude)));
+            Assert.AreEqual(2, items.Count);
+            Assert.AreEqual(@"a;a", string.Join(";", items.Select(i => i.EvaluatedInclude)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveGlob()
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
                 @"<i Include='a.txt;b.cs;bin\foo.cs' />" +
                 @"<i Remove='bin\**' />");
 
-            Assert.Equal(2, items.Count);
-            Assert.Equal(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude)));
+            Assert.AreEqual(2, items.Count);
+            Assert.AreEqual(@"a.txt;b.cs", string.Join(";", items.Select(i => i.EvaluatedInclude)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveItemReference()
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(
@@ -2348,13 +2349,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 @"<j Include='b;d' />" +
                 @"<i Remove='@(j)' />");
 
-            Assert.Equal(2, items.Count);
-            Assert.Equal(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude)));
+            Assert.AreEqual(2, items.Count);
+            Assert.AreEqual(@"a;c", string.Join(";", items.Select(i => i.EvaluatedInclude)));
         }
 
-        [Theory]
-        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @"1.foo;.\2.foo;.\.\3.foo")]
-        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @".\1.foo;.\.\2.foo;.\.\.\3.foo")]
+        [MSBuildTestMethod]
+        [DataRow(@"1.foo;.\2.foo;.\.\3.foo", @"1.foo;.\2.foo;.\.\3.foo")]
+        [DataRow(@"1.foo;.\2.foo;.\.\3.foo", @".\1.foo;.\.\2.foo;.\.\.\3.foo")]
         public void RemoveShouldMatchNonCanonicPaths(string include, string remove)
         {
             var content = @"
@@ -2366,10 +2367,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            Assert.Empty(items);
+            Assert.IsEmpty(items);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveShouldRespectCondition()
         {
             var projectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2379,13 +2380,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
 
-            Assert.Equal(@"a;b", string.Join(";", project.Items.Select(i => i.EvaluatedInclude)));
+            Assert.AreEqual(@"a;b", string.Join(";", project.Items.Select(i => i.EvaluatedInclude)));
         }
 
         /// <summary>
         /// See comment for details: https://github.com/dotnet/msbuild/issues/1475#issuecomment-275520394
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1616")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/1616")]
         public void RemoveWithConditionShouldNotApplyOnItemsIgnoringCondition()
         {
             var projectContents = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2396,10 +2398,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var project = ObjectModelHelpers.CreateInMemoryProject(projectContents);
 
-            Assert.Equal(@"a;b;c", string.Join(";", project.ItemsIgnoringCondition.Select(i => i.EvaluatedInclude)));
+            Assert.AreEqual(@"a;b;c", string.Join(";", project.ItemsIgnoringCondition.Select(i => i.EvaluatedInclude)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveWithItemReferenceOnMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2426,7 +2428,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             items.ElementAt(1).GetMetadataValue("M2").ShouldBe("d");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveWithItemReferenceOnCaseInsensitiveMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2453,7 +2455,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             items.ElementAt(1).GetMetadataValue("M2").ShouldBe("d");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveWithItemReferenceOnFilePathMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2503,7 +2505,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveWithItemReferenceOnIntrinsicMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2525,7 +2527,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "../foo.txt", "/foo/bar.txt" });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveWithPropertyReferenceInMatchOnMetadata()
         {
             string content =
@@ -2563,7 +2565,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveWithItemReferenceInMatchOnMetadata()
         {
             string content =
@@ -2602,7 +2604,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void KeepWithItemReferenceOnNonmatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2633,7 +2635,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             items.ElementAt(3).GetMetadataValue("d").ShouldBe("d");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveMatchingMultipleMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2657,7 +2659,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             items.ElementAt(2).EvaluatedInclude.ShouldBe("d2");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveMultipleItemReferenceOnMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2683,7 +2685,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             items.ShouldBeEmpty();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FailWithMetadataItemReferenceOnMatchingMetadata()
         {
             string content = ObjectModelHelpers.FormatProjectContentsWithItemGroupFragment(
@@ -2702,7 +2704,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 .HelpKeyword.ShouldBe("MSBuild.OM_MatchOnMetadataIsRestrictedToReferencedItems");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateMetadataShouldAddOrReplace()
         {
             string content = @"<i Include='a;b'>
@@ -2738,7 +2740,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 , items[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldRespectCondition()
         {
             string projectContents = @"<i Include='a;b;c'>
@@ -2777,7 +2779,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// See comment for details: https://github.com/dotnet/msbuild/issues/1475#issuecomment-275520394
         /// Conditions on metadata on appear to be respected even for items ignoring condition (don't know why, but that's what the code does).
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1616")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/1616")]
         public void UpdateWithConditionShouldNotApplyOnItemsIgnoringCondition()
         {
             string projectContents = @"<i Include='a;b;c;d'>
@@ -2816,7 +2819,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdateFromUnconditionedElement, itemsIgnoringCondition[3]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LastUpdateWins()
         {
             string content = @"<i Include='a'>
@@ -2839,14 +2842,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdate, items[0]);
         }
 
-        [Theory]
-        [InlineData("abc", "def", "abc")]
-        [InlineData("abc", "de*", "abc")]
-        [InlineData("a*c", "def", "abc")]
-        [InlineData("abc", "def", "*bc")]
-        [InlineData("abc", "d*f", "*bc")]
-        [InlineData("*c", "d*f", "*bc")]
-        [InlineData("a*", "d*", "abc")]
+        [MSBuildTestMethod]
+        [DataRow("abc", "def", "abc")]
+        [DataRow("abc", "de*", "abc")]
+        [DataRow("a*c", "def", "abc")]
+        [DataRow("abc", "def", "*bc")]
+        [DataRow("abc", "d*f", "*bc")]
+        [DataRow("*c", "d*f", "*bc")]
+        [DataRow("a*", "d*", "abc")]
         public void UpdatesProceedInOrder(string first, string second, string third)
         {
             string contents = $@"
@@ -2880,7 +2883,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatej, items[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdatingIndividualItemsProceedsInOrder()
         {
             string contents = @"
@@ -2925,7 +2928,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata("m1", "eighth", items[14]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateWithNoMetadataShouldNotAffectItems()
         {
             string content = @"<i Include='a;b'>
@@ -2945,13 +2948,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {"m3", "m3_contents"}
             };
 
-            Assert.Equal(2, items.Count);
+            Assert.AreEqual(2, items.Count);
 
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata, items[0]);
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata, items[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateOnNonExistingItemShouldDoNothing()
         {
             string content = @"<i Include='a;b'>
@@ -2966,7 +2969,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
 
-            Assert.Equal(2, items.Count);
+            Assert.AreEqual(2, items.Count);
 
             var expectedMetadata = new Dictionary<string, string>
             {
@@ -2978,7 +2981,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadata, items[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateOnEmptyStringShouldThrow()
         {
             string content = @"<i Include='a;b'>
@@ -2991,16 +2994,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                                   <m3>added</m3>
                               </i>";
 
-            var exception = Assert.Throws<InvalidProjectFileException>(() =>
+            var exception = Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ObjectModelHelpers.GetItemsFromFragment(content);
             });
 
-            Assert.Equal("The required attribute \"Update\" is empty or missing from the element <i>.", exception.Message);
+            Assert.AreEqual("The required attribute \"Update\" is empty or missing from the element <i>.", exception.Message);
         }
 
         // Complex metadata: metadata references from the same item; item transforms; correct binding of metadata with same name but different item qualifiers
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldSupportComplexMetadata()
         {
             string content = @"
@@ -3020,7 +3023,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
 
-            Assert.Equal(3, items.Count);
+            Assert.AreEqual(3, items.Count);
 
             var expectedMetadataX = new Dictionary<string, string>
             {
@@ -3046,7 +3049,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataB, items[2]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldImportMetadataFromReferencedItem()
         {
             string content = @"
@@ -3095,7 +3098,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataC, items[4]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OptimizedRemoveOperationRespectsCondition()
         {
             string content = @"<TheItem Include=""InitialValue"" />
@@ -3106,9 +3109,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             items[0].EvaluatedInclude.ShouldBe("InitialValue");
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void EscapeHatchTurnsOffQualifiedMetadataExpansionInUpdateOperation(bool doNotExpandQualifiedMetadataInUpdateOperation)
         {
             using var env = TestEnvironment.Create();
@@ -3148,7 +3151,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateFromReferencedItemShouldBeCaseInsensitive()
         {
             string content = @"
@@ -3171,7 +3174,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateMetadataWithoutItemReferenceShouldBeCaseInsensitive()
         {
             string content = @"
@@ -3190,7 +3193,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[0]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UndeclaredQualifiedMetadataReferencesInUpdateShouldResolveToEmptyStrings()
         {
             string content = @"
@@ -3218,7 +3221,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataA, items[2]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldImportMetadataFromMultipleReferencedItems()
         {
             string content = @"
@@ -3308,7 +3311,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedMetadataY, items[11]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateFromReferencedItemsWithDuplicatesShouldUseLastItemFromEachItemType()
         {
             using var env = TestEnvironment.Create();
@@ -3365,7 +3368,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateFromReferenceItemAndNoMetadataNOOPS()
         {
             string content = @"
@@ -3387,7 +3390,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldBeAbleToContainGlobs()
         {
             var content = @"<i Include='*.foo'>
@@ -3402,7 +3405,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var items = GetItemsFromFragmentWithGlobs(content, "a.foo", "b.foo", "bar1.foo", "bar2.foo");
 
-            Assert.Equal(4, items.Count);
+            Assert.AreEqual(4, items.Count);
 
             var expectedInitialMetadata = new Dictionary<string, string>
             {
@@ -3423,7 +3426,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedUpdatedMetadata, items[3]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldBeAbleToContainItemReferences()
         {
             var content = @"<i1 Include='x;y'>
@@ -3444,7 +3447,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content, true);
 
-            Assert.Equal(4, items.Count);
+            Assert.AreEqual(4, items.Count);
 
             var expected_i1 = new Dictionary<string, string>
             {
@@ -3470,7 +3473,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expected_i2_y, items[3]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldBeAbleToContainProperties()
         {
             var content = @"
@@ -3493,7 +3496,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Equal(3, items.Count);
+            Assert.AreEqual(3, items.Count);
 
             var expectedInitial = new Dictionary<string, string>
             {
@@ -3512,7 +3515,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ObjectModelHelpers.AssertItemHasMetadata(expectedInitial, items[2]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateAndRemoveShouldUseCaseInsensitiveMatching()
         {
             var content = @"
@@ -3623,15 +3626,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
-        [Theory]
-        [MemberData(nameof(UpdateAndRemoveShouldWorkWithEscapedCharactersTestData), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(UpdateAndRemoveShouldWorkWithEscapedCharactersTestData))]
         public void UpdateAndRemoveShouldWorkWithEscapedCharacters(string projectContents, string include, string update, string remove, string[] expectedInclude, Dictionary<string, string>[] expectedMetadata)
         {
             var formattedProjectContents = string.Format(projectContents, include, update, remove);
             ObjectModelHelpers.AssertItemEvaluationFromProject(formattedProjectContents, Array.Empty<string>(), expectedInclude, expectedMetadata);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateAndRemoveShouldNotUseGlobMatchingOnEscapedGlobsFromReferencedItems()
         {
             var project = @"
@@ -3666,9 +3669,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 expectedMetadataPerItem: null);
         }
 
-        [Theory]
-        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @"1.foo;.\2.foo;.\.\3.foo")]
-        [InlineData(@"1.foo;.\2.foo;.\.\3.foo", @".\1.foo;.\.\2.foo;.\.\.\3.foo")]
+        [MSBuildTestMethod]
+        [DataRow(@"1.foo;.\2.foo;.\.\3.foo", @"1.foo;.\2.foo;.\.\3.foo")]
+        [DataRow(@"1.foo;.\2.foo;.\.\3.foo", @".\1.foo;.\.\2.foo;.\.\.\3.foo")]
         public void UpdateShouldMatchNonCanonicPaths(string include, string update)
         {
             var content = @"
@@ -3718,7 +3721,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(fragment);
 
-            Assert.Single(items);
+            Assert.ContainsSingle(items);
             return items[0];
         }
 
@@ -3730,14 +3733,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             IList<ProjectItem> items = ObjectModelHelpers.GetItems(content);
 
-            Assert.Single(items);
+            Assert.ContainsSingle(items);
             return items[0];
         }
 
         /// <summary>
         /// Item metadata "Filename" should not depends on platform specific slashes.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FileNameMetadataEvaluationShouldNotDependsFromPlatformSpecificSlashes()
         {
             using (var env = TestEnvironment.Create())

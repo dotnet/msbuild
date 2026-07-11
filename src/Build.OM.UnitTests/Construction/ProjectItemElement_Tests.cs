@@ -7,7 +7,6 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -17,6 +16,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectItemElement class
     /// </summary>
+    [TestClass]
     public class ProjectItemElement_Tests
     {
         private const string RemoveInTarget = @"
@@ -72,17 +72,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with no children
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void ReadNoChildren(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
-            Assert.Equal(0, Helpers.Count(item.Metadata));
+            Assert.AreEqual(0, Helpers.Count(item.Metadata));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMetadataLocationPreserved()
         {
             string project = """
@@ -96,21 +96,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 """;
 
             ProjectItemElement item = GetItemFromContent(project);
-            Assert.Equal(2, item.Metadata.Count);
+            Assert.AreEqual(2, item.Metadata.Count);
             ProjectMetadataElement metadatum1 = item.Metadata.First();
             ProjectMetadataElement metadatum2 = item.Metadata.Skip(1).First();
 
-            Assert.Equal(4, metadatum1.Location.Line);
-            Assert.Equal(4, metadatum2.Location.Line);
-            Assert.Equal(27, metadatum1.Location.Column);
-            Assert.Equal(43, metadatum2.Location.Column);
+            Assert.AreEqual(4, metadatum1.Location.Line);
+            Assert.AreEqual(4, metadatum2.Location.Line);
+            Assert.AreEqual(27, metadatum1.Location.Column);
+            Assert.AreEqual(43, metadatum2.Location.Column);
         }
 
         /// <summary>
         /// Read item with no include
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i/>
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         // https://github.com/dotnet/msbuild/issues/900
-        // [InlineData(@"
+        // [DataRow(@"
         //            <Project>
         //                <Target Name='t'>
         //                    <ItemGroup>
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         //        ")]
         public void ReadInvalidNoInclude(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -138,15 +138,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item which contains text
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='a'>error text</i>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidContainsText(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -166,15 +166,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with empty include
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include=''/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidEmptyInclude(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -194,15 +194,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with reserved element name
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <PropertyGroup Include='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidReservedElementName(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Exclude without Include
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidExcludeWithoutInclude()
         {
             var project = @"
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             var exception =
-                Assert.Throws<InvalidProjectFileException>(
+                Assert.ThrowsExactly<InvalidProjectFileException>(
                     () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); });
 
             Assert.Contains("Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.", exception.Message);
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Exclude without Include under a target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidExcludeWithoutIncludeUnderTarget()
         {
             var project = @"
@@ -257,21 +257,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             var exception =
-                Assert.Throws<InvalidProjectFileException>(
+                Assert.ThrowsExactly<InvalidProjectFileException>(
                     () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); });
 
             Assert.Contains("The attribute \"Exclude\" in element <i> is unrecognized.", exception.Message);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i include='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -280,14 +280,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' exclude='i2' />
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidItemAttributeCasing(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -307,8 +307,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Basic reading of items
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i'>
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='v1' />
@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -360,28 +360,28 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Equal("i1", items[0].ItemType);
-            Assert.Equal("i", items[0].Include);
+            Assert.AreEqual("i1", items[0].ItemType);
+            Assert.AreEqual("i", items[0].Include);
 
             var metadata1 = Helpers.MakeList(items[0].Metadata);
-            Assert.Single(metadata1);
-            Assert.Equal("m1", metadata1[0].Name);
-            Assert.Equal("v1", metadata1[0].Value);
+            Assert.ContainsSingle(metadata1);
+            Assert.AreEqual("m1", metadata1[0].Name);
+            Assert.AreEqual("v1", metadata1[0].Value);
 
             var metadata2 = Helpers.MakeList(items[1].Metadata);
-            Assert.Equal("i2", items[1].ItemType);
-            Assert.Equal("i", items[1].Include);
-            Assert.Equal("j", items[1].Exclude);
-            Assert.Single(metadata2);
-            Assert.Equal("m2", metadata2[0].Name);
-            Assert.Equal("v2", metadata2[0].Value);
+            Assert.AreEqual("i2", items[1].ItemType);
+            Assert.AreEqual("i", items[1].Include);
+            Assert.AreEqual("j", items[1].Exclude);
+            Assert.ContainsSingle(metadata2);
+            Assert.AreEqual("m2", metadata2[0].Name);
+            Assert.AreEqual("v2", metadata2[0].Value);
         }
 
         /// <summary>
         /// Read metadata on item
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i'>
@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -413,25 +413,25 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemElement item = Helpers.GetFirst(itemGroup.Items);
 
             var metadata = Helpers.MakeList(item.Metadata);
-            Assert.Equal(3, metadata.Count);
-            Assert.Equal("m1", metadata[0].Name);
-            Assert.Equal("v1", metadata[0].Value);
-            Assert.Equal("m2", metadata[1].Name);
-            Assert.Equal("v2", metadata[1].Value);
-            Assert.Equal("c", metadata[1].Condition);
-            Assert.Equal("m1", metadata[2].Name);
-            Assert.Equal("v3", metadata[2].Value);
+            Assert.AreEqual(3, metadata.Count);
+            Assert.AreEqual("m1", metadata[0].Name);
+            Assert.AreEqual("v1", metadata[0].Value);
+            Assert.AreEqual("m2", metadata[1].Name);
+            Assert.AreEqual("v2", metadata[1].Value);
+            Assert.AreEqual("c", metadata[1].Condition);
+            Assert.AreEqual("m1", metadata[2].Name);
+            Assert.AreEqual("v3", metadata[2].Value);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -442,21 +442,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidUpdateWithInclude(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' Exclude='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -467,21 +467,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidUpdateWithIncludeAndExclude(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Exclude='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -492,7 +492,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidUpdateWithExclude(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -501,8 +501,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target, but with metadata
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Remove='i1'>
@@ -511,7 +511,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidRemoveWithMetadata(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -533,15 +533,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target, but with Exclude: not currently supported
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Exclude='i1' Remove='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -552,7 +552,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidExcludeAndRemove(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -561,15 +561,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target, but with Include: not currently supported
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' Remove='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidIncludeAndRemove(string project)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
             });
@@ -589,41 +589,41 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read item with Remove inside of Target
         /// </summary>
-        [Theory]
-        [InlineData(RemoveInTarget)]
-        [InlineData(RemoveOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(RemoveInTarget)]
+        [DataRow(RemoveOutsideTarget)]
         public void ReadValidRemove(string project)
         {
             var item = GetItemFromContent(project);
 
-            Assert.Equal("i", item.Remove);
+            Assert.AreEqual("i", item.Remove);
         }
 
         /// <summary>
         /// Read item with Remove inside of Target
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(UpdateInTarget)]
+        [DataRow(UpdateOutsideTarget)]
         public void ReadValidUpdate(string project)
         {
             var item = GetItemFromContent(project);
 
-            Assert.Equal("i", item.Update);
+            Assert.AreEqual("i", item.Update);
         }
 
         /// <summary>
         /// Read item with Exclude without Include, inside of Target
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' Exclude='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -636,109 +636,109 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             var item = GetItemFromContent(project);
 
-            Assert.Equal("i1", item.Include);
-            Assert.Equal("i2", item.Exclude);
+            Assert.AreEqual("i1", item.Include);
+            Assert.AreEqual("i2", item.Exclude);
         }
 
         /// <summary>
         /// Set the include on an item
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetInclude(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Include = "ib";
 
-            Assert.Equal("ib", item.Include);
+            Assert.AreEqual("ib", item.Include);
         }
 
         /// <summary>
         /// Set empty include: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetEmptyInclude(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Include = String.Empty;
 
-            Assert.Equal(String.Empty, item.Include);
+            Assert.AreEqual(String.Empty, item.Include);
         }
 
         /// <summary>
         /// Set null empty : this removes it
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetNullInclude(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Include = null;
 
-            Assert.Equal(String.Empty, item.Include);
+            Assert.AreEqual(String.Empty, item.Include);
         }
 
         /// <summary>
         /// Set the Exclude on an item
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetExclude(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Exclude = "ib";
 
-            Assert.Equal("ib", item.Exclude);
+            Assert.AreEqual("ib", item.Exclude);
         }
 
         /// <summary>
         /// Set empty Exclude: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetEmptyExclude(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Exclude = String.Empty;
 
-            Assert.Equal(String.Empty, item.Exclude);
+            Assert.AreEqual(String.Empty, item.Exclude);
         }
 
         /// <summary>
         /// Set null Exclude: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetNullExclude(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Exclude = null;
 
-            Assert.Equal(String.Empty, item.Exclude);
+            Assert.AreEqual(String.Empty, item.Exclude);
         }
 
         /// <summary>
         /// Set Remove when Include is present, inside a target
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetInvalidRemoveWithInclude(string project)
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItemElement item = GetItemFromContent(project);
 
@@ -749,12 +749,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Update when Include is present
         /// </summary>
-        [Theory]
-        [InlineData(IncludeInsideTarget)]
-        [InlineData(IncludeOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(IncludeInsideTarget)]
+        [DataRow(IncludeOutsideTarget)]
         public void SetInvalidUpdateWithInclude(string project)
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItemElement item = GetItemFromContent(project);
 
@@ -765,57 +765,57 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the Remove on an item
         /// </summary>
-        [Theory]
-        [InlineData(RemoveInTarget)]
-        [InlineData(RemoveOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(RemoveInTarget)]
+        [DataRow(RemoveOutsideTarget)]
         public void SetRemove(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Remove = "ib";
 
-            Assert.Equal("ib", item.Remove);
+            Assert.AreEqual("ib", item.Remove);
         }
 
         /// <summary>
         /// Set empty Remove: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(RemoveInTarget)]
-        [InlineData(RemoveOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(RemoveInTarget)]
+        [DataRow(RemoveOutsideTarget)]
         public void SetEmptyRemove(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Remove = String.Empty;
 
-            Assert.Equal(String.Empty, item.Remove);
+            Assert.AreEqual(String.Empty, item.Remove);
         }
 
         /// <summary>
         /// Set null Remove: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(RemoveInTarget)]
-        [InlineData(RemoveOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(RemoveInTarget)]
+        [DataRow(RemoveOutsideTarget)]
         public void SetNullRemove(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Remove = null;
 
-            Assert.Equal(String.Empty, item.Remove);
+            Assert.AreEqual(String.Empty, item.Remove);
         }
 
         /// <summary>
         /// Set Include when Remove is present
         /// </summary>
-        [Theory]
-        [InlineData(RemoveInTarget)]
-        [InlineData(RemoveOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(RemoveInTarget)]
+        [DataRow(RemoveOutsideTarget)]
         public void SetInvalidIncludeWithRemove(string project)
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItemElement item = GetItemFromContent(project);
 
@@ -826,12 +826,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Exclude when Remove is present
         /// </summary>
-        [Theory]
-        [InlineData(RemoveInTarget)]
-        [InlineData(RemoveOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(RemoveInTarget)]
+        [DataRow(RemoveOutsideTarget)]
         public void SetInvalidExcludeWithRemove(string project)
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItemElement item = GetItemFromContent(project);
 
@@ -842,12 +842,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Update when Remove is present
         /// </summary>
-        [Theory]
-        [InlineData(RemoveInTarget)]
-        [InlineData(RemoveOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(RemoveInTarget)]
+        [DataRow(RemoveOutsideTarget)]
         public void SetInvalidUpdateWithRemove(string project)
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItemElement item = GetItemFromContent(project);
 
@@ -859,57 +859,57 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the Update on an item
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(UpdateInTarget)]
+        [DataRow(UpdateOutsideTarget)]
         public void SetUpdate(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Update = "ib";
 
-            Assert.Equal("ib", item.Update);
+            Assert.AreEqual("ib", item.Update);
         }
 
         /// <summary>
         /// Set empty Update: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(UpdateInTarget)]
+        [DataRow(UpdateOutsideTarget)]
         public void SetEmptyUpdate(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Update = String.Empty;
 
-            Assert.Equal(String.Empty, item.Update);
+            Assert.AreEqual(String.Empty, item.Update);
         }
 
         /// <summary>
         /// Set null Update: this removes it
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(UpdateInTarget)]
+        [DataRow(UpdateOutsideTarget)]
         public void SetNullUpdate(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Update = null;
 
-            Assert.Equal(String.Empty, item.Update);
+            Assert.AreEqual(String.Empty, item.Update);
         }
 
         /// <summary>
         /// Set Include when Update is present
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(UpdateInTarget)]
+        [DataRow(UpdateOutsideTarget)]
         public void SetInvalidIncludeWithUpdate(string project)
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItemElement item = GetItemFromContent(project);
 
@@ -920,12 +920,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set Exclude when Update is present
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(UpdateInTarget)]
+        [DataRow(UpdateOutsideTarget)]
         public void SetInvalidExcludeWithUpdate(string project)
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectItemElement item = GetItemFromContent(project);
 
@@ -936,22 +936,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the condition on an item
         /// </summary>
-        [Theory]
-        [InlineData(UpdateInTarget)]
-        [InlineData(UpdateOutsideTarget)]
+        [MSBuildTestMethod]
+        [DataRow(UpdateInTarget)]
+        [DataRow(UpdateOutsideTarget)]
         public void SetCondition(string project)
         {
             ProjectItemElement item = GetItemFromContent(project);
 
             item.Condition = "c";
 
-            Assert.Equal("c", item.Condition);
+            Assert.AreEqual("c", item.Condition);
         }
 
         /// <summary>
         /// Setting condition should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingItemConditionDirties()
         {
             Project project = new Project();
@@ -961,13 +961,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Xml.Condition = "false";
             project.ReevaluateIfNecessary();
 
-            Assert.Empty(Helpers.MakeList(project.Items));
+            Assert.IsEmpty(Helpers.MakeList(project.Items));
         }
 
         /// <summary>
         /// Setting include should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingItemIncludeDirties()
         {
             Project project = new Project();
@@ -977,13 +977,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Xml.Include = "i2";
             project.ReevaluateIfNecessary();
 
-            Assert.Equal("i2", Helpers.GetFirst(project.Items).EvaluatedInclude);
+            Assert.AreEqual("i2", Helpers.GetFirst(project.Items).EvaluatedInclude);
         }
 
         /// <summary>
         /// Setting exclude should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingItemExcludeDirties()
         {
             Project project = new Project();
@@ -993,13 +993,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Xml.Exclude = "i1";
             project.ReevaluateIfNecessary();
 
-            Assert.Empty(Helpers.MakeList(project.Items));
+            Assert.IsEmpty(Helpers.MakeList(project.Items));
         }
 
         /// <summary>
         /// Setting exclude should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingItemRemoveDirties()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1008,18 +1008,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Include = null;
             Helpers.ClearDirtyFlag(project);
 
-            Assert.False(project.HasUnsavedChanges);
+            Assert.IsFalse(project.HasUnsavedChanges);
 
             item.Remove = "i2";
 
-            Assert.Equal("i2", item.Remove);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("i2", item.Remove);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Setting update should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingItemUpdateDirties()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -1028,12 +1028,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             item.Include = null;
             Helpers.ClearDirtyFlag(project);
 
-            Assert.False(project.HasUnsavedChanges);
+            Assert.IsFalse(project.HasUnsavedChanges);
 
             item.Update = "i2";
 
-            Assert.Equal("i2", item.Update);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("i2", item.Update);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         private static ProjectItemElement GetItemFromContent(string content)

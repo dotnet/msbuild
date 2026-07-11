@@ -8,7 +8,6 @@ using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -18,15 +17,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectChooseElement class (and for ProjectWhenElement and ProjectOtherwiseElement)
     /// </summary>
+    [TestClass]
     public class ProjectChooseElement_Tests
     {
         /// <summary>
         /// Read choose with unexpected attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -41,10 +41,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Read choose with unexpected Condition attribute.
         /// Condition is not currently allowed on Choose.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidConditionAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -58,10 +58,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with unexpected child
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidChild()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -77,10 +77,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with a When containing no Condition attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidWhen()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -101,10 +101,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with only an otherwise
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidOnlyOtherwise()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -120,10 +120,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with two otherwises
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidTwoOtherwise()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -140,10 +140,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read choose with otherwise before when
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidOtherwiseBeforeWhen()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -163,10 +163,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// One might think this should work but 2.0 required at least one When.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidEmptyChoose()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -177,13 +177,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
-                Assert.Null(Helpers.GetFirst(choose.Children));
+                Assert.IsNull(Helpers.GetFirst(choose.Children));
             });
         }
         /// <summary>
         /// Read choose with only a when
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadChooseOnlyWhen()
         {
             string content = @"
@@ -197,14 +197,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
-            Assert.Equal(1, Helpers.Count(choose.WhenElements));
-            Assert.Null(choose.OtherwiseElement);
+            Assert.AreEqual(1, Helpers.Count(choose.WhenElements));
+            Assert.IsNull(choose.OtherwiseElement);
         }
 
         /// <summary>
         /// Read basic choose
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadChooseBothWhenOtherwise()
         {
             string content = @"
@@ -222,19 +222,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
             List<ProjectWhenElement> whens = Helpers.MakeList(choose.WhenElements);
-            Assert.Equal(2, whens.Count);
-            Assert.Equal("c1", whens[0].Condition);
-            Assert.Equal("c2", whens[1].Condition);
-            Assert.NotNull(choose.OtherwiseElement);
+            Assert.AreEqual(2, whens.Count);
+            Assert.AreEqual("c1", whens[0].Condition);
+            Assert.AreEqual("c2", whens[1].Condition);
+            Assert.IsNotNull(choose.OtherwiseElement);
         }
 
         /// <summary>
         /// Test stack overflow is prevented.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExcessivelyNestedChoose()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 StringBuilder builder1 = new StringBuilder();
                 StringBuilder builder2 = new StringBuilder();
@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting a When's condition should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingWhenConditionDirties()
         {
             string content = @"
@@ -277,11 +277,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectWhenElement when = Helpers.GetFirst(choose.WhenElements);
             when.Condition = "false";
 
-            Assert.Equal("v1", project.GetPropertyValue("p"));
+            Assert.AreEqual("v1", project.GetPropertyValue("p"));
 
             project.ReevaluateIfNecessary();
 
-            Assert.Equal(String.Empty, project.GetPropertyValue("p"));
+            Assert.AreEqual(String.Empty, project.GetPropertyValue("p"));
         }
     }
 }

@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -15,24 +14,25 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectOnErrorElement class
     /// </summary>
+    [TestClass]
     public class ProjectOnErrorElement_Tests
     {
         /// <summary>
         /// Read a target containing only OnError
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadTargetOnlyContainingOnError()
         {
             ProjectOnErrorElement onError = GetOnError();
 
-            Assert.Equal("t", onError.ExecuteTargetsAttribute);
-            Assert.Equal("c", onError.Condition);
+            Assert.AreEqual("t", onError.ExecuteTargetsAttribute);
+            Assert.AreEqual("c", onError.Condition);
         }
 
         /// <summary>
         /// Read a target with two onerrors, and some tasks
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadTargetTwoOnErrors()
         {
             string content = @"
@@ -54,8 +54,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectOnErrorElement onError1 = onErrors[0];
             ProjectOnErrorElement onError2 = onErrors[1];
 
-            Assert.Equal("1", onError1.ExecuteTargetsAttribute);
-            Assert.Equal("2", onError2.ExecuteTargetsAttribute);
+            Assert.AreEqual("1", onError1.ExecuteTargetsAttribute);
+            Assert.AreEqual("2", onError2.ExecuteTargetsAttribute);
         }
 
         /// <summary>
@@ -64,10 +64,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// This was accidentally allowed in 2.0/3.5 but it should be an error now.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMissingExecuteTargets()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
                 ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
-                Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
+                Assert.AreEqual(String.Empty, onError.ExecuteTargetsAttribute);
             });
         }
         /// <summary>
@@ -90,10 +90,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <remarks>
         /// This was accidentally allowed in 2.0/3.5 but it should be an error now.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadEmptyExecuteTargets()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -107,16 +107,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
                 ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
-                Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
+                Assert.AreEqual(String.Empty, onError.ExecuteTargetsAttribute);
             });
         }
         /// <summary>
         /// Read onerror with invalid attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidUnexpectedAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -132,10 +132,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror with invalid child element
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidUnexpectedChild()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -153,10 +153,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidBeforeTask()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -173,10 +173,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidBeforePropertyGroup()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -193,10 +193,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read onerror before task
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidBeforeItemGroup()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -213,23 +213,23 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set ExecuteTargets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetExecuteTargetsValid()
         {
             ProjectOnErrorElement onError = GetOnError();
 
             onError.ExecuteTargetsAttribute = "t2";
 
-            Assert.Equal("t2", onError.ExecuteTargetsAttribute);
+            Assert.AreEqual("t2", onError.ExecuteTargetsAttribute);
         }
 
         /// <summary>
         /// Set ExecuteTargets to null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidExecuteTargetsNull()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectOnErrorElement onError = GetOnError();
 
@@ -239,10 +239,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set ExecuteTargets to empty string
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidExecuteTargetsEmpty()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectOnErrorElement onError = GetOnError();
 
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set on error condition
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -263,14 +263,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             onError.Condition = "c";
 
-            Assert.Equal("c", onError.Condition);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("c", onError.Condition);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set on error executetargets value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetExecuteTargets()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -281,8 +281,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             onError.ExecuteTargetsAttribute = "et2";
 
-            Assert.Equal("et2", onError.ExecuteTargetsAttribute);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("et2", onError.ExecuteTargetsAttribute);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>

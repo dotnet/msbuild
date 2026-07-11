@@ -11,7 +11,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
-    using Xunit;
     using ExportedLinksMap = LinkedObjectsMap<object>;
     using ImportedLinksMap = LinkedObjectsMap<System.UInt32>;
 
@@ -240,13 +239,13 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             foreach (var ai in map.GetActiveLinks())
             {
                 var dbg = ai as IActiveImportDBG;
-                Assert.NotNull(dbg);
+                Assert.IsNotNull(dbg);
                 var view = dbg.Linked;
-                Assert.NotNull(view);
+                Assert.IsNotNull(view);
                 var link = LinkedObjectsFactory.GetLink(view) as ILinkMock;
-                Assert.NotNull(link);
+                Assert.IsNotNull(link);
                 var remoter = link.Remoter;
-                Assert.NotNull(remoter);
+                Assert.IsNotNull(remoter);
 
                 if (views.Contains(view))
                 {

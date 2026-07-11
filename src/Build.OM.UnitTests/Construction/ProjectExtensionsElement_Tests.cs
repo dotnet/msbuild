@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -15,12 +14,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the <see cref="ProjectExtensionsElement"/> class.
     /// </summary>
+    [TestClass]
     public class ProjectExtensionsElement_Tests
     {
         /// <summary>
         /// Read ProjectExtensions with some child
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Read()
         {
             string content = @"
@@ -35,16 +35,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectExtensionsElement extensions = (ProjectExtensionsElement)Helpers.GetFirst(project.Children);
 
-            Assert.Equal(@"<a />", extensions.Content);
+            Assert.AreEqual(@"<a />", extensions.Content);
         }
 
         /// <summary>
         /// Read ProjectExtensions with invalid Condition attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidCondition()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                  <Project>
@@ -58,10 +58,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read project with more than one ProjectExtensions
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidDuplicate()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                  <Project>
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set valid content
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValid()
         {
             ProjectExtensionsElement extensions = GetEmptyProjectExtensions();
@@ -85,17 +85,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             extensions.Content = "a<b/>c";
 
-            Assert.Equal(@"a<b />c", extensions.Content);
-            Assert.True(extensions.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual(@"a<b />c", extensions.Content);
+            Assert.IsTrue(extensions.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set null content
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidNull()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectExtensionsElement extensions = GetEmptyProjectExtensions();
 
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Delete by ID
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeleteById()
         {
             string content = @"
@@ -122,16 +122,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectExtensionsElement extensions = (ProjectExtensionsElement)Helpers.GetFirst(project.Children);
             extensions["a"] = String.Empty;
             content = extensions["a"];
-            Assert.Equal(String.Empty, content);
+            Assert.AreEqual(String.Empty, content);
             extensions["a"] = String.Empty; // make sure it doesn't die or something
 
-            Assert.Equal("y", extensions["b"]);
+            Assert.AreEqual("y", extensions["b"]);
         }
 
         /// <summary>
         /// Get by ID
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetById()
         {
             string content = @"
@@ -148,16 +148,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectExtensionsElement extensions = (ProjectExtensionsElement)Helpers.GetFirst(project.Children);
 
             content = extensions["b"];
-            Assert.Equal("y", content);
+            Assert.AreEqual("y", content);
 
             content = extensions["nonexistent"];
-            Assert.Equal(String.Empty, content);
+            Assert.AreEqual(String.Empty, content);
         }
 
         /// <summary>
         /// Set by ID on not existing ID
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetById()
         {
             string content = @"
@@ -174,13 +174,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectExtensionsElement extensions = (ProjectExtensionsElement)Helpers.GetFirst(project.Children);
 
             extensions["c"] = "z";
-            Assert.Equal("z", extensions["c"]);
+            Assert.AreEqual("z", extensions["c"]);
         }
 
         /// <summary>
         /// Set by ID on existing ID
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetByIdWhereItAlreadyExists()
         {
             string content = @"
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectExtensionsElement extensions = (ProjectExtensionsElement)Helpers.GetFirst(project.Children);
 
             extensions["b"] = "y2";
-            Assert.Equal("y2", extensions["b"]);
+            Assert.AreEqual("y2", extensions["b"]);
         }
 
         /// <summary>

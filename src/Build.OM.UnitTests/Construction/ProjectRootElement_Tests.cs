@@ -18,7 +18,6 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-using Xunit;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -28,6 +27,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectRootElement class
     /// </summary>
+    [TestClass]
     public class ProjectRootElement_Tests
     {
         private const string SimpleProject =
@@ -97,67 +97,67 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Empty project content
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyProject()
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Equal(string.Empty, project.DefaultTargets);
-            Assert.Equal(string.Empty, project.InitialTargets);
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
-            Assert.True(project.HasUnsavedChanges); // it is indeed unsaved
+            Assert.AreEqual(0, Helpers.Count(project.Children));
+            Assert.AreEqual(string.Empty, project.DefaultTargets);
+            Assert.AreEqual(string.Empty, project.InitialTargets);
+            Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, project.ToolsVersion);
+            Assert.IsTrue(project.HasUnsavedChanges); // it is indeed unsaved
         }
 
         /// <summary>
         /// Set default targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDefaultTargets()
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
             project.DefaultTargets = "dt";
-            Assert.Equal("dt", project.DefaultTargets);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("dt", project.DefaultTargets);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set initialtargets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInitialTargets()
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
             project.InitialTargets = "it";
-            Assert.Equal("it", project.InitialTargets);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("it", project.InitialTargets);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set toolsversion
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetToolsVersion()
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
             project.ToolsVersion = "tv";
-            Assert.Equal("tv", project.ToolsVersion);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("tv", project.ToolsVersion);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Setting full path should accept and update relative path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetFullPath()
         {
             ProjectRootElement project = ProjectRootElement.Create();
             project.FullPath = "X";
 
-            Assert.Equal(project.FullPath, Path.Combine(Directory.GetCurrentDirectory(), "X"));
+            Assert.AreEqual(project.FullPath, Path.Combine(Directory.GetCurrentDirectory(), "X"));
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// A ProjectRootElement is notionally a "memory mapped" view of a file, and we assume there is only
         /// one per file path, so we must reject attempts to make another.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructOverSameFileReturnsSame()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
@@ -174,14 +174,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(projectXml1.FullPath);
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.IsTrue(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
         /// Attempting to load a second ProjectRootElement over the same file path simply
         /// returns the first one. This should work even if one of the paths is not a full path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
@@ -190,14 +190,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.IsTrue(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
         /// Attempting to load a second ProjectRootElement over the same file path simply
         /// returns the first one. This should work even if one of the paths is not a full path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath2()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
@@ -206,13 +206,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.IsTrue(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
         /// Using TextReader
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath3()
         {
             string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
@@ -225,13 +225,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.IsTrue(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
         /// Using TextReader
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath4()
         {
             string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
@@ -244,13 +244,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.IsTrue(object.ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
         /// Two ProjectRootElement's over the same file path does not throw (although you shouldn't do it)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetFullPathProjectXmlAlreadyLoaded()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
@@ -263,10 +263,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Invalid XML
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidXml()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader("XXX")));
             });
@@ -275,10 +275,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Valid Xml, invalid namespace on the root
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNamespace()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 var content = @"<Project xmlns='XXX'/>";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
@@ -288,10 +288,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Invalid root tag
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidRootTag()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <XXX />
@@ -303,10 +303,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Valid Xml, invalid syntax below the root
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidChildBelowRoot()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -320,10 +320,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Root indicates upgrade needed
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NeedsUpgrade()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <VisualStudioProject/>
@@ -335,10 +335,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Valid Xml, invalid namespace below the root
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNamespaceBelowRoot()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Tests that the namespace error reports are correct
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNamespaceErrorReport()
         {
             string content = @"
@@ -375,22 +375,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 exceptionThrown = true;
 
                 // MSB4068: The element <msb:Project> is unrecognized, or not supported in this context.
-                Assert.NotEqual("MSB4068", ex.ErrorCode);
+                Assert.AreNotEqual("MSB4068", ex.ErrorCode);
 
                 // MSB4041: The default XML namespace of the project must be the MSBuild XML namespace.
-                Assert.Equal("MSB4041", ex.ErrorCode);
+                Assert.AreEqual("MSB4041", ex.ErrorCode);
             }
 
-            Assert.True(exceptionThrown); // "ERROR: An invalid project file exception should have been thrown."
+            Assert.IsTrue(exceptionThrown); // "ERROR: An invalid project file exception should have been thrown."
         }
 
         /// <summary>
         /// Valid Xml, invalid syntax thrown by child element parsing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidXmlInvalidSyntaxInChildElement()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -407,10 +407,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Valid Xml, invalid syntax, should not get added to the Xml cache and
         /// thus returned on the second request!
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidXmlInvalidSyntaxOpenFromDiskTwice()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -447,9 +447,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Verify that opening project using XmlTextReader does not add it to the Xml cache
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ValidXmlXmlTextReaderNotCache()
         {
             string content = @"<Project />";
@@ -469,8 +469,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 var reader2 = XmlReader.Create(path);
                 ProjectRootElement root2 = ProjectRootElement.Create(reader2);
 
-                Assert.Single(root1.Items);
-                Assert.Empty(root2.Items);
+                Assert.ContainsSingle(root1.Items);
+                Assert.IsEmpty(root2.Items);
 
                 reader1.Dispose();
                 reader2.Dispose();
@@ -484,7 +484,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Verify that opening project using the same path adds it to the Xml cache
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidXmlXmlReaderCache()
         {
             string content = @"<Project />";
@@ -506,8 +506,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 // then we'll see the first version of the file.
                 ProjectRootElement root2 = ProjectRootElement.Create(path);
 
-                Assert.Equal(string.Empty, root1.DefaultTargets);
-                Assert.Equal(string.Empty, root2.DefaultTargets);
+                Assert.AreEqual(string.Empty, root1.DefaultTargets);
+                Assert.AreEqual(string.Empty, root2.DefaultTargets);
             }
             finally
             {
@@ -518,7 +518,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// A simple "system" test: load microsoft.*.targets and verify we don't throw
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadCommonTargets()
         {
             using ProjectCollection projectCollection = new ProjectCollection();
@@ -548,10 +548,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Save project loaded from TextReader, without setting FullPath.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidSaveWithoutFullPath()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 XmlReader reader = XmlReader.Create(new StringReader("<Project xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\"/>"));
                 ProjectRootElement project = ProjectRootElement.Create(reader);
@@ -563,7 +563,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Save content with transforms.
         /// The ">" should not turn into "&lt;"
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveWithTransforms()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Save content with transforms to a file.
         /// The ">" should not turn into "&lt;"
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveWithTransformsToFile()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -624,7 +624,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Save should create a directory if it is missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveToNonexistentDirectory()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -638,9 +638,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 project.Save(path);
 
-                Assert.True(File.Exists(path));
-                Assert.Equal(path, project.FullPath);
-                Assert.Equal(directory, project.DirectoryPath);
+                Assert.IsTrue(File.Exists(path));
+                Assert.AreEqual(path, project.FullPath);
+                Assert.AreEqual(directory, project.DirectoryPath);
             }
             finally
             {
@@ -651,7 +651,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Save should create a directory if it is missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveToNonexistentDirectoryRelativePath()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -670,9 +670,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 project.Save(file); // relative path: file and a single directory only; should create the "bar" part
 
-                Assert.True(File.Exists(file));
-                Assert.Equal(path, project.FullPath);
-                Assert.Equal(directory, project.DirectoryPath);
+                Assert.IsTrue(File.Exists(file));
+                Assert.AreEqual(path, project.FullPath);
+                Assert.AreEqual(directory, project.DirectoryPath);
             }
             finally
             {
@@ -685,10 +685,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Saving an unnamed project without a path specified should give a nice exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveUnnamedProject()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.Save();
@@ -698,33 +698,33 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Verifies that the ProjectRootElement.Encoding property getter returns values
         /// that are based on the XML declaration in the file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EncodingGetterBasedOnXmlDeclaration()
         {
             using ProjectRootElementFromString projectRootElementFromStringUTF16 = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
 </Project>"));
             ProjectRootElement project = projectRootElementFromStringUTF16.Project;
-            Assert.Equal(Encoding.Unicode, project.Encoding);
+            Assert.AreEqual(Encoding.Unicode, project.Encoding);
 
             using ProjectRootElementFromString projectRootElementFromStringUTF8 = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
 </Project>"));
             project = projectRootElementFromStringUTF8.Project;
-            Assert.Equal(Encoding.UTF8, project.Encoding);
+            Assert.AreEqual(Encoding.UTF8, project.Encoding);
 
             using ProjectRootElementFromString projectRootElementFromStringASCII = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""us-ascii""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
 </Project>"));
             project = projectRootElementFromStringASCII.Project;
-            Assert.Equal(Encoding.ASCII, project.Encoding);
+            Assert.AreEqual(Encoding.ASCII, project.Encoding);
         }
 
         /// <summary>
         /// Verifies that ProjectRootElement.Encoding returns the correct value
         /// after reading a file off disk, even if no xml declaration is present.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
             string projectFullPath = FileUtilities.GetTemporaryFileName();
@@ -749,7 +749,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Verifies that the Save method saves an otherwise unmodified project
         /// with a specified file encoding.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveUnmodifiedWithNewEncoding()
         {
             using ProjectRootElementFromString projectRootElementFromString = new(ObjectModelHelpers.CleanupFileContents(@"
@@ -779,7 +779,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// Enumerate over all properties from the project directly.
         /// It should traverse into Choose's.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertiesEnumerator()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -826,18 +826,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             List<ProjectPropertyElement> properties = Helpers.MakeList(project.Properties);
 
-            Assert.Equal(6, properties.Count);
+            Assert.AreEqual(6, properties.Count);
 
-            Assert.Equal("q", properties[1].Name);
-            Assert.Equal("r1", properties[2].Value);
-            Assert.Equal("t1", properties[5].Value);
+            Assert.AreEqual("q", properties[1].Name);
+            Assert.AreEqual("r1", properties[2].Value);
+            Assert.AreEqual("t1", properties[5].Value);
         }
 
         /// <summary>
         /// Enumerate over all items from the project directly.
         /// It should traverse into Choose's.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemsEnumerator()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
@@ -884,11 +884,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             List<ProjectItemElement> items = Helpers.MakeList(project.Items);
 
-            Assert.Equal(6, items.Count);
+            Assert.AreEqual(6, items.Count);
 
-            Assert.Equal("j", items[1].ItemType);
-            Assert.Equal("k1", items[2].Include);
-            Assert.Equal("k4", items[5].Include);
+            Assert.AreEqual("j", items[1].ItemType);
+            Assert.AreEqual("k1", items[2].Include);
+            Assert.AreEqual("k4", items[5].Include);
         }
 
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
@@ -898,7 +898,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [WindowsOnlyFact(additionalMessage: "Security classes are not supported on Unix.")]
         public void SolutionCanNotBeOpened()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string solutionFile = null;
                 string tempFileSentinel = null;
@@ -932,7 +932,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                     File.Delete(solutionFile);
                     File.Delete(tempFileSentinel);
-                    Assert.False(File.Exists(solutionFile));
+                    Assert.IsFalse(File.Exists(solutionFile));
                 }
             });
         }
@@ -943,7 +943,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [WindowsOnlyFact(additionalMessage: "FileSecurity class is not supported on Unix.")]
         public void ProjectCanNotBeOpened()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string projectFile = null;
 
@@ -973,7 +973,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     security?.RemoveAccessRule(rule);
 
                     File.Delete(projectFile);
-                    Assert.False(File.Exists(projectFile));
+                    Assert.IsFalse(File.Exists(projectFile));
                 }
             });
         }
@@ -982,10 +982,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Build a corrupt solution
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionCorrupt()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string solutionFile = null;
 
@@ -1048,7 +1048,7 @@ Project(""{";
 
                 done.WaitOne();
 
-                Assert.Equal(iterations, collection.LoadedProjects.Count);
+                Assert.AreEqual(iterations, collection.LoadedProjects.Count);
 
                 counter = 0;
                 remaining = iterations;
@@ -1073,7 +1073,7 @@ Project(""{";
 
                 done.WaitOne();
 
-                Assert.Empty(collection.LoadedProjects);
+                Assert.IsEmpty(collection.LoadedProjects);
             }
             finally
             {
@@ -1087,7 +1087,7 @@ Project(""{";
         /// <summary>
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConcurrentProjectOpenAndCloseThroughProjectRootElement()
         {
             int iterations = 500;
@@ -1153,7 +1153,7 @@ Project(""{";
         /// <summary>
         /// Tests DeepClone and CopyFrom for ProjectRootElements.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeepClone()
         {
             var pre = ProjectRootElement.Create();
@@ -1201,7 +1201,7 @@ Project(""{";
         /// <summary>
         /// Tests DeepClone and CopyFrom for ProjectRootElement that contain ProjectExtensions with text inside.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeepCloneWithProjectExtensionsElementOfText()
         {
             var pre = ProjectRootElement.Create();
@@ -1216,7 +1216,7 @@ Project(""{";
         /// <summary>
         /// Tests DeepClone and CopyFrom for ProjectRootElement that contain ProjectExtensions with xml inside.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeepCloneWithProjectExtensionsElementOfXml()
         {
             var pre = ProjectRootElement.Create();
@@ -1231,7 +1231,7 @@ Project(""{";
         /// <summary>
         /// Tests DeepClone and CopyFrom when there is metadata expressed as attributes
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeepCloneWithMetadataAsAttributes()
         {
             var project =
@@ -1276,7 +1276,7 @@ Project(""{";
         /// <summary>
         /// Tests TryOpen when preserveFormatting is the same and different than the cached project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TryOpenWithPreserveFormatting()
         {
             string project =
@@ -1298,29 +1298,29 @@ Project(""{";
                 projectXml.Save(projectFile);
 
                 var xml0 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: true);
-                Assert.True(xml0.PreserveFormatting);
+                Assert.IsTrue(xml0.PreserveFormatting);
 
                 var xml1 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: false);
-                Assert.False(xml1.PreserveFormatting);
+                Assert.IsFalse(xml1.PreserveFormatting);
 
                 var xml2 = ProjectRootElement.TryOpen(projectXml.FullPath, projectCollection, preserveFormatting: null);
                 // reuses existing setting
-                Assert.False(xml2.PreserveFormatting);
+                Assert.IsFalse(xml2.PreserveFormatting);
 
-                Assert.NotNull(xml0);
+                Assert.IsNotNull(xml0);
 
-                Assert.Same(xml0, xml1);
-                Assert.Same(xml0, xml2);
+                Assert.AreSame(xml0, xml1);
+                Assert.AreSame(xml0, xml2);
             }
         }
 
-        [Theory]
-        [InlineData(true, false, false)]
-        [InlineData(true, true, true)]
-        [InlineData(false, false, false)]
-        [InlineData(false, true, true)]
-        [InlineData(true, null, true)]
-        [InlineData(false, null, false)]
+        [MSBuildTestMethod]
+        [DataRow(true, false, false)]
+        [DataRow(true, true, true)]
+        [DataRow(false, false, false)]
+        [DataRow(false, true, true)]
+        [DataRow(true, null, true)]
+        [DataRow(false, null, false)]
         public void ReloadCanSpecifyPreserveFormatting(bool initialPreserveFormatting, bool? reloadShouldPreserveFormatting, bool expectedFormattingAfterReload)
         {
             using (var env = TestEnvironment.Create())
@@ -1330,38 +1330,38 @@ Project(""{";
 
                 var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(SimpleProject, null, initialPreserveFormatting);
                 projectElement.Save(projectFile);
-                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+                Assert.AreEqual(initialPreserveFormatting, projectElement.PreserveFormatting);
 
                 projectElement.Reload(false, reloadShouldPreserveFormatting);
-                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+                Assert.AreEqual(expectedFormattingAfterReload, projectElement.PreserveFormatting);
 
                 // reset project to original preserve formatting
                 projectElement.Reload(false, initialPreserveFormatting);
-                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+                Assert.AreEqual(initialPreserveFormatting, projectElement.PreserveFormatting);
 
                 using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(SimpleProject)));
                 projectElement.ReloadFrom(xmlReader, false, reloadShouldPreserveFormatting);
-                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+                Assert.AreEqual(expectedFormattingAfterReload, projectElement.PreserveFormatting);
 
                 // reset project to original preserve formatting
                 projectElement.Reload(false, initialPreserveFormatting);
-                Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
+                Assert.AreEqual(initialPreserveFormatting, projectElement.PreserveFormatting);
 
                 projectElement.ReloadFrom(projectFile, false, reloadShouldPreserveFormatting);
-                Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
+                Assert.AreEqual(expectedFormattingAfterReload, projectElement.PreserveFormatting);
             }
         }
 
-        [Theory]
+        [MSBuildTestMethod]
 
         // same content should still dirty the project
-        [InlineData(
+        [DataRow(
 SimpleProject,
 SimpleProject,
 true, false, false)]
 
         // new comment
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <PropertyGroup>
@@ -1394,7 +1394,7 @@ true, false, false)]
 true, false, true)]
 
         // changed comment
-        [InlineData(
+        [DataRow(
 @"
 <!-- new comment -->
 <Project xmlns=`msbuildnamespace`>
@@ -1430,7 +1430,7 @@ true, false, true)]
 true, false, true)]
 
         // deleted comment
-        [InlineData(
+        [DataRow(
 @"
 <!-- new comment -->
 <Project xmlns=`msbuildnamespace`>
@@ -1463,7 +1463,7 @@ true, false, true)]
 true, false, true)]
 
         // new comments and changed code
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <PropertyGroup>
@@ -1489,7 +1489,7 @@ true, false, true)]
 true, true, true)]
 
         // commented out code
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <PropertyGroup>
@@ -1529,7 +1529,7 @@ true, true, true)]
             AssertReload(initialProjectContents, changedProjectContents, versionChanged, msbuildChildrenChanged, xmlChanged, act);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadedStateIsResilientToChangesAndDiskRoundtrip()
         {
             var initialProjectContents = ObjectModelHelpers.CleanupFileContents(
@@ -1613,7 +1613,7 @@ true, true, true)]
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadThrowsOnInvalidXmlSyntax()
         {
             var missingClosingTag =
@@ -1634,7 +1634,7 @@ true, true, true)]
             Action<ProjectRootElement, string> act = (p, c) =>
             {
                 var exception =
-                    Assert.Throws<InvalidProjectFileException>(
+                    Assert.ThrowsExactly<InvalidProjectFileException>(
                         () =>
                             p.ReloadFrom(
                                 XmlReader.Create(
@@ -1648,13 +1648,13 @@ true, true, true)]
             AssertReload(SimpleProject, missingClosingTag, false, false, false, act);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadThrowsForInMemoryProjectsWithoutAPath()
         {
             Action<ProjectRootElement, string> act = (p, c) =>
             {
                 var exception =
-                    Assert.Throws<InvalidOperationException>(
+                    Assert.ThrowsExactly<InvalidOperationException>(
                         () =>
                             p.Reload(throwIfUnsavedChanges: false));
 
@@ -1665,7 +1665,7 @@ true, true, true)]
             AssertReload(SimpleProject, ComplexProject, false, false, false, act);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadFromAPathThrowsOnMissingPath()
         {
             Action<ProjectRootElement, string> act = (p, c) =>
@@ -1673,7 +1673,7 @@ true, true, true)]
                 var fullPath = Path.GetFullPath("foo");
 
                 var exception =
-                    Assert.Throws<InvalidOperationException>(
+                    Assert.ThrowsExactly<InvalidOperationException>(
                         () =>
                             p.ReloadFrom(fullPath, throwIfUnsavedChanges: false));
 
@@ -1684,40 +1684,40 @@ true, true, true)]
             AssertReload(SimpleProject, ComplexProject, false, false, false, act);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadFromMemoryWhenProjectIsInMemoryKeepsProjectFileEmpty()
         {
             AssertProjectFileAfterReload(
                 true,
                 true,
-                (initial, reload, actualFile) => { Assert.Equal(String.Empty, actualFile); });
+                (initial, reload, actualFile) => { Assert.AreEqual(String.Empty, actualFile); });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadFromMemoryWhenProjectIsInFileKeepsProjectFile()
         {
             AssertProjectFileAfterReload(
                 false,
                 true,
-                (initial, reload, actualFile) => { Assert.Equal(initial, actualFile); });
+                (initial, reload, actualFile) => { Assert.AreEqual(initial, actualFile); });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadFromFileWhenProjectIsInMemorySetsProjectFile()
         {
             AssertProjectFileAfterReload(
                 true,
                 false,
-                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
+                (initial, reload, actualFile) => { Assert.AreEqual(reload, actualFile); });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadFromFileWhenProjectIsInFileUpdatesProjectFile()
         {
             AssertProjectFileAfterReload(
                 false,
                 false,
-                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
+                (initial, reload, actualFile) => { Assert.AreEqual(reload, actualFile); });
         }
 
         private void AssertProjectFileAfterReload(
@@ -1769,7 +1769,7 @@ true, true, true)]
 
                 if (initialProjectFromMemory && reloadProjectFromMemory)
                 {
-                    Assert.Equal(Environment.CurrentDirectory, rootElement.DirectoryPath);
+                    Assert.AreEqual(Environment.CurrentDirectory, rootElement.DirectoryPath);
                 }
                 else
                 {
@@ -1780,7 +1780,7 @@ true, true, true)]
 
         private static string EmptyIfNull(string aString) => aString ?? string.Empty;
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadThrowsOnInvalidMsBuildSyntax()
         {
             var unknownAttribute =
@@ -1801,7 +1801,7 @@ true, true, true)]
             Action<ProjectRootElement, string> act = (p, c) =>
             {
                 var exception =
-                    Assert.Throws<InvalidProjectFileException>(
+                    Assert.ThrowsExactly<InvalidProjectFileException>(
                         () =>
                             p.ReloadFrom(
                                 XmlReader.Create(
@@ -1815,13 +1815,13 @@ true, true, true)]
             AssertReload(SimpleProject, unknownAttribute, false, false, false, act);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadThrowsByDefaultIfThereAreUnsavedChanges()
         {
             Action<ProjectRootElement, string> act = (p, c) =>
             {
                 var exception =
-                    Assert.Throws<InvalidOperationException>(
+                    Assert.ThrowsExactly<InvalidOperationException>(
                         () =>
                             p.ReloadFrom(
                                 XmlReader.Create(
@@ -1834,7 +1834,7 @@ true, true, true)]
             AssertReload(SimpleProject, ComplexProject, false, false, false, act);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadCanOverwriteUnsavedChanges()
         {
             Action<ProjectRootElement, string> act = (p, c) =>
@@ -1861,34 +1861,34 @@ true, true, true)]
             var childrenCount = projectElement.AllChildren.Count();
             var xml = projectElement.RawXml;
 
-            Assert.True(projectElement.HasUnsavedChanges);
+            Assert.IsTrue(projectElement.HasUnsavedChanges);
             act(projectElement, ObjectModelHelpers.CleanupFileContents(changedContents));
 
             if (versionChanged)
             {
-                Assert.NotEqual(version, projectElement.Version);
+                Assert.AreNotEqual(version, projectElement.Version);
             }
             else
             {
-                Assert.Equal(version, projectElement.Version);
+                Assert.AreEqual(version, projectElement.Version);
             }
 
             if (msbuildChildrenChanged)
             {
-                Assert.NotEqual(childrenCount, projectElement.AllChildren.Count());
+                Assert.AreNotEqual(childrenCount, projectElement.AllChildren.Count());
             }
             else
             {
-                Assert.Equal(childrenCount, projectElement.AllChildren.Count());
+                Assert.AreEqual(childrenCount, projectElement.AllChildren.Count());
             }
 
             if (xmlChanged)
             {
-                Assert.NotEqual(xml, projectElement.RawXml);
+                Assert.AreNotEqual(xml, projectElement.RawXml);
             }
             else
             {
-                Assert.Equal(xml, projectElement.RawXml);
+                Assert.AreEqual(xml, projectElement.RawXml);
             }
         }
 
@@ -1898,13 +1898,13 @@ true, true, true)]
         private static void ValidateDeepCloneAndCopyFrom(ProjectRootElement pre)
         {
             var pre2 = pre.DeepClone();
-            Assert.NotSame(pre2, pre);
-            Assert.Equal(pre.RawXml, pre2.RawXml);
+            Assert.AreNotSame(pre2, pre);
+            Assert.AreEqual(pre.RawXml, pre2.RawXml);
 
             var pre3 = ProjectRootElement.Create();
             pre3.AddPropertyGroup(); // this should get wiped out in the DeepCopyFrom
             pre3.DeepCopyFrom(pre);
-            Assert.Equal(pre.RawXml, pre3.RawXml);
+            Assert.AreEqual(pre.RawXml, pre3.RawXml);
         }
 
         /// <summary>
@@ -1916,17 +1916,17 @@ true, true, true)]
             using var collection = new ProjectCollection();
             ProjectRootElement project = ProjectRootElement.Open(projectFullPath, collection);
             project.Save(encoding);
-            Assert.Equal(encoding, project.Encoding); // "Changing an unmodified project's encoding failed to update ProjectRootElement.Encoding."
+            Assert.AreEqual(encoding, project.Encoding); // "Changing an unmodified project's encoding failed to update ProjectRootElement.Encoding."
 
             // Try to verify that the xml declaration was emitted, and that the correct byte order marks
             // are also present.
 
             using (var reader = FileUtilities.OpenRead(projectFullPath, encoding, true))
             {
-                Assert.Equal(encoding, reader.CurrentEncoding);
+                Assert.AreEqual(encoding, reader.CurrentEncoding);
                 string actual = reader.ReadLine();
                 string expected = string.Format(@"<?xml version=""1.0"" encoding=""{0}""?>", encoding.WebName);
-                Assert.Equal(expected, actual); // "The encoding was not emitted as an XML declaration."
+                Assert.AreEqual(expected, actual); // "The encoding was not emitted as an XML declaration."
             }
 
             using var projectCollection = new ProjectCollection();
@@ -1934,8 +1934,8 @@ true, true, true)]
 
             // It's ok for the read Encoding to differ in fields like DecoderFallback,
             // so a pure equality check here is too much.
-            Assert.Equal(encoding.CodePage, project.Encoding.CodePage);
-            Assert.Equal(encoding.EncodingName, project.Encoding.EncodingName);
+            Assert.AreEqual(encoding.CodePage, project.Encoding.CodePage);
+            Assert.AreEqual(encoding.EncodingName, project.Encoding.EncodingName);
         }
 
         /// <summary>
@@ -1949,7 +1949,7 @@ true, true, true)]
             // Let's just be certain the project has been read off disk...
             using var collection = new ProjectCollection();
             ProjectRootElement project = ProjectRootElement.Open(projectFullPath, collection);
-            Assert.Equal(encoding.WebName, project.Encoding.WebName);
+            Assert.AreEqual(encoding.WebName, project.Encoding.WebName);
         }
 
         /// <summary>

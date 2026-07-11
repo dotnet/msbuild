@@ -9,7 +9,6 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -19,26 +18,27 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectImportElement class
     /// </summary>
+    [TestClass]
     public class ProjectImportElement_Tests
     {
         /// <summary>
         /// Read project with no imports
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadNone()
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.Empty(project.Imports);
+            Assert.IsEmpty(project.Imports);
         }
 
         /// <summary>
         /// Read import with no project attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidMissingProject()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -52,10 +52,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read import with empty project attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidEmptyProject()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -69,10 +69,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read import with unexpected attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read basic valid imports
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadBasic()
         {
             string content = @"
@@ -101,16 +101,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
 
-            Assert.Equal(2, imports.Count);
-            Assert.Equal("i1.proj", imports[0].Project);
-            Assert.Equal("i2.proj", imports[1].Project);
-            Assert.Equal("c", imports[1].Condition);
+            Assert.AreEqual(2, imports.Count);
+            Assert.AreEqual("i1.proj", imports[0].Project);
+            Assert.AreEqual("i2.proj", imports[1].Project);
+            Assert.AreEqual("c", imports[1].Condition);
         }
 
         /// <summary>
         /// Set valid project on import
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetProjectValid()
         {
             string content = @"
@@ -125,16 +125,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(project.Children);
 
             import.Project = "i1b.proj";
-            Assert.Equal("i1b.proj", import.Project);
+            Assert.AreEqual("i1b.proj", import.Project);
         }
 
         /// <summary>
         /// Set invalid empty project value on import
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetProjectInvalidEmpty()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 string content = @"
                     <Project>
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting the project attribute should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingProjectDirties()
         {
             string file1 = null;
@@ -181,11 +181,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Project = file2;
 
-                Assert.Equal("v1", project.GetPropertyValue("p"));
+                Assert.AreEqual("v1", project.GetPropertyValue("p"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal("v2", project.GetPropertyValue("p"));
+                Assert.AreEqual("v2", project.GetPropertyValue("p"));
             }
             finally
             {
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Setting the condition should dirty the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingConditionDirties()
         {
             string file = null;
@@ -220,11 +220,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Condition = "false";
 
-                Assert.Equal("v1", project.GetPropertyValue("p"));
+                Assert.AreEqual("v1", project.GetPropertyValue("p"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal(String.Empty, project.GetPropertyValue("p"));
+                Assert.AreEqual(String.Empty, project.GetPropertyValue("p"));
             }
             finally
             {
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Importing a project which has a relative path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportWithRelativePath()
         {
             string tempPath = Path.GetTempPath();

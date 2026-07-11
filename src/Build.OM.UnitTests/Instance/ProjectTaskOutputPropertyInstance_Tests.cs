@@ -4,7 +4,6 @@
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Xunit;
 
 #nullable disable
 
@@ -13,19 +12,20 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for the ProjectTaskOutputItemInstance class.
     /// </summary>
+    [TestClass]
     public class ProjectTaskOutputPropertyInstance_Tests
     {
         /// <summary>
         /// Test accessors
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Accessors()
         {
             var output = GetSampleTaskOutputInstance();
 
-            Assert.Equal("p", output.TaskParameter);
-            Assert.Equal("c", output.Condition);
-            Assert.Equal("p1", output.PropertyName);
+            Assert.AreEqual("p", output.TaskParameter);
+            Assert.AreEqual("c", output.Condition);
+            Assert.AreEqual("p1", output.PropertyName);
         }
 
         /// <summary>

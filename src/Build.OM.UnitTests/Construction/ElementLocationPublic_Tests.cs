@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Construction;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -15,6 +14,7 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the ElementLocation class
     /// </summary>
+    [TestClass]
     public class ElementLocationPublic_Tests
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// loaded from disk, or has been edited since.
         /// This is really a test of our XmlDocumentWithLocation.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ShouldHaveFilePathLocationEvenIfNotLoadedNorSavedYet()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -32,15 +32,15 @@ namespace Microsoft.Build.UnitTests.Construction
             target.Outputs = "o";
             project.AppendChild(target);
 
-            Assert.Equal(project.FullPath, target.Location.File);
-            Assert.Equal(project.FullPath, target.OutputsLocation.File);
+            Assert.AreEqual(project.FullPath, target.Location.File);
+            Assert.AreEqual(project.FullPath, target.OutputsLocation.File);
         }
 
         /// <summary>
         /// Element location should reflect rename.
         /// This is really a test of our XmlXXXXWithLocation.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void XmlLocationReflectsRename()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -49,19 +49,19 @@ namespace Microsoft.Build.UnitTests.Construction
             target.Outputs = "o";
             project.AppendChild(target);
 
-            Assert.Equal(project.FullPath, target.Location.File);
-            Assert.Equal(project.FullPath, target.OutputsLocation.File);
+            Assert.AreEqual(project.FullPath, target.Location.File);
+            Assert.AreEqual(project.FullPath, target.OutputsLocation.File);
 
             project.FullPath = "c:\\y";
 
-            Assert.Equal(project.FullPath, target.Location.File);
-            Assert.Equal(project.FullPath, target.OutputsLocation.File);
+            Assert.AreEqual(project.FullPath, target.Location.File);
+            Assert.AreEqual(project.FullPath, target.OutputsLocation.File);
         }
 
         /// <summary>
         /// We should cache ElementLocation objects for perf.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void XmlLocationsAreCached()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -73,14 +73,14 @@ namespace Microsoft.Build.UnitTests.Construction
             ElementLocation e1 = target.Location;
             ElementLocation e2 = target.OutputsLocation;
 
-            Assert.True(Object.ReferenceEquals(e1, target.Location));
-            Assert.True(Object.ReferenceEquals(e2, target.OutputsLocation));
+            Assert.IsTrue(Object.ReferenceEquals(e1, target.Location));
+            Assert.IsTrue(Object.ReferenceEquals(e2, target.OutputsLocation));
         }
 
         /// <summary>
         /// Test many of the getters
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LocationStringsMedley()
         {
             string content = @"
