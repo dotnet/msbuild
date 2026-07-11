@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
+using Shouldly;
 
 #nullable disable
 
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
         /// Case insensitive.
         /// </summary>
         /// <param name="contains"></param>
-        internal void AssertLogContains(string contains) => Assert.Contains(contains, Log, StringComparison.OrdinalIgnoreCase);
+        internal void AssertLogContains(string contains) => Log.ShouldContain(contains, Case.Insensitive);
 
         public bool BuildProjectFilesInParallel(
             string[] projectFileNames,
@@ -127,6 +127,6 @@ namespace Microsoft.Build.UnitTests
         /// Assert that the log doesn't contain the given string.
         /// </summary>
         /// <param name="contains"></param>
-        internal void AssertLogDoesntContain(string contains) => Assert.DoesNotContain(contains, Log, StringComparison.OrdinalIgnoreCase);
+        internal void AssertLogDoesntContain(string contains) => Log.ShouldNotContain(contains, Case.Insensitive);
     }
 }

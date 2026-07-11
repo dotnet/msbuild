@@ -6,7 +6,6 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -32,21 +31,22 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
+    [TestClass]
     public class Logger_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void ExerciseMiscProperties()
         {
             EmptyLogger logger = new EmptyLogger(LoggerVerbosity.Diagnostic);
             logger.Parameters = "Parameters";
-            Assert.Equal(0, string.Compare(logger.Parameters, "Parameters", StringComparison.OrdinalIgnoreCase));
-            Assert.Equal(LoggerVerbosity.Diagnostic, logger.Verbosity);
+            Assert.AreEqual(0, string.Compare(logger.Parameters, "Parameters", StringComparison.OrdinalIgnoreCase));
+            Assert.AreEqual(LoggerVerbosity.Diagnostic, logger.Verbosity);
             logger.Shutdown();
         }
         /// <summary>
         /// Exercises every combination of the Logger.IsVerbosityAtLeast method.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IsVerbosityAtLeast()
         {
             new EmptyLogger(LoggerVerbosity.Quiet).IsVerbosityAtLeast(LoggerVerbosity.Quiet).ShouldBeTrue();

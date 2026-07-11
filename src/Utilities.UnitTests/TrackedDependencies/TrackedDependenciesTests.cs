@@ -14,12 +14,12 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.TrackedDependencies
 {
+    [TestClass]
     public sealed class TrackedDependenciesTests
     {
         private readonly int _sleepTimeMilliseconds = NativeMethodsShared.IsWindows ? 100 : 1000;
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         /// thing as FileTracker.FormatRootingMarker, except with some extra initial normalization to get rid of
         /// pesky PIDs and TIDs in the tlog names.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FormatNormalizedRootingMarkerTests()
         {
             var tests = new Dictionary<ITaskItem[], string>
@@ -258,7 +258,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             };
             foreach (KeyValuePair<ITaskItem[], string> test in tests)
             {
-                Assert.Equal(test.Value, DependencyTableCache.FormatNormalizedTlogRootingMarker(test.Key)); // "Incorrectly formatted rooting marker"
+                Assert.AreEqual(test.Value, DependencyTableCache.FormatNormalizedTlogRootingMarker(test.Key)); // "Incorrectly formatted rooting marker"
             }
 
             bool exceptionCaught = false;
@@ -271,10 +271,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 exceptionCaught = true;
             }
 
-            Assert.True(exceptionCaught); // "Should have failed to format a rooting marker from a malformed UNC path"
+            Assert.IsTrue(exceptionCaught); // "Should have failed to format a rooting marker from a malformed UNC path"
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateTrackedDependencies()
         {
             Console.WriteLine("Test: CreateTrackedDependencies");
@@ -288,10 +288,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     outputs,
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
-            Assert.NotNull(d);
+            Assert.IsNotNull(d);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleCanonicalCL()
         {
             Console.WriteLine("Test: SingleCanonicalCL");
@@ -321,11 +321,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Single(outofdate);
-            Assert.Equal("TestFiles\\one.cpp", outofdate[0].ItemSpec);
+            Assert.ContainsSingle(outofdate);
+            Assert.AreEqual("TestFiles\\one.cpp", outofdate[0].ItemSpec);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonExistentTlog()
         {
             Console.WriteLine("Test: NonExistentTlog");
@@ -348,11 +348,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Single(outofdate);
-            Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
+            Assert.ContainsSingle(outofdate);
+            Assert.AreEqual(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyTLog()
         {
             Console.WriteLine("Test: EmptyTLog");
@@ -374,11 +374,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Single(outofdate);
-            Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
+            Assert.ContainsSingle(outofdate);
+            Assert.AreEqual(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidReadTLogName()
         {
             Console.WriteLine("Test: InvalidReadTLogName");
@@ -402,11 +402,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadTLogWithInitialEmptyLine()
         {
             Console.WriteLine("Test: ReadTLogWithInitialEmptyLine");
@@ -428,11 +428,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadTLogWithEmptyLineImmediatelyAfterRoot()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyLineImmediatelyAfterRoot");
@@ -454,11 +454,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadTLogWithEmptyLineBetweenRoots()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyLineImmediatelyAfterRoot");
@@ -480,11 +480,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadTLogWithEmptyRoot()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyRoot");
@@ -506,11 +506,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadTLogWithDuplicateInRoot()
         {
             Console.WriteLine("Test: ReadTLogWithDuplicateInRoot");
@@ -534,10 +534,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
 
-            Assert.NotEmpty(d.DependencyTable); // "Dependency Table should not be empty."
+            Assert.IsNotEmpty(d.DependencyTable); // "Dependency Table should not be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidWriteTLogName()
         {
             Console.WriteLine("Test: InvalidWriteTLogName");
@@ -548,11 +548,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     task,
                     DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\|one|.write.tlog")));
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have an error."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WriteTLogWithInitialEmptyLine()
         {
             Console.WriteLine("Test: WriteTLogWithInitialEmptyLine");
@@ -565,11 +565,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     task,
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WriteTLogWithEmptyLineImmediatelyAfterRoot()
         {
             Console.WriteLine("Test: ReadTLogWithEmptyLineImmediatelyAfterRoot");
@@ -582,11 +582,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     task,
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WriteTLogWithEmptyLineBetweenRoots()
         {
             Console.WriteLine("Test: WriteTLogWithEmptyLineImmediatelyAfterRoot");
@@ -599,11 +599,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     task,
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WriteTLogWithEmptyRoot()
         {
             Console.WriteLine("Test: WriteTLogWithEmptyRoot");
@@ -616,11 +616,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     task,
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(d.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(d.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PrimarySourceNotInTlog()
         {
             Console.WriteLine("Test: PrimarySourceNotInTlog");
@@ -653,11 +653,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Single(outofdate);
-            Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
+            Assert.ContainsSingle(outofdate);
+            Assert.AreEqual(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCL()
         {
             Console.WriteLine("Test: MultipleCanonicalCL");
@@ -691,11 +691,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Single(outofdate);
-            Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
+            Assert.ContainsSingle(outofdate);
+            Assert.AreEqual(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLCompactMissingOnSuccess()
         {
             Console.WriteLine("Test: MultipleCanonicalCLCompactMissingOnSuccess");
@@ -752,10 +752,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLCompactMissingOnSuccessMultiEntry()
         {
             Console.WriteLine("Test: MultipleCanonicalCLCompactMissingOnSuccessMultiEntry");
@@ -815,14 +815,14 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
 
-            Assert.Single(writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))]);
-            Assert.Equal(4, writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].Count);
+            Assert.ContainsSingle(writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))]);
+            Assert.AreEqual(4, writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].Count);
             // Everything to do with two.cpp should be left intact
-            Assert.Equal(2, writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Count);
-            Assert.Equal(3, writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Count);
+            Assert.AreEqual(2, writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Count);
+            Assert.AreEqual(3, writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveDependencyFromEntry()
         {
             Console.WriteLine("Test: RemoveDependencyFromEntry");
@@ -864,7 +864,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             CanonicalTrackedOutputFiles writtenOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.False(writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
+            Assert.IsFalse(writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
 
             CanonicalTrackedInputFiles compactInputs = new CanonicalTrackedInputFiles(
                     DependencyTestHelper.MockTask,
@@ -887,10 +887,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     false); /* shred composite rooting markers */
 
-            Assert.False(writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
+            Assert.IsFalse(writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveDependencyFromEntries()
         {
             Console.WriteLine("Test: RemoveDependencyFromEntry");
@@ -935,7 +935,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             CanonicalTrackedOutputFiles writtenOutputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.False(writtenOutputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
+            Assert.IsFalse(writtenOutputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
 
             CanonicalTrackedInputFiles compactInputs = new CanonicalTrackedInputFiles(
                     DependencyTestHelper.MockTask,
@@ -958,10 +958,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false, /* no minimal rebuild optimization */
                     true); /* shred composite rooting markers */
 
-            Assert.False(writtenInputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
+            Assert.IsFalse(writtenInputs.DependencyTable[rootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one3.obj"))));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveRootsWithSharedOutputs()
         {
             Console.WriteLine("Test: RemoveRootsWithSharedOutputs");
@@ -996,18 +996,18 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker1));
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker2));
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker3));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker3));
 
             outputs.RemoveRootsWithSharedOutputs(new ITaskItem[] { new TaskItem(Path.Combine("TestFiles", "one.cpp")), new TaskItem(Path.Combine("TestFiles", "three.cpp")), new TaskItem(Path.Combine("TestFiles", "two.cpp")) });
 
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker1));
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker2));
-            Assert.False(outputs.DependencyTable.ContainsKey(rootingMarker3));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
+            Assert.IsFalse(outputs.DependencyTable.ContainsKey(rootingMarker3));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveRootsWithSharedOutputs_CurrentRootNotInTable()
         {
             Console.WriteLine("Test: RemoveRootsWithSharedOutputs");
@@ -1042,18 +1042,18 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             CanonicalTrackedOutputFiles outputs = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))));
 
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker1));
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker2));
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker3));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker3));
 
             outputs.RemoveRootsWithSharedOutputs(new ITaskItem[] { new TaskItem(Path.Combine("TestFiles", "four.cpp")), new TaskItem(Path.Combine("TestFiles", "one.cpp")), new TaskItem(Path.Combine("TestFiles", "three.cpp")), new TaskItem(Path.Combine("TestFiles", "two.cpp")) });
 
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker1));
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker2));
-            Assert.True(outputs.DependencyTable.ContainsKey(rootingMarker3));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker1));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker2));
+            Assert.IsTrue(outputs.DependencyTable.ContainsKey(rootingMarker3));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLMissingDependency()
         {
             Console.WriteLine("Test: MultipleCanonicalCLMissingDependency");
@@ -1087,10 +1087,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're out of date, since a missing dependency indicates out-of-dateness
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Single(outofdate);
+            Assert.ContainsSingle(outofdate);
 
             // The dependency has been recorded and retrieved correctly
-            Assert.True(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
+            Assert.IsTrue(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
 
             // Save out the compacted read log - our missing dependency will be compacted away
             // The tlog will have to entries compacted, since we're not up to date
@@ -1109,14 +1109,14 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're out of date, since a missing dependency indicates out-of-dateness
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Single(outofdate);
+            Assert.ContainsSingle(outofdate);
 
             // We have a source outstanding for recompilation, it will not appear in
             // the tracking information as it will be written again
-            Assert.False(d.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
+            Assert.IsFalse(d.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLMissingOutputDependencyRemoved()
         {
             Console.WriteLine("Test: MultipleCanonicalCLMissingOutputDependencyRemoved");
@@ -1176,10 +1176,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             compactInputs.SaveTlog();
 
             ITaskItem[] outofDate = compactInputs.ComputeSourcesNeedingCompilation();
-            Assert.Empty(outofDate);
+            Assert.IsEmpty(outofDate);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLMissingInputDependencyRemoved()
         {
             Console.WriteLine("Test: MultipleCanonicalCLMissingInputDependencyRemoved");
@@ -1213,10 +1213,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're out of date, since a missing dependency indicates out-of-dateness
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Single(outofdate);
+            Assert.ContainsSingle(outofdate);
 
             // The dependency has been recorded and retrieved correctly
-            Assert.True(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
+            Assert.IsTrue(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
 
             // Save out the compacted read log - our missing dependency will be compacted away
             // Use an anonymous method to encapsulate the contains check for the tlogs
@@ -1238,10 +1238,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're not out of date, since the missing dependency has been removed
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiplePrimaryCanonicalCL()
         {
             Console.WriteLine("Test: MultiplePrimaryCanonicalCL");
@@ -1294,12 +1294,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 2);
-            Assert.True((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
+            Assert.IsTrue(outofdate.Length == 2);
+            Assert.IsTrue((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
                              (outofdate[1].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiplePrimaryCanonicalCLUnderTemp()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -1359,8 +1359,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
                 ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-                Assert.True(outofdate.Length == 2);
-                Assert.True((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
+                Assert.IsTrue(outofdate.Length == 2);
+                Assert.IsTrue((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
                                  (outofdate[1].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp")));
             }
             finally
@@ -1369,7 +1369,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiplePrimaryCanonicalCLSharedDependency()
         {
             Console.WriteLine("Test: MultiplePrimaryCanonicalCL");
@@ -1419,12 +1419,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 2);
-            Assert.True((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
+            Assert.IsTrue(outofdate.Length == 2);
+            Assert.IsTrue((outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[1].ItemSpec == Path.Combine("TestFiles", "two.cpp")) ||
                              (outofdate[1].ItemSpec == Path.Combine("TestFiles", "one.cpp") && outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLAcrossCommand1()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossCommand1");
@@ -1460,11 +1460,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLAcrossCommand2()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossCommand2");
@@ -1500,11 +1500,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLAcrossCommandNonDependency()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossCommandNonDependency");
@@ -1544,10 +1544,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLAcrossTlogs1()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossTlogs1");
@@ -1591,11 +1591,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCanonicalCLAcrossTlogs2()
         {
             Console.WriteLine("Test: MultipleCanonicalCLAcrossTlogs2");
@@ -1639,11 +1639,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleRootedCL()
         {
             Console.WriteLine("Test: SingleRootedCL");
@@ -1673,11 +1673,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleRootedCLAcrossTlogs1()
         {
             Console.WriteLine("Test: MultipleRootedCLAcrossTlogs1");
@@ -1721,11 +1721,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleRootedCL()
         {
             Console.WriteLine("Test: MultipleRootedCL");
@@ -1771,11 +1771,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleRootedCLNonDependency()
         {
             Console.WriteLine("Test: MultipleRootedCLNonDependency");
@@ -1820,10 +1820,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleRootedCLAcrossTlogs2()
         {
             Console.WriteLine("Test: MultipleRootedCLAcrossTlogs2");
@@ -1867,11 +1867,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputSingleCanonicalCL()
         {
             Console.WriteLine("Test: OutputSingleCanonicalCL");
@@ -1888,11 +1888,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
-            Assert.True(outputs.Length == 1);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs.Length == 1);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputSingleCanonicalCLAcrossTlogs()
         {
             Console.WriteLine("Test: OutputSingleCanonicalCLAcrossTlogs");
@@ -1920,12 +1920,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
-            Assert.True(outputs.Length == 2);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "one.pch")));
+            Assert.IsTrue(outputs.Length == 2);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "one.pch")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputNonExistentTlog()
         {
             Console.WriteLine("Test: NonExistentTlog");
@@ -1938,10 +1938,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
-            Assert.Null(outputs);
+            Assert.IsNull(outputs);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputMultipleCanonicalCL()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCL");
@@ -1966,13 +1966,13 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(sources);
 
-            Assert.True(outputs.Length == 3);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs.Length == 3);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputMultipleCanonicalCLSubrootMatch()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLSubrootMatch");
@@ -2010,47 +2010,47 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(sources2, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
-            Assert.True(outputs.Length == 5);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
-            Assert.True(outputs[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
-            Assert.True(outputs[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
+            Assert.IsTrue(outputs.Length == 5);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs2 = d.OutputsForSource(sources2, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
-            Assert.True(outputs2.Length == 8);
-            Assert.True(outputs2[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs2[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs2[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
-            Assert.True(outputs2[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
-            Assert.True(outputs2[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
-            Assert.True(outputs2[5].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
-            Assert.True(outputs2[6].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
-            Assert.True(outputs2[7].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
+            Assert.IsTrue(outputs2.Length == 8);
+            Assert.IsTrue(outputs2[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs2[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs2[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs2[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs2[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs2[5].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs2[6].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs2[7].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             // Test if sources can find the superset.
             ITaskItem[] outputs3 = d.OutputsForSource(sources, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
-            Assert.True(outputs3.Length == 8);
-            Assert.True(outputs3[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs3[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs3[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
-            Assert.True(outputs3[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
-            Assert.True(outputs3[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
-            Assert.True(outputs3[5].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
-            Assert.True(outputs3[6].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
-            Assert.True(outputs3[7].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
+            Assert.IsTrue(outputs3.Length == 8);
+            Assert.IsTrue(outputs3[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs3[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs3[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs3[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs3[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs3[5].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs3[6].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs3[7].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs4 = d.OutputsForSource(sources, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
-            Assert.True(outputs4.Length == 3);
-            Assert.True(outputs4[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs4[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs4[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs4.Length == 3);
+            Assert.IsTrue(outputs4[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs4[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs4[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputMultipleCanonicalCLSubrootMisMatch()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLSubrootMisMatch");
@@ -2099,35 +2099,35 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(sources2Match, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
-            Assert.True(outputs.Length == 5);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
-            Assert.True(outputs[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
-            Assert.True(outputs[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
+            Assert.IsTrue(outputs.Length == 5);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs2 = d.OutputsForSource(sources2Match, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
-            Assert.True(outputs2.Length == 5);
-            Assert.True(outputs2[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
-            Assert.True(outputs2[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
-            Assert.True(outputs2[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
-            Assert.True(outputs2[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
-            Assert.True(outputs2[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
+            Assert.IsTrue(outputs2.Length == 5);
+            Assert.IsTrue(outputs2[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fOUr.obj")));
+            Assert.IsTrue(outputs2[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "fIve.obj")));
+            Assert.IsTrue(outputs2[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sIx.obj")));
+            Assert.IsTrue(outputs2[3].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "sEvEn.obj")));
+            Assert.IsTrue(outputs2[4].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "EIght.obj")));
 
             ITaskItem[] outputs3 = d.OutputsForSource(sourcesPlusOne, /*searchForSubRootsInCompositeRootingMarkers*/ true);
 
-            Assert.True(outputs3.Length == 3);
-            Assert.True(outputs3[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs3[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs3[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs3.Length == 3);
+            Assert.IsTrue(outputs3[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs3[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs3[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
 
             ITaskItem[] outputs4 = d.OutputsForSource(sourcesPlusOne, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
-            Assert.Empty(outputs4);
+            Assert.IsEmpty(outputs4);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputMultipleCanonicalCLLongTempPath()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLLongTempPath");
@@ -2165,13 +2165,13 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             Environment.SetEnvironmentVariable("TEMP", oldTempPath);
             Environment.SetEnvironmentVariable("TMP", oldTmpPath);
 
-            Assert.True(outputs.Length == 3);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs.Length == 3);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputMultipleCanonicalCLAcrossTLogs()
         {
             Console.WriteLine("Test: OutputMultipleCanonicalCLAcrossTLogs");
@@ -2206,13 +2206,13 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(sources);
 
-            Assert.True(outputs.Length == 3);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs.Length == 3);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputMultipleSingleSubRootCanonicalCL()
         {
             Console.WriteLine("Test: OutputMultipleSingleSubRootCanonicalCL");
@@ -2237,13 +2237,13 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))));
 
-            Assert.True(outputs.Length == 3);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs.Length == 3);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputMultipleUnrecognisedRootCanonicalCL()
         {
             Console.WriteLine("Test: OutputMultipleUnrecognisedRootCanonicalCL");
@@ -2263,10 +2263,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "four.cpp"))));
 
-            Assert.Empty(outputs);
+            Assert.IsEmpty(outputs);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputCLMinimalRebuildOptimization()
         {
             Console.WriteLine("Test: OutputCLMinimalRebuildOptimization");
@@ -2338,7 +2338,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // First of all, all things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
 
             // Delete one of the outputs in the group
             File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
@@ -2346,7 +2346,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // With optimization off, all sources in the group will need compilation
             d.SourcesNeedingCompilation = null;
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(3, outofdate.Length);
+            Assert.AreEqual(3, outofdate.Length);
 
             // With optimization on, only the source that matches the output will need compilation
             d = new CanonicalTrackedInputFiles(
@@ -2359,12 +2359,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                         false); /* shred composite rooting markers */
 
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Single(outofdate);
+            Assert.ContainsSingle(outofdate);
             // And the source is.. two.cpp!
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputCLMinimalRebuildOptimizationComputed()
         {
             Console.WriteLine("Test: OutputCLMinimalRebuildOptimizationComputed");
@@ -2433,7 +2433,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // First of all, all things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
 
             // Delete one of the outputs in the group
             File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
@@ -2441,7 +2441,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // With optimization off, all sources in the group will need compilation
             d.SourcesNeedingCompilation = null;
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(3, outofdate.Length);
+            Assert.AreEqual(3, outofdate.Length);
 
             // With optimization on, only the source that matches the output will need compilation
             d = new CanonicalTrackedInputFiles(
@@ -2454,12 +2454,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false); /* shred composite rooting markers */
 
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Single(outofdate);
+            Assert.ContainsSingle(outofdate);
             // And the source is.. two.cpp!
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReplaceOutputForSource()
         {
             Console.WriteLine("Test: ReplaceOutputForSource");
@@ -2524,7 +2524,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             string threeRootingMarker = FileTracker.FormatRootingMarker(new TaskItem(Path.Combine("TestFiles", "three.cpp")));
             // Remove the fact that three.obj was the tracked output
             bool removed = outputs.RemoveOutputForSourceRoot(threeRootingMarker, Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
-            Assert.True(removed);
+            Assert.IsTrue(removed);
             // "Compute" the replacement output information for this compilation, rather than the one originally tracked
             outputs.AddComputedOutputForSourceRoot(threeRootingMarker, Path.GetFullPath(Path.Combine("TestFiles", "three.i")));
 
@@ -2539,12 +2539,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false); /* shred composite rooting markers */
 
             // We should have one output for three.cpp
-            Assert.Single(outputs.DependencyTable[threeRootingMarker]);
-            Assert.False(outputs.DependencyTable[threeRootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "three.obj"))));
+            Assert.ContainsSingle(outputs.DependencyTable[threeRootingMarker]);
+            Assert.IsFalse(outputs.DependencyTable[threeRootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "three.obj"))));
 
             // All things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
 
             // Delete the new output
             File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "three.i")));
@@ -2552,10 +2552,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // This means a recompile would be required for the roots
             d.SourcesNeedingCompilation = null;
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Single(outofdate);
+            Assert.ContainsSingle(outofdate);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExcludeSpecificDirectory()
         {
             Console.WriteLine("Test: ExcludeSpecificDirectory");
@@ -2628,10 +2628,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // All things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Empty(outofdate);
+            Assert.IsEmpty(outofdate);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveCompactedReadTlog()
         {
             Console.WriteLine("Test: SaveCompactedReadTlog");
@@ -2689,8 +2689,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
 
             d.RemoveEntriesForSource(d.SourcesNeedingCompilation);
             d.SaveTlog();
@@ -2698,7 +2698,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // All the tlogs need to still be there even after compaction
             // It's OK for them to be empty, but their absence might mean a partial clean
             // A missing tlog would mean a clean build
-            Assert.True(Microsoft.Build.Utilities.TrackedDependencies.ItemsExist(tlogs));
+            Assert.IsTrue(Microsoft.Build.Utilities.TrackedDependencies.ItemsExist(tlogs));
 
             // There should be no difference in the out of date files after compaction
             CanonicalTrackedInputFiles d1 = new CanonicalTrackedInputFiles(
@@ -2712,8 +2712,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             outofdate = d1.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 1);
-            Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
+            Assert.IsTrue(outofdate.Length == 1);
+            Assert.IsTrue(outofdate[0].ItemSpec == Path.Combine("TestFiles", "one.cpp"));
 
             ITaskItem[] tlogs2 = {
                                     tlogs[0]
@@ -2731,9 +2731,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             outofdate = d2.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 0);
-            Assert.True(d2.DependencyTable.Count == 1);
-            Assert.False(d2.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
+            Assert.IsTrue(outofdate.Length == 0);
+            Assert.IsTrue(d2.DependencyTable.Count == 1);
+            Assert.IsFalse(d2.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
 
             // There should be no difference even if we send in all the original tlogs
             CanonicalTrackedInputFiles d3 = new CanonicalTrackedInputFiles(
@@ -2747,12 +2747,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             outofdate = d3.ComputeSourcesNeedingCompilation();
 
-            Assert.True(outofdate.Length == 0);
-            Assert.True(d3.DependencyTable.Count == 1);
-            Assert.False(d3.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
+            Assert.IsTrue(outofdate.Length == 0);
+            Assert.IsTrue(d3.DependencyTable.Count == 1);
+            Assert.IsFalse(d3.DependencyTable.ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveCompactedWriteTlog()
         {
             Console.WriteLine("Test: SaveCompactedWriteTlog");
@@ -2797,17 +2797,17 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(sources);
 
-            Assert.Equal(3, outputs.Length);
-            Assert.Equal(outputs[0].ItemSpec, Path.GetFullPath("TestFiles\\oNe.obj"));
-            Assert.Equal(outputs[1].ItemSpec, Path.GetFullPath("TestFiles\\two.obj"));
-            Assert.Equal(outputs[2].ItemSpec, Path.GetFullPath("TestFiles\\three.obj"));
+            Assert.AreEqual(3, outputs.Length);
+            Assert.AreEqual(outputs[0].ItemSpec, Path.GetFullPath("TestFiles\\oNe.obj"));
+            Assert.AreEqual(outputs[1].ItemSpec, Path.GetFullPath("TestFiles\\two.obj"));
+            Assert.AreEqual(outputs[2].ItemSpec, Path.GetFullPath("TestFiles\\three.obj"));
 
             outputs = d.OutputsForSource(fooItem);
-            Assert.Equal(4, outputs.Length);
-            Assert.Equal(outputs[0].ItemSpec, Path.GetFullPath("TestFiles\\foo1.bar"));
-            Assert.Equal(outputs[1].ItemSpec, Path.GetFullPath("TestFiles\\bar1.baz"));
-            Assert.Equal(outputs[2].ItemSpec, Path.GetFullPath("TestFiles\\foo2.bar"));
-            Assert.Equal(outputs[3].ItemSpec, Path.GetFullPath("TestFiles\\bar2.baz"));
+            Assert.AreEqual(4, outputs.Length);
+            Assert.AreEqual(outputs[0].ItemSpec, Path.GetFullPath("TestFiles\\foo1.bar"));
+            Assert.AreEqual(outputs[1].ItemSpec, Path.GetFullPath("TestFiles\\bar1.baz"));
+            Assert.AreEqual(outputs[2].ItemSpec, Path.GetFullPath("TestFiles\\foo2.bar"));
+            Assert.AreEqual(outputs[3].ItemSpec, Path.GetFullPath("TestFiles\\bar2.baz"));
 
             // Compact the tlog removing all entries for "foo" leaving the other entries intact
             d.RemoveEntriesForSource(fooItem);
@@ -2816,7 +2816,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // All the tlogs need to still be there even after compaction
             // It's OK for them to be empty, but their absence might mean a partial clean
             // A missing tlog would mean a clean build
-            Assert.True(Microsoft.Build.Utilities.TrackedDependencies.ItemsExist(tlogs));
+            Assert.IsTrue(Microsoft.Build.Utilities.TrackedDependencies.ItemsExist(tlogs));
 
             // All log information should now be in the tlog[0]
             ITaskItem[] tlogs2 = {
@@ -2827,26 +2827,26 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     tlogs2);
 
             outputs = d2.OutputsForSource(fooItem);
-            Assert.Empty(outputs);
+            Assert.IsEmpty(outputs);
 
             outputs = d2.OutputsForSource(sources);
-            Assert.True(outputs.Length == 3);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs.Length == 3);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
 
             // There should be no difference even if we send in all the original tlogs
             CanonicalTrackedOutputFiles d3 = new CanonicalTrackedOutputFiles(DependencyTestHelper.MockTask,
                     tlogs);
 
             outputs = d3.OutputsForSource(fooItem);
-            Assert.Empty(outputs);
+            Assert.IsEmpty(outputs);
 
             outputs = d3.OutputsForSource(sources);
-            Assert.True(outputs.Length == 3);
-            Assert.True(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
-            Assert.True(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
-            Assert.True(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
+            Assert.IsTrue(outputs.Length == 3);
+            Assert.IsTrue(outputs[0].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "oNe.obj")));
+            Assert.IsTrue(outputs[1].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
+            Assert.IsTrue(outputs[2].ItemSpec == Path.GetFullPath(Path.Combine("TestFiles", "three.obj")));
         }
 
         /// <summary>
@@ -2854,7 +2854,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         /// markers are kept, as in the case where there is a many-to-one relationship between inputs and
         /// outputs (ie. Lib, Link)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveCompactedReadTlog_MaintainCompositeRootingMarkers()
         {
             Console.WriteLine("Test: SaveCompactedReadTlog_MaintainCompositeRootingMarkers");
@@ -2944,11 +2944,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             // nothing should be out of date
-            Assert.Empty(outofdate);
-            Assert.Equal(4, d.DependencyTable.Count);
+            Assert.IsEmpty(outofdate);
+            Assert.AreEqual(4, d.DependencyTable.Count);
 
             // dependencies should include the three .h files written into the .tlogs + the rooting marker
-            Assert.True(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Values.Count == 4);
+            Assert.IsTrue(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Values.Count == 4);
 
             d.SaveTlog();
 
@@ -2963,14 +2963,14 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             d2.ComputeSourcesNeedingCompilation();
 
-            Assert.Empty(outofdate);
-            Assert.Equal(4, d2.DependencyTable.Count);
+            Assert.IsEmpty(outofdate);
+            Assert.AreEqual(4, d2.DependencyTable.Count);
 
             // dependencies should include the three .h files written into the .tlogs + the two rooting marker files
-            Assert.True(d2.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Values.Count == 4);
+            Assert.IsTrue(d2.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "three.cpp")) + "|" + Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Values.Count == 4);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidFlatTrackingTLogName()
         {
             Console.WriteLine("Test: InvalidFlatTrackingTLogName");
@@ -2987,11 +2987,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\|one|.write.tlog")),
                     false); /* don't skip missing files */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingTLogWithInitialEmptyLine()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithInitialEmptyLine");
@@ -3004,11 +3004,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false); /* don't skip missing files */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingTLogWithEmptyLineImmediatelyAfterRoot()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithEmptyLineImmediatelyAfterRoot");
@@ -3021,11 +3021,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false); /* don't skip missing files */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingTLogWithEmptyLineBetweenRoots()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithEmptyLineBetweenRoots");
@@ -3038,11 +3038,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false); /* don't skip missing files */
 
-            Assert.Equal(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Empty(data.DependencyTable); // "DependencyTable should be empty."
+            Assert.AreEqual(1, ((MockEngine)task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.IsEmpty(data.DependencyTable); // "DependencyTable should be empty."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingTLogWithEmptyRoot()
         {
             Console.WriteLine("Test: FlatTrackingTLogWithEmptyRoot");
@@ -3055,11 +3055,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.tlog"))),
                     false); /* don't skip missing files */
 
-            Assert.Equal(0, ((MockEngine)task.BuildEngine).Warnings); // "Should not warn -- root markers are ignored by default"
-            Assert.Single(data.DependencyTable); // "DependencyTable should only contain one entry."
+            Assert.AreEqual(0, ((MockEngine)task.BuildEngine).Warnings); // "Should not warn -- root markers are ignored by default"
+            Assert.ContainsSingle(data.DependencyTable); // "DependencyTable should only contain one entry."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataMissingInputsAndOutputs()
         {
             Console.WriteLine("Test: FlatTrackingDataMissingInputsAndOutputs");
@@ -3095,12 +3095,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
-            Assert.Equal(2, inputs.MissingFiles.Count);
-            Assert.Equal(3, outputs.MissingFiles.Count);
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.AreEqual(2, inputs.MissingFiles.Count);
+            Assert.AreEqual(3, outputs.MissingFiles.Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataMissingInputs()
         {
             Console.WriteLine("Test: FlatTrackingDataMissingInputs");
@@ -3133,14 +3133,14 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing inputs, we're out of date
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
-            Assert.Equal(2, inputs.MissingFiles.Count);
-            Assert.Empty(outputs.MissingFiles);
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.AreEqual(2, inputs.MissingFiles.Count);
+            Assert.IsEmpty(outputs.MissingFiles);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataMissingOutputs()
         {
             Console.WriteLine("Test: FlatTrackingDataMissingOutputs");
@@ -3173,14 +3173,14 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing outputs, we're out of date
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
-            Assert.Empty(inputs.MissingFiles);
-            Assert.Equal(2, outputs.MissingFiles.Count);
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.IsEmpty(inputs.MissingFiles);
+            Assert.AreEqual(2, outputs.MissingFiles.Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataEmptyInputTLogs()
         {
             Console.WriteLine("Test: FlatTrackingDataEmptyInputTLogs");
@@ -3192,12 +3192,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing inputs, we're out of date
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataEmptyOutputTLogs()
         {
             Console.WriteLine("Test: FlatTrackingDataEmptyOutputTLogs");
@@ -3221,14 +3221,14 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // Inputs newer than outputs - if there are no outputs, then we're out of date
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // Inputs newer than tracking - if there are no outputs, then we don't care
-            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.IsTrue(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
             // Inputs or Outputs newer than tracking - if there is an output tlog, even if there's no text written to it, we're not out of date
-            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.IsTrue(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataInputNewerThanTracking()
         {
             Console.WriteLine("Test: FlatTrackingDataInputNewerThanTracking");
@@ -3260,7 +3260,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // Compact the read tlog
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
 
             // Touch the tracking logs so that are more recent that any of the inputs
             Thread.Sleep(_sleepTimeMilliseconds);
@@ -3274,12 +3274,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the outputs
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // We should be up to date with respect to the tracking data
-            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.IsTrue(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataInputNewerThanTrackingNoOutput()
         {
             Console.WriteLine("Test: FlatTrackingDataInputNewerThanTrackingNoOutput");
@@ -3310,10 +3310,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // Compact the read tlog
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
-            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.IsTrue(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataInputNewerThanOutput()
         {
             Console.WriteLine("Test: FlatTrackingDataInputOrOutputNewerThanTracking");
@@ -3350,10 +3350,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be up to date inputs vs outputs
-            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsTrue(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
 
             // We should be out of date inputs & outputs vs tracking (since we wrote the files after the tracking logs)
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
 
             // Touch the input so that we would be out of date with respect to the outputs, and out of date with respect to the tracking logs
             Thread.Sleep(_sleepTimeMilliseconds);
@@ -3363,13 +3363,13 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the tracking logs
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs), "#3");
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs), "#3");
 
             // We should be out of date with respect to the outputs
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs), "#4");
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs), "#4");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingDataInputOrOutputNewerThanTracking()
         {
             Console.WriteLine("Test: FlatTrackingDataInputOrOutputNewerThanTracking");
@@ -3400,9 +3400,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // Compact the read tlog
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
             // We should be up to date inputs vs outputs
-            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsTrue(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // We should be out of date inputs & outputs vs tracking (since we wrote the files after the tracking logs)
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
 
             // Touch the tracking logs so that are more recent that any of the inputs
             Thread.Sleep(_sleepTimeMilliseconds);
@@ -3414,7 +3414,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be up to date with respect to the tracking data
-            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.IsTrue(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
 
             // Touch the input so that we would be out of date with respect to the outputs, but up to date with respect to the tracking logs
             File.SetLastWriteTime(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")), DateTime.Now);
@@ -3423,10 +3423,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the outputs
-            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.IsFalse(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FlatTrackingExcludeDirectories()
         {
             Console.WriteLine("Test: FlatTrackingExcludeDirectories");
@@ -3482,10 +3482,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     new[] { Path.GetFullPath(Path.Combine("TestFiles", "ToBeExcluded")) },
                     sharedLastWriteTimeUtcCache);
 
-            Assert.Equal(originalNewest, data.NewestFileTimeUtc); // "Timestamp changed when no tracked files changed."
+            Assert.AreEqual(originalNewest, data.NewestFileTimeUtc); // "Timestamp changed when no tracked files changed."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TrackingDataCacheResetOnTlogChange()
         {
             Console.WriteLine("Test: FlatTrackingDataCacheResetOnTlogChange");
@@ -3516,22 +3516,22 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 false);
 
             // We should not use the cached dependency table, since it has been updated since it was last read from disk
-            Assert.NotEqual(outputs.DependencyTable, outputs2.DependencyTable);
+            Assert.AreNotEqual(outputs.DependencyTable, outputs2.DependencyTable);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RootContainsSubRoots()
         {
             Console.WriteLine("Test: RootContainsSubRoots");
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "a|b|C|d|e|F|g"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "a"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "g"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "d"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "a|b"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "f|g"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "b|a"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "g|f"));
-            Assert.True(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "b|e"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "a|b|C|d|e|F|g"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "a"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "g"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "d"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "a|b"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "f|g"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "b|a"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "g|f"));
+            Assert.IsTrue(CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents("a|b|c|d|e|f|g", "b|e"));
         }
     }
 

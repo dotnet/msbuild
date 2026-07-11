@@ -9,7 +9,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
 
 #nullable disable
@@ -19,12 +18,13 @@ namespace Microsoft.VisualStudio.Build.UnitTest
     /// <summary>
     /// Tests for the MuxLogger.
     /// </summary>
+    [TestClass]
     public class MuxLogger_Tests
     {
         /// <summary>
         /// Verifies that an empty build with no loggers causes no exceptions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyBuildWithNoLoggers()
         {
             BuildManager buildManager = BuildManager.DefaultBuildManager;
@@ -38,7 +38,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies that a simple build with no loggers causes no exceptions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleBuildWithNoLoggers()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -62,10 +62,10 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies that attempting to register a logger before a build has started is invalid.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RegisteringLoggerBeforeBuildStartedThrows()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 MuxLogger muxLogger = new MuxLogger();
                 muxLogger.RegisterLogger(1, new MockLogger());
@@ -74,7 +74,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies that building with a logger attached to the mux logger is equivalent to building with the logger directly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildWithMuxLoggerEquivalentToNormalLogger()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -139,7 +139,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies correctness of a simple build with one logger.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneSubmissionOneLogger()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -181,7 +181,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies correctness of a two submissions in a single build using separate loggers.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoSubmissionsWithSeparateLoggers()
         {
             string projectBody1 = ObjectModelHelpers.CleanupFileContents(@"
@@ -248,7 +248,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies correctness of a simple build with one logger.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneSubmissionTwoLoggers()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"
@@ -284,7 +284,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             mockLogger1.AssertLogContains("Foo");
             mockLogger1.AssertLogContains("Error");
-            Assert.Equal(1, mockLogger1.ErrorCount);
+            Assert.AreEqual(1, mockLogger1.ErrorCount);
             mockLogger1.AssertNoWarnings();
 
             mockLogger2.AssertLogContains("Foo");
@@ -298,7 +298,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// Verifies correctness of a simple build with one logger.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RegisteringLoggerDuringBuildThrowsException()
         {
             string projectBody = ObjectModelHelpers.CleanupFileContents(@"

@@ -10,7 +10,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #pragma warning disable 0219
 
@@ -18,10 +17,11 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class TaskItemTests
     {
         // Make sure a TaskItem can be constructed using an ITaskItem
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithITaskItem()
         {
             TaskItem from = new TaskItem();
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Make sure metadata can be cloned from an existing ITaskItem
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyMetadataFromITaskItem()
         {
             TaskItem from = new TaskItem();
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
             to.GetMetadata("Bird").ShouldBe("Big");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NullITaskItem()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataNamesAndCount()
         {
             TaskItem taskItem = new TaskItem("x");
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             taskItem.MetadataCount.ShouldBe(ItemSpecModifiers.All.Length + 1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NullITaskItemCast()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
                 // no NullReferenceException
             });
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructFromDictionary()
         {
             Hashtable h = new Hashtable();
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             t.GetMetadata("CUSTOM").ShouldBe("hello");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CannotChangeModifiers()
         {
             Should.Throw<ArgumentException>(() =>
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CannotRemoveModifiers()
         {
             Should.Throw<ArgumentException>(() =>
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests
                 }
             });
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckMetadataCount()
         {
             TaskItem t = new TaskItem("foo");
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests
             t.MetadataCount.ShouldBe(ItemSpecModifiers.All.Length + 1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestFullPath()
         {
             TaskItem from = new TaskItem();
@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests
                     "Monkey.txt"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestRootDir()
         {
             TaskItem from = new TaskItem();
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(ItemSpecModifiers.RootDir).ShouldBe(Path.GetPathRoot(from.GetMetadata(ItemSpecModifiers.FullPath)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestFilename()
         {
             TaskItem from = new TaskItem();
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(ItemSpecModifiers.Filename).ShouldBe("Monkey");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestExtension()
         {
             TaskItem from = new TaskItem();
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(ItemSpecModifiers.Extension).ShouldBe(".txt");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestRelativeDir()
         {
             TaskItem from = new TaskItem();
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(ItemSpecModifiers.RelativeDir).Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestDirectory()
         {
             TaskItem from = new TaskItem();
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(ItemSpecModifiers.Directory).ShouldBe(@"subdir\");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestRecursiveDir()
         {
             TaskItem from = new TaskItem();
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(ItemSpecModifiers.RecursiveDir).Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonexistentRequestIdentity()
         {
             TaskItem from = new TaskItem();
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(ItemSpecModifiers.Identity).ShouldBe("Monkey.txt");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RequestTimeStamps()
         {
             TaskItem from = new TaskItem();
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify metadata cannot be created with null name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateNullNamedMetadata()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -288,7 +288,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify metadata cannot be created with empty name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateEmptyNamedMetadata()
         {
             Should.Throw<ArgumentException>(() =>
@@ -301,7 +301,7 @@ namespace Microsoft.Build.UnitTests
         /// Create a TaskItem with a null metadata value -- this is allowed, but
         /// internally converted to the empty string.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateTaskItemWithNullMetadata()
         {
             IDictionary<string, string> metadata = new Dictionary<string, string>();
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
         /// Set metadata value to null value -- this is allowed, but
         /// internally converted to the empty string.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetNullMetadataValue()
         {
             TaskItem item = new TaskItem("bar");
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadata("m").ShouldBe(string.Empty);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImplementsIMetadataContainer()
         {
             Dictionary<string, string> metadata = new()
@@ -339,14 +339,14 @@ namespace Microsoft.Build.UnitTests
 
             var actualMetadata = metadataContainer.EnumerateMetadata().OrderBy(metadata => metadata.Key).ToList();
             var expectedMetadata = metadata.OrderBy(metadata => metadata.Value).ToList();
-            Assert.True(actualMetadata.SequenceEqual(expectedMetadata));
+            Assert.IsTrue(actualMetadata.SequenceEqual(expectedMetadata));
         }
 
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Test that task items can be successfully constructed based on a task item from another appdomain.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoteTaskItem()
         {
             AppDomain appDomain = null;
@@ -443,9 +443,10 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the generic <see cref="TaskItem{T}"/> struct.
     /// </summary>
+    [TestClass]
     public class TaskItemOfTTests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void SetMetadata_DoesNotThrow()
         {
             var item = new TaskItem<int>(42);
@@ -454,7 +455,7 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadata("key").ShouldBe("value");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveMetadata_DoesNotThrow()
         {
             var item = new TaskItem<int>(42);
@@ -463,7 +464,7 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadata("key").ShouldBeNullOrEmpty();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyMetadataTo_DoesNotThrow()
         {
             var source = new TaskItem<int>(42);
@@ -473,7 +474,7 @@ namespace Microsoft.Build.UnitTests
             dest.GetMetadata("key").ShouldBe("value");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FromITaskItem_PathLikeType_UsesFullPathMetadata()
         {
             // FullPath is a reserved metadata computed by the MSBuild item system as the absolute path.
@@ -486,7 +487,7 @@ namespace Microsoft.Build.UnitTests
             item.Value.FullName.ShouldBe(expectedAbsolutePath);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FromITaskItem_NonPathType_UsesItemSpec()
         {
             var backingItem = new TaskItem("42");
@@ -494,7 +495,7 @@ namespace Microsoft.Build.UnitTests
             item.Value.ShouldBe(42);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Equals_SameValue_ReturnsTrue()
         {
             var a = new TaskItem<int>(42);
@@ -503,7 +504,7 @@ namespace Microsoft.Build.UnitTests
             (a == b).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Equals_DifferentValue_ReturnsFalse()
         {
             var a = new TaskItem<int>(1);
@@ -512,7 +513,7 @@ namespace Microsoft.Build.UnitTests
             (a != b).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Equals_NullStringValue_HandledCorrectly()
         {
             // EqualityComparer<string>.Default handles null without boxing or NullReferenceException
@@ -521,14 +522,14 @@ namespace Microsoft.Build.UnitTests
             a.Equals(b).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetHashCode_NullValue_ReturnsZero()
         {
             var item = new TaskItem<string>((string)null!);
             item.GetHashCode().ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetHashCode_ConsistentWithEquality()
         {
             var a = new TaskItem<int>(42);

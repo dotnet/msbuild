@@ -13,17 +13,17 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class ToolTask_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ToolTask_Tests(ITestOutputHelper testOutput)
+        public ToolTask_Tests(TestContext testOutput)
         {
             _output = testOutput;
         }
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_UserSuppliedToolPathIsLogged()
         {
             using (MyTool t = new MyTool())
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_MissingExecutableIsLogged()
         {
             using (MyTool t = new MyTool())
@@ -155,7 +155,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_WarnIfCommandLineTooLong()
         {
             using (MyTool t = new MyTool())
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HandleExecutionErrorsWhenToolDoesntLogError()
         {
             using (MyTool t = new MyTool())
@@ -204,9 +204,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Exercise the code in ToolTask's default implementation of HandleExecutionErrors.
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using MyTool t = new MyTool();
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests
         /// ToolTask should never run String.Format on strings that are
         /// not meant to be formatted.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DoNotFormatTaskCommandOrMessage()
         {
             using MyTool t = new MyTool();
@@ -265,9 +265,9 @@ namespace Microsoft.Build.UnitTests
         /// Process notification encoding should be consistent with console code page.
         /// not meant to be formatted.
         /// </summary>
-        [InlineData(0, "")]
-        [InlineData(-1, "1>&2")]
-        [Theory]
+        [DataRow(0, "")]
+        [DataRow(-1, "1>&2")]
+        [MSBuildTestMethod]
         public void ProcessNotificationEncodingConsistentWithConsoleCodePage(int exitCode, string errorPart)
         {
             using MyTool t = new MyTool();
@@ -295,7 +295,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When a message is logged to the standard error stream do not error is LogStandardErrorAsError is not true or set.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DoNotErrorWhenTextSentToStandardError()
         {
             using (MyTool t = new MyTool())
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When a message is logged to the standard output stream do not error is LogStandardErrorAsError is  true
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DoNotErrorWhenTextSentToStandardOutput()
         {
             using (MyTool t = new MyTool())
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests
         /// "The command exited with return value 0, but errors were detected" should be logged,
         /// not the generic tool failure error MSB6006.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorWhenTextSentToStandardError()
         {
             using (MyTool t = new MyTool())
@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests
         /// ToolTask should log the "command exited with code" message (not MSB6006) as a low-importance
         /// diagnostic rather than a duplicate error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HandleExecutionErrorsWhenToolLogsErrorAndExitsNonZero()
         {
             using (MyTool t = new MyTool())
@@ -405,7 +405,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When ToolExe is set, it is used instead of ToolName
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolExeWinsOverToolName()
         {
             using (MyTool t = new MyTool())
@@ -424,7 +424,7 @@ namespace Microsoft.Build.UnitTests
         /// When ToolExe is set, it is appended to ToolPath instead
         /// of the regular tool name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolExeIsFoundOnToolPath()
         {
             string shellName = NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Task is not found on path - regress #499196
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskNotFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Task is found on path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to Low should not show up in our log
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OverrideStdOutImportanceToLow()
         {
             string tempFile = FileUtilities.GetTemporaryFileName();
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// StandardOutputImportance set to High should show up in our log
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OverrideStdOutImportanceToHigh()
         {
             string tempFile = FileUtilities.GetTemporaryFileName();
@@ -549,9 +549,9 @@ namespace Microsoft.Build.UnitTests
             File.Delete(tempFile);
         }
 
-        [Theory]
-        [InlineData(true, "InvalidLevel")]
-        [InlineData(false, "InvalidLevel")]
+        [MSBuildTestMethod]
+        [DataRow(true, "InvalidLevel")]
+        [DataRow(false, "InvalidLevel")]
         public void FailToEnumerateStandardLoggingImportance(bool isErr, string invalidLevel)
         {
             using (MyTool t = new MyTool(AssemblyResources.SharedResources))
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests
         /// himself.  This is so that in case the tool doesn't log its errors in canonical
         /// format, the task can still opt to do something reasonable with it.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
             string tempFile = FileUtilities.GetTemporaryFileName();
@@ -648,7 +648,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing env vars through the tooltask public property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EnvironmentVariablesToToolTask()
         {
             using MyTool task = new MyTool();
@@ -669,7 +669,7 @@ namespace Microsoft.Build.UnitTests
 
             if (NativeMethodsShared.IsWindows)
             {
-                Assert.Equal(
+                Assert.AreEqual(
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                         startInfo.Environment["programfiles"],
                         true);
@@ -679,7 +679,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Equals sign in value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
             using MyTool task = new MyTool();
@@ -694,7 +694,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// No value provided
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EnvironmentVariablesToToolTaskInvalid1()
         {
             using MyTool task = new MyTool();
@@ -709,7 +709,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Empty string provided
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EnvironmentVariablesToToolTaskInvalid2()
         {
             using MyTool task = new MyTool();
@@ -724,7 +724,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Empty name part provided
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EnvironmentVariablesToToolTaskInvalid3()
         {
             using MyTool task = new MyTool();
@@ -739,7 +739,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Not set should not wipe out other env vars
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             using MyTool task = new MyTool();
@@ -749,14 +749,14 @@ namespace Microsoft.Build.UnitTests
 
             result.ShouldBe(true);
             task.ExecuteCalled.ShouldBe(true);
-            Assert.True(task.StartInfo.Environment["PATH"].Length > 0);
+            Assert.IsTrue(task.StartInfo.Environment["PATH"].Length > 0);
         }
 
         /// <summary>
         /// Verifies that if a directory with the same name of the tool exists that the tool task correctly
         /// ignores the directory.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolPathIsFoundWhenDirectoryExistsWithNameOfTool()
         {
             string toolName = NativeMethodsShared.IsWindows ? "cmd" : "sh";
@@ -780,7 +780,7 @@ namespace Microsoft.Build.UnitTests
                     };
                     bool result = task.Execute();
 
-                    Assert.NotEqual(directoryNamedSameAsTool, task.PathToToolUsed);
+                    Assert.AreNotEqual(directoryNamedSameAsTool, task.PathToToolUsed);
 
                     result.ShouldBeTrue();
                 }
@@ -794,7 +794,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Confirms we can find a file on the PATH.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FindOnPathSucceeds()
         {
             using MyTool tool = new MyTool();
@@ -820,7 +820,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Equals sign in value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfoCanOverrideEnvironmentVariables()
         {
             using MyTool task = new MyTool();
@@ -834,7 +834,7 @@ namespace Microsoft.Build.UnitTests
             task.StartInfo.Environment.ContainsKey("a").ShouldBe(false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VisualBasicLikeEscapedQuotesInCommandAreNotMadeForwardSlashes()
         {
             using MyTool t = new MyTool();
@@ -866,7 +866,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UsesCustomProcess()
         {
             using (MyToolWithCustomProcess t = new MyToolWithCustomProcess())
@@ -888,12 +888,12 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that a ToolTask running under the command processor on Windows has autorun
         /// disabled or enabled depending on an escape hatch.
         /// </summary>
-        [Theory]
-        [InlineData("MSBUILDUSERAUTORUNINCMD", null, true)]
-        [InlineData("MSBUILDUSERAUTORUNINCMD", "0", true)]
-        [InlineData("MSBUILDUSERAUTORUNINCMD", "1", false)]
-        [Trait("Category", "nonosxtests")]
-        [Trait("Category", "nonlinuxtests")]
+        [MSBuildTestMethod]
+        [DataRow("MSBUILDUSERAUTORUNINCMD", null, true)]
+        [DataRow("MSBUILDUSERAUTORUNINCMD", "0", true)]
+        [DataRow("MSBUILDUSERAUTORUNINCMD", "1", false)]
+        [TestCategory("nonosxtests")]
+        [TestCategory("nonlinuxtests")]
         public void ExecTaskDisablesAutoRun(string environmentVariableName, string environmentVariableValue, bool autoRunShouldBeDisabled)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -946,10 +946,10 @@ namespace Microsoft.Build.UnitTests
             public string ResponseFileCommands { get; private set; }
         }
 
-        [Theory]
-        [InlineData("MSBUILDAVOIDUNICODE", null, false)]
-        [InlineData("MSBUILDAVOIDUNICODE", "0", false)]
-        [InlineData("MSBUILDAVOIDUNICODE", "1", true)]
+        [MSBuildTestMethod]
+        [DataRow("MSBUILDAVOIDUNICODE", null, false)]
+        [DataRow("MSBUILDAVOIDUNICODE", "0", false)]
+        [DataRow("MSBUILDAVOIDUNICODE", "1", true)]
         public void ToolTaskCanUseUnicode(string environmentVariableName, string environmentVariableValue, bool expectNormalizationToANSI)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
@@ -1010,14 +1010,14 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="timeout">New value for <see cref="ToolTask.TaskProcessTerminationTimeout" />.</param>
         /// <param name="isInvalidValid">Is a task expected to be valid or not.</param>
-        [Theory]
-        [InlineData(int.MaxValue, false)]
-        [InlineData(97, false)]
-        [InlineData(0, false)]
-        [InlineData(-1, false)]
-        [InlineData(-2, true)]
-        [InlineData(-101, true)]
-        [InlineData(int.MinValue, true)]
+        [MSBuildTestMethod]
+        [DataRow(int.MaxValue, false)]
+        [DataRow(97, false)]
+        [DataRow(0, false)]
+        [DataRow(-1, false)]
+        [DataRow(-2, true)]
+        [DataRow(-101, true)]
+        [DataRow(int.MinValue, true)]
         public void SetsTerminationTimeoutCorrectly(int timeout, bool isInvalidValid)
         {
             using var env = TestEnvironment.Create(_output);
@@ -1043,10 +1043,10 @@ namespace Microsoft.Build.UnitTests
         /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
         /// that all following executions return success.
         /// </remarks>
-        [Theory]
-        [InlineData(1, false)]
-        [InlineData(3, false)]
-        [InlineData(3, true)]
+        [MSBuildTestMethod]
+        [DataRow(1, false)]
+        [DataRow(3, false)]
+        [DataRow(3, true)]
         public void ToolTaskThatTimeoutAndRetry(int repeats, bool timeoutOnFirstExecution)
         {
             using var env = TestEnvironment.Create(_output);
@@ -1124,7 +1124,7 @@ namespace Microsoft.Build.UnitTests
         /// process that inherits stdout/stderr pipe handles and outlives the tool.
         /// This is a regression test for https://github.com/dotnet/msbuild/issues/2981.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolTaskDoesNotHangWhenGrandchildInheritsPipeHandles()
         {
             using (MyTool t = new MyTool())
@@ -1161,7 +1161,7 @@ namespace Microsoft.Build.UnitTests
         /// https://github.com/dotnet/msbuild/issues/10378 where switching to
         /// WaitForExit(int) caused output to be lost.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolTaskCapturesAllOutputWithFix()
         {
             using (MyTool t = new MyTool())
@@ -1360,7 +1360,7 @@ namespace Microsoft.Build.UnitTests
                 => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_NoWorkingDirectoryOverride_UsesProjectDirectory()
         {
             // Arrange: no GetWorkingDirectory() override — WorkingDirectory should come from TaskEnvironment.
@@ -1380,7 +1380,7 @@ namespace Microsoft.Build.UnitTests
                 "Without a GetWorkingDirectory() override, WorkingDirectory should fall back to taskEnvironment.ProjectDirectory");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_PropagatesSpecificEnvironmentVariable()
         {
             // Arrange: create a driver with a known env var and verify it appears in ProcessStartInfo.
@@ -1404,7 +1404,7 @@ namespace Microsoft.Build.UnitTests
                 "Environment variables from TaskEnvironment should be propagated to ProcessStartInfo");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_RelativeWorkingDirectory_AbsolutizedAgainstProjectDir()
         {
             // Arrange: GetWorkingDirectory() returns a relative path — should be absolutized against project dir.
@@ -1425,7 +1425,7 @@ namespace Microsoft.Build.UnitTests
                 "A relative GetWorkingDirectory() result should be absolutized against taskEnvironment.ProjectDirectory");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_AbsoluteWorkingDirectory_UsesOverridePath()
         {
             // Arrange: GetWorkingDirectory() returns an absolute path — should be used directly.
@@ -1446,7 +1446,7 @@ namespace Microsoft.Build.UnitTests
                 "An absolute GetWorkingDirectory() result should be used directly, not combined with project directory");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_TaskEnvironmentVariablesOverride()
         {
             // Arrange: create a driver with a custom env var.
@@ -1474,7 +1474,7 @@ namespace Microsoft.Build.UnitTests
                 "EnvironmentVariables property on the task should override TaskEnvironment values");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_MultiProcessDriver_BackwardCompat()
         {
             // Arrange: use the default MultiProcessTaskEnvironmentDriver (non-multithreaded mode).
@@ -1497,7 +1497,7 @@ namespace Microsoft.Build.UnitTests
             result.Arguments.ShouldContain("/nologo");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_EmptyWorkingDirectory_KeepsProjectDirectory()
         {
             // Arrange: GetWorkingDirectory() returns empty string — should NOT override project dir.
@@ -1519,7 +1519,7 @@ namespace Microsoft.Build.UnitTests
                 "Empty-string from GetWorkingDirectory() should not override the project directory from TaskEnvironment");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FindOnPath_UsesTaskEnvironmentPath()
         {
             // Arrange: create a temp dir with a dummy file, set TaskEnvironment PATH to that dir.
@@ -1549,7 +1549,7 @@ namespace Microsoft.Build.UnitTests
             result.ShouldBe(Path.Combine(tempDir, toolName));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DeleteTempFile_UsesTaskEnvironmentForAbsolutePath()
         {
             // Arrange: create a temp file in the project directory, use relative path for deletion.
@@ -1575,7 +1575,7 @@ namespace Microsoft.Build.UnitTests
                 "DeleteTempFile should have deleted the file using TaskEnvironment-absolutized path");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_MultiThreadedDriver_SetsWorkingDirectoryAndEnvironment()
         {
             // Arrange: when TaskEnvironment uses MultiThreadedTaskEnvironmentDriver,
@@ -1601,7 +1601,7 @@ namespace Microsoft.Build.UnitTests
                 "MultiThreadedDriver should propagate environment variables");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_MultiProcessDriver_DoesNotSetWorkingDirectory()
         {
             // Arrange: when TaskEnvironment uses the default MultiProcessTaskEnvironmentDriver,
@@ -1621,7 +1621,7 @@ namespace Microsoft.Build.UnitTests
                 "MultiProcessDriver should not set WorkingDirectory, preserving pre-migration behavior");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ComputePathToTool_UsesTaskEnvironmentForFileExistence()
         {
             // Arrange: create a temp dir with a dummy tool, set up TaskEnvironment pointing there.

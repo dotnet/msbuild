@@ -7,15 +7,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class TaskLoggingHelperTests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckMessageCode()
         {
             Task t = new MockTask();
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         /// in this method returning true and passing a non canonical message results in it returning
         /// false
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckMessageFromStreamParsesErrorsAndMessagesCorrectly()
         {
             IBuildEngine2 mockEngine = new MockEngine3();
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             t.Log.LogMessagesFromStream(sr, MessageImportance.High).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogCommandLine()
         {
             MockEngine3 mockEngine = new MockEngine3();
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests
         /// This verifies that we don't try to run FormatString on a string
         /// that isn't a resource (if we did, the unmatched curly would give an exception)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LogMessageWithUnmatchedCurly()
         {
             MockEngine3 mockEngine = new MockEngine3();
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("{4");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogFromResources()
         {
             MockEngine3 mockEngine = new MockEngine3();
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.Log.Contains("Be nice or I wipe your harddrive foo").ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckLogMessageFromFile()
         {
             string file = null;
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckResourcesRegistered()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -233,7 +233,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the LogErrorFromException & LogWarningFromException methods
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestLogFromException()
         {
             string message = "exception message";
@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that <see cref="TaskLoggingHelper.LogErrorFromException(Exception, bool, bool, string)" /> logs inner exceptions from an <see cref="AggregateException" />.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestLogFromExceptionWithAggregateException()
         {
             AggregateException aggregateException = new AggregateException(

@@ -9,7 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -18,12 +17,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Basic tests of Platform.xml parsing
     /// </summary>
+    [TestClass]
     public sealed class PlatformManifest_Tests
     {
         /// <summary>
         /// Should get a read error when the manifest location is invalid
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidManifestLocation()
         {
             PlatformManifest manifest = new PlatformManifest("|||||||");
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Should get a read error when the manifest location is valid but empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyManifestLocation()
         {
             string manifestDirectory = null;
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
         /// Should get a read error when the manifest location is valid but doesn't have a
         /// file named Platform.xml
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ManifestLocationHasNoPlatformXml()
         {
             string manifestDirectory = null;
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Should get a read error when trying to read an invalid manifest file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidManifest()
         {
             string contents = @"|||||";
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that a simple PlatformManifest can be successfully constructed.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleValidManifest()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0` />";
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that a simple PlatformManifest can be successfully constructed, even if it's missing
         /// some fields.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleValidManifestWithMissingFriendlyName()
         {
             string contents = @"<ApplicationPlatform name=`UAP` version=`1.0.0.0` />";
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         /// Platform manifest with a dependent platform missing some information.
         /// NOTE: probably ought to be an error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DependentPlatformMissingName()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify a PlatformManifest with multiple dependent platforms.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleDependentPlatforms()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests
         /// Platform manifest with a contract missing some information.
         /// NOTE: technically probably ought to be an error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ContractMissingVersion()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify a platform manifest with API contracts.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleContracts()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionedContentFlagMissingReturnsFalse()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionedContentInvalidFlagReturnsFalse()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionedContentFalseFlagReturnsFalse()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionedContentTrueFlagReturnsTrue()
         {
             string contents = @"<ApplicationPlatform name=`UAP` friendlyName=`Universal Application Platform` version=`1.0.0.0`>

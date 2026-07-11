@@ -5,17 +5,17 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ProcessExtensions_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ProcessExtensions_Tests(ITestOutputHelper output)
+        public ProcessExtensions_Tests(TestContext output)
         {
             _output = output;
         }
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
             return Process.Start(psi);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task KillTree()
         {
             var psi =
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryGetCommandLine_NullProcess_ReturnsFalse()
         {
             Process process = null;
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
             commandLine.ShouldBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryGetCommandLine_ExitedProcess_ReturnsFalse()
         {
             var psi = NativeMethodsShared.IsWindows
