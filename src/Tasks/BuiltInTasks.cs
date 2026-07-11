@@ -22,16 +22,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static void RegisterAll()
         {
-            Utilities.Task.RegisterTask<Message>();
-            Utilities.Task.RegisterTask<Warning>();
-            Utilities.Task.RegisterTask<Error>();
-            Utilities.Task.RegisterTask<MakeDir>();
-            Utilities.Task.RegisterTask<RemoveDir>();
-            Utilities.Task.RegisterTask<Copy>();
-            Utilities.Task.RegisterTask<Delete>();
-            Utilities.Task.RegisterTask<Touch>();
-            Utilities.Task.RegisterTask<WriteLinesToFile>();
-            Utilities.Task.RegisterTask<ReadLinesFromFile>();
+            Utilities.Task.RegisterTask<Message>(nameof(Message));
+            Utilities.Task.RegisterTask<Warning>(nameof(Warning));
+            Utilities.Task.RegisterTask<Error>(nameof(Error));
+            Utilities.Task.RegisterTask<MakeDir>(nameof(MakeDir), static taskEnvironment => new MakeDir(taskEnvironment));
+            Utilities.Task.RegisterTask<RemoveDir>(nameof(RemoveDir), static taskEnvironment => new RemoveDir(taskEnvironment));
+            Utilities.Task.RegisterTask<Copy>(nameof(Copy), static taskEnvironment => new Copy(taskEnvironment));
+            Utilities.Task.RegisterTask<Delete>(nameof(Delete), static taskEnvironment => new Delete(taskEnvironment));
+            Utilities.Task.RegisterTask<Touch>(nameof(Touch), static taskEnvironment => new Touch(taskEnvironment));
+            Utilities.Task.RegisterTask<WriteLinesToFile>(nameof(WriteLinesToFile), static taskEnvironment => new WriteLinesToFile(taskEnvironment));
+            Utilities.Task.RegisterTask<ReadLinesFromFile>(nameof(ReadLinesFromFile), static taskEnvironment => new ReadLinesFromFile(taskEnvironment));
         }
     }
 }

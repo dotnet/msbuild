@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TaskOutputsArePropagated()
         {
-            ResolveAssemblyReference nodeRar = new()
+            ResolveAssemblyReference nodeRar = new(TaskEnvironment.Fallback)
             {
                 ResolvedFiles = [
                     new TaskItem(
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             RarNodeExecuteResponse response = new(nodeRar, success: true);
 
-            ResolveAssemblyReference clientRar = new();
+            ResolveAssemblyReference clientRar = new(TaskEnvironment.Fallback);
             response.SetTaskOutputs(clientRar);
 
             Assert.True(response.Success);
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         { "CopyLocal", "True" },
                     }),
                 ];
-            ResolveAssemblyReference nodeRar = new()
+            ResolveAssemblyReference nodeRar = new(TaskEnvironment.Fallback)
             {
                 ResolvedFiles = [
                     copyLocalFiles[0],
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             RarNodeExecuteResponse response = new(nodeRar, success: true);
 
-            ResolveAssemblyReference clientRar = new();
+            ResolveAssemblyReference clientRar = new(TaskEnvironment.Fallback);
             response.SetTaskOutputs(clientRar);
 
             Assert.Equal(nodeRar.CopyLocalFiles.Length, clientRar.CopyLocalFiles.Length);

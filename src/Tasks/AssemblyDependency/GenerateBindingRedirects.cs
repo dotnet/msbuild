@@ -24,18 +24,10 @@ namespace Microsoft.Build.Tasks
     public class GenerateBindingRedirects : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GenerateBindingRedirects"/> class.
-        /// </summary>
-        public GenerateBindingRedirects()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="GenerateBindingRedirects"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public GenerateBindingRedirects(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public GenerateBindingRedirects(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         // <param name="SuggestedRedirects">RAR suggested binding redirects.</param>
         // <param name="AppConfigFile">The source App.Config file.</param>

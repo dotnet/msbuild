@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Append one line to the file.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(a.Execute());
 
                 // Read the line from the file.
-                var r = new ReadLinesFromFile
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Append one line to the file.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(a.Execute());
 
                 // Read the line from the file.
-                var r = new ReadLinesFromFile
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Append one line to the file.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(a.Execute());
 
                 // Read the line from the file.
-                var r = new ReadLinesFromFile
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
             var file = FileUtilities.GetTemporaryFileName();
 
             // Read the line from the file.
-            var r = new ReadLinesFromFile
+            var r = new ReadLinesFromFile(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Append one line to the file.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(a.Execute());
 
                 // Read the line from the file.
-                var r = new ReadLinesFromFile
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Append one line to the file.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests
                 File.SetAccessControl(file, fSecurity);
 
                 // Attempt to Read lines from the file.
-                var r = new ReadLinesFromFile();
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback);
                 var mEngine = new MockEngine();
                 r.BuildEngine = mEngine;
                 r.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();

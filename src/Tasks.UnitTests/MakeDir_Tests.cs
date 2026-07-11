@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                MakeDir t = new MakeDir();
+                MakeDir t = new MakeDir(TaskEnvironment.Fallback);
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
                 FileStream fs = File.Create(file);
                 fs.Dispose(); // we're gonna try to delete it
 
-                MakeDir t = new MakeDir();
+                MakeDir t = new MakeDir(TaskEnvironment.Fallback);
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                MakeDir t = new MakeDir();
+                MakeDir t = new MakeDir(TaskEnvironment.Fallback);
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     new TaskItem(dir)
                 };
-                MakeDir t = new MakeDir();
+                MakeDir t = new MakeDir(TaskEnvironment.Fallback);
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -201,7 +201,7 @@ namespace Microsoft.Build.UnitTests
                 // Actually create the directory
                 // Note: Need a new task to reset the Log.HasLoggedErrors
                 engine.Log = "";
-                t = new MakeDir();
+                t = new MakeDir(TaskEnvironment.Fallback);
                 t.BuildEngine = engine;
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.Directories = dirList;
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests
                 FileStream fs = File.Create(file);
                 fs.Dispose(); // we're gonna try to delete it
 
-                MakeDir t = new MakeDir();
+                MakeDir t = new MakeDir(TaskEnvironment.Fallback);
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();

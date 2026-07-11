@@ -142,18 +142,10 @@ namespace Microsoft.Build.Tasks
     internal sealed class RoslynCodeTaskFactoryCSharpCompiler : RoslynCodeTaskFactoryCompilerBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoslynCodeTaskFactoryCSharpCompiler"/> class.
-        /// </summary>
-        public RoslynCodeTaskFactoryCSharpCompiler()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="RoslynCodeTaskFactoryCSharpCompiler"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public RoslynCodeTaskFactoryCSharpCompiler(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public RoslynCodeTaskFactoryCSharpCompiler(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         protected override string ToolName => "csc.exe";
 
@@ -168,18 +160,10 @@ namespace Microsoft.Build.Tasks
     internal sealed class RoslynCodeTaskFactoryVisualBasicCompiler : RoslynCodeTaskFactoryCompilerBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoslynCodeTaskFactoryVisualBasicCompiler"/> class.
-        /// </summary>
-        public RoslynCodeTaskFactoryVisualBasicCompiler()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="RoslynCodeTaskFactoryVisualBasicCompiler"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public RoslynCodeTaskFactoryVisualBasicCompiler(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public RoslynCodeTaskFactoryVisualBasicCompiler(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         public bool? OptionExplicit { get; set; }
 

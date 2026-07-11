@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("DependsOnFoo4Framework"),
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "BAR, Version=4.0";
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("DependsOnFoo35Framework"),
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=v4.0";
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("DependsOnFoo4Framework"),
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 item
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("IndirectDependsOnFoo35Framework"),
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=v4.0";
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("IndirectDependsOnFoo4Framework"),
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 item
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 item
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -266,7 +266,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 item
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 item
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 item
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.TargetFrameworkMoniker = "Foo, Version=4.0";
@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 item
             };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = e;
             t.Assemblies = items;
             t.FindDependencies = false;

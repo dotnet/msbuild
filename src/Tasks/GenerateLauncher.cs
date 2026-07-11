@@ -23,18 +23,10 @@ namespace Microsoft.Build.Tasks
     public sealed class GenerateLauncher : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GenerateLauncher"/> class.
-        /// </summary>
-        public GenerateLauncher()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="GenerateLauncher"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public GenerateLauncher(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public GenerateLauncher(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         private const string LAUNCHER_EXE = "Launcher.exe";
         private const string ENGINE_PATH = "Engine"; // relative to ClickOnce bootstrapper path

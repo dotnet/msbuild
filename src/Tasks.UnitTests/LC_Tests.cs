@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
 
         private static LC CreateTask(string projectDir)
         {
-            return new LC
+            return new LC(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(),
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir),
@@ -123,6 +123,8 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class TestableLC : LC
         {
+            public TestableLC() : base(TaskEnvironment.Fallback) { }
+
             internal string CallGenerateFullPathToTool()
             {
                 return GenerateFullPathToTool();

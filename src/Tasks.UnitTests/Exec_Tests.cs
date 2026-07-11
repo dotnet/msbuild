@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
         private Exec PrepareExec(string command)
         {
             IBuildEngine2 mockEngine = new MockEngine(_output);
-            Exec exec = new Exec();
+            Exec exec = new Exec(TaskEnvironment.Fallback);
             exec.BuildEngine = mockEngine;
             exec.Command = command;
             return exec;
@@ -903,7 +903,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SetEnvironmentVariableParameter()
         {
-            Exec exec = new Exec();
+            Exec exec = new Exec(TaskEnvironment.Fallback);
             exec.BuildEngine = new MockEngine();
             exec.Command = NativeMethodsShared.IsWindows ? "echo [%MYENVVAR%]" : "echo [$myenvvar]";
             exec.EnvironmentVariables = new[] { "myenvvar=myvalue" };
@@ -1082,7 +1082,7 @@ echo line 3"" />
             string expectedFile,
             string notExpectedFile = null)
         {
-            Exec exec = new Exec();
+            Exec exec = new Exec(TaskEnvironment.Fallback);
             exec.TaskEnvironment = taskEnvironment;
             exec.BuildEngine = new MockEngine(_output);
             exec.Command = NativeMethodsShared.IsWindows ? "dir /b" : "ls";
@@ -1144,7 +1144,7 @@ echo line 3"" />
             const string relativeDir = "testDir";
             string absolutePath = Path.Combine(projectDir.Path, relativeDir);
 
-            var exec = new Exec
+            var exec = new Exec(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 Command = "echo hi",
@@ -1167,7 +1167,7 @@ echo line 3"" />
             var projectDir = testEnv.CreateFolder();
             Directory.CreateDirectory(Path.Combine(projectDir.Path, "builddir"));
 
-            var exec = new Exec
+            var exec = new Exec(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 Command = "echo hi",
@@ -1182,6 +1182,8 @@ echo line 3"" />
 
     internal sealed class ExecWrapper : Exec
     {
+        public ExecWrapper() : base(TaskEnvironment.Fallback) { }
+
         public Encoding StdOutputEncoding
         {
             get

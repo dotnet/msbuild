@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 using System;
 using System.IO;
 using System.Net;
@@ -31,7 +32,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
 
-                DownloadFile downloadFile = new DownloadFile
+                DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
 
-                DownloadFile downloadFile = new DownloadFile
+                DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -110,7 +111,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
 
-                DownloadFile downloadFile = new DownloadFile
+                DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -141,7 +142,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
 
-                DownloadFile downloadFile = new DownloadFile
+                DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -170,7 +171,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void InvalidUrlLogsError()
         {
-            DownloadFile downloadFile = new DownloadFile()
+            DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -185,7 +186,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void NotFoundLogsError()
         {
-            DownloadFile downloadFile = new DownloadFile()
+            DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -209,7 +210,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
 
-                DownloadFile downloadFile = new DownloadFile()
+                DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -242,7 +243,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void RetryOnResponseError()
         {
-            DownloadFile downloadFile = new DownloadFile()
+            DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -262,7 +263,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using CancellationTokenSource timeout = new CancellationTokenSource();
             timeout.Cancel();
-            DownloadFile downloadFile = new DownloadFile()
+            DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -286,7 +287,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             DownloadFile downloadFile = null;
             bool failed = false;
-            downloadFile = new DownloadFile()
+            downloadFile = new DownloadFile(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 HttpMessageHandler = new MockHttpMessageHandler((message, token) =>
@@ -325,7 +326,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
 
-                DownloadFile downloadFile = new DownloadFile
+                DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -356,7 +357,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void UnknownFileNameLogsError()
         {
-            DownloadFile downloadFile = new DownloadFile()
+            DownloadFile downloadFile = new DownloadFile(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),

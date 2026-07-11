@@ -37,13 +37,6 @@ namespace Microsoft.Build.Tasks
     public class ResolveAssemblyReference : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ResolveAssemblyReference"/> class using the specified <see cref="TaskEnvironment"/>.
-        /// </summary>
-        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public ResolveAssemblyReference(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
-
-        /// <summary>
         /// key assembly used to trigger inclusion of facade references.
         /// </summary>
         private const string SystemRuntimeAssemblyName = "System.Runtime";
@@ -71,10 +64,12 @@ namespace Microsoft.Build.Tasks
         internal SystemState _cache = null;
 
         /// <summary>
-        /// Construct
+        /// Initializes a new instance of the <see cref="ResolveAssemblyReference"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
-        public ResolveAssemblyReference()
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public ResolveAssemblyReference(TaskEnvironment taskEnvironment)
         {
+            TaskEnvironment = taskEnvironment;
             Strings.Initialize(Log);
         }
 

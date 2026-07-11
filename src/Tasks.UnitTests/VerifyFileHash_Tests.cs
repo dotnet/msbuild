@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 using System;
 using System.IO;
 using Microsoft.Build.Tasks;
@@ -24,7 +25,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifyFileChecksum_FailsForUnknownHashEncoding()
         {
-            new VerifyFileHash
+            new VerifyFileHash(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
@@ -43,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifyFileChecksum_FailsForUnknownAlgorithmName()
         {
-            new VerifyFileHash
+            new VerifyFileHash(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
@@ -62,7 +63,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifyFileChecksum_FailsForFileNotFound()
         {
-            new VerifyFileHash
+            new VerifyFileHash(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "this_does_not_exist.txt"),
@@ -84,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("SHA512", "F923D2DA8F21B67FF4040FE9C5D00B0E891064E7B1DE47B54C9DA86DAAF215EFC64E282056027BEC2E75A83DE9FA6FFE6CA60F0141E19254B25CAE79C2694777")]
         public void VerifyFileChecksum_FailsForMismatch(string algoritm, string hash)
         {
-            VerifyFileHash task = new VerifyFileHash
+            VerifyFileHash task = new VerifyFileHash(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
@@ -104,7 +105,7 @@ namespace Microsoft.Build.UnitTests
         [MemberData(nameof(TestBinary.GetLorem), MemberType = typeof(TestBinary))]
         public void VerifyFileChecksum_Pass(TestBinary testBinary)
         {
-            VerifyFileHash task = new VerifyFileHash
+            VerifyFileHash task = new VerifyFileHash(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 File = testBinary.FilePath,

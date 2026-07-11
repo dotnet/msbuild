@@ -17,18 +17,10 @@ namespace Microsoft.Build.Tasks
     public sealed class FormatUrl : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FormatUrl"/> class.
-        /// </summary>
-        public FormatUrl()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="FormatUrl"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public FormatUrl(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public FormatUrl(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         /// <summary>
         /// Gets or sets the task execution environment used to resolve relative paths against

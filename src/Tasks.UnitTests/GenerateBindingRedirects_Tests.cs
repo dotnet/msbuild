@@ -318,7 +318,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             string outputAppConfig = string.IsNullOrEmpty(targetAppConfigFile) ? _env.ExpectFile(".config").Path : targetAppConfigFile;
 
-            GenerateBindingRedirects bindingRedirects = new GenerateBindingRedirects
+            GenerateBindingRedirects bindingRedirects = new GenerateBindingRedirects(TaskEnvironment.Fallback)
             {
                 BuildEngine = engine,
                 SuggestedRedirects = suggestedRedirects ?? Array.Empty<ITaskItem>(),

@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     new TaskItem(s_nugetCache_N_Lib_NDllPath) // version 2.0.0.0
                 };
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         })
                 };
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;

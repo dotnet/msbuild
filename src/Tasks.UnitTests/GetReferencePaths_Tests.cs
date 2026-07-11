@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
         {
             string targetFrameworkMoniker = ".NetFramework, Version=v4.8";
             MockEngine engine = new();
-            GetReferenceAssemblyPaths getReferencePaths = new();
+            GetReferenceAssemblyPaths getReferencePaths = new(TaskEnvironment.Fallback);
             getReferencePaths.BuildEngine = engine;
             getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
             getReferencePaths.Execute();
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
 
                 string targetFrameworkMoniker = "MyFramework, Version=v4.1";
                 MockEngine engine = new MockEngine();
-                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
                 getReferencePaths.BuildEngine = engine;
                 getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
                 getReferencePaths.RootPath = tempDirectory;
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
                 FrameworkNameVersioning name = new FrameworkNameVersioning("MyFramework", new Version("4.1"), "Client");
                 string targetFrameworkMoniker = name.FullName;
                 MockEngine engine = new MockEngine();
-                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
                 getReferencePaths.BuildEngine = engine;
                 getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
                 getReferencePaths.RootPath = tempDirectory;
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests
         public void TestGeneralFrameworkMonikerNull()
         {
             MockEngine engine = new MockEngine();
-            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
             getReferencePaths.BuildEngine = engine;
             getReferencePaths.TargetFrameworkMoniker = null;
             getReferencePaths.Execute();
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
         public void TestGeneralFrameworkMonikerNonExistent()
         {
             MockEngine engine = new MockEngine();
-            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
             getReferencePaths.BuildEngine = engine;
             // Make a framework which does not exist, intentional misspelling of framework
             getReferencePaths.TargetFrameworkMoniker = ".NetFramewok, Version=v99.0";
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         public void TestSuppressNotFoundError()
         {
             MockEngine engine = new MockEngine();
-            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+            GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
             getReferencePaths.BuildEngine = engine;
             // Make a framework which does not exist, intentional misspelling of framework
             getReferencePaths.TargetFrameworkMoniker = ".NetFramewok, Version=v99.0";
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
 
                 string targetFrameworkMoniker = "MyFramework, Version=v4.1";
                 MockEngine engine = new MockEngine();
-                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
                 getReferencePaths.BuildEngine = engine;
                 getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
                 getReferencePaths.RootPath = tempDirectory;
@@ -265,7 +265,7 @@ namespace Microsoft.Build.UnitTests
 
                 string targetFrameworkMoniker = "MyFramework, Version=v4.1";
                 MockEngine engine = new MockEngine();
-                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
                 getReferencePaths.BuildEngine = engine;
                 getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
                 getReferencePaths.RootPath = tempDirectory;
@@ -321,7 +321,7 @@ namespace Microsoft.Build.UnitTests
 
                 string targetFrameworkMoniker = "MyFramework, Version=v4.1";
                 MockEngine engine = new MockEngine();
-                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths();
+                GetReferenceAssemblyPaths getReferencePaths = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
                 getReferencePaths.BuildEngine = engine;
                 getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
                 getReferencePaths.RootPath = env.CreateFolder().Path;
@@ -357,7 +357,7 @@ namespace Microsoft.Build.UnitTests
 
             // Baseline: absolute RootPath
             MockEngine absoluteEngine = new MockEngine();
-            GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths();
+            GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
             absoluteTask.BuildEngine = absoluteEngine;
             absoluteTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
             absoluteTask.RootPath = absoluteDir;
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test: relative RootPath with TaskEnvironment
             MockEngine relativeEngine = new MockEngine();
-            GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths();
+            GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
             relativeTask.BuildEngine = relativeEngine;
             relativeTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
             relativeTask.TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(baseDir);
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests
 
             // Baseline: absolute fallback path
             MockEngine absoluteEngine = new MockEngine();
-            GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths();
+            GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
             absoluteTask.BuildEngine = absoluteEngine;
             absoluteTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
             absoluteTask.RootPath = nonExistentRoot;
@@ -409,7 +409,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test: relative fallback path with TaskEnvironment
             MockEngine relativeEngine = new MockEngine();
-            GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths();
+            GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths(TaskEnvironment.Fallback);
             relativeTask.BuildEngine = relativeEngine;
             relativeTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
             relativeTask.TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(baseDir);

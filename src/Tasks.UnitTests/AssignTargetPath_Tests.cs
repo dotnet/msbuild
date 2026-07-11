@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress314791()
         {
-            AssignTargetPath t = new AssignTargetPath();
+            AssignTargetPath t = new AssignTargetPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AtConeRoot()
         {
-            AssignTargetPath t = new AssignTargetPath();
+            AssignTargetPath t = new AssignTargetPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OutOfCone()
         {
-            AssignTargetPath t = new AssignTargetPath();
+            AssignTargetPath t = new AssignTargetPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InConeButAbsolute()
         {
-            AssignTargetPath t = new AssignTargetPath();
+            AssignTargetPath t = new AssignTargetPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("file")]
         public void TargetPathAlreadySet(string targetPath)
         {
-            AssignTargetPath t = new AssignTargetPath();
+            AssignTargetPath t = new AssignTargetPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             Dictionary<string, string> metaData = new Dictionary<string, string>();

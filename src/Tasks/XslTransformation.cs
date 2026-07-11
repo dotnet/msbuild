@@ -31,18 +31,10 @@ namespace Microsoft.Build.Tasks
     public class XslTransformation : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="XslTransformation"/> class.
-        /// </summary>
-        public XslTransformation()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="XslTransformation"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public XslTransformation(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public XslTransformation(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         #region Members
 

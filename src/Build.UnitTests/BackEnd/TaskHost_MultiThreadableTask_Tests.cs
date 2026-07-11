@@ -111,6 +111,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// </summary>
     public class DerivedMakeDirTask : MakeDir
     {
+        // MakeDir no longer has a public parameterless constructor, so forward a fallback
+        // TaskEnvironment to the base. The engine overwrites the TaskEnvironment property with the
+        // real environment after construction, which is what this test verifies.
+        public DerivedMakeDirTask() : base(TaskEnvironment.Fallback) { }
+
         public override bool Execute()
         {
             string projectDir = TaskEnvironment.ProjectDirectory;

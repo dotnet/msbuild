@@ -27,14 +27,6 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class Copy : TaskExtension, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Copy"/> class using the specified <see cref="TaskEnvironment"/>.
-        /// </summary>
-        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public Copy(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
-
-
         // Default parallelism determined empirically - times below are in seconds spent in the Copy task building this repo
         // and comparing the task timings from the default and selfhost binlogs with different settings for this parallelism
         // number (via env var override). >=3 samples averaged for each number.
@@ -79,10 +71,13 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="Copy"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
-        public Copy()
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public Copy(TaskEnvironment taskEnvironment)
         {
+            TaskEnvironment = taskEnvironment;
+
             RetryDelayMilliseconds = RetryDelayMillisecondsDefault;
 
             if (DidNotCopyBecauseOfFileMatch == null)

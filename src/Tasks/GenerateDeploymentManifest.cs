@@ -21,18 +21,10 @@ namespace Microsoft.Build.Tasks
     public sealed class GenerateDeploymentManifest : GenerateManifestBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="GenerateDeploymentManifest"/> class.
-        /// </summary>
-        public GenerateDeploymentManifest()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="GenerateDeploymentManifest"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public GenerateDeploymentManifest(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public GenerateDeploymentManifest(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         private bool? _createDesktopShortcut;
         private bool? _disallowUrlActivation;

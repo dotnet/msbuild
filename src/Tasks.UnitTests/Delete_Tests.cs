@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AttributeForwarding()
         {
-            Delete t = new Delete();
+            Delete t = new Delete(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ITaskItem i = new TaskItem("MyFiles.nonexistent");
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem sourceItem = new TaskItem(source);
                 ITaskItem[] sourceFiles = { sourceItem };
 
-                var t = new Delete
+                var t = new Delete(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.SetAttributes(source, FileAttributes.Normal);
                 ITaskItem[] duplicateSourceFiles = { sourceItem, sourceItem };
-                t = new Delete
+                t = new Delete(TaskEnvironment.Fallback)
                 {
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!

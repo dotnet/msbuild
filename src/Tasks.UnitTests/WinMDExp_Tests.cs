@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void References()
         {
-            WinMDExp t = new WinMDExp();
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback);
             t.WinMDModule = "Foo.dll";
 
             TaskItem mscorlibReference = new TaskItem("mscorlib.dll");
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestNoWarnSwitchWithWarnings()
         {
-            WinMDExp t = new WinMDExp();
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback);
             t.WinMDModule = "Foo.dll";
             t.DisabledWarnings = "41999,42016";
             CommandLine.ValidateHasParameter(t, "/nowarn:41999,42016", useResponseFile: true);
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DocumentationFile()
         {
-            WinMDExp t = new WinMDExp();
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback);
 
             t.WinMDModule = "Foo.dll";
             t.OutputDocumentationFile = "output.xml";
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void PDBFileTesting()
         {
-            WinMDExp t = new WinMDExp();
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback);
             t.WinMDModule = "Foo.dll";
             t.OutputWindowsMetadataFile = "Foo.dll";
             t.OutputPDBFile = "output.pdb";
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void WinMDModule()
         {
-            WinMDExp t = new WinMDExp();
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback);
 
             t.WinMDModule = "Foo.dll";
             CommandLine.ValidateContains(t, "Foo.dll", useResponseFile: true);
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UsesrDefinedOutputFile()
         {
-            WinMDExp t = new WinMDExp();
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback);
             t.WinMDModule = "Foo.dll";
             t.OutputWindowsMetadataFile = "Bob.winmd";
             CommandLine.ValidateHasParameter(t, "/out:Bob.winmd", useResponseFile: true);
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoOutputFileDefined()
         {
-            WinMDExp t = new WinMDExp();
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback);
 
             t.WinMDModule = "Foo.dll";
             t.OutputWindowsMetadataFile = "Foo.winmd";
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ArgumentsAreUnquoted()
         {
-            WinMDExp t = new WinMDExp
+            WinMDExp t = new WinMDExp(TaskEnvironment.Fallback)
             {
                 AssemblyUnificationPolicy = "sp ace",
                 InputDocumentationFile = "sp ace",

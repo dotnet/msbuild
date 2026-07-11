@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, destination);
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(source.Path),
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
                 // Question new task, should be false.
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 _mockEngine.Log = string.Empty;
 
                 // Run the task.
-                Unzip unzip2 = new Unzip
+                Unzip unzip2 = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), customMessage: _mockEngine.Log);
 
                 // Question ran task, should be true
-                Unzip unzip3 = new Unzip
+                Unzip unzip3 = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [WindowsOnlyFact(additionalMessage: "Can't figure out how to make CreateDirectory throw on non-Windows.")]
         public void LogsErrorIfDirectoryCannotBeCreated()
         {
-            Unzip unzip = new Unzip
+            Unzip unzip = new Unzip(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 DestinationFolder = new TaskItem(String.Empty),
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, destination);
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(source.Path),
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientTestFile file = testEnvironment.CreateFile("foo.txt", "foo");
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(folder.Path),
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: false);
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(folder.Path),
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -298,7 +298,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -332,7 +332,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -366,7 +366,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -395,7 +395,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -424,7 +424,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -453,7 +453,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
 
-                Unzip unzip = new Unzip
+                Unzip unzip = new Unzip(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFolder = new TaskItem(destination.Path),
@@ -488,7 +488,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
             TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
-            Unzip unzip = new Unzip
+            Unzip unzip = new Unzip(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 DestinationFolder = new TaskItem(destination.Path),

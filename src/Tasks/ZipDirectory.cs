@@ -14,18 +14,10 @@ namespace Microsoft.Build.Tasks
     public sealed class ZipDirectory : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ZipDirectory"/> class.
-        /// </summary>
-        public ZipDirectory()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ZipDirectory"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public ZipDirectory(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public ZipDirectory(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         public const string CompressionLevelOptimal = "Optimal";
         public const string CompressionLevelFastest = "Fastest";

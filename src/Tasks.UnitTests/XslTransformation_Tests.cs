@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             {
                 for (int xsi = 0; xsi < xslInputs.Count; xsi++)
                 {
-                    XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                    XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                     t.BuildEngine = engine;
                     t.OutputPaths = outputPaths;
                     XslTransformation.XmlInput.XmlModes xmlKey = xmlInputs[xmi].Key;
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests
             // test Xsl missing.
             for (int xmi = 0; xmi < xmlInputs.Count; xmi++)
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
 
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests
             // Test Xml missing.
             for (int xsi = 0; xsi < xslInputs.Count; xsi++)
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
 
@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test both missing.
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test too many Xml.
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -332,7 +332,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test too many Xsl.
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test Out
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XmlContent = _xmlDocument;
                 t.XslContent = _xslDocument;
@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test Correct Xslt Parameters
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -451,7 +451,7 @@ namespace Microsoft.Build.UnitTests
                         }
                     }
 
-                    XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                    XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                     t.BuildEngine = engine;
                     t.OutputPaths = outputPaths;
                     t.XmlContent = _xmlDocument;
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests
 
             // load empty parameters
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlInputPaths = xmlPaths;
@@ -523,7 +523,7 @@ namespace Microsoft.Build.UnitTests
 
             // with type specified.
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -552,7 +552,7 @@ namespace Microsoft.Build.UnitTests
 
             // without type specified.
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -579,7 +579,7 @@ namespace Microsoft.Build.UnitTests
 
             // load bad xslt
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests
 
                 // load missing xml
                 {
-                    XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                    XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                     t.BuildEngine = engine;
                     t.XmlInputPaths = xmlPaths;
                     t.XslInputPath = xslPath;
@@ -644,7 +644,7 @@ namespace Microsoft.Build.UnitTests
 
             // load missing xml
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 xmlPaths[0].ItemSpec += "bad";
@@ -673,7 +673,7 @@ namespace Microsoft.Build.UnitTests
 
             // load missing xsl
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlInputPaths = xmlPaths;
@@ -702,7 +702,7 @@ namespace Microsoft.Build.UnitTests
 
             // missing xsltCompiledDll
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -729,7 +729,7 @@ namespace Microsoft.Build.UnitTests
 
             // load bad xml on parameters
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -762,7 +762,7 @@ namespace Microsoft.Build.UnitTests
 
             // load bad output
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -797,7 +797,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test with files
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XmlInputPaths = xmlPaths;
                 t.XslInputPath = xslPath;
@@ -828,7 +828,7 @@ namespace Microsoft.Build.UnitTests
 
             // load error xslDocument
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -868,7 +868,7 @@ namespace Microsoft.Build.UnitTests
 
             // load transformed xsl and assert it is well formatted
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
@@ -913,7 +913,7 @@ namespace Microsoft.Build.UnitTests
 
             CompileDoubleType(doubleTypePath);
 
-            XslTransformation t = new()
+            XslTransformation t = new(TaskEnvironment.Fallback)
             {
                 BuildEngine = engine,
                 OutputPaths = outputPaths,
@@ -961,7 +961,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem[] outputMultiPaths = new TaskItem[] { new TaskItem(outputPaths[0].ItemSpec + ".1.xml"),
                 new TaskItem(outputPaths[0].ItemSpec + ".2.xml"), new TaskItem(outputPaths[0].ItemSpec + ".3.xml"), new TaskItem(outputPaths[0].ItemSpec + ".4.xml") };
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlMultiPaths;
@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem(outputPaths[0].ItemSpec + ".5.xml") };
             // Short version.
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlMultiPaths;
@@ -1024,7 +1024,7 @@ namespace Microsoft.Build.UnitTests
 
             // Long version
             {
-                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlMultiPaths;
@@ -1070,7 +1070,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             // Validate that execution passes when UseTrustedSettings is true
-            XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XslTransformation t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.BuildEngine = engine;
             t.OutputPaths = outputPaths;
             t.XmlInputPaths = new TaskItem[] { myXmlPath1 };
@@ -1080,7 +1080,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(t.Execute()); // "Test should have passed and allowed the use of the document() function within the xslt file"
 
             // Validate that execution fails when UseTrustedSettings is false
-            t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            t = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.BuildEngine = engine;
             t.OutputPaths = outputPaths;
             t.XmlInputPaths = new TaskItem[] { myXmlPath1 };
@@ -1311,7 +1311,7 @@ namespace Microsoft.Build.UnitTests
                 outputPaths[2] = new TaskItem(outputPath3);
 
                 // Test that transformation fails when processing second item with null ItemSpec
-                XslTransformation t2 = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XslTransformation t2 = new XslTransformation(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t2.BuildEngine = engine;
                 t2.XmlInputPaths = xmlPathsWithNull;
                 t2.XslInputPath = new TaskItem(xslPath);

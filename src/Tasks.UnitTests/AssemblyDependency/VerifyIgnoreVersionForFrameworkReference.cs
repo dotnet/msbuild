@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "<File AssemblyName='DependsOn9' Version='9.0.0.0' PublicKeyToken='b17a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                                   "</FileList >";
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.IgnoreVersionForFrameworkReferences = true;
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                            "<File AssemblyName='DependsOn9' Version='9.0.0.0' PublicKeyToken='b17a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                            "</FileList >";
 
-            t = new ResolveAssemblyReference();
+            t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "<File AssemblyName='DependsOn9' Version='9.0.0.0' PublicKeyToken='b17a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                                   "</FileList >";
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                            "<File AssemblyName='DependsOn9' Version='9.0.0.0' PublicKeyToken='b17a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                            "</FileList >";
 
-            t = new ResolveAssemblyReference();
+            t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "<File AssemblyName='DependsOn9' Version='2.0.0.0' PublicKeyToken='b17a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                                   "</FileList >";
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "<File AssemblyName='DependsOn9' Version='2.0.0.0' PublicKeyToken='b17a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='true' />" +
                                   "</FileList >";
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 

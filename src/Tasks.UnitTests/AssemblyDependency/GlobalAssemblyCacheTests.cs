@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SystemRuntimeDepends_No_Build()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SystemRuntimeDepends_Yes()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -404,7 +404,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SystemRuntimeDepends_Yes_Indirect()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -470,7 +470,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SystemRuntimeDepends_Yes_Indirect_ExternallyResolved()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -534,7 +534,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void NETStandardDepends_Yes()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -598,7 +598,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void NETStandardDepends_Yes_Indirect()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -663,7 +663,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void NETStandardDepends_Yes_Indirect_ExternallyResolved()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -728,7 +728,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void DependsOn_NETStandard_and_SystemRuntime()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -796,7 +796,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void DependsOn_NETStandard_and_SystemRuntime_ExternallyResolved()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 

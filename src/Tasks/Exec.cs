@@ -24,20 +24,16 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class Exec : ToolTaskExtension
     {
+        #region Constructors
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Exec"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
         public Exec(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
-
-        #region Constructors
-
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public Exec()
         {
+            TaskEnvironment = taskEnvironment;
+
             Command = string.Empty;
 
             // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding

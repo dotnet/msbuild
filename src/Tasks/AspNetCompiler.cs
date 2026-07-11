@@ -19,18 +19,10 @@ namespace Microsoft.Build.Tasks
     public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AspNetCompiler"/> class.
-        /// </summary>
-        public AspNetCompiler()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AspNetCompiler"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public AspNetCompiler(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public AspNetCompiler(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         /*
             C:\WINDOWS\Microsoft.NET\Framework\v2.0.x86dbg>aspnet_compiler /?

@@ -71,6 +71,30 @@ internal static class TaskClassRegistry
     }
 
     /// <summary>
+    /// Registers a task type under the given name with a factory that receives the <see cref="TaskEnvironment"/>
+    /// the engine is running the task with, so a task without a public parameterless constructor can still be
+    /// registered trim-safely. The <c>[DynamicallyAccessedMembers]</c> roots the type's public constructors and
+    /// properties (so reflective parameter binding stays trim-safe), while the supplied factory performs the
+    /// reflection-free construction.
+    /// </summary>
+    /// <typeparam name="T">The task type to register.</typeparam>
+    /// <param name="taskName">The name a target uses to invoke the task (the <c>TaskName</c> of a <c>&lt;UsingTask&gt;</c>).</param>
+    /// <param name="factory">A delegate that creates a new instance of the task given the current <see cref="TaskEnvironment"/>.</param>
+    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(string taskName, Func<TaskEnvironment, ITask> factory)
+        where T : ITask
+    {
+        ArgumentException.ThrowIfNullOrEmpty(taskName);
+        ArgumentNullException.ThrowIfNull(factory);
+
+        // typeof(T) carries T's [DynamicallyAccessedMembers] here, so building the LoadedType (a GetProperties
+        // walk) is trim-safe and is done once, eagerly, at registration. Construction uses the supplied factory,
+        // so no public parameterless constructor is required.
+        LoadedType loadedType = CreateLoadedType(typeof(T));
+        s_tasksByName[taskName] = new TaskClassRegistration(factory, loadedType);
+        s_hasRegistrations = true;
+    }
+
+    /// <summary>
     /// Registers a task under the given name with an explicit factory, so construction is fully
     /// reflection-free (the host supplies the constructor).
     /// </summary>

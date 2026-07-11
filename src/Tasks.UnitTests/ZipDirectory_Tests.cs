@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 string zipFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.zip");
 
-                ZipDirectory zipDirectory = new ZipDirectory
+                ZipDirectory zipDirectory = new ZipDirectory(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     CompressionLevel = compressionLevel,
@@ -105,7 +106,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientTestFile file = testEnvironment.CreateFile(testEnvironment.DefaultTestDirectory, "test.zip", contents: "test");
 
-                ZipDirectory zipDirectory = new ZipDirectory
+                ZipDirectory zipDirectory = new ZipDirectory(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFile = new TaskItem(file.Path),
@@ -144,7 +145,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 TransientTestFile file = testEnvironment.CreateFile("foo.zip", "foo");
 
-                ZipDirectory zipDirectory = new ZipDirectory
+                ZipDirectory zipDirectory = new ZipDirectory(TaskEnvironment.Fallback)
                 {
                     BuildEngine = _mockEngine,
                     DestinationFile = new TaskItem(file.Path),
@@ -161,7 +162,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void LogsErrorIfDirectoryDoesNotExist()
         {
-            ZipDirectory zipDirectory = new ZipDirectory
+            ZipDirectory zipDirectory = new ZipDirectory(TaskEnvironment.Fallback)
             {
                 BuildEngine = _mockEngine,
                 SourceDirectory = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))),

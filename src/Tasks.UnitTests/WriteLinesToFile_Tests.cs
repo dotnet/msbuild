@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void InvalidEncoding()
         {
-            var a = new WriteLinesToFile
+            var a = new WriteLinesToFile(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             try
             {
                 // Write default encoding: UTF8
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_output),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 };
                 Assert.True(a.Execute());
 
-                var r = new ReadLinesFromFile
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback)
                 {
                     File = new TaskItem(file),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.Delete(file);
 
                 // Write ANSI .. that won't work!
-                a = new WriteLinesToFile
+                a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_output),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Assert.True(a.Execute());
 
                 // Read the line from the file.
-                r = new ReadLinesFromFile
+                r = new ReadLinesFromFile(TaskEnvironment.Fallback)
                 {
                     File = new TaskItem(file),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
@@ -112,7 +112,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             try
             {
                 // Write an initial file.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 a.Execute().ShouldBeTrue();
 
                 // Verify contents
-                var r = new ReadLinesFromFile { File = new TaskItem(file), TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback) { File = new TaskItem(file), TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 r.Execute().ShouldBeTrue();
                 r.Lines[0].ItemSpec.ShouldBe("File contents1");
 
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.SetLastWriteTime(file, writeTime);
 
                 // Write the same contents to the file, timestamps should match.
-                var a2 = new WriteLinesToFile
+                var a2 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
 
                 // Write different contents to the file, last write time should differ.
-                var a3 = new WriteLinesToFile
+                var a3 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -179,7 +179,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             try
             {
                 // Initial write.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.SetLastWriteTime(file, writeTime);
 
                 // Same contents: write is skipped, timestamp preserved.
-                var a2 = new WriteLinesToFile
+                var a2 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -209,7 +209,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
 
                 // Different contents: file is rewritten.
-                var a3 = new WriteLinesToFile
+                var a3 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             string file = testEnv.ExpectFile().Path;
 
-            WriteLinesToFile task = new()
+            WriteLinesToFile task = new(TaskEnvironment.Fallback)
             {
                 BuildEngine = engine,
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -261,7 +261,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             try
             {
                 // Write an initial file.
-                var a = new WriteLinesToFile
+                var a = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 a.Execute().ShouldBeTrue();
 
                 // Verify contents
-                var r = new ReadLinesFromFile { File = new TaskItem(file), TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                var r = new ReadLinesFromFile(TaskEnvironment.Fallback) { File = new TaskItem(file), TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 r.Execute().ShouldBeTrue();
                 r.Lines[0].ItemSpec.ShouldBe("File contents1");
 
@@ -283,7 +283,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.SetLastWriteTime(file, writeTime);
 
                 // Write the same contents to the file, timestamps should match.
-                var a2 = new WriteLinesToFile
+                var a2 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -297,7 +297,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
 
                 // Write different contents to the file, last write time should differ.
-                var a3 = new WriteLinesToFile
+                var a3 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -343,7 +343,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             void TestWriteLines(string fileExists, string fileNotExists, bool Overwrite, bool WriteOnlyWhenDifferent)
             {
-                var test1 = new WriteLinesToFile
+                var test1 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = Overwrite,
                     BuildEngine = new MockEngine(_output),
@@ -355,7 +355,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 };
                 test1.Execute().ShouldBeTrue();
 
-                var test2 = new WriteLinesToFile
+                var test2 = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = Overwrite,
                     BuildEngine = new MockEngine(_output),
@@ -380,7 +380,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var directory = testEnv.CreateFolder(folderPath: null, createFolder: false);
                 var file = Path.Combine(directory.Path, $"{Guid.NewGuid().ToString("N")}.tmp");
 
-                var WriteLinesToFile = new WriteLinesToFile
+                var WriteLinesToFile = new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_output),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
@@ -411,7 +411,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.Exists(file.Path).ShouldBeTrue();
                 File.ReadAllText(file.Path).ShouldNotBeEmpty();
 
-                new WriteLinesToFile
+                new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 File.Exists(file.Path).ShouldBeFalse();
 
-                new WriteLinesToFile
+                new WriteLinesToFile(TaskEnvironment.Fallback)
                 {
                     Overwrite = true,
                     BuildEngine = new MockEngine(_output),

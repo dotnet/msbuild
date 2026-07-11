@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictBetweenNonCopyLocalDependencies()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictBetweenCopyLocalDependencies()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictBetweenCopyLocalDependenciesWithAutoUnify()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictWithBackVersionPrimary()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictWithBackVersionPrimaryWithAutoUnify()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -271,7 +271,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress313747_FalseSuggestedRedirectsWhenAssembliesDifferOnlyByPkt()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "netcore-linux-failing")]
         public void Regress442570_MissingBackVersionShouldWarn()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedirectsAreSuggestedInExternallyResolvedGraph()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "netcore-linux-failing")]
         public void Regress387218_UnificationRequiresStrongName()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -432,7 +432,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "netcore-linux-failing")]
         public void Regress390219_UnificationRequiresSameCulture()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;

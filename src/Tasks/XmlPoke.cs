@@ -22,18 +22,10 @@ namespace Microsoft.Build.Tasks
     public class XmlPoke : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlPoke"/> class.
-        /// </summary>
-        public XmlPoke()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="XmlPoke"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public XmlPoke(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public XmlPoke(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         #region Properties
 

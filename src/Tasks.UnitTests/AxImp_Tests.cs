@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 
 using Xunit;
@@ -17,7 +18,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void ActiveXControlName()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             string testParameterValue = "AxInterop.Foo.dll";
 
             Assert.Null(t.ActiveXControlName); // "ActiveXControlName should be null by default"
@@ -33,7 +34,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void ActiveXControlNameWithSpaces()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             string testParameterValue = @"c:\Program Files\AxInterop.Foo.dll";
 
             Assert.Null(t.ActiveXControlName); // "ActiveXControlName should be null by default"
@@ -49,7 +50,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void GenerateSource()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
 
             Assert.False(t.GenerateSource); // "GenerateSource should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -71,7 +72,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void NoLogo()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
 
             Assert.False(t.NoLogo); // "NoLogo should be false by default"
             CommandLine.ValidateNoParameterStartsWith(t, @"/nologo", false /* no response file */);
@@ -87,7 +88,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void OutputAssembly()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             string testParameterValue = "AxInterop.Foo.dll";
 
             Assert.Null(t.OutputAssembly); // "OutputAssembly should be null by default"
@@ -110,7 +111,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void OutputAssemblyWithSpaces()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             string testParameterValue = @"c:\Program Files\AxInterop.Foo.dll";
 
             Assert.Null(t.OutputAssembly); // "OutputAssembly should be null by default"
@@ -133,7 +134,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void RuntimeCallableWrapper()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             string testParameterValue = "Interop.Foo.dll";
 
             Assert.Null(t.RuntimeCallableWrapperAssembly); // "RuntimeCallableWrapper should be null by default"
@@ -156,7 +157,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void RuntimeCallableWrapperWithSpaces()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             string testParameterValue = @"C:\Program Files\Microsoft Visual Studio 10.0\Interop.Foo.dll";
 
             Assert.Null(t.RuntimeCallableWrapperAssembly); // "RuntimeCallableWrapper should be null by default"
@@ -179,7 +180,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void Silent()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
 
             Assert.False(t.Silent); // "Silent should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -201,7 +202,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void Verbose()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
 
             Assert.False(t.Verbose); // "Verbose should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -223,7 +224,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void TaskFailsWithNoInputs()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
 
             Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxImp.NoInputFileSpecified");
         }

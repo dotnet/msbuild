@@ -19,18 +19,10 @@ namespace Microsoft.Build.Tasks
     public class LC : ToolTaskExtension
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LC"/> class.
-        /// </summary>
-        public LC()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="LC"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public LC(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public LC(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         #region Input/output properties
 

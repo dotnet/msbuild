@@ -46,18 +46,10 @@ namespace Microsoft.Build.Tasks
         internal class TlbImp : AxTlbBaseTask
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="TlbImp"/> class.
-            /// </summary>
-            public TlbImp()
-            {
-            }
-
-            /// <summary>
             /// Initializes a new instance of the <see cref="TlbImp"/> class using the specified <see cref="TaskEnvironment"/>.
             /// </summary>
             /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-            public TlbImp(TaskEnvironment taskEnvironment)
-                : this() => TaskEnvironment = taskEnvironment;
+            public TlbImp(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
             #region Properties
             /*

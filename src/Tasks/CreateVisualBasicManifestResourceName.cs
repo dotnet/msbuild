@@ -19,18 +19,10 @@ namespace Microsoft.Build.Tasks
     public class CreateVisualBasicManifestResourceName : CreateManifestResourceName
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CreateVisualBasicManifestResourceName"/> class.
-        /// </summary>
-        public CreateVisualBasicManifestResourceName()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CreateVisualBasicManifestResourceName"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
         /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
-        public CreateVisualBasicManifestResourceName(TaskEnvironment taskEnvironment)
-            : this() => TaskEnvironment = taskEnvironment;
+        public CreateVisualBasicManifestResourceName(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
 
         protected override string SourceFileExtension => ".vb";
 

@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks
             // Generate wrapper out-of-proc using aximp.exe from the target framework.  MUST
             // HAVE SET SDKTOOLSPATH TO THE TARGET SDK TO WORK
 
-            var axImp = new ResolveComReference.AxImp();
+            var axImp = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
 
             if (ReferenceInfo != null)
             {

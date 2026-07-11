@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InputFiles()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             ITaskItem[] singleTestFile = { new TaskItem("foo.resx") };
             ITaskItem[] singleOutput = { new TaskItem("foo.resources") };
             ITaskItem[] multipleTestFiles = { new TaskItem("hello.resx"), new TaskItem("world.resx"), new TaskItem("!.resx") };
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OutputFiles()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
 
             ITaskItem[] differentLengthInput = { new TaskItem("hello.resx") };
             ITaskItem[] differentLengthOutput = { new TaskItem("world.resources"), new TaskItem("!.resources") };
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
 
             // If only OutputFiles is set, then the task should return -- as far as
             // it's concerned, no work needs to be done.
-            t = new ResGen(); // zero out the log
+            t = new ResGen(TaskEnvironment.Fallback); // zero out the log
             t.InputFiles = null;
             t.OutputFiles = differentLengthOutput;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version45));
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void PublicClass()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
 
             t.InputFiles = throwawayInput;
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void References()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
             ITaskItem a = new TaskItem();
             ITaskItem b = new TaskItem();
@@ -319,7 +319,7 @@ namespace Microsoft.Build.UnitTests
 
         private ResGen CreateCommandLineResGen()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
 
             // setting these values should ensure that no response file is used
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SdkToolsPath()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             string badParameterValue = @"C:\Program Files\Microsoft Visual Studio 10.0\My Fake SDK Path";
             string goodParameterValue = Path.GetTempPath();
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
@@ -374,7 +374,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void StronglyTypedParameters()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
 
             string strLanguage = "c#";
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToolPath()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             string badParameterValue = @"C:\Program Files\Microsoft Visual Studio 10.0\My Fake SDK Path";
             string goodParameterValue = Path.GetTempPath();
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
@@ -466,7 +466,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void UseSourcePath()
         {
-            ResGen t = new ResGen();
+            ResGen t = new ResGen(TaskEnvironment.Fallback);
             ITaskItem[] throwawayInput = { new TaskItem("hello.resx") };
 
             t.InputFiles = throwawayInput;
