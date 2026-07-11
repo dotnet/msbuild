@@ -4,13 +4,13 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
+[TestClass]
 public class Message_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void Handshake_RoundTrips()
     {
         Guid connectionId = Guid.NewGuid();
@@ -22,7 +22,7 @@ public class Message_Tests
         result.Capabilities.ShouldBe(["priority", "dynamic-grants"]);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Handshake_EmptyCapabilities_RoundTrips()
     {
         Guid connectionId = Guid.NewGuid();
@@ -33,7 +33,7 @@ public class Message_Tests
         result.Capabilities.ShouldBeEmpty();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void HandshakeResponse_RoundTrips()
     {
         ServerMessage message = WriteAndReadServerMessage(new ServerHandshakeMessage(capabilities: ["priority"]));
@@ -42,7 +42,7 @@ public class Message_Tests
         result.Capabilities.ShouldBe(["priority"]);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void HandshakeResponse_EmptyCapabilities_RoundTrips()
     {
         ServerMessage message = WriteAndReadServerMessage(new ServerHandshakeMessage([]));
@@ -51,49 +51,49 @@ public class Message_Tests
         result.Capabilities.ShouldBeEmpty();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RequestNodes_RoundTrips()
     {
         ClientMessage message = WriteAndReadClientMessage(new RequestNodesMessage(requestedNodes: 16));
         message.ShouldBe(new RequestNodesMessage(requestedNodes: 16));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ReleaseNodes_RoundTrips()
     {
         ClientMessage message = WriteAndReadClientMessage(ReleaseNodesMessage.Instance);
         message.ShouldBe(ReleaseNodesMessage.Instance);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Heartbeat_RoundTrips()
     {
         ClientMessage message = WriteAndReadClientMessage(HeartbeatMessage.Instance);
         message.ShouldBe(HeartbeatMessage.Instance);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NodeGrant_RoundTrips()
     {
         ServerMessage message = WriteAndReadServerMessage(new NodeGrantMessage(grantedNodes: 4));
         message.ShouldBe(new NodeGrantMessage(4));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Wait_RoundTrips()
     {
         ServerMessage message = WriteAndReadServerMessage(WaitMessage.Instance);
         message.ShouldBe(WaitMessage.Instance);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Error_RoundTrips()
     {
         ServerMessage message = WriteAndReadServerMessage(new ErrorMessage("something went wrong"));
         message.ShouldBe(new ErrorMessage("something went wrong"));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void MultipleClientMessages_ReadSequentially()
     {
         using MemoryStream stream = new();
@@ -113,7 +113,7 @@ public class Message_Tests
         reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void UnknownClientMessageType_Throws()
     {
         using MemoryStream stream = new();
@@ -127,7 +127,7 @@ public class Message_Tests
         Should.Throw<InternalErrorException>(() => reader.ReadClientMessage());
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void UnknownServerMessageType_Throws()
     {
         using MemoryStream stream = new();

@@ -5,14 +5,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 using Constants = Microsoft.Build.Framework.Coordinator.Constants;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
+[TestClass]
+public class CoordinatorIntegration_Tests(TestContext outputHelper)
 {
-    [Fact]
+    [MSBuildTestMethod]
     public async Task ParallelBuilds_BothSucceedWithCoordinator()
     {
         string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
@@ -72,7 +72,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput2.ShouldContain("Hello from project2.proj");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task SingleBuild_CoordinatorCapsMaxNodeCount()
     {
         string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";

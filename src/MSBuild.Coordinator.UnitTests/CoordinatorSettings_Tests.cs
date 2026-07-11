@@ -5,14 +5,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using Constants = Microsoft.Build.Framework.Coordinator.Constants;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorSettings_Tests(ITestOutputHelper output)
+[TestClass]
+public class CoordinatorSettings_Tests(TestContext output)
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void CoordinatorSettings_CustomValues_AreUsed()
     {
         CoordinatorSettings settings = CoordinatorSettings.Default with
@@ -35,21 +35,21 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.ProcessId.ShouldBe(43210);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void CoordinatorSettings_FromEnvironment_DefaultPipeNameContainsBase()
     {
         string pipeName = CoordinatorSettings.FromEnvironment().PipeName;
         pipeName.ShouldContain(CoordinatorSettings.PipeNameBase);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void CoordinatorSettings_FromEnvironment_DefaultPipeNameContainsUserName()
     {
         string pipeName = CoordinatorSettings.FromEnvironment().PipeName;
         pipeName.ShouldContain(Environment.UserName);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void CoordinatorSettings_FromEnvironment_UsesEnvironmentOverrides()
     {
         using TestEnvironment env = TestEnvironment.Create(output);

@@ -7,13 +7,13 @@ using System.Diagnostics;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
+[TestClass]
+public class CoordinatorTelemetry_Tests(TestContext outputHelper)
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void RecordGrantIssued_EmitsActivityWithExpectedTags()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);
@@ -51,7 +51,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         activity.GetTagItem("VS.MSBuild.AllocatedNodes").ShouldBe(12);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RecordGrantDeferred_EmitsActivityWithExpectedTags()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);
@@ -84,7 +84,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RecordGrantReleased_EmitsActivityWithExpectedTags()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);
