@@ -31,8 +31,8 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.10
 - [Restore passes ExcludeRestorePackageImports=true as a global property so NuGet's restore no longer triggers a second evaluation of every project.](https://github.com/dotnet/msbuild/issues/14273)
-- [`-getProperty`/`-getItem` (without a target) stop evaluation after the pass that produces the requested data instead of running a full evaluation, avoiding later passes such as target registration.](https://github.com/dotnet/msbuild/pull/14290)
-- [Additional consumers use partial (stop-after-pass) evaluation: `-preprocess` and project schema validation stop after the Properties pass, and the solution generator's web-deployment (`.wdproj`) dependency scan stops after the Items pass.](https://github.com/dotnet/msbuild/pull/14290)
+- [`-getProperty`/`-getItem` (without a target) stop evaluation after the pass that produces the requested data instead of running a full evaluation, avoiding later passes such as target registration.](https://github.com/dotnet/msbuild/pull/14296)
+- [Additional consumers use partial (stop-after-pass) evaluation: `-preprocess` and project schema validation stop after the Properties pass, and the solution generator's web-deployment (`.wdproj`) dependency scan stops after the Items pass.](https://github.com/dotnet/msbuild/pull/14326)
 
 ### 18.9
 - [GenerateResource: typed ResX data/metadata entries in Mark-of-the-Web files are now treated as untrusted and blocked with MSB3821; unblock the file (or set MSBUILDDISABLEFEATURESFROMVERSION=18.9) to restore prior behavior. ResXFileRef entries are always blocked regardless of this wave.](https://github.com/dotnet/msbuild/pull/14015)

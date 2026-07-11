@@ -907,7 +907,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("18.10", false)]  // wave disabled: full evaluation hits the failing targets pass
         public void PreprocessUsesPartialEvaluation(string disableFeaturesFromVersion, bool expectedSuccess)
         {
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             if (disableFeaturesFromVersion is not null)
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFeaturesFromVersion);
@@ -924,7 +924,7 @@ namespace Microsoft.Build.UnitTests
   <Target Name=""Bad"" BeforeTargets=""$([System.Int32]::Parse('notanumber'))"" />
 </Project>
 ");
-            string results = RunnerUtilities.ExecMSBuild($" {project.Path} -preprocess", out bool success);
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} -preprocess", out bool success, _output);
             success.ShouldBe(expectedSuccess, results);
             if (expectedSuccess)
             {
