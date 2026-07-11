@@ -1,12 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="MSTest.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
 
-    <IsPackable>false</IsPackable>
-
     <AssemblyName>Microsoft.NET.StringTools.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
+    <IsUnitTestProject>true</IsUnitTestProject>
     <IsLibraryTestProject>true</IsLibraryTestProject>
   </PropertyGroup>
 
@@ -23,9 +22,6 @@
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
-    </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>

@@ -4,13 +4,13 @@
 using System;
 using System.IO;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
+    [TestClass]
     public class BuildCanceledEventArgs_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationDeserializationTest()
         {
             var message = "message";

@@ -3,12 +3,12 @@
 
 using System.IO;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Framework.UnitTests
 {
+    [TestClass]
     public class FileClassifierTests
     {
         private sealed class FileClassifierUnderTest : FileClassifier
@@ -17,13 +17,13 @@ namespace Microsoft.Build.Framework.UnitTests
                 => base.RegisterImmutableDirectory(directory, false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Shared_ReturnsInstance()
         {
             FileClassifier.Shared.ShouldNotBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsNonModifiable_EvaluatesModifiability()
         {
             FileClassifierUnderTest classifier = new();
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Framework.UnitTests
             classifier.IsNonModifiable(Path.Combine(volume, "Test3", "File.ext")).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsNonModifiable_DuplicateNugetRegistry_EvaluatesModifiability()
         {
             FileClassifierUnderTest classifier = new();
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Framework.UnitTests
             classifier.IsNonModifiable(Path.Combine(volume, "Test3", "File.ext")).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsNonModifiable_RespectsOSCaseSensitivity()
         {
             FileClassifierUnderTest classifier = new();
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Framework.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsNonModifiable_DoesntThrowWhenPackageFoldersAreNotRegistered()
         {
             FileClassifierUnderTest classifier = new();

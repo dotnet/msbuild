@@ -12,7 +12,7 @@
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(UsingMSTestSdk)' != 'true'">
     <TestRunnerName>XUnitV3</TestRunnerName>
 
     <!-- Pin xunit.v3 / MTP up only when Arcade's default sits below our pin. -->
@@ -21,11 +21,23 @@
 
     <XUnitV3Version Condition="'$(XUnitV3Version)' == '' or $([MSBuild]::VersionLessThan($(XUnitV3Version), $(_MSBuildXUnitV3Pin)))">$(_MSBuildXUnitV3Pin)</XUnitV3Version>
     <MicrosoftTestingPlatformVersion Condition="'$(MicrosoftTestingPlatformVersion)' == '' or $([MSBuild]::VersionLessThan($(MicrosoftTestingPlatformVersion), $(_MSBuildMTPPin)))">$(_MSBuildMTPPin)</MicrosoftTestingPlatformVersion>
-    <OutputType Condition="$(MSBuildProjectName.EndsWith('.UnitTests')) or $(MSBuildProjectName.EndsWith('.Tests'))">Exe</OutputType>
 
     <!-- xUnit1051: Calls to methods which accept CancellationToken should use TestContext.Current.CancellationToken to allow test cancellation to be more responsive. -->
-    <!-- Consider fixing this later. -->
+    <!-- Consider fixing this later for projects that have not yet migrated to MSTest. -->
     <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UsingMSTestSdk)' == 'true'">
+    <UsingToolXUnit>false</UsingToolXUnit>
+    <MSTestParallelizeScope>None</MSTestParallelizeScope>
+    <MicrosoftTestingPlatformVersion>2.3.1</MicrosoftTestingPlatformVersion>
+    <MSTestVersion>4.3.0</MSTestVersion>
+    <!-- Custom test method attributes intentionally preserve existing xUnit-style constructors during incremental migration. -->
+    <NoWarn>$(NoWarn);MSTEST0057</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputType Condition="$(MSBuildProjectName.EndsWith('.UnitTests')) or $(MSBuildProjectName.EndsWith('.Tests'))">Exe</OutputType>
 
     <FullFrameworkTFM>net472</FullFrameworkTFM>
 

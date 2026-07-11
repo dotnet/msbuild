@@ -3,27 +3,27 @@
 
 using Shouldly;
 
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
+    [TestClass]
     public class OperatingSystem_Tests
     {
 #if !NET5_0_OR_GREATER
         [WindowsFullFrameworkOnlyTheory]
-        [InlineData("windows", true)]
-        [InlineData("linux", false)]
-        [InlineData("macOS", false)]
+        [DataRow("windows", true)]
+        [DataRow("linux", false)]
+        [DataRow("macOS", false)]
         public void IsOSPlatform(string platform, bool expected)
         {
             Microsoft.Build.Framework.OperatingSystem.IsOSPlatform(platform).ShouldBe(expected);
         }
 
         [WindowsFullFrameworkOnlyTheory]
-        [InlineData("windows", 4, true)]
-        [InlineData("windows", 999, false)]
-        [InlineData("linux", 0, false)]
-        [InlineData("macOS", 0, false)]
+        [DataRow("windows", 4, true)]
+        [DataRow("windows", 999, false)]
+        [DataRow("linux", 0, false)]
+        [DataRow("macOS", 0, false)]
         public void IsOSPlatformVersionAtLeast(string platform, int major, bool expected)
         {
             Microsoft.Build.Framework.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major).ShouldBe(expected);

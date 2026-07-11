@@ -8,7 +8,6 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -36,6 +35,7 @@ namespace Microsoft.Build.UnitTests
     ///  <c>FEATURE_VISUALSTUDIOSETUP</c> gate inside the helper means the non-net472 build
     ///  returns an empty list unconditionally and there is no native interop to exercise.
     /// </remarks>
+    [TestClass]
     public sealed class VisualStudioLocationHelper_Tests
     {
         [WindowsOnlyFact]
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VisualStudioInstance_Constructor_AssignsAllProperties()
         {
             // Trivial data-shape check on the value-type wrapper. The constructor is the only

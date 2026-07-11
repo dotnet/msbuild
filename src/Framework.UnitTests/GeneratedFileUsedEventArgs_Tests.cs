@@ -4,13 +4,13 @@
 using System;
 using System.IO;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
+    [TestClass]
     public class GeneratedFileUsedEventArgs_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationDeserializationTest()
         {
             string filePath = "path";

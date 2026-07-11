@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Experimental.BuildCheck;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
+    [TestClass]
     public class BuildCheckTracingEventArgs_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationDeserializationTest()
         {
             string key1 = "AA";

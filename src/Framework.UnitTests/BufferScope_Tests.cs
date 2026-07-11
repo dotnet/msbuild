@@ -4,23 +4,23 @@
 using System;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests for <see cref="BufferScope{T}"/>.
     /// </summary>
+    [TestClass]
     public class BufferScope_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void MinimumLengthConstructor_RentsAtLeastRequestedSize()
         {
             using BufferScope<char> buffer = new(16);
             buffer.Length.ShouldBeGreaterThanOrEqualTo(16);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InitialBufferConstructor_UsesProvidedSpan()
         {
             Span<char> initial = stackalloc char[8];
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBe(8);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InitialBufferWithMinimum_UsesInitialWhenLargeEnough()
         {
             Span<byte> initial = stackalloc byte[32];
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBe(32);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InitialBufferWithMinimum_RentsWhenInitialTooSmall()
         {
             Span<byte> initial = stackalloc byte[4];
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBeGreaterThanOrEqualTo(128);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Indexer_GetsAndSetsValues()
         {
             using BufferScope<int> buffer = new(4);
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
             buffer[2].ShouldBe(30);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Slice_ReturnsRequestedRange()
         {
             using BufferScope<char> buffer = new(10);
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
             slice[1].ShouldBe('c');
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ToString_ReturnsSpanContents()
         {
             Span<char> initial = stackalloc char[5];
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
             buffer.ToString().ShouldBe("hello");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnsureCapacity_NoOpWhenAlreadyLargeEnough()
         {
             using BufferScope<int> buffer = new(64);
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBe(originalLength);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnsureCapacity_GrowsWhenNeeded()
         {
             Span<byte> initial = stackalloc byte[4];
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBeGreaterThanOrEqualTo(128);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnsureCapacity_WithCopy_PreservesExistingContents()
         {
             Span<int> initial = stackalloc int[4];
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
             buffer[3].ShouldBe(4);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AsSpan_ReturnsUnderlyingSpan()
         {
             using BufferScope<int> buffer = new(8);
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
             span.Length.ShouldBe(buffer.Length);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImplicitSpanConversion_Works()
         {
             using BufferScope<int> buffer = new(8);
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
             span[0].ShouldBe(42);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImplicitReadOnlySpanConversion_Works()
         {
             using BufferScope<int> buffer = new(8);
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests
             span[0].ShouldBe(42);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetEnumerator_IteratesOverElements()
         {
             using BufferScope<int> buffer = new(stackalloc int[3]);
@@ -165,28 +165,28 @@ namespace Microsoft.Build.UnitTests
             sum.ShouldBe(6);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MinimumLengthConstructor_HandlesZeroLength()
         {
             using BufferScope<int> buffer = new(0);
             buffer.Length.ShouldBeGreaterThanOrEqualTo(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InitialBufferConstructor_HandlesEmptySpan()
         {
             using BufferScope<int> buffer = new([]);
             buffer.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InitialBufferWithMinimum_UsesInitialWhenEqualToMinimum()
         {
             using BufferScope<char> buffer = new(stackalloc char[10], 10);
             buffer.Length.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnsureCapacity_GrowWithoutCopy_ExpandsBuffer()
         {
             using BufferScope<int> buffer = new(10);
@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBeGreaterThanOrEqualTo(50);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnsureCapacity_MultipleGrows_PreservesCopiedData()
         {
             using BufferScope<int> buffer = new(5);
@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests
             buffer[1].ShouldBe(2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RangeSlicing_FullRange_ReturnsAllElements()
         {
             using BufferScope<char> buffer = new(stackalloc char[5]);
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
             slice[4].ShouldBe('E');
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RangeSlicing_PartialRange_ReturnsExpectedElements()
         {
             using BufferScope<int> buffer = new(stackalloc int[10]);
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests
             slice[5].ShouldBe(7);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RangeSlicing_EmptyRange_ReturnsEmptySpan()
         {
             using BufferScope<byte> buffer = new(10);
@@ -254,7 +254,7 @@ namespace Microsoft.Build.UnitTests
             slice.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Slice_CanReturnZeroLengthSpan()
         {
             using BufferScope<int> buffer = new(10);
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests
             slice.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetEnumerator_EmptyBuffer_YieldsNoElements()
         {
             using BufferScope<string> buffer = new([]);
@@ -277,14 +277,14 @@ namespace Microsoft.Build.UnitTests
             count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ToString_EmptyBuffer_ReturnsEmptyString()
         {
             using BufferScope<char> buffer = new([]);
             buffer.ToString().ShouldBe(string.Empty);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPinnableReference_CanModifyUnderlyingMemory()
         {
             using BufferScope<byte> buffer = new(stackalloc byte[10]);
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests
             buffer[0].ShouldBe((byte)100);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPinnableReference_EmptyBuffer_DoesNotThrow()
         {
             using BufferScope<int> buffer = new([]);
@@ -306,7 +306,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Fixed_PinsPooledBuffer()
         {
             using BufferScope<char> buffer = new(64);
@@ -324,7 +324,7 @@ namespace Microsoft.Build.UnitTests
             buffer[0].ShouldBe('Z');
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WorksWithReferenceTypes()
         {
             using BufferScope<string> buffer = new(5);
@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests
             buffer[1].ShouldBe("World");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WorksWithValueTypeStructs()
         {
             using BufferScope<DateTime> buffer = new(3);
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests
             buffer[1].ShouldBe(date2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CombinedOperations_GrowSliceAndEnumerate()
         {
             using BufferScope<int> buffer = new(stackalloc int[5], 10);
@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests
             sum.ShouldBe(15);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Dispose_ClearsSpan()
         {
             BufferScope<byte> buffer = new(16);
@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Dispose_SafeToCallMultipleTimes()
         {
             BufferScope<int> buffer = new(8);
@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests
             buffer.Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Fixed_PinsUnderlyingMemory()
         {
             using BufferScope<char> buffer = new(stackalloc char[8]);

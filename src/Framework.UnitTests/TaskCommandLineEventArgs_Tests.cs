@@ -4,7 +4,6 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 
@@ -13,12 +12,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the functioning of the TaskCommandLineEventArgs class.
     /// </summary>
+    [TestClass]
     public class TaskCommandLineEventArgs_Tests
     {
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EventArgsCtors()
         {
             TaskCommandLineEventArgs taskCommandLineEvent = new TaskCommandLineEventArgs2();

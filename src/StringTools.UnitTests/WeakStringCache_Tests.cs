@@ -11,7 +11,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 using Shouldly;
+#if NET35_UNITTEST
 using Xunit;
+#endif
 
 #if NET35_UNITTEST
 using StringToolsNet35::Microsoft.NET.StringTools;
@@ -21,6 +23,7 @@ using StringToolsNet35::Microsoft.NET.StringTools;
 
 namespace Microsoft.NET.StringTools.Tests
 {
+    [TestClass]
     public class WeakStringCache_Tests : IDisposable
     {
         /// <summary>
@@ -120,7 +123,11 @@ namespace Microsoft.NET.StringTools.Tests
         /// 2. The string is no longer retrievable after all strong GC refs are gone.
         /// 3. The cache completely removes the handle after calling Scavenge on it.
         /// </summary>
+#if NET35_UNITTEST
         [Fact]
+#else
+        [TestMethod]
+#endif
         public void RetainsStringUntilCollected()
         {
             // Add a string to the cache using a non-inlinable method to make sure it's not reachable from a GC root.
@@ -157,7 +164,11 @@ namespace Microsoft.NET.StringTools.Tests
         /// <summary>
         /// Same as RetainsStringUntilCollected but with multiple strings sharing the same hash code.
         /// </summary>
+#if NET35_UNITTEST
         [Fact]
+#else
+        [TestMethod]
+#endif
         public void RetainsLastStringWithGivenHashCode()
         {
             // Add 3 strings with the same hash code.

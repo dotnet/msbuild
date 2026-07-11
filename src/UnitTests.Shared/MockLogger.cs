@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
 #nullable disable
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
 
         private readonly LockType _lockObj = new LockType();  // Protects _fullLog, _testOutputHelper, lists, counts
         private StringBuilder _fullLog = new StringBuilder();
-        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly ITestOutputWriter _testOutputHelper;
         private readonly bool _profileEvaluation;
         private readonly bool _printEventsToStdout;
 
@@ -246,9 +246,9 @@ namespace Microsoft.Build.UnitTests
         {
         }
 
-        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true, LoggerVerbosity verbosity = LoggerVerbosity.Normal)
+        public MockLogger(object testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true, LoggerVerbosity verbosity = LoggerVerbosity.Normal)
         {
-            _testOutputHelper = testOutputHelper;
+            _testOutputHelper = TestOutputWriter.Create(testOutputHelper);
             _profileEvaluation = profileEvaluation;
             _printEventsToStdout = printEventsToStdout;
             Verbosity = verbosity;
@@ -511,9 +511,7 @@ namespace Microsoft.Build.UnitTests
                         PrintFullLog();
                     }
 
-                    Assert.True(
-                        false,
-                        $"Log was expected to contain '{contains[index]}', but did not. Full log:\n=======\n{FullLog}\n=======");
+                    Assert.Fail($"Log was expected to contain '{contains[index]}', but did not. Full log:\n=======\n{FullLog}\n=======");
                 }
             }
         }
@@ -545,12 +543,12 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Assert that no errors were logged
         /// </summary>
-        public void AssertNoErrors() => Assert.Equal(0, ErrorCount);
+        public void AssertNoErrors() => Assert.AreEqual(0, ErrorCount);
 
         /// <summary>
         /// Assert that no warnings were logged
         /// </summary>
-        public void AssertNoWarnings() => Assert.Equal(0, WarningCount);
+        public void AssertNoWarnings() => Assert.AreEqual(0, WarningCount);
 
         public void AssertMessageCount(string message, int expectedCount, bool regexSearch = true)
         {

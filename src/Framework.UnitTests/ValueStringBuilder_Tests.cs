@@ -4,16 +4,16 @@
 using System;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests for <see cref="ValueStringBuilder"/>.
     /// </summary>
+    [TestClass]
     public class ValueStringBuilder_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void Append_String_AppendsContent()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
             builder.Length.ShouldBe(5);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Append_NullString_DoesNothing()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe(string.Empty);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Append_SingleChar_TakesSingleCharFastPath()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("abc");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Append_CharCount_AppendsRepeatedChar()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("-----");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Append_ReadOnlySpan_AppendsContent()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("abcdef");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Append_GrowsBeyondInitialBuffer()
         {
             using ValueStringBuilder builder = new(stackalloc char[4]);
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests
             builder.Capacity.ShouldBeGreaterThanOrEqualTo(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public unsafe void Append_CharPointer_AppendsContent()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("abcdef");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Insert_Char_InsertsAtIndex()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("abccef");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Insert_String_InsertsAtIndex()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("abcdef");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Insert_NullString_DoesNothing()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("abc");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_ReplacesAllOccurrences()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("mxssxssxppx");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_SameChar_ReturnsImmediately()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("hello");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_EmptyBuilder_DoesNothing()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests
             builder.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Indexer_GetSet()
         {
             ValueStringBuilder builder = new(stackalloc char[16]);
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Length_Set_TruncatesContent()
         {
             ValueStringBuilder builder = new(stackalloc char[16]);
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Clear_ResetsLengthButKeepsCapacity()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe(string.Empty);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnsureCapacity_GrowsWhenNeeded()
         {
             using ValueStringBuilder builder = new(stackalloc char[4]);
@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests
             builder.Capacity.ShouldBeGreaterThanOrEqualTo(64);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AsSpan_Terminate_AppendsNullChar()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
             // The terminating '\0' is past Length, but writable from the underlying span.
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryCopyTo_SufficientDestination_ReturnsTrue()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests
             destination.Slice(0, written).ToString().ShouldBe("hello");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryCopyTo_TooSmall_ReturnsFalse()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests
             written.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AppendSpan_ReturnsWritableRegion()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests
             builder.ToString().ShouldBe("abcde");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Slice_ReturnsExpectedRange()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests
             builder.Slice(2).ToString().ShouldBe("cdef");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public unsafe void GetPinnableReference_NullTerminates()
         {
             ValueStringBuilder builder = new(stackalloc char[8]);
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ToStringAndDispose_ReturnsContentAndDisposesBuilder()
         {
 #pragma warning disable CA2000 // ToStringAndDispose is the explicit dispose path under test.
@@ -277,7 +277,7 @@ namespace Microsoft.Build.UnitTests
             builder.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImplicitOperator_ReadOnlySpan_ReturnsContent()
         {
             using ValueStringBuilder builder = new(stackalloc char[16]);

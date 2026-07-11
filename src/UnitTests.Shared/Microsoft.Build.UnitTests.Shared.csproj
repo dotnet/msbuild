@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="xunit.v3.assert" VersionOverride="$(XUnitV3Version)" />
     <PackageReference Include="xunit.v3.extensibility.core" VersionOverride="$(XUnitV3Version)" />
+    <PackageReference Include="MSTest.TestFramework" VersionOverride="4.3.0" PrivateAssets="all" />
     <PackageReference Include="Shouldly" />
   </ItemGroup>
   <ItemGroup>
@@ -20,6 +21,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="MSBuildTestMethodAttribute.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <Compile Include="..\Shared\IsExternalInit.cs" />

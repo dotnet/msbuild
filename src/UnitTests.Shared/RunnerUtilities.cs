@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// Invoke the currently running msbuild and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
-        public static string ExecMSBuild(string msbuildParameters, out bool successfulExit, ITestOutputHelper outputHelper = null)
+        public static string ExecMSBuild(string msbuildParameters, out bool successfulExit, object outputHelper = null)
         {
             return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, outputHelper: outputHelper);
         }
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
-        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, object outputHelper = null)
         {
             return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables());
         }
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests.Shared
         public static Task<(bool SuccessfulExit, string BuildOutput)> ExecBootstrappedMSBuildAsync(
             string msbuildParameters,
             bool shellExecute = false,
-            ITestOutputHelper outputHelper = null,
+            object outputHelper = null,
             bool attachProcessId = true,
             int timeoutMilliseconds = 30_000)
             => Task.Run(() =>
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.Shared
             string msbuildParameters,
             out bool successfulExit,
             bool shellExecute = false,
-            ITestOutputHelper outputHelper = null,
+            object outputHelper = null,
             bool attachProcessId = true,
             int timeoutMilliseconds = 30_000)
         {
@@ -132,11 +132,13 @@ namespace Microsoft.Build.UnitTests.Shared
             string parameters,
             out bool successfulExit,
             bool shellExecute = false,
-            ITestOutputHelper outputHelper = null,
+            object outputHelper = null,
             bool attachProcessId = true,
             int timeoutMilliseconds = 30_000,
             Dictionary<string, string> environmentVariables = null)
         {
+            ITestOutputWriter outputWriter = TestOutputWriter.Create(outputHelper);
+
             if (shellExecute)
             {
                 // we adjust the psi data manually because on net core using ProcessStartInfo.UseShellExecute throws NotImplementedException
@@ -236,7 +238,7 @@ namespace Microsoft.Build.UnitTests.Shared
 
             void WriteOutput(string data)
             {
-                outputHelper?.WriteLine(data);
+                outputWriter?.WriteLine(data);
                 Console.WriteLine(data);
             }
         }

@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+#if NET35_UNITTEST
 using Xunit.Sdk;
+#endif
 
 #nullable disable
 
@@ -13,7 +15,10 @@ namespace Microsoft.NET.StringTools.Tests
         /// <summary>
         /// Represents an array of string fragments to initialize an InternableString with.
         /// </summary>
-        public class TestDatum : IXunitSerializable
+        public class TestDatum
+#if NET35_UNITTEST
+            : IXunitSerializable
+#endif
         {
             private string _string;
             public string[] Fragments { get; private set; }
@@ -38,6 +43,7 @@ namespace Microsoft.NET.StringTools.Tests
                 return _string;
             }
 
+#if NET35_UNITTEST
             public void Deserialize(IXunitSerializationInfo info)
             {
                 Fragments = info.GetValue<string[]>(nameof(Fragments));
@@ -48,6 +54,7 @@ namespace Microsoft.NET.StringTools.Tests
             {
                 info.AddValue(nameof(Fragments), Fragments);
             }
+#endif
         }
 
         public static IEnumerable<object[]> TestData

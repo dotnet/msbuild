@@ -5,7 +5,6 @@
 
 using System;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -14,9 +13,10 @@ namespace Microsoft.Build.UnitTests
     /// On .NET 7+/8+ these methods come from the framework, so the tests only
     /// run on net472 / netstandard2.0 where the polyfills are compiled in.
     /// </summary>
+    [TestClass]
     public class SpanExtensions_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_BasicReplacement_ReplacesCharacter()
         {
             Span<char> span = "hello".ToCharArray();
@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
             span.ToString().ShouldBe("hallo");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_MultipleOccurrences_ReplacesAllCharacters()
         {
             Span<char> span = "mississippi".ToCharArray();
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             span.ToString().ShouldBe("mxssxssxppx");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_CharacterNotFound_MakesNoChanges()
         {
             Span<char> span = "hello".ToCharArray();
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             span.ToString().ShouldBe("hello");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_SameCharacters_ReturnsImmediately()
         {
             Span<char> span = "hello".ToCharArray();
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
             span.ToString().ShouldBe("hello");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_EmptySpan_HandlesCorrectly()
         {
             Span<char> span = Span<char>.Empty;
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
             span.IsEmpty.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_SingleCharacter_ReplacesIfMatches()
         {
             Span<char> span = new[] { 'a' };
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
             span.ToString().ShouldBe("b");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Replace_AllSameCharacters_ReplacesAll()
         {
             Span<char> span = "aaaaa".ToCharArray();
@@ -72,35 +72,35 @@ namespace Microsoft.Build.UnitTests
             span.ToString().ShouldBe("bbbbb");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IndexOfAnyExcept_AllMatch_ReturnsNegativeOne()
         {
             ReadOnlySpan<int> span = new[] { 1, 1, 1 };
             span.IndexOfAnyExcept(1).ShouldBe(-1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IndexOfAnyExcept_FirstDifferent_ReturnsZero()
         {
             ReadOnlySpan<int> span = new[] { 2, 1, 1 };
             span.IndexOfAnyExcept(1).ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IndexOfAnyExcept_LaterDifferent_ReturnsIndex()
         {
             ReadOnlySpan<int> span = new[] { 1, 1, 1, 2, 1 };
             span.IndexOfAnyExcept(1).ShouldBe(3);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IndexOfAnyExcept_Empty_ReturnsNegativeOne()
         {
             ReadOnlySpan<int> span = ReadOnlySpan<int>.Empty;
             span.IndexOfAnyExcept(0).ShouldBe(-1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IndexOfAnyExcept_Char_ReturnsExpected()
         {
             ReadOnlySpan<char> span = "    hello".AsSpan();

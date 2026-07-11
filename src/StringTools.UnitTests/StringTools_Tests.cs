@@ -8,7 +8,9 @@ extern alias StringToolsNet35;
 using System;
 
 using Shouldly;
+#if NET35_UNITTEST
 using Xunit;
+#endif
 
 #if NET35_UNITTEST
 using StringToolsNet35::Microsoft.NET.StringTools;
@@ -21,13 +23,22 @@ using Microsoft.NET.StringTools;
 
 namespace Microsoft.NET.StringTools.Tests
 {
+    [TestClass]
     public class StringTools_Tests
     {
+#if NET35_UNITTEST
         [Theory]
         [InlineData("")]
         [InlineData("A")]
         [InlineData("Hello")]
         [InlineData("HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello")]
+#else
+        [TestMethod]
+        [DataRow("")]
+        [DataRow("A")]
+        [DataRow("Hello")]
+        [DataRow("HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello")]
+#endif
         public void InternsStrings(string str)
         {
             string internedString1 = Strings.WeakIntern(str);
@@ -46,7 +57,11 @@ namespace Microsoft.NET.StringTools.Tests
 #endif
         }
 
+#if NET35_UNITTEST
         [Fact]
+#else
+        [TestMethod]
+#endif
         public void CreatesDiagnosticReport()
         {
             string statisticsNotEnabledString = "EnableStatisticsGathering() has not been called";

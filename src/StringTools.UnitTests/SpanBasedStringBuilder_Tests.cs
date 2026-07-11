@@ -8,7 +8,9 @@ extern alias StringToolsNet35;
 using System.Collections.Generic;
 
 using Shouldly;
+#if NET35_UNITTEST
 using Xunit;
+#endif
 
 #if NET35_UNITTEST
 using StringToolsNet35::Microsoft.NET.StringTools;
@@ -18,6 +20,7 @@ using StringToolsNet35::Microsoft.NET.StringTools;
 
 namespace Microsoft.NET.StringTools.Tests
 {
+    [TestClass]
     public class SpanBasedStringBuilder_Tests
     {
         private SpanBasedStringBuilder MakeSpanBasedStringBuilder(InterningTestData.TestDatum datum, bool appendSubStrings = false)
@@ -47,16 +50,26 @@ namespace Microsoft.NET.StringTools.Tests
         public static IEnumerable<object[]> TestData => InterningTestData.TestData;
         public static IEnumerable<object[]> TestDataForTrim => InterningTestData.TestDataForTrim;
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestData))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestData))]
+#endif
         public void LengthReturnsLength(InterningTestData.TestDatum datum)
         {
             using var stringBuilder = MakeSpanBasedStringBuilder(datum);
             stringBuilder.Length.ShouldBe(datum.Length);
         }
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestData))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestData))]
+#endif
         public void EnumeratorEnumeratesCharacters(InterningTestData.TestDatum datum)
         {
             using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
@@ -68,8 +81,13 @@ namespace Microsoft.NET.StringTools.Tests
             }
         }
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestData))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestData))]
+#endif
         public void EqualsReturnsExpectedValue(InterningTestData.TestDatum datum)
         {
             using var stringBuilder = MakeSpanBasedStringBuilder(datum);
@@ -90,7 +108,11 @@ namespace Microsoft.NET.StringTools.Tests
             internableString.Equals("Things").ShouldBeFalse();
         }
 
+#if NET35_UNITTEST
         [Fact]
+#else
+        [TestMethod]
+#endif
         public void ReferenceEqualsReturnsExpectedValue()
         {
             string str = "Test";
@@ -100,9 +122,15 @@ namespace Microsoft.NET.StringTools.Tests
             internableString.ReferenceEquals(str).ShouldBeFalse();
         }
 
+#if NET35_UNITTEST
         [Theory]
         [InlineData("012345678")] // odd number of characters
         [InlineData("0123456789")] // even number of characters
+#else
+        [TestMethod]
+        [DataRow("012345678")] // odd number of characters
+        [DataRow("0123456789")] // even number of characters
+#endif
         public void GetHashCodeIsStableRegardlessOfSpanLength(string testString)
         {
             int hashCode = new InternableString(testString).GetHashCode();
@@ -122,16 +150,26 @@ namespace Microsoft.NET.StringTools.Tests
             }
         }
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestData))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestData))]
+#endif
         public void AppendAppendsString(InterningTestData.TestDatum datum)
         {
             using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum, false);
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString());
         }
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestData))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestData))]
+#endif
         public void AppendAppendsSubstring(InterningTestData.TestDatum datum)
         {
             using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum, true);
@@ -139,8 +177,13 @@ namespace Microsoft.NET.StringTools.Tests
         }
 
 #if !NET35_UNITTEST
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestDataForTrim))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestDataForTrim))]
+#endif
         public void TrimStartRemovesLeadingWhiteSpace(InterningTestData.TestDatum datum)
         {
             using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
@@ -148,8 +191,13 @@ namespace Microsoft.NET.StringTools.Tests
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString().TrimStart());
         }
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestDataForTrim))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestDataForTrim))]
+#endif
         public void TrimEndRemovesTrailingWhiteSpace(InterningTestData.TestDatum datum)
         {
             using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
@@ -157,8 +205,13 @@ namespace Microsoft.NET.StringTools.Tests
             new InternableString(stringBuilder).ExpensiveConvertToString().ShouldBe(datum.ToString().TrimEnd());
         }
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestDataForTrim))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestDataForTrim))]
+#endif
         public void TrimRemovesLeadingAndTrailingWhiteSpace(InterningTestData.TestDatum datum)
         {
             using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);
@@ -167,8 +220,13 @@ namespace Microsoft.NET.StringTools.Tests
         }
 #endif
 
+#if NET35_UNITTEST
         [Theory]
         [MemberData(nameof(TestData))]
+#else
+        [TestMethod]
+        [DynamicData(nameof(TestData))]
+#endif
         public void ClearRemovesAllCharacters(InterningTestData.TestDatum datum)
         {
             using SpanBasedStringBuilder stringBuilder = MakeSpanBasedStringBuilder(datum);

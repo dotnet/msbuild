@@ -5,31 +5,32 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests;
 
+[TestClass]
+
 public class Assumed_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void Null_DoesNotThrow_WhenNull()
     {
         Assumed.Null<string>(null);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Null_Throws_WhenNotNull()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Null("hello"));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Null_InterpolatedHandler_DoesNotThrow_WhenNull()
     {
         Assumed.Null<string>(null, $"should not format");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Null_InterpolatedHandler_Throws_WhenNotNull()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -39,19 +40,19 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNull_DoesNotThrow_WhenNotNull()
     {
         Assumed.NotNull("hello");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNull_Throws_WhenNull()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotNull<string>(null));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNull_InterpolatedHandler_Throws_WhenNull()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -60,25 +61,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_DoesNotThrow_WhenValid()
     {
         Assumed.NotNullOrEmpty("hello");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Throws_WhenNull()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty(null));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Throws_WhenEmpty()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty(""));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_InterpolatedHandler_Throws_WhenEmpty()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -87,25 +88,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_DoesNotThrow_WhenTrue()
     {
         Assumed.True(true);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_DoesNotThrow_WithMessage_WhenTrue()
     {
         Assumed.True(true, "msbuild rules");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_Throws_WhenFalse()
     {
         Should.Throw<InternalErrorException>(() => Assumed.True(false));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_InterpolatedHandler_Throws_WhenFalse()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -114,7 +115,7 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_InterpolatedHandler_DoesNotFormat_WhenConditionIsTrue()
     {
         bool formatted = false;
@@ -122,7 +123,7 @@ public class Assumed_Tests
         formatted.ShouldBeFalse("Interpolated string should not have been formatted when condition is true");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_InterpolatedHandler_FormatsMessage_WhenConditionIsFalse()
     {
         bool formatted = false;
@@ -135,7 +136,7 @@ public class Assumed_Tests
         ex.Message.ShouldContain("error: formatted");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_InterpolatedHandler_FormatsMultipleArgs_WhenConditionIsFalse()
     {
         var ex = Should.Throw<InternalErrorException>(() =>
@@ -146,19 +147,19 @@ public class Assumed_Tests
         ex.Message.ShouldContain("a=1 b=2 c=three");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void False_DoesNotThrow_WhenFalse()
     {
         Assumed.False(false);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void False_Throws_WhenTrue()
     {
         Should.Throw<InternalErrorException>(() => Assumed.False(true));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void False_InterpolatedHandler_Throws_WhenTrue()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -167,19 +168,19 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_DoesNotThrow_WhenEqual()
     {
         Assumed.Equal(42, 42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_Throws_WhenNotEqual()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Equal(1, 2));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_InterpolatedHandler_Throws_WhenNotEqual()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -188,31 +189,31 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_String_DoesNotThrow_WhenEqual()
     {
         Assumed.Equal("abc", "abc");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_String_Throws_WhenNotEqual()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Equal("abc", "def"));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_DoesNotThrow_WhenNotEqual()
     {
         Assumed.NotEqual(1, 2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_Throws_WhenEqual()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotEqual(5, 5));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_InterpolatedHandler_Throws_WhenEqual()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -221,25 +222,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThan_DoesNotThrow_WhenGreater()
     {
         Assumed.GreaterThan(5, 3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThan_Throws_WhenEqual()
     {
         Should.Throw<InternalErrorException>(() => Assumed.GreaterThan(3, 3));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThan_Throws_WhenLess()
     {
         Should.Throw<InternalErrorException>(() => Assumed.GreaterThan(2, 3));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThan_InterpolatedHandler_Throws_WhenNotGreater()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -248,25 +249,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThanOrEqual_DoesNotThrow_WhenEqual()
     {
         Assumed.GreaterThanOrEqual(3, 3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThanOrEqual_DoesNotThrow_WhenGreater()
     {
         Assumed.GreaterThanOrEqual(5, 3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThanOrEqual_Throws_WhenLess()
     {
         Should.Throw<InternalErrorException>(() => Assumed.GreaterThanOrEqual(2, 3));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GreaterThanOrEqual_InterpolatedHandler_Throws_WhenLess()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -275,25 +276,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThan_DoesNotThrow_WhenLess()
     {
         Assumed.LessThan(2, 5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThan_Throws_WhenEqual()
     {
         Should.Throw<InternalErrorException>(() => Assumed.LessThan(3, 3));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThan_Throws_WhenGreater()
     {
         Should.Throw<InternalErrorException>(() => Assumed.LessThan(5, 3));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThan_InterpolatedHandler_Throws_WhenNotLess()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -302,25 +303,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThanOrEqual_DoesNotThrow_WhenEqual()
     {
         Assumed.LessThanOrEqual(3, 3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThanOrEqual_DoesNotThrow_WhenLess()
     {
         Assumed.LessThanOrEqual(2, 5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThanOrEqual_Throws_WhenGreater()
     {
         Should.Throw<InternalErrorException>(() => Assumed.LessThanOrEqual(5, 3));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LessThanOrEqual_InterpolatedHandler_Throws_WhenGreater()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -329,20 +330,20 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Zero_DoesNotThrow_WhenZero()
     {
         Assumed.Zero(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Zero_Throws_WhenNonZero()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Zero(1));
         Should.Throw<InternalErrorException>(() => Assumed.Zero(-1));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Zero_InterpolatedHandler_Throws_WhenNonZero()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -351,25 +352,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Negative_DoesNotThrow_WhenNegative()
     {
         Assumed.Negative(-1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Negative_Throws_WhenZero()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Negative(0));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Negative_Throws_WhenPositive()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Negative(1));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Negative_InterpolatedHandler_Throws_WhenNotNegative()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -378,25 +379,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NegativeOrZero_DoesNotThrow_WhenNegative()
     {
         Assumed.NegativeOrZero(-1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NegativeOrZero_DoesNotThrow_WhenZero()
     {
         Assumed.NegativeOrZero(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NegativeOrZero_Throws_WhenPositive()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NegativeOrZero(1));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NegativeOrZero_InterpolatedHandler_Throws_WhenPositive()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -405,25 +406,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Positive_DoesNotThrow_WhenPositive()
     {
         Assumed.Positive(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Positive_Throws_WhenZero()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Positive(0));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Positive_Throws_WhenNegative()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Positive(-1));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Positive_InterpolatedHandler_Throws_WhenNotPositive()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -432,25 +433,25 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PositiveOrZero_DoesNotThrow_WhenPositive()
     {
         Assumed.PositiveOrZero(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PositiveOrZero_DoesNotThrow_WhenZero()
     {
         Assumed.PositiveOrZero(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PositiveOrZero_Throws_WhenNegative()
     {
         Should.Throw<InternalErrorException>(() => Assumed.PositiveOrZero(-1));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PositiveOrZero_InterpolatedHandler_Throws_WhenNegative()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -459,37 +460,37 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InRange_DoesNotThrow_WhenInRange()
     {
         Assumed.InRange(5, 1, 10);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InRange_DoesNotThrow_AtLowerBound()
     {
         Assumed.InRange(1, 1, 10);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InRange_DoesNotThrow_AtUpperBound()
     {
         Assumed.InRange(10, 1, 10);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InRange_Throws_WhenBelowRange()
     {
         Should.Throw<InternalErrorException>(() => Assumed.InRange(0, 1, 10));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InRange_Throws_WhenAboveRange()
     {
         Should.Throw<InternalErrorException>(() => Assumed.InRange(11, 1, 10));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InRange_InterpolatedHandler_Throws_WhenOutOfRange()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -498,20 +499,20 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unreachable_AlwaysThrows()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Unreachable());
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unreachable_WithMessage_AlwaysThrows()
     {
         var ex = Should.Throw<InternalErrorException>(() => Assumed.Unreachable("should not get here"));
         ex.Message.ShouldContain("should not get here");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unreachable_InterpolatedHandler_AlwaysThrows()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -520,19 +521,19 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unreachable_Generic_AlwaysThrows()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Unreachable<int>());
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unreachable_Generic_WithMessage_AlwaysThrows()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Unreachable<int>("nope"));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unreachable_Generic_InterpolatedHandler_AlwaysThrows()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -541,14 +542,14 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_WithCustomMessage_IncludesMessage()
     {
         var ex = Should.Throw<InternalErrorException>(() => Assumed.True(false, "custom message"));
         ex.Message.ShouldContain("custom message");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void True_WithDefaultMessage_IncludesExpression()
     {
         bool myCondition = false;
@@ -556,7 +557,7 @@ public class Assumed_Tests
         ex.Message.ShouldContain("myCondition");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNull_WithDefaultMessage_IncludesExpression()
     {
         string? myValue = null;
@@ -564,7 +565,7 @@ public class Assumed_Tests
         ex.Message.ShouldContain("myValue");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Null_WithDefaultMessage_IncludesExpression()
     {
         string myValue = "hello";
@@ -572,7 +573,7 @@ public class Assumed_Tests
         ex.Message.ShouldContain("myValue");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_WithDefaultMessage_IncludesExpression()
     {
         int myValue = 1;
@@ -580,7 +581,7 @@ public class Assumed_Tests
         ex.Message.ShouldContain("myValue");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_WithDefaultMessage_IncludesExpression()
     {
         string? myValue = null;
@@ -590,31 +591,31 @@ public class Assumed_Tests
 
     // Equal with StringComparison
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_DoesNotThrow_WhenEqualOrdinal()
     {
         Assumed.Equal("abc", "abc", StringComparison.Ordinal);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_DoesNotThrow_WhenEqualIgnoreCase()
     {
         Assumed.Equal("ABC", "abc", StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_Throws_WhenNotEqualOrdinal()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Equal("ABC", "abc", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_Throws_WhenNotEqual()
     {
         Should.Throw<InternalErrorException>(() => Assumed.Equal("abc", "def", StringComparison.OrdinalIgnoreCase));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_HandlesNulls()
     {
         Assumed.Equal(null, null, StringComparison.Ordinal);
@@ -622,13 +623,13 @@ public class Assumed_Tests
         Should.Throw<InternalErrorException>(() => Assumed.Equal("abc", null, StringComparison.Ordinal));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_InterpolatedHandler_DoesNotThrow_WhenEqual()
     {
         Assumed.Equal("ABC", "abc", StringComparison.OrdinalIgnoreCase, $"should not format");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_InterpolatedHandler_Throws_WhenNotEqual()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -637,7 +638,7 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Equal_StringComparison_WithDefaultMessage_IncludesExpression()
     {
         string myValue = "ABC";
@@ -647,31 +648,31 @@ public class Assumed_Tests
 
     // NotEqual with StringComparison
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_DoesNotThrow_WhenNotEqualOrdinal()
     {
         Assumed.NotEqual("ABC", "abc", StringComparison.Ordinal);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_DoesNotThrow_WhenNotEqual()
     {
         Assumed.NotEqual("abc", "def", StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_Throws_WhenEqualOrdinal()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotEqual("abc", "abc", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_Throws_WhenEqualIgnoreCase()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotEqual("ABC", "abc", StringComparison.OrdinalIgnoreCase));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_HandlesNulls()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotEqual(null, null, StringComparison.Ordinal));
@@ -679,13 +680,13 @@ public class Assumed_Tests
         Assumed.NotEqual("abc", null, StringComparison.Ordinal);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_InterpolatedHandler_DoesNotThrow_WhenNotEqual()
     {
         Assumed.NotEqual("ABC", "abc", StringComparison.Ordinal, $"should not format");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_InterpolatedHandler_Throws_WhenEqual()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -694,7 +695,7 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotEqual_StringComparison_WithDefaultMessage_IncludesExpression()
     {
         string myValue = "abc";
@@ -704,32 +705,32 @@ public class Assumed_Tests
 
     // NotNullOrEmpty for IReadOnlyCollection<T>
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Collection_DoesNotThrow_WhenNonEmpty()
     {
         Assumed.NotNullOrEmpty<int>([1, 2, 3]);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Collection_Throws_WhenNull()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty<int>(null));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Collection_Throws_WhenEmpty()
     {
         Should.Throw<InternalErrorException>(() => Assumed.NotNullOrEmpty<int>([]));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Collection_InterpolatedHandler_DoesNotThrow_WhenNonEmpty()
     {
         List<int> items = [1, 2, 3];
         Assumed.NotNullOrEmpty(items, $"should not format");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Collection_InterpolatedHandler_Throws_WhenNull()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -738,7 +739,7 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Collection_InterpolatedHandler_Throws_WhenEmpty()
     {
         Should.Throw<InternalErrorException>(() =>
@@ -747,7 +748,7 @@ public class Assumed_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void NotNullOrEmpty_Collection_WithDefaultMessage_IncludesExpression()
     {
         List<string>? myCollection = null;

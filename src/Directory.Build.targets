@@ -16,52 +16,49 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- Respect the traits set up by PlatformSpecific attribute. -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --filter-not-trait Category=nonwindowstests</XunitOptions>
+    <_ExcludedTestCategoryFilter Condition="$([MSBuild]::IsOSPlatform('windows'))">nonwindowstests</_ExcludedTestCategoryFilter>
 
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux'))">$(XunitOptions) --filter-not-trait Category=nonlinuxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">$(XunitOptions) --filter-not-trait Category=netcore-linux-failing</XunitOptions>
+    <_ExcludedTestCategoryFilter Condition="$([MSBuild]::IsOSPlatform('linux'))">nonlinuxtests</_ExcludedTestCategoryFilter>
+    <_ExcludedTestCategoryFilter Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">$(_ExcludedTestCategoryFilter);netcore-linux-failing</_ExcludedTestCategoryFilter>
 
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) --filter-not-trait Category=nonosxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">$(XunitOptions) --filter-not-trait Category=netcore-osx-failing</XunitOptions>
+    <_ExcludedTestCategoryFilter Condition="$([MSBuild]::IsOSPlatform('osx'))">nonosxtests</_ExcludedTestCategoryFilter>
+    <_ExcludedTestCategoryFilter Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">$(_ExcludedTestCategoryFilter);netcore-osx-failing</_ExcludedTestCategoryFilter>
 
     <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) --filter-not-trait Category=nonfreebsdtests</XunitOptions>
+    <_ExcludedTestCategoryFilter Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">nonfreebsdtests</_ExcludedTestCategoryFilter>
 
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) --filter-not-trait Category=nonnetcoreapptests</XunitOptions>
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions) --filter-not-trait Category=nonnetfxtests</XunitOptions>
+    <_ExcludedTestCategoryFilter Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(_ExcludedTestCategoryFilter);nonnetcoreapptests</_ExcludedTestCategoryFilter>
+    <_ExcludedTestCategoryFilter Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(_ExcludedTestCategoryFilter);nonnetfxtests</_ExcludedTestCategoryFilter>
 
     <!-- Normal runs EXCLUDE quarantined tests: tests marked [ActiveIssue(...)] carry the
-         Category=failing trait. The scheduled quarantine pipeline sets RunQuarantinedTests=true to
-         run ONLY those tests instead, so we keep collecting pass/fail signal on quarantined tests
-         (an [ActiveIssue] test never executes in normal CI). See azure-pipelines/quarantine.yml. -->
-    <XunitOptions Condition="'$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --filter-not-trait Category=failing</XunitOptions>
+         failing category. The scheduled quarantine pipeline sets RunQuarantinedTests=true to
+         run ONLY those tests instead. See azure-pipelines/quarantine.yml. -->
+    <_ExcludedTestCategoryFilter Condition="'$(RunQuarantinedTests)' != 'true'">$(_ExcludedTestCategoryFilter);failing</_ExcludedTestCategoryFilter>
+
+    <!-- xUnit projects use Category traits; migrated MSTest.Sdk projects expose the same values as TestCategory traits. -->
+    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' == 'true' and '$(_ExcludedTestCategoryFilter)' != ''">$(UnitTestRunnerOptions) --filter-not-trait TestCategory=$(_ExcludedTestCategoryFilter)</UnitTestRunnerOptions>
+    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' != 'true' and '$(_ExcludedTestCategoryFilter)' != ''">$(UnitTestRunnerOptions) --filter-not-trait Category=$(_ExcludedTestCategoryFilter)</UnitTestRunnerOptions>
+
     <!-- Quarantined tests are expected to be flaky, and most assemblies contain zero quarantined
          tests; treat exit code 8 (zero tests ran) and 2 (test failures) as success so a red run means
          an actual infrastructure problem. The per-test signal is the published TRX, not exit code.
          The "8;2" value MUST stay quoted: arcade runs the test command through <Exec>, which on
-         non-Windows executes via /bin/sh, where an unquoted ';' is a command separator (it would
-         split the command and the trailing "2" + remaining arguments fragment fails with code 127). -->
-    <XunitOptions Condition="'$(RunQuarantinedTests)' == 'true'">$(XunitOptions) --filter-trait Category=failing --ignore-exit-code "8;2"</XunitOptions>
-    
-    <!-- Enable code coverage -->
-    <!-- There are separate runsettings files for Windows and non-Windows. -->
-    <!-- Some test projects hang on windows and hence coverage is disabled for these projects. -->
-    <!-- Quarantined-only runs (RunQuarantinedTests=true, the scheduled quarantine pipeline) skip
-         coverage: those runs only collect flaky pass/fail signal via repeated execution, and coverage
-         instrumentation adds overhead and can perturb timing-sensitive flakes. -->
-    <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -coverage - -coverage-settings $(RepoRoot)CoverageWindowsFull.config</XunitOptions> -->
-    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows')) and '$(RunQuarantinedTests)' != 'true'">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
+         non-Windows executes via /bin/sh, where an unquoted ';' is a command separator. -->
+    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' == 'true' and '$(RunQuarantinedTests)' == 'true'"> --filter-trait TestCategory=failing --ignore-exit-code "8;2"</UnitTestRunnerOptions>
+    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' != 'true' and '$(RunQuarantinedTests)' == 'true'"> --filter-trait Category=failing --ignore-exit-code "8;2"</UnitTestRunnerOptions>
 
-    <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
+    <!-- Enable code coverage on non-Windows normal runs. Quarantined-only runs skip coverage. -->
+    <UnitTestRunnerOptions Condition="!$([MSBuild]::IsOSPlatform('windows')) and '$(RunQuarantinedTests)' != 'true'">$(UnitTestRunnerOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</UnitTestRunnerOptions>
+
+    <TestRunnerAdditionalArguments>$(UnitTestRunnerOptions)</TestRunnerAdditionalArguments>
 
     <PackageOutputPath Condition="'$(IsVisualStudioInsertionPackage)' == 'true'">$(DevDivPackagesDir)</PackageOutputPath>
 
-    <DefineConstants Condition="'$(XUnitV3Version)' != '' and $([MSBuild]::VersionGreaterThanOrEquals($(XUnitV3Version), '4.0.0'))">$(DefineConstants);XUNIT_V3_4_OR_LATER</DefineConstants>
+    <DefineConstants Condition="'$(UsingMSTestSdk)' != 'true' and '$(XUnitV3Version)' != '' and $([MSBuild]::VersionGreaterThanOrEquals($(XUnitV3Version), '4.0.0'))">$(DefineConstants);XUNIT_V3_4_OR_LATER</DefineConstants>
 
-    <!-- Arcade sdk also carries an xunit.runner.json which sometimes overrides the one in this repo. Assign a value to the arcade properties XUnitDesktopSettingsFile and XUnitCoreSettingsFile to prevent the arcade version of the file being added. -->
-    <XUnitDesktopSettingsFile>$(MSBuildThisFileDirectory)Shared\UnitTests\xunit.runner.json</XUnitDesktopSettingsFile>
-    <XUnitCoreSettingsFile>$(XUnitDesktopSettingsFile)</XUnitCoreSettingsFile>
+    <!-- Arcade sdk also carries an xunit.runner.json which sometimes overrides the one in this repo. Assign these only for xUnit projects. -->
+    <XUnitDesktopSettingsFile Condition="'$(UsingMSTestSdk)' != 'true'">$(MSBuildThisFileDirectory)Shared\UnitTests\xunit.runner.json</XUnitDesktopSettingsFile>
+    <XUnitCoreSettingsFile Condition="'$(UsingMSTestSdk)' != 'true'">$(XUnitDesktopSettingsFile)</XUnitCoreSettingsFile>
   </PropertyGroup>
 
   <!-- Wrapper invariant for CTS: the resulting test DLL must not be named
@@ -83,13 +80,16 @@
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
-    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(IsVSTestForCtsProject)' != 'true'" />
+    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(UsingMSTestSdk)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(UsingMSTestSdk)' != 'true' AND '$(IsVSTestForCtsProject)' != 'true'" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
-    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
+    <Compile Include="$(RepoRoot)src\Shared\UnitTests\MSTestGlobalUsings.cs" Condition="'$(UsingMSTestSdk)' == 'true'" />
+    <Compile Include="$(RepoRoot)src\UnitTests.Shared\MSBuildTestMethodAttribute.cs" Condition="'$(UsingMSTestSdk)' == 'true' AND '$(IsLibraryTestProject)' != 'true'" />
+    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(UsingMSTestSdk)' == 'true' AND '$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
+    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.Xunit.cs" Condition="'$(UsingMSTestSdk)' != 'true' AND '$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>

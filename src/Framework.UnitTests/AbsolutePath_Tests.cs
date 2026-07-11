@@ -5,11 +5,10 @@ using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class AbsolutePath_Tests
     {
         private static AbsolutePath GetTestBasePath()
@@ -34,7 +33,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePath_FromAbsolutePath_ShouldPreservePath()
         {
             string absolutePathString = Path.GetTempPath();
@@ -44,7 +43,7 @@ namespace Microsoft.Build.UnitTests
             Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePath_NullOrEmpty_ShouldThrowOnNull()
         {
             string? path = null;
@@ -52,7 +51,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentNullException>(() => new AbsolutePath(path!));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         [UseInvariantCulture]
         public void AbsolutePath_NullOrEmpty_ShouldThrowOnEmpty()
         {
@@ -62,7 +61,7 @@ namespace Microsoft.Build.UnitTests
             exception.Message.ShouldStartWith("The value cannot be an empty string.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnNull()
         {
             string? path = null;
@@ -71,7 +70,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentNullException>(() => new AbsolutePath(path!, basePath));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         [UseInvariantCulture]
         public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnEmpty()
         {
@@ -82,11 +81,11 @@ namespace Microsoft.Build.UnitTests
             exception.Message.ShouldStartWith("The value cannot be an empty string.");
         }
 
-        [Theory]
-        [InlineData("subfolder")]
-        [InlineData("deep/nested/path")]
-        [InlineData(".")]
-        [InlineData("..")]
+        [MSBuildTestMethod]
+        [DataRow("subfolder")]
+        [DataRow("deep/nested/path")]
+        [DataRow(".")]
+        [DataRow("..")]
         public void AbsolutePath_FromRelativePath_ShouldResolveAgainstBase(string relativePath)
         {
             string baseDirectory = Path.Combine(Path.GetTempPath(), "testfolder");
@@ -99,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             absolutePath.Value.ShouldBe(expectedPath);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePath_Equality_ShouldWorkCorrectly()
         {
             string testPath = Path.GetTempPath();
@@ -113,7 +112,7 @@ namespace Microsoft.Build.UnitTests
             (path1 == differentPath).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePath_Inequality_ShouldWorkCorrectly()
         {
             string testPath = Path.GetTempPath();
@@ -126,7 +125,7 @@ namespace Microsoft.Build.UnitTests
 #pragma warning restore CS1718 // Comparison made to same variable
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePath_GetHashCode_ShouldBeConsistentWithEquals()
         {
             string testPath = Path.GetTempPath();
@@ -138,7 +137,7 @@ namespace Microsoft.Build.UnitTests
             path1.GetHashCode().ShouldBe(path2.GetHashCode());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePath_Equals_WithObject_ShouldWorkCorrectly()
         {
             string testPath = Path.GetTempPath();
@@ -174,9 +173,9 @@ namespace Microsoft.Build.UnitTests
             (lowerPath == upperPath).ShouldBeFalse();
         }
 
-        [Theory]
-        [InlineData("not/rooted/path", false, true)]
-        [InlineData("not/rooted/path", true, false)]
+        [MSBuildTestMethod]
+        [DataRow("not/rooted/path", false, true)]
+        [DataRow("not/rooted/path", true, false)]
         public void AbsolutePath_RootedValidation_ShouldBehaveProperly(string path, bool ignoreRootedCheck, bool shouldThrow)
         {
             if (shouldThrow)
@@ -192,24 +191,24 @@ namespace Microsoft.Build.UnitTests
 
         [WindowsOnlyTheory]
         // True Windows absolute paths - should be accepted
-        [InlineData("C:\\foo", true)]                    // Standard Windows absolute path
-        [InlineData("C:\\foo\\bar", true)]                // Another Windows absolute path
-        [InlineData("D:\\foo\\bar", true)]                // Different drive Windows path
-        [InlineData("C:\\foo\\bar\\.", true)]              // Windows absolute path with current directory
-        [InlineData("C:\\foo\\bar\\..", true)]             // Windows absolute path with parent directory
+        [DataRow("C:\\foo", true)]                    // Standard Windows absolute path
+        [DataRow("C:\\foo\\bar", true)]                // Another Windows absolute path
+        [DataRow("D:\\foo\\bar", true)]                // Different drive Windows path
+        [DataRow("C:\\foo\\bar\\.", true)]              // Windows absolute path with current directory
+        [DataRow("C:\\foo\\bar\\..", true)]             // Windows absolute path with parent directory
         // Windows rooted but NOT absolute paths - should be rejected
-        [InlineData("\\foo", false)]                     // Root-relative (missing drive)
-        [InlineData("\\foo\\bar", false)]                 // Root-relative (missing drive)
-        [InlineData("C:foo", false)]                    // Drive-relative (no backslash after colon)
-        [InlineData("C:1\\foo", false)]                  // Drive-relative with unexpected character
+        [DataRow("\\foo", false)]                     // Root-relative (missing drive)
+        [DataRow("\\foo\\bar", false)]                 // Root-relative (missing drive)
+        [DataRow("C:foo", false)]                    // Drive-relative (no backslash after colon)
+        [DataRow("C:1\\foo", false)]                  // Drive-relative with unexpected character
         // Relative paths - should be rejected
-        [InlineData("foo", false)]                       // Simple relative path
-        [InlineData("foo/bar", false)]                   // Forward slash relative path
-        [InlineData("foo\\bar", false)]                  // Backslash relative path
-        [InlineData(".", false)]                         // Current directory
-        [InlineData("..", false)]                        // Parent directory
-        [InlineData("../parent", false)]                 // Parent relative path
-        [InlineData("subfolder/file.txt", false)]        // Nested relative path
+        [DataRow("foo", false)]                       // Simple relative path
+        [DataRow("foo/bar", false)]                   // Forward slash relative path
+        [DataRow("foo\\bar", false)]                  // Backslash relative path
+        [DataRow(".", false)]                         // Current directory
+        [DataRow("..", false)]                        // Parent directory
+        [DataRow("../parent", false)]                 // Parent relative path
+        [DataRow("subfolder/file.txt", false)]        // Nested relative path
         public void AbsolutePath_WindowsPathValidation_ShouldAcceptOnlyTrueAbsolutePaths(string path, bool shouldBeAccepted)
         {
             ValidatePathAcceptance(path, shouldBeAccepted);
@@ -217,25 +216,25 @@ namespace Microsoft.Build.UnitTests
 
         [UnixOnlyTheory]
         // True Unix absolute paths - should be accepted
-        [InlineData("/foo", true)]                       // Standard Unix absolute path
-        [InlineData("/foo/bar", true)]                   // Nested Unix absolute path
-        [InlineData("/", true)]                          // Root directory
-        [InlineData("/foo/bar/.", true)]                 // Unix absolute path with current directory
-        [InlineData("/foo/bar/..", true)]                // Unix absolute path with parent directory
+        [DataRow("/foo", true)]                       // Standard Unix absolute path
+        [DataRow("/foo/bar", true)]                   // Nested Unix absolute path
+        [DataRow("/", true)]                          // Root directory
+        [DataRow("/foo/bar/.", true)]                 // Unix absolute path with current directory
+        [DataRow("/foo/bar/..", true)]                // Unix absolute path with parent directory
         // Relative paths - should be rejected (same on all platforms)
-        [InlineData("foo", false)]                       // Simple relative path
-        [InlineData("foo/bar", false)]                   // Forward slash relative path
-        [InlineData("foo\\bar", false)]                  // Backslash relative path (unusual on Unix but still relative)
-        [InlineData(".", false)]                         // Current directory
-        [InlineData("..", false)]                        // Parent directory
-        [InlineData("../parent", false)]                 // Parent relative path
-        [InlineData("subfolder/file.txt", false)]        // Nested relative path
+        [DataRow("foo", false)]                       // Simple relative path
+        [DataRow("foo/bar", false)]                   // Forward slash relative path
+        [DataRow("foo\\bar", false)]                  // Backslash relative path (unusual on Unix but still relative)
+        [DataRow(".", false)]                         // Current directory
+        [DataRow("..", false)]                        // Parent directory
+        [DataRow("../parent", false)]                 // Parent relative path
+        [DataRow("subfolder/file.txt", false)]        // Nested relative path
         public void AbsolutePath_UnixPathValidation_ShouldAcceptOnlyTrueAbsolutePaths(string path, bool shouldBeAccepted)
         {
             ValidatePathAcceptance(path, shouldBeAccepted);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetCanonicalForm_NullPath_ShouldThrow()
         {
             var absolutePath = new AbsolutePath(null!, null!, ignoreRootedCheck: true);
@@ -245,24 +244,24 @@ namespace Microsoft.Build.UnitTests
 
 
         [WindowsOnlyTheory]
-        [InlineData("C:\\foo\\.\\bar")]                    // Current directory reference
-        [InlineData("C:\\foo\\..\\bar")]                   // Parent directory reference
-        [InlineData("C:\\foo/bar")]                        // Forward slash to backslash
-        [InlineData("C:\\foo\\bar")]                       // Simple Windows path (no normalization needed)
-        [InlineData("C:\\foo\\\\bar")]                     // Consecutive backslashes
-        [InlineData("C:\\foo\\bar\\\\")]                   // Trailing consecutive backslashes
+        [DataRow("C:\\foo\\.\\bar")]                    // Current directory reference
+        [DataRow("C:\\foo\\..\\bar")]                   // Parent directory reference
+        [DataRow("C:\\foo/bar")]                        // Forward slash to backslash
+        [DataRow("C:\\foo\\bar")]                       // Simple Windows path (no normalization needed)
+        [DataRow("C:\\foo\\\\bar")]                     // Consecutive backslashes
+        [DataRow("C:\\foo\\bar\\\\")]                   // Trailing consecutive backslashes
         public void GetCanonicalForm_WindowsPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
             ValidateGetCanonicalFormMatchesSystem(inputPath);
         }
 
         [UnixOnlyTheory]
-        [InlineData("/foo/./bar")]                         // Current directory reference
-        [InlineData("/foo/../bar")]                        // Parent directory reference     
-        [InlineData("/foo/bar")]                           // Simple Unix path (no normalization needed)
-        [InlineData("/foo/bar\\baz")]                      // Simple Unix path with backslash that is not a path separator (no normalization needed)
-        [InlineData("/foo//bar")]                          // Consecutive forward slashes
-        [InlineData("/foo/bar//")]                         // Trailing consecutive forward slashes
+        [DataRow("/foo/./bar")]                         // Current directory reference
+        [DataRow("/foo/../bar")]                        // Parent directory reference
+        [DataRow("/foo/bar")]                           // Simple Unix path (no normalization needed)
+        [DataRow("/foo/bar\\baz")]                      // Simple Unix path with backslash that is not a path separator (no normalization needed)
+        [DataRow("/foo//bar")]                          // Consecutive forward slashes
+        [DataRow("/foo/bar//")]                         // Trailing consecutive forward slashes
         public void GetCanonicalForm_UnixPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
             ValidateGetCanonicalFormMatchesSystem(inputPath);
@@ -289,33 +288,33 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [WindowsOnlyTheory]
         // Root-relative — anchored at base path's drive root.
-        [InlineData(@"X:\proj", @"\foo", @"X:\foo")]
-        [InlineData(@"X:\proj", @"\foo\bar", @"X:\foo\bar")]
-        [InlineData(@"X:\proj", @"\sub\dir\file.txt", @"X:\sub\dir\file.txt")]
+        [DataRow(@"X:\proj", @"\foo", @"X:\foo")]
+        [DataRow(@"X:\proj", @"\foo\bar", @"X:\foo\bar")]
+        [DataRow(@"X:\proj", @"\sub\dir\file.txt", @"X:\sub\dir\file.txt")]
         // Drive-relative on the same drive as base path — anchored under base path itself.
-        [InlineData(@"X:\proj", @"X:foo", @"X:\proj\foo")]
-        [InlineData(@"X:\proj", @"X:", @"X:\proj")]
-        [InlineData(@"X:\proj", @"X:sub\file.txt", @"X:\proj\sub\file.txt")]
+        [DataRow(@"X:\proj", @"X:foo", @"X:\proj\foo")]
+        [DataRow(@"X:\proj", @"X:", @"X:\proj")]
+        [DataRow(@"X:\proj", @"X:sub\file.txt", @"X:\proj\sub\file.txt")]
         // Drive-relative with a drive different from base path — drive dropped, remainder anchored.
-        [InlineData(@"C:\proj", @"D:foo", @"C:\proj\foo")]
+        [DataRow(@"C:\proj", @"D:foo", @"C:\proj\foo")]
         // Root-relative against UNC base path — re-rooted under the UNC share.
-        [InlineData(@"\\server\share\base", @"\foo", @"\\server\share\foo")]
-        [InlineData(@"\\server\share\base", @"\sub\file.txt", @"\\server\share\sub\file.txt")]
+        [DataRow(@"\\server\share\base", @"\foo", @"\\server\share\foo")]
+        [DataRow(@"\\server\share\base", @"\sub\file.txt", @"\\server\share\sub\file.txt")]
         // Drive-relative against UNC base path — drive dropped, remainder anchored.
-        [InlineData(@"\\server\share\base", @"X:foo", @"\\server\share\base\foo")]
+        [DataRow(@"\\server\share\base", @"X:foo", @"\\server\share\base\foo")]
         // Root-relative against DOS device base path (\\?\ and \\.\) — re-rooted under the device root.
-        [InlineData(@"\\?\C:\base", @"\foo", @"\\?\C:\foo")]
-        [InlineData(@"\\.\C:\base", @"\foo", @"\\.\C:\foo")]
+        [DataRow(@"\\?\C:\base", @"\foo", @"\\?\C:\foo")]
+        [DataRow(@"\\.\C:\base", @"\foo", @"\\.\C:\foo")]
         // Drive-relative against DOS device base path — drive dropped, remainder anchored.
-        [InlineData(@"\\?\C:\base", @"X:foo", @"\\?\C:\base\foo")]
-        [InlineData(@"\\.\C:\base", @"X:foo", @"\\.\C:\base\foo")]
+        [DataRow(@"\\?\C:\base", @"X:foo", @"\\?\C:\base\foo")]
+        [DataRow(@"\\.\C:\base", @"X:foo", @"\\.\C:\base\foo")]
         // Pass-through: fully qualified inputs win and are not touched by anchoring.
-        [InlineData(@"C:\proj", @"D:\absolute\file.txt", @"D:\absolute\file.txt")]
-        [InlineData(@"C:\proj", @"\\server\share\file.txt", @"\\server\share\file.txt")]
-        [InlineData(@"C:\proj", @"\\?\C:\file.txt", @"\\?\C:\file.txt")]
+        [DataRow(@"C:\proj", @"D:\absolute\file.txt", @"D:\absolute\file.txt")]
+        [DataRow(@"C:\proj", @"\\server\share\file.txt", @"\\server\share\file.txt")]
+        [DataRow(@"C:\proj", @"\\?\C:\file.txt", @"\\?\C:\file.txt")]
         // Plain relative input — anchored to basePath via Path.Combine, never touches CWD.
-        [InlineData(@"C:\proj", @"foo", @"C:\proj\foo")]
-        [InlineData(@"C:\proj", @"sub\file.txt", @"C:\proj\sub\file.txt")]
+        [DataRow(@"C:\proj", @"foo", @"C:\proj\foo")]
+        [DataRow(@"C:\proj", @"sub\file.txt", @"C:\proj\sub\file.txt")]
         public void AnchorsToBasePath_NotProcessState(string baseDir, string input, string expected)
         {
             var basePath = new AbsolutePath(baseDir);
@@ -333,7 +332,7 @@ namespace Microsoft.Build.UnitTests
             canonical.OriginalValue.ShouldBe(input);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetCanonicalForm_InvalidPathCharacters_ShouldThrowSameAsPathGetFullPath()
         {
             // A path containing a null character is invalid on all platforms.
@@ -343,7 +342,15 @@ namespace Microsoft.Build.UnitTests
             var absolutePath = new AbsolutePath(invalidPath, ignoreRootedCheck: true);
 
             // Capture the exception that Path.GetFullPath would throw
-            Exception? getFullPathException = Record.Exception(() => Path.GetFullPath(invalidPath));
+            Exception? getFullPathException = null;
+            try
+            {
+                Path.GetFullPath(invalidPath);
+            }
+            catch (Exception ex)
+            {
+                getFullPathException = ex;
+            }
 
             getFullPathException.ShouldNotBeNull("Path.GetFullPath should throw for a path with null character");
 

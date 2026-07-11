@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
+    [TestClass]
     public class BuildSubmissionStartedEventArgs_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationDeserializationTest()
         {
             var globalVariables = new Dictionary<string, string?>

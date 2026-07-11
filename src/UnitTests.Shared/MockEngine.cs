@@ -12,7 +12,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
 using Shouldly;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 #nullable disable
 
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
     public sealed class MockEngine : EngineServices, IBuildEngine10, ITaskFactoryBuildParameterProvider
     {
         private readonly LockType _lockObj = new LockType();  // Protects _log, _output
-        private readonly ITestOutputHelper _output;
+        private readonly ITestOutputWriter _output;
         private readonly StringBuilder _log = new StringBuilder();
         private readonly ProjectCollection _projectCollection = new ProjectCollection();
         private readonly bool _logToConsole;
@@ -80,9 +80,9 @@ namespace Microsoft.Build.UnitTests
             _logToConsole = logToConsole;
         }
 
-        public MockEngine(ITestOutputHelper output)
+        public MockEngine(object output)
         {
-            _output = output;
+            _output = TestOutputWriter.Create(output);
             MockLogger = new MockLogger(output);
             _logToConsole = false; // We have a better place to put it.
         }

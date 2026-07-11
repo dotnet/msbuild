@@ -3,7 +3,6 @@
 
 using System.Runtime.InteropServices;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -22,20 +21,23 @@ namespace Microsoft.Build.UnitTests
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.Skip = "This test only runs on Windows and when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
+                this.Skip = AppendAdditionalMessage("This test only runs on Windows and when long path support is disabled.", additionalMessage);
                 return;
             }
 
-            if (fullFrameworkOnly && !CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
+            if (fullFrameworkOnly && !RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", System.StringComparison.OrdinalIgnoreCase))
             {
-                this.Skip = "This test only runs on full .NET Framework and when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
+                this.Skip = AppendAdditionalMessage("This test only runs on full .NET Framework and when long path support is disabled.", additionalMessage);
                 return;
             }
 
             if (!NativeMethodsShared.IsMaxPathLegacyWindows())
             {
-                this.Skip = "This test only runs when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
+                this.Skip = AppendAdditionalMessage("This test only runs when long path support is disabled.", additionalMessage);
             }
         }
+
+        private static string AppendAdditionalMessage(string message, string? additionalMessage)
+            => !string.IsNullOrWhiteSpace(additionalMessage) ? $"{message} {additionalMessage}" : message;
     }
 }

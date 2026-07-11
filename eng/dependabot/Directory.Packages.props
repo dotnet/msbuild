@@ -49,8 +49,8 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.0.6" />
-    <PackageVersion Update="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(MicrosoftTestingExtensionsCodeCoverageVersion)' != ''" Version="$(MicrosoftTestingExtensionsCodeCoverageVersion)" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.0.6" Condition="'$(UsingMSTestSdk)' != 'true'" />
+    <PackageVersion Update="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(UsingMSTestSdk)' != 'true' and '$(MicrosoftTestingExtensionsCodeCoverageVersion)' != ''" Version="$(MicrosoftTestingExtensionsCodeCoverageVersion)" />
 
     <PackageVersion Include="FakeItEasy" Version="8.1.0" />
     <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
@@ -61,6 +61,10 @@
 
     <PackageVersion Include="Verify.XunitV3" Version="28.12.0" />
     <PackageVersion Update="Verify.XunitV3" Condition="'$(VerifyXunitV3Version)' != ''" Version="$(VerifyXunitV3Version)" />
+
+    <PackageVersion Include="Verify.MSTest" Version="30.20.0" />
+    <PackageVersion Update="Verify.MSTest" Condition="'$(VerifyMSTestVersion)' != ''" Version="$(VerifyMSTestVersion)" />
+
   </ItemGroup>
 
   <!-- CsWin32 source generator for Windows interop (dev-time only) -->

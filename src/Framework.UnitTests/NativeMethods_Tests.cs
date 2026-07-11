@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Shouldly;
-using Xunit;
 using NativeMethods = Microsoft.Build.Framework.NativeMethods;
 
 namespace Microsoft.Build.UnitTests
@@ -13,13 +12,14 @@ namespace Microsoft.Build.UnitTests
     /// report the client's terminal capabilities instead of the node's own redirected stdout
     /// (see dotnet/msbuild#13940).
     /// </summary>
+    [TestClass]
     public class NativeMethods_Tests
     {
-        [Theory]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
+        [MSBuildTestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
         public void QueryIsScreenAndTryEnableAnsiColorCodes_HonorsOverride(bool acceptAnsi, bool outputIsScreen)
         {
             try
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void QueryIsScreenAndTryEnableAnsiColorCodes_OverrideAppliesToStandardError()
         {
             try

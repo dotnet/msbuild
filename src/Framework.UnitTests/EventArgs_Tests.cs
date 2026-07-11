@@ -4,7 +4,6 @@
 using System;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -13,6 +12,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Unit test the base class BuildEventArgs
     /// </summary>
+    [TestClass]
     public class EventArgs_Tests
     {
         #region BaseClass Equals Tests
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise getHashCode.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetHashCode()
         {
             s_baseGenericEvent.GetHashCode();
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EventArgsCtors()
         {
             GenericBuildEventArgs genericEventTest = new GenericBuildEventArgs();
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the BuildEventContext is exercised
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExerciseBuildEventContext()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(0, 0, 0, 0, 0, 0, 0);

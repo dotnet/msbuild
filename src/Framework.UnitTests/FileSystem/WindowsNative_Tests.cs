@@ -8,7 +8,6 @@ using System.Runtime.Versioning;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -20,6 +19,7 @@ namespace Microsoft.Build.UnitTests
     ///  blittable <c>WIN32_FIND_DATAW</c>.
     /// </summary>
     [SupportedOSPlatform("windows6.0.6000")]
+    [TestClass]
     public sealed class WindowsNative_Tests : IDisposable
     {
         private readonly string _tempDir;
