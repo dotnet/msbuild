@@ -9,7 +9,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -108,12 +107,13 @@ namespace Microsoft.Build.Engine.UnitTests
     /// These tests verify that tasks work correctly in both multithreaded and single-threaded scenarios
     /// with proper environment isolation, following the pattern of MSBuildServer_Tests.
     /// </summary>
+    [TestClass]
     public class MSBuildMultithreaded_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
 
-        public MSBuildMultithreaded_Tests(ITestOutputHelper output)
+        public MSBuildMultithreaded_Tests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
@@ -124,9 +124,9 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.Dispose();
         }
 
-        [Theory]
-        [InlineData(true, "/m /nodereuse:false /mt")]
-        [InlineData(false, "/m /nodereuse:false")]
+        [MSBuildTestMethod]
+        [DataRow(true, "/m /nodereuse:false /mt")]
+        [DataRow(false, "/m /nodereuse:false")]
         public void MSBuildTask_EnvironmentIsolation(bool isMultithreaded, string msbuildArgs)
         {
             string project = $@"
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// BuildParameters.MultiThreaded so tasks observe true multi-threaded behavior,
         /// even without the -mt switch on the command line.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildForceMultiThreadedEnvironmentVariablePropagatesToBuildParameters()
         {
             string project = $@"

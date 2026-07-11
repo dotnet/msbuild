@@ -8,13 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.CommandLine.Experimental;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.CommandLine.UnitTests
 {
+    [TestClass]
     public class CommandLineParserTests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseReturnsInstance()
         {
             CommandLineParser parser = new CommandLineParser();
@@ -24,7 +24,7 @@ namespace Microsoft.Build.CommandLine.UnitTests
             result.Targets.ShouldBe(["targets.txt"]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseThrowsException()
         {
             CommandLineParser parser = new CommandLineParser();
