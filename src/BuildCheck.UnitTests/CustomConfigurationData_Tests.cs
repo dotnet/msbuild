@@ -4,13 +4,13 @@
 using System.Collections.Generic;
 using Microsoft.Build.Experimental.BuildCheck;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
+[TestClass]
 public class CustomConfigurationData_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeTrue_NullInstance()
     {
         var customConfigurationData1 = CustomConfigurationData.Null;
@@ -19,7 +19,7 @@ public class CustomConfigurationData_Tests
         customConfigurationData1.Equals(customConfigurationData2).ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeTrue_SameInstance()
     {
         var customConfigurationData1 = new CustomConfigurationData("testRuleId");
@@ -28,7 +28,7 @@ public class CustomConfigurationData_Tests
         customConfigurationData1.Equals(customConfigurationData2).ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeFalse_DifferentObjectType()
     {
         var customConfigurationData1 = new CustomConfigurationData("testRuleId");
@@ -37,7 +37,7 @@ public class CustomConfigurationData_Tests
         customConfigurationData1.Equals(customConfigurationData2).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeTrue_DifferentInstanceSameValues()
     {
         var customConfigurationData1 = new CustomConfigurationData("testRuleId");
@@ -47,7 +47,7 @@ public class CustomConfigurationData_Tests
     }
 
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeTrue_CustomConfigDataSame()
     {
         var config1 = new Dictionary<string, string>()
@@ -66,7 +66,7 @@ public class CustomConfigurationData_Tests
     }
 
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeFalse_CustomConfigDataDifferent()
     {
         var config = new Dictionary<string, string>()
@@ -79,7 +79,7 @@ public class CustomConfigurationData_Tests
         customConfigurationData1.Equals(customConfigurationData2).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeFalse_CustomConfigDataDifferentKeys()
     {
         var config1 = new Dictionary<string, string>()
@@ -98,7 +98,7 @@ public class CustomConfigurationData_Tests
         customConfigurationData1.Equals(customConfigurationData2).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeFalse_CustomConfigDataDifferentValues()
     {
         var config1 = new Dictionary<string, string>()
@@ -117,7 +117,7 @@ public class CustomConfigurationData_Tests
         customConfigurationData1.Equals(customConfigurationData2).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TestCustomConfigurationData_Equals_ShouldBeTrue_CustomConfigDataKeysOrderDiffers()
     {
         var config1 = new Dictionary<string, string>()

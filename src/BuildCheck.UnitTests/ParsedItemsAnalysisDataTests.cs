@@ -6,13 +6,13 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.UnitTests;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
+[TestClass]
 public class ParsedItemsCheckDataTests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void ItemsHolder_GetItemsOfType_ShouldFilterProperly()
     {
         ProjectRootElement root = ProjectRootElement.Create();

@@ -7,13 +7,13 @@ using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
+[TestClass]
 public class EditorConfigParser_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void NoSectionConfigured_ResultsEmptyResultConfig()
     {
         var configs = new List<EditorConfigFile>(){
@@ -33,7 +33,7 @@ public class EditorConfigParser_Tests
         mergedResult.Keys.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ProperOrderOfconfiguration_ClosestToTheFileShouldBeApplied()
     {
         var configs = new List<EditorConfigFile>(){
@@ -57,7 +57,7 @@ public class EditorConfigParser_Tests
         mergedResult["property1"].ShouldBe("value1");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EditorconfigFileDiscovery_RootTrue()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -89,7 +89,7 @@ public class EditorConfigParser_Tests
         listOfEditorConfigFile[0].NamedSections[0].Properties["test_key"].ShouldBe("test_value_updated");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EditorconfigFileDiscovery_RootFalse()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -117,7 +117,7 @@ public class EditorConfigParser_Tests
         listOfEditorConfigFile[0].NamedSections[0].Name.ShouldBe("*.csproj");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Parse_HandlesDifferentLineEndings()
     {
         var mixedEndingsText = "root = true\r\n" +
