@@ -2216,7 +2216,18 @@ namespace Microsoft.Build.Construction
 
                     try
                     {
-                        Project msbuildProject = new Project(project.AbsolutePath, _globalProperties, childProjectToolsVersion);
+                        // Only the ProjectDependency items and SourceWebProject property are read below, both
+                        // available after the Items pass. Stop evaluation there instead of running a full
+                        // evaluation. Gated behind change wave 18.10 so the historical full-evaluation behavior
+                        // can be restored if needed.
+                        Project msbuildProject = Project.FromFile(project.AbsolutePath, new Microsoft.Build.Definition.ProjectOptions
+                        {
+                            GlobalProperties = _globalProperties,
+                            ToolsVersion = childProjectToolsVersion,
+                            EvaluationStage = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                                ? Microsoft.Build.Evaluation.ProjectEvaluationStage.Items
+                                : Microsoft.Build.Evaluation.ProjectEvaluationStage.Full,
+                        });
 
                         // ProjectDependency items work exactly like ProjectReference items from the point of
                         // view of determining that project B depends on project A.  This item must cause

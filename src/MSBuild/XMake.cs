@@ -1638,7 +1638,19 @@ namespace Microsoft.Build.CommandLine
                 // If the user has requested that the schema be validated, do that here.
                 if (needToValidateProject && !isSolution)
                 {
-                    Microsoft.Build.Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                    // Schema validation only needs the toolset resolved from the project's ToolsVersion,
+                    // which is final after the Properties pass. Stop evaluation there instead of running a
+                    // full evaluation. Gated behind change wave 18.10 so the historical full-evaluation
+                    // behavior can be restored if needed.
+                    Microsoft.Build.Evaluation.Project project = Project.FromFile(projectFile, new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        GlobalProperties = globalProperties,
+                        ToolsVersion = toolsVersion,
+                        EvaluationStage = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                            ? ProjectEvaluationStage.Properties
+                            : ProjectEvaluationStage.Full,
+                    });
                     Microsoft.Build.Evaluation.Toolset toolset = projectCollection.GetToolset(toolsVersion ?? project.ToolsVersion);
 
                     if (toolset == null)
@@ -1665,7 +1677,19 @@ namespace Microsoft.Build.CommandLine
                     }
                     else
                     {
-                        Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                        // Preprocessing (SaveLogicalProject) only walks the import closure, which is resolved
+                        // during the Properties pass. Stop evaluation there instead of running a full
+                        // evaluation. Gated behind change wave 18.10 so the historical full-evaluation
+                        // behavior can be restored if needed.
+                        Project project = Project.FromFile(projectFile, new ProjectOptions
+                        {
+                            ProjectCollection = projectCollection,
+                            GlobalProperties = globalProperties,
+                            ToolsVersion = toolsVersion,
+                            EvaluationStage = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                                ? ProjectEvaluationStage.Properties
+                                : ProjectEvaluationStage.Full,
+                        });
 
                         project.SaveLogicalProject(preprocessWriter);
 

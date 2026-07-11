@@ -896,6 +896,42 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// <c>-preprocess</c> only walks the import closure, which is resolved during the Properties pass
+        /// (partial evaluation, gated behind change wave 18.10). A project whose only error is in the
+        /// targets pass therefore preprocesses successfully, but reverts to failing when the change wave
+        /// is opted out (full evaluation).
+        /// </summary>
+        [Theory]
+        [InlineData(null, true)]      // wave enabled (default): partial evaluation stops before the failing targets pass
+        [InlineData("18.10", false)]  // wave disabled: full evaluation hits the failing targets pass
+        public void PreprocessUsesPartialEvaluation(string disableFeaturesFromVersion, bool expectedSuccess)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            if (disableFeaturesFromVersion is not null)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFeaturesFromVersion);
+            }
+
+            // The BeforeTargets expression only fails when the targets pass runs (pass 5); the import
+            // closure and properties (pass 1) are unaffected, so a partial evaluation preprocesses the
+            // project without hitting the error.
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>EvalValue</Foo>
+  </PropertyGroup>
+  <Target Name=""Bad"" BeforeTargets=""$([System.Int32]::Parse('notanumber'))"" />
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} -preprocess", out bool success);
+            success.ShouldBe(expectedSuccess, results);
+            if (expectedSuccess)
+            {
+                results.ShouldContain("EvalValue");
+            }
+        }
+
         [Fact]
         public void BuildFailsWithBadPropertyName()
         {
