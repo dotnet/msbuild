@@ -184,7 +184,7 @@ namespace Microsoft.Build.Evaluation
                                 transformExpressions = new List<ItemExpressionCapture>(1);
                             }
 
-                            transformExpressions.Add(new ItemExpressionCapture(startQuoted, endQuoted - startQuoted, expression.Substring(startQuoted, endQuoted - startQuoted)));
+                            transformExpressions.Add(new ItemExpressionCapture(startQuoted, endQuoted - startQuoted, Strings.WeakIntern(expression.AsSpan(startQuoted, endQuoted - startQuoted))));
                             SinkWhitespace(expression, ref currentIndex);
                             continue;
                         }
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         separatorStart = currentIndex - startPoint;
-                        separator = expression.Substring(currentIndex, closingQuote - currentIndex);
+                        separator = Strings.WeakIntern(expression.AsSpan(currentIndex, closingQuote - currentIndex));
 
                         currentIndex = closingQuote + 1;
                     }
@@ -639,14 +639,14 @@ namespace Microsoft.Build.Evaluation
                 {
                     int endFunctionArguments = i - 1;
 
-                    string functionName = expression.Substring(startTransform, endFunctionName - startTransform);
+                    string functionName = Strings.WeakIntern(expression.AsSpan(startTransform, endFunctionName - startTransform));
                     string functionArguments = null;
                     if (endFunctionArguments > startFunctionArguments)
                     {
                         functionArguments = Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
                     }
 
-                    ItemExpressionCapture capture = new ItemExpressionCapture(startTransform, i - startTransform, expression.Substring(startTransform, i - startTransform), null, null, -1, null, functionName, functionArguments);
+                    ItemExpressionCapture capture = new ItemExpressionCapture(startTransform, i - startTransform, Strings.WeakIntern(expression.AsSpan(startTransform, i - startTransform)), null, null, -1, null, functionName, functionArguments);
 
                     return capture;
                 }
