@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,18 +6,18 @@ using System.IO;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
+    [TestClass]
     public class ResolveAssemblyReference_CustomCultureTests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ResolveAssemblyReference_CustomCultureTests(ITestOutputHelper output)
+        public ResolveAssemblyReference_CustomCultureTests(TestContext output)
         {
             _output = output;
         }
@@ -28,13 +28,13 @@ namespace Microsoft.Build.Tasks.UnitTests
             "CustomCulture");
 
         [WindowsOnlyTheory]
-        [InlineData(true, "", true, true)]
-        [InlineData(false)]
-        [InlineData(true, "yue", false, true)]
-        [InlineData(false, "yue", false, true)]
-        [InlineData(true, "euy", true)]
-        [InlineData(true, "yue;euy")]
-        [InlineData(true, "euy;yue")]
+        [DataRow(true, "", true, true)]
+        [DataRow(false)]
+        [DataRow(true, "yue", false, true)]
+        [DataRow(false, "yue", false, true)]
+        [DataRow(true, "euy", true)]
+        [DataRow(true, "yue;euy")]
+        [DataRow(true, "euy;yue")]
         public void E2EScenarioTests(bool enableCustomCulture, string customCultureExclusions = "", bool isYueCultureExpected = false, bool isEuyCultureExpected = false)
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))

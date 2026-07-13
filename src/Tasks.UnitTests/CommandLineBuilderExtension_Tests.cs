@@ -7,12 +7,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class CommandLineBuilderExtensionTest
     {
         /*
@@ -22,10 +22,10 @@ namespace Microsoft.Build.UnitTests
         * the boolean flag has a string value that cannot be converted to a boolean. In this
         * case we expect an exception.
         */
-        [Fact]
+        [MSBuildTestMethod]
         public void AppendItemWithInvalidBooleanAttribute()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 // Construct the task item.
                 TaskItem i = new TaskItem();
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
                         new ITaskItem[] { i },
                         new string[] { "Name", "Private" },
                         new bool[] { false, true });
-                    Assert.Equal(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
+                    Assert.AreEqual(@"/myswitch:MyResource.bmp,Kenny,Private", c.ToString());
                 }
                 catch (ArgumentException e)
                 {
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests
         /// order on the command-line, so we skip all subsequent attributes as soon
         /// as we find one missing.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AppendItemWithMissingAttribute()
         {
             // Construct the task items.
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
                 new string[] { "Name", "HintPath", "Access" },
                 null);
 
-            Assert.Equal(
+            Assert.AreEqual(
                @"/myswitch:MySoundEffect.wav,Kenny "
                + @"/myswitch:MySplashScreen.bmp,Cartman,c:\foo,Public",
                c.ToString());

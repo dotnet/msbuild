@@ -2,23 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Tasks;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class VisualBasicParserUtilititesTests
     {
         // Try just and empty file
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyFile()
         {
             AssertParse("", null);
         }
 
         // A simple form
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleForm()
         {
             AssertParse(
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A simple form with a namespace
-        [Fact]
+        [MSBuildTestMethod]
         public void Namespace()
         {
             AssertParse(
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A simple form with a namespace
-        [Fact]
+        [MSBuildTestMethod]
         public void NestedNamespace()
         {
             AssertParse(
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // A namespace the is ended before the class
-        [Fact]
+        [MSBuildTestMethod]
         public void NestedAndEndedNamespace()
         {
             AssertParse(
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
         /// name was something like "BugResources.RemoveStuff.XYZ", because we would
         /// only match the "BugResources" bit.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NamespaceElementBeginsWithRem()
         {
             AssertParse(
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             ExtractedClassName className = VisualBasicParserUtilities.GetFirstClassNameFullyQualified(
                 StreamHelpers.StringToStream(source));
 
-            Assert.Equal(expectedClassName, className.Name);
+            Assert.AreEqual(expectedClassName, className.Name);
         }
     }
 }

@@ -8,15 +8,15 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
+    [TestClass]
     public sealed class StronglyNamedDependencyAppConfig : ResolveAssemblyReferenceTestFixture
     {
-        public StronglyNamedDependencyAppConfig(ITestOutputHelper output) : base(output)
+        public StronglyNamedDependencyAppConfig(TestContext output) : base(output)
         {
         }
 
@@ -43,9 +43,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Strongly named dependencies should unify according to the bindingRedirects in the app.config.
         /// </summary>
-        [Theory]
-        [InlineData(null)]
-        [InlineData("\uE025\uE026")]
+        [MSBuildTestMethod]
+        [DataRow(null)]
+        [DataRow("\uE025\uE026")]
         public void Exists(string appConfigNameSuffix)
         {
             // Create the engine.
@@ -74,8 +74,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains(
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the deny list it should be removed and warned.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsPromotedDependencyInTheDenyList()
         {
             string engineOnlySubset =
@@ -147,8 +147,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
                 bool succeeded = Execute(t, false);
 
-                Assert.True(succeeded);
-                Assert.Empty(t.ResolvedDependencyFiles);
+                Assert.IsTrue(succeeded);
+                Assert.IsEmpty(t.ResolvedDependencyFiles);
                 engine.AssertLogDoesntContain(
                         String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
             }
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// An unrelated bindingRedirect in the app.config should have no bearing on unification
         /// of another file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsDifferentName()
         {
             // Create the engine.
@@ -204,8 +204,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, even
         /// if a range is involved.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsOldVersionRange()
         {
             // Create the engine.
@@ -254,8 +254,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains(
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// The fusion loader is going to want to respect the app.config file. There's no point in
         /// feeding it the wrong version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HighVersionDoesntExist()
         {
             // Create the engine.
@@ -306,8 +306,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.IsTrue(succeeded);
+            Assert.IsEmpty(t.ResolvedDependencyFiles);
             string shouldContain;
 
             string code = t.Log.ExtractMessageCode(
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// The lower (unified-from) version need not exist on disk (in fact we shouldn't even try to
         /// resolve it) in order to arrive at the correct answer.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LowVersionDoesntExist()
         {
             // Create the engine.
@@ -372,8 +372,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains(
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "0.5.0.0", appConfigFile, Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll")));
@@ -390,7 +390,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Can't proceed with a bad app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GarbageVersionInAppConfigFile()
         {
             // Create the engine.
@@ -417,8 +417,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
-            Assert.False(succeeded);
-            Assert.Equal(1, engine.Errors);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(1, engine.Errors);
 
             // Cleanup.
             File.Delete(appConfigFile);
@@ -432,7 +432,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Can't proceed with a bad app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GarbageAppConfigMissingOldVersion()
         {
             // Create the engine.
@@ -459,8 +459,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
-            Assert.False(succeeded);
-            Assert.Equal(1, engine.Errors);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(1, engine.Errors);
             engine.AssertLogContains(
                     String.Format(AssemblyResources.GetString("AppConfig.BindingRedirectMissingOldVersion")));
 
@@ -476,7 +476,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Can't proceed with a bad app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GarbageAppConfigMissingNewVersion()
         {
             // Create the engine.
@@ -503,8 +503,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
-            Assert.False(succeeded);
-            Assert.Equal(1, engine.Errors);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(1, engine.Errors);
             engine.AssertLogContains(
                     String.Format(AssemblyResources.GetString("AppConfig.BindingRedirectMissingNewVersion")));
 
@@ -521,7 +521,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Can't proceed with a bad app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GarbageAppConfigAssemblyNameMissingPKTAndCulture()
         {
             // Create the engine.
@@ -548,8 +548,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
-            Assert.False(succeeded);
-            Assert.Equal(1, engine.Errors);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(1, engine.Errors);
 
             // Cleanup.
             File.Delete(appConfigFile);
@@ -565,7 +565,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// With the introduction of the GenerateBindingRedirects task, RAR now accepts AutoUnify and App.Config at the same time.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AppConfigSpecifiedWhenAutoUnifyEqualsTrue()
         {
             // Create the engine.
@@ -595,8 +595,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             // With the introduction of GenerateBindingRedirects task, RAR now accepts AutoUnify and App.Config at the same time.
-            Assert.True(succeeded);
-            Assert.Equal(0, engine.Errors);
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(0, engine.Errors);
 
             // Cleanup.
             File.Delete(appConfigFile);
@@ -610,7 +610,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// App.config must exist if specified.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AppConfigDoesntExist()
         {
             // Create the engine.
@@ -630,8 +630,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t.AppConfigFile = @"C:\MyNonexistentFolder\MyNonExistentApp.config";
 
             bool succeeded = Execute(t);
-            Assert.False(succeeded);
-            Assert.Equal(1, engine.Errors);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(1, engine.Errors);
         }
     }
 }

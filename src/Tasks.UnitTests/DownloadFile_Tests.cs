@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -13,18 +13,18 @@ using System.Threading.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class DownloadFile_Tests
     {
         private readonly MockEngine _mockEngine = new MockEngine();
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanBeCanceled()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanDownloadToFolder()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanGetFileNameFromResponseHeader()
         {
             const string filename = "C6DDD10A99E149F78FA11F133127BF38.txt";
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanSpecifyFileName()
         {
             const string filename = "4FD96E4A322842ACB70C40FC16E69A55.txt";
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidUrlLogsError()
         {
             DownloadFile downloadFile = new DownloadFile()
@@ -182,7 +182,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB3921");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NotFoundLogsError()
         {
             DownloadFile downloadFile = new DownloadFile()
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("Response status code does not indicate success: 404 (Not Found).");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RetryOnDownloadError()
         {
             const string content = "Foo";
@@ -239,7 +239,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RetryOnResponseError()
         {
             DownloadFile downloadFile = new DownloadFile()
@@ -257,7 +257,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB3924", customMessage: _mockEngine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbortOnTimeout()
         {
             using CancellationTokenSource timeout = new CancellationTokenSource();
@@ -281,7 +281,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB3923", customMessage: _mockEngine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task NoRunawayLoop()
         {
             DownloadFile downloadFile = null;
@@ -318,7 +318,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             result.ShouldBeFalse(_mockEngine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SkipUnchangedFiles()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -353,7 +353,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UnknownFileNameLogsError()
         {
             DownloadFile downloadFile = new DownloadFile()

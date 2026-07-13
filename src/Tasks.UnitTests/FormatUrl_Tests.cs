@@ -6,15 +6,15 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class FormatUrl_Tests
     {
-        private readonly ITestOutputHelper _out;
+        private readonly TestContext _out;
 
-        public FormatUrl_Tests(ITestOutputHelper testOutputHelper)
+        public FormatUrl_Tests(TestContext testOutputHelper)
         {
             _out = testOutputHelper;
         }
@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is null.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NullTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is empty.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// No InputUrl value is provided. InputUrl is not a required parameter for the task.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoInputTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a UNC.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UncPathTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests
         /// The URL to format is a local absolute file path.
         /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LocalAbsolutePathTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
         /// The URL to format is a local relative file path.
         /// This test uses Environment.CurrentDirectory to have a file path value appropriate to the current OS/filesystem.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LocalRelativePathTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a URL using localhost.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UrlLocalHostTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a URL.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UrlTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The URL to format is a URL with a 'parent' element (..) in the path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UrlParentPathTest()
         {
             var t = GetFormatUrlUnderTest();
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
         /// not the process current working directory. This documents the intentional semantic change
         /// introduced when migrating the task to multithreaded execution.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RelativePathResolvesAgainstProjectDirectory()
         {
             using TestEnvironment env = TestEnvironment.Create(_out);
@@ -266,7 +266,7 @@ namespace Microsoft.Build.UnitTests
         /// contract: relative-path resolution must derive from the per-task <see cref="TaskEnvironment"/>
         /// rather than any process-wide state (the original bug class motivating the migration).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RelativePathResolvesIndependentlyAcrossInstances()
         {
             using TestEnvironment env = TestEnvironment.Create(_out);

@@ -6,12 +6,12 @@ using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class SdkToolsPathUtility_Tests
     {
         private string _defaultSdkToolsPath = NativeMethodsShared.IsWindows ? "C:\\ProgramFiles\\WIndowsSDK\\bin" : "/ProgramFiles/WindowsSDK/bin";
@@ -40,37 +40,37 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the sdkToolsPath is null or empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolNullOrEmptySdkToolPath()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.X86, null, _toolName, _log, true);
-            Assert.Null(toolPath);
+            Assert.IsNull(toolPath);
 
             string comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathNotSpecifiedOrToolDoesNotExist", _toolName, null);
             _mockEngine.AssertLogContains(comment);
-            Assert.Equal(0, _mockEngine.Warnings);
+            Assert.AreEqual(0, _mockEngine.Warnings);
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, null, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest));
             _mockEngine.AssertLogContains(comment);
-            Assert.Equal(1, _mockEngine.Errors);
+            Assert.AreEqual(1, _mockEngine.Errors);
         }
 
         /// <summary>
         /// Test the case where the sdkToolsPath is null or empty and we do not want to log errors or warnings
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolNullOrEmptySdkToolPathNoLogging()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.X86, null, _toolName, _log, false);
-            Assert.Null(toolPath);
+            Assert.IsNull(toolPath);
 
             string comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathNotSpecifiedOrToolDoesNotExist", _toolName, null);
             _mockEngine.AssertLogDoesntContain(comment);
-            Assert.Equal(0, _mockEngine.Warnings);
+            Assert.AreEqual(0, _mockEngine.Warnings);
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, null, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version45));
             _mockEngine.AssertLogDoesntContain(comment);
-            Assert.Equal(0, _mockEngine.Errors);
+            Assert.AreEqual(0, _mockEngine.Errors);
         }
 
         #endregion
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x86 and the tool exists in the x86 sdk path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolX86ExistsOnx86()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.X86, _defaultSdkToolsPath, _toolName, _log, true);
@@ -87,8 +87,8 @@ namespace Microsoft.Build.UnitTests
             // Path we expect to get out of the method
             string expectedPath = Path.Combine(_defaultSdkToolsPath, _toolName);
 
-            Assert.Equal(expectedPath, toolPath);
-            Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
+            Assert.AreEqual(expectedPath, toolPath);
+            Assert.IsTrue(String.IsNullOrEmpty(_mockEngine.Log));
         }
 
 
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x64 and the tool exists in the x64 sdk path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolX64ExistsOnx64()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX64, ProcessorArchitecture.AMD64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -107,14 +107,14 @@ namespace Microsoft.Build.UnitTests
             string expectedPath = Path.Combine(_defaultSdkToolsPath, "x64");
             expectedPath = Path.Combine(expectedPath, _toolName);
 
-            Assert.Equal(expectedPath, toolPath);
-            Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
+            Assert.AreEqual(expectedPath, toolPath);
+            Assert.IsTrue(String.IsNullOrEmpty(_mockEngine.Log));
         }
 
         /// <summary>
         /// Test the case where the processor architecture is x64 and the tool does not exists in the x64 sdk path but does exist in the x86 path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolX64ExistsOnx86()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.AMD64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -122,8 +122,8 @@ namespace Microsoft.Build.UnitTests
             // Path we expect to get out of the method
             string expectedPath = Path.Combine(_defaultSdkToolsPath, _toolName);
 
-            Assert.Equal(expectedPath, toolPath);
-            Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
+            Assert.AreEqual(expectedPath, toolPath);
+            Assert.IsTrue(String.IsNullOrEmpty(_mockEngine.Log));
         }
         #endregion
 
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is ia64 and the tool exists in the ia64 sdk path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolIa64ExistsOnIa64()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInIa64, ProcessorArchitecture.IA64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -140,14 +140,14 @@ namespace Microsoft.Build.UnitTests
             string expectedPath = Path.Combine(_defaultSdkToolsPath, "ia64");
             expectedPath = Path.Combine(expectedPath, _toolName);
 
-            Assert.Equal(expectedPath, toolPath);
-            Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
+            Assert.AreEqual(expectedPath, toolPath);
+            Assert.IsTrue(String.IsNullOrEmpty(_mockEngine.Log));
         }
 
         /// <summary>
         /// Test the case where the processor architecture is ia64 and the tool does not exists in the ia64 sdk path but does exist in the x86 path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolIa64ExistsOnx86()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileExistsOnlyInX86, ProcessorArchitecture.IA64, _defaultSdkToolsPath, _toolName, _log, true);
@@ -155,8 +155,8 @@ namespace Microsoft.Build.UnitTests
             // Path we expect to get out of the method
             string expectedPath = Path.Combine(_defaultSdkToolsPath, _toolName);
 
-            Assert.Equal(expectedPath, toolPath);
-            Assert.True(String.IsNullOrEmpty(_mockEngine.Log));
+            Assert.AreEqual(expectedPath, toolPath);
+            Assert.IsTrue(String.IsNullOrEmpty(_mockEngine.Log));
         }
         #endregion
 
@@ -164,18 +164,18 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the processor architecture is x86 and the tool does not exist in the x86 sdk path (or anywhere for that matter)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolX86DoesNotExistAnywhere()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, _defaultSdkToolsPath, _toolName, _log, true);
-            Assert.Null(toolPath);
+            Assert.IsNull(toolPath);
 
             string comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.PlatformSDKFileNotFoundSdkToolsPath", _toolName, _defaultSdkToolsPath, _defaultSdkToolsPath);
             _mockEngine.AssertLogContains(comment);
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, _defaultSdkToolsPath, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest));
             _mockEngine.AssertLogContains(comment);
-            Assert.Equal(1, _mockEngine.Errors);
+            Assert.AreEqual(1, _mockEngine.Errors);
         }
 
         /// <summary>
@@ -185,26 +185,26 @@ namespace Microsoft.Build.UnitTests
         public void VerifyErrorWithIllegalChars()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, "./?><;)(*&^%$#@!", _toolName, _log, true);
-            Assert.Null(toolPath);
+            Assert.IsNull(toolPath);
             _mockEngine.AssertLogContains("MSB3666");
-            Assert.Equal(1, _mockEngine.Errors);
+            Assert.AreEqual(1, _mockEngine.Errors);
         }
 
         /// <summary>
         /// Test the case where the processor architecture is x86 and the tool does not exist in the x86 sdk path (or anywhere for that matter)and we do not want to log
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GeneratePathToToolX86DoesNotExistAnywhereNoLogging()
         {
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, _defaultSdkToolsPath, _toolName, _log, false);
-            Assert.Null(toolPath);
+            Assert.IsNull(toolPath);
 
             string comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.PlatformSDKFileNotFoundSdkToolsPath", _toolName, _defaultSdkToolsPath, _defaultSdkToolsPath);
             _mockEngine.AssertLogDoesntContain(comment);
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, _defaultSdkToolsPath, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version45));
             _mockEngine.AssertLogDoesntContain(comment);
-            Assert.Equal(0, _mockEngine.Errors);
+            Assert.AreEqual(0, _mockEngine.Errors);
         }
 
         #region Helper Classes

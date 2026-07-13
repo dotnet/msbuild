@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.Build.Evaluation;
-using Xunit;
 
 #nullable disable
 
@@ -13,6 +12,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// A base class for testing the directory build project import functionality in Microsoft.Common.props and Microsoft.Common.targets.
     /// </summary>
+    [TestClass]
     public abstract class DirectoryBuildProjectImportTestBase : IDisposable
     {
         private const string BasicDirectoryBuildProjectContents = @"
@@ -67,7 +67,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ensures that if a directory build project does not exist, it won't be imported and the project can be successfully evaluated.
         /// </summary>
-        [Fact(Skip = "Tests always have Directory.Build files in the output directory to prevent them from picking up the Directory.Build files in the root of the repo")]
+        [MSBuildTestMethod]
+        [Ignore("Tests always have Directory.Build files in the output directory to prevent them from picking up the Directory.Build files in the root of the repo")]
         public void DoesNotImportDirectoryBuildProjectIfNotExist()
         {
             // ---------------------
@@ -82,16 +83,17 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("true", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(DirectoryBuildProjectBasePathPropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(DirectoryBuildProjectFile, project.GetPropertyValue(DirectoryBuildProjectFilePropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
+            Assert.AreEqual("true", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(String.Empty, project.GetPropertyValue(DirectoryBuildProjectBasePathPropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(DirectoryBuildProjectFile, project.GetPropertyValue(DirectoryBuildProjectFilePropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(String.Empty, project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
         }
 
         /// <summary>
         /// Ensures that when the user disables the import by setting the corresponding property to "false", then all of the functionality is disabled.
         /// </summary>
-        [Fact(Skip = "Tests always have Directory.Build files in the output directory to prevent them from picking up the Directory.Build files in the root of the repo")]
+        [MSBuildTestMethod]
+        [Ignore("Tests always have Directory.Build files in the output directory to prevent them from picking up the Directory.Build files in the root of the repo")]
         public void DoesNotImportDirectoryBuildProjectWhenDisabled()
         {
             // ---------------------
@@ -115,17 +117,17 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("false", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue("WasDirectoryBuildProjectImported"), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(DirectoryBuildProjectBasePathPropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(DirectoryBuildProjectFilePropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(String.Empty, project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
+            Assert.AreEqual("false", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(String.Empty, project.GetPropertyValue("WasDirectoryBuildProjectImported"), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(String.Empty, project.GetPropertyValue(DirectoryBuildProjectBasePathPropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(String.Empty, project.GetPropertyValue(DirectoryBuildProjectFilePropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(String.Empty, project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
         }
 
         /// <summary>
         /// Ensures that when the user specifies a custom directory build props file that it is imported correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportsDirectoryBuildProjectCustomFile()
         {
             string customFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(CustomBuildProjectFile, BasicDirectoryBuildProjectContents);
@@ -145,15 +147,15 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("true", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal("true", project.GetPropertyValue("WasDirectoryBuildProjectImported"), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(customFilePath, project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
+            Assert.AreEqual("true", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual("true", project.GetPropertyValue("WasDirectoryBuildProjectImported"), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(customFilePath, project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
         }
 
         /// <summary>
         /// Ensures that if a directory build project exists, it will be imported.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportsDirectoryBuildProjectIfExists()
         {
             ObjectModelHelpers.CreateFileInTempProjectDirectory(DirectoryBuildProjectFile, BasicDirectoryBuildProjectContents);
@@ -170,11 +172,11 @@ namespace Microsoft.Build.UnitTests
                 </Project>
             "));
 
-            Assert.Equal("true", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal("true", project.GetPropertyValue("WasDirectoryBuildProjectImported"), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(ObjectModelHelpers.TempProjectDir, project.GetPropertyValue(DirectoryBuildProjectBasePathPropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(DirectoryBuildProjectFile, project.GetPropertyValue(DirectoryBuildProjectFilePropertyName), StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(Path.Combine(ObjectModelHelpers.TempProjectDir, DirectoryBuildProjectFile), project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
+            Assert.AreEqual("true", project.GetPropertyValue(ImportDirectoryBuildProjectPropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual("true", project.GetPropertyValue("WasDirectoryBuildProjectImported"), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(ObjectModelHelpers.TempProjectDir, project.GetPropertyValue(DirectoryBuildProjectBasePathPropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(DirectoryBuildProjectFile, project.GetPropertyValue(DirectoryBuildProjectFilePropertyName), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual(Path.Combine(ObjectModelHelpers.TempProjectDir, DirectoryBuildProjectFile), project.GetPropertyValue(DirectoryBuildProjectPathPropertyName));
         }
     }
 }

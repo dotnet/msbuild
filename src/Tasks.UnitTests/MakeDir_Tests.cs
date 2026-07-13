@@ -7,18 +7,18 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class MakeDir_Tests
     {
         /// <summary>
         /// Make sure that attributes set on input items are forwarded to output items.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AttributeForwarding()
         {
             string temp = Path.GetTempPath();
@@ -39,16 +39,16 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.True(success);
-                Assert.Single(t.DirectoriesCreated);
-                Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
+                Assert.IsTrue(success);
+                Assert.ContainsSingle(t.DirectoriesCreated);
+                Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
                     engine.Log);
-                Assert.Equal("en-GB", t.DirectoriesCreated[0].GetMetadata("Locale"));
+                Assert.AreEqual("en-GB", t.DirectoriesCreated[0].GetMetadata("Locale"));
 
                 // Output ItemSpec should not be overwritten.
-                Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
+                Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
             }
             finally
             {
@@ -91,20 +91,20 @@ namespace Microsoft.Build.UnitTests
 
                 if (NativeMethodsShared.IsWindows)
                 {
-                    Assert.False(success);
-                    Assert.Equal(2, t.DirectoriesCreated.Length);
-                    Assert.Equal(dir2, t.DirectoriesCreated[1].ItemSpec);
+                    Assert.IsFalse(success);
+                    Assert.AreEqual(2, t.DirectoriesCreated.Length);
+                    Assert.AreEqual(dir2, t.DirectoriesCreated[1].ItemSpec);
                 }
                 else
                 {
                     // Since Unix pretty much does not have invalid characters,
                     // the invalid name is not really invalid
-                    Assert.True(success);
-                    Assert.Equal(3, t.DirectoriesCreated.Length);
-                    Assert.Equal(dir2, t.DirectoriesCreated[2].ItemSpec);
+                    Assert.IsTrue(success);
+                    Assert.AreEqual(3, t.DirectoriesCreated.Length);
+                    Assert.AreEqual(dir2, t.DirectoriesCreated[2].ItemSpec);
                 }
 
-                Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
+                Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
                     engine.Log);
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Creating a directory that already exists should not log anything.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateNewDirectory()
         {
             string temp = Path.GetTempPath();
@@ -144,9 +144,9 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.True(success);
-                Assert.Single(t.DirectoriesCreated);
-                Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
+                Assert.IsTrue(success);
+                Assert.ContainsSingle(t.DirectoriesCreated);
+                Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
                     engine.Log);
@@ -154,10 +154,10 @@ namespace Microsoft.Build.UnitTests
                 engine.Log = "";
                 success = t.Execute();
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 // should still return directory even though it didn't need to be created
-                Assert.Single(t.DirectoriesCreated);
-                Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
+                Assert.ContainsSingle(t.DirectoriesCreated);
+                Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.DoesNotContain(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
                     engine.Log);
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Question Create Directory when a directory is needed to be created should return false.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void QuestionCreateNewDirectory()
         {
             string temp = Path.GetTempPath();
@@ -192,8 +192,8 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.False(success);
-                Assert.Single(t.DirectoriesCreated);
+                Assert.IsFalse(success);
+                Assert.ContainsSingle(t.DirectoriesCreated);
                 Assert.Contains(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
                     engine.Log);
@@ -206,17 +206,17 @@ namespace Microsoft.Build.UnitTests
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.Directories = dirList;
                 success = t.Execute();
-                Assert.True(success);
+                Assert.IsTrue(success);
 
                 // Question an existing directory should return true.
                 engine.Log = "";
                 t.FailIfNotIncremental = true;
                 success = t.Execute();
-                Assert.True(success);
+                Assert.IsTrue(success);
 
                 // should still return directory even though it didn't need to be created
-                Assert.Single(t.DirectoriesCreated);
-                Assert.Equal(dir, t.DirectoriesCreated[0].ItemSpec);
+                Assert.ContainsSingle(t.DirectoriesCreated);
+                Assert.AreEqual(dir, t.DirectoriesCreated[0].ItemSpec);
                 Assert.DoesNotContain(
                     String.Format(AssemblyResources.GetString("MakeDir.Comment"), dir),
                     engine.Log);
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Make sure that nice message is logged if a file already exists with that name.
         */
-        [Fact]
+        [MSBuildTestMethod]
         public void FileAlreadyExists()
         {
             string temp = Path.GetTempPath();
@@ -255,8 +255,8 @@ namespace Microsoft.Build.UnitTests
 
                 bool success = t.Execute();
 
-                Assert.False(success);
-                Assert.Empty(t.DirectoriesCreated);
+                Assert.IsFalse(success);
+                Assert.IsEmpty(t.DirectoriesCreated);
                 Assert.Contains("MSB3191", engine.Log);
                 Assert.Contains(file, engine.Log);
             }

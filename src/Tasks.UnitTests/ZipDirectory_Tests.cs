@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -9,10 +9,10 @@ using System.Linq;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class ZipDirectory_Tests
     {
         private readonly MockEngine _mockEngine = new MockEngine();
@@ -24,17 +24,17 @@ namespace Microsoft.Build.Tasks.UnitTests
             Supported,
         }
 
-        [Theory]
-        [InlineData(null, CompressionSupportKind.Supported)]
-        [InlineData("Optimal", CompressionSupportKind.Supported)]
-        [InlineData("Fastest", CompressionSupportKind.Supported)]
-        [InlineData("NoCompression", CompressionSupportKind.Supported)]
+        [MSBuildTestMethod]
+        [DataRow(null, CompressionSupportKind.Supported)]
+        [DataRow("Optimal", CompressionSupportKind.Supported)]
+        [DataRow("Fastest", CompressionSupportKind.Supported)]
+        [DataRow("NoCompression", CompressionSupportKind.Supported)]
 #if NET
-        [InlineData("SmallestSize", CompressionSupportKind.Supported)]
+        [DataRow("SmallestSize", CompressionSupportKind.Supported)]
 #elif NETFRAMEWORK
-        [InlineData("SmallestSize", CompressionSupportKind.NotSupportedOnNetFramework)]
+        [DataRow("SmallestSize", CompressionSupportKind.NotSupportedOnNetFramework)]
 #endif
-        [InlineData("RandomUnsupportedValue", CompressionSupportKind.NotSupported)]
+        [DataRow("RandomUnsupportedValue", CompressionSupportKind.NotSupported)]
         public void CanZipDirectory(string? compressionLevel, CompressionSupportKind compressionSupportKind)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
                 else
                 {
-                    Assert.Equal(CompressionSupportKind.Supported, compressionSupportKind);
+                    Assert.AreEqual(CompressionSupportKind.Supported, compressionSupportKind);
 
                     // Should not contain any warnings between MSB3941 - MSB3950
                     _mockEngine.Log.ShouldNotContain("MSB394", customMessage: _mockEngine.Log); // Prefix
@@ -93,7 +93,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanOverwriteExistingFile()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfDestinationExists()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfDirectoryDoesNotExist()
         {
             ZipDirectory zipDirectory = new ZipDirectory

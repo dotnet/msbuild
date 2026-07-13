@@ -7,15 +7,15 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class ResourceManagement_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleCoreRequest()
         {
             var messages = AssertBuildSucceededAndGetMessages(@"
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             GetTrailingIntegerFromMessage(filteredMessages[0]).ShouldBeGreaterThan(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleCoreRequestWithNoRelease()
         {
             var messages = AssertBuildSucceededAndGetMessages(@"
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             grantedCores2.ShouldBe(grantedCores1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleCoreRequestWithReacquire()
         {
             var messages = AssertBuildSucceededAndGetMessages(@"
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             grantedCores2.ShouldBe(grantedCores1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCoreRequests()
         {
             // Exercise concurrent RequestCores() and ReleaseCores() calls.

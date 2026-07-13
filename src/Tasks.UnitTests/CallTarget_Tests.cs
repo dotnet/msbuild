@@ -8,12 +8,12 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class CallTarget_Tests : IDisposable
     {
         public CallTarget_Tests()
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Simple test of the CallTarget task.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Simple()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Simple test of the CallTarget task, where one of the middle targets invoked fails.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FailedTargets()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@"
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the CallTarget task, where one of the middle targets invoked fails, but we
         /// specified RunEachTargetSeparately, so all the targets should have been run anyway.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FailedTargetsRunSeparately()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@"
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Inside C");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FailsWithOnlyTargetErrors()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@"
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests
         /// to succeed, so that callers of the task don't have to add a Condition to ensure
         /// that the list of targets is non-empty.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoTargets()
         {
             ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the CallTarget task and capture the outputs of the invoked targets.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CaptureTargetOutputs()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject(@"
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
 
             ProjectInstance instance = project.CreateProjectInstance();
             bool success = instance.Build();
-            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
+            Assert.IsTrue(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
 
             IEnumerable<ProjectItemInstance> targetOutputs = instance.GetItems("myfancytargetoutputs");
 
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests
                 targetOutputsTaskItems.ToArray(), false /* ignore the order */);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CaptureTargetOutputsRunningEachTargetSeparately()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"

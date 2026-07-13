@@ -5,7 +5,6 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
@@ -14,16 +13,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit test the cases where we need to determine if the target framework is greater than the current target framework
     /// </summary>
+    [TestClass]
     public sealed class VerifyIgnoreVersionForFrameworkReference : ResolveAssemblyReferenceTestFixture
     {
-        public VerifyIgnoreVersionForFrameworkReference(ITestOutputHelper output) : base(output)
+        public VerifyIgnoreVersionForFrameworkReference(TestContext output) : base(output)
         {
         }
 
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreVersionBasic()
         {
             MockEngine e = new MockEngine(_output);
@@ -45,10 +45,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
 
-            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
-            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);
-            Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
+            Assert.AreEqual(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.AreEqual(0, e.Errors); // "No errors expected in this scenario."
+            Assert.ContainsSingle(t.ResolvedFiles);
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
 
             // Do the resolution without the metadata, expect it to not work since we should not be able to find Dependson9 version 10.0.0.0
             e = new MockEngine(_output);
@@ -68,16 +68,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
-            Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
+            Assert.AreEqual(1, e.Warnings); // "Expected one warning in this scenario."
             e.AssertLogContains("MSB3257");
             e.AssertLogContains("DependsOn9");
-            Assert.Empty(t.ResolvedFiles);
+            Assert.IsEmpty(t.ResolvedFiles);
         }
 
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreVersionBasicTestMetadata()
         {
             MockEngine e = new MockEngine(_output);
@@ -98,10 +98,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
-            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
-            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);
-            Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
+            Assert.AreEqual(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.AreEqual(0, e.Errors); // "No errors expected in this scenario."
+            Assert.ContainsSingle(t.ResolvedFiles);
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
 
             // Do the resolution without the metadata, expect it to not work since we should not be able to find Dependson9 version 10.0.0.0
             e = new MockEngine(_output);
@@ -121,16 +121,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
-            Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
+            Assert.AreEqual(1, e.Warnings); // "Expected one warning in this scenario."
             e.AssertLogContains("MSB3257");
             e.AssertLogContains("DependsOn9");
-            Assert.Empty(t.ResolvedFiles);
+            Assert.IsEmpty(t.ResolvedFiles);
         }
 
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreVersionDisableIfSpecificVersionTrue()
         {
             MockEngine e = new MockEngine(_output);
@@ -151,16 +151,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
-            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
-            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles);
-            Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
+            Assert.AreEqual(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.AreEqual(0, e.Errors); // "No errors expected in this scenario."
+            Assert.ContainsSingle(t.ResolvedFiles);
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
         }
 
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreVersionDisableIfHintPath()
         {
             MockEngine e = new MockEngine(_output);
@@ -183,10 +183,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
 
-            Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
+            Assert.AreEqual(1, e.Warnings); // "Expected one warning in this scenario."
             e.AssertLogContains("MSB3257");
             e.AssertLogContains("DependsOn9");
-            Assert.Empty(t.ResolvedFiles);
+            Assert.IsEmpty(t.ResolvedFiles);
         }
     }
 }

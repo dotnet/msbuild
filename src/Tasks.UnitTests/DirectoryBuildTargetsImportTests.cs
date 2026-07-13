@@ -8,6 +8,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests that Microsoft.Common.targets successfully imports a directory build project in the directory tree of the project being built.
     /// </summary>
+    [TestClass]
     public sealed class DirectoryBuildTargetsImportTests : DirectoryBuildProjectImportTestBase
     {
         protected override string DirectoryBuildProjectFile => "Directory.Build.targets";

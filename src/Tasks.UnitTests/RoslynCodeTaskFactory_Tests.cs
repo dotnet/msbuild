@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -16,34 +17,36 @@ using MicrosoftIO = Microsoft.IO;
 #endif
 using Shouldly;
 using VerifyTests;
-using VerifyXunit;
-using Xunit;
+using VerifyMSTest;
 
-using static VerifyXunit.Verifier;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    public class RoslynCodeTaskFactory_Tests
+    [TestClass]
+    [UsesVerify]
+    public partial class RoslynCodeTaskFactory_Tests
     {
         private const string TaskName = "MyInlineTask";
 
-        private readonly ITestOutputHelper _output;
         private readonly VerifySettings _verifySettings;
 
-        public RoslynCodeTaskFactory_Tests(ITestOutputHelper output)
+        [ModuleInitializer]
+        internal static void InitializeVerify()
         {
-            _output = output;
-            UseProjectRelativeDirectory("TaskFactorySource");
+            Verifier.UseProjectRelativeDirectory("TaskFactorySource");
+        }
 
+        public RoslynCodeTaskFactory_Tests()
+        {
             _verifySettings = new();
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void InlineTaskWithAssemblyPlatformAgnostic(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -88,9 +91,8 @@ Log.LogError(Alpha.GetString());
             }
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [DataRow(false)]
+        [DataRow(true)]
         [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
         public void InlineTaskWithAssembly(bool forceOutOfProc)
         {
@@ -157,9 +159,9 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 2;
@@ -241,7 +243,7 @@ Log.LogError(Class1.ToPrint());
             messages.Length.ShouldBe(1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutOfProcRoslynTaskFactoryCachesAssemblyPath()
         {
             try
@@ -292,7 +294,7 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VisualBasicFragment()
         {
             const string fragment = "Dim x = 0";
@@ -304,7 +306,7 @@ Log.LogError(Class1.ToPrint());
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Fragment);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RoslynCodeTaskFactoryWithoutCS1702Warning()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -365,7 +367,7 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VisualBasicFragmentWithProperties()
         {
             ICollection<TaskPropertyInfo> parameters = new List<TaskPropertyInfo>
@@ -387,7 +389,7 @@ Log.LogError(Class1.ToPrint());
                 parameters: parameters);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VisualBasicMethod()
         {
             const string method = @"Public Overrides Function Execute() As Boolean
@@ -402,7 +404,7 @@ Log.LogError(Class1.ToPrint());
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Method);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CodeLanguageFromTaskBody()
         {
             TryLoadTaskBodyAndExpectSuccess("<Code Language=\"CS\">code</Code>", expectedCodeLanguage: "CS");
@@ -419,7 +421,7 @@ Log.LogError(Class1.ToPrint());
             TryLoadTaskBodyAndExpectSuccess("<Code>code</Code>", expectedCodeLanguage: "CS");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CodeTypeFromTaskBody()
         {
             foreach (RoslynCodeTaskFactoryCodeType codeType in Enum.GetValues(typeof(RoslynCodeTaskFactoryCodeType)).Cast<RoslynCodeTaskFactoryCodeType>())
@@ -441,7 +443,7 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CSharpClass()
         {
             const string taskClassSourceCode = @"namespace InlineTask
@@ -466,7 +468,7 @@ Log.LogError(Class1.ToPrint());
                 expectedCodeLanguage: "CS");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CSharpFragment()
         {
             const string fragment = "int x = 0;";
@@ -474,7 +476,7 @@ Log.LogError(Class1.ToPrint());
             TryLoadTaskBodyAndExpectSuccess(taskBody: $"<Code>{fragment}</Code>", verifySource: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CSharpFragmentWithProperties()
         {
             ICollection<TaskPropertyInfo> parameters = new List<TaskPropertyInfo>
@@ -495,7 +497,7 @@ Log.LogError(Class1.ToPrint());
                 parameters: parameters);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CSharpMethod()
         {
             const string method = @"public override bool Execute() { int x = 0; return true; }";
@@ -506,7 +508,7 @@ Log.LogError(Class1.ToPrint());
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Method);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CSharpClassSourceCodeFromFile()
         {
             const string taskClassSourceCode = @"namespace InlineTask
@@ -536,7 +538,7 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CSharpFragmentSourceCodeFromFile()
         {
             const string sourceCodeFileContents = "int x = 0;";
@@ -552,7 +554,7 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CSharpMethodSourceCodeFromFile()
         {
             const string sourceCodeFileContents = @"public override bool Execute() { int x = 0; return true; }";
@@ -568,7 +570,7 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyCodeElement()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -576,10 +578,10 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "You must specify source code within the Code element or a path to a file containing source code.");
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("Include=\"\"")]
-        [InlineData("Include=\" \"")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("Include=\"\"")]
+        [DataRow("Include=\" \"")]
         public void EmptyIncludeAttributeOnReferenceElement(string includeSetting)
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -587,7 +589,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: $"The \"Include\" attribute of the <Reference> element in the task \"{TaskName}\" has been set but is empty. Make sure the attribute has a proper value.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyLanguageAttributeOnCodeElement()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -595,7 +597,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The \"Language\" attribute of the <Code> element has been set but is empty. If the \"Language\" attribute is set it must not be empty.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyNamespaceAttributeOnUsingElement()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -603,7 +605,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The \"Namespace\" attribute of the <Using> element has been set but is empty. If the \"Namespace\" attribute is set it must not be empty.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptySourceAttributeOnCodeElement()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -611,7 +613,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The \"Source\" attribute of the <Code> element has been set but is empty. If the \"Source\" attribute is set it must not be empty.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyTypeAttributeOnCodeElement()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -619,14 +621,14 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The \"Type\" attribute of the <Code> element has been set but is empty. If the \"Type\" attribute is set it must not be empty.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreTaskCommentsAndWhiteSpace()
         {
             TryLoadTaskBodyAndExpectSuccess("<!-- Comment --><Code>code</Code>");
             TryLoadTaskBodyAndExpectSuccess("                <Code>code</Code>");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidCodeElementAttribute()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -634,7 +636,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The attribute \"Invalid\" is not valid for the <Code> element.  Valid attributes are \"Language\", \"Source\", and \"Type\".");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidCodeLanguage()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -642,7 +644,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The specified code language \"Invalid\" is invalid.  The supported code languages are \"CS, VB\".");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidCodeType()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -650,7 +652,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The specified code type \"Invalid\" is invalid.  The supported code types are \"Fragment, Method, Class\".");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidTaskChildElement()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -662,7 +664,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The element <Text> is not a valid child of the <Task> element.  Valid child elements are <Code>, <Reference>, and <Using>.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidTaskXml()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -670,7 +672,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "The specified task XML is invalid.  '<' is an unexpected token. The expected token is '='. Line 1, position 19.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingCodeElement()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -678,7 +680,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: $"The <Code> element is missing for the \"{TaskName}\" task. This element is required.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCodeNodes()
         {
             TryLoadTaskBodyAndExpectFailure(
@@ -686,7 +688,7 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "Only one <Code> element can be specified.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NamespacesFromTaskBody()
         {
             const string taskBody = @"
@@ -705,7 +707,7 @@ Log.LogError(Class1.ToPrint());
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReferencesFromTaskBody()
         {
             const string taskBody = @"
@@ -726,7 +728,7 @@ Log.LogError(Class1.ToPrint());
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SourceCodeFromFile()
         {
             const string sourceCodeFileContents = @"
@@ -744,9 +746,9 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void MismatchedTaskNameAndTaskClassName(bool forceOutOfProc)
         {
             const string taskName = "SayHello";
@@ -791,9 +793,9 @@ namespace InlineTask
             }
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void ClassDoesNotInheritFromITask(bool forceOutOfProc)
         {
             const string taskName = "ClassDoesNotInheritFromITask";
@@ -823,7 +825,7 @@ namespace InlineTask
                 </Project>
                 """;
 
-            using TestEnvironment env = TestEnvironment.Create(_output);
+            using TestEnvironment env = TestEnvironment.Create(TestContext);
             if (forceOutOfProc)
             {
                 env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
@@ -834,7 +836,7 @@ namespace InlineTask
             logger.AssertLogContains(unformattedMessage);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmbedsGeneratedFromSourceFileInBinlog()
         {
             string taskName = "HelloTask";
@@ -859,7 +861,7 @@ namespace InlineTask
                 FactoryType.RoslynCodeTaskFactory, taskName, sourceContent, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile()
         {
             string taskName = "HelloTask";
@@ -877,7 +879,7 @@ namespace InlineTask
                 FactoryType.RoslynCodeTaskFactory, taskName, sourceContent, false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmbedsGeneratedFileInBinlog()
         {
             string taskXml = @"
@@ -893,7 +895,7 @@ namespace InlineTask
                 FactoryType.RoslynCodeTaskFactory, "HelloTask", taskXml, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmbedsGeneratedFileInBinlogWhenFailsToCompile()
         {
             string taskXml = @"
@@ -910,9 +912,9 @@ namespace InlineTask
         }
 
 #if !FEATURE_RUN_EXE_IN_TESTS
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void RoslynCodeTaskFactory_UsingAPI(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 3 : 4;
@@ -1041,16 +1043,16 @@ namespace InlineTask
 
             if (verifySource)
             {
-                Verify(taskInfo.SourceCode, _verifySettings).GetAwaiter().GetResult();
+                Verifier.Verify(taskInfo.SourceCode, _verifySettings).GetAwaiter().GetResult();
             }
         }
 
         /// <summary>
         /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
         {
             MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
@@ -1088,7 +1090,7 @@ namespace InlineTask
         /// <summary>
         /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
         {
             var mockEngine = new MockEngine
@@ -1118,7 +1120,7 @@ namespace InlineTask
         /// <summary>
         /// Verifies that both ForceOutOfProcessExecution and multi-threaded build work together
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BothForceAndMultiThreadedWork()
         {
             MockEngine buildEngine = new MockEngine 
@@ -1148,7 +1150,7 @@ namespace InlineTask
         /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
         /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1216,9 +1218,9 @@ namespace InlineTask
         /// because the file path is resolved relative to the multi-threaded process's CWD instead of the project file directory.
         /// Creates a realistic scenario with nested directories similar to a multi-project solution structure.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SourceCodeFromRelativeFilePath_ResolvesRelativeToProjectFile(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1316,7 +1318,7 @@ EndGlobal
         /// Unit test that verifies TryLoadTaskBody resolves relative file paths correctly.
         /// This is a lower-level test that directly tests the method responsible for loading code from external files.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TryLoadTaskBody_ResolvesRelativeSourcePath()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1363,7 +1365,7 @@ EndGlobal
         /// <summary>
         /// Verifies that absolute paths in multi-threaded mode are passed through unchanged.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TryLoadTaskBody_AbsolutePathPassesThrough()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1411,7 +1413,7 @@ EndGlobal
         /// Verifies that relative paths with parent directory navigation (..) work correctly.
         /// This is a legitimate use case for shared code files in parent directories.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TryLoadTaskBody_RelativePathWithParentNavigation()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1458,10 +1460,10 @@ EndGlobal
         /// <summary>
         /// Verifies that empty or whitespace source paths are handled with clear error messages.
         /// </summary>
-        [Theory]
-        [InlineData("")]
-        [InlineData(" ")]
-        [InlineData("  ")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow(" ")]
+        [DataRow("  ")]
         public void TryLoadTaskBody_EmptySourcePathFails(string emptyPath)
         {
             MockEngine mockEngine = new MockEngine 
@@ -1495,7 +1497,7 @@ EndGlobal
         /// Verifies behavior when ProjectFileOfTaskNode is null in multi-threaded mode.
         /// This should fail with a clear error rather than silently producing incorrect results.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TryLoadTaskBody_NullProjectFileInMultiThreadedMode()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1534,7 +1536,7 @@ EndGlobal
         /// <summary>
         /// Verifies that non-existent source files produce appropriate file not found errors.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TryLoadTaskBody_NonExistentSourceFile()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1575,7 +1577,7 @@ EndGlobal
         /// environment variable points to a nonexistent directory. This is a real-world
         /// edge case in corporate environments with roaming profiles or cleanup scripts.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RoslynCodeTaskFactoryTempDirectoryDoesntExist()
         {
             string projectFileContents = """
@@ -1593,7 +1595,7 @@ EndGlobal
                     </Project>
                     """;
 
-            using (TestEnvironment env = TestEnvironment.Create(_output))
+            using (TestEnvironment env = TestEnvironment.Create(TestContext))
             {
                 string newTempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 

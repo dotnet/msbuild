@@ -4,73 +4,73 @@
 using System;
 
 using Microsoft.Build.Shared.LanguageParser;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class VisualBasicTokenizer_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void Empty() { AssertTokenize("", "", "", 0); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneSpace() { AssertTokenize(" ", " \x0d", ".eol", 1); }
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoSpace() { AssertTokenize("  ", "  \x0d", ".eol", 1); }
-        [Fact]
+        [MSBuildTestMethod]
         public void Tab() { AssertTokenize("\t", "\t\x0d", ".eol", 1); }
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoTab() { AssertTokenize("\t\t", "\t\t\x0d", ".eol", 1); }
-        [Fact]
+        [MSBuildTestMethod]
         public void SpaceTab() { AssertTokenize(" \t", " \t\x0d", ".eol", 1); }
 
         // Test line continuation character
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleLineContinuation() { AssertTokenize(" _\xd\xa", "."); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LineContinuationWithspacesAfter() { AssertTokenize(" _ \xd\xa\xd\xa", "."); }
 
         // Comments
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleComment() { AssertTokenize("' This is a comment\xd", "Comment(' This is a comment)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void RemComment() { AssertTokenize("rEm This is a comment\xd", "Comment(rEm This is a comment)eol"); }
 
         // Identifiers
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleIdentifier() { AssertTokenize("_MyIdentifier3\xd", "Identifier(_MyIdentifier3)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithEmbeddedUnderscore() { AssertTokenize("_M_\xd", "Identifier(_M_)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithStringTypeCharacter() { AssertTokenize("MyString$\xd", "Identifier(MyString$)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithLongTypeCharacter() { AssertTokenize("MyString&\xd", "Identifier(MyString&)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithDecimalTypeCharacter() { AssertTokenize("MyString@\xd", "Identifier(MyString@)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithSingleTypeCharacter() { AssertTokenize("MyString!\xd", "Identifier(MyString!)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithDoubleTypeCharacter() { AssertTokenize("MyString#\xd", "Identifier(MyString#)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithIntegerTypeCharacter() { AssertTokenize("MyString%\xd", "Identifier(MyString%)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedIdentifier() { AssertTokenize("[Namespace]\xd", "Namespace\xd", "Identifier(Namespace)eol", 1); }
-        [Fact]
+        [MSBuildTestMethod]
         public void UnfinishedEscapedIdentifier() { AssertTokenize("[Namespace\xd", "ExpectedIdentifier([Namespace)"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedIdentifierWithoutGoodStart() { AssertTokenize("[3]\xd", "ExpectedIdentifier([)"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedLineContinuation() { AssertTokenize("[_]\xd", "ExpectedIdentifier([_])"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedButEmptyIdentifier() { AssertTokenize("[]\xd", "ExpectedIdentifier([)"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedIdentifierHasType() { AssertTokenize("[MyString$]\xd", "ExpectedIdentifier([MyString)"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedIdentifierHasTypeOnTheOutside() { AssertTokenize("[MyString]$\xd", "MyString$\xd", "Identifier(MyString)Unrecognized($)", 1); }
 
         // A lone underscore is an invalid identifier.
-        [Fact]
+        [MSBuildTestMethod]
         public void LoneUnderscore()
         {
             AssertTokenize(
@@ -79,89 +79,89 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Boolean literals
-        [Fact]
+        [MSBuildTestMethod]
         public void BooleanTrue() { AssertTokenize("tRuE\xd", "BooleanLiteral(tRuE)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void BooleanFalse() { AssertTokenize("falsE\xd", "BooleanLiteral(falsE)eol"); }
 
         // Integer literals
-        [Fact]
+        [MSBuildTestMethod]
         public void HexInteger() { AssertTokenize("&H0123456789aBcDeF\xd", "HexIntegerLiteral(&H0123456789aBcDeF)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void Octalnteger() { AssertTokenize("&O01234567\xd", "OctalIntegerLiteral(&O01234567)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLowerCase() { AssertTokenize("&h001\xd", "HexIntegerLiteral(&h001)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OctalntegerUpperCase() { AssertTokenize("&o001\xd", "OctalIntegerLiteral(&o001)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void Decimallnteger() { AssertTokenize("001\xd", "DecimalIntegerLiteral(001)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidHexInteger() { AssertTokenize("&H00FG\xd", "HexIntegerLiteral(&H00F)Identifier(G)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidOctalnteger() { AssertTokenize("&O0089\xd", "OctalIntegerLiteral(&O00)DecimalIntegerLiteral(89)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidHexIntegerWithNoneValid() { AssertTokenize("&HG\xd", "ExpectedValidHexDigit(&H)"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidOctalntegerWithNoneValid() { AssertTokenize("&O9\xd", "ExpectedValidOctalDigit(&O)"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerShort() { AssertTokenize("&HaBcDeFS\xd", "HexIntegerLiteral(&HaBcDeFS)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerShortLower() { AssertTokenize("&HaBcDeFs\xd", "HexIntegerLiteral(&HaBcDeFs)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerShort() { AssertTokenize("123S\xd", "DecimalIntegerLiteral(123S)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerShortLower() { AssertTokenize("123s\xd", "DecimalIntegerLiteral(123s)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OctalntegerShort() { AssertTokenize("&O01234567S\xd", "OctalIntegerLiteral(&O01234567S)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OctalntegerShortLower() { AssertTokenize("&O01234567s\xd", "OctalIntegerLiteral(&O01234567s)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerInteger() { AssertTokenize("&HaBcDeFI\xd", "HexIntegerLiteral(&HaBcDeFI)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerIntegerLower() { AssertTokenize("&HaBcDeFi\xd", "HexIntegerLiteral(&HaBcDeFi)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OctalntegerInteger() { AssertTokenize("&O01234567I\xd", "OctalIntegerLiteral(&O01234567I)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OctalntegerIntegerLower() { AssertTokenize("&O01234567i\xd", "OctalIntegerLiteral(&O01234567i)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerInteger() { AssertTokenize("123I\xd", "DecimalIntegerLiteral(123I)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerIntegerLower() { AssertTokenize("123i\xd", "DecimalIntegerLiteral(123i)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLong() { AssertTokenize("&HaBcDeFL\xd", "HexIntegerLiteral(&HaBcDeFL)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLongLower() { AssertTokenize("&HaBcDeFl\xd", "HexIntegerLiteral(&HaBcDeFl)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OctalntegerLong() { AssertTokenize("&O01234567L\xd", "OctalIntegerLiteral(&O01234567L)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OctalntegerLongLower() { AssertTokenize("&O01234567l\xd", "OctalIntegerLiteral(&O01234567l)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLong() { AssertTokenize("123L\xd", "DecimalIntegerLiteral(123L)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerIntegerLong() { AssertTokenize("123l\xd", "DecimalIntegerLiteral(123l)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerWithIntegerTypeChar() { AssertTokenize("1234%\xd", "DecimalIntegerLiteral(1234%)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerWithLongTypeChar() { AssertTokenize("1234&\xd", "DecimalIntegerLiteral(1234&)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerWithDecimalTypeChar() { AssertTokenize("1234@\xd", "DecimalIntegerLiteral(1234@)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerWithSingleTypeChar() { AssertTokenize("1234!\xd", "DecimalIntegerLiteral(1234!)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerWithDoubleTypeChar() { AssertTokenize("1234#\xd", "DecimalIntegerLiteral(1234#)eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerWithStringTypeChar() { AssertTokenize("1234$\xd", "DecimalIntegerLiteral(1234)Unrecognized($)"); }
 
         // String literal
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicString() { AssertTokenize("\"A string\"\xd", "StringLiteral(\"A string\")eol"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void StringWithDoubledQuotesAsEscape() { AssertTokenize("\"\"\"\"\x0d", "\"\"\"\"\x0d", "StringLiteral(\"\"\"\")eol", 1); }
-        [Fact]
+        [MSBuildTestMethod]
         public void StringUnclosed() { AssertTokenize("\"string\x0d", "EndOfFileInsideString(\"string\x0d)"); }
 
         // Operators
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckAllOperators()
         {
             AssertTokenize(
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Inplace arrays
-        [Fact]
+        [MSBuildTestMethod]
         public void InplaceArray()
         {
             AssertTokenize(
@@ -179,18 +179,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Keywords
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleKeyword() { AssertTokenize("Namespace\xd", "Keyword(Namespace)eol"); }
 
         // From the real world
-        [Fact]
+        [MSBuildTestMethod]
         public void WackyBrackettedClassName()
         {
             AssertTokenize(
                 "Public Class [!output SAFE_ITEM_NAME]\xd",
                 "Keyword(Public).Keyword(Class).ExpectedIdentifier([)");
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void MyClassIsAKeyword()
         {
             AssertTokenize(
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_x0dx0aIsASingleLine()
         {
             AssertTokenize("\x0d\x0a", "\x0d\x0a", "eol", 1);
@@ -282,9 +282,9 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(tokenKey);
             }
 
-            Assert.Equal(expectedSource, results);
-            Assert.Equal(expectedTokenKey, tokenKey);
-            Assert.Equal(expectedLastLineNumber, lastLine);
+            Assert.AreEqual(expectedSource, results);
+            Assert.AreEqual(expectedTokenKey, tokenKey);
+            Assert.AreEqual(expectedLastLineNumber, lastLine);
         }
     }
 }

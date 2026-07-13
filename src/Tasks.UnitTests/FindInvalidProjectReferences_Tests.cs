@@ -5,18 +5,18 @@ using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class FindInvalidProjectReferences_Tests
     {
         /// <summary>
         /// Verify FindInvalidProjectReferences for several target platform monikers
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyFindInvalidProjectReferences()
         {
             // Create the engine.
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             t.ProjectReferences = new TaskItem[] { new TaskItem("proj1.proj", proj1), new TaskItem("proj2.proj", proj2), new TaskItem("proj3.proj", proj3), new TaskItem("proj4.proj", proj4) };
             t.BuildEngine = engine;
             bool succeeded = t.Execute();
-            Assert.True(succeeded);
+            Assert.IsTrue(succeeded);
 
             string warning1 = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj1.proj", "Windows, Version=7.0");
             engine.AssertLogDoesntContain(warning1);
@@ -54,9 +54,9 @@ namespace Microsoft.Build.UnitTests
             string warning4 = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj4.proj", "Windows, Version=8.2");
             engine.AssertLogContains(warning4);
 
-            Assert.Equal(2, t.InvalidReferences.Length);
-            Assert.Equal("proj3.proj", t.InvalidReferences[0].ItemSpec);
-            Assert.Equal("proj4.proj", t.InvalidReferences[1].ItemSpec);
+            Assert.AreEqual(2, t.InvalidReferences.Length);
+            Assert.AreEqual("proj3.proj", t.InvalidReferences[0].ItemSpec);
+            Assert.AreEqual("proj4.proj", t.InvalidReferences[1].ItemSpec);
         }
     }
 }

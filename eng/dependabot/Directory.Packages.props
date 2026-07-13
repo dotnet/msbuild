@@ -62,7 +62,7 @@
     <PackageVersion Include="Verify.XunitV3" Version="28.12.0" />
     <PackageVersion Update="Verify.XunitV3" Condition="'$(VerifyXunitV3Version)' != ''" Version="$(VerifyXunitV3Version)" />
 
-    <PackageVersion Include="Verify.MSTest" Version="30.20.0" />
+    <PackageVersion Include="Verify.MSTest" Version="31.24.0" />
     <PackageVersion Update="Verify.MSTest" Condition="'$(VerifyMSTestVersion)' != ''" Version="$(VerifyMSTestVersion)" />
 
   </ItemGroup>

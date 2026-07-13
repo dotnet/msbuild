@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
@@ -21,14 +20,15 @@ namespace Microsoft.Build.UnitTests
     using Microsoft.Build.Tasks.UnitTests;
     using Shouldly;
 
+    [TestClass]
     public sealed class CodeTaskFactoryTests
     {
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void BuildTaskSimpleCodeFactory(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -67,9 +67,9 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v4.0.dll is expected to NOT be in MSBuildToolsPath, that
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void BuildTaskSimpleCodeFactory_RedirectFrom4(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -109,9 +109,9 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void BuildTaskSimpleCodeFactory_RedirectFrom12(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -152,9 +152,9 @@ namespace Microsoft.Build.UnitTests
         /// being in MSBuildToolsPath anymore, that this does NOT affect full fusion AssemblyNames --
         /// it's picked up from the GAC, where it is anyway, so there's no need to redirect.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void BuildTaskSimpleCodeFactory_NoAssemblyNameRedirect(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyRequiredAttribute()
         {
             string projectFileContents = @"
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a runtime exception is logged
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RuntimeException()
         {
             string projectFileContents = @"
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the languages attribute is set but it is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyLanguage()
         {
             string projectFileContents = @"
@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the Type attribute is set but it is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyType()
         {
             string projectFileContents = @"
@@ -302,7 +302,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the source attribute is set but it is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptySource()
         {
             string projectFileContents = @"
@@ -330,10 +330,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a reference is missing an include attribute is set but it is empty
         /// </summary>
-        [Theory]
-        [InlineData("")]
-        [InlineData("Include=\"\"")]
-        [InlineData("Include=\" \"")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("Include=\"\"")]
+        [DataRow("Include=\" \"")]
         public void EmptyReferenceInclude(string includeSetting)
         {
             string taskName = "CustomTaskFromCodeFactory_EmptyReferenceInclude";
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a Using statement is missing an namespace attribute is set but it is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyUsingNamespace()
         {
             string projectFileContents = @"
@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get pass even if the reference is not a full path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReferenceNotPath()
         {
             string projectFileContents = @"
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error a reference has strange chars
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReferenceInvalidChars()
         {
             string projectFileContents = @"
@@ -449,7 +449,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a using has invalid chars
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UsingInvalidChars()
         {
             string projectFileContents = @"
@@ -477,7 +477,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if the sources points to an invalid file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SourcesInvalidFile()
         {
             string tempFileName = "Moose_" + Guid.NewGuid().ToString() + ".cs";
@@ -506,7 +506,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the code element is missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingCodeElement()
         {
             string projectFileContents = @"
@@ -530,9 +530,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have adding a using statement
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void BuildTaskSimpleCodeFactoryTestExtraUsing(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -571,9 +571,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify setting the output tag on the parameter causes it to be an output from the perspective of the targets
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void BuildTaskDateCodeFactory(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -613,7 +613,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the vb language works and that creating the execute method also works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MethodImplmentationVB()
         {
             string projectFileContents = @"
@@ -645,7 +645,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that System does not need to be passed in as a extra reference when targeting vb
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildTaskSimpleCodeFactoryTestSystemVB()
         {
             string projectFileContents = @"
@@ -674,7 +674,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that System does not need to be passed in as a extra reference when targeting c#
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildTaskSimpleCodeFactoryTestSystemCS()
         {
             string projectFileContents = @"
@@ -703,9 +703,9 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we can pass in extra references than the automatic ones. For example the c# compiler does not pass in
         /// system.dll. So lets test that case
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void BuildTaskSimpleCodeFactoryTestExtraReference(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -755,7 +755,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutOfProcCodeTaskFactoryCachesAssemblyPath()
         {
             try
@@ -809,7 +809,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// jscript .net works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MethodImplementationJScriptNet()
         {
             if (!CodeDomProvider.IsDefinedLanguage("js"))
@@ -848,7 +848,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set a code type of Method which expects us to override the execute method entirely.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MethodImplementation()
         {
             string projectFileContents = @"
@@ -881,7 +881,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set the type to Class and this expects an entire class to be entered into the code tag
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ClassImplementationTest()
         {
             string projectFileContents = @"
@@ -947,7 +947,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set the type to Class and this expects an entire class to be entered into the code tag
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ClassImplementationTestDoesNotInheritFromITask()
         {
             string projectFileContents = @"
@@ -1004,7 +1004,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the Type attribute is set but it is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCodeElements()
         {
             string projectFileContents = @"
@@ -1035,7 +1035,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a the Type attribute is set but it is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReferenceNestedInCode()
         {
             string projectFileContents = @"
@@ -1068,7 +1068,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if there is an unknown element in the task tag
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UnknownElementInTask()
         {
             string projectFileContents = @"
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can set a source file location and this will be read in and used.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ClassSourcesTest()
         {
             string sourceFileContent = @"
@@ -1179,7 +1179,7 @@ namespace Microsoft.Build.UnitTests
         /// Code factory test where the TMP directory does not exist.
         /// See https://github.com/dotnet/msbuild/issues/328 for details.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildTaskSimpleCodeFactoryTempDirectoryDoesntExist()
         {
             string projectFileContents = @"
@@ -1205,14 +1205,14 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 // Ensure we're getting the right temp path (%TMP% == GetTempPath())
-                Assert.Equal(
+                Assert.AreEqual(
                     FileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
                     FileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
-                Assert.False(Directory.Exists(newTempPath));
+                Assert.IsFalse(Directory.Exists(newTempPath));
 
                 Environment.SetEnvironmentVariable("TMP", newTempPath);
 
-                Assert.Equal(
+                Assert.AreEqual(
                     FileUtilities.EnsureTrailingSlash(newTempPath),
                     FileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
 
@@ -1229,9 +1229,9 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void RedundantMSBuildReferences(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -1271,9 +1271,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the generated code from source is embedded in the binlog
         /// </summary>
         /// <param name="forceOutOfProc"></param>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void EmbedsGeneratedFromSourceFileInBinlog(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 1 : 0;
@@ -1311,9 +1311,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the generated code from source is embedded in the binlog even when it fails to compile
         /// </summary>
         /// <param name="forceOutOfProc"></param>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 3 : 2;
@@ -1344,9 +1344,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the generated code is embedded in the binlog
         /// </summary>
         /// <param name="forceOutOfProc"></param>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void EmbedsGeneratedFileInBinlog(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 5 : 4;
@@ -1375,9 +1375,9 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the generated code is embedded in the binlog even when it fails to compile
         /// </summary>
         /// <param name="forceOutOfProc"></param>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void EmbedsGeneratedFileInBinlogWhenFailsToCompile(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 7 : 6;
@@ -1402,7 +1402,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ShouldEmitSingleGeneratedFileIntoBinlog()
         {
             using var env = TestEnvironment.Create();
@@ -1464,7 +1464,7 @@ namespace Microsoft.Build.UnitTests
 
             Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContent, binaryLogger, out bool result, out string projectDirectory);
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
@@ -1477,9 +1477,9 @@ namespace Microsoft.Build.UnitTests
                 /// <summary>
         /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
         {
             MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
@@ -1514,7 +1514,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
         {
             MockEngine buildEngine = new MockEngine 
@@ -1544,7 +1544,7 @@ namespace Microsoft.Build.UnitTests
         /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
         /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1599,9 +1599,10 @@ namespace Microsoft.Build.UnitTests
         }
     }
 #else
+    [TestClass]
     public sealed class CodeTaskFactoryTests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void CodeTaskFactoryNotSupported()
         {
             string projectFileContents = @"
@@ -1625,8 +1626,8 @@ namespace Microsoft.Build.UnitTests
 
             BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
 
-            Assert.NotNull(error);
-            Assert.Equal("MSB4801", error.Code);
+            Assert.IsNotNull(error);
+            Assert.AreEqual("MSB4801", error.Code);
             Assert.Contains("CodeTaskFactory", error.Message);
         }
     }

@@ -8,7 +8,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AutoUnify;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -17,15 +16,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Test a few perf scenarios.
     /// </summary>
+    [TestClass]
     public sealed class Perf : ResolveAssemblyReferenceTestFixture
     {
-        public Perf(ITestOutputHelper output) : base(output)
+        public Perf(TestContext output) : base(output)
         {
         }
 
-        [Theory]
-        [InlineData(RARSimulationMode.LoadProject, 1)]
-        [InlineData(RARSimulationMode.BuildProject, 2)]
+        [MSBuildTestMethod]
+        [DataRow(RARSimulationMode.LoadProject, 1)]
+        [DataRow(RARSimulationMode.BuildProject, 2)]
         public void AutoUnifyUsesMinimumIO(RARSimulationMode rarSimulationMode, int ioThreshold)
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DependeeDirectoryIsProbedForDependency()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 bool succeeded = Execute(t);
 
-                Assert.True(succeeded);
+                Assert.IsTrue(succeeded);
 
                 uniqueFileExists[s_dependsOnNuGet_NWinMdPath].ShouldBe(1);
                 uniqueFileExists[s_dependsOnNuGet_NDllPath].ShouldBe(1);
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DependeeDirectoryShouldNotBeProbedForDependencyWhenDependencyResolvedExternally()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 bool succeeded = Execute(t);
 
-                Assert.True(succeeded);
+                Assert.IsTrue(succeeded);
 
                 uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.winmd");
                 uniqueFileExists.ShouldNotContainKey(@"C:\DependsOnNuget\N.dll");

@@ -11,7 +11,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.Xaml;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -33,7 +32,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Test to see whether all of the correct boolean switches are appended.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestDefaultFlags()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -44,7 +43,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// A test to see if all of the reversible flags are generated correctly
         /// This test case leaves the default flags the way they are
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReversibleFlagsWithDefaults()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -57,7 +56,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// A test to see if all of the reversible flags are generated correctly
         /// This test case explicitly sets the ComplexReversible to be false
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReversibleFlagsWithoutDefaults()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -70,7 +69,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests to make sure enums are working well.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBasicString()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -79,7 +78,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestDynamicEnum()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -91,7 +90,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests the basic string array type
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBasicStringArray()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -105,7 +104,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests the basic string array type, with an array that contains multiple values.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBasicStringArray_MultipleValues()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -121,7 +120,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests to see whether the integer appears correctly on the command line
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInteger()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -134,7 +133,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests the (full) functionality of a reversible property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexReversible()
         {
             // When flag is set to false
@@ -150,7 +149,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexString()
         {
             // check to see that the resulting value is good
@@ -163,7 +162,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests the functionality of a string type property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexStringArray()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -173,20 +172,20 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexIntegerLessThanMin()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 object fakeTaskInstance = CreateFakeTask();
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 2);
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexIntegerGreaterThanMax()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 object fakeTaskInstance = CreateFakeTask();
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 256);
@@ -194,7 +193,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
                 CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
             });
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexIntegerWithinRange()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -211,7 +210,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <returns>true if the two are the same, false if they are different</returns>
         private void CheckCommandLine(string expected, string actual)
         {
-            Assert.Equal(expected, actual);
+            Assert.AreEqual(expected, actual);
         }
 
         /// <summary>
@@ -233,12 +232,13 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
     /// <summary>
     /// Tests for XamlDataDrivenToolTask / XamlTaskFactory in the context of a project file.
     /// </summary>
+    [TestClass]
     public class ProjectFileTests
     {
         /// <summary>
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CommandLineErrorsReportFullCommandlineAmpersandTemp()
         {
             string projectFile = @"
@@ -272,7 +272,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
                 MockLogger logger = new MockLogger();
 
                 bool success = p.Build(logger);
-                Assert.False(success);
+                Assert.IsFalse(success);
                 logger.AssertLogContains("FINDSTR");
 
                 // Should not be logging ToolTask.ToolCommandFailed, should be logging Xaml.CommandFailed
@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CommandLineErrorsReportFullCommandline()
         {
             string projectFile = @"
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
 
             bool success = p.Build(logger);
 
-            Assert.False(success); // "Build should have failed"
+            Assert.IsFalse(success); // "Build should have failed"
 
             // Should not be logging ToolTask.ToolCommandFailed, should be logging Xaml.CommandFailed
             logger.AssertLogDoesntContain("MSB6006");
@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// <summary>
         /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SquareBracketEscaping()
         {
             string projectFile = @"
@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
 
             bool success = p.Build(logger);
 
-            Assert.True(success); // "Build should have succeeded"
+            Assert.IsTrue(success); // "Build should have succeeded"
 
             logger.AssertLogContains("echo  1) value            end");
             logger.AssertLogContains("echo  2) [value           end");
@@ -391,11 +391,12 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
     /// <summary>
     /// Tests for XamlDataDrivenToolTask error handling using direct task instantiation.
     /// </summary>
+    [TestClass]
     public class ErrorHandlingTests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ErrorHandlingTests(ITestOutputHelper output)
+        public ErrorHandlingTests(TestContext output)
         {
             _output = output;
         }
@@ -405,7 +406,7 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// were logged during execution, the special "exited zero with errors" message (MSB3725)
         /// is used instead of the normal command failure message (MSB3721).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExitCodeZeroWithLoggedErrors_LogsMSB3725()
         {
             var cmdLine = NativeMethodsShared.IsWindows

@@ -6,19 +6,19 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class WinMDExpTests
     {
         /// <summary>
         /// Tests the "References" parameter on the winmdexp task, and confirms that it sets
         /// the /reference switch on the command-line correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void References()
         {
             WinMDExp t = new WinMDExp();
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
                 useResponseFile: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestNoWarnSwitchWithWarnings()
         {
             WinMDExp t = new WinMDExp();
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
 
         // Tests the "GenerateDocumentation" and "DocumentationFile" parameters on the Vbc task,
         // and confirms that it sets the /doc switch on the command-line correctly.
-        [Fact]
+        [MSBuildTestMethod]
         public void DocumentationFile()
         {
             WinMDExp t = new WinMDExp();
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "/md:input.xml", useResponseFile: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PDBFileTesting()
         {
             WinMDExp t = new WinMDExp();
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "/mp:input.pdb", useResponseFile: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WinMDModule()
         {
             WinMDExp t = new WinMDExp();
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateContains(t, "Foo.dll", useResponseFile: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UsesrDefinedOutputFile()
         {
             WinMDExp t = new WinMDExp();
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "/out:Bob.winmd", useResponseFile: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoOutputFileDefined()
         {
             WinMDExp t = new WinMDExp();
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, "/out:Foo.winmd", useResponseFile: true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ArgumentsAreUnquoted()
         {
             WinMDExp t = new WinMDExp
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
                 "sp ace",
             };
 
-            Assert.Equal(expected, actual);
+            Assert.AreEqual(expected, actual);
         }
     }
 }

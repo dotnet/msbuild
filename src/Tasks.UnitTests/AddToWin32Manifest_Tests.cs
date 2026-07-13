@@ -10,7 +10,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 #if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -19,6 +18,7 @@ using Windows.Win32.System.LibraryLoader;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class AddToWin32Manifest_Tests
     {
         private static string TestAssetsRootPath { get; } = Path.Combine(
@@ -26,16 +26,16 @@ namespace Microsoft.Build.Tasks.UnitTests
             "TestResources",
             "Manifests");
 
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
-        public AddToWin32Manifest_Tests(ITestOutputHelper testOutput) => _testOutput = testOutput;
+        public AddToWin32Manifest_Tests(TestContext testOutput) => _testOutput = testOutput;
 
-        [Theory]
-        [InlineData("testManifestWithInvalidSupportedArchs.manifest", false)]
-        [InlineData("testManifestWithApplicationDefined.manifest", true)]
-        [InlineData("testManifestSavesTheCurrentNodesPositions.manifest", true)]
-        [InlineData("testManifestNoPrefixes.manifest", true)]
-        [InlineData(null, true)]
+        [MSBuildTestMethod]
+        [DataRow("testManifestWithInvalidSupportedArchs.manifest", false)]
+        [DataRow("testManifestWithApplicationDefined.manifest", true)]
+        [DataRow("testManifestSavesTheCurrentNodesPositions.manifest", true)]
+        [DataRow("testManifestNoPrefixes.manifest", true)]
+        [DataRow(null, true)]
         public void ManifestPopulationCheck(string? manifestName, bool expectedResult)
         {
             AddToWin32Manifest task = new AddToWin32Manifest()
@@ -83,9 +83,9 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         [SupportedOSPlatform("windows6.1")]
         [WindowsOnlyTheory]
-        [InlineData(null, true)]
-        [InlineData("buildIn.manifest", true)]
-        [InlineData("testManifestWithValidSupportedArchs.manifest", true)]
+        [DataRow(null, true)]
+        [DataRow("buildIn.manifest", true)]
+        [DataRow("testManifestWithValidSupportedArchs.manifest", true)]
         public void E2EScenarioTests(string? manifestName, bool expectedResult)
         {
             using (TestEnvironment env = TestEnvironment.Create())

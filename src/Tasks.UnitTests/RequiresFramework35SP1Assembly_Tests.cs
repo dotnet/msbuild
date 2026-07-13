@@ -6,15 +6,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class RequiresFramework35SP1Assembly_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public RequiresFramework35SP1Assembly_Tests(ITestOutputHelper output)
+        public RequiresFramework35SP1Assembly_Tests(TestContext output)
         {
             _output = output;
         }
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = new MockEngine(_output),
             };
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Defaults_UncheckedSigningTriggers()
         {
             // The task's default SigningManifests=false is itself an "unchecked signing" trigger,
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SigningEnabled_NoOtherSignals_DoesNotTrigger()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorReportUrl_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateDesktopShortcut_OnNet35_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SuiteName_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -80,12 +80,12 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
-        [Theory]
-        [InlineData("ReferencedAssemblies")]
-        [InlineData("Assemblies")]
-        [InlineData("Files")]
-        [InlineData("DeploymentManifestEntryPoint")]
-        [InlineData("EntryPoint")]
+        [MSBuildTestMethod]
+        [DataRow("ReferencedAssemblies")]
+        [DataRow("Assemblies")]
+        [DataRow("Files")]
+        [DataRow("DeploymentManifestEntryPoint")]
+        [DataRow("EntryPoint")]
         public void IncludeHashFalse_OnAnyItemInput_Triggers(string inputName)
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateDesktopShortcut_OnNet20_DoesNotTrigger()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateDesktopShortcut_BareVersionString_Works()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Sp1AssemblyIdentity_TriggersWithoutIncludeHash()
         {
             RequiresFramework35SP1Assembly task = CreateTask();
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
             task.RequiresMinimumFramework35SP1.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Net35ClientSentinelIdentity_Triggers()
         {
             RequiresFramework35SP1Assembly task = CreateTask();

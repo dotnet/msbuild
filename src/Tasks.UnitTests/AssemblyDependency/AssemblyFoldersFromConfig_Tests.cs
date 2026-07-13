@@ -8,15 +8,15 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 {
+    [TestClass]
     public class AssemblyFoldersFromConfig_Tests : ResolveAssemblyReferenceTestFixture
     {
-        public AssemblyFoldersFromConfig_Tests(ITestOutputHelper output) : base(output)
+        public AssemblyFoldersFromConfig_Tests(TestContext output) : base(output)
         {
             s_existentFiles.AddRange(new[]
             {
@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssemblyFoldersFromConfigTest()
         {
             var assemblyConfig = Path.GetTempFileName();
@@ -50,8 +50,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Execute(t);
 
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2", "assemblyfromconfig2.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.ContainsSingle(t.ResolvedFiles);
+                Assert.AreEqual(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2", "assemblyfromconfig2.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssemblyFoldersFromConfigPlatformSpecificAssemblyFirstTest()
         {
             var assemblyConfig = Path.GetTempFileName();
@@ -80,8 +80,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Execute(t);
 
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86", "assemblyfromconfig_common.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.ContainsSingle(t.ResolvedFiles);
+                Assert.AreEqual(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86", "assemblyfromconfig_common.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssemblyFoldersFromConfigNormalizeNetFrameworkVersion()
         {
             var assemblyConfig = Path.GetTempFileName();
@@ -110,8 +110,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Execute(t);
 
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.ContainsSingle(t.ResolvedFiles);
+                Assert.AreEqual(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
 
                 // Try again changing only the processor architecture
@@ -125,8 +125,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Execute(t);
 
-                Assert.Single(t.ResolvedFiles);
-                Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
+                Assert.ContainsSingle(t.ResolvedFiles);
+                Assert.AreEqual(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssemblyFoldersFromConfigFileNotFoundTest()
         {
             var assemblyConfig = Path.GetTempFileName();
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 };
 
 
-                Assert.Throws<InternalErrorException>(() => Execute(t));
+                Assert.ThrowsExactly<InternalErrorException>(() => Execute(t));
             }
             finally
             {
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssemblyFoldersFromConfigFileMalformed()
         {
             var assemblyConfig = Path.GetTempFileName();
@@ -181,8 +181,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 var success = Execute(t);
 
-                Assert.False(success);
-                Assert.Empty(t.ResolvedFiles);
+                Assert.IsFalse(success);
+                Assert.IsEmpty(t.ResolvedFiles);
                 engine.AssertLogContains(") specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: ");
             }
             finally

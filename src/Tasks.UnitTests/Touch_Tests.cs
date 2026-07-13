@@ -8,12 +8,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class Touch_Tests
     {
         internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Fail("Unexpected set last write time: " + path);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TouchExisting()
         {
             Touch t = new Touch();
@@ -196,16 +196,16 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.True(success);
+            Assert.IsTrue(success);
 
-            Assert.Single(t.TouchedFiles);
+            Assert.ContainsSingle(t.TouchedFiles);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
                 engine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TouchNonExisting()
         {
             Touch t = new Touch();
@@ -221,14 +221,14 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Not success because the file doesn't exist
-            Assert.False(success);
+            Assert.IsFalse(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt),
                 engine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TouchNonExistingAlwaysCreate()
         {
             Touch t = new Touch();
@@ -245,14 +245,14 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Success because the file was created.
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
                 engine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TouchNonExistingAlwaysCreateAndBadlyFormedTimestamp()
         {
             Touch t = new Touch();
@@ -271,12 +271,12 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Failed because of badly formed time string.
-            Assert.False(success);
+            Assert.IsFalse(success);
 
             Assert.Contains("MSB3376", engine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TouchReadonly()
         {
             Touch t = new Touch();
@@ -293,13 +293,13 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Failed because file is readonly.
-            Assert.False(success);
+            Assert.IsFalse(success);
 
             Assert.Contains("MSB3374", engine.Log);
             Assert.Contains(myreadonly_txt, engine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TouchReadonlyForce()
         {
             Touch t = new Touch();
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests
             Execute(t);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TouchNonExistingDirectoryDoesntExist()
         {
             Touch t = new Touch();
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Failed because the target directory didn't exist.
-            Assert.False(success);
+            Assert.IsFalse(success);
 
             Assert.Contains("MSB3371", engine.Log);
             Assert.Contains(nonexisting_txt, engine.Log);
@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Question touch on non-existing file should return false.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void QuestionTouchNonExisting()
         {
             Touch t = new Touch();
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests
             bool success = Execute(t);
 
             // Not success because the file doesn't exist
-            Assert.False(success);
+            Assert.IsFalse(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.FileDoesNotExist"), mynonexisting_txt),
@@ -370,7 +370,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Question touch on a non-existing file with AlwaysCreate property should return false.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void QuestionTouchNonExistingAlwaysCreate()
         {
             Touch t = new Touch();
@@ -386,7 +386,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Question touch should return true and the file is not touched.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void QuestionTouchExisting()
         {
             Touch t = new Touch();
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),

@@ -11,18 +11,18 @@ using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Tasks.UnitTests.ResourceHandling;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class ResGenDependencies_Tests : IDisposable
     {
         private readonly TestEnvironment _env;
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ResGenDependencies_Tests(ITestOutputHelper output)
+        public ResGenDependencies_Tests(TestContext output)
         {
             _env = TestEnvironment.Create(output);
             _output = output;
@@ -33,8 +33,8 @@ namespace Microsoft.Build.UnitTests
             _env.Dispose();
         }
 
-        [Theory]
-        [MemberData(nameof(GenerateResource_Tests.Utilities.UsePreserializedResourceStates), MemberType = typeof(GenerateResource_Tests.Utilities))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(GenerateResource_Tests.Utilities.UsePreserializedResourceStates), typeof(GenerateResource_Tests.Utilities))]
 
         public void DirtyCleanScenario(bool useMSBuildResXReader)
         {
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
         /// System.Byte[], System.IO.MemoryStream, and FileStreamResource types
         /// (e.g. System.Drawing.Bitmap).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LinkedFilesTrackedForAllResourceTypes()
         {
             var folder = _env.CreateFolder(createFolder: true);

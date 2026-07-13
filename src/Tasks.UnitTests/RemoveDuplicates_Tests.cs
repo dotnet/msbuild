@@ -3,18 +3,18 @@
 
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class RemoveDuplicates_Tests
     {
         /// <summary>
         /// Pass one item in, get the same item back.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneItemNop()
         {
             var t = new RemoveDuplicates();
@@ -23,16 +23,16 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new[] { new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
-            Assert.True(success);
-            Assert.Single(t.Filtered);
-            Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
-            Assert.False(t.HadAnyDuplicates);
+            Assert.IsTrue(success);
+            Assert.ContainsSingle(t.Filtered);
+            Assert.AreEqual("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.IsFalse(t.HadAnyDuplicates);
         }
 
         /// <summary>
         /// Pass in two of the same items.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoItemsTheSame()
         {
             var t = new RemoveDuplicates();
@@ -41,16 +41,16 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new[] { new TaskItem("MyFile.txt"), new TaskItem("MyFile.txt") };
 
             bool success = t.Execute();
-            Assert.True(success);
-            Assert.Single(t.Filtered);
-            Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
-            Assert.True(t.HadAnyDuplicates);
+            Assert.IsTrue(success);
+            Assert.ContainsSingle(t.Filtered);
+            Assert.AreEqual("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.IsTrue(t.HadAnyDuplicates);
         }
 
         /// <summary>
         /// Item order preserved
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OrderPreservedNoDups()
         {
             var t = new RemoveDuplicates();
@@ -66,17 +66,17 @@ namespace Microsoft.Build.UnitTests
             };
 
             bool success = t.Execute();
-            Assert.True(success);
-            Assert.Equal(3, t.Filtered.Length);
-            Assert.Equal("MyFile2.txt", t.Filtered[0].ItemSpec);
-            Assert.Equal("MyFile1.txt", t.Filtered[1].ItemSpec);
-            Assert.Equal("MyFile3.txt", t.Filtered[2].ItemSpec);
+            Assert.IsTrue(success);
+            Assert.AreEqual(3, t.Filtered.Length);
+            Assert.AreEqual("MyFile2.txt", t.Filtered[0].ItemSpec);
+            Assert.AreEqual("MyFile1.txt", t.Filtered[1].ItemSpec);
+            Assert.AreEqual("MyFile3.txt", t.Filtered[2].ItemSpec);
         }
 
         /// <summary>
         /// Item order preserved, keeping the first items seen when there are duplicates.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OrderPreservedDups()
         {
             var t = new RemoveDuplicates();
@@ -92,17 +92,17 @@ namespace Microsoft.Build.UnitTests
             };
 
             bool success = t.Execute();
-            Assert.True(success);
-            Assert.Equal(3, t.Filtered.Length);
-            Assert.Equal("MyFile2.txt", t.Filtered[0].ItemSpec);
-            Assert.Equal("MyFile1.txt", t.Filtered[1].ItemSpec);
-            Assert.Equal("MyFile3.txt", t.Filtered[2].ItemSpec);
+            Assert.IsTrue(success);
+            Assert.AreEqual(3, t.Filtered.Length);
+            Assert.AreEqual("MyFile2.txt", t.Filtered[0].ItemSpec);
+            Assert.AreEqual("MyFile1.txt", t.Filtered[1].ItemSpec);
+            Assert.AreEqual("MyFile3.txt", t.Filtered[2].ItemSpec);
         }
 
         /// <summary>
         /// Pass in two items that are different.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoItemsDifferent()
         {
             var t = new RemoveDuplicates();
@@ -111,17 +111,17 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new[] { new TaskItem("MyFile1.txt"), new TaskItem("MyFile2.txt") };
 
             bool success = t.Execute();
-            Assert.True(success);
-            Assert.Equal(2, t.Filtered.Length);
-            Assert.Equal("MyFile1.txt", t.Filtered[0].ItemSpec);
-            Assert.Equal("MyFile2.txt", t.Filtered[1].ItemSpec);
-            Assert.False(t.HadAnyDuplicates);
+            Assert.IsTrue(success);
+            Assert.AreEqual(2, t.Filtered.Length);
+            Assert.AreEqual("MyFile1.txt", t.Filtered[0].ItemSpec);
+            Assert.AreEqual("MyFile2.txt", t.Filtered[1].ItemSpec);
+            Assert.IsFalse(t.HadAnyDuplicates);
         }
 
         /// <summary>
         /// Case should not matter.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CaseInsensitive()
         {
             var t = new RemoveDuplicates();
@@ -130,25 +130,25 @@ namespace Microsoft.Build.UnitTests
             t.Inputs = new[] { new TaskItem("MyFile.txt"), new TaskItem("MyFIle.tXt") };
 
             bool success = t.Execute();
-            Assert.True(success);
-            Assert.Single(t.Filtered);
-            Assert.Equal("MyFile.txt", t.Filtered[0].ItemSpec);
-            Assert.True(t.HadAnyDuplicates);
+            Assert.IsTrue(success);
+            Assert.ContainsSingle(t.Filtered);
+            Assert.AreEqual("MyFile.txt", t.Filtered[0].ItemSpec);
+            Assert.IsTrue(t.HadAnyDuplicates);
         }
 
         /// <summary>
         /// No inputs should result in zero-length outputs.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingInputs()
         {
             var t = new RemoveDuplicates();
             t.BuildEngine = new MockEngine();
             bool success = t.Execute();
 
-            Assert.True(success);
-            Assert.Empty(t.Filtered);
-            Assert.False(t.HadAnyDuplicates);
+            Assert.IsTrue(success);
+            Assert.IsEmpty(t.Filtered);
+            Assert.IsFalse(t.HadAnyDuplicates);
         }
     }
 }

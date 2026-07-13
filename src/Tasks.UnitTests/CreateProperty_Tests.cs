@@ -3,12 +3,12 @@
 
 using System;
 using Microsoft.Build.Evaluation;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class CreateProperty_Tests : IDisposable
     {
         public CreateProperty_Tests()
@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that I can use the CreateProperty task to blank out a property value.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateBlankProperty()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that I can use the CreateProperty task to create a property
         /// that has a parsable semicolon in it.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreatePropertyWithSemicolon()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure that I can use the CreateProperty task to create a property
         /// that has a literal semicolon in it.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreatePropertyWithLiteralSemicolon()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(@"

@@ -7,19 +7,19 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class ResolveNonMSBuildProjectOutput_Tests
     {
         private const string attributeProject = "Project";
 
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ResolveNonMSBuildProjectOutput_Tests(ITestOutputHelper output)
+        public ResolveNonMSBuildProjectOutput_Tests(TestContext output)
         {
             _output = output;
         }
@@ -60,18 +60,18 @@ namespace Microsoft.Build.UnitTests
                 itemSpec, projectGuid, package, name, expectedResult, result,
                 expectedMissingAttribute, missingAttr);
 
-            Assert.Equal(result, expectedResult);
+            Assert.AreEqual(expectedResult, result);
             if (!result)
             {
-                Assert.Equal(missingAttr, expectedMissingAttribute);
+                Assert.AreEqual(expectedMissingAttribute, missingAttr);
             }
             else
             {
-                Assert.Null(missingAttr);
+                Assert.IsNull(missingAttr);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestVerifyReferenceAttributes()
         {
             // a correct reference
@@ -112,18 +112,18 @@ namespace Microsoft.Build.UnitTests
                 "expected result \"{5}\", actual result \"{6}\", expected path \"{7}\", actual path \"{8}\".",
                 itemSpec, projectGuid, package, name, xmlString, expectedResult, result, expectedPath, resolvedPath);
 
-            Assert.Equal(result, expectedResult);
+            Assert.AreEqual(expectedResult, result);
             if (result)
             {
-                Assert.Equal(resolvedPath.ItemSpec, expectedPath);
+                Assert.AreEqual(expectedPath, resolvedPath.ItemSpec);
             }
             else
             {
-                Assert.Null(resolvedPath);
+                Assert.IsNull(resolvedPath);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestResolve()
         {
             // empty pre-generated string
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestManagedCheck()
         {
             Hashtable unresolvedOutputs = null;
@@ -225,17 +225,17 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, path => (path == Path.Combine("obj", "managed.dll")), out unresolvedOutputs, out resolvedOutputs);
 
-            Assert.NotNull(resolvedOutputs);
-            Assert.True(resolvedOutputs.Contains(Path.Combine("obj", "managed.dll")));
-            Assert.True(resolvedOutputs.Contains(Path.Combine("obj", "unmanaged.dll")));
-            Assert.Equal("true", ((ITaskItem)resolvedOutputs[Path.Combine("obj", "managed.dll")]).GetMetadata("ManagedAssembly"));
-            Assert.NotEqual("true", ((ITaskItem)resolvedOutputs[Path.Combine("obj", "unmanaged.dll")]).GetMetadata("ManagedAssembly"));
+            Assert.IsNotNull(resolvedOutputs);
+            Assert.IsTrue(resolvedOutputs.Contains(Path.Combine("obj", "managed.dll")));
+            Assert.IsTrue(resolvedOutputs.Contains(Path.Combine("obj", "unmanaged.dll")));
+            Assert.AreEqual("true", ((ITaskItem)resolvedOutputs[Path.Combine("obj", "managed.dll")]).GetMetadata("ManagedAssembly"));
+            Assert.AreNotEqual("true", ((ITaskItem)resolvedOutputs[Path.Combine("obj", "unmanaged.dll")]).GetMetadata("ManagedAssembly"));
         }
 
         /// <summary>
         /// Verifies that the UnresolvedProjectReferences output parameter is populated correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestUnresolvedReferences()
         {
             ArrayList projectRefs = new ArrayList();
@@ -254,10 +254,10 @@ namespace Microsoft.Build.UnitTests
             Hashtable resolvedOutputs;
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, out unresolvedOutputs, out resolvedOutputs);
 
-            Assert.Empty(resolvedOutputs); // "No resolved refs expected for case 1"
-            Assert.Equal(2, unresolvedOutputs.Count); // "Two unresolved refs expected for case 1"
-            Assert.Equal(unresolvedOutputs["MCDep1.vcproj"], projectRefs[0]);
-            Assert.Equal(unresolvedOutputs["MCDep2.vcproj"], projectRefs[1]);
+            Assert.IsEmpty(resolvedOutputs); // "No resolved refs expected for case 1"
+            Assert.AreEqual(2, unresolvedOutputs.Count); // "Two unresolved refs expected for case 1"
+            Assert.AreEqual(unresolvedOutputs["MCDep1.vcproj"], projectRefs[0]);
+            Assert.AreEqual(unresolvedOutputs["MCDep2.vcproj"], projectRefs[1]);
 
             // 2. multiple project refs, one resolvable
             projectOutputs = new Hashtable();
@@ -268,10 +268,10 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, out unresolvedOutputs, out resolvedOutputs);
 
-            Assert.Single(resolvedOutputs); // "One resolved ref expected for case 2"
-            Assert.True(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct.dll")));
-            Assert.Single(unresolvedOutputs); // "One unresolved ref expected for case 2"
-            Assert.Equal(unresolvedOutputs["MCDep1.vcproj"], projectRefs[0]);
+            Assert.ContainsSingle(resolvedOutputs); // "One resolved ref expected for case 2"
+            Assert.IsTrue(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct.dll")));
+            Assert.ContainsSingle(unresolvedOutputs); // "One unresolved ref expected for case 2"
+            Assert.AreEqual(unresolvedOutputs["MCDep1.vcproj"], projectRefs[0]);
 
             // 3. multiple project refs, all resolvable
             projectOutputs = new Hashtable();
@@ -283,10 +283,10 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, out unresolvedOutputs, out resolvedOutputs);
 
-            Assert.Equal(2, resolvedOutputs.Count); // "Two resolved refs expected for case 3"
-            Assert.True(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct.dll")));
-            Assert.True(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct2.dll")));
-            Assert.Empty(unresolvedOutputs); // "No unresolved refs expected for case 3"
+            Assert.AreEqual(2, resolvedOutputs.Count); // "Two resolved refs expected for case 3"
+            Assert.IsTrue(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct.dll")));
+            Assert.IsTrue(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct2.dll")));
+            Assert.IsEmpty(unresolvedOutputs); // "No unresolved refs expected for case 3"
 
             // 4. multiple project refs, all failed to resolve
             projectOutputs = new Hashtable();
@@ -298,8 +298,8 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, out unresolvedOutputs, out resolvedOutputs);
 
-            Assert.Empty(resolvedOutputs); // "No resolved refs expected for case 4"
-            Assert.Empty(unresolvedOutputs); // "No unresolved refs expected for case 4"
+            Assert.IsEmpty(resolvedOutputs); // "No resolved refs expected for case 4"
+            Assert.IsEmpty(unresolvedOutputs); // "No unresolved refs expected for case 4"
 
             // 5. multiple project refs, one resolvable, one failed to resolve
             projectOutputs = new Hashtable();
@@ -311,9 +311,9 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, out unresolvedOutputs, out resolvedOutputs);
 
-            Assert.Single(resolvedOutputs); // "One resolved ref expected for case 5"
-            Assert.True(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct.dll")));
-            Assert.Empty(unresolvedOutputs); // "No unresolved refs expected for case 5"
+            Assert.ContainsSingle(resolvedOutputs); // "One resolved ref expected for case 5"
+            Assert.IsTrue(resolvedOutputs.ContainsKey(Path.Combine("obj", "correct.dll")));
+            Assert.IsEmpty(unresolvedOutputs); // "No unresolved refs expected for case 5"
 
             // 6. multiple project refs, one unresolvable, one failed to resolve
             projectOutputs = new Hashtable();
@@ -324,12 +324,12 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectOutputs, out unresolvedOutputs, out resolvedOutputs);
 
-            Assert.Empty(resolvedOutputs); // "No resolved refs expected for case 6"
-            Assert.Single(unresolvedOutputs); // "One unresolved ref expected for case 6"
-            Assert.Equal(unresolvedOutputs["MCDep2.vcproj"], projectRefs[1]);
+            Assert.IsEmpty(resolvedOutputs); // "No resolved refs expected for case 6"
+            Assert.ContainsSingle(unresolvedOutputs); // "One unresolved ref expected for case 6"
+            Assert.AreEqual(unresolvedOutputs["MCDep2.vcproj"], projectRefs[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestVerifyProjectReferenceItem()
         {
             ResolveNonMSBuildProjectOutput rvpo = new ResolveNonMSBuildProjectOutput();
@@ -341,16 +341,16 @@ namespace Microsoft.Build.UnitTests
 
             MockEngine engine = new MockEngine(_output);
             rvpo.BuildEngine = engine;
-            Assert.True(rvpo.VerifyProjectReferenceItems(taskItems, false /* treat problems as warnings */));
-            Assert.Equal(1, engine.Warnings);
-            Assert.Equal(0, engine.Errors);
+            Assert.IsTrue(rvpo.VerifyProjectReferenceItems(taskItems, false /* treat problems as warnings */));
+            Assert.AreEqual(1, engine.Warnings);
+            Assert.AreEqual(0, engine.Errors);
             engine.AssertLogContains("MSB3107");
 
             engine = new MockEngine(_output);
             rvpo.BuildEngine = engine;
-            Assert.False(rvpo.VerifyProjectReferenceItems(taskItems, true /* treat problems as errors */));
-            Assert.Equal(0, engine.Warnings);
-            Assert.Equal(1, engine.Errors);
+            Assert.IsFalse(rvpo.VerifyProjectReferenceItems(taskItems, true /* treat problems as errors */));
+            Assert.AreEqual(0, engine.Warnings);
+            Assert.AreEqual(1, engine.Errors);
             engine.AssertLogContains("MSB3107");
         }
     }

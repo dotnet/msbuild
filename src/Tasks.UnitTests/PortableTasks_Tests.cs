@@ -7,15 +7,15 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class PortableTasks_Tests
     {
-        private readonly ITestOutputHelper _outputHelper;
+        private readonly TestContext _outputHelper;
 
         private static readonly string PortableTaskFolderPath = Path.GetFullPath(
             Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
 
         private const string ProjectFileName = "portableTaskTest.proj";
 
-        public PortableTasks_Tests(ITestOutputHelper outputHelper)
+        public PortableTasks_Tests(TestContext outputHelper)
         {
             _outputHelper = outputHelper;
         }
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestNonDesktopMSBuildShouldRunPortableTask()
         {
             RunMSBuildOnProjectWithPortableTaskAndAssertOutput(false);

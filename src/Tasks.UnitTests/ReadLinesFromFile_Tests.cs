@@ -10,18 +10,18 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class ReadLinesFromFile_Tests
     {
         /// <summary>
         /// Write one line, read one line.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Basic()
         {
             // Start with a missing file.
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("Line1") }
                 };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
@@ -43,21 +43,21 @@ namespace Microsoft.Build.UnitTests
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
-                Assert.True(r.Execute());
+                Assert.IsTrue(r.Execute());
 
-                Assert.Single(r.Lines);
-                Assert.Equal("Line1", r.Lines[0].ItemSpec);
+                Assert.ContainsSingle(r.Lines);
+                Assert.AreEqual("Line1", r.Lines[0].ItemSpec);
 
                 // Write two more lines to the file.
                 a.Lines = new ITaskItem[] { new TaskItem("Line2"), new TaskItem("Line3") };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Read all of the lines and verify them.
-                Assert.True(r.Execute());
-                Assert.Equal(3, r.Lines.Length);
-                Assert.Equal("Line1", r.Lines[0].ItemSpec);
-                Assert.Equal("Line2", r.Lines[1].ItemSpec);
-                Assert.Equal("Line3", r.Lines[2].ItemSpec);
+                Assert.IsTrue(r.Execute());
+                Assert.AreEqual(3, r.Lines.Length);
+                Assert.AreEqual("Line1", r.Lines[0].ItemSpec);
+                Assert.AreEqual("Line2", r.Lines[1].ItemSpec);
+                Assert.AreEqual("Line3", r.Lines[2].ItemSpec);
             }
             finally
             {
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
         /// The file should contain the *unescaped* lines, but no escaping information should be
         /// lost when read.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Escaping()
         {
             // Start with a missing file.
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("Line1_%253b_") }
                 };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
@@ -92,21 +92,21 @@ namespace Microsoft.Build.UnitTests
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
-                Assert.True(r.Execute());
+                Assert.IsTrue(r.Execute());
 
-                Assert.Single(r.Lines);
-                Assert.Equal("Line1_%3b_", r.Lines[0].ItemSpec);
+                Assert.ContainsSingle(r.Lines);
+                Assert.AreEqual("Line1_%3b_", r.Lines[0].ItemSpec);
 
                 // Write two more lines to the file.
                 a.Lines = new ITaskItem[] { new TaskItem("Line2"), new TaskItem("Line3") };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Read all of the lines and verify them.
-                Assert.True(r.Execute());
-                Assert.Equal(3, r.Lines.Length);
-                Assert.Equal("Line1_%3b_", r.Lines[0].ItemSpec);
-                Assert.Equal("Line2", r.Lines[1].ItemSpec);
-                Assert.Equal("Line3", r.Lines[2].ItemSpec);
+                Assert.IsTrue(r.Execute());
+                Assert.AreEqual(3, r.Lines.Length);
+                Assert.AreEqual("Line1_%3b_", r.Lines[0].ItemSpec);
+                Assert.AreEqual("Line2", r.Lines[1].ItemSpec);
+                Assert.AreEqual("Line3", r.Lines[2].ItemSpec);
             }
             finally
             {
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Write a line that contains an ANSI character that is not ASCII.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ANSINonASCII()
         {
             // Start with a missing file.
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("My special character is \u00C3") }
                 };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
@@ -139,10 +139,10 @@ namespace Microsoft.Build.UnitTests
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
-                Assert.True(r.Execute());
+                Assert.IsTrue(r.Execute());
 
-                Assert.Single(r.Lines);
-                Assert.Equal("My special character is \u00C3", r.Lines[0].ItemSpec);
+                Assert.ContainsSingle(r.Lines);
+                Assert.AreEqual("My special character is \u00C3", r.Lines[0].ItemSpec);
             }
             finally
             {
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Reading lines from an missing file should result in the empty list.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMissing()
         {
             var file = FileUtilities.GetTemporaryFileName();
@@ -164,15 +164,15 @@ namespace Microsoft.Build.UnitTests
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
             };
-            Assert.True(r.Execute());
+            Assert.IsTrue(r.Execute());
 
-            Assert.Empty(r.Lines);
+            Assert.IsEmpty(r.Lines);
         }
 
         /// <summary>
         /// Reading blank lines from a file should be ignored.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreBlankLines()
         {
             // Start with a missing file.
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem("\0\0\0\0\0\0\0\0\0")
                 }
                 };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
@@ -202,12 +202,12 @@ namespace Microsoft.Build.UnitTests
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
-                Assert.True(r.Execute());
+                Assert.IsTrue(r.Execute());
 
-                Assert.Equal(3, r.Lines.Length);
-                Assert.Equal("Line1", r.Lines[0].ItemSpec);
-                Assert.Equal("Line2", r.Lines[1].ItemSpec);
-                Assert.Equal("Line3", r.Lines[2].ItemSpec);
+                Assert.AreEqual(3, r.Lines.Length);
+                Assert.AreEqual("Line1", r.Lines[0].ItemSpec);
+                Assert.AreEqual("Line2", r.Lines[1].ItemSpec);
+                Assert.AreEqual("Line3", r.Lines[2].ItemSpec);
             }
             finally
             {
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Reading lines from a file that you have no access to.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadNoAccess()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("This is a new line") }
                 };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Remove all File access to the file to current user
                 var fSecurity = File.GetAccessControl(file);
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests
                 r.BuildEngine = mEngine;
                 r.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 r.File = new TaskItem(file);
-                Assert.False(r.Execute());
+                Assert.IsFalse(r.Execute());
             }
             finally
             {

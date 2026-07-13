@@ -7,12 +7,12 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class Delete_Tests
     {
         /*
@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Make sure that attributes set on input items are forwarded to output items.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void AttributeForwarding()
         {
             Delete t = new Delete();
@@ -33,10 +33,10 @@ namespace Microsoft.Build.UnitTests
 
             t.Execute();
 
-            Assert.Equal("en-GB", t.DeletedFiles[0].GetMetadata("Locale"));
+            Assert.AreEqual("en-GB", t.DeletedFiles[0].GetMetadata("Locale"));
 
             // Output ItemSpec should not be overwritten.
-            Assert.Equal("MyFiles.nonexistent", t.DeletedFiles[0].ItemSpec);
+            Assert.AreEqual("MyFiles.nonexistent", t.DeletedFiles[0].ItemSpec);
         }
 
         /// <summary>

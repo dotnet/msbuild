@@ -9,7 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
@@ -19,6 +18,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference GlobalAssemblyCache.
     /// </summary>
+    [TestClass]
     public sealed class GlobalAssemblyCacheTests : ResolveAssemblyReferenceTestFixture
     {
         private const string system4 = "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private GetPathFromFusionName _getPathFromFusionName = new GetPathFromFusionName(MockGetPathFromFusionName);
         private GetGacEnumerator _gacEnumerator = new GetGacEnumerator(MockAssemblyCacheEnumerator);
 
-        public GlobalAssemblyCacheTests(ITestOutputHelper output) : base(output)
+        public GlobalAssemblyCacheTests(TestContext output) : base(output)
         {
         }
 
@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// This test two aspects. First that we get the correct runtime, second that we get the highest version for that assembly in the runtime.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySimpleNamev2057020()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -57,8 +57,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("2.0.57027"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, false);
-            Assert.NotNull(path);
-            Assert.Equal(system2Path, path);
+            Assert.IsNotNull(path);
+            Assert.AreEqual(system2Path, path);
         }
 
 
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySimpleNamev2057020SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -82,8 +82,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("2.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
-            Assert.NotNull(path);
-            Assert.Equal(system4Path, path);
+            Assert.IsNotNull(path);
+            Assert.AreEqual(system4Path, path);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyFusionNamev2057020SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -105,8 +105,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("2.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
-            Assert.NotNull(path);
-            Assert.Equal(system2Path, path);
+            Assert.IsNotNull(path);
+            Assert.AreEqual(system2Path, path);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// This test two aspects. First that we get the correct runtime, second that we get the highest version for that assembly in the runtime.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySimpleNamev40()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -128,8 +128,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("4.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, false);
-            Assert.NotNull(path);
-            Assert.Equal(system4Path, path);
+            Assert.IsNotNull(path);
+            Assert.AreEqual(system4Path, path);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySimpleNamev40SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -152,8 +152,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("4.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
-            Assert.NotNull(path);
-            Assert.Equal(system4Path, path);
+            Assert.IsNotNull(path);
+            Assert.AreEqual(system4Path, path);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify that by setting the wants specific version to true that we will return the highest version when only the simple name is used.
         /// Essentially specific version for the gac resolver means do not filter by runtime.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyFusionNamev40SpecificVersion()
         {
             // We want to pass a very generic name to get the correct gac entries.
@@ -173,17 +173,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
 
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, _runtimeVersion, new Version("4.0.0.0"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
-            Assert.NotNull(path);
-            Assert.Equal(system4Path, path);
+            Assert.IsNotNull(path);
+            Assert.AreEqual(system4Path, path);
         }
 
         /// <summary>
         /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyEmptyPublicKeyspecificVersion()
         {
-            Assert.Throws<FileLoadException>(() =>
+            Assert.ThrowsExactly<FileLoadException>(() =>
             {
                 AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=");
                 string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, getRuntimeVersion, new Version("2.0.50727"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
@@ -193,23 +193,23 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyNullPublicKey()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=null");
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, getRuntimeVersion, new Version("2.0.50727"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, false);
-            Assert.Null(path);
+            Assert.IsNull(path);
         }
 
         /// <summary>
         /// Verify when a assembly name is passed in which has the public key explicitly set to null that we return null as the assembly cannot be in the gac.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyNullPublicKeyspecificVersion()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=null");
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.None, getRuntimeVersion, new Version("2.0.50727"), false, new FileExists(MockFileExists), _getPathFromFusionName, _gacEnumerator, true);
-            Assert.Null(path);
+            Assert.IsNull(path);
         }
 
 
@@ -217,55 +217,55 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyProcessorArchitectureDoesNotCrash()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.MSIL, getRuntimeVersion, new Version("2.0.50727"), false, new FileExists(MockFileExists), _getPathFromFusionName, null /* use the real gac enumerator*/, false);
-            Assert.Null(path);
+            Assert.IsNull(path);
         }
 
         /// <summary>
         /// When a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyProcessorArchitectureDoesNotCrashSpecificVersion()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.MSIL, getRuntimeVersion, new Version("2.0.50727"), false, new FileExists(MockFileExists), _getPathFromFusionName, null /* use the real gac enumerator*/, true);
-            Assert.Null(path);
+            Assert.IsNull(path);
         }
 
         /// <summary>
         /// See bug 648678,  when a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyProcessorArchitectureDoesNotCrashFullFusionName()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.MSIL, getRuntimeVersion, new Version("2.0.50727"), true, new FileExists(MockFileExists), _getPathFromFusionName, null /* use the real gac enumerator*/, false);
-            Assert.Null(path);
+            Assert.IsNull(path);
         }
 
         /// <summary>
         /// When a processor architecture is on the end of a fusion name we were appending another processor architecture onto the end causing an invalid fusion name
         /// this was causing the GAC (api's) to crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyProcessorArchitectureDoesNotCrashFullFusionNameSpecificVersion()
         {
             AssemblyNameExtension fusionName = new AssemblyNameExtension("System, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL");
             string path = GlobalAssemblyCache.GetLocation(fusionName, SystemProcessorArchitecture.MSIL, getRuntimeVersion, new Version("2.0.50727"), true, new FileExists(MockFileExists), _getPathFromFusionName, null /* use the real gac enumerator*/, true);
-            Assert.Null(path);
+            Assert.IsNull(path);
         }
 
 
         // System.Runtime dependency calculation tests
 
         // No dependency
-        [Fact]
+        [MSBuildTestMethod]
         public void SystemRuntimeDepends_No_Build()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // build mode
             t.FindDependencies = true;
-            Assert.True(
+            Assert.IsTrue(
                 t.Execute(
                     fileExists,
                     directoryExists,
@@ -303,12 +303,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     isWinMDFile,
                     readMachineTypeFromPEHeader));
 
-            Assert.Equal("false", t.DependsOnSystemRuntime, true); // "Expected no System.Runtime dependency found during build."
-            Assert.Equal("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during build."
+            Assert.AreEqual("false", t.DependsOnSystemRuntime, true); // "Expected no System.Runtime dependency found during build."
+            Assert.AreEqual("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(
+            Assert.IsTrue(
                 t.Execute(
                     fileExists,
                     directoryExists,
@@ -328,13 +328,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     isWinMDFile,
                     readMachineTypeFromPEHeader));
 
-            Assert.Equal("false", t.DependsOnSystemRuntime, true); // "Expected no System.Runtime dependency found during intellibuild."
-            Assert.Equal("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during intellibuild."
+            Assert.AreEqual("false", t.DependsOnSystemRuntime, true); // "Expected no System.Runtime dependency found during intellibuild."
+            Assert.AreEqual("false", t.DependsOnNETStandard, true); //                   "Expected no netstandard dependency found during intellibuild."
         }
 
 
         // Direct dependency
-        [Fact]
+        [MSBuildTestMethod]
         public void SystemRuntimeDepends_Yes()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -353,7 +353,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(
+            Assert.IsTrue(
                 t.Execute(
                     fileExists,
                     directoryExists,
@@ -373,11 +373,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     isWinMDFile,
                     readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(
+            Assert.IsTrue(
                 t.Execute(
                     fileExists,
                     directoryExists,
@@ -397,11 +397,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     isWinMDFile,
                     readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
         }
 
         // Indirect dependency
-        [Fact]
+        [MSBuildTestMethod]
         public void SystemRuntimeDepends_Yes_Indirect()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(
+            Assert.IsTrue(
                 t.Execute(
                     fileExists,
                     directoryExists,
@@ -440,11 +440,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     isWinMDFile,
                     readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(
+            Assert.IsTrue(
                 t.Execute(
                     fileExists,
                     directoryExists,
@@ -464,10 +464,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     isWinMDFile,
                     readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SystemRuntimeDepends_Yes_Indirect_ExternallyResolved()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -506,11 +506,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -528,10 +528,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 checkIfAssemblyIsInGac, isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NETStandardDepends_Yes()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -550,7 +550,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -569,11 +569,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard, true); // "Expected System.Runtime dependency found during build."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); // "Expected System.Runtime dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -592,10 +592,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard, true); // "Expected System.Runtime dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); // "Expected System.Runtime dependency found during intellibuild."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NETStandardDepends_Yes_Indirect()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -614,7 +614,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -633,11 +633,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during build."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -656,11 +656,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during intellibuild."
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NETStandardDepends_Yes_Indirect_ExternallyResolved()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -699,11 +699,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during build."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -722,10 +722,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); // "Expected netstandard dependency found during intellibuild."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DependsOn_NETStandard_and_SystemRuntime()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -746,7 +746,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -765,12 +765,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
-            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -789,11 +789,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
-            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DependsOn_NETStandard_and_SystemRuntime_ExternallyResolved()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -816,7 +816,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // build mode
             t.FindDependencies = true;
 
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -835,12 +835,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
-            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during build."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during build."
 
             // intelli build mode
             t.FindDependencies = false;
-            Assert.True(t.Execute(
+            Assert.IsTrue(t.Execute(
                 fileExists,
                 directoryExists,
                 getDirectories,
@@ -859,8 +859,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Assert.Equal("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
-            Assert.Equal("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnSystemRuntime, true); // "Expected System.Runtime dependency found during intellibuild."
+            Assert.AreEqual("true", t.DependsOnNETStandard, true); //                   "Expected netstandard dependency found during intellibuild."
         }
 
         #region HelperDelegates

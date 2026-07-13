@@ -1,19 +1,19 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class Hash_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void HashTaskTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
@@ -23,33 +23,33 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 new TaskItem("Item1"), new TaskItem("Item2"), new TaskItem("Item3")
             });
-            Assert.Equal(expectedHash, actualHash);
+            Assert.AreEqual(expectedHash, actualHash);
 
             // Try again to ensure the same hash
             var actualHash2 = ExecuteHashTask(new ITaskItem[]
             {
                 new TaskItem("Item1"), new TaskItem("Item2"), new TaskItem("Item3")
             });
-            Assert.Equal(expectedHash, actualHash2);
+            Assert.AreEqual(expectedHash, actualHash2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HashTaskEmptyInputTest()
         {
             // Hash should be valid for empty item
             var emptyItemHash = ExecuteHashTask(new ITaskItem[] { new TaskItem("") });
-            Assert.False(string.IsNullOrWhiteSpace(emptyItemHash));
-            Assert.NotEmpty(emptyItemHash);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(emptyItemHash));
+            Assert.IsNotEmpty(emptyItemHash);
 
             // Hash should be null for null ItemsToHash or array of length 0
             var nullItemsHash = ExecuteHashTask(null);
-            Assert.Null(nullItemsHash);
+            Assert.IsNull(nullItemsHash);
 
             var zeroLengthItemsHash = ExecuteHashTask(System.Array.Empty<ITaskItem>());
-            Assert.Null(zeroLengthItemsHash);
+            Assert.IsNull(zeroLengthItemsHash);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HashTaskLargeInputCountTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
@@ -62,10 +62,10 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
 
             var actualHash = ExecuteHashTask(itemsToHash);
-            Assert.Equal(expectedHash, actualHash);
+            Assert.AreEqual(expectedHash, actualHash);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HashTaskLargeInputSizeTest()
         {
             // This hash was pre-computed. If the implementation changes it may need to be adjusted.
@@ -79,12 +79,12 @@ namespace Microsoft.Build.Tasks.UnitTests
             ITaskItem[] itemsToHash = new ITaskItem[] { new TaskItem(string.Join("", array)) };
 
             var actualHash = ExecuteHashTask(itemsToHash);
-            Assert.Equal(expectedHash, actualHash);
+            Assert.AreEqual(expectedHash, actualHash);
         }
 
         // This test verifies that hash computes correctly for various numbers of characters.
         // We would like to process edge of the buffer use cases regardless on the size of the buffer.
-        [Fact]
+        [MSBuildTestMethod]
         public void HashTaskDifferentInputSizesTest()
         {
             int maxInputSize = 2000;
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     .Where(g => g.Count() > 1)
                     .Select(g => g.Key);
             // none of the hashes should repeat
-            Assert.Empty(hashGroups);
+            Assert.IsEmpty(hashGroups);
 
             string GetHash(string input)
             {
@@ -108,12 +108,12 @@ namespace Microsoft.Build.Tasks.UnitTests
                     ItemsToHash = new ITaskItem[] { new TaskItem(input) },
                     IgnoreCase = false
                 };
-                Assert.True(hashTask.Execute());
+                Assert.IsTrue(hashTask.Execute());
                 return hashTask.HashResult;
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HashTaskIgnoreCaseTest()
         {
             var uppercaseHash =
@@ -140,9 +140,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                         new TaskItem("item3")
                     },
                     true);
-            Assert.Equal(uppercaseHash, lowercaseHash);
-            Assert.Equal(uppercaseHash, mixedcaseHash);
-            Assert.Equal(mixedcaseHash, lowercaseHash);
+            Assert.AreEqual(uppercaseHash, lowercaseHash);
+            Assert.AreEqual(uppercaseHash, mixedcaseHash);
+            Assert.AreEqual(mixedcaseHash, lowercaseHash);
         }
 
         private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false)
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 IgnoreCase = ignoreCase
             };
 
-            Assert.True(hashTask.Execute());
+            Assert.IsTrue(hashTask.Execute());
 
             return hashTask.HashResult;
         }

@@ -6,12 +6,12 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ResolveAnalyzerRuleSet_Tests
     {
         private sealed class TemporaryFile : IDisposable
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedRuleSetPath_FullPath_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -64,12 +64,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedRuleSetPath_FullPath_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -87,13 +87,13 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.True(result);
-                Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
+                Assert.IsTrue(result);
+                Assert.AreEqual(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedRuleSetPath_SimpleNameAlone_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -107,12 +107,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedRuleSetPath_SimpleNameAndProjectDirectory_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -133,15 +133,15 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.True(result);
-                Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
+                Assert.IsTrue(result);
+                Assert.AreEqual(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GetResolvedRuleSetPath_SimpleNameAndProjectDirectory_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -158,12 +158,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedRuleSetPath_SimpleNameAndDirectories_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -184,15 +184,15 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.True(result);
-                Assert.Equal(expected: ruleSetFullPath, actual: resolvedRuleSet);
+                Assert.IsTrue(result);
+                Assert.AreEqual(expected: ruleSetFullPath, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GetResolvedRuleSetPath_SimpleNameAndDirectories_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -208,14 +208,14 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_NonExistent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -232,14 +232,14 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GetResolvedRuleSetPath_RelativePath_WithProject_Existent()
         {
             MockEngine mockEngine = new MockEngine();
@@ -262,15 +262,15 @@ namespace Microsoft.Build.UnitTests
                 bool result = task.Execute();
                 string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-                Assert.True(result);
-                Assert.Equal(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
+                Assert.IsTrue(result);
+                Assert.AreEqual(expected: codeAnalysisRuleSet, actual: resolvedRuleSet);
                 mockEngine.AssertLogDoesntContain("MSB3884");
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GetResolvedRuleSetPath_RelativePath_NoProject()
         {
             MockEngine mockEngine = new MockEngine();
@@ -285,12 +285,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogContains("MSB3884");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedRuleSetPath_EmptyString()
         {
             MockEngine mockEngine = new MockEngine();
@@ -304,12 +304,12 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogDoesntContain("MSB3884");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedRuleSetPath_Null()
         {
             MockEngine mockEngine = new MockEngine();
@@ -323,8 +323,8 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
             string resolvedRuleSet = task.ResolvedCodeAnalysisRuleSet;
 
-            Assert.True(result);
-            Assert.Null(resolvedRuleSet);
+            Assert.IsTrue(result);
+            Assert.IsNull(resolvedRuleSet);
             mockEngine.AssertLogDoesntContain("MSB3884");
         }
     }

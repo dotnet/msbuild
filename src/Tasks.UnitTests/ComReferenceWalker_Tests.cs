@@ -6,7 +6,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Tasks;
-using Xunit;
 using Windows.Win32.System.Com;
 using Windows.Win32.System.Ole;
 using COMException = System.Runtime.InteropServices.COMException;
@@ -16,6 +15,7 @@ using Marshal = System.Runtime.InteropServices.Marshal;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ComReferenceWalker_Tests
     {
         // Obtains a COM-callable-wrapper pointer for the managed mock type library (which implements the
@@ -51,17 +51,17 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            Assert.Equal(contains, dependencyExists);
+            Assert.AreEqual(contains, dependencyExists);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WalkTypeInfosInEmptyLibrary()
         {
             MockTypeLib typeLib = new MockTypeLib();
 
             ComDependencyWalker walker = new ComDependencyWalker();
             AnalyzeTypeLibrary(walker, typeLib);
-            Assert.Equal(0, walker.GetDependencies().GetLength(0));
+            Assert.AreEqual(0, walker.GetDependencies().GetLength(0));
 
             typeLib.AssertAllHandlesReleased();
         }
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A type in the main type library implements an interface from a dependent type library
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImplementedInterfaces()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinedVariableUDT()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinedVariableUDTArray()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinedVariableUDTPtr()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ThereAndBackAgain()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ComplexComposition()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, dependencyTypeLib, true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefinedFunction()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib1, dependencyTypeLib2, dependencyTypeLib3;
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
             dependencyTypeLib3.AssertAllHandlesReleased();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreKnownOleTypes()
         {
             MockTypeLib mainTypeLib = new MockTypeLib();
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, oleTypeLib, false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreGuidType()
         {
             MockTypeLib mainTypeLib = new MockTypeLib();
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests
             RunDependencyWalker(mainTypeLib, oleTypeLib, false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoreNetExportedTypeLibs()
         {
             MockTypeLib mainTypeLib, dependencyTypeLib;
@@ -242,7 +242,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The main type lib is broken... don't expect any results, but make sure we don't throw.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FaultInjectionMainLib()
         {
             // The primary test here is that we don't throw, which can't be explicitly expressed in NUnit...
@@ -274,10 +274,10 @@ namespace Microsoft.Build.UnitTests
                 // original exception instance. Failure points in COM methods that cannot report an HRESULT
                 // (GetTypeInfoCount, and the void Release* methods) are swallowed at the boundary and produce no
                 // recorded problem, so allow either zero or one captured problem.
-                Assert.True(walker.EncounteredProblems.Count <= 1, "Test failed for failure point " + failurePoint.ToString());
+                Assert.IsTrue(walker.EncounteredProblems.Count <= 1, "Test failed for failure point " + failurePoint.ToString());
                 foreach (Exception problem in walker.EncounteredProblems)
                 {
-                    Assert.IsType<COMException>(problem);
+                    Assert.IsExactInstanceOfType<COMException>(problem);
                 }
 
                 mainTypeLib.AssertAllHandlesReleased();
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FullDependenciesWithIncrementalAnalysis()
         {
             MockTypeLib mainTypeLib1, mainTypeLib2, mainTypeLib3, dependencyTypeLib1, dependencyTypeLib2, dependencyTypeLib3;
@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib1, true);
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib2, false);
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib3, false);
-            Assert.Equal(2, analyzedTypes.Count);
+            Assert.AreEqual(2, analyzedTypes.Count);
 
             walker.ClearDependencyList();
             AnalyzeTypeLibrary(walker, mainTypeLib2);
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib1, true);
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib2, true);
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib3, false);
-            Assert.Equal(4, analyzedTypes.Count);
+            Assert.AreEqual(4, analyzedTypes.Count);
 
             walker.ClearDependencyList();
             AnalyzeTypeLibrary(walker, mainTypeLib3);
@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib1, true);
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib2, false);
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib3, true);
-            Assert.Equal(6, analyzedTypes.Count);
+            Assert.AreEqual(6, analyzedTypes.Count);
         }
     }
 }

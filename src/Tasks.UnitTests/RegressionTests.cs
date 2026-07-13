@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -8,17 +8,17 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public sealed class RegressionTests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public RegressionTests(ITestOutputHelper output)
+        public RegressionTests(TestContext output)
         {
             _output = output;
         }
@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Verifies that when a user overrides the BaseIntermediateOutputPath that the build still works.
         /// </summary>
         /// <remarks>This was written because of regression https://github.com/dotnet/msbuild/issues/1509. </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void OverrideBaseIntermediateOutputPathSucceeds()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject($@"
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             bool result = project.Build(new MockLogger(_output));
 
-            Assert.True(result);
+            Assert.IsTrue(result);
         }
 
         /// <summary>
@@ -78,13 +78,13 @@ namespace Microsoft.Build.Tasks.UnitTests
 ");
             var logger = new MockLogger(_output);
             bool result = project.Build(logger);
-            Assert.True(result, "Output:" + Environment.NewLine + logger.FullLog);
+            Assert.IsTrue(result, "Output:" + Environment.NewLine + logger.FullLog);
         }
 
         /// <summary>
         /// Test for https://github.com/dotnet/msbuild/issues/8153
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IsWellKnownAttributeValuePreserved()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Test for https://github.com/dotnet/msbuild/issues/13478.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyUpToDateMarkerTracksImplementationAssemblyWrites()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Test for https://github.com/dotnet/msbuild/issues/13478.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyUpToDateMarkerIsNotCreatedForMainAssemblyWritesWhenReferenceAssembliesAreNotProduced()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
