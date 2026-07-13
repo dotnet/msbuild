@@ -43,7 +43,7 @@
       <!-- NuGet.Build.Tasks.Console.exe will be in the None ItemGroup -->
       <_NuGetRuntimeDependencies Include="%(None.Identity)" Condition="'@(None->Contains('NuGet.'))' == 'true'" />
 
-      <_NuGetRuntimeDependencies Include="$(NetCoreSdkRoot)$(DotNetCliVersion)\RuntimeIdentifierGraph.json" />
+      <_NuGetRuntimeDependencies Include="$(NetCoreSdkRoot)RuntimeIdentifierGraph.json" />
     </ItemGroup>
   </Target>
 
@@ -85,7 +85,7 @@
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
       <SdkResolverFiles Include="$(AvailableVsInstallPath)\MSBuild\Current\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
       <NuGetSdkResolverManifest Include="$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
-      <InstalledSdks Include="$(NetCoreSdkRoot)$(DotNetCliVersion)\Sdks\**\*.*" />
+      <InstalledSdks Include="$(NetCoreSdkRoot)Sdks\**\*.*" />
 
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
