@@ -71,12 +71,12 @@ public class TaskInstantiationBenchmark
         => (ITask)Activator.CreateInstance(_taskEnvironmentType, new object[] { _taskEnvironment })!;
 
     [Benchmark]
-    public ITask LoadedType_Parameterless()
-        => (ITask)_parameterlessLoadedType.CreateInstance(_taskEnvironment);
+    public ITask? LoadedType_Parameterless()
+        => _parameterlessLoadedType.CreateInstance(_taskEnvironment);
 
     [Benchmark]
-    public ITask LoadedType_TaskEnvironmentConstructor()
-        => (ITask)_taskEnvironmentLoadedType.CreateInstance(_taskEnvironment);
+    public ITask? LoadedType_TaskEnvironmentConstructor()
+        => _taskEnvironmentLoadedType.CreateInstance(_taskEnvironment);
 
     /// <summary>
     /// Task exposing only the implicit parameterless constructor. Exercises the

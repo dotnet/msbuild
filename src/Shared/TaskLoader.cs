@@ -121,7 +121,7 @@ namespace Microsoft.Build.Shared
                     // the task declares one (so the task can compute environment-dependent defaults during
                     // construction) or the parameterless one otherwise, through a cached, Native AOT friendly
                     // mechanism. The engine still assigns the TaskEnvironment property separately afterward.
-                    return (ITask?)loadedType.CreateInstance(taskEnvironment);
+                    return loadedType.CreateInstance(taskEnvironment);
                 }
 
 #if FEATURE_APPDOMAIN

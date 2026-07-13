@@ -197,8 +197,8 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Creates an instance of this loaded type for use as a task. When the type declares a constructor that
-        /// takes a single <see cref="TaskEnvironment"/>, that constructor is invoked with
+        /// Creates an <see cref="ITask"/> instance of this loaded type. When the type declares a constructor
+        /// that takes a single <see cref="TaskEnvironment"/>, that constructor is invoked with
         /// <paramref name="taskEnvironment"/> — falling back to <see cref="TaskEnvironment.Fallback"/> when the
         /// caller does not supply one — so the task can compute environment-dependent defaults during
         /// construction; otherwise the public parameterless constructor is used. The engine still assigns the
@@ -212,7 +212,7 @@ namespace Microsoft.Build.Shared
         /// instantiations approach the speed of the CLR's cached activator. Constructor discovery is deferred
         /// until this first call — see <see cref="EnsureConstructorsResolved"/>.
         /// </remarks>
-        internal object CreateInstance(TaskEnvironment? taskEnvironment)
+        internal ITask? CreateInstance(TaskEnvironment? taskEnvironment)
         {
             EnsureConstructorsResolved();
 
@@ -220,18 +220,18 @@ namespace Microsoft.Build.Shared
             {
                 object environment = taskEnvironment ?? TaskEnvironment.Fallback;
 #if NET
-                return _taskEnvironmentInvoker!.Invoke(environment);
+                return (ITask?)_taskEnvironmentInvoker!.Invoke(environment);
 #else
-                return _taskEnvironmentConstructor.Invoke([environment]);
+                return (ITask?)_taskEnvironmentConstructor.Invoke([environment]);
 #endif
             }
 
             if (_parameterlessConstructor is not null)
             {
 #if NET
-                return _parameterlessInvoker!.Invoke();
+                return (ITask?)_parameterlessInvoker!.Invoke();
 #else
-                return _parameterlessConstructor.Invoke(null);
+                return (ITask?)_parameterlessConstructor.Invoke(null);
 #endif
             }
 
