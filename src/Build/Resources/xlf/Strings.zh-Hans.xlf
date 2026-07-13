@@ -428,34 +428,34 @@
       </trans-unit>
       <trans-unit id="CoordinatorFailedToConnect">
         <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">未能连接到生成协调器。生成将不进行节点协调的情况下继续进行。</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">未能启动生成协调器。生成将不进行节点协调的情况下继续进行。</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToNegotiate">
         <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">未能与生成协调器协商。生成将不进行节点协调的情况下继续进行。</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">
         <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">等待启动生成协调器时超时。生成将不进行节点协调的情况下继续进行。</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>
-        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <target state="translated">协调器为此生成授权了 {0} 个节点。</target>
         <note>
       LOCALIZATION: {0} is the number of nodes granted by the coordinator.
     </note>
       </trans-unit>
       <trans-unit id="CoordinatorWaitingForNodes">
         <source>Waiting for coordinator to grant build resources...</source>
-        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <target state="translated">正在等待协调器授权生成资源...</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
@@ -719,6 +719,16 @@
         <target state="translated">MatchOnMetadata 不能在 &lt;Target&gt; 外部使用。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OM_PartialEvaluationCannotBuild">
+        <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
+        <target state="new">The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</target>
+        <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationMemberUnavailable">
+        <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
+        <target state="new">The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</target>
+        <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
+      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">无法使用包含 null 或空目标名称的集合调用方法 {0}。</target>
@@ -935,7 +945,7 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">还原完成({0})</target>
+        <target state="translated">还原完成({0}秒)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
