@@ -192,7 +192,7 @@ namespace Microsoft.Build.Shared
             get
             {
                 EnsureConstructorsResolved();
-                return _taskEnvironmentConstructor is not null;
+                return _constructorNeedsEnvironment;
             }
         }
 
@@ -216,39 +216,42 @@ namespace Microsoft.Build.Shared
         {
             EnsureConstructorsResolved();
 
-            if (_taskEnvironmentConstructor is not null)
-            {
-                object environment = taskEnvironment ?? TaskEnvironment.Fallback;
 #if NET
-                return (ITask?)_taskEnvironmentInvoker!.Invoke(environment);
-#else
-                return (ITask?)_taskEnvironmentConstructor.Invoke([environment]);
-#endif
-            }
-
-            if (_parameterlessConstructor is not null)
-            {
-#if NET
-                return (ITask?)_parameterlessInvoker!.Invoke();
-#else
-                return (ITask?)_parameterlessConstructor.Invoke(null);
-#endif
-            }
-
             // Neither a parameterless nor a TaskEnvironment constructor exists; surface the same failure
             // Activator.CreateInstance would have produced rather than a NullReferenceException.
-            throw new MissingMethodException(Type.FullName, ".ctor");
+            if (_constructorInvoker is null)
+            {
+                throw new MissingMethodException(Type.FullName, ".ctor");
+            }
+
+            return _constructorNeedsEnvironment
+                ? (ITask?)_constructorInvoker.Invoke(taskEnvironment ?? TaskEnvironment.Fallback)
+                : (ITask?)_constructorInvoker.Invoke();
+#else
+            if (_constructor is null)
+            {
+                throw new MissingMethodException(Type.FullName, ".ctor");
+            }
+
+            return _constructorNeedsEnvironment
+                ? (ITask?)_constructor.Invoke([taskEnvironment ?? TaskEnvironment.Fallback])
+                : (ITask?)_constructor.Invoke(null);
+#endif
         }
 
-        private ConstructorInfo? _taskEnvironmentConstructor;
-
-        private ConstructorInfo? _parameterlessConstructor;
-
+        // The single public instance constructor CreateInstance uses, chosen once in
+        // EnsureConstructorsResolved: the TaskEnvironment constructor when the type declares one, otherwise
+        // the parameterless constructor. _constructorNeedsEnvironment records which of the two it is, so no
+        // second constructor reference has to be kept around. On .NET only the ConstructorInvoker is retained
+        // (the ConstructorInfo it wraps is not, to keep this object small); older frameworks that lack
+        // ConstructorInvoker fall back to invoking the ConstructorInfo directly.
 #if NET
-        private ConstructorInvoker? _taskEnvironmentInvoker;
-
-        private ConstructorInvoker? _parameterlessInvoker;
+        private ConstructorInvoker? _constructorInvoker;
+#else
+        private ConstructorInfo? _constructor;
 #endif
+
+        private bool _constructorNeedsEnvironment;
 
         private volatile bool _constructorsResolved;
 
@@ -305,8 +308,8 @@ namespace Microsoft.Build.Shared
         /// we actually instantiate — not for the many <see cref="LoadedType"/> instances built solely to
         /// marshal property metadata to a task host. A <see cref="LoadedType"/> is cached per task type and
         /// shared across threads in multi-threaded builds, so the memoization is intentionally lock-free: the
-        /// worst a race can do is resolve the same (equivalent) constructors on more than one thread — every
-        /// published field is a reference written atomically — and the volatile
+        /// worst a race can do is resolve the same (equivalent) constructor on more than one thread — every
+        /// published field is written atomically (a reference, or a <see cref="bool"/>) — and the volatile
         /// <see cref="_constructorsResolved"/> flag guarantees a reader that observes <c>true</c> also observes
         /// those published references.
         /// </remarks>
@@ -342,26 +345,24 @@ namespace Microsoft.Build.Shared
                 // executed in a task host rather than instantiated in-proc, so it is safe to report none here.
             }
 
-            _parameterlessConstructor = parameterlessConstructor;
-            _taskEnvironmentConstructor = taskEnvironmentConstructor;
+            _constructorNeedsEnvironment = taskEnvironmentConstructor is not null;
+
+            // Prefer the TaskEnvironment constructor when present so a task can compute environment-dependent
+            // defaults during construction; otherwise use the parameterless constructor.
+            ConstructorInfo? chosenConstructor = taskEnvironmentConstructor ?? parameterlessConstructor;
 
 #if NET
-            // Build the cached invoker for whichever constructor CreateInstance will actually use. Types loaded
-            // only for metadata inspection run in a task host and are never instantiated in-proc, so they never
-            // need an invoker (and a MetadataLoadContext ConstructorInfo cannot be invoked). ConstructorInvoker
-            // caches an optimized, Native AOT friendly invocation path so repeated instantiations approach
-            // Activator.CreateInstance speed without generating dynamic code.
-            if (!LoadedViaMetadataLoadContext)
+            // Build the cached invoker for the chosen constructor. Types loaded only for metadata inspection
+            // run in a task host and are never instantiated in-proc, so they never need an invoker (and a
+            // MetadataLoadContext ConstructorInfo cannot be invoked). ConstructorInvoker caches an optimized,
+            // Native AOT friendly invocation path so repeated instantiations approach Activator.CreateInstance
+            // speed without generating dynamic code.
+            if (chosenConstructor is not null && !LoadedViaMetadataLoadContext)
             {
-                if (taskEnvironmentConstructor is not null)
-                {
-                    _taskEnvironmentInvoker = ConstructorInvoker.Create(taskEnvironmentConstructor);
-                }
-                else if (parameterlessConstructor is not null)
-                {
-                    _parameterlessInvoker = ConstructorInvoker.Create(parameterlessConstructor);
-                }
+                _constructorInvoker = ConstructorInvoker.Create(chosenConstructor);
             }
+#else
+            _constructor = chosenConstructor;
 #endif
 
             _constructorsResolved = true;
